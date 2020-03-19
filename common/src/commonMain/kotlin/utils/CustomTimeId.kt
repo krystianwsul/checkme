@@ -1,11 +1,11 @@
 package com.krystianwsul.common.utils
 
-sealed class CustomTimeId : Parcelable, Serializable { // todo instance consider ProjectKey
+sealed class CustomTimeId<T : ProjectType> : Parcelable, Serializable {
 
     abstract val value: String
 
     @Parcelize
-    data class Private(override val value: String) : CustomTimeId(), Comparable<Private> {
+    data class Private(override val value: String) : CustomTimeId<ProjectType.Private>(), Comparable<Private> {
 
         override fun toString() = value
 
@@ -13,7 +13,7 @@ sealed class CustomTimeId : Parcelable, Serializable { // todo instance consider
     }
 
     @Parcelize
-    data class Shared(override val value: String) : CustomTimeId() {
+    data class Shared(override val value: String) : CustomTimeId<ProjectType.Shared>() {
 
         override fun toString() = value
     }

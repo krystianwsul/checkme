@@ -4,6 +4,6 @@ import com.krystianwsul.common.utils.ProjectKey
 
 class ProjectUndoData {
 
-    val projectIds = mutableSetOf<ProjectKey>()
+    val projectIds = mutableSetOf<ProjectKey<*>>()
     val taskUndoData = TaskUndoData()
 }

@@ -4,16 +4,15 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
-class MonthlyDaySchedule<T : CustomTimeId, U : ProjectKey>(
-        rootTask: Task<T, U>,
-        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<T, U>
-) : RepeatingSchedule<T, U>(rootTask) {
+class MonthlyDaySchedule<T : ProjectType>(
+        rootTask: Task<T>,
+        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<T>
+) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
@@ -23,12 +22,12 @@ class MonthlyDaySchedule<T : CustomTimeId, U : ProjectKey>(
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    override fun <T : CustomTimeId, U : ProjectKey> getInstanceInDate(
-            task: Task<T, U>,
+    override fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<T, U>? {
+    ): Instance<T>? {
         val dateThisMonth = getDate(date.year, date.month)
 
         if (dateThisMonth != date)

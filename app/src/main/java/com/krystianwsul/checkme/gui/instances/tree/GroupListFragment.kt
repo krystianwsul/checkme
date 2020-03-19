@@ -975,7 +975,8 @@ class GroupListFragment @JvmOverloads constructor(
             val children: List<TaskData>,
             val startExactTimeStamp: ExactTimeStamp,
             override val note: String?,
-            val imageState: ImageState?) : SelectedData {
+            val imageState: ImageState?
+    ) : SelectedData {
 
         init {
             check(name.isNotEmpty())

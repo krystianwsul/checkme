@@ -4,10 +4,14 @@ import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 
-open class RootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RootUserProperties {
+open class RootUserRecord(
+        create: Boolean,
+        override val createObject: UserWrapper
+) : RemoteRecord(create), RootUserProperties {
 
     companion object {
 
@@ -32,7 +36,7 @@ open class RootUserRecord(create: Boolean, override val createObject: UserWrappe
     override val projectIds
         get() = createObject.projects
                 .keys
-                .map(ProjectKey::Shared)
+                .map { ProjectKey.Shared(it) }
                 .toSet()
 
     override val friends
@@ -84,7 +88,7 @@ open class RootUserRecord(create: Boolean, override val createObject: UserWrappe
         }
     }
 
-    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
+    override fun removeProject(projectKey: ProjectKey<ProjectType.Shared>): Boolean {
         val projectId = projectKey.key
 
         return if (createObject.projects.containsKey(projectId)) {

@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-class TaskHierarchyRelevance(val taskHierarchy: TaskHierarchy<*, *>) {
+class TaskHierarchyRelevance(val taskHierarchy: TaskHierarchy<*>) {
 
     var relevant = false
         private set

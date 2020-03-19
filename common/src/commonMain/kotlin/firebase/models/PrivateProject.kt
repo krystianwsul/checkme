@@ -6,16 +6,18 @@ import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
         override val remoteProjectRecord: RemotePrivateProjectRecord
-) : Project<CustomTimeId.Private, ProjectKey.Private>() {
+) : Project<ProjectType.Private>() {
+
+    override val id = remoteProjectRecord.id
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
-    override val remoteTasks: MutableMap<String, Task<CustomTimeId.Private, ProjectKey.Private>>
-    override val taskHierarchyContainer = TaskHierarchyContainer<CustomTimeId.Private, ProjectKey.Private>()
+    override val remoteTasks: MutableMap<String, Task<ProjectType.Private>>
+    override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Private>()
 
     override val customTimes get() = remoteCustomTimes.values
 
@@ -57,16 +59,16 @@ class PrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getRemoteCustomTime(customTimeId: CustomTimeId): PrivateCustomTime {
+    override fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
         check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Private))
 
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<CustomTimeId.Private, ProjectKey.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
+    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
     override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Private(customTimeId))
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*, *>) = when (customTime) {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*>) = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == id) {

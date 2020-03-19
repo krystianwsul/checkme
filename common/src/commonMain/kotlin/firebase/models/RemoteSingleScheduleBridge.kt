@@ -2,12 +2,11 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.schedules.SingleScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteSingleScheduleRecord
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-class RemoteSingleScheduleBridge<T : CustomTimeId, U : ProjectKey>(
-        private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord<T, U>
-) : RemoteScheduleBridge<T, U>(remoteSingleScheduleRecord), SingleScheduleBridge<T, U> {
+class RemoteSingleScheduleBridge<T : ProjectType>(
+        private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord<T>
+) : RemoteScheduleBridge<T>(remoteSingleScheduleRecord), SingleScheduleBridge<T> {
 
     override val year get() = remoteSingleScheduleRecord.year
 

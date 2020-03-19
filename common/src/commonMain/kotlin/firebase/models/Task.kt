@@ -10,9 +10,9 @@ import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class Task<T : CustomTimeId, U : ProjectKey>(
-        val remoteProject: Project<T, U>,
-        private val remoteTaskRecord: RemoteTaskRecord<T, U>
+class Task<T : ProjectType>(
+        val remoteProject: Project<T>,
+        private val remoteTaskRecord: RemoteTaskRecord<T>
 ) {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
@@ -21,7 +21,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
-    private val remoteSchedules = ArrayList<Schedule<T, U>>()
+    private val remoteSchedules = ArrayList<Schedule<T>>()
 
     val name get() = remoteTaskRecord.name
 
@@ -67,9 +67,9 @@ class Task<T : CustomTimeId, U : ProjectKey>(
 
     private fun getRootTask(
             exactTimeStamp: ExactTimeStamp
-    ): Task<T, U> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
+    ): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
-    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T, U>> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
         check(current(exactTimeStamp))
 
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
@@ -88,14 +88,14 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         return currentSchedules
     }
 
-    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule<T, U>? {
+    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule<T>? {
         return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
     }
 
-    private class MockSingleScheduleBridge<T : CustomTimeId, U : ProjectKey>(
-            private val singleScheduleBridge: SingleScheduleBridge<T, U>,
-            private val instance: Instance<T, U>
-    ) : SingleScheduleBridge<T, U> by singleScheduleBridge {
+    private class MockSingleScheduleBridge<T : ProjectType>(
+            private val singleScheduleBridge: SingleScheduleBridge<T>,
+            private val instance: Instance<T>
+    ) : SingleScheduleBridge<T> by singleScheduleBridge {
 
         override val customTimeKey get() = instance.instanceCustomTimeKey
 
@@ -173,7 +173,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         setMyEndExactTimeStamp(uuid, now, endData)
     }
 
-    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T, U>? {
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T>? {
         val taskHierarchies = if (current(exactTimeStamp)) {
             check(notDeleted(exactTimeStamp))
 
@@ -200,7 +200,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         setMyEndExactTimeStamp(uuid, now, null)
     }
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T, U>? {
+    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T>? {
         check(notDeleted(exactTimeStamp))
 
         return getParentTaskHierarchy(exactTimeStamp)?.let {
@@ -212,8 +212,8 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         }
     }
 
-    fun getPastRootInstances(now: ExactTimeStamp): List<Instance<T, U>> {
-        val allInstances = mutableMapOf<InstanceKey, Instance<T, U>>()
+    fun getPastRootInstances(now: ExactTimeStamp): List<Instance<T>> {
+        val allInstances = mutableMapOf<InstanceKey, Instance<T>>()
 
         allInstances.putAll(existingInstances
                 .values
@@ -248,7 +248,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
-    ): List<Instance<T, U>> {
+    ): List<Instance<T>> {
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp,
@@ -284,7 +284,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
     ) {
-        val removeSchedules = mutableListOf<Schedule<T, U>>()
+        val removeSchedules = mutableListOf<Schedule<T>>()
         val addScheduleDatas = scheduleDatas.toMutableList()
 
         val oldSchedules = getCurrentSchedules(now)
@@ -382,7 +382,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
             name: String,
             note: String?,
             image: TaskJson.Image?
-    ): Task<T, U> {
+    ): Task<T> {
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         val childTask = remoteProject.newRemoteTask(taskJson)
@@ -416,18 +416,18 @@ class Task<T : CustomTimeId, U : ProjectKey>(
             now: ExactTimeStamp
     ) = createSchedules(ownerKey, now, scheduleDatas)
 
-    fun addChild(childTask: Task<*, *>, now: ExactTimeStamp) {
+    fun addChild(childTask: Task<*>, now: ExactTimeStamp) {
         @Suppress("UNCHECKED_CAST")
-        remoteProject.createTaskHierarchy(this, childTask as Task<T, U>, now)
+        remoteProject.createTaskHierarchy(this, childTask as Task<T>, now)
     }
 
-    fun deleteSchedule(schedule: Schedule<T, U>) {
+    fun deleteSchedule(schedule: Schedule<T>) {
         check(remoteSchedules.contains(schedule))
 
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(instance: Instance<T, U>, scheduleDateTime: DateTime): InstanceRecord<T> {
+    fun createRemoteInstanceRecord(instance: Instance<T>, scheduleDateTime: DateTime): InstanceRecord<T> {
         val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
@@ -436,7 +436,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         val customTimeId = scheduleDateTime.time
                 .timePair
                 .customTimeKey
-                ?.let { it.customTimeId as T }
+                ?.let { it.customTimeId as CustomTimeId<T> }
 
         val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, customTimeId)
 
@@ -445,7 +445,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         return remoteInstanceRecord
     }
 
-    fun deleteInstance(instance: Instance<T, U>) {
+    fun deleteInstance(instance: Instance<T>) {
         val scheduleKey = instance.scheduleKey
 
         check(existingRemoteInstances.containsKey(scheduleKey))
@@ -456,7 +456,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
-    fun getInstance(scheduleDateTime: DateTime): Instance<T, U> {
+    fun getInstance(scheduleDateTime: DateTime): Instance<T> {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
@@ -531,19 +531,19 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         }
     }
 
-    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*, *>>) {
+    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*>>) {
         for (schedule in schedules) {
             val (customTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
             when (schedule) {
-                is SingleSchedule<*, *> -> {
+                is SingleSchedule<*> -> {
                     val date = schedule.date
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
-                is WeeklySchedule<*, *> -> {
+                is WeeklySchedule<*> -> {
                     for (dayOfWeek in schedule.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
                                 now.long,
@@ -559,7 +559,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
                         remoteSchedules.add(WeeklySchedule(this, RemoteWeeklyScheduleBridge(remoteWeeklyScheduleRecord)))
                     }
                 }
-                is MonthlyDaySchedule<*, *> -> {
+                is MonthlyDaySchedule<*> -> {
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
                             now.long,
                             schedule.endTime,
@@ -574,7 +574,7 @@ class Task<T : CustomTimeId, U : ProjectKey>(
 
                     remoteSchedules.add(MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(remoteMonthlyDayScheduleRecord)))
                 }
-                is MonthlyWeekSchedule<*, *> -> {
+                is MonthlyWeekSchedule<*> -> {
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
                             now.long,
                             schedule.endTime,
@@ -595,15 +595,15 @@ class Task<T : CustomTimeId, U : ProjectKey>(
         }
     }
 
-    fun getParentTaskHierarchies(): Set<TaskHierarchy<T, U>> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
+    fun getParentTaskHierarchies(): Set<TaskHierarchy<T>> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
 
     fun getChildTaskHierarchies() = remoteProject.getTaskHierarchiesByParentTaskKey(taskKey)
 
     fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp,
-            projectId: ProjectKey
-    ): Task<*, *> {
+            projectId: ProjectKey<*>
+    ): Task<*> {
         return if (projectId == remoteProject.id)
             this
         else
@@ -647,16 +647,16 @@ class Task<T : CustomTimeId, U : ProjectKey>(
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup<*, *>, project: Project<*, *>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String
     }
 
     interface ProjectUpdater {
 
-        fun <T : CustomTimeId, U : ProjectKey> convertRemoteToRemote(
+        fun <T : ProjectType> convertRemoteToRemote(
                 now: ExactTimeStamp,
-                startingTask: Task<T, U>,
-                projectId: ProjectKey
-        ): Task<*, *>
+                startingTask: Task<T>,
+                projectId: ProjectKey<*>
+        ): Task<*>
     }
 
     data class EndData(

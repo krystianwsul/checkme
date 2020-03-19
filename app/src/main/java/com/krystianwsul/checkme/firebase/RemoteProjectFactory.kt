@@ -43,7 +43,7 @@ class RemoteProjectFactory(
             .toMutableMap()
 
     val remoteProjects
-        get() = remoteSharedProjects.toMutableMap<ProjectKey, Project<*, *>>().apply {
+        get() = remoteSharedProjects.toMutableMap<ProjectKey<*>, Project<*>>().apply {
             put(remotePrivateProject.id, remotePrivateProject)
         }.toMap()
 
@@ -137,7 +137,7 @@ class RemoteProjectFactory(
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             note: String?,
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
     ) = createRemoteTaskHelper(now, name, note, projectId, imageUuid, deviceDbInfo).apply {
@@ -148,10 +148,10 @@ class RemoteProjectFactory(
             now: ExactTimeStamp,
             name: String,
             note: String?,
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
-    ): Task<*, *> {
+    ): Task<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
@@ -197,13 +197,13 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*, *>): CustomTime<*, *> {
+    fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*>): CustomTime<*> {
         check(remoteProjects.containsKey(customTimeKey.remoteProjectId))
 
         return remoteProjects.getValue(customTimeKey.remoteProjectId).getRemoteCustomTime(customTimeKey.customTimeId)
     }
 
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*, *>? {
+    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*>? {
         val taskKey = instanceKey.taskKey
 
         if (TextUtils.isEmpty(taskKey.remoteTaskId))
@@ -217,19 +217,19 @@ class RemoteProjectFactory(
 
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!
 
-    private fun getRemoteProjectIfPresent(taskKey: TaskKey): Project<*, *>? {
+    private fun getRemoteProjectIfPresent(taskKey: TaskKey): Project<*>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return remoteProjects[taskKey.remoteProjectId]
     }
 
-    fun getTaskForce(taskKey: TaskKey): Task<*, *> {
+    fun getTaskForce(taskKey: TaskKey): Task<*> {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId)
     }
 
-    fun getTaskIfPresent(taskKey: TaskKey): Task<*, *>? {
+    fun getTaskIfPresent(taskKey: TaskKey): Task<*>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)
@@ -239,17 +239,18 @@ class RemoteProjectFactory(
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
-    fun getRemoteProjectForce(projectId: ProjectKey): Project<*, *> {
+    fun <T : ProjectType> getRemoteProjectForce(projectId: ProjectKey<T>): Project<T> {
         check(remoteProjects.containsKey(projectId))
 
-        return remoteProjects.getValue(projectId)
+        @Suppress("UNCHECKED_CAST")
+        return remoteProjects.getValue(projectId) as Project<T>
     }
 
     fun getRemoteProjectIfPresent(projectId: String) = remoteProjects.entries
             .singleOrNull { it.key.key == projectId }
             ?.value
 
-    override fun deleteProject(project: Project<*, *>) {
+    override fun deleteProject(project: Project<*>) {
         val projectId = project.id
 
         check(remoteProjects.containsKey(projectId))

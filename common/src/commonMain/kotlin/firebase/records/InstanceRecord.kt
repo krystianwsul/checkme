@@ -9,16 +9,17 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
 
-class InstanceRecord<T : CustomTimeId>(
+class InstanceRecord<T : ProjectType>(
         create: Boolean,
-        private val remoteTaskRecord: RemoteTaskRecord<T, *>,
+        private val remoteTaskRecord: RemoteTaskRecord<T>,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
-        val scheduleCustomTimeId: T?
+        val scheduleCustomTimeId: CustomTimeId<T>?
 ) : RemoteRecord(create) {
 
     companion object {
@@ -45,10 +46,10 @@ class InstanceRecord<T : CustomTimeId>(
             return key
         }
 
-        fun <T : CustomTimeId> stringToScheduleKey(
-                remoteProjectRecord: RemoteProjectRecord<T, *>,
+        fun <T : ProjectType> stringToScheduleKey(
+                remoteProjectRecord: RemoteProjectRecord<T>,
                 key: String
-        ): Pair<ScheduleKey, T?> {
+        ): Pair<ScheduleKey, CustomTimeId<T>?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
 
             fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
@@ -142,7 +143,7 @@ class InstanceRecord<T : CustomTimeId>(
     }
 
     var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
-        var customTimeId: T? = null
+        var customTimeId: CustomTimeId<T>? = null
         var hourMinute: HourMinute? = null
 
         when (value) {

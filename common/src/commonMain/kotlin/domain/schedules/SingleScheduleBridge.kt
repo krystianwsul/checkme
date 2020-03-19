@@ -1,9 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-interface SingleScheduleBridge<T : CustomTimeId, U : ProjectKey> : ScheduleBridge<T, U> {
+interface SingleScheduleBridge<T : ProjectType> : ScheduleBridge<T> {
 
     val year: Int
 

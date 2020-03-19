@@ -1,18 +1,17 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.firebase.models.TaskHierarchy
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 
-class TaskHierarchyContainer<T : CustomTimeId, U : ProjectKey> {
+class TaskHierarchyContainer<T : ProjectType> {
 
-    private val taskHierarchiesById = HashMap<String, TaskHierarchy<T, U>>()
+    private val taskHierarchiesById = HashMap<String, TaskHierarchy<T>>()
 
-    private val taskHierarchiesByParent = MultiMap<T, U>()
-    private val taskHierarchiesByChild = MultiMap<T, U>()
+    private val taskHierarchiesByParent = MultiMap<T>()
+    private val taskHierarchiesByChild = MultiMap<T>()
 
-    fun add(id: String, taskHierarchy: TaskHierarchy<T, U>) {
+    fun add(id: String, taskHierarchy: TaskHierarchy<T>) {
         check(!taskHierarchiesById.containsKey(id))
 
         taskHierarchiesById[id] = taskHierarchy
@@ -38,19 +37,19 @@ class TaskHierarchyContainer<T : CustomTimeId, U : ProjectKey> {
         check(taskHierarchiesByParent.remove(parentTaskKey, taskHierarchy))
     }
 
-    fun getByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T, U>> = taskHierarchiesByChild.get(childTaskKey)
+    fun getByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> = taskHierarchiesByChild.get(childTaskKey)
 
-    fun getByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T, U>> = taskHierarchiesByParent.get(parentTaskKey)
+    fun getByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T>> = taskHierarchiesByParent.get(parentTaskKey)
 
     fun getById(id: String) = taskHierarchiesById[id]!!
 
-    val all: Collection<TaskHierarchy<*, *>> get() = taskHierarchiesById.values
+    val all: Collection<TaskHierarchy<*>> get() = taskHierarchiesById.values
 
-    private class MultiMap<T : CustomTimeId, U : ProjectKey> {
+    private class MultiMap<T : ProjectType> {
 
-        private val values = mutableMapOf<TaskKey, MutableSet<TaskHierarchy<T, U>>>()
+        private val values = mutableMapOf<TaskKey, MutableSet<TaskHierarchy<T>>>()
 
-        fun put(taskKey: TaskKey, taskHierarchy: TaskHierarchy<T, U>): Boolean {
+        fun put(taskKey: TaskKey, taskHierarchy: TaskHierarchy<T>): Boolean {
             if (!values.containsKey(taskKey))
                 values[taskKey] = mutableSetOf()
             return values.getValue(taskKey).add(taskHierarchy)
@@ -58,12 +57,12 @@ class TaskHierarchyContainer<T : CustomTimeId, U : ProjectKey> {
 
         fun containsEntry(
                 taskKey: TaskKey,
-                taskHierarchy: TaskHierarchy<T, U>
+                taskHierarchy: TaskHierarchy<T>
         ) = values[taskKey]?.contains(taskHierarchy) ?: false
 
         fun remove(
                 taskKey: TaskKey,
-                taskHierarchy: TaskHierarchy<T, U>
+                taskHierarchy: TaskHierarchy<T>
         ) = values[taskKey]?.remove(taskHierarchy) ?: false
 
         fun get(taskKey: TaskKey) = values[taskKey]?.toMutableSet() ?: mutableSetOf()

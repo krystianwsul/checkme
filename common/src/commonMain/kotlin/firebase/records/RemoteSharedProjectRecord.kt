@@ -4,21 +4,18 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class RemoteSharedProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         private val parent: Parent,
         create: Boolean,
-        id: ProjectKey.Shared,
+        override val id: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<CustomTimeId.Shared, ProjectKey.Shared>(
+) : RemoteProjectRecord<ProjectType.Shared>(
         create,
-        id,
-        jsonWrapper.projectJson
+        jsonWrapper.projectJson,
+        id
 ) {
 
     override val customTimeRecords = jsonWrapper.projectJson
@@ -123,12 +120,12 @@ class RemoteSharedProjectRecord(
 
     override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Shared(id))
 
-    override fun getcustomTimeId(id: String) = CustomTimeId.Shared(id)
+    override fun getCustomTimeId(id: String) = CustomTimeId.Shared(id)
 
-    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId.Shared) = CustomTimeKey.Shared(id, customTimeId)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) = CustomTimeKey.Shared(id, customTimeId)
 
     interface Parent {
 
-        fun deleteRemoteSharedProjectRecord(id: ProjectKey.Shared)
+        fun deleteRemoteSharedProjectRecord(id: ProjectKey<ProjectType.Shared>)
     }
 }

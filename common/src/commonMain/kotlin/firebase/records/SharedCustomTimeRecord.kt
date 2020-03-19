@@ -4,7 +4,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 import kotlin.properties.Delegates.observable
 
@@ -14,7 +14,7 @@ class SharedCustomTimeRecord(
         override val id: CustomTimeId.Shared,
         override val customTimeJson: SharedCustomTimeJson,
         override val remoteProjectRecord: RemoteSharedProjectRecord
-) : CustomTimeRecord<CustomTimeId.Shared, ProjectKey.Shared>(create) {
+) : CustomTimeRecord<ProjectType.Shared>(create) {
 
     constructor(
             id: CustomTimeId.Shared,

@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class StrangerProjectManager {
 
-    private var strangerProjects: Pair<ProjectKey, List<Pair<UserKey, Boolean>>>? = null
+    private var strangerProjects: Pair<ProjectKey<*>, List<Pair<UserKey, Boolean>>>? = null
 
     fun save(domainFactory: DomainFactory) {
         val values = mutableMapOf<String, Any?>()
@@ -29,7 +29,7 @@ class StrangerProjectManager {
     }
 
     fun updateStrangerProjects(
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             addedStrangers: Set<UserKey>,
             removedStrangers: Set<UserKey>
     ) {

@@ -54,7 +54,7 @@ object ShortcutQueue {
 
     fun updateShortcuts(shortcutDatas: List<ShortcutData>) = relay.accept(shortcutDatas)
 
-    class ShortcutData(deviceDbInfo: DeviceDbInfo, task: Task<*, *>) {
+    class ShortcutData(deviceDbInfo: DeviceDbInfo, task: Task<*>) {
 
         val taskKey = task.taskKey
         val name = task.name

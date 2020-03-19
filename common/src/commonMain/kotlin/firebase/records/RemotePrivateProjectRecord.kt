@@ -7,16 +7,17 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 class RemotePrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        id: ProjectKey.Private,
+        override val id: ProjectKey.Private,
         private val projectJson: PrivateProjectJson
-) : RemoteProjectRecord<CustomTimeId.Private, ProjectKey.Private>(
+) : RemoteProjectRecord<ProjectType.Private>(
         create,
-        id,
-        projectJson
+        projectJson,
+        id
 ) {
 
     override val customTimeRecords = projectJson.customTimes
@@ -81,7 +82,7 @@ class RemotePrivateProjectRecord(
 
     override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Private(id))
 
-    override fun getcustomTimeId(id: String) = CustomTimeId.Private(id)
+    override fun getCustomTimeId(id: String) = CustomTimeId.Private(id)
 
-    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId.Private) = CustomTimeKey.Private(id, customTimeId)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) = CustomTimeKey.Private(id, customTimeId as CustomTimeId.Private)
 }

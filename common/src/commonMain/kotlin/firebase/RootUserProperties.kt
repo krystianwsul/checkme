@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 interface RootUserProperties {
@@ -20,5 +21,5 @@ interface RootUserProperties {
     fun removeFriendOf(userKey: UserKey)
 
     fun addProject(projectKey: ProjectKey.Shared)
-    fun removeProject(projectKey: ProjectKey.Shared): Boolean
+    fun removeProject(projectKey: ProjectKey<ProjectType.Shared>): Boolean
 }

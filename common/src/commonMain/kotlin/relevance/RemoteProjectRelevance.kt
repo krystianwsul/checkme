@@ -2,7 +2,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.Project
 
-class RemoteProjectRelevance(val project: Project<*, *>) {
+class RemoteProjectRelevance(val project: Project<*>) {
 
     var relevant = false
         private set

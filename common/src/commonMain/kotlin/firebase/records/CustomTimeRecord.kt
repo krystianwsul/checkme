@@ -6,20 +6,20 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 
-abstract class CustomTimeRecord<T : CustomTimeId, U : ProjectKey>(create: Boolean) : RemoteRecord(create) {
+abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord(create) {
 
     companion object {
 
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    abstract val id: T
-    abstract val customTimeKey: CustomTimeKey<T, U>
+    abstract val id: CustomTimeId<T>
+    abstract val customTimeKey: CustomTimeKey<T>
     protected abstract val customTimeJson: CustomTimeJson
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, U>
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
     var name by Committer({ customTimeJson::name })
 

@@ -2,14 +2,13 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.RemoteTaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-class TaskHierarchy<T : CustomTimeId, U : ProjectKey>(
-        private val project: Project<T, U>,
+class TaskHierarchy<T : ProjectType>(
+        private val project: Project<T>,
         private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord
 ) {
 

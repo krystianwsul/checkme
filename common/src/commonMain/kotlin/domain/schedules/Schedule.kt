@@ -6,14 +6,13 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule<T : CustomTimeId, U : ProjectKey>(private val rootTask: Task<T, U>) {
+abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
 
-    protected abstract val scheduleBridge: ScheduleBridge<T, U>
+    protected abstract val scheduleBridge: ScheduleBridge<T>
 
     protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
 
@@ -50,13 +49,13 @@ abstract class Schedule<T : CustomTimeId, U : ProjectKey>(private val rootTask: 
     fun current(exactTimeStamp: ExactTimeStamp) =
             startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
 
-    abstract fun <T : CustomTimeId, U : ProjectKey> getInstances(
-            task: Task<T, U>,
+    abstract fun <T : ProjectType> getInstances(
+            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance<T, U>>
+    ): Sequence<Instance<T>>
 
-    abstract fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean
+    abstract fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean
 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 

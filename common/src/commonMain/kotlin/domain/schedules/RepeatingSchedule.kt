@@ -4,23 +4,22 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.NullableWrapper
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
 
-abstract class RepeatingSchedule<T : CustomTimeId, U : ProjectKey>(rootTask: Task<T, U>) : Schedule<T, U>(rootTask) {
+abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
-    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T, U>
+    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T>
 
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until
 
-    override fun <T : CustomTimeId, U : ProjectKey> getInstances(
-            task: Task<T, U>,
+    override fun <T : ProjectType> getInstances(
+            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
-    ): Sequence<Instance<T, U>> {
+    ): Sequence<Instance<T>> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
@@ -44,7 +43,7 @@ abstract class RepeatingSchedule<T : CustomTimeId, U : ProjectKey>(rootTask: Tas
 
         check(startExactTimeStamp < endExactTimeStamp)
 
-        val nullableSequence: Sequence<Instance<*, *>?>
+        val nullableSequence: Sequence<Instance<*>?>
 
         if (startExactTimeStamp.date == endExactTimeStamp.date) {
             nullableSequence = sequenceOf(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, endExactTimeStamp.hourMilli))
@@ -73,14 +72,14 @@ abstract class RepeatingSchedule<T : CustomTimeId, U : ProjectKey>(rootTask: Tas
         return nullableSequence.filterNotNull()
     }
 
-    protected abstract fun <T : CustomTimeId, U : ProjectKey> getInstanceInDate(
-            task: Task<T, U>,
+    protected abstract fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<T, U>?
+    ): Instance<T>?
 
-    override fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean {
+    override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
         return until?.let {

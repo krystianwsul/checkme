@@ -64,7 +64,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private lateinit var customView: View
     private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
-    private var customTimeDatas: Map<CustomTimeKey<*, *>, CreateTaskViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -78,7 +78,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*, *>) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
             check(customTimeDatas != null)
 
             scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
@@ -461,7 +461,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*, *>, CreateTaskViewModel.CustomTimeData>) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
         if (this::scheduleDialogData.isInitialized)

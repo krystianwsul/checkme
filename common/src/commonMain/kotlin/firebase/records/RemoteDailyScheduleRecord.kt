@@ -2,15 +2,14 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 
-class RemoteDailyScheduleRecord<T : CustomTimeId, U : ProjectKey>(
+class RemoteDailyScheduleRecord<T : ProjectType>(
         id: String,
-        remoteTaskRecord: RemoteTaskRecord<T, U>,
+        remoteTaskRecord: RemoteTaskRecord<T>,
         scheduleWrapper: ScheduleWrapper
-) : RemoteScheduleRecord<T, U>(
+) : RemoteScheduleRecord<T>(
         id,
         remoteTaskRecord,
         scheduleWrapper,

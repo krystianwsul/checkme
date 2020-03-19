@@ -6,13 +6,13 @@ import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
-class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
+class RemoteTaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<T, U>,
+        private val remoteProjectRecord: RemoteProjectRecord<T>,
         private val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
@@ -23,15 +23,15 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
 
     val remoteInstanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
 
-    val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T, U>> = HashMap()
+    val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T>> = HashMap()
 
-    val remoteDailyScheduleRecords: MutableMap<String, RemoteDailyScheduleRecord<T, U>> = HashMap()
+    val remoteDailyScheduleRecords: MutableMap<String, RemoteDailyScheduleRecord<T>> = HashMap()
 
-    val remoteWeeklyScheduleRecords: MutableMap<String, RemoteWeeklyScheduleRecord<T, U>> = HashMap()
+    val remoteWeeklyScheduleRecords: MutableMap<String, RemoteWeeklyScheduleRecord<T>> = HashMap()
 
-    val remoteMonthlyDayScheduleRecords: MutableMap<String, RemoteMonthlyDayScheduleRecord<T, U>> = HashMap()
+    val remoteMonthlyDayScheduleRecords: MutableMap<String, RemoteMonthlyDayScheduleRecord<T>> = HashMap()
 
-    val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T, U>> = HashMap()
+    val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T>> = HashMap()
 
     override val createObject: TaskJson
         // because of duplicate functionality when converting local task
@@ -93,7 +93,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<T, U>,
+            remoteProjectRecord: RemoteProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             false,
@@ -103,7 +103,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
     )
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<T, U>,
+            remoteProjectRecord: RemoteProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             true,
@@ -217,7 +217,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
     fun newRemoteInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            customTimeId: T?
+            customTimeId: CustomTimeId<T>?
     ): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
@@ -228,7 +228,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
         return remoteInstanceRecord
     }
 
-    fun newRemoteSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T, U> {
+    fun newRemoteSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T> {
         val remoteSingleScheduleRecord = RemoteSingleScheduleRecord(this, scheduleWrapper)
         check(!remoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.id))
 
@@ -236,7 +236,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
         return remoteSingleScheduleRecord
     }
 
-    fun newRemoteWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord<T, U> {
+    fun newRemoteWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord<T> {
         val remoteWeeklyScheduleRecord = RemoteWeeklyScheduleRecord(this, scheduleWrapper)
         check(!remoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.id))
 
@@ -244,7 +244,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
         return remoteWeeklyScheduleRecord
     }
 
-    fun newRemoteMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord<T, U> {
+    fun newRemoteMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord<T> {
         val remoteMonthlyDayScheduleRecord = RemoteMonthlyDayScheduleRecord(this, scheduleWrapper)
         check(!remoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.id))
 
@@ -252,7 +252,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
         return remoteMonthlyDayScheduleRecord
     }
 
-    fun newRemoteMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord<T, U> {
+    fun newRemoteMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord<T> {
         val remoteMonthlyWeekScheduleRecord = RemoteMonthlyWeekScheduleRecord(this, scheduleWrapper)
         check(!remoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.id))
 
@@ -264,7 +264,7 @@ class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
 
     fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
 
-    fun getcustomTimeId(id: String) = remoteProjectRecord.getcustomTimeId(id)
+    fun getcustomTimeId(id: String) = remoteProjectRecord.getCustomTimeId(id)
     fun getRemoteCustomTimeKey(id: String) = remoteProjectRecord.getRemoteCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)

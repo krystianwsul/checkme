@@ -4,15 +4,14 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 
-class WeeklySchedule<T : CustomTimeId, U : ProjectKey>(
-        rootTask: Task<T, U>,
-        override val repeatingScheduleBridge: WeeklyScheduleBridge<T, U>
-) : RepeatingSchedule<T, U>(rootTask) {
+class WeeklySchedule<T : ProjectType>(
+        rootTask: Task<T>,
+        override val repeatingScheduleBridge: WeeklyScheduleBridge<T>
+) : RepeatingSchedule<T>(rootTask) {
 
     val daysOfWeek
         get() = repeatingScheduleBridge.daysOfWeek
@@ -22,12 +21,12 @@ class WeeklySchedule<T : CustomTimeId, U : ProjectKey>(
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
-    override fun <T : CustomTimeId, U : ProjectKey> getInstanceInDate(
-            task: Task<T, U>,
+    override fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<T, U>? {
+    ): Instance<T>? {
         val day = date.dayOfWeek
 
         if (!daysOfWeek.contains(day))

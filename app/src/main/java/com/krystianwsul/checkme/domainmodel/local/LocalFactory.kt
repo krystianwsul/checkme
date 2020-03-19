@@ -21,12 +21,12 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
     override fun getShown(
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             taskId: String,
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
-            scheduleCustomTimeId: CustomTimeId?,
+            scheduleCustomTimeId: CustomTimeId<*>?,
             scheduleHour: Int?,
             scheduleMinute: Int?
     ): InstanceShownRecord? {
@@ -66,7 +66,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     override fun createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
-            projectId: ProjectKey
+            projectId: ProjectKey<*>
     ): InstanceShownRecord {
         val (customTimeId, hour, minute) = scheduleDateTime.time
                 .timePair

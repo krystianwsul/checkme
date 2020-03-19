@@ -19,7 +19,7 @@ object BackendNotifier {
 
     private const val PREFIX = "https://us-central1-check-me-add47.cloudfunctions.net/notify?"
 
-    fun getUrl(projects: Set<ProjectKey>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
+    fun getUrl(projects: Set<ProjectKey<*>>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=${it.key}" }.toMutableSet()
@@ -34,7 +34,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(projects: Set<Project<*, *>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
+    fun notify(projects: Set<Project<*>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
         val production = when (AndroidDatabaseWrapper.root) {
             "development" -> false
             "production" -> true

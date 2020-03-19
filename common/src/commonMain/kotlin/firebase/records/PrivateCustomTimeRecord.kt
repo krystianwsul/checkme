@@ -4,7 +4,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 
 class PrivateCustomTimeRecord(
@@ -12,7 +12,7 @@ class PrivateCustomTimeRecord(
         override val id: CustomTimeId.Private,
         override val customTimeJson: PrivateCustomTimeJson,
         override val remoteProjectRecord: RemotePrivateProjectRecord
-) : CustomTimeRecord<CustomTimeId.Private, ProjectKey.Private>(create) {
+) : CustomTimeRecord<ProjectType.Private>(create) {
 
     constructor(
             id: CustomTimeId.Private,

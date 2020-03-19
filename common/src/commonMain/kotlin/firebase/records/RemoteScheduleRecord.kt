@@ -3,13 +3,12 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-abstract class RemoteScheduleRecord<T : CustomTimeId, U : ProjectKey>(
+abstract class RemoteScheduleRecord<T : ProjectType>(
         create: Boolean,
         val id: String,
-        protected val remoteTaskRecord: RemoteTaskRecord<T, U>,
+        protected val remoteTaskRecord: RemoteTaskRecord<T>,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         endTimeKey: String
@@ -40,7 +39,7 @@ abstract class RemoteScheduleRecord<T : CustomTimeId, U : ProjectKey>(
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T, U>,
+            remoteTaskRecord: RemoteTaskRecord<T>,
             scheduleWrapper: ScheduleWrapper,
             scheduleJson: ScheduleJson,
             endTimeKey: String
@@ -54,7 +53,7 @@ abstract class RemoteScheduleRecord<T : CustomTimeId, U : ProjectKey>(
     )
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T, U>,
+            remoteTaskRecord: RemoteTaskRecord<T>,
             scheduleWrapper: ScheduleWrapper,
             scheduleJson: ScheduleJson,
             endTimeKey: String

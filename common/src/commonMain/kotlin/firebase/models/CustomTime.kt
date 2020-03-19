@@ -7,17 +7,17 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-abstract class CustomTime<T : CustomTimeId, U : ProjectKey> : Time {
+abstract class CustomTime<T : ProjectType> : Time {
 
-    protected abstract val project: Project<T, U>
+    protected abstract val project: Project<T>
 
-    abstract val customTimeRecord: CustomTimeRecord<T, *>
+    abstract val customTimeRecord: CustomTimeRecord<T>
 
-    abstract val id: T
+    abstract val id: CustomTimeId<T>
 
-    abstract val key: CustomTimeKey<T, U>
+    abstract val key: CustomTimeKey<T>
 
     val name get() = customTimeRecord.name
 

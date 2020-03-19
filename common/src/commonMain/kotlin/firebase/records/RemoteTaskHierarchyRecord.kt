@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 class RemoteTaskHierarchyRecord(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<*, *>,
+        private val remoteProjectRecord: RemoteProjectRecord<*>,
         override val createObject: TaskHierarchyJson
 ) : RemoteRecord(create) {
 
@@ -27,12 +27,12 @@ class RemoteTaskHierarchyRecord(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<*, *>,
+            remoteProjectRecord: RemoteProjectRecord<*>,
             taskHierarchyJson: TaskHierarchyJson
     ) : this(false, id, remoteProjectRecord, taskHierarchyJson)
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<*, *>,
+            remoteProjectRecord: RemoteProjectRecord<*>,
             taskHierarchyJson: TaskHierarchyJson
     ) : this(
             true,

@@ -10,7 +10,7 @@ import com.soywiz.klock.days
 
 object Irrelevant {
 
-    fun setIrrelevant(parent: Project.Parent, project: Project<*, *>, now: ExactTimeStamp): Result {
+    fun setIrrelevant(parent: Project.Parent, project: Project<*>, now: ExactTimeStamp): Result {
         val tasks = project.tasks
 
         // relevant hack
@@ -126,7 +126,7 @@ object Irrelevant {
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
     data class Result(
-            val relevantInstances: Collection<Instance<*, *>>,
+            val relevantInstances: Collection<Instance<*>>,
             val removedSharedProjects: Collection<SharedProject>
     )
 }

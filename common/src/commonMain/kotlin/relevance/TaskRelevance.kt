@@ -7,7 +7,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
 
-class TaskRelevance(val task: Task<*, *>) {
+class TaskRelevance(val task: Task<*>) {
 
     var relevant = false
         private set
@@ -31,7 +31,7 @@ class TaskRelevance(val task: Task<*, *>) {
 
         val oldestVisible = task.getOldestVisible()
 
-        fun Instance<*, *>.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
+        fun Instance<*>.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
 
         // mark instances relevant
         task.getPastRootInstances(now)
@@ -56,8 +56,8 @@ class TaskRelevance(val task: Task<*, *>) {
     }
 
     fun setRemoteRelevant(
-            remoteCustomTimeRelevances: Map<CustomTimeKey<*, *>, RemoteCustomTimeRelevance>,
-            remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>
+            remoteCustomTimeRelevances: Map<CustomTimeKey<*>, RemoteCustomTimeRelevance>,
+            remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>
     ) {
         check(relevant)
 

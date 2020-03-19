@@ -1,14 +1,14 @@
 package com.krystianwsul.common.utils
 
 @Parcelize
-data class TaskKey(val remoteProjectId: ProjectKey, val remoteTaskId: String) : Parcelable, Serializable {
+data class TaskKey(val remoteProjectId: ProjectKey<*>, val remoteTaskId: String) : Parcelable, Serializable {
 
     companion object {
 
         fun fromShortcut(shortcut: String): TaskKey {
             val (type, projectId, taskId) = shortcut.split(':')
 
-            val projectKey: ProjectKey = ProjectKey.Type
+            val projectKey: ProjectKey<*> = ProjectKey.Type
                     .valueOf(type)
                     .newKey(projectId)
 

@@ -1,9 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-interface MonthlyWeekScheduleBridge<T : CustomTimeId, U : ProjectKey> : RepeatingScheduleBridge<T, U> {
+interface MonthlyWeekScheduleBridge<T : ProjectType> : RepeatingScheduleBridge<T> {
 
     val dayOfMonth: Int
 

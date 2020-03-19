@@ -6,12 +6,13 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
+abstract class RemoteProjectRecord<T : ProjectType>(
         create: Boolean,
-        val id: U,
-        private val projectJson: ProjectJson
+        private val projectJson: ProjectJson,
+        private val _id: ProjectKey<T> // bo musi być dostępne w konstruktorze, a abstract nie jest jeszcze zinicjalizowane
 ) : RemoteRecord(create) {
 
     companion object {
@@ -19,7 +20,9 @@ abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
         const val PROJECT_JSON = "projectJson"
     }
 
-    abstract val customTimeRecords: Map<T, CustomTimeRecord<T, U>>
+    abstract val id: ProjectKey<T>
+
+    abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
 
     val remoteTaskRecords = projectJson.tasks
             .mapValues { (id, taskJson) ->
@@ -39,7 +42,7 @@ abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
                 .toMutableMap()
     }
 
-    override val key get() = id.key
+    override val key get() = _id.key
 
     abstract val childKey: String
 
@@ -54,7 +57,7 @@ abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
                 remoteTaskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T, U> {
+    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
         val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
@@ -76,11 +79,11 @@ abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
 
     abstract fun getScheduleRecordId(taskId: String): String
 
-    abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T, *>
+    abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T>
 
-    abstract fun getcustomTimeId(id: String): T
+    abstract fun getCustomTimeId(id: String): CustomTimeId<T>
 
-    abstract fun getRemoteCustomTimeKey(customTimeId: T): CustomTimeKey<T, U>
+    abstract fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<T>): CustomTimeKey<T>
 
-    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getcustomTimeId(customTimeId))
+    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getCustomTimeId(customTimeId))
 }

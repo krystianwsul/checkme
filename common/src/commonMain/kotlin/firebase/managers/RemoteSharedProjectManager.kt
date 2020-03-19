@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
 
@@ -48,7 +49,7 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
         remoteProjectRecords[it.id] = Pair(it, false)
     }
 
-    override fun deleteRemoteSharedProjectRecord(id: ProjectKey.Shared) {
+    override fun deleteRemoteSharedProjectRecord(id: ProjectKey<ProjectType.Shared>) {
         remoteProjectRecords.remove(id)
     }
 }

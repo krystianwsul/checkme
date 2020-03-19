@@ -6,7 +6,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
 
-class InstanceRelevance(val instance: Instance<*, *>) {
+class InstanceRelevance(val instance: Instance<*>) {
 
     var relevant = false
         private set
@@ -44,7 +44,10 @@ class InstanceRelevance(val instance: Instance<*, *>) {
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<CustomTimeKey<*, *>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>) {
+    fun setRemoteRelevant(
+            remoteCustomTimeRelevances: Map<CustomTimeKey<*>, RemoteCustomTimeRelevance>,
+            remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>
+    ) {
         check(relevant)
 
         val remoteProject = instance.project

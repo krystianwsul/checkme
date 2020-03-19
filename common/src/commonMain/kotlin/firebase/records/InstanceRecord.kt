@@ -8,11 +8,11 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
 
-class InstanceRecord<T : RemoteCustomTimeId>(
+class InstanceRecord<T : CustomTimeId>(
         create: Boolean,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>,
         override val createObject: InstanceJson,
@@ -35,7 +35,7 @@ class InstanceRecord<T : RemoteCustomTimeId>(
                     check(it.hourMinute == null)
 
                     it.customTimeKey
-                            .remoteCustomTimeId
+                            .customTimeId
                             .value
                 } else {
                     it.hourMinute!!.run { "$hour-$minute" }
@@ -45,7 +45,7 @@ class InstanceRecord<T : RemoteCustomTimeId>(
             return key
         }
 
-        fun <T : RemoteCustomTimeId> stringToScheduleKey(
+        fun <T : CustomTimeId> stringToScheduleKey(
                 remoteProjectRecord: RemoteProjectRecord<T, *>,
                 key: String
         ): Pair<ScheduleKey, T?> {
@@ -74,7 +74,7 @@ class InstanceRecord<T : RemoteCustomTimeId>(
 
                 val customTimeKey = remoteProjectRecord.getRemoteCustomTimeKey(customTimeId)
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.remoteCustomTimeId)
+                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
             }
         }
     }
@@ -135,9 +135,9 @@ class InstanceRecord<T : RemoteCustomTimeId>(
                     if (matchResult != null)
                         JsonTime.Normal<T>(HourMinute.fromJson(it))
                     else
-                        JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it))
+                        JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it))
                 }
-                ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
+                ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it)) }
                         ?: createObject.instanceHour?.let { hour -> createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) } }
     }
 

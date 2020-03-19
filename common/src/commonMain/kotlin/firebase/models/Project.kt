@@ -16,7 +16,7 @@ import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
+abstract class Project<T : CustomTimeId, U : ProjectKey> {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T, U>
 
@@ -129,7 +129,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
             ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is CustomTime<*, *> -> Triple(newTime.key.remoteCustomTimeId, null, null)
+        is CustomTime<*, *> -> Triple(newTime.key.customTimeId, null, null)
         is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
         else -> throw IllegalArgumentException()
     }
@@ -155,7 +155,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         when (newInstanceTime) {
             is CustomTime<*, *> -> {
                 instanceCustomTimeId = newInstanceTime.key
-                        .remoteCustomTimeId
+                        .customTimeId
                         .value
                 instanceHour = null
                 instanceMinute = null
@@ -267,9 +267,9 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U> // todo instances try to remove
+    abstract fun getRemoteCustomTime(customTimeId: CustomTimeId): CustomTime<T, U> // todo instances try to remove
     abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T, U>): CustomTime<T, U>
-    abstract fun getRemoteCustomTime(remoteCustomTimeId: String): CustomTime<T, U>
+    abstract fun getRemoteCustomTime(customTimeId: String): CustomTime<T, U>
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,

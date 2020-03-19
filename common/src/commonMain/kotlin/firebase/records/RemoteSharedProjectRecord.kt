@@ -4,9 +4,9 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
 
 class RemoteSharedProjectRecord(
@@ -15,7 +15,7 @@ class RemoteSharedProjectRecord(
         create: Boolean,
         id: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<RemoteCustomTimeId.Shared, ProjectKey.Shared>(
+) : RemoteProjectRecord<CustomTimeId.Shared, ProjectKey.Shared>(
         create,
         id,
         jsonWrapper.projectJson
@@ -26,9 +26,9 @@ class RemoteSharedProjectRecord(
             .map { (id, customTimeJson) ->
                 check(id.isNotEmpty())
 
-                val remoteCustomTimeId = RemoteCustomTimeId.Shared(id)
+                val customTimeId = CustomTimeId.Shared(id)
 
-                remoteCustomTimeId to SharedCustomTimeRecord(remoteCustomTimeId, this, customTimeJson)
+                customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
             }
             .toMap()
             .toMutableMap()
@@ -113,7 +113,7 @@ class RemoteSharedProjectRecord(
 
     override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(id)
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(id))
 
     override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(id)
 
@@ -121,11 +121,11 @@ class RemoteSharedProjectRecord(
 
     override fun getTaskHierarchyRecordId() = databaseWrapper.newSharedTaskHierarchyRecordId(id)
 
-    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(RemoteCustomTimeId.Shared(id))
+    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Shared(id))
 
-    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
+    override fun getcustomTimeId(id: String) = CustomTimeId.Shared(id)
 
-    override fun getRemoteCustomTimeKey(remoteCustomTimeId: RemoteCustomTimeId.Shared) = CustomTimeKey.Shared(id, remoteCustomTimeId)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId.Shared) = CustomTimeKey.Shared(id, customTimeId)
 
     interface Parent {
 

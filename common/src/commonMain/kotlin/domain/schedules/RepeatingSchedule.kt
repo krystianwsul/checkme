@@ -4,19 +4,19 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.soywiz.klock.days
 
-abstract class RepeatingSchedule<T : RemoteCustomTimeId, U : ProjectKey>(rootTask: Task<T, U>) : Schedule<T, U>(rootTask) {
+abstract class RepeatingSchedule<T : CustomTimeId, U : ProjectKey>(rootTask: Task<T, U>) : Schedule<T, U>(rootTask) {
 
     protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T, U>
 
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until
 
-    override fun <T : RemoteCustomTimeId, U : ProjectKey> getInstances(
+    override fun <T : CustomTimeId, U : ProjectKey> getInstances(
             task: Task<T, U>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
@@ -73,7 +73,7 @@ abstract class RepeatingSchedule<T : RemoteCustomTimeId, U : ProjectKey>(rootTas
         return nullableSequence.filterNotNull()
     }
 
-    protected abstract fun <T : RemoteCustomTimeId, U : ProjectKey> getInstanceInDate(
+    protected abstract fun <T : CustomTimeId, U : ProjectKey> getInstanceInDate(
             task: Task<T, U>,
             date: Date,
             startHourMilli: HourMilli?,

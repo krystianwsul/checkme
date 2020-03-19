@@ -200,7 +200,7 @@ class RemoteProjectFactory(
     fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*, *>): CustomTime<*, *> {
         check(remoteProjects.containsKey(customTimeKey.remoteProjectId))
 
-        return remoteProjects.getValue(customTimeKey.remoteProjectId).getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
+        return remoteProjects.getValue(customTimeKey.remoteProjectId).getRemoteCustomTime(customTimeKey.customTimeId)
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*, *>? {

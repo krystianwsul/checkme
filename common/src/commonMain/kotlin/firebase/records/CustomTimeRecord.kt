@@ -1,16 +1,15 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.domain.UserInfo
-
 import com.krystianwsul.common.firebase.json.CustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-abstract class CustomTimeRecord<T : RemoteCustomTimeId, U : ProjectKey>(create: Boolean) : RemoteRecord(create) {
+abstract class CustomTimeRecord<T : CustomTimeId, U : ProjectKey>(create: Boolean) : RemoteRecord(create) {
 
     companion object {
 

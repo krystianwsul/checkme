@@ -4,10 +4,10 @@ import com.krystianwsul.common.domain.schedules.WeeklyScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteDailyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemoteDailyScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
+class RemoteDailyScheduleBridge<T : CustomTimeId, U : ProjectKey>(
         remoteDailyScheduleRecord: RemoteDailyScheduleRecord<T, U>
 ) : RemoteScheduleBridge<T, U>(remoteDailyScheduleRecord), WeeklyScheduleBridge<T, U> {
 

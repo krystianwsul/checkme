@@ -3,10 +3,10 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
+abstract class RemoteScheduleRecord<T : CustomTimeId, U : ProjectKey>(
         create: Boolean,
         val id: String,
         protected val remoteTaskRecord: RemoteTaskRecord<T, U>,

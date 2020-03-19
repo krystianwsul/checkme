@@ -5,11 +5,11 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
+abstract class CustomTime<T : CustomTimeId, U : ProjectKey> : Time {
 
     protected abstract val project: Project<T, U>
 

@@ -3,12 +3,12 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectKey>(
+abstract class RemoteProjectRecord<T : CustomTimeId, U : ProjectKey>(
         create: Boolean,
         val id: U,
         private val projectJson: ProjectJson
@@ -78,9 +78,9 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectKey>(
 
     abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T, *>
 
-    abstract fun getRemoteCustomTimeId(id: String): T
+    abstract fun getcustomTimeId(id: String): T
 
-    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T, U>
+    abstract fun getRemoteCustomTimeKey(customTimeId: T): CustomTimeKey<T, U>
 
-    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getRemoteCustomTimeId(customTimeId))
+    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getcustomTimeId(customTimeId))
 }

@@ -5,11 +5,11 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
 
-class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private constructor(
+class RemoteTaskRecord<T : CustomTimeId, U : ProjectKey> private constructor(
         create: Boolean,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T, U>,
@@ -134,7 +134,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val (scheduleKey, remoteCustomTimeId) = InstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
+            val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
             val remoteInstanceRecord = InstanceRecord(
                     create,
@@ -142,7 +142,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
                     instanceJson,
                     scheduleKey,
                     key,
-                    remoteCustomTimeId)
+                    customTimeId)
 
             remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
@@ -217,11 +217,11 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
     fun newRemoteInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            remoteCustomTimeId: T?
+            customTimeId: T?
     ): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
-        val remoteInstanceRecord = InstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
+        val remoteInstanceRecord = InstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, customTimeId)
         check(!remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord
@@ -264,7 +264,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
 
     fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
 
-    fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
+    fun getcustomTimeId(id: String) = remoteProjectRecord.getcustomTimeId(id)
     fun getRemoteCustomTimeKey(id: String) = remoteProjectRecord.getRemoteCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)

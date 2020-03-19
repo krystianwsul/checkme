@@ -6,12 +6,12 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule<T : RemoteCustomTimeId, U : ProjectKey>(private val rootTask: Task<T, U>) {
+abstract class Schedule<T : CustomTimeId, U : ProjectKey>(private val rootTask: Task<T, U>) {
 
     protected abstract val scheduleBridge: ScheduleBridge<T, U>
 
@@ -30,11 +30,10 @@ abstract class Schedule<T : RemoteCustomTimeId, U : ProjectKey>(private val root
     val timePair get() = scheduleBridge.timePair
 
     val time
-        get() = timePair.run {
-            customTimeKey?.let {
-                rootTask.remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
-            } ?: NormalTime(hourMinute!!)
-        }
+        get() = customTimeKey?.let {
+            rootTask.remoteProject.getRemoteCustomTime(it.customTimeId)
+        } ?: NormalTime(timePair.hourMinute!!)
+
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         check(current(endExactTimeStamp))
@@ -51,7 +50,7 @@ abstract class Schedule<T : RemoteCustomTimeId, U : ProjectKey>(private val root
     fun current(exactTimeStamp: ExactTimeStamp) =
             startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
 
-    abstract fun <T : RemoteCustomTimeId, U : ProjectKey> getInstances(
+    abstract fun <T : CustomTimeId, U : ProjectKey> getInstances(
             task: Task<T, U>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?

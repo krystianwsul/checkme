@@ -6,11 +6,11 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 
-class SingleSchedule<T : RemoteCustomTimeId, U : ProjectKey>(
+class SingleSchedule<T : CustomTimeId, U : ProjectKey>(
         rootTask: Task<T, U>,
         val singleScheduleBridge: SingleScheduleBridge<T, U>
 ) : Schedule<T, U>(rootTask) {
@@ -23,11 +23,11 @@ class SingleSchedule<T : RemoteCustomTimeId, U : ProjectKey>(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun <T : RemoteCustomTimeId, U : ProjectKey> getInstance(task: Task<T, U>) = task.getInstance(dateTime)
+    fun <T : CustomTimeId, U : ProjectKey> getInstance(task: Task<T, U>) = task.getInstance(dateTime)
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
-    override fun <T : RemoteCustomTimeId, U : ProjectKey> getInstances(
+    override fun <T : CustomTimeId, U : ProjectKey> getInstances(
             task: Task<T, U>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?

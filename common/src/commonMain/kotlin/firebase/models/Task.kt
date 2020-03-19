@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class Task<T : RemoteCustomTimeId, U : ProjectKey>(
+class Task<T : CustomTimeId, U : ProjectKey>(
         val remoteProject: Project<T, U>,
         private val remoteTaskRecord: RemoteTaskRecord<T, U>
 ) {
@@ -92,7 +92,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
     }
 
-    private class MockSingleScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
+    private class MockSingleScheduleBridge<T : CustomTimeId, U : ProjectKey>(
             private val singleScheduleBridge: SingleScheduleBridge<T, U>,
             private val instance: Instance<T, U>
     ) : SingleScheduleBridge<T, U> by singleScheduleBridge {
@@ -433,12 +433,12 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         @Suppress("UNCHECKED_CAST")
-        val remoteCustomTimeId = scheduleDateTime.time
+        val customTimeId = scheduleDateTime.time
                 .timePair
                 .customTimeKey
-                ?.let { it.remoteCustomTimeId as T }
+                ?.let { it.customTimeId as T }
 
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, remoteCustomTimeId)
+        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, customTimeId)
 
         existingRemoteInstances[instance.scheduleKey] = instance
 
@@ -466,13 +466,13 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
 
     fun createSchedules(ownerKey: UserKey, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
         for ((scheduleData, time) in scheduleDatas) {
-            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, time)
+            val (customTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, time)
 
             when (scheduleData) {
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
 
-                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId?.value, hour, minute)))
+                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
@@ -482,7 +482,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                                 now.long,
                                 null,
                                 dayOfWeek.ordinal,
-                                remoteCustomTimeId?.value,
+                                customTimeId?.value,
                                 hour,
                                 minute,
                                 scheduleData.from?.toJson(),
@@ -500,7 +500,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                             null,
                             dayOfMonth,
                             beginningOfMonth,
-                            remoteCustomTimeId?.value,
+                            customTimeId?.value,
                             hour,
                             minute,
                             scheduleData.from?.toJson(),
@@ -518,7 +518,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                             dayOfMonth,
                             dayOfWeek.ordinal,
                             beginningOfMonth,
-                            remoteCustomTimeId?.value,
+                            customTimeId?.value,
                             hour,
                             minute,
                             scheduleData.from?.toJson(),
@@ -533,13 +533,13 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
 
     fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*, *>>) {
         for (schedule in schedules) {
-            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
+            val (customTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
             when (schedule) {
                 is SingleSchedule<*, *> -> {
                     val date = schedule.date
 
-                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, remoteCustomTimeId?.value, hour, minute)))
+                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
@@ -549,7 +549,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                                 now.long,
                                 schedule.endTime,
                                 dayOfWeek.ordinal,
-                                remoteCustomTimeId?.value,
+                                customTimeId?.value,
                                 hour,
                                 minute,
                                 schedule.from?.toJson(),
@@ -565,7 +565,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                             schedule.endTime,
                             schedule.dayOfMonth,
                             schedule.beginningOfMonth,
-                            remoteCustomTimeId?.value,
+                            customTimeId?.value,
                             hour,
                             minute,
                             schedule.from?.toJson(),
@@ -581,7 +581,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                             schedule.dayOfMonth,
                             schedule.dayOfWeek.ordinal,
                             schedule.beginningOfMonth,
-                            remoteCustomTimeId?.value,
+                            customTimeId?.value,
                             hour,
                             minute,
                             schedule.from?.toJson(),
@@ -652,7 +652,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
 
     interface ProjectUpdater {
 
-        fun <T : RemoteCustomTimeId, U : ProjectKey> convertRemoteToRemote(
+        fun <T : CustomTimeId, U : ProjectKey> convertRemoteToRemote(
                 now: ExactTimeStamp,
                 startingTask: Task<T, U>,
                 projectId: ProjectKey

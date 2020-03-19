@@ -2,11 +2,11 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-class RemoteWeeklyScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : RemoteScheduleRecord<T, U> {
+class RemoteWeeklyScheduleRecord<T : CustomTimeId, U : ProjectKey> : RemoteScheduleRecord<T, U> {
 
     private val weeklyScheduleJson by lazy { createObject.weeklyScheduleJson!! }
 

@@ -4,7 +4,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 
-interface ScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey> {
+interface ScheduleBridge<T : CustomTimeId, U : ProjectKey> {
 
     val startTime: Long
 

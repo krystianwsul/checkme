@@ -4,18 +4,18 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleData
 
-sealed class ScheduleGroup<T : RemoteCustomTimeId, U : ProjectKey> {
+sealed class ScheduleGroup<T : CustomTimeId, U : ProjectKey> {
 
     companion object {
 
         private val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
 
-        fun <T : RemoteCustomTimeId, U : ProjectKey> getGroups(schedules: List<Schedule<out T, out U>>): List<ScheduleGroup<T, U>> {
+        fun <T : CustomTimeId, U : ProjectKey> getGroups(schedules: List<Schedule<out T, out U>>): List<ScheduleGroup<T, U>> {
             fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
                 getHourMinute(day).let { it.hour * 60 + it.minute }
             }
@@ -62,7 +62,7 @@ sealed class ScheduleGroup<T : RemoteCustomTimeId, U : ProjectKey> {
 
     abstract val schedules: List<Schedule<T, U>>
 
-    class Single<T : RemoteCustomTimeId, U : ProjectKey>(
+    class Single<T : CustomTimeId, U : ProjectKey>(
             private val singleSchedule: SingleSchedule<T, U>
     ) : ScheduleGroup<T, U>() {
 
@@ -73,7 +73,7 @@ sealed class ScheduleGroup<T : RemoteCustomTimeId, U : ProjectKey> {
         override val schedules get() = listOf(singleSchedule)
     }
 
-    class Weekly<T : RemoteCustomTimeId, U : ProjectKey>(
+    class Weekly<T : CustomTimeId, U : ProjectKey>(
             override val customTimeKey: CustomTimeKey<T, U>?,
             private val timePair: TimePair,
             private val weeklySchedules: List<WeeklySchedule<T, U>>,
@@ -88,7 +88,7 @@ sealed class ScheduleGroup<T : RemoteCustomTimeId, U : ProjectKey> {
         override val schedules get() = weeklySchedules
     }
 
-    class MonthlyDay<T : RemoteCustomTimeId, U : ProjectKey>(
+    class MonthlyDay<T : CustomTimeId, U : ProjectKey>(
             private val monthlyDaySchedule: MonthlyDaySchedule<T, U>
     ) : ScheduleGroup<T, U>() {
 
@@ -106,7 +106,7 @@ sealed class ScheduleGroup<T : RemoteCustomTimeId, U : ProjectKey> {
         override val schedules get() = listOf(monthlyDaySchedule)
     }
 
-    class MonthlyWeek<T : RemoteCustomTimeId, U : ProjectKey>(
+    class MonthlyWeek<T : CustomTimeId, U : ProjectKey>(
             private val monthlyWeekSchedule: MonthlyWeekSchedule<T, U>
     ) : ScheduleGroup<T, U>() {
 

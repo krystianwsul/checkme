@@ -7,7 +7,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
+class Instance<T : CustomTimeId, U : ProjectKey> {
 
     companion object {
 
@@ -18,7 +18,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
                 taskKey: TaskKey
         ) = getNotificationId(
                 scheduleDate,
-                scheduleCustomTimeKey?.let { Pair(it.remoteProjectId.key, it.remoteCustomTimeId.value) },
+                scheduleCustomTimeKey?.let { Pair(it.remoteProjectId.key, it.customTimeId.value) },
                 scheduleHourMinute,
                 taskKey.run { Pair(remoteProjectId.key, remoteTaskId) }
         )
@@ -315,7 +315,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
                 @Suppress("UNCHECKED_CAST")
                 when (it) {
-                    is CustomTime<*, *> -> JsonTime.Custom(it.key.remoteCustomTimeId as T)
+                    is CustomTime<*, *> -> JsonTime.Custom(it.key.customTimeId as T)
                     is NormalTime -> JsonTime.Normal(it.hourMinute)
                     else -> throw IllegalArgumentException()
                 }
@@ -360,7 +360,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
         return if (shared != null) {
-            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as SharedCustomTime
+            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.customTimeId) as SharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
                 val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
@@ -376,7 +376,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
         }
     }
 
-    private sealed class Data<T : RemoteCustomTimeId> {
+    private sealed class Data<T : CustomTimeId> {
 
         abstract val scheduleDate: Date
         abstract val scheduleTime: Time
@@ -388,7 +388,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
         abstract val hidden: Boolean
 
-        class Real<T : RemoteCustomTimeId>(
+        class Real<T : CustomTimeId>(
                 private val instance: Instance<T, *>,
                 val instanceRecord: InstanceRecord<T>
         ) : Data<T>() {
@@ -420,7 +420,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
             override val hidden get() = instanceRecord.hidden
         }
 
-        class Virtual<T : RemoteCustomTimeId>(val scheduleDateTime: DateTime) : Data<T>() {
+        class Virtual<T : CustomTimeId>(val scheduleDateTime: DateTime) : Data<T>() {
 
             override val scheduleDate by lazy { scheduleDateTime.date }
 
@@ -470,13 +470,13 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: RemoteCustomTimeId?,
+                scheduleCustomTimeId: CustomTimeId?,
                 scheduleHour: Int?,
                 scheduleMinute: Int?
         ): Shown?
 
         fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
-            val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
+            val (customTimeId, hour, minute) = scheduleDateTime.time
                     .timePair
                     .destructureRemote()
 
@@ -486,7 +486,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,
-                    remoteCustomTimeId,
+                    customTimeId,
                     hour,
                     minute
             )

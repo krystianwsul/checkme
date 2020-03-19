@@ -2,22 +2,22 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
 import kotlin.properties.Delegates.observable
 
 
 class SharedCustomTimeRecord(
         create: Boolean,
-        override val id: RemoteCustomTimeId.Shared,
+        override val id: CustomTimeId.Shared,
         override val customTimeJson: SharedCustomTimeJson,
         override val remoteProjectRecord: RemoteSharedProjectRecord
-) : CustomTimeRecord<RemoteCustomTimeId.Shared, ProjectKey.Shared>(create) {
+) : CustomTimeRecord<CustomTimeId.Shared, ProjectKey.Shared>(create) {
 
     constructor(
-            id: RemoteCustomTimeId.Shared,
+            id: CustomTimeId.Shared,
             remoteProjectRecord: RemoteSharedProjectRecord,
             customTimeJson: SharedCustomTimeJson
     ) : this(false, id, customTimeJson, remoteProjectRecord)
@@ -39,10 +39,10 @@ class SharedCustomTimeRecord(
         customTimeJson.ownerKey = newValue?.key
     }
 
-    var privateKey: RemoteCustomTimeId.Private?
+    var privateKey: CustomTimeId.Private?
         get() = customTimeJson.privateKey
                 .takeUnless { it.isNullOrEmpty() }
-                ?.let { RemoteCustomTimeId.Private(it) }
+                ?.let { CustomTimeId.Private(it) }
         set(value) {
             checkNotNull(value)
 

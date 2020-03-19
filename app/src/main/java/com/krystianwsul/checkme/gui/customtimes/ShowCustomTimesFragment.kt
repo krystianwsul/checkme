@@ -270,7 +270,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onClick(holder: NodeHolder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.remoteCustomTimeId.compareTo((other as CustomTimeNode).customTimeData.id.remoteCustomTimeId)
+        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
     }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {

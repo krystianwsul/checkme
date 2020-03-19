@@ -4,16 +4,16 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
         id: ProjectKey.Private,
         private val projectJson: PrivateProjectJson
-) : RemoteProjectRecord<RemoteCustomTimeId.Private, ProjectKey.Private>(
+) : RemoteProjectRecord<CustomTimeId.Private, ProjectKey.Private>(
         create,
         id,
         projectJson
@@ -23,9 +23,9 @@ class RemotePrivateProjectRecord(
             .map { (id, customTimeJson) ->
                 check(id.isNotEmpty())
 
-                val remoteCustomTimeId = RemoteCustomTimeId.Private(id)
+                val customTimeId = CustomTimeId.Private(id)
 
-                remoteCustomTimeId to PrivateCustomTimeRecord(remoteCustomTimeId, this, customTimeJson)
+                customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
             }
             .toMap()
             .toMutableMap()
@@ -71,7 +71,7 @@ class RemotePrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(id))
 
     override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(id)
 
@@ -79,9 +79,9 @@ class RemotePrivateProjectRecord(
 
     override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(id)
 
-    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(RemoteCustomTimeId.Private(id))
+    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Private(id))
 
-    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
+    override fun getcustomTimeId(id: String) = CustomTimeId.Private(id)
 
-    override fun getRemoteCustomTimeKey(remoteCustomTimeId: RemoteCustomTimeId.Private) = CustomTimeKey.Private(id, remoteCustomTimeId)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId.Private) = CustomTimeKey.Private(id, customTimeId)
 }

@@ -3,10 +3,10 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.domain.schedules.MonthlyWeekScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteMonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemoteMonthlyWeekScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
+class RemoteMonthlyWeekScheduleBridge<T : CustomTimeId, U : ProjectKey>(
         private val remoteMonthlyWeekScheduleRecord: RemoteMonthlyWeekScheduleRecord<T, U>
 ) : RemoteScheduleBridge<T, U>(remoteMonthlyWeekScheduleRecord), MonthlyWeekScheduleBridge<T, U> {
 

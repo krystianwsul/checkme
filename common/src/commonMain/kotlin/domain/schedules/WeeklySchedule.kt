@@ -4,12 +4,12 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 
-class WeeklySchedule<T : RemoteCustomTimeId, U : ProjectKey>(
+class WeeklySchedule<T : CustomTimeId, U : ProjectKey>(
         rootTask: Task<T, U>,
         override val repeatingScheduleBridge: WeeklyScheduleBridge<T, U>
 ) : RepeatingSchedule<T, U>(rootTask) {
@@ -22,7 +22,7 @@ class WeeklySchedule<T : RemoteCustomTimeId, U : ProjectKey>(
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
-    override fun <T : RemoteCustomTimeId, U : ProjectKey> getInstanceInDate(
+    override fun <T : CustomTimeId, U : ProjectKey> getInstanceInDate(
             task: Task<T, U>,
             date: Date,
             startHourMilli: HourMilli?,

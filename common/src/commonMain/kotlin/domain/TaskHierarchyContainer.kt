@@ -1,11 +1,11 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.firebase.models.TaskHierarchy
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
-class TaskHierarchyContainer<T : RemoteCustomTimeId, U : ProjectKey> {
+class TaskHierarchyContainer<T : CustomTimeId, U : ProjectKey> {
 
     private val taskHierarchiesById = HashMap<String, TaskHierarchy<T, U>>()
 
@@ -46,7 +46,7 @@ class TaskHierarchyContainer<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val all: Collection<TaskHierarchy<*, *>> get() = taskHierarchiesById.values
 
-    private class MultiMap<T : RemoteCustomTimeId, U : ProjectKey> {
+    private class MultiMap<T : CustomTimeId, U : ProjectKey> {
 
         private val values = mutableMapOf<TaskKey, MutableSet<TaskHierarchy<T, U>>>()
 

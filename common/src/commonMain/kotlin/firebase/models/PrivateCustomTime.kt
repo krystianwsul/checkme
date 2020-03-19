@@ -5,17 +5,17 @@ import com.krystianwsul.common.firebase.records.PrivateCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class PrivateCustomTime(
         override val project: PrivateProject,
         override val customTimeRecord: PrivateCustomTimeRecord
-) : CustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
+) : CustomTime<CustomTimeId.Private, ProjectKey.Private>() {
 
     override val key = customTimeRecord.customTimeKey
-    override val id = key.remoteCustomTimeId
+    override val id = key.customTimeId
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
             .map { (it as CustomTime<*, *>).customTimeRecord }

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.time
 
-interface Time {
+interface Time { // todo sealed
 
     val timePair: TimePair
 

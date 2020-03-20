@@ -427,18 +427,17 @@ class Task<T : ProjectType>(
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(instance: Instance<T>, scheduleDateTime: DateTime): InstanceRecord<T> {
-        val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
-
-        val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
-
+    fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
         @Suppress("UNCHECKED_CAST")
-        val customTimeId = scheduleDateTime.time
-                .timePair
-                .customTimeKey
-                ?.let { it.customTimeId as CustomTimeId<T> }
-
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, customTimeId)
+        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(
+                InstanceJson(),
+                instance.scheduleKey,
+                instance.scheduleDateTime
+                        .time
+                        .timePair
+                        .customTimeKey
+                        ?.let { it.customTimeId as CustomTimeId<T> }
+        )
 
         existingRemoteInstances[instance.scheduleKey] = instance
 

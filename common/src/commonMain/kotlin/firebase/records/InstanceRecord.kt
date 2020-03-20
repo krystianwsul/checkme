@@ -1,8 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 
-import com.krystianwsul.common.ErrorLogger
-
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -91,58 +89,24 @@ class InstanceRecord<T : ProjectType>(
                 ?.minute
     }
 
-    private fun getInitialInstanceDate(): Date? {
-        createObject.instanceDate
+    private fun getInitialInstanceDate() = createObject.instanceDate
                 .takeUnless { it.isNullOrEmpty() }
-                ?.let { return Date.fromJson(it) }
-
-        val instanceYear = createObject.instanceYear
-        val instanceMonth = createObject.instanceMonth
-        val instanceDay = createObject.instanceDay
-
-        if (((instanceYear != null) != (instanceMonth != null)) || (instanceYear != null) != (instanceDay != null))
-            ErrorLogger.instance.logException(InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
-
-        return if (instanceYear != null && instanceMonth != null && instanceDay != null)
-            Date(instanceYear, instanceMonth, instanceDay)
-        else
-            null
-    }
+            ?.let { Date.fromJson(it) }
 
     var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
-        setProperty(createObject::instanceYear, value!!.year)
-        setProperty(createObject::instanceMonth, value.month)
-        setProperty(createObject::instanceDay, value.day)
-        setProperty(createObject::instanceDate, value.toJson())
+        setProperty(createObject::instanceDate, value!!.toJson())
     }
 
-    private val initialInstanceJsonTime: JsonTime<T>?
+    @Suppress("RemoveExplicitTypeArguments")
+    private fun getInitialInstanceJsonTime() = createObject.instanceTime
+            ?.let {
+                if (hourMinuteRegex.find(it) != null)
+                    JsonTime.Normal<T>(HourMinute.fromJson(it))
+                else
+                    JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it))
+            }
 
-    init {
-        @Suppress("RemoveExplicitTypeArguments")
-        initialInstanceJsonTime = createObject.instanceTime
-                ?.let {
-                    if (hourMinuteRegex.find(it) != null)
-                        JsonTime.Normal<T>(HourMinute.fromJson(it))
-                    else
-                        JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it))
-                }
-                ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it)) }
-                        ?: createObject.instanceHour?.let { hour -> createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) } }
-    }
-
-    var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
-        var customTimeId: CustomTimeId<T>? = null
-        var hourMinute: HourMinute? = null
-
-        when (value) {
-            is JsonTime.Custom -> customTimeId = value.id
-            is JsonTime.Normal -> hourMinute = value.hourMinute
-        }
-
-        setProperty(createObject::instanceCustomTimeId, customTimeId?.value)
-        setProperty(createObject::instanceHour, hourMinute?.hour)
-        setProperty(createObject::instanceMinute, hourMinute?.minute)
+    var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
         setProperty(createObject::instanceTime, value?.toJson())
     }
 
@@ -150,6 +114,4 @@ class InstanceRecord<T : ProjectType>(
     var hidden by Committer(createObject::hidden)
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
-
-    class InconsistentInstanceException(message: String) : Exception(message)
 }

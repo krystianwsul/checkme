@@ -147,40 +147,20 @@ abstract class Project<T : ProjectType> {
             }
         }
 
-        val instanceCustomTimeId: String?
-        val instanceHour: Int?
-        val instanceMinute: Int?
-        val instanceTimeString: String
-
-        when (newInstanceTime) {
-            is CustomTime<*> -> {
-                instanceCustomTimeId = newInstanceTime.key
+        val instanceTimeString = when (newInstanceTime) {
+            is CustomTime<*> -> newInstanceTime.key
                         .customTimeId
                         .value
-                instanceHour = null
-                instanceMinute = null
-                instanceTimeString = instanceCustomTimeId
-            }
-            is NormalTime -> {
-                instanceCustomTimeId = null
-                instanceHour = newInstanceTime.hourMinute.hour
-                instanceMinute = newInstanceTime.hourMinute.minute
-                instanceTimeString = newInstanceTime.hourMinute.toJson()
-            }
+            is NormalTime -> newInstanceTime.hourMinute.toJson()
             else -> throw IllegalArgumentException()
         }
 
         return InstanceJson(
                 done,
                 instanceDate.toJson(),
-                instanceDate.year,
-                instanceDate.month,
-                instanceDate.day,
                 instanceTimeString,
-                instanceCustomTimeId,
-                instanceHour,
-                instanceMinute,
-                instance.ordinal)
+                instance.ordinal
+        )
     }
 
     fun <V : TaskHierarchy<*>> copyRemoteTaskHierarchy(

@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
-class RemoteTaskRecord<T : ProjectType> private constructor(
+class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T>,

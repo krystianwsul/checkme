@@ -13,7 +13,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.firebase.records.RemoteTaskRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -103,7 +103,7 @@ class RemoteProjectFactory(
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
                         }
-                    } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+                    } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
                         // hack for oldestVisible being set on records removed by cloud function
                     }
                 }
@@ -122,7 +122,7 @@ class RemoteProjectFactory(
             val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
             remotePrivateProject = PrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(localFactory, now) }
-        } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+        } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
             // hack for oldestVisible being set on records removed by cloud function
 
             /*

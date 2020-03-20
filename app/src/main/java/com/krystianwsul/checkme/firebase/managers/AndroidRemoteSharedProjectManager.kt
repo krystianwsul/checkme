@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
-import com.krystianwsul.common.firebase.records.RemoteTaskRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : RemoteSharedProjectManager<DomainFactory>() {
@@ -23,7 +23,7 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
     override var remoteProjectRecords = children.mapNotNull {
         try {
             ProjectKey.Shared(it.key!!) to Pair(it.toRecord(), false)
-        } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+        } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
             MyCrashlytics.logException(onlyVisibilityPresentException)
 
             null

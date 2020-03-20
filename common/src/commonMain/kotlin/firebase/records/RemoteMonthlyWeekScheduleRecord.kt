@@ -20,25 +20,25 @@ class RemoteMonthlyWeekScheduleRecord<T : ProjectType> : RemoteScheduleRecord<T>
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
     ) : super(
             id,
-            remoteTaskRecord,
+            taskRecord,
             scheduleWrapper,
             scheduleWrapper.monthlyWeekScheduleJson!!,
             "monthlyWeekScheduleJson"
     )
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
     ) : super(
-            remoteTaskRecord,
+            taskRecord,
             scheduleWrapper,
             scheduleWrapper.monthlyWeekScheduleJson!!,
             "monthlyWeekScheduleJson"
     )
 
-    override fun deleteFromParent() = check(remoteTaskRecord.remoteMonthlyWeekScheduleRecords.remove(id) == this)
+    override fun deleteFromParent() = check(taskRecord.remoteMonthlyWeekScheduleRecords.remove(id) == this)
 }

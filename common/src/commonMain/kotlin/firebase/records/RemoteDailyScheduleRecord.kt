@@ -7,15 +7,15 @@ import com.krystianwsul.common.utils.ProjectType
 
 class RemoteDailyScheduleRecord<T : ProjectType>(
         id: String,
-        remoteTaskRecord: RemoteTaskRecord<T>,
+        taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper
 ) : RemoteScheduleRecord<T>(
         id,
-        remoteTaskRecord,
+        taskRecord,
         scheduleWrapper,
         scheduleWrapper.dailyScheduleJson!!,
         "dailyScheduleJson"
 ) {
 
-    override fun deleteFromParent() = check(remoteTaskRecord.remoteDailyScheduleRecords.remove(id) == this)
+    override fun deleteFromParent() = check(taskRecord.remoteDailyScheduleRecords.remove(id) == this)
 }

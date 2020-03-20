@@ -29,7 +29,7 @@ abstract class RemoteProjectRecord<T : ProjectType>(
                 .mapValues { (id, taskJson) ->
                     check(id.isNotEmpty())
 
-                    RemoteTaskRecord(id, this, taskJson)
+                    TaskRecord(id, this, taskJson)
                 }
                 .toMutableMap()
     }
@@ -59,8 +59,8 @@ abstract class RemoteProjectRecord<T : ProjectType>(
                 remoteTaskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
-        val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
+    fun newRemoteTaskRecord(taskJson: TaskJson): TaskRecord<T> {
+        val remoteTaskRecord = TaskRecord(this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord

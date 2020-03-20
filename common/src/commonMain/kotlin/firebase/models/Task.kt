@@ -6,16 +6,16 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.RemoteTaskRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class Task<T : ProjectType>(
         val remoteProject: Project<T>,
-        private val remoteTaskRecord: RemoteTaskRecord<T>
+        private val taskRecord: TaskRecord<T>
 ) {
 
-    private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
+    private val existingRemoteInstances = taskRecord.remoteInstanceRecords
             .values
             .map { Instance(remoteProject, this, it) }
             .associateBy { it.scheduleKey }
@@ -23,23 +23,23 @@ class Task<T : ProjectType>(
 
     private val remoteSchedules = ArrayList<Schedule<T>>()
 
-    val name get() = remoteTaskRecord.name
+    val name get() = taskRecord.name
 
     val schedules get() = remoteSchedules
 
-    val startExactTimeStamp get() = ExactTimeStamp(remoteTaskRecord.startTime)
+    val startExactTimeStamp get() = ExactTimeStamp(taskRecord.startTime)
 
-    val note get() = remoteTaskRecord.note
+    val note get() = taskRecord.note
 
-    val taskKey get() = TaskKey(remoteProject.id, remoteTaskRecord.id)
+    val taskKey get() = TaskKey(remoteProject.id, taskRecord.id)
 
-    val id get() = remoteTaskRecord.id
+    val id get() = taskRecord.id
 
     val existingInstances get() = existingRemoteInstances
 
     val project get() = remoteProject
 
-    val imageJson get() = remoteTaskRecord.image
+    val imageJson get() = taskRecord.image
 
     fun getEndExactTimeStamp() = getEndData()?.exactTimeStamp
 
@@ -326,7 +326,7 @@ class Task<T : ProjectType>(
     }.sortedBy { it.ordinal }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
-        val image = remoteTaskRecord.image ?: return null
+        val image = taskRecord.image ?: return null
 
         return if (image.uploaderUuid != null) {
             if (image.uploaderUuid == deviceDbInfo.uuid)
@@ -339,7 +339,7 @@ class Task<T : ProjectType>(
     }
 
     fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
-        remoteTaskRecord.image = when (imageState) {
+        taskRecord.image = when (imageState) {
             null -> null
             is ImageState.Remote -> TaskJson.Image(imageState.uuid)
             is ImageState.Local -> TaskJson.Image(imageState.uuid, deviceDbInfo.uuid)
@@ -348,31 +348,31 @@ class Task<T : ProjectType>(
     }
 
     init {
-        remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords
+        remoteSchedules.addAll(taskRecord.remoteSingleScheduleRecords
                 .values
                 .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.remoteDailyScheduleRecords
+        remoteSchedules.addAll(taskRecord.remoteDailyScheduleRecords
                 .values
                 .map { WeeklySchedule(this, RemoteDailyScheduleBridge(it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.remoteWeeklyScheduleRecords
+        remoteSchedules.addAll(taskRecord.remoteWeeklyScheduleRecords
                 .values
                 .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyDayScheduleRecords
+        remoteSchedules.addAll(taskRecord.remoteMonthlyDayScheduleRecords
                 .values
                 .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyWeekScheduleRecords
+        remoteSchedules.addAll(taskRecord.remoteMonthlyWeekScheduleRecords
                 .values
                 .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) })
     }
 
-    fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+    fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
     private fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {
-        remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
+        taskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
 
         updateOldestVisible(uuid, now)
     }
@@ -392,22 +392,22 @@ class Task<T : ProjectType>(
         return childTask
     }
 
-    fun getOldestVisible() = remoteTaskRecord.oldestVisible
+    fun getOldestVisible() = taskRecord.oldestVisible
 
-    private fun setOldestVisible(uuid: String, date: Date) = remoteTaskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
+    private fun setOldestVisible(uuid: String, date: Date) = taskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
 
     fun delete() {
         schedules.toMutableList().forEach { it.delete() }
 
         remoteProject.deleteTask(this)
-        remoteTaskRecord.delete()
+        taskRecord.delete()
     }
 
     fun setName(name: String, note: String?) {
         check(name.isNotEmpty())
 
-        remoteTaskRecord.name = name
-        remoteTaskRecord.note = note
+        taskRecord.name = name
+        taskRecord.note = note
     }
 
     private fun addSchedules(
@@ -429,7 +429,7 @@ class Task<T : ProjectType>(
 
     fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
         @Suppress("UNCHECKED_CAST")
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(
+        val remoteInstanceRecord = taskRecord.newRemoteInstanceRecord(
                 InstanceJson(),
                 instance.scheduleKey,
                 instance.scheduleDateTime
@@ -471,13 +471,13 @@ class Task<T : ProjectType>(
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
 
-                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
+                    val remoteSingleScheduleRecord = taskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
-                        val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
+                        val remoteWeeklyScheduleRecord = taskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
                                 now.long,
                                 null,
                                 dayOfWeek.ordinal,
@@ -494,7 +494,7 @@ class Task<T : ProjectType>(
                 is ScheduleData.MonthlyDay -> {
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
-                    val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
+                    val remoteMonthlyDayScheduleRecord = taskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
                             now.long,
                             null,
                             dayOfMonth,
@@ -511,7 +511,7 @@ class Task<T : ProjectType>(
                 is ScheduleData.MonthlyWeek -> {
                     val (dayOfMonth, dayOfWeek, beginningOfMonth, _) = scheduleData
 
-                    val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
+                    val remoteMonthlyWeekScheduleRecord = taskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
                             now.long,
                             null,
                             dayOfMonth,
@@ -538,13 +538,13 @@ class Task<T : ProjectType>(
                 is SingleSchedule<*> -> {
                     val date = schedule.date
 
-                    val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
+                    val remoteSingleScheduleRecord = taskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
                 is WeeklySchedule<*> -> {
                     for (dayOfWeek in schedule.daysOfWeek) {
-                        val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
+                        val remoteWeeklyScheduleRecord = taskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
                                 now.long,
                                 schedule.endTime,
                                 dayOfWeek.ordinal,
@@ -559,7 +559,7 @@ class Task<T : ProjectType>(
                     }
                 }
                 is MonthlyDaySchedule<*> -> {
-                    val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
+                    val remoteMonthlyDayScheduleRecord = taskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
                             now.long,
                             schedule.endTime,
                             schedule.dayOfMonth,
@@ -574,7 +574,7 @@ class Task<T : ProjectType>(
                     remoteSchedules.add(MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(remoteMonthlyDayScheduleRecord)))
                 }
                 is MonthlyWeekSchedule<*> -> {
-                    val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
+                    val remoteMonthlyWeekScheduleRecord = taskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
                             now.long,
                             schedule.endTime,
                             schedule.dayOfMonth,

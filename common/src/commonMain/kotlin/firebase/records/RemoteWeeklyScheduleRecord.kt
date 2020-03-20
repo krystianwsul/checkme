@@ -16,25 +16,25 @@ class RemoteWeeklyScheduleRecord<T : ProjectType> : RemoteScheduleRecord<T> {
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
     ) : super(
             id,
-            remoteTaskRecord,
+            taskRecord,
             scheduleWrapper,
             scheduleWrapper.weeklyScheduleJson!!,
             "weeklyScheduleJson"
     )
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
     ) : super(
-            remoteTaskRecord,
+            taskRecord,
             scheduleWrapper,
             scheduleWrapper.weeklyScheduleJson!!,
             "weeklyScheduleJson"
     )
 
-    override fun deleteFromParent() = check(remoteTaskRecord.remoteWeeklyScheduleRecords.remove(id) == this)
+    override fun deleteFromParent() = check(taskRecord.remoteWeeklyScheduleRecords.remove(id) == this)
 }

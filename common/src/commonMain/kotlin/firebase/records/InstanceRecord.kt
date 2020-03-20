@@ -13,7 +13,7 @@ import kotlin.properties.Delegates.observable
 
 class InstanceRecord<T : ProjectType>(
         create: Boolean,
-        private val remoteTaskRecord: RemoteTaskRecord<T>,
+        private val taskRecord: TaskRecord<T>,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
@@ -67,9 +67,9 @@ class InstanceRecord<T : ProjectType>(
         }
     }
 
-    override val key by lazy { remoteTaskRecord.key + "/instances/" + firebaseKey }
+    override val key by lazy { taskRecord.key + "/instances/" + firebaseKey }
 
-    val taskId by lazy { remoteTaskRecord.id }
+    val taskId by lazy { taskRecord.id }
 
     var done by Committer(createObject::done)
 
@@ -103,7 +103,7 @@ class InstanceRecord<T : ProjectType>(
                 if (hourMinuteRegex.find(it) != null)
                     JsonTime.Normal<T>(HourMinute.fromJson(it))
                 else
-                    JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it))
+                    JsonTime.Custom(taskRecord.getcustomTimeId(it))
             }
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
@@ -113,5 +113,5 @@ class InstanceRecord<T : ProjectType>(
     var ordinal by Committer(createObject::ordinal)
     var hidden by Committer(createObject::hidden)
 
-    override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
+    override fun deleteFromParent() = check(taskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 }

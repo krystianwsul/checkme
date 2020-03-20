@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectType
 abstract class RemoteScheduleRecord<T : ProjectType>(
         create: Boolean,
         val id: String,
-        protected val remoteTaskRecord: RemoteTaskRecord<T>,
+        protected val taskRecord: TaskRecord<T>,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         endTimeKey: String
@@ -19,48 +19,48 @@ abstract class RemoteScheduleRecord<T : ProjectType>(
         const val SCHEDULES = "schedules"
     }
 
-    final override val key get() = remoteTaskRecord.key + "/" + SCHEDULES + "/" + id
+    final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 
     val startTime get() = scheduleJson.startTime
 
     var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
-    val projectId get() = remoteTaskRecord.projectId
+    val projectId get() = taskRecord.projectId
 
-    val taskId get() = remoteTaskRecord.id
+    val taskId get() = taskRecord.id
 
     val hour get() = scheduleJson.hour
 
     val minute get() = scheduleJson.minute
 
     val customTimeKey by lazy {
-        scheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeKey(it) }
+        scheduleJson.customTimeId?.let { taskRecord.getRemoteCustomTimeKey(it) }
     }
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper,
             scheduleJson: ScheduleJson,
             endTimeKey: String
     ) : this(
             false,
             id,
-            remoteTaskRecord,
+            taskRecord,
             scheduleWrapper,
             scheduleJson,
             endTimeKey
     )
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper,
             scheduleJson: ScheduleJson,
             endTimeKey: String
     ) : this(
             true,
-            remoteTaskRecord.getScheduleRecordId(),
-            remoteTaskRecord,
+            taskRecord.getScheduleRecordId(),
+            taskRecord,
             scheduleWrapper,
             scheduleJson,
             endTimeKey

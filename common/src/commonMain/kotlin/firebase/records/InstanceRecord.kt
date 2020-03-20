@@ -29,21 +29,10 @@ class InstanceRecord<T : ProjectType>(
         private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun scheduleKeyToString(scheduleKey: ScheduleKey): String {
-            var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
-            key += scheduleKey.scheduleTimePair.let {
-                if (it.customTimeKey != null) {
-                    check(it.hourMinute == null)
-
-                    it.customTimeKey
-                            .customTimeId
-                            .value
-                } else {
-                    it.hourMinute!!.run { "$hour-$minute" }
-                }
+        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.run {
+            scheduleDate.run { "$year-$month-$day-" } + scheduleTimePair.run {
+                customTimeKey?.customTimeId ?: hourMinute!!.run { "$hour-$minute" }
             }
-
-            return key
         }
 
         fun <T : ProjectType> stringToScheduleKey(
@@ -130,10 +119,10 @@ class InstanceRecord<T : ProjectType>(
     private val initialInstanceJsonTime: JsonTime<T>?
 
     init {
+        @Suppress("RemoveExplicitTypeArguments")
         initialInstanceJsonTime = createObject.instanceTime
                 ?.let {
-                    val matchResult = hourMinuteRegex.find(it)
-                    if (matchResult != null)
+                    if (hourMinuteRegex.find(it) != null)
                         JsonTime.Normal<T>(HourMinute.fromJson(it))
                     else
                         JsonTime.Custom(remoteTaskRecord.getcustomTimeId(it))

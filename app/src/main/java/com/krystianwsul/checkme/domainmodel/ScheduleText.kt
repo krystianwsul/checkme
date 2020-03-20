@@ -10,7 +10,7 @@ import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import java.util.*
@@ -53,7 +53,7 @@ sealed class ScheduleText {
     protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
         return (timePair.customTimeKey?.let {
             project.getRemoteCustomTime(it.customTimeId)
-        } ?: NormalTime(timePair.hourMinute!!)).toString()
+        } ?: Time.Normal(timePair.hourMinute!!)).toString()
     }
 
     class Single(private val scheduleGroup: ScheduleGroup.Single<*>) : ScheduleText() {

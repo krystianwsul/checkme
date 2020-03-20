@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
@@ -22,7 +21,7 @@ abstract class Project<T : ProjectType> {
 
     protected abstract val remoteTasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
-    protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, CustomTime<T>>
+    protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
 
     abstract val id: ProjectKey<T>
 
@@ -44,7 +43,7 @@ abstract class Project<T : ProjectType> {
 
     val taskIds get() = remoteTasks.keys
 
-    abstract val customTimes: Collection<CustomTime<T>>
+    abstract val customTimes: Collection<Time.Custom<T>>
 
     val taskHierarchies get() = taskHierarchyContainer.all
 
@@ -114,14 +113,13 @@ abstract class Project<T : ProjectType> {
 
     abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: CustomTime<*>
-    ): CustomTime<T>
+            customTime: Time.Custom<*>
+    ): Time.Custom<T>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {
-            is CustomTime<*> -> getOrCreateCustomTime(ownerKey, it)
-            is NormalTime -> it
-            else -> throw IllegalArgumentException()
+            is Time.Custom<*> -> getOrCreateCustomTime(ownerKey, it)
+            is Time.Normal -> it
         }
     }
 
@@ -129,9 +127,8 @@ abstract class Project<T : ProjectType> {
             ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is CustomTime<*> -> Triple(newTime.key.customTimeId, null, null)
-        is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
-        else -> throw IllegalArgumentException()
+        is Time.Custom<*> -> Triple(newTime.key.customTimeId, null, null)
+        is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
     }
 
     private fun getInstanceJson(ownerKey: UserKey, instance: Instance<*>): InstanceJson {
@@ -141,18 +138,16 @@ abstract class Project<T : ProjectType> {
 
         val newInstanceTime = instance.instanceTime.let {
             when (it) {
-                is CustomTime<*> -> getOrCreateCustomTime(ownerKey, it)
-                is NormalTime -> it
-                else -> throw IllegalArgumentException()
+                is Time.Custom<*> -> getOrCreateCustomTime(ownerKey, it)
+                is Time.Normal -> it
             }
         }
 
         val instanceTimeString = when (newInstanceTime) {
-            is CustomTime<*> -> newInstanceTime.key
+            is Time.Custom<*> -> newInstanceTime.key
                         .customTimeId
                         .value
-            is NormalTime -> newInstanceTime.hourMinute.toJson()
-            else -> throw IllegalArgumentException()
+            is Time.Normal -> newInstanceTime.hourMinute.toJson()
         }
 
         return InstanceJson(
@@ -247,9 +242,9 @@ abstract class Project<T : ProjectType> {
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): CustomTime<T>
-    abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T>): CustomTime<T>
-    abstract fun getRemoteCustomTime(customTimeId: String): CustomTime<T>
+    abstract fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): Time.Custom<T>
+    abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
+    abstract fun getRemoteCustomTime(customTimeId: String): Time.Custom<T>
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,

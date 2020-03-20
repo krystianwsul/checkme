@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -68,7 +69,7 @@ class PrivateProject(
     override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
     override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Private(customTimeId))
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*>) = when (customTime) {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>) = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == id) {

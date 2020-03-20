@@ -4,7 +4,7 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -31,7 +31,7 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
     val time
         get() = customTimeKey?.let {
             rootTask.remoteProject.getRemoteCustomTime(it.customTimeId)
-        } ?: NormalTime(timePair.hourMinute!!)
+        } ?: Time.Normal(timePair.hourMinute!!)
 
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {

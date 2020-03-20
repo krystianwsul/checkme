@@ -102,9 +102,9 @@ class Instance<T : ProjectType> {
 
     @Suppress("UNCHECKED_CAST")
     val instanceCustomTimeKey
-        get() = (instanceTime as? CustomTime<T>)?.key
+        get() = (instanceTime as? Time.Custom<T>)?.key
 
-    private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
+    private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
@@ -315,9 +315,8 @@ class Instance<T : ProjectType> {
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
                 @Suppress("UNCHECKED_CAST")
                 when (it) {
-                    is CustomTime<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
-                    is NormalTime -> JsonTime.Normal(it.hourMinute)
-                    else -> throw IllegalArgumentException()
+                    is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
+                    is Time.Normal -> JsonTime.Normal(it.hourMinute)
                 }
             }
         }
@@ -327,7 +326,7 @@ class Instance<T : ProjectType> {
 
     private fun createInstanceRecord() = Data.Real(
             this,
-            task.createRemoteInstanceRecord(this, scheduleDateTime)
+            task.createRemoteInstanceRecord(this)
     ).also { data = it }
 
     fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
@@ -400,7 +399,7 @@ class Instance<T : ProjectType> {
             override val scheduleTime
                 get() = instanceRecord.run {
                     scheduleCustomTimeId?.let { getCustomTime(it) }
-                            ?: NormalTime(scheduleHour!!, scheduleMinute!!)
+                            ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
                 }
 
             override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
@@ -410,7 +409,7 @@ class Instance<T : ProjectType> {
                         ?.let {
                             when (it) {
                                 is JsonTime.Custom -> getCustomTime(it.id)
-                                is JsonTime.Normal -> NormalTime(it.hourMinute)
+                                is JsonTime.Normal -> Time.Normal(it.hourMinute)
                             }
                         }
                         ?: scheduleTime

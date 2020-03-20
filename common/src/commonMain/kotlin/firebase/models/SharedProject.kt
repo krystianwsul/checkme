@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -114,7 +115,7 @@ class SharedProject(
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): CustomTime<ProjectType.Shared> = getRemoteCustomTime(customTimeKey.customTimeId)
+    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
     override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Shared(customTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
@@ -129,7 +130,7 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*>): SharedCustomTime {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>): SharedCustomTime {
         fun copy(): SharedCustomTime {
             val private = customTime as? PrivateCustomTime
 

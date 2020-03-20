@@ -197,7 +197,7 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*>): CustomTime<*> {
+    fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*>): Time.Custom<*> {
         check(remoteProjects.containsKey(customTimeKey.remoteProjectId))
 
         return remoteProjects.getValue(customTimeKey.remoteProjectId).getRemoteCustomTime(customTimeKey.customTimeId)

@@ -27,7 +27,7 @@ class SharedCustomTimeRecord(
             customTimeJson: SharedCustomTimeJson
     ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
-    override val customTimeKey = CustomTimeKey.Shared(remoteProjectRecord.id, id)
+    override val customTimeKey = CustomTimeKey.Shared(remoteProjectRecord.projectKey, id)
 
     override val createObject get() = customTimeJson
 

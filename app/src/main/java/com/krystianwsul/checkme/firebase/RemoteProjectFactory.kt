@@ -35,7 +35,7 @@ class RemoteProjectFactory(
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
             .associate { (remoteSharedProjectRecord, _) ->
-                remoteSharedProjectRecord.id to SharedProject(remoteSharedProjectRecord).apply {
+                remoteSharedProjectRecord.projectKey to SharedProject(remoteSharedProjectRecord).apply {
                     fixNotificationShown(localFactory, now)
                     updateDeviceDbInfo(deviceDbInfo)
                 }
@@ -99,7 +99,7 @@ class RemoteProjectFactory(
                     try {
                         val remoteProjectRecord = remoteSharedProjectManager.setChild(databaseEvent.dataSnapshot)
 
-                        remoteSharedProjects[remoteProjectRecord.id] = SharedProject(remoteProjectRecord).apply {
+                        remoteSharedProjects[remoteProjectRecord.projectKey] = SharedProject(remoteProjectRecord).apply {
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
                         }

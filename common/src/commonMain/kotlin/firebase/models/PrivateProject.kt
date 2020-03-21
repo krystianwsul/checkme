@@ -14,7 +14,7 @@ class PrivateProject(
         override val remoteProjectRecord: RemotePrivateProjectRecord
 ) : Project<ProjectType.Private>() {
 
-    override val id = remoteProjectRecord.id
+    override val id = remoteProjectRecord.projectKey
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
     override val remoteTasks: MutableMap<String, Task<ProjectType.Private>>

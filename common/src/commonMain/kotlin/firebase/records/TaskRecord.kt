@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ScheduleKey
 class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<T>,
+        private val projectRecord: RemoteProjectRecord<T>,
         private val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
@@ -63,13 +63,15 @@ class TaskRecord<T : ProjectType> private constructor(
             return taskJson
         }
 
-    override val key get() = remoteProjectRecord.childKey + "/" + TASKS + "/" + id
+    override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
 
-    val projectId get() = remoteProjectRecord.id
+    val projectId get() = projectRecord.projectKey
 
     var name by Committer(taskJson::name)
 
     val startTime get() = taskJson.startTime
+
+    val taskKey by lazy { projectRecord.getTaskKey(id) }
 
     var endData
         get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, false) }
@@ -134,7 +136,7 @@ class TaskRecord<T : ProjectType> private constructor(
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
+            val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(projectRecord, key)
 
             val remoteInstanceRecord = ProjectInstanceRecord(
                     create,
@@ -268,12 +270,12 @@ class TaskRecord<T : ProjectType> private constructor(
         return remoteMonthlyWeekScheduleRecord
     }
 
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskRecords.remove(id) == this)
+    override fun deleteFromParent() = check(projectRecord.remoteTaskRecords.remove(id) == this)
 
-    fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
+    fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
 
-    fun getcustomTimeId(id: String) = remoteProjectRecord.getCustomTimeId(id)
-    fun getRemoteCustomTimeKey(id: String) = remoteProjectRecord.getRemoteCustomTimeKey(id)
+    fun getcustomTimeId(id: String) = projectRecord.getCustomTimeId(id)
+    fun getRemoteCustomTimeKey(id: String) = projectRecord.getRemoteCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
 

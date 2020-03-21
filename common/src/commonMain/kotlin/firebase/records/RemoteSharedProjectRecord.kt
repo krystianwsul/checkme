@@ -10,12 +10,12 @@ class RemoteSharedProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         private val parent: Parent,
         create: Boolean,
-        override val id: ProjectKey.Shared,
+        override val projectKey: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
 ) : RemoteProjectRecord<ProjectType.Shared>(
         create,
         jsonWrapper.projectJson,
-        id
+        projectKey
 ) {
 
     override val customTimeRecords = jsonWrapper.projectJson
@@ -108,21 +108,21 @@ class RemoteSharedProjectRecord(
 
     override val childKey get() = "$key/$PROJECT_JSON"
 
-    override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(id)
+    override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(projectKey)
 
-    fun getCustomTimeRecordId() = CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
-    override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(id)
+    override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey)
 
-    override fun getScheduleRecordId(taskId: String) = databaseWrapper.newSharedScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() = databaseWrapper.newSharedTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
 
     override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Shared(id))
 
     override fun getCustomTimeId(id: String) = CustomTimeId.Shared(id)
 
-    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) = CustomTimeKey.Shared(id, customTimeId)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) = CustomTimeKey.Shared(projectKey, customTimeId)
 
     interface Parent {
 

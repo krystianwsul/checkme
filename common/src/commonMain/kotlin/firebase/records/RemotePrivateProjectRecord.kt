@@ -12,12 +12,12 @@ import com.krystianwsul.common.utils.ProjectType
 class RemotePrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        override val id: ProjectKey.Private,
+        override val projectKey: ProjectKey.Private,
         private val projectJson: PrivateProjectJson
 ) : RemoteProjectRecord<ProjectType.Private>(
         create,
         projectJson,
-        id
+        projectKey
 ) {
 
     override val customTimeRecords = projectJson.customTimes
@@ -72,17 +72,17 @@ class RemotePrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun getCustomTimeRecordId() = CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(projectKey))
 
-    override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(id)
+    override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(projectKey)
 
-    override fun getScheduleRecordId(taskId: String) = databaseWrapper.getPrivateScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = databaseWrapper.getPrivateScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)
 
     override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Private(id))
 
     override fun getCustomTimeId(id: String) = CustomTimeId.Private(id)
 
-    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) = CustomTimeKey.Private(id, customTimeId as CustomTimeId.Private)
+    override fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) = CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Private)
 }

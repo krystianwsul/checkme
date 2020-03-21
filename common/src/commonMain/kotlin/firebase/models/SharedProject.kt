@@ -16,7 +16,7 @@ class SharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord
 ) : Project<ProjectType.Shared>() {
 
-    override val id = remoteProjectRecord.id
+    override val id = remoteProjectRecord.projectKey
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

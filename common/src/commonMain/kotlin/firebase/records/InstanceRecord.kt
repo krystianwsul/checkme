@@ -7,6 +7,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
@@ -108,4 +109,6 @@ abstract class InstanceRecord<T : ProjectType>(
 
     var ordinal by Committer(createObject::ordinal)
     var hidden by Committer(createObject::hidden)
+
+    val instanceKey by lazy { InstanceKey(taskRecord.taskKey, scheduleKey) }
 }

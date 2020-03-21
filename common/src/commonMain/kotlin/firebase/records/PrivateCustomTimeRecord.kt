@@ -25,7 +25,7 @@ class PrivateCustomTimeRecord(
             customTimeJson: PrivateCustomTimeJson
     ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
-    override val customTimeKey = CustomTimeKey.Private(remoteProjectRecord.id, id)
+    override val customTimeKey = CustomTimeKey.Private(remoteProjectRecord.projectKey, id)
 
     override val createObject get() = customTimeJson
 

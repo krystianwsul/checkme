@@ -44,7 +44,7 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
     var saturdayHour by Committer({ customTimeJson::saturdayHour })
     var saturdayMinute by Committer({ customTimeJson::saturdayMinute })
 
-    val projectId get() = remoteProjectRecord.id
+    val projectId get() = remoteProjectRecord.projectKey
 
     override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
 

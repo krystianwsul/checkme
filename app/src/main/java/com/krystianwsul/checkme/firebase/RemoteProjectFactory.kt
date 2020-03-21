@@ -4,8 +4,8 @@ import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.firebase.managers.AndroidRemotePrivateProjectManager
-import com.krystianwsul.checkme.firebase.managers.AndroidRemoteSharedProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -21,18 +21,15 @@ import com.krystianwsul.common.utils.*
 class RemoteProjectFactory(
         deviceDbInfo: DeviceDbInfo,
         private val localFactory: LocalFactory,
-        sharedChildren: List<DataSnapshot>,
-        privateSnapshot: DataSnapshot,
+        private val remotePrivateProjectManager: AndroidPrivateProjectManager,
+        private val remoteSharedProjectManager: AndroidSharedProjectManager,
         now: ExactTimeStamp
 ) : Project.Parent {
 
-    private val remotePrivateProjectManager = AndroidRemotePrivateProjectManager(deviceDbInfo.userInfo, privateSnapshot, now)
-    private val remoteSharedProjectManager = AndroidRemoteSharedProjectManager(sharedChildren)
-
-    var remotePrivateProject = PrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(localFactory, now) }
+    var remotePrivateProject = PrivateProject(remotePrivateProjectManager.privateProjectRecord).apply { fixNotificationShown(localFactory, now) }
         private set
 
-    val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
+    val remoteSharedProjects = remoteSharedProjectManager.sharedProjectRecords
             .values
             .associate { (remoteSharedProjectRecord, _) ->
                 remoteSharedProjectRecord.projectKey to SharedProject(remoteSharedProjectRecord).apply {
@@ -87,10 +84,10 @@ class RemoteProjectFactory(
 
     fun onChildEvent(deviceDbInfo: DeviceDbInfo, databaseEvent: DatabaseEvent, now: ExactTimeStamp): Boolean {
         val projectKey = ProjectKey.Shared(databaseEvent.key)
-        val projectPair = remoteSharedProjectManager.remoteProjectRecords[projectKey]
+        val projectPair = remoteSharedProjectManager.sharedProjectRecords[projectKey]
 
         if (projectPair?.second == true) {
-            remoteSharedProjectManager.remoteProjectRecords[projectKey] = Pair(projectPair.first, false)
+            remoteSharedProjectManager.sharedProjectRecords[projectKey] = Pair(projectPair.first, false)
 
             return true
         } else {

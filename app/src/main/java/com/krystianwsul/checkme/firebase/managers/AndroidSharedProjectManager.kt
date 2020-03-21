@@ -6,21 +6,21 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
+import com.krystianwsul.common.firebase.managers.SharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 
-class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : RemoteSharedProjectManager<DomainFactory>() {
+class AndroidSharedProjectManager(children: Iterable<DataSnapshot>) : SharedProjectManager<DomainFactory>() {
 
     private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(
             AndroidDatabaseWrapper,
-            this@AndroidRemoteSharedProjectManager,
+            this@AndroidSharedProjectManager,
             ProjectKey.Shared(key!!),
             getValue(JsonWrapper::class.java)!!
     )
 
-    override var remoteProjectRecords = children.mapNotNull {
+    override var sharedProjectRecords = children.mapNotNull {
         try {
             ProjectKey.Shared(it.key!!) to Pair(it.toRecord(), false)
         } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
@@ -38,13 +38,13 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
         val key = ProjectKey.Shared(dataSnapshot.key!!)
 
         return dataSnapshot.toRecord().also {
-            remoteProjectRecords[key] = Pair(it, false)
+            sharedProjectRecords[key] = Pair(it, false)
         }
     }
 
     override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
     fun removeChild(key: ProjectKey.Shared) {
-        check(remoteProjectRecords.remove(key) != null)
+        check(sharedProjectRecords.remove(key) != null)
     }
 }

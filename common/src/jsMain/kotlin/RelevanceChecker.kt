@@ -48,7 +48,7 @@ object RelevanceChecker {
             databaseWrapper.getPrivateProjects {
                 val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-                val privateProjects = privateProjectManager.remotePrivateProjectRecords.map {
+                val privateProjects = privateProjectManager.privateProjectRecords.map {
                     PrivateProject(it)
                 }
 
@@ -77,7 +77,7 @@ object RelevanceChecker {
             databaseWrapper.getSharedProjects {
                 val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
 
-                val sharedProjects = sharedProjectManager.remoteProjectRecords
+                val sharedProjects = sharedProjectManager.sharedProjectRecords
                         .entries
                         .associate { it.key to SharedProject(it.value.first) }
                         .toMutableMap()

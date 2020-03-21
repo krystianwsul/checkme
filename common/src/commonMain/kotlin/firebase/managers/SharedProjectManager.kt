@@ -8,11 +8,11 @@ import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
-abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
+abstract class SharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
 
-    val isSaved get() = remoteProjectRecords.any { it.value.second }
+    val isSaved get() = sharedProjectRecords.any { it.value.second }
 
-    abstract var remoteProjectRecords: MutableMap<ProjectKey.Shared, Pair<RemoteSharedProjectRecord, Boolean>>
+    abstract var sharedProjectRecords: MutableMap<ProjectKey.Shared, Pair<RemoteSharedProjectRecord, Boolean>>
         protected set
 
     abstract val databaseWrapper: DatabaseWrapper
@@ -24,7 +24,7 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
     fun save(extra: T): Boolean {
         val values = mutableMapOf<String, Any?>()
 
-        val newRemoteProjectRecords = remoteProjectRecords.mapValues {
+        val newRemoteProjectRecords = sharedProjectRecords.mapValues {
             Pair(it.value.first, it.value.first.getValues(values))
         }.toMutableMap()
 
@@ -33,7 +33,7 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
         if (values.isNotEmpty()) {
             check(!isSaved)
 
-            remoteProjectRecords = newRemoteProjectRecords
+            sharedProjectRecords = newRemoteProjectRecords
 
             databaseWrapper.updateRecords(values, getDatabaseCallback(extra))
         } else {
@@ -44,12 +44,12 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
     }
 
     fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
-        check(!remoteProjectRecords.containsKey(it.projectKey))
+        check(!sharedProjectRecords.containsKey(it.projectKey))
 
-        remoteProjectRecords[it.projectKey] = Pair(it, false)
+        sharedProjectRecords[it.projectKey] = Pair(it, false)
     }
 
     override fun deleteRemoteSharedProjectRecord(id: ProjectKey<ProjectType.Shared>) {
-        remoteProjectRecords.remove(id)
+        sharedProjectRecords.remove(id)
     }
 }

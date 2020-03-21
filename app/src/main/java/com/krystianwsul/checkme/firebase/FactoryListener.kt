@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.firebase
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -103,11 +105,19 @@ class FactoryListener(
                         privateProjectSingle,
                         sharedProjectSingle
                 ) { privateProject, sharedProjects ->
+                    val privateProjectManager = AndroidPrivateProjectManager(
+                            deviceDbInfo.userInfo,
+                            privateProject,
+                            ExactTimeStamp.now
+                    )
+
+                    val sharedProjectManager = AndroidSharedProjectManager(sharedProjects)
+
                     RemoteProjectFactory(
                             deviceDbInfo,
                             localFactory,
-                            sharedProjects,
-                            privateProject,
+                            privateProjectManager,
+                            sharedProjectManager,
                             ExactTimeStamp.now
                     )
                 }

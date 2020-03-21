@@ -7,25 +7,25 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.managers.RemotePrivateProjectManager
+import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 
-class AndroidRemotePrivateProjectManager(
+class AndroidPrivateProjectManager(
         userInfo: UserInfo,
         dataSnapshot: DataSnapshot,
         now: ExactTimeStamp
-) : RemotePrivateProjectManager<DomainFactory>() {
+) : PrivateProjectManager<DomainFactory>() {
 
-    var remoteProjectRecord = if (dataSnapshot.value == null) {
+    var privateProjectRecord = if (dataSnapshot.value == null) {
         RemotePrivateProjectRecord(AndroidDatabaseWrapper, userInfo, PrivateProjectJson(startTime = now.long))
     } else {
         dataSnapshot.toRecord()
     }
         private set
 
-    override val remotePrivateProjectRecords get() = listOf(remoteProjectRecord)
+    override val privateProjectRecords get() = listOf(privateProjectRecord)
 
     override val databaseWrapper = AndroidDatabaseWrapper
 
@@ -36,8 +36,8 @@ class AndroidRemotePrivateProjectManager(
     )
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemotePrivateProjectRecord {
-        remoteProjectRecord = dataSnapshot.toRecord()
-        return remoteProjectRecord
+        privateProjectRecord = dataSnapshot.toRecord()
+        return privateProjectRecord
     }
 
     override fun getDatabaseCallback(extra: DomainFactory, values: Map<String, Any?>): DatabaseCallback {

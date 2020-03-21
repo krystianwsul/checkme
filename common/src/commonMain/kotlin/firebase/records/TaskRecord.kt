@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.ProjectInstanceRecord
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
@@ -136,7 +137,7 @@ class TaskRecord<T : ProjectType> private constructor(
 
             val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
-            val remoteInstanceRecord = InstanceRecord(
+            val remoteInstanceRecord = ProjectInstanceRecord(
                     create,
                     this,
                     instanceJson,
@@ -221,7 +222,15 @@ class TaskRecord<T : ProjectType> private constructor(
     ): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
-        val remoteInstanceRecord = InstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, customTimeId)
+        val remoteInstanceRecord = ProjectInstanceRecord(
+                true,
+                this,
+                instanceJson,
+                scheduleKey,
+                firebaseKey,
+                customTimeId
+        )
+
         check(!remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord

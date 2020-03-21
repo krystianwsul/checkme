@@ -11,12 +11,12 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
 
-class InstanceRecord<T : ProjectType>(
+abstract class InstanceRecord<T : ProjectType>(
         create: Boolean,
-        private val taskRecord: TaskRecord<T>,
-        override val createObject: InstanceJson,
+        protected val taskRecord: TaskRecord<T>,
+        final override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
-        private val firebaseKey: String,
+        override val key: String,
         val scheduleCustomTimeId: CustomTimeId<T>?
 ) : RemoteRecord(create) {
 
@@ -67,8 +67,6 @@ class InstanceRecord<T : ProjectType>(
         }
     }
 
-    override val key by lazy { taskRecord.key + "/instances/" + firebaseKey }
-
     var done by Committer(createObject::done)
 
     val scheduleYear by lazy { scheduleKey.scheduleDate.year }
@@ -110,6 +108,4 @@ class InstanceRecord<T : ProjectType>(
 
     var ordinal by Committer(createObject::ordinal)
     var hidden by Committer(createObject::hidden)
-
-    override fun deleteFromParent() = check(taskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 }

@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.ProjectInstanceRecord
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper

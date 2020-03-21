@@ -11,7 +11,6 @@ class RootInstanceRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         createObject: InstanceJson,
         scheduleKey: ScheduleKey,
-        firebaseKey: String,
         scheduleCustomTimeId: CustomTimeId<T>?,
         private val parent: Parent
 ) : InstanceRecord<T>(
@@ -19,7 +18,7 @@ class RootInstanceRecord<T : ProjectType>(
         taskRecord,
         createObject,
         scheduleKey,
-        "${taskRecord.projectId.key}-${taskRecord.id}-$firebaseKey",
+        "${taskRecord.projectId.key}-${taskRecord.id}/${scheduleKeyToDateString(scheduleKey, true)}/${scheduleKeyToTimeString(scheduleKey, true)}",
         scheduleCustomTimeId
 ) {
 

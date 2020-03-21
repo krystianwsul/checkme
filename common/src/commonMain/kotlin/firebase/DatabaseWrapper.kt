@@ -11,6 +11,7 @@ abstract class DatabaseWrapper {
         const val USERS_KEY = "users"
         const val RECORDS_KEY = "records"
         const val PRIVATE_PROJECTS_KEY = "privateProjects"
+        const val KEY_INSTANCES = "instances"
     }
 
     protected abstract fun getNewId(path: String): String
@@ -49,4 +50,9 @@ abstract class DatabaseWrapper {
             values: Map<String, Any?>,
             callback: DatabaseCallback
     ) = update(USERS_KEY, values, callback)
+
+    fun updateInstances(
+            values: Map<String, Any?>,
+            callback: DatabaseCallback
+    ) = update(KEY_INSTANCES, values, callback)
 }

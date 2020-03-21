@@ -10,6 +10,7 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
+import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
 abstract class InstanceRecord<T : ProjectType>(
@@ -28,10 +29,24 @@ abstract class InstanceRecord<T : ProjectType>(
         private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.run {
-            scheduleDate.run { "$year-$month-$day-" } + scheduleTimePair.run {
-                customTimeKey?.customTimeId ?: hourMinute!!.run { "$hour-$minute" }
-            }
+        private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
+
+        @JvmStatic
+        protected fun scheduleKeyToDateString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleDate.run {
+            fun Int.pad() = pad(padding)
+
+            "$year-${month.pad()}-${day.pad()}"
+        }
+
+        @JvmStatic
+        protected fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
+            fun Int.pad() = pad(padding)
+
+            customTimeKey?.customTimeId ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
+        }
+
+        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {
+            scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
         fun <T : ProjectType> stringToScheduleKey(

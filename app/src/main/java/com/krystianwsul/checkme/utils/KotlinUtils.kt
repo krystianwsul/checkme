@@ -193,6 +193,17 @@ fun checkError(domainFactory: DomainFactory, caller: String, values: Map<String,
     }
 }
 
+fun checkError(caller: String): DatabaseCallback {
+    return { databaseMessage, successful, exception ->
+        val message = "firebase write: $caller $databaseMessage"
+        if (successful) {
+            MyCrashlytics.log(message)
+        } else {
+            MyCrashlytics.logException(FirebaseWriteException(message, exception))
+        }
+    }
+}
+
 fun Task<Void>.getMessage() = "isCanceled: $isCanceled, isComplete: $isComplete, isSuccessful: $isSuccessful, exception: $exception"
 
 fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {

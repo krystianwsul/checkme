@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
-abstract class RootInstanceManager<T : ProjectType>(private val taskRecord: TaskRecord<T>) : RootInstanceRecord.Parent {
+abstract class RootInstanceManager<T : ProjectType>(protected val taskRecord: TaskRecord<T>) : RootInstanceRecord.Parent {
 
     abstract var rootInstanceRecords: MutableMap<InstanceKey, Pair<RootInstanceRecord<T>, Boolean>>
         protected set
@@ -51,7 +51,6 @@ abstract class RootInstanceManager<T : ProjectType>(private val taskRecord: Task
             scheduleKey: ScheduleKey,
             customTimeId: CustomTimeId<T>?
     ) = RootInstanceRecord<T>(
-            true,
             taskRecord,
             instanceJson,
             scheduleKey,

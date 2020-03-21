@@ -49,13 +49,14 @@ abstract class InstanceRecord<T : ProjectType>(
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
+        @JvmStatic
+        protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
+
         fun <T : ProjectType> stringToScheduleKey(
                 remoteProjectRecord: RemoteProjectRecord<T>,
                 key: String
         ): Pair<ScheduleKey, CustomTimeId<T>?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
-
-            fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
 
             if (hourMinuteMatchResult != null) {
                 val year = hourMinuteMatchResult.getInt(1)

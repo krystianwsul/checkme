@@ -219,7 +219,10 @@ val Menu.items get() = MenuItemsIterable(this)
 
 fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenuHack: Boolean = false, onEnd: (() -> Unit)? = null) {
     if (replaceMenuHack) {
-        fun getViews(ids: List<Int>) = ids.mapNotNull { findViewById<View>(it) }
+        fun getViews(ids: List<Int>) = ids.mapNotNull {
+            @Suppress("RemoveExplicitTypeArguments")
+            findViewById<View>(it)
+        }
 
         val hideItems = itemVisibilities.filterNot { it.second }.map { it.first }
         val hideViews = getViews(hideItems)

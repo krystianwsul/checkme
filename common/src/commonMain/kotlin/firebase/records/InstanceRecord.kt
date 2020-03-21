@@ -69,8 +69,6 @@ class InstanceRecord<T : ProjectType>(
 
     override val key by lazy { taskRecord.key + "/instances/" + firebaseKey }
 
-    val taskId by lazy { taskRecord.id }
-
     var done by Committer(createObject::done)
 
     val scheduleYear by lazy { scheduleKey.scheduleDate.year }

@@ -48,9 +48,6 @@ object ImageManager {
     fun init() = downloaders.forEach { it.init() }
 
     @Synchronized
-    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task<*>>, callback: () -> Unit) = downloaders.forEach { it.prefetch(deviceDbInfo, tasks, callback) }
-
-    @Synchronized
     fun getLargeIcon(uuid: String?) = largeIconDownloader.getImage(uuid)
 
     @Synchronized

@@ -34,7 +34,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
     override fun onStart() {
         super.onStart()
 
-        BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
+        BottomSheetBehavior.from(requireDialog().window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
             skipCollapsed = true
 
             addBottomSheetCallback(bottomSheetCallback)

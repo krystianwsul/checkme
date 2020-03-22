@@ -21,5 +21,5 @@ class ProjectInstanceRecord<T : ProjectType>(
         scheduleCustomTimeId
 ) {
 
-    override fun deleteFromParent() = check(taskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
+    override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)
 }

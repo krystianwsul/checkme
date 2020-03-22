@@ -71,4 +71,8 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").data()
 
     fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
+
+    private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
+
+    fun getRootInstanceSingle(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).data()
 }

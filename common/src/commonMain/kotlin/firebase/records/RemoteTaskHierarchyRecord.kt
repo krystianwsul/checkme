@@ -45,5 +45,5 @@ class RemoteTaskHierarchyRecord(
 
     fun setOrdinal(ordinal: Double) = setProperty(createObject::ordinal, ordinal)
 
-    override fun deleteFromParent() = check(projectRecord.remoteTaskHierarchyRecords.remove(id) == this)
+    override fun deleteFromParent() = check(projectRecord.taskHierarchyRecords.remove(id) == this)
 }

@@ -49,7 +49,7 @@ abstract class Project<T : ProjectType> {
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    fun newRemoteTask(taskJson: TaskJson): Task<T> {
+    fun newTask(taskJson: TaskJson): Task<T> {
         val remoteTaskRecord = projectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = Task(this, remoteTaskRecord)
@@ -187,19 +187,19 @@ abstract class Project<T : ProjectType> {
 
     fun deleteTaskHierarchy(taskHierarchy: TaskHierarchy<T>) = taskHierarchyContainer.removeForce(taskHierarchy.id)
 
-    fun getRemoteTaskIfPresent(taskId: String) = remoteTasks[taskId]
+    fun getTaskIfPresent(taskId: String) = remoteTasks[taskId]
 
-    fun getRemoteTaskForce(taskId: String) = remoteTasks[taskId]
+    fun getTaskForce(taskId: String) = remoteTasks[taskId]
             ?: throw MissingTaskException(id, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> {
-        check(childTaskKey.remoteTaskId.isNotEmpty())
+        check(childTaskKey.taskId.isNotEmpty())
 
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
     fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T>> {
-        check(parentTaskKey.remoteTaskId.isNotEmpty())
+        check(parentTaskKey.taskId.isNotEmpty())
 
         return taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
     }
@@ -242,9 +242,9 @@ abstract class Project<T : ProjectType> {
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): Time.Custom<T>
-    abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
-    abstract fun getRemoteCustomTime(customTimeId: String): Time.Custom<T>
+    abstract fun getCustomTime(customTimeId: CustomTimeId<*>): Time.Custom<T>
+    abstract fun getCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
+    abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,

@@ -20,9 +20,9 @@ class TaskHierarchy<T : ProjectType>(
 
     val id by lazy { remoteTaskHierarchyRecord.id }
 
-    val parentTask by lazy { project.getRemoteTaskForce(parentTaskId) }
+    val parentTask by lazy { project.getTaskForce(parentTaskId) }
 
-    val childTask by lazy { project.getRemoteTaskForce(childTaskId) }
+    val childTask by lazy { project.getTaskForce(childTaskId) }
 
     val parentTaskId by lazy { remoteTaskHierarchyRecord.parentTaskId }
     val childTaskId by lazy { remoteTaskHierarchyRecord.childTaskId }

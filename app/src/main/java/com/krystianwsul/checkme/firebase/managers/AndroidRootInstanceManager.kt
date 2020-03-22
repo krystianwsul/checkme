@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.ProjectType
 
 class AndroidRootInstanceManager<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        children: List<SnapshotInfo>
+        snapshotInfos: List<SnapshotInfo>
 ) : RootInstanceManager<T>(taskRecord) {
 
     private fun SnapshotInfo.toRecord() = RootInstanceRecord(
@@ -22,7 +22,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
             this@AndroidRootInstanceManager
     )
 
-    override var rootInstanceRecords = children.map { it.toRecord() to false }
+    override var rootInstanceRecords = snapshotInfos.map { it.toRecord() to false }
             .associateBy { it.first.instanceKey }
             .toMutableMap()
 

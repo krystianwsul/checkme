@@ -52,7 +52,7 @@ sealed class ScheduleText {
 
     protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
         return (timePair.customTimeKey?.let {
-            project.getRemoteCustomTime(it.customTimeId)
+            project.getCustomTime(it.customTimeId)
         } ?: Time.Normal(timePair.hourMinute!!)).toString()
     }
 

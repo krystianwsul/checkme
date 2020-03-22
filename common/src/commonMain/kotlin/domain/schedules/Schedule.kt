@@ -30,7 +30,7 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
 
     val time
         get() = customTimeKey?.let {
-            rootTask.remoteProject.getRemoteCustomTime(it.customTimeId)
+            rootTask.project.getCustomTime(it.customTimeId)
         } ?: Time.Normal(timePair.hourMinute!!)
 
 

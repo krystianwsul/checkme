@@ -42,7 +42,7 @@ abstract class SharedProjectManager<T> : SharedProjectRecord.Parent {
         return isSaved
     }
 
-    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
+    fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!sharedProjectRecords.containsKey(it.projectKey))
 
         setSharedProjectRecord(it.projectKey, Pair(it, false))

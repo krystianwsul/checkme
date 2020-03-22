@@ -4,6 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -14,10 +15,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Singles
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.merge
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.*
 
 class FactoryListener(
         localFactory: LocalFactory,
@@ -94,7 +92,7 @@ class FactoryListener(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val sharedProjectSingle = sharedProjectKeysObservable.firstOrError()
+                val sharedProjectManagerSingle = sharedProjectKeysObservable.firstOrError()
                         .flatMap { (old, new) ->
                             check(old.isEmpty())
 
@@ -106,15 +104,54 @@ class FactoryListener(
                         .map { AndroidSharedProjectManager(it) }
                         .cache()
 
+                val taskRecordObservable = Observables.combineLatest(
+                                privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
+                                sharedProjectManagerSingle.flatMapObservable { it.sharedProjectObservable }
+                        )
+                        .map { (privateProjectRecord, sharedProjectRecords) ->
+                            listOf(
+                                    listOf(privateProjectRecord.taskRecords),
+                                    sharedProjectRecords.map { it.value.taskRecords }
+                            ).flatten()
+                                    .map { it.values }
+                                    .flatten()
+                        }
+                        .publish()
+                        .apply { domainDisposable += connect() }
+
+                val rootInstanceManagerSingle = taskRecordObservable.firstOrError()
+                        .flatMap {
+                            it.map { taskRecord ->
+                                AndroidDatabaseWrapper.getRootInstanceSingle(taskRecord.rootInstanceKey).map { taskRecord to it }
+                            }.zipSingle()
+                        }
+                        .map {
+                            it.map { (taskRecord, dataSnapshot) ->
+                                val snapshotInfos = dataSnapshot.children
+                                        .map {
+                                            val dateString = it.key!!
+
+                                            it.children.map {
+                                                AndroidRootInstanceManager.SnapshotInfo(dateString, it.key!!, it)
+                                            }
+                                        }
+                                        .flatten()
+
+                                taskRecord.taskKey to AndroidRootInstanceManager(taskRecord, snapshotInfos)
+                            }.toMap()
+                        }
+
                 val projectFactorySingle = Singles.zip(
                         privateProjectManagerSingle,
-                        sharedProjectSingle
-                ) { privateProjectManager, sharedProjectManager ->
-                    RemoteProjectFactory(
+                        sharedProjectManagerSingle,
+                        rootInstanceManagerSingle
+                ) { privateProjectManager, sharedProjectManager, rootInstanceManagers ->
+                    ProjectFactory(
                             deviceDbInfo,
                             localFactory,
                             privateProjectManager,
                             sharedProjectManager,
+                            rootInstanceManagers,
                             ExactTimeStamp.now
                     )
                 }
@@ -141,7 +178,7 @@ class FactoryListener(
                         }
                         .addTo(domainDisposable)
 
-                sharedProjectSingle.flatMapObservable { sharedProjectEvents }
+                sharedProjectManagerSingle.flatMapObservable { sharedProjectEvents }
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
                         }

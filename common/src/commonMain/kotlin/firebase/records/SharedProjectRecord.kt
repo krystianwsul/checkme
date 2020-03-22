@@ -87,11 +87,11 @@ class SharedProjectRecord(
 
     private val createProjectJson
         get() = jsonWrapper.projectJson.apply {
-            tasks = remoteTaskRecords.values
+            tasks = taskRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 
-            taskHierarchies = remoteTaskHierarchyRecords.values
+            taskHierarchies = taskHierarchyRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 

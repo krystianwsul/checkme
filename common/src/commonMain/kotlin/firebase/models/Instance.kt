@@ -18,9 +18,9 @@ class Instance<T : ProjectType> {
                 taskKey: TaskKey
         ) = getNotificationId(
                 scheduleDate,
-                scheduleCustomTimeKey?.let { Pair(it.remoteProjectId.key, it.customTimeId.value) },
+                scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
                 scheduleHourMinute,
-                taskKey.run { Pair(remoteProjectId.key, remoteTaskId) }
+                taskKey.run { Pair(projectId.key, taskId) }
         )
 
         /*
@@ -359,7 +359,7 @@ class Instance<T : ProjectType> {
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
         return if (shared != null) {
-            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.customTimeId) as SharedCustomTime
+            val sharedCustomTime = remoteProject.getCustomTime(shared.customTimeId) as SharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
                 val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
@@ -392,7 +392,7 @@ class Instance<T : ProjectType> {
                 val instanceRecord: InstanceRecord<T>
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId<T>) = instance.remoteProject.getRemoteCustomTime(customTimeId)
+            fun getCustomTime(customTimeId: CustomTimeId<T>) = instance.remoteProject.getCustomTime(customTimeId)
 
             override val scheduleDate get() = instanceRecord.let { Date(it.scheduleYear, it.scheduleMonth, it.scheduleDay) }
 
@@ -448,7 +448,7 @@ class Instance<T : ProjectType> {
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.remoteTaskId, scheduleDateTime, taskKey.remoteProjectId)
+                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectId)
             return shown!!
         }
     }
@@ -480,8 +480,8 @@ class Instance<T : ProjectType> {
                     .destructureRemote()
 
             return getShown(
-                    taskKey.remoteProjectId,
-                    taskKey.remoteTaskId,
+                    taskKey.projectId,
+                    taskKey.taskId,
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,

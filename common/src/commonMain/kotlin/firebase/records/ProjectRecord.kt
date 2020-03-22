@@ -21,7 +21,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
 
-    val remoteTaskRecords by lazy {
+    val taskRecords by lazy {
         projectJson.tasks
                 .mapValues { (id, taskJson) ->
                     check(id.isNotEmpty())
@@ -31,7 +31,7 @@ abstract class ProjectRecord<T : ProjectType>(
                 .toMutableMap()
     }
 
-    val remoteTaskHierarchyRecords by lazy {
+    val taskHierarchyRecords by lazy {
         projectJson.taskHierarchies
                 .mapValues { (id, taskHierarchyJson) ->
                     check(id.isNotEmpty())
@@ -52,23 +52,23 @@ abstract class ProjectRecord<T : ProjectType>(
     var endTime by Committer(projectJson::endTime, "$key/$PROJECT_JSON")
 
     override val children
-        get() = remoteTaskRecords.values +
-                remoteTaskHierarchyRecords.values +
+        get() = taskRecords.values +
+                taskHierarchyRecords.values +
                 customTimeRecords.values
 
     fun newRemoteTaskRecord(taskJson: TaskJson): TaskRecord<T> {
         val remoteTaskRecord = TaskRecord(this, taskJson)
-        check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
+        check(!taskRecords.containsKey(remoteTaskRecord.id))
 
-        remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
         return remoteTaskRecord
     }
 
     fun newRemoteTaskHierarchyRecord(taskHierarchyJson: TaskHierarchyJson): RemoteTaskHierarchyRecord {
         val remoteTaskHierarchyRecord = RemoteTaskHierarchyRecord(this, taskHierarchyJson)
-        check(!remoteTaskHierarchyRecords.containsKey(remoteTaskHierarchyRecord.id))
+        check(!taskHierarchyRecords.containsKey(remoteTaskHierarchyRecord.id))
 
-        remoteTaskHierarchyRecords[remoteTaskHierarchyRecord.id] = remoteTaskHierarchyRecord
+        taskHierarchyRecords[remoteTaskHierarchyRecord.id] = remoteTaskHierarchyRecord
         return remoteTaskHierarchyRecord
     }
 

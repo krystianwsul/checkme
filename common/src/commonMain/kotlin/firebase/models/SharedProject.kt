@@ -40,13 +40,13 @@ class SharedProject(
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
 
-        remoteTasks = projectRecord.remoteTaskRecords
+        remoteTasks = projectRecord.taskRecords
                 .values
                 .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
-        projectRecord.remoteTaskHierarchyRecords
+        projectRecord.taskHierarchyRecords
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
@@ -109,14 +109,14 @@ class SharedProject(
             ownerKey: UserKey
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId.customTimeId }
 
-    override fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): SharedCustomTime {
+    override fun getCustomTime(customTimeId: CustomTimeId<*>): SharedCustomTime {
         check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Shared))
 
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
-    override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Shared(customTimeId))
+    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getCustomTime(customTimeKey.customTimeId)
+    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Shared(customTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
         val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)

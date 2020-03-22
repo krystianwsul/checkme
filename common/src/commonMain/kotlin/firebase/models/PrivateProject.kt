@@ -30,13 +30,13 @@ class PrivateProject(
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
 
-        remoteTasks = projectRecord.remoteTaskRecords
+        remoteTasks = projectRecord.taskRecords
                 .values
                 .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
-        projectRecord.remoteTaskHierarchyRecords
+        projectRecord.taskHierarchyRecords
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
@@ -60,14 +60,14 @@ class PrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getRemoteCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
+    override fun getCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
         check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Private))
 
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.customTimeId)
-    override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Private(customTimeId))
+    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getCustomTime(customTimeKey.customTimeId)
+    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Private(customTimeId))
 
     override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>) = when (customTime) {
         is PrivateCustomTime -> customTime

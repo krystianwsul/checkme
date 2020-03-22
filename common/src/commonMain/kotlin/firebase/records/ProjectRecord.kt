@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : ProjectType>(
+abstract class ProjectRecord<T : ProjectType>(
         create: Boolean,
         private val projectJson: ProjectJson,
         private val _id: ProjectKey<T> // bo musi być dostępne w konstruktorze, a abstract nie jest jeszcze zinicjalizowane

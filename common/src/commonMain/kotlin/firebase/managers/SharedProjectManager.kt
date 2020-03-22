@@ -4,15 +4,14 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ProjectType
 
-abstract class SharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
+abstract class SharedProjectManager<T> : SharedProjectRecord.Parent {
 
     val isSaved get() = sharedProjectRecords.any { it.value.second }
 
-    abstract var sharedProjectRecords: MutableMap<ProjectKey.Shared, Pair<RemoteSharedProjectRecord, Boolean>>
+    abstract var sharedProjectRecords: Map<ProjectKey.Shared, Pair<SharedProjectRecord, Boolean>>
         protected set
 
     abstract val databaseWrapper: DatabaseWrapper
@@ -43,13 +42,14 @@ abstract class SharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
         return isSaved
     }
 
-    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
+    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!sharedProjectRecords.containsKey(it.projectKey))
 
-        sharedProjectRecords[it.projectKey] = Pair(it, false)
+        setSharedProjectRecord(it.projectKey, Pair(it, false))
     }
 
-    override fun deleteRemoteSharedProjectRecord(id: ProjectKey<ProjectType.Shared>) {
-        sharedProjectRecords.remove(id)
-    }
+    abstract fun setSharedProjectRecord(
+            projectKey: ProjectKey.Shared,
+            pair: Pair<SharedProjectRecord, Boolean>
+    )
 }

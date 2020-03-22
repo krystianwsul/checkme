@@ -42,7 +42,7 @@ class RootInstanceRecord<T : ProjectType>(
         }
 
         private fun <T : ProjectType> timeStringToTime(
-                projectRecord: RemoteProjectRecord<T>,
+                projectRecord: ProjectRecord<T>,
                 timeString: String
         ): Pair<TimePair, CustomTimeId<T>?> {
             val result = hourMinuteRegex.find(timeString)
@@ -60,7 +60,7 @@ class RootInstanceRecord<T : ProjectType>(
         }
 
         private fun <T : ProjectType> dateTimeStringsToSchedulePair(
-                projectRecord: RemoteProjectRecord<T>,
+                projectRecord: ProjectRecord<T>,
                 dateString: String,
                 timeString: String
         ): Pair<ScheduleKey, CustomTimeId<T>?> {

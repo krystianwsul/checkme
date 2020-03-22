@@ -4,7 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
-import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
@@ -13,12 +13,12 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 class SharedProject(
-        override val remoteProjectRecord: RemoteSharedProjectRecord
+        override val projectRecord: SharedProjectRecord
 ) : Project<ProjectType.Shared>() {
 
-    override val id = remoteProjectRecord.projectKey
+    override val id = projectRecord.projectKey
 
-    private val remoteUsers = remoteProjectRecord.remoteUserRecords
+    private val remoteUsers = projectRecord.remoteUserRecords
             .values
             .map { ProjectUser(this, it) }
             .associateBy { it.id }
@@ -33,20 +33,20 @@ class SharedProject(
     override val customTimes get() = remoteCustomTimes.values
 
     init {
-        for (remoteCustomTimeRecord in remoteProjectRecord.customTimeRecords.values) {
+        for (remoteCustomTimeRecord in projectRecord.customTimeRecords.values) {
             @Suppress("LeakingThis")
             val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
 
-        remoteTasks = remoteProjectRecord.remoteTaskRecords
+        remoteTasks = projectRecord.remoteTaskRecords
                 .values
                 .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
-        remoteProjectRecord.remoteTaskHierarchyRecords
+        projectRecord.remoteTaskHierarchyRecords
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
@@ -57,7 +57,7 @@ class SharedProject(
 
         check(!remoteUsers.containsKey(id))
 
-        val remoteProjectUserRecord = remoteProjectRecord.newRemoteUserRecord(rootUser.userJson)
+        val remoteProjectUserRecord = projectRecord.newRemoteUserRecord(rootUser.userJson)
         val remoteProjectUser = ProjectUser(this, remoteProjectUserRecord)
 
         remoteUsers[id] = remoteProjectUser
@@ -119,7 +119,7 @@ class SharedProject(
     override fun getRemoteCustomTime(customTimeId: String) = getRemoteCustomTime(CustomTimeId.Shared(customTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
-        val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
+        val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
 

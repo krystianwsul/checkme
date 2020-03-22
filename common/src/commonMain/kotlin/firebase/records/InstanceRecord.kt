@@ -53,7 +53,7 @@ abstract class InstanceRecord<T : ProjectType>(
         protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
 
         fun <T : ProjectType> stringToScheduleKey(
-                remoteProjectRecord: RemoteProjectRecord<T>,
+                projectRecord: ProjectRecord<T>,
                 key: String
         ): Pair<ScheduleKey, CustomTimeId<T>?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
@@ -77,7 +77,7 @@ abstract class InstanceRecord<T : ProjectType>(
                 val customTimeId = customTimeMatchResult.groupValues[4]
                 check(customTimeId.isNotEmpty())
 
-                val customTimeKey = remoteProjectRecord.getRemoteCustomTimeKey(customTimeId)
+                val customTimeKey = projectRecord.getRemoteCustomTimeKey(customTimeId)
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
             }

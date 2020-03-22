@@ -6,13 +6,13 @@ import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.*
 
-class RemoteSharedProjectRecord(
+class SharedProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         private val parent: Parent,
         create: Boolean,
         override val projectKey: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<ProjectType.Shared>(
+) : ProjectRecord<ProjectType.Shared>(
         create,
         jsonWrapper.projectJson,
         projectKey
@@ -126,6 +126,6 @@ class RemoteSharedProjectRecord(
 
     interface Parent {
 
-        fun deleteRemoteSharedProjectRecord(id: ProjectKey<ProjectType.Shared>)
+        fun deleteRemoteSharedProjectRecord(projectKey: ProjectKey.Shared)
     }
 }

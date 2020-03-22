@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
+import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
@@ -11,10 +11,10 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
-        override val remoteProjectRecord: RemotePrivateProjectRecord
+        override val projectRecord: PrivateProjectRecord
 ) : Project<ProjectType.Private>() {
 
-    override val id = remoteProjectRecord.projectKey
+    override val id = projectRecord.projectKey
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
     override val remoteTasks: MutableMap<String, Task<ProjectType.Private>>
@@ -23,27 +23,27 @@ class PrivateProject(
     override val customTimes get() = remoteCustomTimes.values
 
     init {
-        for (remoteCustomTimeRecord in remoteProjectRecord.customTimeRecords.values) {
+        for (remoteCustomTimeRecord in projectRecord.customTimeRecords.values) {
             @Suppress("LeakingThis")
             val remoteCustomTime = PrivateCustomTime(this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
 
-        remoteTasks = remoteProjectRecord.remoteTaskRecords
+        remoteTasks = projectRecord.remoteTaskRecords
                 .values
                 .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
-        remoteProjectRecord.remoteTaskHierarchyRecords
+        projectRecord.remoteTaskHierarchyRecords
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
     }
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): PrivateCustomTime {
-        val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
+        val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = PrivateCustomTime(this, remoteCustomTimeRecord)
 

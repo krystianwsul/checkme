@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.managers
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
+import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import kotlin.properties.Delegates
 
 abstract class PrivateProjectManager<T> {
@@ -12,7 +12,7 @@ abstract class PrivateProjectManager<T> {
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    abstract val privateProjectRecords: List<RemotePrivateProjectRecord>
+    abstract val privateProjectRecords: List<PrivateProjectRecord>
 
     protected abstract fun getDatabaseCallback(extra: T, values: Map<String, Any?>): DatabaseCallback
 

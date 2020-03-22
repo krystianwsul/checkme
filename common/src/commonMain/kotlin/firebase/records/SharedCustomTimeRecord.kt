@@ -13,25 +13,25 @@ class SharedCustomTimeRecord(
         create: Boolean,
         override val id: CustomTimeId.Shared,
         override val customTimeJson: SharedCustomTimeJson,
-        override val remoteProjectRecord: RemoteSharedProjectRecord
+        override val projectRecord: SharedProjectRecord
 ) : CustomTimeRecord<ProjectType.Shared>(create) {
 
     constructor(
             id: CustomTimeId.Shared,
-            remoteProjectRecord: RemoteSharedProjectRecord,
+            remoteProjectRecord: SharedProjectRecord,
             customTimeJson: SharedCustomTimeJson
     ) : this(false, id, customTimeJson, remoteProjectRecord)
 
     constructor(
-            remoteProjectRecord: RemoteSharedProjectRecord,
+            remoteProjectRecord: SharedProjectRecord,
             customTimeJson: SharedCustomTimeJson
     ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
-    override val customTimeKey = CustomTimeKey.Shared(remoteProjectRecord.projectKey, id)
+    override val customTimeKey = CustomTimeKey.Shared(projectRecord.projectKey, id)
 
     override val createObject get() = customTimeJson
 
-    override fun deleteFromParent() = check(remoteProjectRecord.customTimeRecords.remove(id) == this)
+    override fun deleteFromParent() = check(projectRecord.customTimeRecords.remove(id) == this)
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 

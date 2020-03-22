@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 class RemoteTaskHierarchyRecord(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<*>,
+        private val projectRecord: ProjectRecord<*>,
         override val createObject: TaskHierarchyJson
 ) : RemoteRecord(create) {
 
@@ -15,7 +15,7 @@ class RemoteTaskHierarchyRecord(
         const val TASK_HIERARCHIES = "taskHierarchies"
     }
 
-    override val key get() = remoteProjectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
+    override val key get() = projectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
 
     val startTime get() = createObject.startTime
 
@@ -27,17 +27,17 @@ class RemoteTaskHierarchyRecord(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<*>,
+            projectRecord: ProjectRecord<*>,
             taskHierarchyJson: TaskHierarchyJson
-    ) : this(false, id, remoteProjectRecord, taskHierarchyJson)
+    ) : this(false, id, projectRecord, taskHierarchyJson)
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<*>,
+            projectRecord: ProjectRecord<*>,
             taskHierarchyJson: TaskHierarchyJson
     ) : this(
             true,
-            remoteProjectRecord.getTaskHierarchyRecordId(),
-            remoteProjectRecord,
+            projectRecord.getTaskHierarchyRecordId(),
+            projectRecord,
             taskHierarchyJson
     )
 
@@ -45,5 +45,5 @@ class RemoteTaskHierarchyRecord(
 
     fun setOrdinal(ordinal: Double) = setProperty(createObject::ordinal, ordinal)
 
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskHierarchyRecords.remove(id) == this)
+    override fun deleteFromParent() = check(projectRecord.remoteTaskHierarchyRecords.remove(id) == this)
 }

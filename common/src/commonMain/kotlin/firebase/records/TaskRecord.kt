@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ScheduleKey
 class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
-        val projectRecord: RemoteProjectRecord<T>,
+        val projectRecord: ProjectRecord<T>,
         private val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
@@ -97,22 +97,22 @@ class TaskRecord<T : ProjectType> private constructor(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<T>,
+            projectRecord: ProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             false,
             id,
-            remoteProjectRecord,
+            projectRecord,
             taskJson
     )
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<T>,
+            projectRecord: ProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             true,
-            remoteProjectRecord.getTaskRecordId(),
-            remoteProjectRecord,
+            projectRecord.getTaskRecordId(),
+            projectRecord,
             taskJson
     )
 

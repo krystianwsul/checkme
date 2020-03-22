@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.RemoteProjectRecord
+import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -17,7 +17,7 @@ import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType> {
 
-    abstract val remoteProjectRecord: RemoteProjectRecord<T>
+    abstract val projectRecord: ProjectRecord<T>
 
     protected abstract val remoteTasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
@@ -26,16 +26,16 @@ abstract class Project<T : ProjectType> {
     abstract val id: ProjectKey<T>
 
     var name
-        get() = remoteProjectRecord.name
+        get() = projectRecord.name
         set(name) {
             check(name.isNotEmpty())
 
-            remoteProjectRecord.name = name
+            projectRecord.name = name
         }
 
-    private val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
+    private val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
 
-    val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
+    val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
 
     val taskKeys get() = remoteTasks.keys
 
@@ -50,7 +50,7 @@ abstract class Project<T : ProjectType> {
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
     fun newRemoteTask(taskJson: TaskJson): Task<T> {
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
+        val remoteTaskRecord = projectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = Task(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
@@ -65,7 +65,7 @@ abstract class Project<T : ProjectType> {
             now: ExactTimeStamp
     ) {
         val taskHierarchyJson = TaskHierarchyJson(parentTask.id, childTask.id, now.long, null, null)
-        val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
+        val remoteTaskHierarchyRecord = projectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)
 
@@ -99,7 +99,7 @@ abstract class Project<T : ProjectType> {
                 task.note,
                 instanceJsons,
                 oldestVisible = oldestVisibleMap.toMutableMap())
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
+        val remoteTaskRecord = projectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = Task(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
@@ -170,7 +170,7 @@ abstract class Project<T : ProjectType> {
         val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
 
         val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, now.long, endTime, startTaskHierarchy.ordinal)
-        val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
+        val remoteTaskHierarchyRecord = projectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)
 
@@ -207,7 +207,7 @@ abstract class Project<T : ProjectType> {
     fun delete(parent: Parent) {
         parent.deleteProject(this)
 
-        remoteProjectRecord.delete()
+        projectRecord.delete()
     }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -231,13 +231,13 @@ abstract class Project<T : ProjectType> {
 
         projectUndoData.projectIds.add(id)
 
-        remoteProjectRecord.endTime = now.long
+        projectRecord.endTime = now.long
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         check(!current(now))
 
-        remoteProjectRecord.endTime = null
+        projectRecord.endTime = null
     }
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)

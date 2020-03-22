@@ -19,7 +19,7 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
     abstract val id: CustomTimeId<T>
     abstract val customTimeKey: CustomTimeKey<T>
     protected abstract val customTimeJson: CustomTimeJson
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
+    protected abstract val projectRecord: ProjectRecord<T>
 
     var name by Committer({ customTimeJson::name })
 
@@ -44,9 +44,9 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
     var saturdayHour by Committer({ customTimeJson::saturdayHour })
     var saturdayMinute by Committer({ customTimeJson::saturdayMinute })
 
-    val projectId get() = remoteProjectRecord.projectKey
+    val projectId get() = projectRecord.projectKey
 
-    override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
+    override val key get() = projectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
 
     abstract fun mine(userInfo: UserInfo): Boolean
 

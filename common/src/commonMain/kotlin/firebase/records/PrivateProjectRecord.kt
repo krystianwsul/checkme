@@ -9,12 +9,12 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
-class RemotePrivateProjectRecord(
+class PrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
         override val projectKey: ProjectKey.Private,
         private val projectJson: PrivateProjectJson
-) : RemoteProjectRecord<ProjectType.Private>(
+) : ProjectRecord<ProjectType.Private>(
         create,
         projectJson,
         projectKey

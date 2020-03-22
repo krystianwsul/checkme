@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
-import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
+import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 class JsPrivateProjectManager(
@@ -13,7 +13,7 @@ class JsPrivateProjectManager(
         privateProjectJsons: Map<String, PrivateProjectJson>
 ) : PrivateProjectManager<Unit>() {
 
-    override val privateProjectRecords = privateProjectJsons.map { RemotePrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
+    override val privateProjectRecords = privateProjectJsons.map { PrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
 
     override var saveCallback: (() -> Unit)? = null
 

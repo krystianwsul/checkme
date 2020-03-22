@@ -11,25 +11,25 @@ class PrivateCustomTimeRecord(
         create: Boolean,
         override val id: CustomTimeId.Private,
         override val customTimeJson: PrivateCustomTimeJson,
-        override val remoteProjectRecord: RemotePrivateProjectRecord
+        override val projectRecord: PrivateProjectRecord
 ) : CustomTimeRecord<ProjectType.Private>(create) {
 
     constructor(
             id: CustomTimeId.Private,
-            remoteProjectRecord: RemotePrivateProjectRecord,
+            remoteProjectRecord: PrivateProjectRecord,
             customTimeJson: PrivateCustomTimeJson
     ) : this(false, id, customTimeJson, remoteProjectRecord)
 
     constructor(
-            remoteProjectRecord: RemotePrivateProjectRecord,
+            remoteProjectRecord: PrivateProjectRecord,
             customTimeJson: PrivateCustomTimeJson
     ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
-    override val customTimeKey = CustomTimeKey.Private(remoteProjectRecord.projectKey, id)
+    override val customTimeKey = CustomTimeKey.Private(projectRecord.projectKey, id)
 
     override val createObject get() = customTimeJson
 
-    override fun deleteFromParent() = check(remoteProjectRecord.customTimeRecords.remove(id) == this)
+    override fun deleteFromParent() = check(projectRecord.customTimeRecords.remove(id) == this)
 
     override fun mine(userInfo: UserInfo) = true
 

@@ -87,7 +87,7 @@ class RemoteProjectFactory(
         val projectPair = remoteSharedProjectManager.sharedProjectRecords[projectKey]
 
         if (projectPair?.second == true) {
-            remoteSharedProjectManager.sharedProjectRecords[projectKey] = Pair(projectPair.first, false)
+            remoteSharedProjectManager.setSharedProjectRecord(projectKey, Pair(projectPair.first, false))
 
             return true
         } else {
@@ -105,7 +105,7 @@ class RemoteProjectFactory(
                     }
                 }
                 is DatabaseEvent.Remove -> {
-                    remoteSharedProjectManager.removeChild(projectKey)
+                    remoteSharedProjectManager.deleteRemoteSharedProjectRecord(projectKey)
                     remoteSharedProjects.remove(projectKey)
                 }
             }

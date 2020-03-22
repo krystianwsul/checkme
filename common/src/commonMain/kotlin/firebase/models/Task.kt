@@ -5,8 +5,8 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -14,12 +14,24 @@ import com.krystianwsul.common.utils.*
 class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
-        private val rootInstanceRecords: Collection<RootInstanceRecord<T>>
+        private val rootInstanceManager: RootInstanceManager<T>
 ) {
+
+    companion object {
+
+        const val USE_ROOT_INSTANCES = true // todo instances
+    }
 
     private val _existingInstances = taskRecord.instanceRecords
             .values
-            .apply { addAll(rootInstanceRecords) }
+            .toMutableList<InstanceRecord<T>>()
+            .apply {
+                addAll(
+                        rootInstanceManager.rootInstanceRecords
+                                .values
+                                .map { it.first }
+                )
+            }
             .map { Instance(project, this, it) }
             .toMutableList()
             .associateBy { it.scheduleKey }
@@ -353,31 +365,31 @@ class Task<T : ProjectType>(
     init {
         _schedules.addAll(
                 taskRecord.remoteSingleScheduleRecords
-                .values
+                        .values
                         .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) }
         )
 
         _schedules.addAll(
                 taskRecord.remoteDailyScheduleRecords
-                .values
+                        .values
                         .map { WeeklySchedule(this, RemoteDailyScheduleBridge(it)) }
         )
 
         _schedules.addAll(
                 taskRecord.remoteWeeklyScheduleRecords
-                .values
+                        .values
                         .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) }
         )
 
         _schedules.addAll(
                 taskRecord.remoteMonthlyDayScheduleRecords
-                .values
+                        .values
                         .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) }
         )
 
         _schedules.addAll(
                 taskRecord.remoteMonthlyWeekScheduleRecords
-                .values
+                        .values
                         .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
         )
     }
@@ -444,8 +456,13 @@ class Task<T : ProjectType>(
     }
 
     fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
+        val newRecord = if (USE_ROOT_INSTANCES)
+            rootInstanceManager::newRootInstanceRecord
+        else
+            taskRecord::newInstanceRecord
+
         @Suppress("UNCHECKED_CAST")
-        val instanceRecord = taskRecord.newInstanceRecord(
+        val instanceRecord = newRecord(
                 InstanceJson(),
                 instance.scheduleKey,
                 instance.scheduleDateTime

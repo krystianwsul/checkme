@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.Date
@@ -18,6 +19,7 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType> {
 
     abstract val projectRecord: ProjectRecord<T>
+    abstract val rootInstanceManagers: Map<TaskKey, RootInstanceManager<T>>
 
     protected abstract val remoteTasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
@@ -52,7 +54,7 @@ abstract class Project<T : ProjectType> {
     fun newTask(taskJson: TaskJson): Task<T> {
         val remoteTaskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val remoteTask = Task(this, remoteTaskRecord, listOf())
+        val remoteTask = Task(this, remoteTaskRecord, rootInstanceManagers.getValue(remoteTaskRecord.taskKey))
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -82,7 +84,7 @@ abstract class Project<T : ProjectType> {
 
         val oldestVisible = oldTask.getOldestVisible()
 
-        val instanceJsons = instances.associate {
+        val instanceJsons = instances.associate { // todo instances conditionally write to rootInstanceManager
             val instanceJson = getInstanceJson(deviceDbInfo.key, it)
             val scheduleKey = it.scheduleKey
 
@@ -103,7 +105,7 @@ abstract class Project<T : ProjectType> {
 
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val newTask = Task(this, taskRecord, listOf()) // todo instances write elsewhere
+        val newTask = Task(this, taskRecord, rootInstanceManagers.getValue(taskRecord.taskKey))
         check(!remoteTasks.containsKey(newTask.id))
 
         remoteTasks[newTask.id] = newTask

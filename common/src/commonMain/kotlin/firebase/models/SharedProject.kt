@@ -4,18 +4,15 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
-import com.krystianwsul.common.firebase.records.RootInstanceRecord
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
-        private val rootInstanceRecords: Map<String, List<RootInstanceRecord<ProjectType.Shared>>>
+        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>
 ) : Project<ProjectType.Shared>() {
 
     override val id = projectRecord.projectKey
@@ -44,7 +41,7 @@ class SharedProject(
 
         remoteTasks = projectRecord.taskRecords
                 .values
-                .map { Task(this, it, rootInstanceRecords.getValue(it.id)) }
+                .map { Task(this, it, rootInstanceManagers.getValue(it.taskKey)) }
                 .associateBy { it.id }
                 .toMutableMap()
 

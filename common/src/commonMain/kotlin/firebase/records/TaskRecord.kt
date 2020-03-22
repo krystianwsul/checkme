@@ -21,7 +21,7 @@ class TaskRecord<T : ProjectType> private constructor(
         const val TASKS = "tasks"
     }
 
-    val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
+    val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()
 
     val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T>> = HashMap()
 
@@ -225,7 +225,7 @@ class TaskRecord<T : ProjectType> private constructor(
     ): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
-        val remoteInstanceRecord = ProjectInstanceRecord(
+        val projectInstanceRecord = ProjectInstanceRecord(
                 true,
                 this,
                 instanceJson,
@@ -234,10 +234,10 @@ class TaskRecord<T : ProjectType> private constructor(
                 customTimeId
         )
 
-        check(!instanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
+        check(!instanceRecords.containsKey(projectInstanceRecord.scheduleKey))
 
-        instanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord
-        return remoteInstanceRecord
+        instanceRecords[projectInstanceRecord.scheduleKey] = projectInstanceRecord
+        return projectInstanceRecord
     }
 
     fun newSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T> {

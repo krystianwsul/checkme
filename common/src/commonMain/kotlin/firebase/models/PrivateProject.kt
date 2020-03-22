@@ -2,18 +2,15 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
-        private val rootInstanceRecords: Map<String, Collection<RootInstanceRecord<ProjectType.Private>>>
+        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>
 ) : Project<ProjectType.Private>() {
 
     override val id = projectRecord.projectKey
@@ -34,7 +31,7 @@ class PrivateProject(
 
         remoteTasks = projectRecord.taskRecords
                 .values
-                .map { Task(this, it, rootInstanceRecords.getValue(it.id)) }
+                .map { Task(this, it, rootInstanceManagers.getValue(it.taskKey)) }
                 .associateBy { it.id }
                 .toMutableMap()
 

@@ -49,7 +49,11 @@ class FactoryListener(
                         .apply { domainDisposable += connect() }
 
                 val userSingle = AndroidDatabaseWrapper.getUserSingle(deviceInfo.key).cache()
-                val privateProjectSingle = AndroidDatabaseWrapper.getPrivateProjectSingle(deviceInfo.key.toPrivateProjectKey()).cache()
+
+                val privateProjectManagerSingle = AndroidDatabaseWrapper.getPrivateProjectSingle(deviceInfo.key.toPrivateProjectKey())
+                        .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now) }
+                        .cache()
+
                 val friendSingle = AndroidDatabaseWrapper.getFriendSingle(deviceInfo.key).cache()
 
                 val startTime = ExactTimeStamp.now
@@ -90,7 +94,7 @@ class FactoryListener(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val sharedProjectSingle: Single<List<DataSnapshot>> = sharedProjectKeysObservable.firstOrError()
+                val sharedProjectSingle = sharedProjectKeysObservable.firstOrError()
                         .flatMap { (old, new) ->
                             check(old.isEmpty())
 
@@ -99,20 +103,13 @@ class FactoryListener(
                                     ?.zipSingle()
                                     ?: Single.just(listOf())
                         }
+                        .map { AndroidSharedProjectManager(it) }
                         .cache()
 
                 val projectFactorySingle = Singles.zip(
-                        privateProjectSingle,
+                        privateProjectManagerSingle,
                         sharedProjectSingle
-                ) { privateProject, sharedProjects ->
-                    val privateProjectManager = AndroidPrivateProjectManager(
-                            deviceDbInfo.userInfo,
-                            privateProject,
-                            ExactTimeStamp.now
-                    )
-
-                    val sharedProjectManager = AndroidSharedProjectManager(sharedProjects)
-
+                ) { privateProjectManager, sharedProjectManager ->
                     RemoteProjectFactory(
                             deviceDbInfo,
                             localFactory,
@@ -138,7 +135,7 @@ class FactoryListener(
                     )
                 }.cache()
 
-                privateProjectSingle.flatMapObservable { privateProjectObservable }
+                privateProjectManagerSingle.flatMapObservable { privateProjectObservable }
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
                         }

@@ -164,6 +164,14 @@ class FactoryListener(
                         .publish()
                         .apply { domainDisposable += connect() }
 
+                fun DataSnapshot.toSnapshotInfos() = children.map { // todo instances use class for parsing
+                    val dateString = it.key!!
+
+                    it.children.map {
+                        AndroidRootInstanceManager.SnapshotInfo(dateString, it.key!!, it)
+                    }
+                }.flatten()
+
                 val rootInstanceManagerSingle = rootInstanceRxObservable.firstOrError()
                         .flatMap {
                             it.values
@@ -172,19 +180,48 @@ class FactoryListener(
                         }
                         .map {
                             it.map { (taskRecord, dataSnapshot) ->
-                                val snapshotInfos = dataSnapshot.children
-                                        .map {
-                                            val dateString = it.key!!
-
-                                            it.children.map {
-                                                AndroidRootInstanceManager.SnapshotInfo(dateString, it.key!!, it)
-                                            }
-                                        }
-                                        .flatten()
-
-                                taskRecord.taskKey to AndroidRootInstanceManager(taskRecord, snapshotInfos)
+                                taskRecord.taskKey to AndroidRootInstanceManager(
+                                        taskRecord,
+                                        dataSnapshot.toSnapshotInfos()
+                                )
                             }.toMap()
                         }
+
+                val rootInstanceTaskEvents = rootInstanceRxObservable.scan(Triple(setOf<TaskKey>(), setOf<TaskKey>(), mapOf<TaskKey, RootInstanceRx>())) { (_, _, oldMap), newMap ->
+                            val oldKeys = oldMap.keys
+                            val newKeys = newMap.keys
+
+                            val removedKeys = oldKeys - newKeys
+                            val addedKeys = newKeys - oldKeys
+
+                            Triple(removedKeys, addedKeys, newMap)
+                        }
+                        .skip(1)
+                        .switchMap { (removedKeys, addedKeys, map) ->
+                            val removeTaskEvents = removedKeys.map { Observable.just(ProjectFactory.InstanceEvent.RemoveTask(it) as ProjectFactory.InstanceEvent) }
+
+                            val addTaskEvents = addedKeys.map {
+                                val rootInstanceRx = map.getValue(it)
+
+                                rootInstanceRx.single
+                                        .map {
+                                            ProjectFactory.InstanceEvent.AddTask(rootInstanceRx.taskRecord, it.toSnapshotInfos()) as ProjectFactory.InstanceEvent
+                                        }
+                                        .toObservable()
+                            }
+
+                            listOf(removeTaskEvents, addTaskEvents).flatten().merge()
+                        }
+
+                val rootInstanceInstanceEvents = rootInstanceRxObservable.switchMap {
+                    it.map { (taskKey, rootInstanceRx) ->
+                        rootInstanceRx.observable.map {
+                            ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos()) as ProjectFactory.InstanceEvent
+                        }
+                    }.merge()
+                }
+
+                val rootInstanceEvents = listOf(rootInstanceTaskEvents, rootInstanceInstanceEvents).merge()
 
                 val projectFactorySingle = Singles.zip(
                         privateProjectManagerSingle,
@@ -239,6 +276,10 @@ class FactoryListener(
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateUserRecord(it) }.addTo(domainDisposable)
                         }
+                        .addTo(domainDisposable)
+
+                domainFactorySingle.flatMapObservable { domainFactory -> rootInstanceEvents.map { Pair(domainFactory, it) } }
+                        .subscribe { (domainFactory, instanceEvent) -> domainFactory.updateInstanceRecords(instanceEvent) }
                         .addTo(domainDisposable)
 
                 domainFactorySingle.map { NullableWrapper(it) }

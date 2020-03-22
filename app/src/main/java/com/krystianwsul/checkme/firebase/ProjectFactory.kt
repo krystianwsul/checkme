@@ -54,7 +54,7 @@ class ProjectFactory(
 
     val isSharedSaved get() = sharedProjectManager.isSaved
 
-    val eitherSaved get() = isPrivateSaved || isSharedSaved
+    val isSaved get() = isPrivateSaved || isSharedSaved || rootInstanceManagers.any { it.value.isSaved }
 
     val tasks get() = projects.values.flatMap { it.tasks }
 
@@ -114,6 +114,10 @@ class ProjectFactory(
 
             return false
         }
+    }
+
+    fun onInstanceEvent(instanceEvent: InstanceEvent, now: ExactTimeStamp): Boolean {
+        TODO() // todo instances
     }
 
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
@@ -193,7 +197,8 @@ class ProjectFactory(
     fun save(domainFactory: DomainFactory): Boolean {
         val privateSaved = privateProjectManager.save(domainFactory)
         val sharedSaved = sharedProjectManager.save(domainFactory)
-        return privateSaved || sharedSaved
+        val instanceSaved = rootInstanceManagers.map { it.value.save() }.any { it }
+        return privateSaved || sharedSaved || instanceSaved
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) = projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
@@ -240,4 +245,24 @@ class ProjectFactory(
             .getTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
+
+    sealed class InstanceEvent {
+
+        abstract val taskKey: TaskKey
+
+        class AddTask(
+                val taskRecord: TaskRecord<*>,
+                val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+        ) : InstanceEvent() {
+
+            override val taskKey = taskRecord.taskKey
+        }
+
+        class RemoveTask(override val taskKey: TaskKey) : InstanceEvent()
+
+        class Instances(
+                override val taskKey: TaskKey,
+                val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+        ) : InstanceEvent()
+    }
 }

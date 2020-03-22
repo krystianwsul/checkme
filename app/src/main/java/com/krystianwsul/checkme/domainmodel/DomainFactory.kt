@@ -71,7 +71,7 @@ class DomainFactory(
 
             val domainFactory = nullableInstance
 
-            if (domainFactory?.projectFactory?.eitherSaved != false) {
+            if (domainFactory?.projectFactory?.isSaved != false) {
                 TickHolder.addTickData(newTickData)
             } else {
                 val tickData = TickHolder.getTickData()
@@ -92,7 +92,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) { // todo route all external calls through here
             val domainFactory = nullableInstance
-            if (domainFactory?.projectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+            if (domainFactory?.projectFactory?.isSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
                 domainFactory.checkSave()
                 firebaseListener(domainFactory)
             } else {
@@ -103,7 +103,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
             val domainFactory = nullableInstance
-            if (domainFactory?.projectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+            if (domainFactory?.projectFactory?.isSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
                 Preferences.tickLog.logLineHour("running firebaseListener $source")
                 firebaseListener(domainFactory)
             } else {
@@ -177,7 +177,6 @@ class DomainFactory(
         firstRun = false
 
         updateShortcuts(now)
-
         updateFriends()
     }
 
@@ -194,7 +193,7 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    private fun updateIsSaved() = isSaved.accept(projectFactory.eitherSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
+    private fun updateIsSaved() = isSaved.accept(projectFactory.isSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
 
     fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
 
@@ -250,8 +249,6 @@ class DomainFactory(
 
         val start = ExactTimeStamp.now
 
-        updateShortcuts(start)
-
         val runType: RunType
         if (projectFactory.isPrivateSaved) {
             projectFactory.isPrivateSaved = false
@@ -269,6 +266,8 @@ class DomainFactory(
             runType = RunType.REMOTE
         }
 
+        updateShortcuts(start)
+
         tryNotifyListeners(start, "DomainFactory.updatePrivateProjectRecord", runType)
     }
 
@@ -277,8 +276,6 @@ class DomainFactory(
         MyCrashlytics.log("updateSharedProjectRecord")
 
         val now = ExactTimeStamp.now
-
-        updateShortcuts(now)
 
         val localChange = projectFactory.onChildEvent(deviceDbInfo, databaseEvent, now)
 
@@ -290,13 +287,76 @@ class DomainFactory(
             RunType.REMOTE
         }
 
+        updateShortcuts(now)
+
         tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords", runType)
+    }
+
+    @Synchronized
+    fun updateUserRecord(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("updateUserRecord")
+
+        val runType = if (remoteUserFactory.isSaved) {
+            remoteUserFactory.isSaved = false
+
+            RunType.LOCAL
+        } else {
+            remoteUserFactory.onNewSnapshot(dataSnapshot)
+
+            updateFriends()
+
+            RunType.REMOTE
+        }
+
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
+    }
+
+    @Synchronized
+    fun updateFriendRecords(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("setFriendRecords")
+
+        val runType = if (remoteFriendFactory.isSaved) {
+            remoteFriendFactory.isSaved = false
+
+            RunType.LOCAL
+        } else {
+            remoteFriendFactory.onNewSnapshot(dataSnapshot.children)
+
+            updateFriends()
+
+            RunType.REMOTE
+        }
+
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
+    }
+
+    @Synchronized
+    fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+        MyCrashlytics.log("updateSharedProjectRecord")
+
+        val now = ExactTimeStamp.now
+
+        val localChange = projectFactory.onInstanceEvent(instanceEvent, now)
+
+        val runType = if (localChange) {
+            RunType.LOCAL
+        } else {
+            TickHolder.getTickData()?.sharedTriggered()
+
+            RunType.REMOTE
+        }
+
+        updateShortcuts(now)
+
+        tryNotifyListeners(now, "DomainFactory.updateInstanceRecords", runType)
+
+        updateShortcuts(now)
     }
 
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
         MyCrashlytics.log("tryNotifyListeners $source $runType")
 
-        if (projectFactory.eitherSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
+        if (projectFactory.isSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return
 
         updateIsSaved()
@@ -344,44 +404,6 @@ class DomainFactory(
     private enum class RunType {
 
         APP_START, SIGN_IN, LOCAL, REMOTE
-    }
-
-    @Synchronized
-    fun updateUserRecord(dataSnapshot: DataSnapshot) {
-        MyCrashlytics.log("updateUserRecord")
-
-        val runType = if (remoteUserFactory.isSaved) {
-            remoteUserFactory.isSaved = false
-
-            RunType.LOCAL
-        } else {
-            remoteUserFactory.onNewSnapshot(dataSnapshot)
-
-            updateFriends()
-
-            RunType.REMOTE
-        }
-
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
-    }
-
-    @Synchronized
-    fun updateFriendRecords(dataSnapshot: DataSnapshot) {
-        MyCrashlytics.log("setFriendRecords")
-
-        val runType = if (remoteFriendFactory.isSaved) {
-            remoteFriendFactory.isSaved = false
-
-            RunType.LOCAL
-        } else {
-            remoteFriendFactory.onNewSnapshot(dataSnapshot.children)
-
-            updateFriends()
-
-            RunType.REMOTE
-        }
-
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
     }
 
     // gets
@@ -1011,7 +1033,7 @@ class DomainFactory(
     @Synchronized
     fun setInstancesDateTime(dataId: Int, source: SaveService.Source, instanceKeys: Set<InstanceKey>, instanceDate: Date, instanceTimePair: TimePair) {
         MyCrashlytics.log("DomainFactory.setInstancesDateTime")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(instanceKeys.isNotEmpty())
 
@@ -1036,7 +1058,7 @@ class DomainFactory(
     @Synchronized
     fun setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
         Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
@@ -1060,7 +1082,7 @@ class DomainFactory(
     @Synchronized
     fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>): HourUndoData {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -1088,7 +1110,7 @@ class DomainFactory(
     @Synchronized
     fun undoInstancesAddHour(dataId: Int, source: SaveService.Source, hourUndoData: HourUndoData) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1110,7 +1132,7 @@ class DomainFactory(
     @Synchronized
     fun setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
         Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
@@ -1130,7 +1152,7 @@ class DomainFactory(
     @Synchronized
     fun setInstanceDone(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): ExactTimeStamp? {
         MyCrashlytics.log("DomainFactory.setInstanceDone")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1150,7 +1172,7 @@ class DomainFactory(
     @Synchronized
     fun setInstancesNotNotified(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>) {
         MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1173,7 +1195,7 @@ class DomainFactory(
     @Synchronized
     fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>, done: Boolean): ExactTimeStamp {
         MyCrashlytics.log("DomainFactory.setInstancesDone")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1194,13 +1216,13 @@ class DomainFactory(
 
     @Synchronized
     fun checkSave() {
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
     }
 
     @Synchronized
     fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
 
@@ -1213,7 +1235,7 @@ class DomainFactory(
     @Synchronized
     fun setInstancesNotified(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(instanceKeys.isNotEmpty())
 
@@ -1235,7 +1257,7 @@ class DomainFactory(
             copyTaskKey: TaskKey? = null
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1285,7 +1307,7 @@ class DomainFactory(
             imagePath: NullableWrapper<Pair<String, Uri>>?
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateScheduleTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
@@ -1340,7 +1362,7 @@ class DomainFactory(
             removeInstanceKeys: List<InstanceKey>
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
@@ -1394,7 +1416,7 @@ class DomainFactory(
             copyTaskKey: TaskKey? = null
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createRootTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
 
@@ -1442,7 +1464,7 @@ class DomainFactory(
             removeInstanceKeys: List<InstanceKey>
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
         check(joinTaskKeys.size > 1)
@@ -1496,7 +1518,7 @@ class DomainFactory(
             imagePath: NullableWrapper<Pair<String, Uri>>?
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateRootTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
 
@@ -1543,7 +1565,7 @@ class DomainFactory(
             copyTaskKey: TaskKey? = null
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createChildTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1601,7 +1623,7 @@ class DomainFactory(
             removeInstanceKeys: List<InstanceKey>
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
         check(joinTaskKeys.size > 1)
@@ -1648,7 +1670,7 @@ class DomainFactory(
             imagePath: NullableWrapper<Pair<String, Uri>>?
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateChildTask")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
 
@@ -1691,7 +1713,7 @@ class DomainFactory(
     @Synchronized
     fun setInstanceOrdinal(dataId: Int, instanceKey: InstanceKey, ordinal: Double) {
         MyCrashlytics.log("DomainFactory.setInstanceOrdinal")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1709,7 +1731,7 @@ class DomainFactory(
     @Synchronized
     fun setTaskHierarchyOrdinal(dataId: Int, hierarchyData: HierarchyData) {
         MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1762,7 +1784,7 @@ class DomainFactory(
     @Synchronized
     fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         return setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
     }
@@ -1770,7 +1792,7 @@ class DomainFactory(
     @Synchronized
     fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, instanceKey: InstanceKey): Pair<TaskUndoData, Boolean> {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1793,7 +1815,7 @@ class DomainFactory(
     @Synchronized
     fun clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) {
         MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -1839,7 +1861,7 @@ class DomainFactory(
     @Synchronized
     fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): CustomTimeKey.Private {
         MyCrashlytics.log("DomainFactory.createCustomTime")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
 
@@ -1880,7 +1902,7 @@ class DomainFactory(
             hourMinutes: Map<DayOfWeek, HourMinute>
     ) {
         MyCrashlytics.log("DomainFactory.updateCustomTime")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
 
@@ -1906,7 +1928,7 @@ class DomainFactory(
             current: Boolean
     ) {
         MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         check(customTimeIds.isNotEmpty())
 
@@ -1925,7 +1947,7 @@ class DomainFactory(
     @Synchronized
     fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
@@ -2137,7 +2159,7 @@ class DomainFactory(
     @Synchronized
     fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
-        if (projectFactory.eitherSaved) throw SavedFactoryException()
+        if (projectFactory.isSaved) throw SavedFactoryException()
 
         val task = getTaskIfPresent(taskKey) ?: return
 

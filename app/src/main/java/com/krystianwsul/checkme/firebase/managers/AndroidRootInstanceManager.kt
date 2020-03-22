@@ -17,8 +17,8 @@ class AndroidRootInstanceManager<T : ProjectType>(
     private fun SnapshotInfo.toRecord() = RootInstanceRecord(
             taskRecord,
             dataSnapshot.getValue(InstanceJson::class.java)!!,
-            dateKey,
-            timeKey,
+            snapshotKey.dateKey,
+            snapshotKey.timeKey,
             this@AndroidRootInstanceManager
     )
 
@@ -30,9 +30,20 @@ class AndroidRootInstanceManager<T : ProjectType>(
 
     override fun getDatabaseCallback() = checkError("RootInstanceManager.save")
 
-    data class SnapshotInfo(
+    data class SnapshotKey(
             val dateKey: String,
-            val timeKey: String,
-            val dataSnapshot: DataSnapshot
+            val timeKey: String
     )
+
+    data class SnapshotInfo(
+            val snapshotKey: SnapshotKey,
+            val dataSnapshot: DataSnapshot
+    ) {
+
+        constructor(
+                dateKey: String,
+                timeKey: String,
+                dataSnapshot: DataSnapshot
+        ) : this(SnapshotKey(dateKey, timeKey), dataSnapshot)
+    }
 }

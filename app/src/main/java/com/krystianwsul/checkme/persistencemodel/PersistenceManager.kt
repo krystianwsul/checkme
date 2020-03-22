@@ -66,7 +66,7 @@ class PersistenceManager(
 
     fun deleteInstanceShownRecords(taskKeys: Set<TaskKey>) {
         val remove = _instanceShownRecords.filterNot {
-            taskKeys.any { taskKey -> it.projectId == taskKey.projectId.key && it.taskId == taskKey.taskId }
+            taskKeys.any { taskKey -> it.projectId == taskKey.projectKey.key && it.taskId == taskKey.taskId }
         }
 
         remove.forEach { it.delete() }

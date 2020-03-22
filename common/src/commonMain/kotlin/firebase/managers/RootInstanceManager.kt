@@ -48,11 +48,11 @@ abstract class RootInstanceManager<T : ProjectType>(
         return isSaved
     }
 
-    fun newRootTaskRecord(
+    fun newRootInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
             customTimeId: CustomTimeId<T>?
-    ) = RootInstanceRecord<T>(
+    ) = RootInstanceRecord(
             taskRecord,
             instanceJson,
             scheduleKey,

@@ -123,8 +123,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
-            putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectId.key)
-            putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectId.type.ordinal)
+            putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
+            putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectKey.type.ordinal)
             putExtra(KEY_PARENT_TASK, parentTaskKeyHint.taskId)
         }
 

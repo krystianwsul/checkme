@@ -363,7 +363,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 if (selectedDatas.all { it.taskCurrent }) {
                     val projectIdCount = selectedDatas.asSequence()
-                            .map { it.taskKey.projectId }
+                            .map { it.taskKey.projectKey }
                             .distinct()
                             .count()
 

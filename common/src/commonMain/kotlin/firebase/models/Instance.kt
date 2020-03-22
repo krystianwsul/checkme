@@ -20,7 +20,7 @@ class Instance<T : ProjectType> {
                 scheduleDate,
                 scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
                 scheduleHourMinute,
-                taskKey.run { Pair(projectId.key, taskId) }
+                taskKey.run { Pair(projectKey.key, taskId) }
         )
 
         /*
@@ -448,7 +448,7 @@ class Instance<T : ProjectType> {
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectId)
+                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
             return shown!!
         }
     }
@@ -480,7 +480,7 @@ class Instance<T : ProjectType> {
                     .destructureRemote()
 
             return getShown(
-                    taskKey.projectId,
+                    taskKey.projectKey,
                     taskKey.taskId,
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,

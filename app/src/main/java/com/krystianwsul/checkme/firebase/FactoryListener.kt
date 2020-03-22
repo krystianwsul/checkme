@@ -204,8 +204,8 @@ class FactoryListener(
                                 val rootInstanceRx = map.getValue(it)
 
                                 rootInstanceRx.single
-                                        .map {
-                                            ProjectFactory.InstanceEvent.AddTask(rootInstanceRx.taskRecord, it.toSnapshotInfos()) as ProjectFactory.InstanceEvent
+                                        .map<ProjectFactory.InstanceEvent> {
+                                            ProjectFactory.InstanceEvent.AddTask(rootInstanceRx.taskRecord, it.toSnapshotInfos())
                                         }
                                         .toObservable()
                             }
@@ -215,8 +215,8 @@ class FactoryListener(
 
                 val rootInstanceInstanceEvents = rootInstanceRxObservable.switchMap {
                     it.map { (taskKey, rootInstanceRx) ->
-                        rootInstanceRx.observable.map {
-                            ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos()) as ProjectFactory.InstanceEvent
+                        rootInstanceRx.observable.map<ProjectFactory.InstanceEvent> {
+                            ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos())
                         }
                     }.merge()
                 }
@@ -233,7 +233,7 @@ class FactoryListener(
                             localFactory,
                             privateProjectManager,
                             sharedProjectManager,
-                            rootInstanceManagers,
+                            rootInstanceManagers.toMutableMap(),
                             ExactTimeStamp.now
                     )
                 }

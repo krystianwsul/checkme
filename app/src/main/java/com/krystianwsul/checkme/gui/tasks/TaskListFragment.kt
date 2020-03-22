@@ -132,7 +132,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val childTaskDatas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
-            val projectIdCount = childTaskDatas.map { it.taskKey.projectId }
+            val projectIdCount = childTaskDatas.map { it.taskKey.projectKey }
                     .distinct()
                     .count()
 

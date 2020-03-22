@@ -336,7 +336,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val localChange = projectFactory.onInstanceEvent(instanceEvent, now)
+        val localChange = projectFactory.onInstanceEvent(instanceEvent)
 
         val runType = if (localChange) {
             RunType.LOCAL
@@ -861,7 +861,7 @@ class DomainFactory(
             if (joinTaskKeys != null) {
                 check(joinTaskKeys.size > 1)
 
-                val projectIds = joinTaskKeys.map { it.projectId }.distinct()
+                val projectIds = joinTaskKeys.map { it.projectKey }.distinct()
 
                 projectId = projectIds.single()
             }
@@ -1368,7 +1368,7 @@ class DomainFactory(
         check(scheduleDatas.isNotEmpty())
         check(joinTaskKeys.size > 1)
 
-        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectId }
+        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
                 .distinct()
                 .single()
 
@@ -1471,7 +1471,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectId }
+        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
                 .distinct()
                 .single()
 
@@ -1633,7 +1633,7 @@ class DomainFactory(
         val parentTask = getTaskForce(parentTaskKey)
         check(parentTask.current(now))
 
-        check(joinTaskKeys.map { it.projectId }.distinct().size == 1)
+        check(joinTaskKeys.map { it.projectKey }.distinct().size == 1)
 
         val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 

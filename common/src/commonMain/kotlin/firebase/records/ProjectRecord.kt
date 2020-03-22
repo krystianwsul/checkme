@@ -56,7 +56,7 @@ abstract class ProjectRecord<T : ProjectType>(
                 taskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newRemoteTaskRecord(taskJson: TaskJson): TaskRecord<T> {
+    fun newTaskRecord(taskJson: TaskJson): TaskRecord<T> {
         val remoteTaskRecord = TaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 

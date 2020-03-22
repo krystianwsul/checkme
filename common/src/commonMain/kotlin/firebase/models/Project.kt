@@ -50,9 +50,9 @@ abstract class Project<T : ProjectType> {
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
     fun newTask(taskJson: TaskJson): Task<T> {
-        val remoteTaskRecord = projectRecord.newRemoteTaskRecord(taskJson)
+        val remoteTaskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val remoteTask = Task(this, remoteTaskRecord)
+        val remoteTask = Task(this, remoteTaskRecord, listOf())
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -74,13 +74,13 @@ abstract class Project<T : ProjectType> {
 
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
-            task: Task<*>,
+            oldTask: Task<*>,
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp
     ): Task<T> {
-        val endTime = task.getEndExactTimeStamp()?.long
+        val endTime = oldTask.getEndExactTimeStamp()?.long
 
-        val oldestVisible = task.getOldestVisible()
+        val oldestVisible = oldTask.getOldestVisible()
 
         val instanceJsons = instances.associate {
             val instanceJson = getInstanceJson(deviceDbInfo.key, it)
@@ -93,22 +93,24 @@ abstract class Project<T : ProjectType> {
                 ?: mapOf()
 
         val taskJson = TaskJson(
-                task.name,
+                oldTask.name,
                 now.long,
                 endTime,
-                task.note,
+                oldTask.note,
                 instanceJsons,
-                oldestVisible = oldestVisibleMap.toMutableMap())
-        val remoteTaskRecord = projectRecord.newRemoteTaskRecord(taskJson)
+                oldestVisible = oldestVisibleMap.toMutableMap()
+        )
 
-        val remoteTask = Task(this, remoteTaskRecord)
-        check(!remoteTasks.containsKey(remoteTask.id))
+        val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        remoteTasks[remoteTask.id] = remoteTask
+        val newTask = Task(this, taskRecord, listOf()) // todo instances write elsewhere
+        check(!remoteTasks.containsKey(newTask.id))
 
-        remoteTask.copySchedules(deviceDbInfo, now, task.getCurrentSchedules(now))
+        remoteTasks[newTask.id] = newTask
 
-        return remoteTask
+        newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now))
+
+        return newTask
     }
 
     abstract fun getOrCreateCustomTime(

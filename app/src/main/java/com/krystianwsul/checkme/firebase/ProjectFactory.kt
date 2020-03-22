@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -28,23 +29,68 @@ class ProjectFactory(
         now: ExactTimeStamp
 ) : Project.Parent {
 
-    var privateProject = PrivateProject(privateProjectManager.privateProjectRecord).apply { fixNotificationShown(localFactory, now) }
+    var privateProject: PrivateProject
         private set
 
-    val sharedProjects = sharedProjectManager.sharedProjectRecords
-            .values
-            .associate { (sharedProjectRecord, _) ->
-                sharedProjectRecord.projectKey to SharedProject(sharedProjectRecord).apply {
-                    fixNotificationShown(localFactory, now)
-                    updateDeviceDbInfo(deviceDbInfo)
+    val sharedProjects: MutableMap<ProjectKey.Shared, SharedProject>
+
+    init {
+        val privateRootInstances = rootInstanceManagers.filter { it.key.projectId is ProjectKey.Private }
+                .map { (key, value) ->
+                    val rootInstanceRecords = value.rootInstanceRecords
+                            .values
+                            .map {
+                                @Suppress("UNCHECKED_CAST")
+                                it.first as RootInstanceRecord<ProjectType.Private>
+                            }
+
+                    key.taskId to rootInstanceRecords
                 }
-            }
-            .toMutableMap()
+                .toMap()
+
+        privateProject = PrivateProject(
+                privateProjectManager.privateProjectRecord,
+                privateRootInstances
+        ).apply { fixNotificationShown(localFactory, now) }
+
+        val sharedRootInstances = rootInstanceManagers.filter { it.key.projectId is ProjectKey.Private }
+                .toList()
+                .groupBy { it.first.projectId }
+                .mapValues {
+                    it.value
+                            .groupBy { it.first.taskId }
+                            .mapValues {
+                                it.value
+                                        .map {
+                                            it.second
+                                                    .rootInstanceRecords
+                                                    .map {
+                                                        @Suppress("UNCHECKED_CAST")
+                                                        it.value.first as RootInstanceRecord<ProjectType.Shared>
+                                                    }
+                                        }
+                                        .flatten()
+                            }
+                }
+
+        sharedProjects = sharedProjectManager.sharedProjectRecords
+                .values
+                .associate { (sharedProjectRecord, _) ->
+                    sharedProjectRecord.projectKey to SharedProject(
+                            sharedProjectRecord,
+                            sharedRootInstances.getValue(sharedProjectRecord.projectKey)
+                    ).apply {
+                        fixNotificationShown(localFactory, now)
+                        updateDeviceDbInfo(deviceDbInfo)
+                    }
+                }
+                .toMutableMap()
+    }
 
     val projects
         get() = sharedProjects.toMutableMap<ProjectKey<*>, Project<*>>().apply {
             put(privateProject.id, privateProject)
-        }.toMap()
+        }
 
     var isPrivateSaved
         get() = privateProjectManager.isSaved
@@ -185,7 +231,7 @@ class ProjectFactory(
 
         val sharedProjectRecord = sharedProjectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
 
-        val sharedProject = SharedProject(sharedProjectRecord)
+        val sharedProject = SharedProject(sharedProjectRecord, mapOf())
 
         check(!projects.containsKey(sharedProject.id))
 

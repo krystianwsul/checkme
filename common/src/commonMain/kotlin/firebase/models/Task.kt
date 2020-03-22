@@ -6,18 +6,22 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class Task<T : ProjectType>(
         val project: Project<T>,
-        private val taskRecord: TaskRecord<T>
+        private val taskRecord: TaskRecord<T>,
+        private val rootInstanceRecords: Collection<RootInstanceRecord<T>>
 ) {
 
     private val _existingInstances = taskRecord.instanceRecords
             .values
+            .apply { addAll(rootInstanceRecords) }
             .map { Instance(project, this, it) }
+            .toMutableList()
             .associateBy { it.scheduleKey }
             .toMutableMap()
 

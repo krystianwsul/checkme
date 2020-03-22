@@ -82,7 +82,7 @@ class RootInstanceRecord<T : ProjectType>(
             taskRecord,
             createObject,
             scheduleKey,
-            "${taskRecord.projectId.key}-${taskRecord.id}/${scheduleKeyToDateString(scheduleKey, true)}/${scheduleKeyToTimeString(scheduleKey, true)}",
+            "${scheduleKeyToDateString(scheduleKey, true)}/${scheduleKeyToTimeString(scheduleKey, true)}",
             scheduleCustomTimeId,
             parent
     )
@@ -92,7 +92,6 @@ class RootInstanceRecord<T : ProjectType>(
             createObject: InstanceJson,
             dateString: String,
             timeString: String,
-            firebaseKey: String,
             parent: Parent,
             schedulePair: Pair<ScheduleKey, CustomTimeId<T>?> = dateTimeStringsToSchedulePair(taskRecord.projectRecord, dateString, timeString)
     ) : this(
@@ -100,7 +99,7 @@ class RootInstanceRecord<T : ProjectType>(
             taskRecord,
             createObject,
             schedulePair.first,
-            firebaseKey,
+            "$dateString/$timeString",
             schedulePair.second,
             parent
     )

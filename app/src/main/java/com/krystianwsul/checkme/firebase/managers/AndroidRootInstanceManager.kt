@@ -19,7 +19,6 @@ class AndroidRootInstanceManager<T : ProjectType>(
             dataSnapshot.getValue(InstanceJson::class.java)!!,
             dateKey,
             timeKey,
-            firebaseKey,
             this@AndroidRootInstanceManager
     )
 
@@ -32,7 +31,6 @@ class AndroidRootInstanceManager<T : ProjectType>(
     override fun getDatabaseCallback() = checkError("RootInstanceManager.save")
 
     data class SnapshotInfo(
-            val firebaseKey: String,
             val dateKey: String,
             val timeKey: String,
             val dataSnapshot: DataSnapshot

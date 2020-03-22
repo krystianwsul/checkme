@@ -65,6 +65,8 @@ class TaskRecord<T : ProjectType> private constructor(
 
     override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
 
+    val rootInstanceKey by lazy { "${projectRecord.projectKey.key}-$id" }
+
     val projectId get() = projectRecord.projectKey
 
     var name by Committer(taskJson::name)

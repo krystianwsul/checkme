@@ -52,7 +52,8 @@ abstract class DatabaseWrapper {
     ) = update(USERS_KEY, values, callback)
 
     fun updateInstances(
+            taskFirebaseKey: String,
             values: Map<String, Any?>,
             callback: DatabaseCallback
-    ) = update(KEY_INSTANCES, values, callback)
+    ) = update("$KEY_INSTANCES/$taskFirebaseKey", values, callback)
 }

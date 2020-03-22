@@ -28,29 +28,29 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
                 .child(root)
     }
 
-    fun getUserDataDatabaseReference(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}/userData")
+    private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
+
+    fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
 
     // todo same change as for projects
-    fun addFriend(friendKey: UserKey) = rootReference.child("$USERS_KEY/${friendKey.key}/friendOf/${userInfo.key}").setValue(true)
+    fun addFriend(userKey: UserKey) = getUserQuery(userKey).child("friendOf/${userInfo.key}").setValue(true)
 
-    fun addFriends(friendKeys: Set<UserKey>) = rootReference.child(USERS_KEY).updateChildren(friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap())
+    fun addFriends(friendKeys: Set<UserKey>) = rootReference.child(USERS_KEY).updateChildren(
+            friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap()
+    )
 
-    fun getFriendSingle(key: UserKey) = rootReference.child(USERS_KEY)
-            .orderByChild("friendOf/${key.key}")
+    private fun getFriendQuery(userKey: UserKey) = rootReference.child(USERS_KEY)
+            .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
-            .data()
 
-    fun getFriendObservable(key: UserKey) = rootReference.child(USERS_KEY)
-            .orderByChild("friendOf/${key.key}")
-            .equalTo(true)
-            .dataChanges()
+    fun getFriendSingle(userKey: UserKey) = getFriendQuery(userKey).data()
+    fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).dataChanges()
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()
             .key!!
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
-
     fun getSharedProjectSingle(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).data()
     fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
 
@@ -61,18 +61,15 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
-
     fun getPrivateProjectSingle(key: ProjectKey.Private) = privateProjectQuery(key).data()
-
     fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
     fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").data()
-
     fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
-
     fun getRootInstanceSingle(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).data()
+    fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).dataChanges()
 }

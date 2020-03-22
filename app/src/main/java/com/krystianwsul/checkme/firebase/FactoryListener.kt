@@ -10,11 +10,14 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.*
 
 class FactoryListener(
@@ -115,15 +118,57 @@ class FactoryListener(
                             ).flatten()
                                     .map { it.values }
                                     .flatten()
+                                    .map { it.taskKey to it }
+                                    .toMap()
                         }
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val rootInstanceManagerSingle = taskRecordObservable.firstOrError()
+                class RootInstanceRx(
+                        val taskRecord: TaskRecord<*>,
+                        val single: Single<DataSnapshot>,
+                        val observable: Observable<DataSnapshot>,
+                        val disposable: Disposable
+                )
+
+                val rootInstanceRxObservable = taskRecordObservable.scan(mapOf<TaskKey, RootInstanceRx>()) { oldMap, newTaskRecords ->
+                            val oldKeys = oldMap.keys
+                            val newKeys = newTaskRecords.keys
+
+                            val removedKeys = oldKeys - newKeys
+                            val addedKeys = newKeys - oldKeys
+
+                            removedKeys.forEach {
+                                oldMap.getValue(it)
+                                        .disposable
+                                        .dispose()
+                            }
+
+                            val addedMap = addedKeys.map { taskKey ->
+                                val taskRecord = newTaskRecords.getValue(taskKey)
+
+                                val single = AndroidDatabaseWrapper.getRootInstanceSingle(taskRecord.rootInstanceKey).cache()
+
+                                val observable = single.flatMapObservable {
+                                    AndroidDatabaseWrapper.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                }.publish()
+
+                                val disposable = observable.connect()
+
+                                taskKey to RootInstanceRx(taskRecord, single, observable, disposable)
+                            }.toMap()
+
+                            oldMap + addedMap
+                        }
+                        .skip(1)
+                        .publish()
+                        .apply { domainDisposable += connect() }
+
+                val rootInstanceManagerSingle = rootInstanceRxObservable.firstOrError()
                         .flatMap {
-                            it.map { taskRecord ->
-                                AndroidDatabaseWrapper.getRootInstanceSingle(taskRecord.rootInstanceKey).map { taskRecord to it }
-                            }.zipSingle()
+                            it.values
+                                    .map { it.single.map { dataSnapshot -> Pair(it.taskRecord, dataSnapshot) } }
+                                    .zipSingle()
                         }
                         .map {
                             it.map { (taskRecord, dataSnapshot) ->

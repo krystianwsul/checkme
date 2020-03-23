@@ -14,10 +14,7 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -41,80 +38,81 @@ class FactoryLoader(
                 val deviceInfo = it.value
                 val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
-                val userObservable = AndroidDatabaseWrapper.getUserObservable(deviceInfo.key)
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                val userDatabaseRx = DatabaseRx(
+                        domainDisposable,
+                        AndroidDatabaseWrapper.getUserObservable(deviceInfo.key)
+                )
 
-                val privateProjectObservable = AndroidDatabaseWrapper.getPrivateProjectObservable(deviceInfo.key.toPrivateProjectKey())
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                val privateProjectKey = deviceDbInfo.key.toPrivateProjectKey()
 
-                val friendObservable = AndroidDatabaseWrapper.getFriendObservable(deviceInfo.key)
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                val privateProjectDatabaseRx = DatabaseRx(
+                        domainDisposable,
+                        AndroidDatabaseWrapper.getPrivateProjectObservable(privateProjectKey)
+                )
 
-                val userSingle = AndroidDatabaseWrapper.getUserSingle(deviceInfo.key).cache()
+                fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
+                fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }
 
-                val privateProjectManagerSingle = AndroidDatabaseWrapper.getPrivateProjectSingle(deviceInfo.key.toPrivateProjectKey())
+                val privateProjectManagerSingle = privateProjectDatabaseRx.single
                         .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now) }
-                        .cache()
+                        .cacheImmediate()
 
-                val friendSingle = AndroidDatabaseWrapper.getFriendSingle(deviceInfo.key).cache()
+                val friendDatabaseRx = DatabaseRx(
+                        domainDisposable,
+                        AndroidDatabaseWrapper.getFriendObservable(deviceInfo.key)
+                )
 
                 val startTime = ExactTimeStamp.now
 
-                val userFactorySingle = userSingle.map { RemoteUserFactory(localFactory.uuid, it, deviceInfo) }.cache()
+                val userFactorySingle = userDatabaseRx.single
+                        .map { RemoteUserFactory(localFactory.uuid, it, deviceInfo) }
+                        .cacheImmediate()
 
-                val sharedProjectKeysObservable = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
-                        .scan(Pair(setOf<ProjectKey.Shared>(), setOf<ProjectKey.Shared>())) { old, new -> Pair(old.second, new) }
-                        .publish()
-                        .apply { domainDisposable += connect() }
-
-                val sharedProjectEvents = sharedProjectKeysObservable.scan<Pair<Set<ProjectKey.Shared>, Map<ProjectKey.Shared, Observable<DataSnapshot>>>>(Pair(setOf(), mapOf())) { (_, oldMap), (oldProjectIds, newProjectIds) ->
-                            val newMap = oldMap.toMutableMap()
-
-                            val removedIds = oldProjectIds - newProjectIds
-                            removedIds.forEach { newMap.remove(it) }
-
-                            val addedIds = newProjectIds - oldProjectIds
-                            addedIds.forEach {
-                                check(!newMap.containsKey(it))
-
-                                newMap[it] = AndroidDatabaseWrapper.getSharedProjectObservable(it)
-                                        .publish()
-                                        .apply { connect() }
-                            }
-
-                            Pair(removedIds, newMap)
+                val sharedProjectDatabaseRx = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
+                        .processChanges {
+                            DatabaseRx(
+                                    domainDisposable,
+                                    AndroidDatabaseWrapper.getSharedProjectObservable(it)
+                            )
                         }
-                        .switchMap { (removedIds, addChangeObservables) ->
-                            val removedEvents = Observable.fromIterable(removedIds.map { DatabaseEvent.Remove(it.key) })
+                        .doOnNext {
+                            it.removedEntries.forEach {
+                                it.value
+                                        .disposable
+                                        .dispose()
+                            }
+                        }
+                        .publishImmediate()
 
-                            val addChangeEvents = addChangeObservables.values
-                                    .map { it.map(DatabaseEvent::AddChange) }
+                val sharedProjectManagerSingle = sharedProjectDatabaseRx.firstOrError()
+                        .flatMap {
+                            it.newMap
+                                    .map { it.value.single }
+                                    .zipSingle()
+                        }
+                        .map { AndroidSharedProjectManager(it) }
+                        .cacheImmediate()
+
+                val sharedProjectEvents = sharedProjectDatabaseRx.skip(1)
+                        .switchMap {
+                            val removedEvents = Observable.fromIterable(
+                                    it.removedEntries
+                                            .keys
+                                            .map { DatabaseEvent.Remove(it.key) }
+                            )
+
+                            val addChangeEvents = it.newMap.values
+                                    .map { it.changeObservable.map { DatabaseEvent.AddChange(it) } }
                                     .merge()
 
                             listOf(removedEvents, addChangeEvents).merge()
                         }
-                        .publish()
-                        .apply { domainDisposable += connect() }
-
-                val sharedProjectManagerSingle = sharedProjectKeysObservable.firstOrError()
-                        .flatMap { (old, new) ->
-                            check(old.isEmpty())
-
-                            new.takeIf { it.isNotEmpty() }
-                                    ?.map { AndroidDatabaseWrapper.getSharedProjectSingle(it) }
-                                    ?.zipSingle()
-                                    ?: Single.just(listOf())
-                        }
-                        .map { AndroidSharedProjectManager(it) }
-                        .cache()
+                        .publishImmediate()
 
                 val taskRecordObservable = Observables.combineLatest(
-                                privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
-                                sharedProjectManagerSingle.flatMapObservable { it.sharedProjectObservable }
-                        )
+                        privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
+                        sharedProjectManagerSingle.flatMapObservable { it.sharedProjectObservable }
+                )
                         .map { (privateProjectRecord, sharedProjectRecords) ->
                             listOf(
                                     listOf(privateProjectRecord.taskRecords),
@@ -125,48 +123,26 @@ class FactoryLoader(
                                     .map { it.taskKey to it }
                                     .toMap()
                         }
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                        .publishImmediate()
 
-                class RootInstanceRx(
-                        val taskRecord: TaskRecord<*>,
-                        val single: Single<DataSnapshot>,
-                        val observable: Observable<DataSnapshot>,
-                        val disposable: Disposable
-                )
-
-                val rootInstanceRxObservable = taskRecordObservable.scan(mapOf<TaskKey, RootInstanceRx>()) { oldMap, newTaskRecords ->
-                            val oldKeys = oldMap.keys
-                            val newKeys = newTaskRecords.keys
-
-                            val removedKeys = oldKeys - newKeys
-                            val addedKeys = newKeys - oldKeys
-
-                            removedKeys.forEach {
-                                oldMap.getValue(it)
+                val rootInstanceDatabaseRx = taskRecordObservable.processChanges { _, taskRecord ->
+                    Pair(
+                            taskRecord,
+                            DatabaseRx(
+                                    domainDisposable,
+                                    AndroidDatabaseWrapper.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                            )
+                    )
+                }
+                        .doOnNext {
+                            it.removedEntries.forEach {
+                                it.value
+                                        .second
                                         .disposable
                                         .dispose()
                             }
-
-                            val addedMap = addedKeys.map { taskKey ->
-                                val taskRecord = newTaskRecords.getValue(taskKey)
-
-                                val single = AndroidDatabaseWrapper.getRootInstanceSingle(taskRecord.rootInstanceKey).cache()
-
-                                val observable = single.flatMapObservable {
-                                    AndroidDatabaseWrapper.getRootInstanceObservable(taskRecord.rootInstanceKey)
-                                }.publish()
-
-                                val disposable = observable.connect()
-
-                                taskKey to RootInstanceRx(taskRecord, single, observable, disposable)
-                            }.toMap()
-
-                            oldMap + addedMap
                         }
-                        .skip(1)
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                        .publishImmediate()
 
                 fun DataSnapshot.toSnapshotInfos() = children.map { // todo instances use class for parsing
                     val dateString = it.key!!
@@ -176,10 +152,11 @@ class FactoryLoader(
                     }
                 }.flatten()
 
-                val rootInstanceManagerSingle = rootInstanceRxObservable.firstOrError()
+                val rootInstanceManagerSingle = rootInstanceDatabaseRx.firstOrError()
                         .flatMap {
-                            it.values
-                                    .map { it.single.map { dataSnapshot -> Pair(it.taskRecord, dataSnapshot) } }
+                            it.newMap
+                                    .values
+                                    .map { it.second.single.map { dataSnapshot -> Pair(it.first, dataSnapshot) } }
                                     .zipSingle()
                         }
                         .map {
@@ -190,40 +167,39 @@ class FactoryLoader(
                                 )
                             }.toMap()
                         }
+                        .cacheImmediate()
 
-                val rootInstanceTaskEvents = rootInstanceRxObservable.scan(Triple(setOf<TaskKey>(), setOf<TaskKey>(), mapOf<TaskKey, RootInstanceRx>())) { (_, _, oldMap), newMap ->
-                            val oldKeys = oldMap.keys
-                            val newKeys = newMap.keys
+                val rootInstanceTaskEvents = rootInstanceDatabaseRx.skip(1)
+                        .switchMap {
+                            val removeTaskEvents = it.removedEntries
+                                    .keys
+                                    .map { Observable.just(ProjectFactory.InstanceEvent.RemoveTask(it) as ProjectFactory.InstanceEvent) }
 
-                            val removedKeys = oldKeys - newKeys
-                            val addedKeys = newKeys - oldKeys
-
-                            Triple(removedKeys, addedKeys, newMap)
-                        }
-                        .skip(1)
-                        .switchMap { (removedKeys, addedKeys, map) ->
-                            val removeTaskEvents = removedKeys.map { Observable.just(ProjectFactory.InstanceEvent.RemoveTask(it) as ProjectFactory.InstanceEvent) }
-
-                            val addTaskEvents = addedKeys.map {
-                                val rootInstanceRx = map.getValue(it)
-
-                                rootInstanceRx.single
-                                        .map<ProjectFactory.InstanceEvent> {
-                                            ProjectFactory.InstanceEvent.AddTask(rootInstanceRx.taskRecord, it.toSnapshotInfos())
-                                        }
-                                        .toObservable()
-                            }
+                            val addTaskEvents = it.addedEntries
+                                    .values
+                                    .map { (taskRecord, databaseRx) ->
+                                        databaseRx.single
+                                                .map<ProjectFactory.InstanceEvent> {
+                                                    ProjectFactory.InstanceEvent.AddTask(taskRecord, it.toSnapshotInfos())
+                                                }
+                                                .toObservable()
+                                    }
 
                             listOf(removeTaskEvents, addTaskEvents).flatten().merge()
                         }
 
-                val rootInstanceInstanceEvents = rootInstanceRxObservable.switchMap {
-                    it.map { (taskKey, rootInstanceRx) ->
-                        rootInstanceRx.observable.map<ProjectFactory.InstanceEvent> {
-                            ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos())
+                val rootInstanceInstanceEvents = rootInstanceDatabaseRx.skip(1)
+                        .switchMap {
+                            it.newMap
+                                    .map { (taskKey, pair) ->
+                                        pair.second
+                                                .changeObservable
+                                                .map<ProjectFactory.InstanceEvent> {
+                                                    ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos())
+                                                }
+                                    }
+                                    .merge()
                         }
-                    }.merge()
-                }
 
                 val rootInstanceEvents = listOf(rootInstanceTaskEvents, rootInstanceInstanceEvents).merge()
 
@@ -245,7 +221,7 @@ class FactoryLoader(
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,
                         projectFactorySingle,
-                        friendSingle
+                        friendDatabaseRx.single
                 ) { remoteUserFactory, remoteProjectFactory, friends ->
                     DomainFactory(
                             localFactory,
@@ -258,31 +234,31 @@ class FactoryLoader(
                     )
                 }.cache()
 
-                privateProjectManagerSingle.flatMapObservable { privateProjectObservable }
+                privateProjectDatabaseRx.changeObservable
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 
-                sharedProjectManagerSingle.flatMapObservable { sharedProjectEvents }
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
+                domainDisposable += sharedProjectEvents.subscribe {
+                    domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
+                }
 
-                friendSingle.flatMapObservable { friendObservable }
+                friendDatabaseRx.changeObservable
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateFriendRecords(it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 
-                userSingle.flatMapObservable { userObservable }
+                userDatabaseRx.changeObservable
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateUserRecord(it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 
-                domainFactorySingle.flatMapObservable { domainFactory -> rootInstanceEvents.map { Pair(domainFactory, it) } }
+                rootInstanceEvents.switchMapSingle {
+                    domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) }
+                }
                         .subscribe { (domainFactory, instanceEvent) -> domainFactory.updateInstanceRecords(instanceEvent) }
                         .addTo(domainDisposable)
 
@@ -294,4 +270,80 @@ class FactoryLoader(
             }
         }
     }
+
+    private class DatabaseRx(
+            domainDisposable: CompositeDisposable,
+            databaseObservable: Observable<DataSnapshot>
+    ) {
+
+        val single: Single<DataSnapshot>
+        val changeObservable: Observable<DataSnapshot>
+        val disposable: Disposable
+
+        init {
+            val observable = databaseObservable.publish()
+            disposable = observable.connect()
+            domainDisposable += disposable
+
+            single = observable.firstOrError()
+                    .cache()
+                    .apply { domainDisposable += subscribe() }
+
+            changeObservable = observable.skip(1)
+        }
+    }
+
+    private fun <T, U> Observable<Set<T>>.processChanges(adder: (T) -> U) = scan(MapChanges<T, U>()) { oldMapChanges, newKeys ->
+        val oldMap = oldMapChanges.newMap
+
+        val removedKeys = oldMap.keys - newKeys
+        val addedKeys = newKeys - oldMap.keys
+        val unchangedKeys = newKeys - addedKeys
+
+        val newMap = oldMap.toMutableMap().apply {
+            addedKeys.forEach { put(it, adder(it)) }
+        }
+
+        fun Set<T>.entries(map: Map<T, U>) = map { it to map.getValue(it) }.toMap()
+
+        MapChanges(
+                removedKeys.entries(oldMap),
+                addedKeys.entries(newMap),
+                unchangedKeys.entries(newMap),
+                oldMap,
+                newMap
+        )
+    }.skip(1)
+
+    private fun <T, U, V> Observable<Map<T, U>>.processChanges(adder: (T, U) -> V) = scan(MapChanges<T, V>()) { oldMapChanges, newInputMap ->
+        val oldMap = oldMapChanges.newMap
+
+        val removedKeys = oldMap.keys - newInputMap.keys
+        val addedKeys = newInputMap.keys - oldMap.keys
+        val unchangedKeys = newInputMap.keys - addedKeys
+
+        val newOutputMap: Map<T, V> = oldMap.toMutableMap().apply {
+            addedKeys.forEach {
+                put(it, adder(it, newInputMap.getValue(it)))
+            }
+        }
+
+        fun Set<T>.entries(map: Map<T, V>) = map { it to map.getValue(it) }.toMap()
+
+        MapChanges(
+                removedKeys.entries(oldMap),
+                addedKeys.entries(newOutputMap),
+                unchangedKeys.entries(newOutputMap),
+                oldMap,
+                newOutputMap
+        )
+    }
+
+    private class MapChanges<T, U>(
+            val removedEntries: Map<T, U> = mapOf(),
+            val addedEntries: Map<T, U> = mapOf(),
+            val unchangedEntries: Map<T, U> = mapOf(),
+            val oldMap: Map<T, U> = mapOf(),
+            val newMap: Map<T, U> = mapOf()
+    )
 }

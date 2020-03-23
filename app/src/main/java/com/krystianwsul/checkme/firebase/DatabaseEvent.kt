@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.google.firebase.database.DataSnapshot
 
-sealed class DatabaseEvent {
+sealed class DatabaseEvent { // todo custom event, with instance data
 
     abstract val key: String
 

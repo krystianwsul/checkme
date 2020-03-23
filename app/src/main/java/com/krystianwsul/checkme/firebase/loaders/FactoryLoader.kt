@@ -76,11 +76,9 @@ class FactoryLoader(
                             )
                         }
                         .doOnNext {
-                            it.removedEntries.forEach {
-                                it.value
-                                        .disposable
-                                        .dispose()
-                            }
+                            it.removedEntries
+                                    .values
+                                    .dispose()
                         }
                         .publishImmediate()
 
@@ -135,12 +133,9 @@ class FactoryLoader(
                     )
                 }
                         .doOnNext {
-                            it.removedEntries.forEach {
-                                it.value
-                                        .second
-                                        .disposable
-                                        .dispose()
-                            }
+                            it.removedEntries
+                                    .map { it.value.second }
+                                    .dispose()
                         }
                         .publishImmediate()
 
@@ -293,18 +288,22 @@ class FactoryLoader(
         }
     }
 
-    private fun <T, U> Observable<Set<T>>.processChanges(adder: (T) -> U) = scan(MapChanges<T, U>()) { oldMapChanges, newKeys ->
+    private fun <T, U, V> Observable<T>.processChanges(
+            keyGetter: (T) -> Set<U>,
+            adder: (T, U) -> V
+    ): Observable<MapChanges<U, V>> = scan(MapChanges<U, V>()) { oldMapChanges, newData ->
         val oldMap = oldMapChanges.newMap
+        val newKeys = keyGetter(newData)
 
         val removedKeys = oldMap.keys - newKeys
         val addedKeys = newKeys - oldMap.keys
         val unchangedKeys = newKeys - addedKeys
 
         val newMap = oldMap.toMutableMap().apply {
-            addedKeys.forEach { put(it, adder(it)) }
+            addedKeys.forEach { put(it, adder(newData, it)) }
         }
 
-        fun Set<T>.entries(map: Map<T, U>) = map { it to map.getValue(it) }.toMap()
+        fun Set<U>.entries(map: Map<U, V>) = map { it to map.getValue(it) }.toMap()
 
         MapChanges(
                 removedKeys.entries(oldMap),
@@ -315,28 +314,18 @@ class FactoryLoader(
         )
     }.skip(1)
 
-    private fun <T, U, V> Observable<Map<T, U>>.processChanges(adder: (T, U) -> V) = scan(MapChanges<T, V>()) { oldMapChanges, newInputMap ->
-        val oldMap = oldMapChanges.newMap
+    private fun <T, U> Observable<Set<T>>.processChanges(adder: (T) -> U) = processChanges(
+            { it },
+            { _, key -> adder(key) }
+    )
 
-        val removedKeys = oldMap.keys - newInputMap.keys
-        val addedKeys = newInputMap.keys - oldMap.keys
-        val unchangedKeys = newInputMap.keys - addedKeys
+    private fun <T, U, V> Observable<Map<T, U>>.processChanges(adder: (T, U) -> V) = processChanges(
+            { it.keys },
+            { newData, key -> adder(key, newData.getValue(key)) }
+    )
 
-        val newOutputMap: Map<T, V> = oldMap.toMutableMap().apply {
-            addedKeys.forEach {
-                put(it, adder(it, newInputMap.getValue(it)))
-            }
-        }
-
-        fun Set<T>.entries(map: Map<T, V>) = map { it to map.getValue(it) }.toMap()
-
-        MapChanges(
-                removedKeys.entries(oldMap),
-                addedKeys.entries(newOutputMap),
-                unchangedKeys.entries(newOutputMap),
-                oldMap,
-                newOutputMap
-        )
+    private fun Collection<DatabaseRx>.dispose() = forEach {
+        it.disposable.dispose()
     }
 
     private class MapChanges<T, U>(

@@ -6,13 +6,15 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
-        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>
+        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
+        private val _newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>
 ) : Project<ProjectType.Shared>() {
 
     override val id = projectRecord.projectKey
@@ -162,4 +164,6 @@ class SharedProject(
             else -> throw IllegalArgumentException()
         } ?: copy()
     }
+
+    override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Shared>) = _newRootInstanceManager(taskRecord)
 }

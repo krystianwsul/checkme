@@ -59,7 +59,7 @@ class RootInstanceRecord<T : ProjectType>(
             }
         }
 
-        private fun <T : ProjectType> dateTimeStringsToSchedulePair(
+        fun <T : ProjectType> dateTimeStringsToSchedulePair(
                 projectRecord: ProjectRecord<T>,
                 dateString: String,
                 timeString: String

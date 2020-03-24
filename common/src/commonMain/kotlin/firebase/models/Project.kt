@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -51,14 +52,22 @@ abstract class Project<T : ProjectType> {
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
+    protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
+
     fun newTask(taskJson: TaskJson): Task<T> {
-        val remoteTaskRecord = projectRecord.newTaskRecord(taskJson)
+        val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val remoteTask = Task(this, remoteTaskRecord, rootInstanceManagers.getValue(remoteTaskRecord.taskKey))
-        check(!remoteTasks.containsKey(remoteTask.id))
-        remoteTasks[remoteTask.id] = remoteTask
+        check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
-        return remoteTask
+        val task = Task(
+                this,
+                taskRecord,
+                newRootInstanceManager(taskRecord)
+        )
+        check(!remoteTasks.containsKey(task.id))
+        remoteTasks[task.id] = task
+
+        return task
     }
 
     fun createTaskHierarchy(

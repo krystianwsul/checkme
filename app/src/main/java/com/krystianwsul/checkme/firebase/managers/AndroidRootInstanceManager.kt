@@ -35,8 +35,6 @@ class AndroidRootInstanceManager<T : ProjectType>(
     fun newRootInstanceRecord(snapshotInfo: SnapshotInfo): RootInstanceRecord<T> {
         val rootInstanceRecord = snapshotInfo.toRecord()
 
-        check(!rootInstanceRecords.containsKey(rootInstanceRecord.instanceKey))
-
         rootInstanceRecords[rootInstanceRecord.instanceKey] = Pair(rootInstanceRecord, false)
 
         return rootInstanceRecord

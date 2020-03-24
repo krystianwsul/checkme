@@ -339,7 +339,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val localChange = projectFactory.onInstanceEvent(instanceEvent)
+        val localChange = projectFactory.onInstanceEvent(instanceEvent, now)
 
         val runType = if (localChange) {
             RunType.LOCAL

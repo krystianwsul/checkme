@@ -4,13 +4,15 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
-        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>
+        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
+        private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>
 ) : Project<ProjectType.Private>() {
 
     override val id = projectRecord.projectKey
@@ -97,4 +99,6 @@ class PrivateProject(
         }
         else -> throw IllegalArgumentException()
     }
+
+    override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Private>) = _newRootInstanceManager(taskRecord)
 }

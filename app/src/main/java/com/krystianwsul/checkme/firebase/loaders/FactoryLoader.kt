@@ -181,16 +181,15 @@ class FactoryLoader(
                         }
                         .cacheImmediate()
 
-                val rootInstanceEvents = rootInstanceDatabaseRx.skip(1)
-                        .switchMap {
-                            it.newMap
-                                    .map { (taskKey, pair) ->
-                                        pair.second
-                                                .changeObservable
-                                                .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
-                                    }
-                                    .merge()
-                        }
+                val rootInstanceEvents = rootInstanceDatabaseRx.switchMap {
+                    it.newMap
+                            .map { (taskKey, pair) ->
+                                pair.second
+                                        .changeObservable
+                                        .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
+                            }
+                            .merge()
+                }
 
                 val projectFactorySingle = Singles.zip(
                         privateProjectManagerSingle,

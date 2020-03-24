@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -19,7 +18,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
 
     private fun SnapshotInfo.toRecord() = RootInstanceRecord(
             taskRecord,
-            dataSnapshot.getValue(InstanceJson::class.java)!!,
+            instanceJson,
             snapshotKey.dateKey,
             snapshotKey.timeKey,
             this@AndroidRootInstanceManager
@@ -67,13 +66,13 @@ class AndroidRootInstanceManager<T : ProjectType>(
 
     data class SnapshotInfo(
             val snapshotKey: SnapshotKey,
-            val dataSnapshot: DataSnapshot
+            val instanceJson: InstanceJson
     ) {
 
         constructor(
                 dateKey: String,
                 timeKey: String,
-                dataSnapshot: DataSnapshot
-        ) : this(SnapshotKey(dateKey, timeKey), dataSnapshot)
+                instanceJson: InstanceJson
+        ) : this(SnapshotKey(dateKey, timeKey), instanceJson)
     }
 }

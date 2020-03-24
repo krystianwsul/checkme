@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -13,6 +14,7 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -138,13 +140,15 @@ class FactoryLoader(
                         }
                         .publishImmediate()
 
-                fun DataSnapshot.toSnapshotInfos() = children.map { // todo instances use class for parsing
-                    val dateString = it.key!!
+                val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
-                    it.children.map {
-                        AndroidRootInstanceManager.SnapshotInfo(dateString, it.key!!, it)
+                fun DataSnapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
+                    timeMap.map { (timeString, instanceJson) ->
+                        AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
                     }
-                }.flatten()
+                }
+                        ?.flatten()
+                        ?: listOf()
 
                 val rootInstanceManagerSingle = rootInstanceDatabaseRx.firstOrError()
                         .flatMap {

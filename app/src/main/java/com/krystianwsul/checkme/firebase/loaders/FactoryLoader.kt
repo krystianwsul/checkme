@@ -4,7 +4,6 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -96,11 +95,11 @@ class FactoryLoader(
                             val removedEvents = Observable.fromIterable(
                                     it.removedEntries
                                             .keys
-                                            .map { DatabaseEvent.Remove(it.key) }
+                                            .map { ProjectFactory.SharedProjectEvent.Remove(it.key) }
                             )
 
                             val addChangeEvents = it.newMap.values
-                                    .map { it.changeObservable.map { DatabaseEvent.AddChange(it) } }
+                                    .map { it.changeObservable.map { ProjectFactory.SharedProjectEvent.AddChange(it) } }
                                     .merge()
 
                             listOf(removedEvents, addChangeEvents).merge()

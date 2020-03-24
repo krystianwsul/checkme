@@ -111,8 +111,8 @@ class ProjectFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onChildEvent(deviceDbInfo: DeviceDbInfo, databaseEvent: DatabaseEvent, now: ExactTimeStamp): Boolean {
-        val projectKey = ProjectKey.Shared(databaseEvent.key)
+    fun onSharedProjectEvent(deviceDbInfo: DeviceDbInfo, sharedProjectEvent: SharedProjectEvent, now: ExactTimeStamp): Boolean {
+        val projectKey = ProjectKey.Shared(sharedProjectEvent.key)
         val projectPair = sharedProjectManager.sharedProjectRecords[projectKey]
 
         if (projectPair?.second == true) {
@@ -120,10 +120,10 @@ class ProjectFactory(
 
             return true
         } else {
-            when (databaseEvent) {
-                is DatabaseEvent.AddChange -> {
+            when (sharedProjectEvent) {
+                is SharedProjectEvent.AddChange -> {
                     try {
-                        val remoteProjectRecord = sharedProjectManager.setChild(databaseEvent.dataSnapshot)
+                        val remoteProjectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
 
                         sharedProjects[remoteProjectRecord.projectKey] = SharedProject(remoteProjectRecord, mapOf()).apply {
                             fixNotificationShown(localFactory, now)
@@ -133,7 +133,7 @@ class ProjectFactory(
                         // hack for oldestVisible being set on records removed by cloud function
                     }
                 }
-                is DatabaseEvent.Remove -> {
+                is SharedProjectEvent.Remove -> {
                     sharedProjectManager.deleteRemoteSharedProjectRecord(projectKey)
                     sharedProjects.remove(projectKey)
                 }
@@ -352,6 +352,18 @@ class ProjectFactory(
             .getTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
+
+    sealed class SharedProjectEvent {
+
+        abstract val key: String
+
+        class AddChange(val dataSnapshot: DataSnapshot) : SharedProjectEvent() {
+
+            override val key = dataSnapshot.key!!
+        }
+
+        class Remove(override val key: String) : SharedProjectEvent()
+    }
 
     sealed class InstanceEvent {
 

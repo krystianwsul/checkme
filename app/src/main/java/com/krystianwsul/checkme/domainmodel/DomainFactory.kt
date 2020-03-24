@@ -10,7 +10,10 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
+import com.krystianwsul.checkme.firebase.ProjectFactory
+import com.krystianwsul.checkme.firebase.RemoteFriendFactory
+import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -272,12 +275,12 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateSharedProjectRecords(databaseEvent: DatabaseEvent) {
+    fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
         MyCrashlytics.log("updateSharedProjectRecord")
 
         val now = ExactTimeStamp.now
 
-        val localChange = projectFactory.onChildEvent(deviceDbInfo, databaseEvent, now)
+        val localChange = projectFactory.onSharedProjectEvent(deviceDbInfo, sharedProjectEvent, now)
 
         val runType = if (localChange) {
             RunType.LOCAL

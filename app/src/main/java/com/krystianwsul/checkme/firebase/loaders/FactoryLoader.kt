@@ -16,6 +16,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.ExactTimeStamp
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -122,7 +123,8 @@ class FactoryLoader(
                                     .map { it.value.second }
                                     .dispose()
                         }
-                        .publishImmediate()
+                        .replay(1)
+                        .apply { domainDisposable += connect() }
 
                 val sharedProjectEvents = sharedProjectDatabaseRx.skip(1)
                         .switchMap {
@@ -147,8 +149,12 @@ class FactoryLoader(
                                         Singles.zip(
                                                 databaseRx.single,
                                                 snapshotInfoSingle
-                                        ).map {
-                                            ProjectFactory.SharedProjectEvent.Add(it.first, it.second.toMap())
+                                        ).flatMapMaybe { (dataSnapshot, snapshotInfos) ->
+                                            Maybe.fromCallable<ProjectFactory.SharedProjectEvent.Add> {
+                                                dataSnapshot.takeIf { it.exists() }?.let {
+                                                    ProjectFactory.SharedProjectEvent.Add(dataSnapshot, snapshotInfos.toMap())
+                                                }
+                                            }
                                         }.toObservable()
                                     }
                                     .merge()
@@ -156,7 +162,9 @@ class FactoryLoader(
                             val changeEvents = it.newMap
                                     .values
                                     .map {
-                                        it.changeObservable.map { ProjectFactory.SharedProjectEvent.Change(it) }
+                                        it.changeObservable
+                                                .filter { it.exists() }
+                                                .map { ProjectFactory.SharedProjectEvent.Change(it) }
                                     }
                                     .merge()
 
@@ -244,10 +252,10 @@ class FactoryLoader(
                         }
                         .addTo(domainDisposable)
 
-                rootInstanceEvents.switchMapSingle {
-                    domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) }
-                }
-                        .subscribe { (domainFactory, instanceEvent) -> domainFactory.updateInstanceRecords(instanceEvent) }
+                rootInstanceEvents.switchMapSingle { domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) } }
+                        .subscribe { (domainFactory, instanceEvent) ->
+                            domainFactory.updateInstanceRecords(instanceEvent)
+                        }
                         .addTo(domainDisposable)
 
                 domainFactorySingle.map { NullableWrapper(it) }

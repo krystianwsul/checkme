@@ -33,10 +33,10 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
 
     // todo same change as for projects
-    fun addFriend(userKey: UserKey) = getUserQuery(userKey).child("friendOf/${userInfo.key}").setValue(true)
+    fun addFriend(userKey: UserKey) = getUserQuery(userKey).child("friendOf/${userInfo.key.key}").setValue(true)
 
     fun addFriends(friendKeys: Set<UserKey>) = rootReference.child(USERS_KEY).updateChildren(
-            friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap()
+            friendKeys.map { "${it.key}/friendOf/${userInfo.key.key}" to true }.toMap()
     )
 
     private fun getFriendQuery(userKey: UserKey) = rootReference.child(USERS_KEY)

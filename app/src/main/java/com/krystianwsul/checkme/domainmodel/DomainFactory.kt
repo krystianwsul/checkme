@@ -161,9 +161,6 @@ class DomainFactory(
 
         addedFriends.forEach { remoteUserFactory.remoteUser.addFriend(it) }
         removedFriends.forEach { remoteUserFactory.remoteUser.removeFriend(it) }
-
-        if (addedFriends.isNotEmpty() || removedFriends.isNotEmpty())
-            save(0, SaveService.Source.GUI)
     }
 
     init {
@@ -198,9 +195,13 @@ class DomainFactory(
 
     private fun updateIsSaved() = isSaved.accept(projectFactory.isSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
 
-    fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
+    fun save(
+            dataId: Int,
+            source: SaveService.Source,
+            forceDomainChanged: Boolean = false
+    ) = save(setOf(dataId), source, forceDomainChanged)
 
-    fun save(dataIds: Set<Int>, source: SaveService.Source) {
+    fun save(dataIds: Set<Int>, source: SaveService.Source, forceDomainChanged: Boolean = false) {
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
@@ -215,11 +216,13 @@ class DomainFactory(
         val userChanges = remoteUserFactory.save(this)
         val friendChanges = remoteFriendFactory.save(this)
 
-        if (localChanges || remoteChanges || userChanges || friendChanges) {
+        val changes = localChanges || remoteChanges || userChanges || friendChanges
+
+        if (changes || forceDomainChanged)
             domainChanged.accept(dataIds)
 
+        if (changes)
             updateIsSaved()
-        }
     }
 
     private fun updateShortcuts(now: ExactTimeStamp) {
@@ -396,7 +399,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        save(0, SaveService.Source.GUI)
+        save(0, SaveService.Source.GUI, runType == RunType.REMOTE)
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })

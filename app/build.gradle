@@ -142,6 +142,8 @@ dependencies {
     implementation project(':common')
 
     implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
+
+    implementation("com.uber.rxdogtag:rxdogtag:1.0.0")
 }
 
 apply plugin: 'com.google.gms.google-services'

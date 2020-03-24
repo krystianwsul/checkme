@@ -332,10 +332,14 @@ val Resources.isLandscape get() = configuration.orientation == Configuration.ORI
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
 
-fun <T : Any> List<Single<T>>.zipSingle() = Single.zip(this) {
-    it.map {
-        @Suppress("UNCHECKED_CAST")
-        it as T
+fun <T : Any> List<Single<T>>.zipSingle() = if (isEmpty()) {
+    Single.just(listOf())
+} else {
+    Single.zip(this) {
+        it.map {
+            @Suppress("UNCHECKED_CAST")
+            it as T
+        }
     }
 }
 

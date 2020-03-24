@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceInfo
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
+import com.uber.rxdogtag.RxDogTag
 import io.reactivex.Maybe
 import net.danlew.android.joda.JodaTimeAndroid
 import java.io.File
@@ -67,6 +68,8 @@ class MyApplication : Application() {
         instance = this
         context = this
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        RxDogTag.install()
 
         JodaTimeAndroid.init(this)
 

@@ -92,22 +92,6 @@ class FactoryLoader(
                         .map { AndroidSharedProjectManager(it) }
                         .cacheImmediate()
 
-                val sharedProjectEvents = sharedProjectDatabaseRx.skip(1)
-                        .switchMap {
-                            val removedEvents = Observable.fromIterable(
-                                    it.removedEntries
-                                            .keys
-                                            .map { ProjectFactory.SharedProjectEvent.Remove(it.key) }
-                            )
-
-                            val addChangeEvents = it.newMap.values
-                                    .map { it.changeObservable.map { ProjectFactory.SharedProjectEvent.AddChange(it) } }
-                                    .merge()
-
-                            listOf(removedEvents, addChangeEvents).merge()
-                        }
-                        .publishImmediate()
-
                 val taskRecordObservable = Observables.combineLatest(
                         privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
                         sharedProjectManagerSingle.flatMapObservable { it.sharedProjectObservable }
@@ -140,15 +124,45 @@ class FactoryLoader(
                         }
                         .publishImmediate()
 
-                val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
+                val sharedProjectEvents = sharedProjectDatabaseRx.skip(1)
+                        .switchMap {
+                            val removeEvents = Observable.fromIterable(
+                                    it.removedEntries
+                                            .keys
+                                            .map { ProjectFactory.SharedProjectEvent.Remove(it.key) }
+                            )
 
-                fun DataSnapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
-                    timeMap.map { (timeString, instanceJson) ->
-                        AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
-                    }
-                }
-                        ?.flatten()
-                        ?: listOf()
+                            val addEvents = it.addedEntries
+                                    .map { (projectId, databaseRx) ->
+                                        val snapshotInfoSingle = rootInstanceDatabaseRx.firstOrError().flatMap {
+                                            it.newMap
+                                                    .filterKeys { it.projectKey == projectId }
+                                                    .values
+                                                    .map { (taskRecord, databaseRx) ->
+                                                        databaseRx.single.map { taskRecord.taskKey to it.toSnapshotInfos() }
+                                                    }
+                                                    .zipSingle()
+                                        }
+
+                                        Singles.zip(
+                                                databaseRx.single,
+                                                snapshotInfoSingle
+                                        ).map {
+                                            ProjectFactory.SharedProjectEvent.Add(it.first, it.second.toMap())
+                                        }.toObservable()
+                                    }
+                                    .merge()
+
+                            val changeEvents = it.newMap
+                                    .values
+                                    .map {
+                                        it.changeObservable.map { ProjectFactory.SharedProjectEvent.Change(it) }
+                                    }
+                                    .merge()
+
+                            listOf(removeEvents, addEvents, changeEvents).merge()
+                        }
+                        .publishImmediate()
 
                 val rootInstanceManagerSingle = rootInstanceDatabaseRx.firstOrError()
                         .flatMap {
@@ -167,39 +181,16 @@ class FactoryLoader(
                         }
                         .cacheImmediate()
 
-                val rootInstanceTaskEvents = rootInstanceDatabaseRx.skip(1)
-                        .switchMap {
-                            val removeTaskEvents = it.removedEntries
-                                    .keys
-                                    .map { Observable.just(ProjectFactory.InstanceEvent.RemoveTask(it) as ProjectFactory.InstanceEvent) }
-
-                            val addTaskEvents = it.addedEntries
-                                    .values
-                                    .map { (taskRecord, databaseRx) ->
-                                        databaseRx.single
-                                                .map<ProjectFactory.InstanceEvent> {
-                                                    ProjectFactory.InstanceEvent.AddTask(taskRecord, it.toSnapshotInfos())
-                                                }
-                                                .toObservable()
-                                    }
-
-                            listOf(removeTaskEvents, addTaskEvents).flatten().merge()
-                        }
-
-                val rootInstanceInstanceEvents = rootInstanceDatabaseRx.skip(1)
+                val rootInstanceEvents = rootInstanceDatabaseRx.skip(1)
                         .switchMap {
                             it.newMap
                                     .map { (taskKey, pair) ->
                                         pair.second
                                                 .changeObservable
-                                                .map<ProjectFactory.InstanceEvent> {
-                                                    ProjectFactory.InstanceEvent.Instances(taskKey, it.toSnapshotInfos())
-                                                }
+                                                .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
                                     }
                                     .merge()
                         }
-
-                val rootInstanceEvents = listOf(rootInstanceTaskEvents, rootInstanceInstanceEvents).merge()
 
                 val projectFactorySingle = Singles.zip(
                         privateProjectManagerSingle,
@@ -338,4 +329,14 @@ class FactoryLoader(
             val oldMap: Map<T, U> = mapOf(),
             val newMap: Map<T, U> = mapOf()
     )
+
+    private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
+
+    private fun DataSnapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
+        timeMap.map { (timeString, instanceJson) ->
+            AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
+        }
+    }
+            ?.flatten()
+            ?: listOf()
 }

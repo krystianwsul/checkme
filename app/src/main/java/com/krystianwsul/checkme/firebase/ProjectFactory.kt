@@ -111,7 +111,11 @@ class ProjectFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onSharedProjectEvent(deviceDbInfo: DeviceDbInfo, sharedProjectEvent: SharedProjectEvent, now: ExactTimeStamp): Boolean {
+    fun onSharedProjectEvent(
+            deviceDbInfo: DeviceDbInfo,
+            sharedProjectEvent: SharedProjectEvent,
+            now: ExactTimeStamp
+    ): Boolean {
         val projectKey = ProjectKey.Shared(sharedProjectEvent.key)
         val projectPair = sharedProjectManager.sharedProjectRecords[projectKey]
 
@@ -121,11 +125,38 @@ class ProjectFactory(
             return true
         } else {
             when (sharedProjectEvent) {
-                is SharedProjectEvent.AddChange -> {
+                is SharedProjectEvent.Add -> {
                     try {
-                        val remoteProjectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
+                        val projectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
 
-                        sharedProjects[remoteProjectRecord.projectKey] = SharedProject(remoteProjectRecord, mapOf()).apply {
+                        rootInstanceManagers += projectRecord.taskRecords
+                                .values
+                                .map {
+                                    it.taskKey to AndroidRootInstanceManager(
+                                            it,
+                                            sharedProjectEvent.snapshotInfos[it.taskKey] ?: listOf()
+                                    )
+                                }
+
+                        sharedProjects[projectRecord.projectKey] = SharedProject(
+                                projectRecord,
+                                getSharedRootInstanceManagers(projectKey)
+                        ).apply {
+                            fixNotificationShown(localFactory, now)
+                            updateDeviceDbInfo(deviceDbInfo)
+                        }
+                    } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
+                        // hack for oldestVisible being set on records removed by cloud function
+                    }
+                }
+                is SharedProjectEvent.Change -> {
+                    try {
+                        val projectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
+
+                        sharedProjects[projectRecord.projectKey] = SharedProject(
+                                projectRecord,
+                                getSharedRootInstanceManagers(projectRecord.projectKey)
+                        ).apply {
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
                         }
@@ -148,77 +179,45 @@ class ProjectFactory(
         val projectKey = taskKey.projectKey
         val rootInstanceManager = rootInstanceManagers[taskKey]
 
-        fun reloadProject() {
-            when (projectKey) {
-                is ProjectKey.Private -> {
-                    check(privateProject.id == projectKey)
+        checkNotNull(rootInstanceManager)
 
-                    privateProject = PrivateProject(
-                            privateProject.projectRecord,
-                            getPrivateRootInstanceManagers()
-                    )
-                }
-                is ProjectKey.Shared -> {
-                    val sharedProject = sharedProjects.getValue(projectKey)
+        val project = projects.getValue(projectKey)
 
-                    sharedProjects[projectKey] = SharedProject(
-                            sharedProject.projectRecord,
-                            getSharedRootInstanceManagers(projectKey)
-                    )
-                }
-            }
-        }
+        return instanceEvent.snapshotInfos
+                .map {
+                    val instanceKey = InstanceKey(taskKey, it.snapshotKey.getScheduleKey(project.projectRecord))
+                    val pair = rootInstanceManager.rootInstanceRecords[instanceKey]
 
-        return when (instanceEvent) {
-            is InstanceEvent.AddTask -> {
-                if (rootInstanceManager != null) {
-                    true
-                } else {
-                    rootInstanceManagers[taskKey] = AndroidRootInstanceManager(
-                            instanceEvent.taskRecord,
-                            instanceEvent.snapshotInfos
-                    )
+                    if (pair?.second == true) {
+                        rootInstanceManager.clearSaved(instanceKey)
 
-                    reloadProject()
+                        true
+                    } else {
+                        rootInstanceManager.newRootInstanceRecord(it)
 
-                    false
-                }
-            }
-            is InstanceEvent.RemoveTask -> {
-                if (rootInstanceManager == null) {
-                    true
-                } else {
-                    rootInstanceManagers.remove(taskKey)
+                        when (projectKey) {
+                            is ProjectKey.Private -> {
+                                check(privateProject.id == projectKey)
 
-                    reloadProject()
-
-                    false
-                }
-            }
-            is InstanceEvent.Instances -> {
-                checkNotNull(rootInstanceManager)
-
-                val project = projects.getValue(projectKey)
-
-                instanceEvent.snapshotInfos
-                        .map {
-                            val instanceKey = InstanceKey(taskKey, it.snapshotKey.getScheduleKey(project.projectRecord))
-                            val pair = rootInstanceManager.rootInstanceRecords[instanceKey]
-
-                            if (pair?.second == true) {
-                                rootInstanceManager.clearSaved(instanceKey)
-
-                                true
-                            } else {
-                                rootInstanceManager.newRootInstanceRecord(it)
-
-                                reloadProject()
-
-                                false
+                                privateProject = PrivateProject(
+                                        privateProject.projectRecord,
+                                        getPrivateRootInstanceManagers()
+                                )
                             }
-                        }.all { it }
-            }
-        }
+                            is ProjectKey.Shared -> {
+                                val sharedProject = sharedProjects.getValue(projectKey)
+
+                                sharedProjects[projectKey] = SharedProject(
+                                        sharedProject.projectRecord,
+                                        getSharedRootInstanceManagers(projectKey)
+                                )
+                            }
+                        }
+
+                        false
+                    }
+                }
+                .all { it }
     }
 
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
@@ -357,7 +356,15 @@ class ProjectFactory(
 
         abstract val key: String
 
-        class AddChange(val dataSnapshot: DataSnapshot) : SharedProjectEvent() {
+        class Change(val dataSnapshot: DataSnapshot) : SharedProjectEvent() {
+
+            override val key = dataSnapshot.key!!
+        }
+
+        class Add(
+                val dataSnapshot: DataSnapshot,
+                val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
+        ) : SharedProjectEvent() {
 
             override val key = dataSnapshot.key!!
         }
@@ -365,23 +372,8 @@ class ProjectFactory(
         class Remove(override val key: String) : SharedProjectEvent()
     }
 
-    sealed class InstanceEvent {
-
-        abstract val taskKey: TaskKey
-
-        class AddTask(
-                val taskRecord: TaskRecord<*>,
-                val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
-        ) : InstanceEvent() {
-
-            override val taskKey = taskRecord.taskKey
-        }
-
-        class RemoveTask(override val taskKey: TaskKey) : InstanceEvent()
-
-        class Instances(
-                override val taskKey: TaskKey,
-                val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
-        ) : InstanceEvent()
-    }
+    class InstanceEvent(
+            val taskKey: TaskKey,
+            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+    )
 }

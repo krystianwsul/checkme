@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
@@ -43,7 +42,6 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
 
-    fun getFriendSingle(userKey: UserKey) = getFriendQuery(userKey).data()
     fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).dataChanges()
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -51,7 +49,6 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .key!!
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
-    fun getSharedProjectSingle(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).data()
     fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
@@ -61,12 +58,10 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
-    fun getPrivateProjectSingle(key: ProjectKey.Private) = privateProjectQuery(key).data()
     fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").data()
     fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")

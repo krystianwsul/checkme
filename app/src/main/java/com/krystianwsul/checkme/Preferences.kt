@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme
 
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.utils.deserialize
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -10,7 +11,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-object Preferences {
+object Preferences : FactoryProvider.Preferences {
 
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
@@ -28,7 +29,7 @@ object Preferences {
 
     val tickLog = Logger(TICK_LOG)
 
-    var tab by observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
+    override var tab by observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
         sharedPreferences.edit()
                 .putInt(TAB_KEY, newValue)
                 .apply()

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -310,7 +309,7 @@ class ProjectFactory(
             userInfo: UserInfo,
             friendFactory: RemoteFriendFactory
     ): SharedProject {
-        check(!TextUtils.isEmpty(name))
+        check(name.isNotEmpty())
 
         val friendIds = recordOf.toMutableSet()
         friendIds.remove(userInfo.key)

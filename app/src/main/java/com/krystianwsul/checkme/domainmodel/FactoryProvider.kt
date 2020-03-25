@@ -19,6 +19,8 @@ interface FactoryProvider {
 
     val database: Database
 
+    val preferences: Preferences
+
     fun newDomain(
             localFactory: Local,
             remoteUserFactory: RemoteUserFactory,
@@ -93,11 +95,18 @@ interface FactoryProvider {
         }
     }
 
+    interface Preferences {
+
+        var tab: Int
+    }
+
     object Impl : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 
         override val database = AndroidDatabaseWrapper
+
+        override val preferences = com.krystianwsul.checkme.Preferences
 
         override fun newDomain(
                 localFactory: Local,

@@ -64,7 +64,7 @@ class FactoryLoader(
                 val startTime = ExactTimeStamp.now
 
                 val userFactorySingle = userDatabaseRx.single
-                        .map { RemoteUserFactory(localFactory.uuid, it, deviceInfo) }
+                        .map { RemoteUserFactory(localFactory.uuid, it, deviceInfo, factoryProvider) }
                         .cacheImmediate()
 
                 val sharedProjectDatabaseRx = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }

@@ -49,7 +49,7 @@ class DomainFactory(
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp,
         friendSnapshot: DataSnapshot
-) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater {
+) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
 
@@ -247,10 +247,10 @@ class DomainFactory(
     // firebase
 
     @Synchronized
-    fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
+    override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot) {
+    override fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updatePrivateProjectRecord")
 
         val start = ExactTimeStamp.now
@@ -278,7 +278,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
+    override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
         MyCrashlytics.log("updateSharedProjectRecord")
 
         val now = ExactTimeStamp.now
@@ -299,7 +299,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateUserRecord(dataSnapshot: DataSnapshot) {
+    override fun updateUserRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updateUserRecord")
 
         val runType = if (remoteUserFactory.isSaved) {
@@ -318,7 +318,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateFriendRecords(dataSnapshot: DataSnapshot) {
+    override fun updateFriendRecords(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("setFriendRecords")
 
         val runType = if (remoteFriendFactory.isSaved) {
@@ -337,7 +337,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+    override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
         MyCrashlytics.log("updateSharedProjectRecord")
 
         val now = ExactTimeStamp.now

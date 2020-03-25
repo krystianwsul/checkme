@@ -2,8 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.GenericTypeIndicator
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
@@ -24,11 +23,12 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.*
 
 class FactoryLoader(
-        localFactory: LocalFactory,
-        deviceInfoObservable: Observable<NullableWrapper<DeviceInfo>>
+        localFactory: FactoryProvider.Local,
+        deviceInfoObservable: Observable<NullableWrapper<DeviceInfo>>,
+        factoryProvider: FactoryProvider
 ) {
 
-    val domainFactoryObservable: Observable<NullableWrapper<DomainFactory>>
+    val domainFactoryObservable: Observable<NullableWrapper<FactoryProvider.Domain>>
 
     init {
         val domainDisposable = CompositeDisposable()
@@ -219,7 +219,7 @@ class FactoryLoader(
                         projectFactorySingle,
                         friendDatabaseRx.single
                 ) { remoteUserFactory, remoteProjectFactory, friends ->
-                    DomainFactory(
+                    factoryProvider.newDomain(
                             localFactory,
                             remoteUserFactory,
                             remoteProjectFactory,
@@ -260,7 +260,7 @@ class FactoryLoader(
 
                 domainFactorySingle.map { NullableWrapper(it) }
             } else {
-                DomainFactory.nullableInstance?.clearUserInfo()
+                factoryProvider.nullableInstance?.clearUserInfo()
 
                 Single.just(NullableWrapper())
             }

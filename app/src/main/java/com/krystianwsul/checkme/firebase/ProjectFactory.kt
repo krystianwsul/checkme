@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase
 import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -23,7 +23,7 @@ import com.krystianwsul.common.utils.*
 
 class ProjectFactory(
         deviceDbInfo: DeviceDbInfo,
-        private val localFactory: LocalFactory,
+        private val localFactory: FactoryProvider.Local,
         private val privateProjectManager: AndroidPrivateProjectManager,
         private val sharedProjectManager: AndroidSharedProjectManager,
         private val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<*>>,

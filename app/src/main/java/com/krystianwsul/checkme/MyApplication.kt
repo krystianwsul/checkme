@@ -13,6 +13,7 @@ import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
@@ -96,8 +97,12 @@ class MyApplication : Application() {
 
         FactoryLoader(
                 localFactory,
-                deviceInfoRelay
-        ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
+                deviceInfoRelay,
+                FactoryProvider.Impl
+        ).domainFactoryObservable.subscribe {
+            @Suppress("UNCHECKED_CAST")
+            DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
+        }
 
         if (token == null)
             FirebaseInstanceId.getInstance()

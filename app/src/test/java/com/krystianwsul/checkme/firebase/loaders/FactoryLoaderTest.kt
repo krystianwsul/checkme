@@ -58,7 +58,7 @@ class FactoryLoaderTest {
         }
     }
 
-    private class TestDomain : FactoryProvider.Domain {
+    private open class TestDomain : FactoryProvider.Domain {
 
         override fun clearUserInfo() {
             TODO("Not yet implemented")
@@ -83,6 +83,19 @@ class FactoryLoaderTest {
         override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
             TODO("Not yet implemented")
         }
+    }
+
+    private class AllowTestDomain : TestDomain() {
+
+        var allowUser = false
+        var allowPrivate = false
+        var allowShared = false
+        var allowInstance = false
+
+        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = check(allowUser)
+        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = check(allowPrivate)
+        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) = check(allowShared)
+        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) = check(allowInstance)
     }
 
     private class TestDatabase : FactoryProvider.Database() {
@@ -134,8 +147,8 @@ class FactoryLoaderTest {
         ) = TestDomain()
     }
 
-    private val userInfo = UserInfo("email", "name")
-    private val deviceInfoWrapper = NullableWrapper(DeviceInfo(userInfo, "token"))
+    private val userInfo by lazy { UserInfo("email", "name") }
+    private val deviceInfoWrapper by lazy { NullableWrapper(DeviceInfo(userInfo, "token")) }
 
     private open class TestSnapshot : FactoryProvider.Database.Snapshot {
 
@@ -158,11 +171,6 @@ class FactoryLoaderTest {
         }
     }
 
-    private class EmptyTestSnapshot() : TestSnapshot() {
-
-        override fun exists() = false
-    }
-
     @Suppress("UNCHECKED_CAST")
     private class ValueTestSnapshot(private val value: Any, override val key: String? = null) : TestSnapshot() {
 
@@ -175,39 +183,38 @@ class FactoryLoaderTest {
 
     private val compositeDisposable = CompositeDisposable()
 
+    private val privateProjectKey by lazy { userInfo.key.key }
+    private val sharedProjectKey = "sharedProject"
+    private val privateTaskKey = "privateTask"
+    private val sharedTaskKey = "sharedTask"
+
+    private lateinit var deviceInfoObservable: PublishRelay<NullableWrapper<DeviceInfo>>
+    private lateinit var testFactoryProvider: TestFactoryProvider
+    private lateinit var factoryLoader: FactoryLoader
+    private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
+    
     @Before
     fun before() {
         mockkStatic(Base64::class)
         every { Base64.encodeToString(any(), any()) } returns "key"
-    }
 
-    @After
-    fun after() = compositeDisposable.clear()
-
-    @Test
-    fun testInitialize() {
-        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
-
-        FactoryLoader(local, deviceInfoObservable, TestFactoryProvider())
-
-        deviceInfoObservable.accept(deviceInfoWrapper)
-    }
-
-    @Test
-    fun testEmpty() {
-        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
-        val testFactoryProvider = TestFactoryProvider()
-
-        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
-
-        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
+        deviceInfoObservable = PublishRelay.create()
+        testFactoryProvider = TestFactoryProvider()
+        factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
+        domainFactoryRelay = BehaviorRelay.create()
 
         factoryLoader.domainFactoryObservable
                 .subscribe(domainFactoryRelay)
                 .addTo(compositeDisposable)
 
         deviceInfoObservable.accept(deviceInfoWrapper)
+    }
 
+    @After
+    fun after() = compositeDisposable.clear()
+
+    @Test
+    fun testEmpty() {
         testFactoryProvider.database
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper()))
@@ -227,19 +234,6 @@ class FactoryLoaderTest {
 
     @Test
     fun testSharedProject() {
-        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
-        val testFactoryProvider = TestFactoryProvider()
-
-        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
-
-        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
-
-        factoryLoader.domainFactoryObservable
-                .subscribe(domainFactoryRelay)
-                .addTo(compositeDisposable)
-
-        deviceInfoObservable.accept(deviceInfoWrapper)
-
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
@@ -268,19 +262,6 @@ class FactoryLoaderTest {
 
     @Test
     fun testPrivateAndSharedTask() {
-        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
-        val testFactoryProvider = TestFactoryProvider()
-
-        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
-
-        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
-
-        factoryLoader.domainFactoryObservable
-                .subscribe(domainFactoryRelay)
-                .addTo(compositeDisposable)
-
-        deviceInfoObservable.accept(deviceInfoWrapper)
-
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
@@ -327,21 +308,6 @@ class FactoryLoaderTest {
 
     @Test
     fun testPrivateAndSharedInstances() {
-        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
-        val testFactoryProvider = TestFactoryProvider()
-
-        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
-
-        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
-
-        factoryLoader.domainFactoryObservable
-                .subscribe(domainFactoryRelay)
-                .addTo(compositeDisposable)
-
-        deviceInfoObservable.accept(deviceInfoWrapper)
-
-        val sharedProjectKey = "sharedProject"
-
         testFactoryProvider.database
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
@@ -350,15 +316,11 @@ class FactoryLoaderTest {
                 .friendObservable
                 .accept(TestSnapshot())
 
-        val privateTaskKey = "privateTask"
-
         testFactoryProvider.database
                 .privateProjectObservable
                 .accept(ValueTestSnapshot(PrivateProjectJson(
                         tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
                 ))
-
-        val sharedTaskKey = "sharedTask"
 
         testFactoryProvider.database
                 .sharedProjectObservable
@@ -371,8 +333,6 @@ class FactoryLoaderTest {
                 ))
 
         assertNull(domainFactoryRelay.value)
-
-        val privateProjectKey = userInfo.key.key
 
         val map = mapOf("2019-03-25" to mapOf("14-47" to InstanceJson()))
 

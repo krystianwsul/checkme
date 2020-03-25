@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.RelayProperty
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.UserInfo
@@ -17,14 +16,15 @@ import io.reactivex.Observable
 class AndroidPrivateProjectManager(
         userInfo: UserInfo,
         dataSnapshot: FactoryProvider.Database.Snapshot,
-        now: ExactTimeStamp
+        now: ExactTimeStamp,
+        private val factoryProvider: FactoryProvider
 ) : PrivateProjectManager<DomainFactory>() {
 
     private val privateProjectProperty = RelayProperty(
             this,
             dataSnapshot.takeIf { it.exists() }
                     ?.let { dataSnapshot.toRecord() }
-                    ?: PrivateProjectRecord(AndroidDatabaseWrapper, userInfo, PrivateProjectJson(startTime = now.long))
+                    ?: PrivateProjectRecord(factoryProvider.database, userInfo, PrivateProjectJson(startTime = now.long))
     )
 
     var privateProjectRecord by privateProjectProperty
@@ -34,10 +34,10 @@ class AndroidPrivateProjectManager(
 
     override val privateProjectRecords get() = listOf(privateProjectRecord)
 
-    override val databaseWrapper = AndroidDatabaseWrapper
+    override val databaseWrapper = factoryProvider.database
 
     private fun FactoryProvider.Database.Snapshot.toRecord() = PrivateProjectRecord(
-            AndroidDatabaseWrapper,
+            factoryProvider.database,
             ProjectKey.Private(key!!),
             getValue(PrivateProjectJson::class.java)!!
     )

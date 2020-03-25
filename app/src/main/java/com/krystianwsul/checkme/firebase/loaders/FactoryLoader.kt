@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -42,14 +41,14 @@ class FactoryLoader(
 
                 val userDatabaseRx = DatabaseRx(
                         domainDisposable,
-                        AndroidDatabaseWrapper.getUserObservable(deviceInfo.key)
+                        factoryProvider.database.getUserObservable(deviceInfo.key)
                 )
 
                 val privateProjectKey = deviceDbInfo.key.toPrivateProjectKey()
 
                 val privateProjectDatabaseRx = DatabaseRx(
                         domainDisposable,
-                        AndroidDatabaseWrapper.getPrivateProjectObservable(privateProjectKey)
+                        factoryProvider.database.getPrivateProjectObservable(privateProjectKey)
                 )
 
                 fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
@@ -61,7 +60,7 @@ class FactoryLoader(
 
                 val friendDatabaseRx = DatabaseRx(
                         domainDisposable,
-                        AndroidDatabaseWrapper.getFriendObservable(deviceInfo.key)
+                        factoryProvider.database.getFriendObservable(deviceInfo.key)
                 )
 
                 val startTime = ExactTimeStamp.now
@@ -74,7 +73,7 @@ class FactoryLoader(
                         .processChanges {
                             DatabaseRx(
                                     domainDisposable,
-                                    AndroidDatabaseWrapper.getSharedProjectObservable(it)
+                                    factoryProvider.database.getSharedProjectObservable(it)
                             )
                         }
                         .doOnNext {
@@ -114,7 +113,7 @@ class FactoryLoader(
                             taskRecord,
                             DatabaseRx(
                                     domainDisposable,
-                                    AndroidDatabaseWrapper.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                    factoryProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
                             )
                     )
                 }

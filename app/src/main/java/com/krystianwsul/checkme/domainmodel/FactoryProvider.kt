@@ -2,15 +2,21 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
+import io.reactivex.Observable
 
 interface FactoryProvider {
 
     val nullableInstance: Domain?
+
+    val database: Database
 
     fun newDomain(
             localFactory: Local,
@@ -42,9 +48,24 @@ interface FactoryProvider {
         val uuid: String
     }
 
+    interface Database {
+
+        fun getUserObservable(key: UserKey): Observable<DataSnapshot>
+
+        fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<DataSnapshot>
+
+        fun getFriendObservable(userKey: UserKey): Observable<DataSnapshot>
+
+        fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<DataSnapshot>
+
+        fun getRootInstanceObservable(taskFirebaseKey: String): Observable<DataSnapshot>
+    }
+
     object Impl : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
+
+        override val database = AndroidDatabaseWrapper
 
         override fun newDomain(
                 localFactory: Local,

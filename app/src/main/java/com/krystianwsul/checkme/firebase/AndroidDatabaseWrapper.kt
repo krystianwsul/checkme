@@ -4,6 +4,7 @@ import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -11,7 +12,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 
-object AndroidDatabaseWrapper : DatabaseWrapper() {
+object AndroidDatabaseWrapper : DatabaseWrapper(), FactoryProvider.Database {
 
     val root: String by lazy {
         MyApplication.instance
@@ -42,14 +43,14 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
 
-    fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).dataChanges()
+    override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).dataChanges()
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()
             .key!!
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
-    fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
+    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.child(path)
@@ -58,12 +59,12 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
-    fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
+    override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
+    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
-    fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).dataChanges()
+    override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).dataChanges()
 }

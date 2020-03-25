@@ -17,7 +17,10 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.*
+import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.Singles
+import io.reactivex.rxkotlin.merge
+import io.reactivex.rxkotlin.plusAssign
 
 class FactoryLoader(
         localFactory: FactoryProvider.Local,
@@ -96,18 +99,23 @@ class FactoryLoader(
                 )
                         .map { (privateProjectRecord, sharedProjectRecords) ->
                             listOf(
-                                    listOf(privateProjectRecord.taskRecords),
-                                    sharedProjectRecords.map { it.value.taskRecords }
+                                    listOf(privateProjectRecord),
+                                    sharedProjectRecords.values
                             ).flatten()
-                                    .map { it.values }
+                                    .map { projectRecord ->
+                                        projectRecord.taskRecords
+                                                .values
+                                                .map { projectRecord to it }
+                                    }
                                     .flatten()
-                                    .map { it.taskKey to it }
+                                    .map { it.second.taskKey to it }
                                     .toMap()
                         }
                         .publishImmediate()
 
-                val rootInstanceDatabaseRx = taskRecordObservable.processChanges { _, taskRecord ->
-                    Pair(
+                val rootInstanceDatabaseRx = taskRecordObservable.processChanges { _, (projectRecord, taskRecord) ->
+                    Triple(
+                            projectRecord,
                             taskRecord,
                             DatabaseRx(
                                     domainDisposable,
@@ -117,7 +125,7 @@ class FactoryLoader(
                 }
                         .doOnNext {
                             it.removedEntries
-                                    .map { it.value.second }
+                                    .map { it.value.third }
                                     .dispose()
                         }
                         .replay(1)
@@ -133,11 +141,12 @@ class FactoryLoader(
 
                             val addEvents = it.addedEntries
                                     .map { (projectId, databaseRx) ->
+                                        // todo maybe I can just use the project record directly
                                         val snapshotInfoSingle = rootInstanceDatabaseRx.firstOrError().flatMap {
                                             it.newMap
                                                     .filterKeys { it.projectKey == projectId }
                                                     .values
-                                                    .map { (taskRecord, databaseRx) ->
+                                                    .map { (_, taskRecord, databaseRx) ->
                                                         databaseRx.single.map { taskRecord.taskKey to it.toSnapshotInfos() }
                                                     }
                                                     .zipSingle()
@@ -173,7 +182,11 @@ class FactoryLoader(
                         .flatMap {
                             it.newMap
                                     .values
-                                    .map { it.second.single.map { dataSnapshot -> Pair(it.first, dataSnapshot) } }
+                                    .map {
+                                        it.third
+                                                .single
+                                                .map { dataSnapshot -> Pair(it.second, dataSnapshot) }
+                                    }
                                     .zipSingle()
                         }
                         .map {
@@ -190,7 +203,7 @@ class FactoryLoader(
                 val rootInstanceEvents = rootInstanceDatabaseRx.switchMap {
                     it.newMap
                             .map { (taskKey, pair) ->
-                                pair.second
+                                pair.third
                                         .changeObservable
                                         .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
                             }
@@ -229,33 +242,21 @@ class FactoryLoader(
                     )
                 }.cache()
 
-                privateProjectDatabaseRx.changeObservable
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
-
-                domainDisposable += sharedProjectEvents.subscribe {
-                    domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
+                fun <T> Observable<T>.subscribeDomain(action: FactoryProvider.Domain.(T) -> Unit) {
+                    domainDisposable += switchMapSingle {
+                        domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) }
+                    }.subscribe { it.first.action(it.second) }
                 }
 
-                friendDatabaseRx.changeObservable
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateFriendRecords(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
+                privateProjectDatabaseRx.changeObservable.subscribeDomain { updatePrivateProjectRecord(it) }
 
-                userDatabaseRx.changeObservable
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateUserRecord(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
+                sharedProjectEvents.subscribeDomain { updateSharedProjectRecords(it) }
 
-                rootInstanceEvents.switchMapSingle { domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) } }
-                        .subscribe { (domainFactory, instanceEvent) ->
-                            domainFactory.updateInstanceRecords(instanceEvent)
-                        }
-                        .addTo(domainDisposable)
+                friendDatabaseRx.changeObservable.subscribeDomain { updateFriendRecords(it) }
+
+                userDatabaseRx.changeObservable.subscribeDomain { updateUserRecord(it) }
+
+                rootInstanceEvents.subscribeDomain { updateInstanceRecords(it) }
 
                 domainFactorySingle.map { NullableWrapper(it) }
             } else {

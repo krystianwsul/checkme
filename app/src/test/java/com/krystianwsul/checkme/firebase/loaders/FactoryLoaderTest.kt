@@ -22,10 +22,10 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxkotlin.addTo
 import org.junit.After
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -85,31 +85,91 @@ class FactoryLoaderTest {
         }
     }
 
-    private class AllowTestDomain : TestDomain() {
+    private class ExpectTestDomain : TestDomain() {
 
-        var allowUser = false
-        var allowPrivate = false
-        var allowShared = false
-        var allowInstance = false
+        private var userListener: ((dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit)? = null
+        private var privateListener: ((dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit)? = null
+        private var sharedListener: ((sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit)? = null
+        private var instanceListener: ((instanceEvent: ProjectFactory.InstanceEvent) -> Unit)? = null
 
-        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = check(allowUser)
-        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = check(allowPrivate)
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) = check(allowShared)
-        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) = check(allowInstance)
+        fun checkUser(listener: (dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit) {
+            assertNull(userListener)
+
+            userListener = listener
+        }
+
+        fun checkPrivate(listener: (dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit) {
+            assertNull(privateListener)
+
+            privateListener = listener
+        }
+
+        fun checkShared(listener: (sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit) {
+            assertNull(sharedListener)
+
+            sharedListener = listener
+        }
+
+        fun checkInstance(listener: (instanceEvent: ProjectFactory.InstanceEvent) -> Unit) {
+            assertNull(instanceListener)
+
+            instanceListener = listener
+        }
+
+        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+            assertNotNull(userListener)
+
+            userListener!!(dataSnapshot)
+
+            userListener = null
+        }
+
+        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+            assertNotNull(privateListener)
+
+            privateListener!!(dataSnapshot)
+
+            privateListener = null
+        }
+
+        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
+            assertNotNull(sharedListener)
+
+            sharedListener!!(sharedProjectEvent)
+
+            sharedListener = null
+        }
+
+        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+            assertNotNull(instanceListener)
+
+            instanceListener!!(instanceEvent)
+
+            instanceListener = null
+        }
     }
 
     private class TestDatabase : FactoryProvider.Database() {
 
         val friendObservable = PublishRelay.create<Snapshot>()
-        val privateProjectObservable = PublishRelay.create<Snapshot>()
+        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
         val sharedProjectObservable = PublishRelay.create<Snapshot>()
         val userObservable = PublishRelay.create<Snapshot>()
 
-        val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot>>()
+        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot>>()
+
+        fun acceptInstance(
+                projectId: String,
+                taskId: String,
+                map: Map<String, Map<String, InstanceJson>>
+        ) = rootInstanceObservables.getValue("$projectId-$taskId").accept(ValueTestSnapshot(map))
 
         override fun getFriendObservable(userKey: UserKey) = friendObservable
-        override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable
+
+        override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it) }!!
+
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
+
         override fun getUserObservable(key: UserKey) = userObservable
 
         override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
@@ -136,6 +196,8 @@ class FactoryLoaderTest {
 
         override val preferences = TestPreferences()
 
+        val domain = ExpectTestDomain()
+
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
                 remoteUserFactory: RemoteUserFactory,
@@ -144,7 +206,7 @@ class FactoryLoaderTest {
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,
                 friendSnapshot: FactoryProvider.Database.Snapshot
-        ) = TestDomain()
+        ) = domain
     }
 
     private val userInfo by lazy { UserInfo("email", "name") }
@@ -192,11 +254,19 @@ class FactoryLoaderTest {
     private lateinit var testFactoryProvider: TestFactoryProvider
     private lateinit var factoryLoader: FactoryLoader
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
+
+    private lateinit var errors: MutableList<Throwable>
     
     @Before
     fun before() {
         mockkStatic(Base64::class)
         every { Base64.encodeToString(any(), any()) } returns "key"
+
+        errors = mutableListOf()
+        RxJavaPlugins.setErrorHandler {
+            it.printStackTrace()
+            errors.add(it)
+        }
 
         deviceInfoObservable = PublishRelay.create()
         testFactoryProvider = TestFactoryProvider()
@@ -211,17 +281,20 @@ class FactoryLoaderTest {
     }
 
     @After
-    fun after() = compositeDisposable.clear()
+    fun after() {
+        compositeDisposable.clear()
 
-    @Test
-    fun testEmpty() {
+        assertTrue(errors.isEmpty())
+    }
+
+    private fun initializeEmpty() {
         testFactoryProvider.database
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper()))
 
         testFactoryProvider.database
                 .privateProjectObservable
-                .accept(ValueTestSnapshot(PrivateProjectJson()))
+                .accept(PrivateProjectJson())
 
         assertNull(domainFactoryRelay.value)
 
@@ -230,6 +303,11 @@ class FactoryLoaderTest {
                 .accept(TestSnapshot())
 
         assertNotNull(domainFactoryRelay.value)
+    }
+
+    @Test
+    fun testEmpty() {
+        initializeEmpty()
     }
 
     @Test
@@ -242,7 +320,7 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
                 .privateProjectObservable
-                .accept(ValueTestSnapshot(PrivateProjectJson()))
+                .accept(PrivateProjectJson())
 
         testFactoryProvider.database
                 .sharedProjectObservable
@@ -276,9 +354,9 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
                 .privateProjectObservable
-                .accept(ValueTestSnapshot(PrivateProjectJson(
+                .accept(PrivateProjectJson(
                         tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
-                ))
+                )
 
         val sharedTaskKey = "sharedTask"
 
@@ -296,12 +374,10 @@ class FactoryLoaderTest {
 
         val privateProjectKey = userInfo.key.key
 
-        testFactoryProvider.database
-                .rootInstanceObservables
-                .apply {
-                    getValue("$privateProjectKey-$privateTaskKey").accept(ValueTestSnapshot(mapOf<String, Map<String, InstanceJson>>()))
-                    getValue("$sharedProjectKey-$sharedTaskKey").accept(ValueTestSnapshot(mapOf<String, Map<String, InstanceJson>>()))
-                }
+        testFactoryProvider.database.apply {
+            acceptInstance(privateProjectKey, privateTaskKey, mapOf())
+            acceptInstance(sharedProjectKey, sharedTaskKey, mapOf())
+        }
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -318,9 +394,9 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
                 .privateProjectObservable
-                .accept(ValueTestSnapshot(PrivateProjectJson(
+                .accept(PrivateProjectJson(
                         tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
-                ))
+                )
 
         testFactoryProvider.database
                 .sharedProjectObservable
@@ -334,15 +410,26 @@ class FactoryLoaderTest {
 
         assertNull(domainFactoryRelay.value)
 
-        val map = mapOf("2019-03-25" to mapOf("14-47" to InstanceJson()))
+        val map = mapOf("2020-03-25" to mapOf("14-47" to InstanceJson()))
 
-        testFactoryProvider.database
-                .rootInstanceObservables
-                .apply {
-                    getValue("$privateProjectKey-$privateTaskKey").accept(ValueTestSnapshot(map))
-                    getValue("$sharedProjectKey-$sharedTaskKey").accept(ValueTestSnapshot(map))
-                }
+        testFactoryProvider.database.apply {
+            acceptInstance(privateProjectKey, privateTaskKey, map)
+            acceptInstance(sharedProjectKey, sharedTaskKey, map)
+        }
 
         assertNotNull(domainFactoryRelay.value)
+    }
+
+    @Test
+    fun testAddPrivateTask() {
+        initializeEmpty()
+
+        testFactoryProvider.apply {
+            domain.checkPrivate { }
+            database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson())))
+
+            domain.checkInstance { }
+            database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))
+        }
     }
 }

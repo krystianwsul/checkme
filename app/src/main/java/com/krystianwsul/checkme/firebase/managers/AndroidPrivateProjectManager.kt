@@ -10,11 +10,10 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.Observable
 
 class AndroidPrivateProjectManager(
-        userInfo: UserInfo,
+        private val userInfo: UserInfo,
         dataSnapshot: FactoryProvider.Database.Snapshot,
         now: ExactTimeStamp,
         private val factoryProvider: FactoryProvider
@@ -38,7 +37,7 @@ class AndroidPrivateProjectManager(
 
     private fun FactoryProvider.Database.Snapshot.toRecord() = PrivateProjectRecord(
             factoryProvider.database,
-            ProjectKey.Private(key!!),
+            userInfo.key.toPrivateProjectKey(),
             getValue(PrivateProjectJson::class.java)!!
     )
 

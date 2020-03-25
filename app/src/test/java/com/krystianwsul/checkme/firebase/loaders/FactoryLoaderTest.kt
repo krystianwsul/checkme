@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
@@ -9,12 +10,21 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import org.junit.After
+import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Test
 
 class FactoryLoaderTest {
@@ -104,15 +114,89 @@ class FactoryLoaderTest {
         ) = TestDomain()
     }
 
+    private val deviceInfo = NullableWrapper(DeviceInfo(
+            UserInfo("email", "name"),
+            "token"
+    ))
+
+    private open class TestSnapshot : FactoryProvider.Database.Snapshot {
+
+        override val key: String?
+            get() = TODO("Not yet implemented")
+
+        override val children: Iterable<FactoryProvider.Database.Snapshot>
+            get() = TODO("Not yet implemented")
+
+        override fun exists(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun <T> getValue(valueType: Class<T>): T? {
+            TODO("Not yet implemented")
+        }
+
+        override fun <T> getValue(typeIndicator: FactoryProvider.Database.TypeIndicator<T>): T? {
+            TODO("Not yet implemented")
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private class ValueTestSnapshot(private val value: Any) : TestSnapshot() {
+
+        override fun exists() = true
+
+        override fun <T> getValue(valueType: Class<T>) = value as T
+
+        override fun <T> getValue(typeIndicator: FactoryProvider.Database.TypeIndicator<T>) = value as T
+    }
+
+    private val compositeDisposable = CompositeDisposable()
+
+    @Before
+    fun before() {
+        mockkStatic(Base64::class)
+        every { Base64.encodeToString(any(), any()) } returns ""
+    }
+
+    @After
+    fun after() = compositeDisposable.clear()
+
     @Test
     fun testInitialize() {
         val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
 
-        val factoryLoader = FactoryLoader(local, deviceInfoObservable, TestFactoryProvider())
+        FactoryLoader(local, deviceInfoObservable, TestFactoryProvider())
 
-        deviceInfoObservable.accept(NullableWrapper(DeviceInfo(
-                UserInfo("email", "name"),
-                "token"
-        )))
+        deviceInfoObservable.accept(deviceInfo)
+    }
+
+    @Test
+    fun testEmpty() {
+        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
+        val testFactoryProvider = TestFactoryProvider()
+
+        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
+
+        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
+
+        factoryLoader.domainFactoryObservable
+                .subscribe(domainFactoryRelay)
+                .addTo(compositeDisposable)
+
+        deviceInfoObservable.accept(deviceInfo)
+
+        testFactoryProvider.database
+                .userObservable
+                .accept(ValueTestSnapshot(UserWrapper()))
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(ValueTestSnapshot(PrivateProjectJson()))
+
+        testFactoryProvider.database
+                .friendObservable
+                .accept(TestSnapshot())
+
+        assertNotNull(domainFactoryRelay.value)
     }
 }

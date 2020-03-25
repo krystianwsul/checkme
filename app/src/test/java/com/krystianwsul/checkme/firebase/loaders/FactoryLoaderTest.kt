@@ -60,17 +60,29 @@ class FactoryLoaderTest {
 
     private class TestDomain : FactoryProvider.Domain {
 
-        override fun clearUserInfo() = Unit
+        override fun clearUserInfo() {
+            TODO("Not yet implemented")
+        }
 
-        override fun updateFriendRecords(dataSnapshot: FactoryProvider.Database.Snapshot) = Unit
+        override fun updateFriendRecords(dataSnapshot: FactoryProvider.Database.Snapshot) {
+            TODO("Not yet implemented")
+        }
 
-        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) = Unit
+        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+            TODO("Not yet implemented")
+        }
 
-        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = Unit
+        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+            TODO("Not yet implemented")
+        }
 
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) = Unit
+        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
+            TODO("Not yet implemented")
+        }
 
-        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) = Unit
+        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+            TODO("Not yet implemented")
+        }
     }
 
     private class TestDatabase : FactoryProvider.Database() {

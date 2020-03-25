@@ -87,7 +87,7 @@ class FactoryLoader(
                                     .map { it.value.single }
                                     .zipSingle()
                         }
-                        .map { AndroidSharedProjectManager(it) }
+                        .map { AndroidSharedProjectManager(it, factoryProvider) }
                         .cacheImmediate()
 
                 val taskRecordObservable = Observables.combineLatest(
@@ -328,6 +328,7 @@ class FactoryLoader(
         it.disposable.dispose()
     }
 
+    @Suppress("unused")
     private class MapChanges<T, U>(
             val removedEntries: Map<T, U> = mapOf(),
             val addedEntries: Map<T, U> = mapOf(),

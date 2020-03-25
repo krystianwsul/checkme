@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
@@ -13,7 +13,8 @@ import com.krystianwsul.common.utils.ScheduleKey
 
 class AndroidRootInstanceManager<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        snapshotInfos: List<SnapshotInfo>
+        snapshotInfos: List<SnapshotInfo>,
+        factoryProvider: FactoryProvider
 ) : RootInstanceManager<T>(taskRecord) {
 
     private fun SnapshotInfo.toRecord() = RootInstanceRecord(
@@ -28,7 +29,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
             .associateBy { it.first.instanceKey }
             .toMutableMap()
 
-    override val databaseWrapper = AndroidDatabaseWrapper
+    override val databaseWrapper = factoryProvider.database
 
     override fun getDatabaseCallback() = checkError("RootInstanceManager.save")
 

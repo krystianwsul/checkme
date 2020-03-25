@@ -25,7 +25,8 @@ class ProjectFactory(
         private val privateProjectManager: AndroidPrivateProjectManager,
         private val sharedProjectManager: AndroidSharedProjectManager,
         private val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<*>>,
-        now: ExactTimeStamp
+        now: ExactTimeStamp,
+        private val factoryProvider: FactoryProvider
 ) : Project.Parent {
 
     var privateProject: PrivateProject
@@ -52,7 +53,7 @@ class ProjectFactory(
                 privateProjectManager.privateProjectRecord,
                 getPrivateRootInstanceManagers()
         ) {
-            AndroidRootInstanceManager(it, listOf())
+            AndroidRootInstanceManager(it, listOf(), factoryProvider)
         }.apply { fixNotificationShown(localFactory, now) }
 
         sharedProjects = sharedProjectManager.sharedProjectRecords
@@ -62,7 +63,7 @@ class ProjectFactory(
                             sharedProjectRecord,
                             getSharedRootInstanceManagers(sharedProjectRecord.projectKey)
                     ) {
-                        AndroidRootInstanceManager(it, listOf())
+                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
                     }.apply {
                         fixNotificationShown(localFactory, now)
                         updateDeviceDbInfo(deviceDbInfo)
@@ -137,7 +138,9 @@ class ProjectFactory(
                                 .map {
                                     it.taskKey to AndroidRootInstanceManager(
                                             it,
-                                            sharedProjectEvent.snapshotInfos[it.taskKey] ?: listOf()
+                                            sharedProjectEvent.snapshotInfos[it.taskKey]
+                                                    ?: listOf(),
+                                            factoryProvider
                                     )
                                 }
 
@@ -145,7 +148,7 @@ class ProjectFactory(
                                 projectRecord,
                                 getSharedRootInstanceManagers(projectKey)
                         ) {
-                            AndroidRootInstanceManager(it, listOf())
+                            AndroidRootInstanceManager(it, listOf(), factoryProvider)
                         }.apply {
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
@@ -162,7 +165,7 @@ class ProjectFactory(
                                 projectRecord,
                                 getSharedRootInstanceManagers(projectRecord.projectKey)
                         ) {
-                            AndroidRootInstanceManager(it, listOf())
+                            AndroidRootInstanceManager(it, listOf(), factoryProvider)
                         }.apply {
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
@@ -232,7 +235,7 @@ class ProjectFactory(
                             privateProject.projectRecord,
                             getPrivateRootInstanceManagers()
                     ) {
-                        AndroidRootInstanceManager(it, listOf())
+                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
                     }.apply {
                         fixNotificationShown(localFactory, now)
                     }
@@ -244,7 +247,7 @@ class ProjectFactory(
                             sharedProject.projectRecord,
                             getSharedRootInstanceManagers(projectKey)
                     ) {
-                        AndroidRootInstanceManager(it, listOf())
+                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
                     }.apply {
                         fixNotificationShown(localFactory, now)
                     }
@@ -263,7 +266,7 @@ class ProjectFactory(
                     remotePrivateProjectRecord,
                     getPrivateRootInstanceManagers()
             ) {
-                AndroidRootInstanceManager(it, listOf())
+                AndroidRootInstanceManager(it, listOf(), factoryProvider)
             }.apply { fixNotificationShown(localFactory, now) }
         } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
             // hack for oldestVisible being set on records removed by cloud function
@@ -328,7 +331,7 @@ class ProjectFactory(
         val sharedProject = SharedProject(
                 sharedProjectRecord,
                 getSharedRootInstanceManagers(sharedProjectRecord.projectKey)
-        ) { AndroidRootInstanceManager(it, listOf()) }
+        ) { AndroidRootInstanceManager(it, listOf(), factoryProvider) }
 
         check(!projects.containsKey(sharedProject.id))
 

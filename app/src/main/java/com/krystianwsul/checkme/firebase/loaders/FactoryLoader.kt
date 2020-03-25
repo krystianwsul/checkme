@@ -180,7 +180,8 @@ class FactoryLoader(
                             it.map { (taskRecord, dataSnapshot) ->
                                 taskRecord.taskKey to AndroidRootInstanceManager(
                                         taskRecord,
-                                        dataSnapshot.toSnapshotInfos()
+                                        dataSnapshot.toSnapshotInfos(),
+                                        factoryProvider
                                 )
                             }.toMap()
                         }
@@ -207,7 +208,8 @@ class FactoryLoader(
                             privateProjectManager,
                             sharedProjectManager,
                             rootInstanceManagers.toMutableMap(),
-                            ExactTimeStamp.now
+                            ExactTimeStamp.now,
+                            factoryProvider
                     )
                 }
 

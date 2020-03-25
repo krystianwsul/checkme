@@ -10,8 +10,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -24,6 +23,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import org.junit.After
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -114,10 +114,8 @@ class FactoryLoaderTest {
         ) = TestDomain()
     }
 
-    private val deviceInfo = NullableWrapper(DeviceInfo(
-            UserInfo("email", "name"),
-            "token"
-    ))
+    private val userInfo = UserInfo("email", "name")
+    private val deviceInfoWrapper = NullableWrapper(DeviceInfo(userInfo, "token"))
 
     private open class TestSnapshot : FactoryProvider.Database.Snapshot {
 
@@ -141,7 +139,7 @@ class FactoryLoaderTest {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private class ValueTestSnapshot(private val value: Any) : TestSnapshot() {
+    private class ValueTestSnapshot(private val value: Any, override val key: String? = null) : TestSnapshot() {
 
         override fun exists() = true
 
@@ -155,7 +153,7 @@ class FactoryLoaderTest {
     @Before
     fun before() {
         mockkStatic(Base64::class)
-        every { Base64.encodeToString(any(), any()) } returns ""
+        every { Base64.encodeToString(any(), any()) } returns "key"
     }
 
     @After
@@ -167,7 +165,7 @@ class FactoryLoaderTest {
 
         FactoryLoader(local, deviceInfoObservable, TestFactoryProvider())
 
-        deviceInfoObservable.accept(deviceInfo)
+        deviceInfoObservable.accept(deviceInfoWrapper)
     }
 
     @Test
@@ -183,7 +181,7 @@ class FactoryLoaderTest {
                 .subscribe(domainFactoryRelay)
                 .addTo(compositeDisposable)
 
-        deviceInfoObservable.accept(deviceInfo)
+        deviceInfoObservable.accept(deviceInfoWrapper)
 
         testFactoryProvider.database
                 .userObservable
@@ -192,6 +190,49 @@ class FactoryLoaderTest {
         testFactoryProvider.database
                 .privateProjectObservable
                 .accept(ValueTestSnapshot(PrivateProjectJson()))
+
+        assertNull(domainFactoryRelay.value)
+
+        testFactoryProvider.database
+                .friendObservable
+                .accept(TestSnapshot())
+
+        assertNotNull(domainFactoryRelay.value)
+    }
+
+    @Test
+    fun testSharedProject() {
+        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
+        val testFactoryProvider = TestFactoryProvider()
+
+        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
+
+        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
+
+        factoryLoader.domainFactoryObservable
+                .subscribe(domainFactoryRelay)
+                .addTo(compositeDisposable)
+
+        deviceInfoObservable.accept(deviceInfoWrapper)
+
+        val sharedProjectKey = "sharedProject"
+
+        testFactoryProvider.database
+                .userObservable
+                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(ValueTestSnapshot(PrivateProjectJson()))
+
+        testFactoryProvider.database
+                .sharedProjectObservable
+                .accept(ValueTestSnapshot(
+                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
+                        sharedProjectKey
+                ))
+
+        assertNull(domainFactoryRelay.value)
 
         testFactoryProvider.database
                 .friendObservable

@@ -10,7 +10,10 @@ import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-class RemoteFriendFactory(children: Iterable<FactoryProvider.Database.Snapshot>) {
+class RemoteFriendFactory(
+        children: Iterable<FactoryProvider.Database.Snapshot>,
+        database: FactoryProvider.Database
+) {
 
     companion object {
 
@@ -19,7 +22,7 @@ class RemoteFriendFactory(children: Iterable<FactoryProvider.Database.Snapshot>)
                 .toMutableMap()
     }
 
-    private val remoteFriendManager = AndroidRemoteRootUserManager(children)
+    private val remoteFriendManager = AndroidRemoteRootUserManager(children, database)
     private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = remoteFriendManager.remoteRootUserRecords.toRootUsers()

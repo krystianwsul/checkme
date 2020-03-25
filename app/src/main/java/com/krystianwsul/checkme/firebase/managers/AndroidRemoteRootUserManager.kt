@@ -2,14 +2,17 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 
-class AndroidRemoteRootUserManager(children: Iterable<FactoryProvider.Database.Snapshot>) : RemoteRootUserManager() {
+class AndroidRemoteRootUserManager(
+        children: Iterable<FactoryProvider.Database.Snapshot>,
+        override val databaseWrapper: DatabaseWrapper
+) : RemoteRootUserManager() {
 
     companion object {
 
@@ -19,8 +22,6 @@ class AndroidRemoteRootUserManager(children: Iterable<FactoryProvider.Database.S
     }
 
     override var remoteRootUserRecords = children.toRootUserRecords()
-
-    override val databaseWrapper = AndroidDatabaseWrapper
 
     override fun getDatabaseCallback(): DatabaseCallback {
         return { databaseMessage, successful, exception ->

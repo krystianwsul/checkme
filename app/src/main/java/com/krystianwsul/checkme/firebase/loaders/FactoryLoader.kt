@@ -53,7 +53,7 @@ class FactoryLoader(
                 fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }
 
                 val privateProjectManagerSingle = privateProjectDatabaseRx.single
-                        .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now) }
+                        .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now, factoryProvider) }
                         .cacheImmediate()
 
                 val friendDatabaseRx = DatabaseRx(

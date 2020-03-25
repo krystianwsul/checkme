@@ -8,12 +8,11 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 
-object AndroidDatabaseWrapper : DatabaseWrapper(), FactoryProvider.Database {
+object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     val root: String by lazy {
         MyApplication.instance
@@ -44,8 +43,8 @@ object AndroidDatabaseWrapper : DatabaseWrapper(), FactoryProvider.Database {
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
 
-    private fun Query.snapshotChanges() = dataChanges().map<FactoryProvider.Database.Snapshot> {
-        FactoryProvider.Database.Snapshot.Impl(it)
+    private fun Query.snapshotChanges() = dataChanges().map<Snapshot> {
+        Snapshot.Impl(it)
     }!!
 
     override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).snapshotChanges()

@@ -165,7 +165,7 @@ class DomainFactory(
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        remoteFriendFactory = RemoteFriendFactory(friendSnapshot.children)
+        remoteFriendFactory = RemoteFriendFactory(friendSnapshot.children, AndroidDatabaseWrapper)
 
         val now = ExactTimeStamp.now
 

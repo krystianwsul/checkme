@@ -324,4 +324,65 @@ class FactoryLoaderTest {
 
         assertNotNull(domainFactoryRelay.value)
     }
+
+    @Test
+    fun testPrivateAndSharedInstances() {
+        val deviceInfoObservable = BehaviorRelay.create<NullableWrapper<DeviceInfo>>()
+        val testFactoryProvider = TestFactoryProvider()
+
+        val factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
+
+        val domainFactoryRelay = BehaviorRelay.create<NullableWrapper<FactoryProvider.Domain>>()
+
+        factoryLoader.domainFactoryObservable
+                .subscribe(domainFactoryRelay)
+                .addTo(compositeDisposable)
+
+        deviceInfoObservable.accept(deviceInfoWrapper)
+
+        val sharedProjectKey = "sharedProject"
+
+        testFactoryProvider.database
+                .userObservable
+                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
+
+        testFactoryProvider.database
+                .friendObservable
+                .accept(TestSnapshot())
+
+        val privateTaskKey = "privateTask"
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(ValueTestSnapshot(PrivateProjectJson(
+                        tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
+                ))
+
+        val sharedTaskKey = "sharedTask"
+
+        testFactoryProvider.database
+                .sharedProjectObservable
+                .accept(ValueTestSnapshot(
+                        JsonWrapper(SharedProjectJson(
+                                users = mutableMapOf(userInfo.key.key to UserJson()),
+                                tasks = mutableMapOf(sharedTaskKey to TaskJson(name = sharedTaskKey))
+                        )),
+                        sharedProjectKey
+                ))
+
+        assertNull(domainFactoryRelay.value)
+
+        val privateProjectKey = userInfo.key.key
+
+        val map = mapOf("2019-03-25" to mapOf("14-47" to InstanceJson()))
+
+        testFactoryProvider.database
+                .rootInstanceObservables
+                .apply {
+                    getValue("$privateProjectKey-$privateTaskKey").accept(ValueTestSnapshot(map))
+                    getValue("$sharedProjectKey-$sharedTaskKey").accept(ValueTestSnapshot(map))
+                }
+
+        assertNotNull(domainFactoryRelay.value)
+    }
 }

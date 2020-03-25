@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
@@ -73,11 +74,11 @@ class FactoryLoaderTest {
 
     private class TestDatabase : FactoryProvider.Database() {
 
-        val friendObservable = BehaviorRelay.create<Snapshot>()
-        val privateProjectObservable = BehaviorRelay.create<Snapshot>()
-        val rootInstanceObservable = BehaviorRelay.create<Snapshot>()
-        val sharedProjectObservable = BehaviorRelay.create<Snapshot>()
-        val userObservable = BehaviorRelay.create<Snapshot>()
+        val friendObservable = PublishRelay.create<Snapshot>()
+        val privateProjectObservable = PublishRelay.create<Snapshot>()
+        val rootInstanceObservable = PublishRelay.create<Snapshot>()
+        val sharedProjectObservable = PublishRelay.create<Snapshot>()
+        val userObservable = PublishRelay.create<Snapshot>()
 
         override fun getFriendObservable(userKey: UserKey) = friendObservable
         override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable

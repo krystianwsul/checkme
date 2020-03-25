@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
@@ -43,14 +44,18 @@ object AndroidDatabaseWrapper : DatabaseWrapper(), FactoryProvider.Database {
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
 
-    override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).dataChanges()
+    private fun Query.snapshotChanges() = dataChanges().map<FactoryProvider.Database.Snapshot> {
+        FactoryProvider.Database.Snapshot.Impl(it)
+    }!!
+
+    override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).snapshotChanges()
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()
             .key!!
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
-    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
+    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).snapshotChanges()
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.child(path)
@@ -59,12 +64,12 @@ object AndroidDatabaseWrapper : DatabaseWrapper(), FactoryProvider.Database {
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
-    override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
+    override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).snapshotChanges()
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
+    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshotChanges()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
-    override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).dataChanges()
+    override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).snapshotChanges()
 }

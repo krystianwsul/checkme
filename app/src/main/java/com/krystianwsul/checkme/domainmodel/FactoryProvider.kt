@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectFactory
@@ -25,18 +26,18 @@ interface FactoryProvider {
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
             readTime: ExactTimeStamp,
-            friendSnapshot: DataSnapshot
+            friendSnapshot: Database.Snapshot
     ): Domain
 
     interface Domain {
 
-        fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot)
+        fun updatePrivateProjectRecord(dataSnapshot: Database.Snapshot)
 
         fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent)
 
-        fun updateFriendRecords(dataSnapshot: DataSnapshot)
+        fun updateFriendRecords(dataSnapshot: Database.Snapshot)
 
-        fun updateUserRecord(dataSnapshot: DataSnapshot)
+        fun updateUserRecord(dataSnapshot: Database.Snapshot)
 
         fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent)
 
@@ -50,15 +51,41 @@ interface FactoryProvider {
 
     interface Database {
 
-        fun getUserObservable(key: UserKey): Observable<DataSnapshot>
+        fun getUserObservable(key: UserKey): Observable<Snapshot>
 
-        fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<DataSnapshot>
+        fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot>
 
-        fun getFriendObservable(userKey: UserKey): Observable<DataSnapshot>
+        fun getFriendObservable(userKey: UserKey): Observable<Snapshot>
 
-        fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<DataSnapshot>
+        fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot>
 
-        fun getRootInstanceObservable(taskFirebaseKey: String): Observable<DataSnapshot>
+        fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot>
+
+        interface Snapshot {
+
+            val key: String?
+
+            val children: Iterable<Snapshot>
+
+            fun exists(): Boolean
+
+            fun <T> getValue(type: Class<T>): T?
+
+            fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
+
+            class Impl(private val dataSnapshot: DataSnapshot) : Snapshot {
+
+                override val key get() = dataSnapshot.key
+
+                override val children get() = dataSnapshot.children.map { Impl(it) }
+
+                override fun exists() = dataSnapshot.exists()
+
+                override fun <T> getValue(type: Class<T>) = dataSnapshot.getValue(type)
+
+                override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = dataSnapshot.getValue(genericTypeIndicator)
+            }
+        }
     }
 
     object Impl : FactoryProvider {
@@ -74,7 +101,7 @@ interface FactoryProvider {
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,
-                friendSnapshot: DataSnapshot
+                friendSnapshot: Database.Snapshot
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 remoteUserFactory,

@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.DeviceInfo
@@ -15,12 +15,12 @@ import kotlin.properties.Delegates.observable
 class RemoteMyUserManager(
         deviceInfo: DeviceInfo,
         private val uuid: String,
-        dataSnapshot: DataSnapshot
+        dataSnapshot: FactoryProvider.Database.Snapshot
 ) {
 
     var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
 
-    var remoteUserRecord = if (dataSnapshot.value == null) {
+    var remoteUserRecord = if (!dataSnapshot.exists()) {
         val userWrapper = UserWrapper(
                 mutableMapOf(),
                 deviceInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
@@ -32,9 +32,9 @@ class RemoteMyUserManager(
     }
         private set
 
-    private fun DataSnapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
+    private fun FactoryProvider.Database.Snapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
 
-    fun newSnapshot(dataSnapshot: DataSnapshot): MyUserRecord {
+    fun newSnapshot(dataSnapshot: FactoryProvider.Database.Snapshot): MyUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()
         return remoteUserRecord
     }

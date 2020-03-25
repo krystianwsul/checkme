@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
@@ -268,11 +267,11 @@ class FactoryLoader(
 
     private class DatabaseRx(
             domainDisposable: CompositeDisposable,
-            databaseObservable: Observable<DataSnapshot>
+            databaseObservable: Observable<FactoryProvider.Database.Snapshot>
     ) {
 
-        val single: Single<DataSnapshot>
-        val changeObservable: Observable<DataSnapshot>
+        val single: Single<FactoryProvider.Database.Snapshot>
+        val changeObservable: Observable<FactoryProvider.Database.Snapshot>
         val disposable: Disposable
 
         init {
@@ -338,7 +337,7 @@ class FactoryLoader(
 
     private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
-    private fun DataSnapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
+    private fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
         timeMap.map { (timeString, instanceJson) ->
             AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
         }

@@ -69,9 +69,9 @@ interface FactoryProvider {
 
             fun exists(): Boolean
 
-            fun <T> getValue(type: Class<T>): T?
+            fun <T> getValue(valueType: Class<T>): T?
 
-            fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
+            fun <T> getValue(typeIndicator: TypeIndicator<T>): T?
 
             class Impl(private val dataSnapshot: DataSnapshot) : Snapshot {
 
@@ -81,10 +81,15 @@ interface FactoryProvider {
 
                 override fun exists() = dataSnapshot.exists()
 
-                override fun <T> getValue(type: Class<T>) = dataSnapshot.getValue(type)
+                override fun <T> getValue(valueType: Class<T>) = dataSnapshot.getValue(valueType)
 
-                override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = dataSnapshot.getValue(genericTypeIndicator)
+                override fun <T> getValue(typeIndicator: TypeIndicator<T>) = dataSnapshot.getValue(typeIndicator.genericTypeIndicator)
             }
+        }
+
+        abstract class TypeIndicator<T> {
+
+            val genericTypeIndicator = object : GenericTypeIndicator<T>() {}
         }
     }
 

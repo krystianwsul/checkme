@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
@@ -343,7 +344,7 @@ class FactoryLoader(
             val newMap: Map<T, U> = mapOf()
     )
 
-    private val typeToken = object : FactoryProvider.Database.TypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
+    private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
     private fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
         timeMap.map { (timeString, instanceJson) ->

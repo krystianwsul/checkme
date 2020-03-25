@@ -74,7 +74,7 @@ interface FactoryProvider {
 
             fun <T> getValue(valueType: Class<T>): T?
 
-            fun <T> getValue(typeIndicator: TypeIndicator<T>): T?
+            fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
 
             class Impl(private val dataSnapshot: DataSnapshot) : Snapshot {
 
@@ -86,13 +86,8 @@ interface FactoryProvider {
 
                 override fun <T> getValue(valueType: Class<T>) = dataSnapshot.getValue(valueType)
 
-                override fun <T> getValue(typeIndicator: TypeIndicator<T>) = dataSnapshot.getValue(typeIndicator.genericTypeIndicator)
+                override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = dataSnapshot.getValue(genericTypeIndicator)
             }
-        }
-
-        abstract class TypeIndicator<T> {
-
-            val genericTypeIndicator = object : GenericTypeIndicator<T>() {}
         }
     }
 

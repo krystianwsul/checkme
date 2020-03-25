@@ -88,9 +88,14 @@ class FactoryLoaderTest {
     private class ExpectTestDomain : TestDomain() {
 
         private var userListener: ((dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit)? = null
-        private var privateListener: ((dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit)? = null
+        private var privateListenerWrapper: ListenerWrapper<FactoryProvider.Database.Snapshot>? = null
         private var sharedListener: ((sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit)? = null
         private var instanceListener: ((instanceEvent: ProjectFactory.InstanceEvent) -> Unit)? = null
+
+        class ListenerWrapper<T> {
+
+            var result: T? = null
+        }
 
         fun checkUser(listener: (dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit) {
             assertNull(userListener)
@@ -98,10 +103,16 @@ class FactoryLoaderTest {
             userListener = listener
         }
 
-        fun checkPrivate(listener: (dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit) {
-            assertNull(privateListener)
+        fun checkPrivate(listener: ListenerWrapper<FactoryProvider.Database.Snapshot>.() -> Unit) {
+            assertNull(privateListenerWrapper)
 
-            privateListener = listener
+            privateListenerWrapper = ListenerWrapper()
+
+            privateListenerWrapper!!.listener()
+
+            assertNotNull(privateListenerWrapper!!.result)
+
+            privateListenerWrapper = null
         }
 
         fun checkShared(listener: (sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit) {
@@ -125,11 +136,10 @@ class FactoryLoaderTest {
         }
 
         override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
-            assertNotNull(privateListener)
+            assertNotNull(privateListenerWrapper)
+            assertNull(privateListenerWrapper!!.result)
 
-            privateListener!!(dataSnapshot)
-
-            privateListener = null
+            privateListenerWrapper!!.result = dataSnapshot
         }
 
         override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
@@ -425,8 +435,9 @@ class FactoryLoaderTest {
         initializeEmpty()
 
         testFactoryProvider.apply {
-            domain.checkPrivate { }
-            database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson())))
+            domain.checkPrivate {
+                database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson())))
+            }
 
             domain.checkInstance { }
             database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))

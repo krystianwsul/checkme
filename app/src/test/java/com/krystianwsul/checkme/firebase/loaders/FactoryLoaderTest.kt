@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
+import com.google.firebase.database.GenericTypeIndicator
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.ProjectFactory
@@ -237,7 +238,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun <T> getValue(typeIndicator: FactoryProvider.Database.TypeIndicator<T>): T? {
+        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T? {
             TODO("Not yet implemented")
         }
     }
@@ -249,7 +250,7 @@ class FactoryLoaderTest {
 
         override fun <T> getValue(valueType: Class<T>) = value as T
 
-        override fun <T> getValue(typeIndicator: FactoryProvider.Database.TypeIndicator<T>) = value as T
+        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = value as T
     }
 
     private val compositeDisposable = CompositeDisposable()

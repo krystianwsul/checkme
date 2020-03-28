@@ -266,35 +266,6 @@ class FactoryLoader(
         }
     }
 
-    private class DatabaseRx(
-            domainDisposable: CompositeDisposable,
-            databaseObservable: Observable<FactoryProvider.Database.Snapshot>
-    ) {
-
-        val single: Single<FactoryProvider.Database.Snapshot>
-        val changeObservable: Observable<FactoryProvider.Database.Snapshot>
-        val latest: Single<FactoryProvider.Database.Snapshot>
-        val disposable = CompositeDisposable()
-
-        init {
-            val observable = databaseObservable.publish()
-
-            single = observable.firstOrError()
-                    .cache()
-                    .apply { domainDisposable += subscribe() }
-
-            changeObservable = observable.skip(1)
-
-            latest = observable.replay(1)
-                    .apply { disposable += connect() }
-                    .firstOrError()
-
-            disposable += observable.connect()
-
-            domainDisposable += disposable
-        }
-    }
-
     private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
     private fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->

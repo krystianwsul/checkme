@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme
 
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.deserialize
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.common.time.ExactTimeStamp

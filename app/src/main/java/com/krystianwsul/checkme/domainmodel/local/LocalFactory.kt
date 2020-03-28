@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager

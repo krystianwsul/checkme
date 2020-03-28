@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper

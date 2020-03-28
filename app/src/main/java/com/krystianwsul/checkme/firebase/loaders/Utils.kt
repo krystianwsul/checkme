@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.GenericTypeIndicator
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.common.firebase.json.InstanceJson
 import io.reactivex.Observable

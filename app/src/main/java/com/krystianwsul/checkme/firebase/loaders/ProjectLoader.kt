@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.records.ProjectRecord

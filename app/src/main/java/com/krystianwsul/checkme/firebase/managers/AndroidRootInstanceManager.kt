@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager

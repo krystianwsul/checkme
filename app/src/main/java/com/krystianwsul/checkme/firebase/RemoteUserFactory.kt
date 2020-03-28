@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.models.MyUser

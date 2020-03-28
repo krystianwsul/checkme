@@ -68,17 +68,15 @@ class FactoryLoader(
                         .cacheImmediate()
 
                 val sharedProjectDatabaseRx = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
-                        .processChanges {
-                            DatabaseRx(
-                                    domainDisposable,
-                                    factoryProvider.database.getSharedProjectObservable(it)
-                            )
-                        }
-                        .doOnNext {
-                            it.removedEntries
-                                    .values
-                                    .dispose()
-                        }
+                        .processChanges(
+                                {
+                                    DatabaseRx(
+                                            domainDisposable,
+                                            factoryProvider.database.getSharedProjectObservable(it)
+                                    )
+                                },
+                                { it.disposable.dispose() }
+                        )
                         .publishImmediate()
 
                 val sharedProjectManagerSingle = sharedProjectDatabaseRx.firstOrError()
@@ -106,20 +104,22 @@ class FactoryLoader(
                         }
                         .publishImmediate()
 
-                val rootInstanceDatabaseRx = taskRecordObservable.processChanges { _, taskRecord ->
-                    Pair(
-                            taskRecord,
-                            DatabaseRx(
-                                    domainDisposable,
-                                    factoryProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                val rootInstanceDatabaseRx = taskRecordObservable.processChanges(
+                        { _, taskRecord ->
+                            Pair(
+                                    taskRecord,
+                                    DatabaseRx(
+                                            domainDisposable,
+                                            factoryProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                    )
                             )
-                    )
-                }
-                        .doOnNext {
-                            it.removedEntries
-                                    .map { it.value.second }
+                        },
+                        {
+                            it.second
+                                    .disposable
                                     .dispose()
                         }
+                )
                         .replay(1)
                         .apply { domainDisposable += connect() }
 
@@ -297,7 +297,8 @@ class FactoryLoader(
 
     private fun <T, U, V> Observable<T>.processChanges(
             keyGetter: (T) -> Set<U>,
-            adder: (T, U) -> V
+            adder: (T, U) -> V,
+            remover: (V) -> Unit
     ): Observable<MapChanges<U, V>> = scan(MapChanges<U, V>()) { oldMapChanges, newData ->
         val oldMap = oldMapChanges.newMap
         val newKeys = keyGetter(newData)
@@ -312,8 +313,12 @@ class FactoryLoader(
 
         fun Set<U>.entries(map: Map<U, V>) = map { it to map.getValue(it) }.toMap()
 
+        val removedEntries = removedKeys.entries(oldMap)
+
+        removedEntries.values.forEach(remover)
+
         MapChanges(
-                removedKeys.entries(oldMap),
+                removedEntries,
                 addedKeys.entries(newMap),
                 unchangedKeys.entries(newMap),
                 oldMap,
@@ -321,14 +326,22 @@ class FactoryLoader(
         )
     }.skip(1)
 
-    private fun <T, U> Observable<Set<T>>.processChanges(adder: (T) -> U) = processChanges(
+    private fun <T, U> Observable<Set<T>>.processChanges(
+            adder: (T) -> U,
+            remover: (U) -> Unit
+    ) = processChanges(
             { it },
-            { _, key -> adder(key) }
+            { _, key -> adder(key) },
+            remover
     )
 
-    private fun <T, U, V> Observable<Map<T, U>>.processChanges(adder: (T, U) -> V) = processChanges(
+    private fun <T, U, V> Observable<Map<T, U>>.processChanges(
+            adder: (T, U) -> V,
+            remover: (V) -> Unit
+    ) = processChanges(
             { it.keys },
-            { newData, key -> adder(key, newData.getValue(key)) }
+            { newData, key -> adder(key, newData.getValue(key)) },
+            remover
     )
 
     private fun Collection<DatabaseRx>.dispose() = forEach {

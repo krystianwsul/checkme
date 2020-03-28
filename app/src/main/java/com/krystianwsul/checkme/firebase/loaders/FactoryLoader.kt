@@ -348,15 +348,6 @@ class FactoryLoader(
         it.disposable.dispose()
     }
 
-    @Suppress("unused")
-    private class MapChanges<T, U>(
-            val removedEntries: Map<T, U> = mapOf(),
-            val addedEntries: Map<T, U> = mapOf(),
-            val unchangedEntries: Map<T, U> = mapOf(),
-            val oldMap: Map<T, U> = mapOf(),
-            val newMap: Map<T, U> = mapOf()
-    )
-
     private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
     private fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->

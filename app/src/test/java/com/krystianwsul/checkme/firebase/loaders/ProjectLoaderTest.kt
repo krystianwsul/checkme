@@ -74,6 +74,8 @@ class ProjectLoaderTest {
         }
 
         fun checkEmpty() = assertTrue(handlers.isEmpty())
+
+        fun checkNotEmpty() = assertTrue(handlers.isNotEmpty())
     }
 
     private lateinit var addProjectEmissionTester: EmissionTester<ProjectLoader.AddProjectEvent<ProjectType.Private>>
@@ -156,6 +158,8 @@ class ProjectLoaderTest {
                 projectKey,
                 PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
         ))
+
+        addProjectEmissionTester.checkNotEmpty()
 
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }

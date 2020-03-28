@@ -11,23 +11,19 @@ class DatabaseRx(
         databaseObservable: Observable<FactoryProvider.Database.Snapshot>
 ) {
 
+    val observable: Observable<FactoryProvider.Database.Snapshot>
     val first: Single<FactoryProvider.Database.Snapshot>
     val changes: Observable<FactoryProvider.Database.Snapshot>
-    val latest: Single<FactoryProvider.Database.Snapshot>
     val disposable = CompositeDisposable()
 
     init {
-        val observable = databaseObservable.publish()
+        observable = databaseObservable.publish()
 
         first = observable.firstOrError()
                 .cache()
                 .apply { domainDisposable += subscribe() }
 
-        changes = observable.skip(1)
-
-        latest = observable.replay(1)
-                .apply { disposable += connect() }
-                .firstOrError()
+        changes = observable.skip(1).apply { domainDisposable += subscribe() }
 
         disposable += observable.connect()
 

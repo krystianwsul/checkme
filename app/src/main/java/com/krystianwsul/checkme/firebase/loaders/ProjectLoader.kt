@@ -79,7 +79,9 @@ class ProjectLoader<T : ProjectType>(
                         .newMap
                         .values
                         .map { (taskRecord, databaseRx) ->
-                            databaseRx.observable.map { ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos()) }
+                            databaseRx.changes.map {
+                                ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                            }
                         }
                         .merge()
             }

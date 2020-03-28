@@ -20,9 +20,11 @@ class DatabaseRx(
 
         first = observable.firstOrError()
                 .cache()
-                .apply { domainDisposable += subscribe() }
+                .apply { disposable += subscribe() }
 
-        changes = observable.skip(1).apply { domainDisposable += subscribe() }
+        changes = observable.skip(1)
+                .publish()
+                .apply { disposable += connect() }
 
         disposable += observable.connect()
 

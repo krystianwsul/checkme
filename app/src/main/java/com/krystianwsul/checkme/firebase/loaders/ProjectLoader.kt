@@ -14,7 +14,7 @@ import io.reactivex.rxkotlin.plusAssign
 class ProjectLoader<T : ProjectType>(
         projectRecordObservable: Observable<ProjectRecord<*>>,
         domainDisposable: CompositeDisposable,
-        factoryProvider: FactoryProvider
+        projectProvider: ProjectProvider
 ) {
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
             .processChanges(
@@ -26,7 +26,7 @@ class ProjectLoader<T : ProjectType>(
                                 taskRecord,
                                 DatabaseRx(
                                         domainDisposable,
-                                        factoryProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                        projectProvider.getRootInstanceObservable(taskRecord.rootInstanceKey)
                                 )
                         )
                     },

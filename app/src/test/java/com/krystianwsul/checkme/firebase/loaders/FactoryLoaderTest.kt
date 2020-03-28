@@ -222,7 +222,7 @@ class FactoryLoaderTest {
     private val userInfo by lazy { UserInfo("email", "name") }
     private val deviceInfoWrapper by lazy { NullableWrapper(DeviceInfo(userInfo, "token")) }
 
-    private open class TestSnapshot : FactoryProvider.Database.Snapshot {
+    open class TestSnapshot : FactoryProvider.Database.Snapshot {
 
         override val key: String?
             get() = TODO("Not yet implemented")
@@ -244,7 +244,7 @@ class FactoryLoaderTest {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private class ValueTestSnapshot(private val value: Any, override val key: String? = null) : TestSnapshot() {
+    class ValueTestSnapshot(private val value: Any, override val key: String? = null) : TestSnapshot() {
 
         override fun exists() = true
 

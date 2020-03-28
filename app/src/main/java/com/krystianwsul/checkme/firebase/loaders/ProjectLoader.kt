@@ -12,7 +12,7 @@ import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 
 class ProjectLoader<T : ProjectType>(
-        projectRecordObservable: Observable<ProjectRecord<*>>,
+        projectRecordObservable: Observable<ProjectRecord<T>>,
         domainDisposable: CompositeDisposable,
         projectProvider: ProjectProvider
 ) {

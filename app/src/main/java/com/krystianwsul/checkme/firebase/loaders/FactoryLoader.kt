@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.FactoryProvider
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
@@ -11,7 +10,6 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -52,7 +50,7 @@ class FactoryLoader(
                 fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
                 fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }
 
-                val privateProjectManagerSingle = privateProjectDatabaseRx.single
+                val privateProjectManagerSingle = privateProjectDatabaseRx.first
                         .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now, factoryProvider) }
                         .cacheImmediate()
 
@@ -63,7 +61,7 @@ class FactoryLoader(
 
                 val startTime = ExactTimeStamp.now
 
-                val userFactorySingle = userDatabaseRx.single
+                val userFactorySingle = userDatabaseRx.first
                         .map { RemoteUserFactory(localFactory.uuid, it, deviceInfo, factoryProvider) }
                         .cacheImmediate()
 
@@ -81,8 +79,9 @@ class FactoryLoader(
 
                 val sharedProjectManagerSingle = sharedProjectDatabaseRx.firstOrError()
                         .flatMap {
-                            it.newMap
-                                    .map { it.value.single }
+                            it.second
+                                    .newMap
+                                    .map { it.value.first }
                                     .zipSingle()
                         }
                         .map { AndroidSharedProjectManager(it, factoryProvider) }
@@ -126,25 +125,28 @@ class FactoryLoader(
                 val sharedProjectEvents = sharedProjectDatabaseRx.skip(1)
                         .switchMap {
                             val removeEvents = Observable.fromIterable(
-                                    it.removedEntries
+                                    it.second
+                                            .removedEntries
                                             .keys
                                             .map { ProjectFactory.SharedProjectEvent.Remove(it.key) }
                             )
 
-                            val addEvents = it.addedEntries
+                            val addEvents = it.second
+                                    .addedEntries
                                     .map { (projectId, databaseRx) ->
                                         val snapshotInfoSingle = rootInstanceDatabaseRx.firstOrError().flatMap {
-                                            it.newMap
+                                            it.second
+                                                    .newMap
                                                     .filterKeys { it.projectKey == projectId }
                                                     .values
                                                     .map { (taskRecord, databaseRx) ->
-                                                        databaseRx.single.map { taskRecord.taskKey to it.toSnapshotInfos() }
+                                                        databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
                                                     }
                                                     .zipSingle()
                                         }
 
                                         Singles.zip(
-                                                databaseRx.single,
+                                                databaseRx.first,
                                                 snapshotInfoSingle
                                         ).flatMapMaybe { (dataSnapshot, snapshotInfos) ->
                                             Maybe.fromCallable<ProjectFactory.SharedProjectEvent.Add> {
@@ -156,10 +158,11 @@ class FactoryLoader(
                                     }
                                     .merge()
 
-                            val changeEvents = it.newMap
+                            val changeEvents = it.second
+                                    .newMap
                                     .values
                                     .map {
-                                        it.changeObservable
+                                        it.changes
                                                 .filter { it.exists() }
                                                 .map { ProjectFactory.SharedProjectEvent.Change(it) }
                                     }
@@ -171,9 +174,10 @@ class FactoryLoader(
 
                 val rootInstanceManagerSingle = rootInstanceDatabaseRx.firstOrError()
                         .flatMap {
-                            it.newMap
+                            it.second
+                                    .newMap
                                     .values
-                                    .map { it.second.single.map { dataSnapshot -> Pair(it.first, dataSnapshot) } }
+                                    .map { it.second.first.map { dataSnapshot -> Pair(it.first, dataSnapshot) } }
                                     .zipSingle()
                         }
                         .map {
@@ -188,10 +192,11 @@ class FactoryLoader(
                         .cacheImmediate()
 
                 val rootInstanceEvents = rootInstanceDatabaseRx.switchMap {
-                    it.newMap
+                    it.second
+                            .newMap
                             .map { (taskKey, pair) ->
                                 pair.second
-                                        .changeObservable
+                                        .changes
                                         .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
                             }
                             .merge()
@@ -216,7 +221,7 @@ class FactoryLoader(
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,
                         projectFactorySingle,
-                        friendDatabaseRx.single
+                        friendDatabaseRx.first
                 ) { remoteUserFactory, remoteProjectFactory, friends ->
                     factoryProvider.newDomain(
                             localFactory,
@@ -229,7 +234,7 @@ class FactoryLoader(
                     )
                 }.cache()
 
-                privateProjectDatabaseRx.changeObservable
+                privateProjectDatabaseRx.changes
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
                         }
@@ -239,13 +244,13 @@ class FactoryLoader(
                     domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
                 }
 
-                friendDatabaseRx.changeObservable
+                friendDatabaseRx.changes
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateFriendRecords(it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 
-                userDatabaseRx.changeObservable
+                userDatabaseRx.changes
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updateUserRecord(it) }.addTo(domainDisposable)
                         }
@@ -265,14 +270,4 @@ class FactoryLoader(
             }
         }
     }
-
-    private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
-
-    private fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
-        timeMap.map { (timeString, instanceJson) ->
-            AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
-        }
-    }
-            ?.flatten()
-            ?: listOf()
 }

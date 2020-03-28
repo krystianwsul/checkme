@@ -1,13 +1,16 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.google.firebase.database.GenericTypeIndicator
+import com.krystianwsul.checkme.domainmodel.FactoryProvider
+import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.common.firebase.json.InstanceJson
 import io.reactivex.Observable
 
-
-private fun <T, U, V> Observable<T>.processChanges(
+fun <T, U, V> Observable<T>.processChanges(
         keyGetter: (T) -> Set<U>,
         adder: (T, U) -> V,
         remover: (V) -> Unit
-): Observable<MapChanges<U, V>> = scan(MapChanges<U, V>()) { oldMapChanges, newData ->
+): Observable<Pair<T, MapChanges<U, V>>> = scan(Pair<T?, MapChanges<U, V>>(null, MapChanges())) { (value, oldMapChanges), newData ->
     val oldMap = oldMapChanges.newMap
     val newKeys = keyGetter(newData)
 
@@ -25,14 +28,14 @@ private fun <T, U, V> Observable<T>.processChanges(
 
     removedEntries.values.forEach(remover)
 
-    MapChanges(
+    value to MapChanges(
             removedEntries,
             addedKeys.entries(newMap),
             unchangedKeys.entries(newMap),
             oldMap,
             newMap
     )
-}.skip(1)
+}.skip(1).map { Pair(it.first!!, it.second) }
 
 fun <T, U> Observable<Set<T>>.processChanges(
         adder: (T) -> U,
@@ -51,3 +54,13 @@ fun <T, U, V> Observable<Map<T, U>>.processChanges(
         { newData, key -> adder(key, newData.getValue(key)) },
         remover
 )
+
+private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
+
+fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
+    timeMap.map { (timeString, instanceJson) ->
+        AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
+    }
+}
+        ?.flatten()
+        ?: listOf()

@@ -271,4 +271,31 @@ class ProjectLoaderTest {
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionTester.checkEmpty()
     }
+
+    @Test
+    fun testSingleTaskRemoveTask() {
+        addProjectEmissionTester.addHandler { }
+
+        val taskId = "taskKey"
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
+        ))
+
+        addProjectEmissionTester.checkNotEmpty()
+
+        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+
+        addProjectEmissionTester.checkEmpty()
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson()
+        ))
+
+        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+    }
 }

@@ -351,3 +351,15 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
         it.get(this) as U
     }
 }
+
+fun <T> Single<T>.tryGetCurrentValue(): T? {
+    var value: T? = null
+    subscribe { t -> value = t }.dispose()
+    return value
+}
+
+fun <T> Observable<T>.tryGetCurrentValue(): T? {
+    var value: T? = null
+    subscribe { t -> value = t }.dispose()
+    return value
+}

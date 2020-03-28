@@ -32,7 +32,7 @@ class ProjectLoader<T : ProjectType>(
                     },
                     { it.second.disposable.dispose() }
             )
-            .replay(1)
+            .publish()
             .apply { domainDisposable += connect() }
 
     // first snapshot of everything

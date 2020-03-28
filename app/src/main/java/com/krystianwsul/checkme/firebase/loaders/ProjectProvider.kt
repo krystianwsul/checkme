@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import io.reactivex.Observable
 
-interface ProjectProvider {
+abstract class ProjectProvider : DatabaseWrapper() {
 
-    fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot>
+    abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot>
 }

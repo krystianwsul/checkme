@@ -56,7 +56,8 @@ class ProjectLoaderTest {
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 
-    private inner class EmissionTester<T>(
+    private inner class EmissionTester<T : Any>(
+            name: String,
             private val publishRelay: PublishRelay<T> = PublishRelay.create()
     ) : Consumer<T> by publishRelay {
 
@@ -64,8 +65,12 @@ class ProjectLoaderTest {
 
         init {
             compositeDisposable += publishRelay.subscribe {
-                handlers.first().invoke(it)
-                handlers.removeFirst()
+                try {
+                    handlers.first().invoke(it)
+                    handlers.removeFirst()
+                } catch (exception: Exception) {
+                    throw EmissionException(name, it, exception)
+                }
             }
         }
 
@@ -77,6 +82,12 @@ class ProjectLoaderTest {
 
         fun checkNotEmpty() = assertTrue(handlers.isNotEmpty())
     }
+
+    private class EmissionException(
+            name: String,
+            value: Any,
+            exception: Exception
+    ) : Exception("name: $name, value: $value", exception)
 
     private lateinit var addProjectEmissionTester: EmissionTester<ProjectLoader.AddProjectEvent<ProjectType.Private>>
     private lateinit var addTaskEmissionTester: EmissionTester<ProjectLoader.AddTaskEvent<ProjectType.Private>>
@@ -103,9 +114,9 @@ class ProjectLoaderTest {
                 projectProvider
         )
 
-        addProjectEmissionTester = EmissionTester()
-        addTaskEmissionTester = EmissionTester()
-        changeInstancesEmissionTester = EmissionTester()
+        addProjectEmissionTester = EmissionTester("addProject")
+        addTaskEmissionTester = EmissionTester("addTask")
+        changeInstancesEmissionTester = EmissionTester("changeInstances")
 
         projectLoader.addProjectEvent
                 .subscribe(addProjectEmissionTester)
@@ -162,5 +173,65 @@ class ProjectLoaderTest {
         addProjectEmissionTester.checkNotEmpty()
 
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+    }
+
+    @Test
+    fun testSingleTaskRepeat() {
+        addProjectEmissionTester.addHandler { }
+
+        val taskId = "taskKey"
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
+        ))
+
+        addProjectEmissionTester.checkNotEmpty()
+
+        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed")))
+        ))
+    }
+
+    @Test
+    fun testSingleTaskAddTask() {
+        addProjectEmissionTester.addHandler { }
+
+        val taskId1 = "taskKey1"
+        val taskId2 = "taskKey2"
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1")))
+        ))
+
+        addProjectEmissionTester.checkNotEmpty()
+
+        projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
+
+        addProjectEmissionTester.checkEmpty()
+
+        addTaskEmissionTester.addHandler { }
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(
+                        taskId1 to TaskJson("task1"),
+                        taskId2 to TaskJson("task2")
+                ))
+        ))
+
+        addTaskEmissionTester.checkNotEmpty()
+
+        projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
+
+        addTaskEmissionTester.checkEmpty()
     }
 }

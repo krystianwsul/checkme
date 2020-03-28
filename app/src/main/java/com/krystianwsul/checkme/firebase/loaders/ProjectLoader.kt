@@ -50,7 +50,7 @@ class ProjectLoader<T : ProjectType>(
                         .map { AddProjectEvent(projectRecord, it.toMap()) }
             }
             .cache()
-            .apply { domainDisposable += subscribe() }
+            .apply { domainDisposable += subscribe() }!!
 
     // Here we observe the initial instances for new tasks
     val addTaskEvents = rootInstanceDatabaseRx.skip(1)
@@ -68,7 +68,7 @@ class ProjectLoader<T : ProjectType>(
                         .merge()
             }
             .publish()
-            .apply { domainDisposable += connect() }
+            .apply { domainDisposable += connect() }!!
 
     // Here we observe changes to all the previously subscribed instances
     val changeInstancesEvents = rootInstanceDatabaseRx.skip(1)
@@ -84,7 +84,7 @@ class ProjectLoader<T : ProjectType>(
                         .merge()
             }
             .publish()
-            .apply { domainDisposable += connect() }
+            .apply { domainDisposable += connect() }!!
 
     class AddProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,

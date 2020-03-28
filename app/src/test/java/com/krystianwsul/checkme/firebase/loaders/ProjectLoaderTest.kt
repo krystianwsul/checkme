@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
@@ -142,5 +143,20 @@ class ProjectLoaderTest {
                 projectKey,
                 PrivateProjectJson()
         ))
+    }
+
+    @Test
+    fun testSingleTask() {
+        addProjectEmissionTester.addHandler { }
+
+        val taskId = "taskKey"
+
+        projectRecordRelay.accept(PrivateProjectRecord(
+                projectProvider,
+                projectKey,
+                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
+        ))
+
+        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
 }

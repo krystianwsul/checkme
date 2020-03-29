@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -53,7 +52,7 @@ interface FactoryProvider {
         val uuid: String
     }
 
-    abstract class Database : DatabaseWrapper() {
+    abstract class Database : ProjectProvider() {
 
         abstract fun getUserObservable(key: UserKey): Observable<Snapshot>
 
@@ -62,8 +61,6 @@ interface FactoryProvider {
         abstract fun getFriendObservable(userKey: UserKey): Observable<Snapshot>
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot>
-
-        abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot>
 
         interface Snapshot {
 

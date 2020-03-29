@@ -36,7 +36,7 @@ fun <T, U, V> Observable<T>.processChanges(
     )
 }.skip(1).map { Pair(it.first!!, it.second) }
 
-fun <T, U> Observable<Set<T>>.processChanges(
+fun <T, U> Observable<Set<T>>.processChangesSet(
         adder: (T) -> U,
         remover: (U) -> Unit
 ) = processChanges(
@@ -45,7 +45,7 @@ fun <T, U> Observable<Set<T>>.processChanges(
         remover
 )
 
-fun <T, U, V> Observable<Map<T, U>>.processChanges(
+fun <T, U, V> Observable<Map<T, U>>.processChangesMap(
         adder: (T, U) -> V,
         remover: (V) -> Unit
 ) = processChanges(

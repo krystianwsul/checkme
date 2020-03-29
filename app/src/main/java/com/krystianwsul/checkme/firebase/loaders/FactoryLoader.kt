@@ -65,7 +65,7 @@ class FactoryLoader(
                         .cacheImmediate()
 
                 val sharedProjectDatabaseRx = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
-                        .processChanges(
+                        .processChangesSet(
                                 {
                                     DatabaseRx(
                                             domainDisposable,
@@ -102,7 +102,7 @@ class FactoryLoader(
                         }
                         .publishImmediate()
 
-                val rootInstanceDatabaseRx = taskRecordObservable.processChanges(
+                val rootInstanceDatabaseRx = taskRecordObservable.processChangesMap(
                         { _, taskRecord ->
                             Pair(
                                     taskRecord,

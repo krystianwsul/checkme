@@ -71,20 +71,19 @@ class ProjectLoader<T : ProjectType>(
             .apply { domainDisposable += connect() }!!
 
     // Here we observe changes to all the previously subscribed instances
-    val changeInstancesEvents = rootInstanceDatabaseRx.skip(1)
-            .switchMap {
-                val projectRecord = it.first.first
+    val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
+        val projectRecord = it.first.first
 
-                it.second
-                        .newMap
-                        .values
-                        .map { (taskRecord, databaseRx) ->
-                            databaseRx.changes.map {
-                                ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
-                            }
-                        }
-                        .merge()
-            }
+        it.second
+                .newMap
+                .values
+                .map { (taskRecord, databaseRx) ->
+                    databaseRx.changes.map {
+                        ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                    }
+                }
+                .merge()
+    }
             .publish()
             .apply { domainDisposable += connect() }!!
 

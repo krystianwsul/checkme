@@ -89,6 +89,7 @@ class ProjectLoader<T : ProjectType>(
             .apply { domainDisposable += connect() }!!
 
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
+            .filter { it.second.addedEntries.isEmpty() }
             .switchMap {
                 val projectRecord = it.first.first
 

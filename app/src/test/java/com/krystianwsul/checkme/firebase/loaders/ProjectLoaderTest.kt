@@ -92,6 +92,7 @@ class ProjectLoaderTest {
     private lateinit var addProjectEmissionTester: EmissionTester<ProjectLoader.AddProjectEvent<ProjectType.Private>>
     private lateinit var addTaskEmissionTester: EmissionTester<ProjectLoader.AddTaskEvent<ProjectType.Private>>
     private lateinit var changeInstancesEmissionTester: EmissionTester<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
+    private lateinit var changeProjectEmissionTester: EmissionTester<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
 
     private val projectKey = ProjectKey.Private("projectKey")
 
@@ -117,6 +118,7 @@ class ProjectLoaderTest {
         addProjectEmissionTester = EmissionTester("addProject")
         addTaskEmissionTester = EmissionTester("addTask")
         changeInstancesEmissionTester = EmissionTester("changeInstances")
+        changeProjectEmissionTester = EmissionTester("changeProject")
 
         projectLoader.addProjectEvent
                 .subscribe(addProjectEmissionTester)
@@ -129,6 +131,10 @@ class ProjectLoaderTest {
         projectLoader.changeInstancesEvents
                 .subscribe(changeInstancesEmissionTester)
                 .addTo(compositeDisposable)
+
+        projectLoader.changeProjectEvents
+                .subscribe(changeProjectEmissionTester)
+                .addTo(compositeDisposable)
     }
 
     @After
@@ -138,6 +144,7 @@ class ProjectLoaderTest {
         addProjectEmissionTester.checkEmpty()
         addTaskEmissionTester.checkEmpty()
         changeInstancesEmissionTester.checkEmpty()
+        changeProjectEmissionTester.checkEmpty()
 
         assertTrue(errors.isEmpty())
     }
@@ -177,48 +184,43 @@ class ProjectLoaderTest {
 
     @Test
     fun testSingleTaskRepeat() {
-        addProjectEmissionTester.addHandler { }
-
         val taskId = "taskKey"
 
+        addProjectEmissionTester.addHandler { }
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
                 PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
         ))
-
         addProjectEmissionTester.checkNotEmpty()
-
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+        addProjectEmissionTester.checkEmpty()
 
+        changeProjectEmissionTester.addHandler { }
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
                 PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed")))
         ))
+        changeProjectEmissionTester.checkEmpty()
     }
 
     @Test
     fun testSingleTaskAddTask() {
-        addProjectEmissionTester.addHandler { }
-
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
+        addProjectEmissionTester.addHandler { }
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
                 PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1")))
         ))
-
         addProjectEmissionTester.checkNotEmpty()
-
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-
         addProjectEmissionTester.checkEmpty()
 
         addTaskEmissionTester.addHandler { }
-
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
@@ -227,11 +229,8 @@ class ProjectLoaderTest {
                         taskId2 to TaskJson("task2")
                 ))
         ))
-
         addTaskEmissionTester.checkNotEmpty()
-
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
-
         addTaskEmissionTester.checkEmpty()
     }
 
@@ -274,27 +273,25 @@ class ProjectLoaderTest {
 
     @Test
     fun testSingleTaskRemoveTask() {
-        addProjectEmissionTester.addHandler { }
-
         val taskId = "taskKey"
 
+        addProjectEmissionTester.addHandler { }
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
                 PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
         ))
-
         addProjectEmissionTester.checkNotEmpty()
-
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-
         addProjectEmissionTester.checkEmpty()
 
+        changeProjectEmissionTester.addHandler { }
         projectRecordRelay.accept(PrivateProjectRecord(
                 projectProvider,
                 projectKey,
                 PrivateProjectJson()
         ))
+        changeProjectEmissionTester.checkEmpty()
 
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }

@@ -88,6 +88,23 @@ class ProjectLoader<T : ProjectType>(
             .publish()
             .apply { domainDisposable += connect() }!!
 
+    val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
+            .switchMap {
+                val projectRecord = it.first.first
+
+                it.second
+                        .newMap
+                        .values
+                        .map { (_, databaseRx) ->
+                            databaseRx.latest()
+                                    .map { ChangeProjectEvent(projectRecord, it.toSnapshotInfos()) }
+                                    .toObservable()
+                        }
+                        .merge()
+            }
+            .publish()
+            .apply { domainDisposable += connect() }!!
+
     class AddProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
@@ -95,13 +112,18 @@ class ProjectLoader<T : ProjectType>(
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val taskRecord: TaskRecord<*>,
+            val taskRecord: TaskRecord<T>,
             val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val taskRecord: TaskRecord<*>,
+            val taskRecord: TaskRecord<T>,
+            val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
+    )
+
+    class ChangeProjectEvent<T : ProjectType>(
+            val projectRecord: ProjectRecord<T>,
             val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
     )
 }

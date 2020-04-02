@@ -206,26 +206,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
         }
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
-    }
-
-    public override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        if (hourMinutes.isNotEmpty()) {
-            outState.putSerializable(KEY_HOUR_MINUTES, HashMap(hourMinutes))
-            outState.putBoolean(KEY_ALL_DAYS_EXPANDED, allDaysExpanded)
-        }
-    }
-
-    private fun updateGui() {
-        check(hourMinutes.isNotEmpty())
-
-        toolbarLayout.visibility = View.VISIBLE
-        showCustomTimeContainer.visibility = View.VISIBLE
-
-        TransitionManager.beginDelayedTransition(showCustomTimeContainer)
-        timeIndividualDaysLayout.visibility = if (allDaysExpanded) View.VISIBLE else View.GONE
-        timeAllDaysTimeLayout.visibility = if (allDaysExpanded) View.GONE else View.VISIBLE
 
         timeAllDaysText.setFixedOnClickListener {
             allDaysExpanded = !allDaysExpanded
@@ -241,9 +221,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
             updateGui()
         }
 
-        val allDaysHourMinute = hourMinutes.getValue(DayOfWeek.SUNDAY)
-        timeAllDaysTime.setText(allDaysHourMinute.toString())
-
         timeAllDaysTime.setFixedOnClickListener {
             TimePickerDialogFragment.newInstance(allDaysHourMinute, SerializableUnit).apply {
                 listener = allDaysListener
@@ -254,13 +231,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
         @Suppress("UNCHECKED_CAST")
         (supportFragmentManager.findFragmentByTag(TAG_TIME_PICKER_ALL_DAYS) as? TimePickerDialogFragment<SerializableUnit>)?.listener = allDaysListener
 
-        for (dayOfWeek in DayOfWeek.values()) {
-            val timeView = timeViews.getValue(dayOfWeek)
-            val hourMinute = hourMinutes.getValue(dayOfWeek)
-
-            timeView.setText(hourMinute.toString())
-
-            timeView.setFixedOnClickListener {
+        DayOfWeek.values().forEach { dayOfWeek ->
+            timeViews.getValue(dayOfWeek).setFixedOnClickListener {
                 val currHourMinute = hourMinutes.getValue(dayOfWeek)
 
                 TimePickerDialogFragment.newInstance(currHourMinute, dayOfWeek).apply {
@@ -289,6 +261,37 @@ class ShowCustomTimeActivity : NavBarActivity() {
                 updateError()
             }
         })
+    }
+
+    public override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        if (hourMinutes.isNotEmpty()) {
+            outState.putSerializable(KEY_HOUR_MINUTES, HashMap(hourMinutes))
+            outState.putBoolean(KEY_ALL_DAYS_EXPANDED, allDaysExpanded)
+        }
+    }
+
+    private val allDaysHourMinute get() = hourMinutes.getValue(DayOfWeek.SUNDAY)
+
+    private fun updateGui() {
+        check(hourMinutes.isNotEmpty())
+
+        toolbarLayout.visibility = View.VISIBLE
+        showCustomTimeContainer.visibility = View.VISIBLE
+
+        TransitionManager.beginDelayedTransition(showCustomTimeContainer)
+        timeIndividualDaysLayout.visibility = if (allDaysExpanded) View.VISIBLE else View.GONE
+        timeAllDaysTimeLayout.visibility = if (allDaysExpanded) View.GONE else View.VISIBLE
+
+        timeAllDaysTime.setText(allDaysHourMinute.toString())
+
+        for (dayOfWeek in DayOfWeek.values()) {
+            val timeView = timeViews.getValue(dayOfWeek)
+            val hourMinute = hourMinutes.getValue(dayOfWeek)
+
+            timeView.setText(hourMinute.toString())
+        }
     }
 
     private fun onLoadFinished(data: ShowCustomTimeViewModel.Data) {

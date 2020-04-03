@@ -8,7 +8,7 @@ import io.reactivex.Observable
 fun <T, U, V> Observable<T>.processChanges(
         keyGetter: (T) -> Set<U>,
         adder: (T, U) -> V,
-        remover: (V) -> Unit
+        remover: ((V) -> Unit)? = null
 ): Observable<Pair<T, MapChanges<U, V>>> = scan(Pair<T?, MapChanges<U, V>>(null, MapChanges())) { (_, oldMapChanges), newData ->
     val oldMap = oldMapChanges.newMap
     val newKeys = keyGetter(newData)
@@ -25,7 +25,7 @@ fun <T, U, V> Observable<T>.processChanges(
 
     val removedEntries = removedKeys.entries(oldMap)
 
-    removedEntries.values.forEach(remover)
+    remover?.let { removedEntries.values.forEach(it) }
 
     newData to MapChanges(
             removedEntries,

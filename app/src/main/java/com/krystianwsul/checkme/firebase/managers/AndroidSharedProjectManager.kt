@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -10,11 +11,12 @@ import com.krystianwsul.common.firebase.managers.SharedProjectManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
 class AndroidSharedProjectManager(
         children: Iterable<FactoryProvider.Database.Snapshot>,
         private val factoryProvider: FactoryProvider
-) : SharedProjectManager<DomainFactory>() {
+) : SharedProjectManager<DomainFactory>(), ProjectProvider.ProjectManager<ProjectType.Shared> {
 
     private fun FactoryProvider.Database.Snapshot.toRecord() = SharedProjectRecord(
             factoryProvider.database,
@@ -45,10 +47,10 @@ class AndroidSharedProjectManager(
 
     override val databaseWrapper = factoryProvider.database
 
-    fun setChild(dataSnapshot: FactoryProvider.Database.Snapshot): SharedProjectRecord {
-        val key = ProjectKey.Shared(dataSnapshot.key!!)
+    override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): SharedProjectRecord {
+        val key = ProjectKey.Shared(snapshot.key!!)
 
-        return dataSnapshot.toRecord().also {
+        return snapshot.toRecord().also {
             sharedProjectProperty[key] = Pair(it, false)
         }
     }

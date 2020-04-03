@@ -30,7 +30,7 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun addProjectRecord(snapshot: FactoryProvider.Database.Snapshot): PrivateProjectRecord {
+    override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): PrivateProjectRecord {
         privateProjectRecord = if (first) {
             first = false
 

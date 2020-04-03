@@ -131,7 +131,7 @@ class ProjectFactory(
             when (sharedProjectEvent) {
                 is SharedProjectEvent.Add -> {
                     try {
-                        val projectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
+                        val projectRecord = sharedProjectManager.setProjectRecord(sharedProjectEvent.dataSnapshot)
 
                         rootInstanceManagers += projectRecord.taskRecords
                                 .values
@@ -159,7 +159,7 @@ class ProjectFactory(
                 }
                 is SharedProjectEvent.Change -> {
                     try {
-                        val projectRecord = sharedProjectManager.setChild(sharedProjectEvent.dataSnapshot)
+                        val projectRecord = sharedProjectManager.setProjectRecord(sharedProjectEvent.dataSnapshot)
 
                         sharedProjects[projectRecord.projectKey] = SharedProject(
                                 projectRecord,
@@ -260,7 +260,7 @@ class ProjectFactory(
 
     fun onNewPrivate(dataSnapshot: FactoryProvider.Database.Snapshot, now: ExactTimeStamp) {
         try {
-            val remotePrivateProjectRecord = privateProjectManager.addProjectRecord(dataSnapshot)
+            val remotePrivateProjectRecord = privateProjectManager.setProjectRecord(dataSnapshot)
 
             privateProject = PrivateProject(
                     remotePrivateProjectRecord,

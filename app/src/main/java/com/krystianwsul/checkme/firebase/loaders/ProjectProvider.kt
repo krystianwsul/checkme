@@ -16,6 +16,6 @@ interface ProjectProvider {
 
     interface ProjectManager<T : ProjectType> {
 
-        fun addProjectRecord(snapshot: FactoryProvider.Database.Snapshot): ProjectRecord<T>
+        fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): ProjectRecord<T>
     }
 }

@@ -13,12 +13,14 @@ import io.reactivex.rxkotlin.plusAssign
 
 class ProjectLoader<T : ProjectType>(
         snapshotObservable: Observable<FactoryProvider.Database.Snapshot>,
-        domainDisposable: CompositeDisposable,
+        private val domainDisposable: CompositeDisposable,
         projectProvider: ProjectProvider,
         projectManager: ProjectProvider.ProjectManager<T>
 ) {
 
-    private val projectRecordObservable = snapshotObservable.map(projectManager::addProjectRecord)
+    private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
+
+    private val projectRecordObservable = snapshotObservable.map(projectManager::setProjectRecord)
 
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
             .processChanges(
@@ -36,8 +38,7 @@ class ProjectLoader<T : ProjectType>(
                     },
                     { it.second.disposable.dispose() }
             )
-            .publish()
-            .apply { domainDisposable += connect() }
+            .publishImmediate()
 
     // first snapshot of everything
     val addProjectEvent = rootInstanceDatabaseRx.firstOrError()
@@ -71,8 +72,7 @@ class ProjectLoader<T : ProjectType>(
                         }
                         .merge()
             }
-            .publish()
-            .apply { domainDisposable += connect() }!!
+            .publishImmediate()
 
     // Here we observe changes to all the previously subscribed instances
     val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
@@ -87,9 +87,7 @@ class ProjectLoader<T : ProjectType>(
                     }
                 }
                 .merge()
-    }
-            .publish()
-            .apply { domainDisposable += connect() }!!
+    }.publishImmediate()
 
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
             .filter { it.second.addedEntries.isEmpty() }
@@ -106,8 +104,7 @@ class ProjectLoader<T : ProjectType>(
                         }
                         .merge()
             }
-            .publish()
-            .apply { domainDisposable += connect() }!!
+            .publishImmediate()
 
     class AddProjectEvent<T : ProjectType>(
             val projectManager: ProjectProvider.ProjectManager<T>,

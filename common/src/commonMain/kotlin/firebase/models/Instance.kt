@@ -131,7 +131,7 @@ class Instance<T : ProjectType> private constructor(
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
             Pair(now, "now"),
-            Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"),
+            //Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"), this was messing up single instance lists
             task.getEndExactTimeStamp()?.let { Pair(it.minusOne(), "task end") },
             done?.let { Pair(it.minusOne(), "done") }
     ).minBy { it.first }!!

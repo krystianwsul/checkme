@@ -78,7 +78,7 @@ abstract class Project<T : ProjectType> {
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp
     ): Task<T> {
-        val endTime = task.getEndExactTimeStamp()?.long
+        val endTime = task.endExactTimeStamp?.long
 
         val oldestVisible = task.getOldestVisible()
 
@@ -167,9 +167,16 @@ abstract class Project<T : ProjectType> {
         check(remoteParentTaskId.isNotEmpty())
         check(remoteChildTaskId.isNotEmpty())
 
-        val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
+        val endTime = startTaskHierarchy.endExactTimeStamp?.long
 
-        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, now.long, endTime, startTaskHierarchy.ordinal)
+        val taskHierarchyJson = TaskHierarchyJson(
+                remoteParentTaskId,
+                remoteChildTaskId,
+                now.long,
+                endTime,
+                startTaskHierarchy.ordinal
+        )
+
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)

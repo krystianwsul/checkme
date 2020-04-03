@@ -35,18 +35,18 @@ class TaskHierarchy<T : ProjectType>(
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
         val startExactTimeStamp = startExactTimeStamp
-        val endExactTimeStamp = getEndExactTimeStamp()
+        val endExactTimeStamp = endExactTimeStamp
 
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
-        val endExactTimeStamp = getEndExactTimeStamp()
+        val endExactTimeStamp = endExactTimeStamp
 
         return endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp
     }
 
-    fun getEndExactTimeStamp() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
+    val endExactTimeStamp get() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 
     fun setEndExactTimeStamp(now: ExactTimeStamp) {
         check(current(now))

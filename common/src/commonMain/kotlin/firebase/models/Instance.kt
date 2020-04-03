@@ -132,7 +132,7 @@ class Instance<T : ProjectType> private constructor(
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
             Pair(now, "now"),
             //Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"), this was messing up single instance lists
-            task.getEndExactTimeStamp()?.let { Pair(it.minusOne(), "task end") },
+            task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
             done?.let { Pair(it.minusOne(), "done") }
     ).minBy { it.first }!!
 
@@ -197,7 +197,7 @@ class Instance<T : ProjectType> private constructor(
         return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             parentTask.getInstance(scheduleDateTime)
         } else {
-            fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
+            fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
 
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
 

@@ -53,7 +53,7 @@ class MonthlyWeekSchedule<T : ProjectType>(
         val dateThisMonth = now.date.run { getDate(year, month) }
         val thisMonth = DateTime(dateThisMonth, time)
 
-        val endExactTimeStamp = getEndExactTimeStamp()
+        val endExactTimeStamp = endExactTimeStamp
 
         val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
             thisMonth

@@ -29,7 +29,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).max()!!
 
         val endExactTimeStamp = listOfNotNull(
-                getEndExactTimeStamp(),
+                endExactTimeStamp,
                 repeatingScheduleBridge.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()

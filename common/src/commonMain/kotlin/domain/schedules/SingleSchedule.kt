@@ -39,7 +39,7 @@ class SingleSchedule<T : ProjectType>(
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
             return emptySequence()
 
-        if (getEndExactTimeStamp()?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
+        if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
             return emptySequence()
 
         return sequenceOf(getInstance(task))

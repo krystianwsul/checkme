@@ -41,13 +41,13 @@ class Task<T : ProjectType>(
 
     val imageJson get() = taskRecord.image
 
-    fun getEndExactTimeStamp() = getEndData()?.exactTimeStamp
+    val endExactTimeStamp get() = getEndData()?.exactTimeStamp
 
     fun current(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp && notDeleted(exactTimeStamp)
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
-    fun notDeleted(exactTimeStamp: ExactTimeStamp) = getEndExactTimeStamp()?.let { it > exactTimeStamp } != false
+    fun notDeleted(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp } != false
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (!current(now))
@@ -256,7 +256,7 @@ class Task<T : ProjectType>(
         ).max()!!
 
         val endExactTimeStamp = listOfNotNull(
-                getEndExactTimeStamp(),
+                endExactTimeStamp,
                 givenEndExactTimeStamp
         ).min()!!
 
@@ -319,7 +319,7 @@ class Task<T : ProjectType>(
 
     private class OldestVisibleException6(message: String) : Exception(message)
 
-    fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
+    fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
         it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)

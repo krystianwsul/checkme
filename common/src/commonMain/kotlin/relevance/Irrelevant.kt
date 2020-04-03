@@ -38,7 +38,7 @@ object Irrelevant {
 
         tasks.asSequence()
                 .filter {
-                    val exactTimeStamp = getIrrelevantNow(it.getEndExactTimeStamp())
+                    val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
 
                     it.current(exactTimeStamp) && it.isRootTask(exactTimeStamp) && it.isVisible(exactTimeStamp, true)
                 }

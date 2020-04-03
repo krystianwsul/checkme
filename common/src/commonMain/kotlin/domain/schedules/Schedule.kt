@@ -18,7 +18,7 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
 
     val startTime by lazy { scheduleBridge.startTime }
 
-    protected fun getEndExactTimeStamp() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
+    protected val endExactTimeStamp get() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
     val endTime get() = scheduleBridge.endTime
 
@@ -47,7 +47,7 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
     }
 
     fun current(exactTimeStamp: ExactTimeStamp) =
-            startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
+            startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp?.let { it > exactTimeStamp } != false)
 
     abstract fun <T : ProjectType> getInstances(
             task: Task<T>,

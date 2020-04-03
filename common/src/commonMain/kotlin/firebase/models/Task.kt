@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.*
 class Task<T : ProjectType>(
         val remoteProject: Project<T>,
         private val taskRecord: TaskRecord<T>
-) {
+) : Current {
 
     private val existingRemoteInstances = taskRecord.remoteInstanceRecords
             .values
@@ -27,7 +27,7 @@ class Task<T : ProjectType>(
 
     val schedules get() = remoteSchedules
 
-    val startExactTimeStamp get() = ExactTimeStamp(taskRecord.startTime)
+    override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
 
     val note get() = taskRecord.note
 
@@ -41,13 +41,9 @@ class Task<T : ProjectType>(
 
     val imageJson get() = taskRecord.image
 
-    val endExactTimeStamp get() = getEndData()?.exactTimeStamp
-
-    fun current(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp && notDeleted(exactTimeStamp)
+    override val endExactTimeStamp get() = getEndData()?.exactTimeStamp
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
-
-    fun notDeleted(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp } != false
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (!current(now))

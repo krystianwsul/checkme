@@ -6,19 +6,19 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
+abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Current {
 
     protected abstract val scheduleBridge: ScheduleBridge<T>
 
-    protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
+    override val endExactTimeStamp get() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
     val startTime by lazy { scheduleBridge.startTime }
-
-    protected val endExactTimeStamp get() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
     val endTime get() = scheduleBridge.endTime
 
@@ -45,9 +45,6 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) {
 
         scheduleBridge.endTime = null
     }
-
-    fun current(exactTimeStamp: ExactTimeStamp) =
-            startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp?.let { it > exactTimeStamp } != false)
 
     abstract fun <T : ProjectType> getInstances(
             task: Task<T>,

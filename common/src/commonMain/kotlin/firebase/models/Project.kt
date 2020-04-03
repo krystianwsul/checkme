@@ -15,7 +15,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : ProjectType> {
+abstract class Project<T : ProjectType> : Current {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
@@ -33,9 +33,8 @@ abstract class Project<T : ProjectType> {
             remoteProjectRecord.name = name
         }
 
-    private val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
-
-    val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
+    override val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
     val taskKeys get() = remoteTasks.keys
 
@@ -215,12 +214,6 @@ abstract class Project<T : ProjectType> {
         parent.deleteProject(this)
 
         remoteProjectRecord.delete()
-    }
-
-    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val endExactTimeStamp = endExactTimeStamp
-
-        return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
     fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {

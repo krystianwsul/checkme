@@ -12,10 +12,14 @@ import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 
 class ProjectLoader<T : ProjectType>(
-        projectRecordObservable: Observable<out ProjectRecord<T>>,
+        snapshotObservable: Observable<FactoryProvider.Database.Snapshot>,
         domainDisposable: CompositeDisposable,
-        projectProvider: ProjectProvider
+        projectProvider: ProjectProvider,
+        projectManager: ProjectProvider.ProjectManager<T>
 ) {
+
+    private val projectRecordObservable = snapshotObservable.map(projectManager::addProjectRecord)
+
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
             .processChanges(
                     { it.second.keys },
@@ -26,7 +30,7 @@ class ProjectLoader<T : ProjectType>(
                                 taskRecord,
                                 DatabaseRx(
                                         domainDisposable,
-                                        projectProvider.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                        projectProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
                                 )
                         )
                     },
@@ -47,7 +51,7 @@ class ProjectLoader<T : ProjectType>(
                             databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
                         }
                         .zipSingle()
-                        .map { AddProjectEvent(projectRecord, it.toMap()) }
+                        .map { AddProjectEvent(projectManager, projectRecord, it.toMap()) }
             }
             .cache()
             .apply { domainDisposable += subscribe() }!!
@@ -106,6 +110,7 @@ class ProjectLoader<T : ProjectType>(
             .apply { domainDisposable += connect() }!!
 
     class AddProjectEvent<T : ProjectType>(
+            val projectManager: ProjectProvider.ProjectManager<T>,
             val projectRecord: ProjectRecord<T>,
             val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
     )

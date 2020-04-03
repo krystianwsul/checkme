@@ -1,16 +1,19 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
+import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import io.mockk.every
+import io.mockk.mockkStatic
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
@@ -26,35 +29,41 @@ import org.junit.Test
 @ExperimentalStdlibApi
 class ProjectLoaderTest {
 
-    private class TestProjectProvider : ProjectProvider() {
+    private class TestProjectProvider : ProjectProvider {
 
         private val rootInstanceObservables = mutableMapOf<String, PublishRelay<FactoryProvider.Database.Snapshot>>()
+
+        override val database = object : ProjectProvider.Database() {
+
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot> {
+                if (!rootInstanceObservables.containsKey(taskFirebaseKey))
+                    rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
+                return rootInstanceObservables.getValue(taskFirebaseKey)
+            }
+
+            override fun getNewId(path: String): String {
+                TODO("Not yet implemented")
+            }
+
+            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+                TODO("Not yet implemented")
+            }
+        }
 
         fun acceptInstance(
                 projectId: String,
                 taskId: String,
                 map: Map<String, Map<String, InstanceJson>>
         ) = rootInstanceObservables.getValue("$projectId-$taskId").accept(FactoryLoaderTest.ValueTestSnapshot(map))
-
-        override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot> {
-            if (!rootInstanceObservables.containsKey(taskFirebaseKey))
-                rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-            return rootInstanceObservables.getValue(taskFirebaseKey)
-        }
-
-        override fun getNewId(path: String): String {
-            TODO("Not yet implemented")
-        }
-
-        override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-            TODO("Not yet implemented")
-        }
     }
 
-    private lateinit var projectRecordRelay: BehaviorRelay<ProjectRecord<ProjectType.Private>>
+    private lateinit var projectSnapshotRelay: BehaviorRelay<FactoryProvider.Database.Snapshot>
     private val compositeDisposable = CompositeDisposable()
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
+
+    private fun acceptProject(privateProjectJson: PrivateProjectJson) =
+            projectSnapshotRelay.accept(FactoryLoaderTest.ValueTestSnapshot(privateProjectJson, projectKey.key))
 
     private inner class EmissionTester<T : Any>(
             name: String,
@@ -94,25 +103,29 @@ class ProjectLoaderTest {
     private lateinit var changeInstancesEmissionTester: EmissionTester<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
     private lateinit var changeProjectEmissionTester: EmissionTester<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
 
-    private val projectKey = ProjectKey.Private("projectKey")
+    private val projectKey = ProjectKey.Private("userKey")
 
     private lateinit var errors: MutableList<Throwable>
 
     @Before
     fun before() {
+        mockkStatic(Base64::class)
+        every { Base64.encodeToString(any(), any()) } returns projectKey.key
+
         errors = mutableListOf()
         RxJavaPlugins.setErrorHandler {
             it.printStackTrace()
             errors.add(it)
         }
 
-        projectRecordRelay = BehaviorRelay.create()
+        projectSnapshotRelay = BehaviorRelay.create()
         projectProvider = TestProjectProvider()
 
         projectLoader = ProjectLoader(
-                projectRecordRelay,
+                projectSnapshotRelay,
                 compositeDisposable,
-                projectProvider
+                projectProvider,
+                AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
         )
 
         addProjectEmissionTester = EmissionTester("addProject")
@@ -158,27 +171,16 @@ class ProjectLoaderTest {
     fun testEmptyProject() {
         addProjectEmissionTester.addHandler { }
 
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson()
-        ))
+        acceptProject(PrivateProjectJson())
     }
 
     @Test
     fun testSingleTask() {
-        addProjectEmissionTester.addHandler { }
-
         val taskId = "taskKey"
 
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
-        ))
-
+        addProjectEmissionTester.addHandler { }
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
         addProjectEmissionTester.checkNotEmpty()
-
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
 
@@ -187,21 +189,13 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         addProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
         addProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
         addProjectEmissionTester.checkEmpty()
 
         changeProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed"))))
         changeProjectEmissionTester.checkEmpty()
     }
 
@@ -211,24 +205,16 @@ class ProjectLoaderTest {
         val taskId2 = "taskKey2"
 
         addProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
         addProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
         addProjectEmissionTester.checkEmpty()
 
         addTaskEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                         taskId1 to TaskJson("task1"),
                         taskId2 to TaskJson("task2")
-                ))
-        ))
+        )))
         addTaskEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
         addTaskEmissionTester.checkEmpty()
@@ -240,24 +226,16 @@ class ProjectLoaderTest {
         val taskId2 = "taskKey2"
 
         addProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
         addProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
         addProjectEmissionTester.checkEmpty()
 
         addTaskEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                         taskId1 to TaskJson("task1"),
                         taskId2 to TaskJson("task2")
-                ))
-        ))
+        )))
         addTaskEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
         addTaskEmissionTester.checkEmpty()
@@ -276,21 +254,13 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         addProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
         addProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
         addProjectEmissionTester.checkEmpty()
 
         changeProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson()
-        ))
+        acceptProject(PrivateProjectJson())
         changeProjectEmissionTester.checkEmpty()
 
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
@@ -301,11 +271,7 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         addProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
         addProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
         addProjectEmissionTester.checkEmpty()
@@ -315,11 +281,7 @@ class ProjectLoaderTest {
         changeInstancesEmissionTester.checkEmpty()
 
         changeProjectEmissionTester.addHandler { }
-        projectRecordRelay.accept(PrivateProjectRecord(
-                projectProvider,
-                projectKey,
-                PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change")))
-        ))
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
         changeProjectEmissionTester.checkEmpty()
 
         changeInstancesEmissionTester.addHandler { }

@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -49,9 +50,17 @@ class FactoryLoader(
                 fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
                 fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }
 
-                val privateProjectManagerSingle = privateProjectDatabaseRx.first
-                        .map { AndroidPrivateProjectManager(deviceDbInfo.userInfo, it, ExactTimeStamp.now, factoryProvider) }
-                        .cacheImmediate()
+                val privateProjectManager = AndroidPrivateProjectManager(
+                        deviceDbInfo.userInfo,
+                        factoryProvider.database
+                )
+
+                val privateProjectLoader = ProjectLoader(
+                        privateProjectDatabaseRx.observable,
+                        domainDisposable,
+                        factoryProvider.projectProvider,
+                        privateProjectManager
+                )
 
                 val friendDatabaseRx = DatabaseRx(
                         domainDisposable,
@@ -87,7 +96,7 @@ class FactoryLoader(
                         .cacheImmediate()
 
                 val taskRecordObservable = Observables.combineLatest(
-                        privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
+                        Observable.never<PrivateProjectRecord>(), //privateProjectManagerSingle.flatMapObservable { it.privateProjectObservable },
                         sharedProjectManagerSingle.flatMapObservable { it.sharedProjectObservable }
                 )
                         .map { (privateProjectRecord, sharedProjectRecords) ->
@@ -202,10 +211,9 @@ class FactoryLoader(
                 }
 
                 val projectFactorySingle = Singles.zip(
-                        privateProjectManagerSingle,
                         sharedProjectManagerSingle,
                         rootInstanceManagerSingle
-                ) { privateProjectManager, sharedProjectManager, rootInstanceManagers ->
+                ) { sharedProjectManager, rootInstanceManagers ->
                     ProjectFactory(
                             deviceDbInfo,
                             localFactory,

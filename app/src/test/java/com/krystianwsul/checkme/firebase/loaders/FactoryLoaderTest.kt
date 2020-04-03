@@ -206,6 +206,11 @@ class FactoryLoaderTest {
 
         override val preferences = TestPreferences()
 
+        override val projectProvider = object : ProjectProvider {
+
+            override val database = this@TestFactoryProvider.database
+        }
+
         val domain = ExpectTestDomain()
 
         override fun newDomain(

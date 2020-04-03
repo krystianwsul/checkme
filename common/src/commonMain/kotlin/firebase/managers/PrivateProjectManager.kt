@@ -8,7 +8,9 @@ import kotlin.properties.Delegates
 
 abstract class PrivateProjectManager<T> {
 
-    var isSaved by Delegates.observable(false) { _, _, value -> ErrorLogger.instance.log("RemotePrivateProjectManager.isSaved = $value") }
+    var isSaved by Delegates.observable(false) { _, _, value ->
+        ErrorLogger.instance.log("PrivateProjectManager.isSaved = $value")
+    }
 
     abstract val databaseWrapper: DatabaseWrapper
 

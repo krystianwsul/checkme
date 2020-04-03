@@ -260,7 +260,7 @@ class ProjectFactory(
 
     fun onNewPrivate(dataSnapshot: FactoryProvider.Database.Snapshot, now: ExactTimeStamp) {
         try {
-            val remotePrivateProjectRecord = privateProjectManager.newSnapshot(dataSnapshot)
+            val remotePrivateProjectRecord = privateProjectManager.addProjectRecord(dataSnapshot)
 
             privateProject = PrivateProject(
                     remotePrivateProjectRecord,

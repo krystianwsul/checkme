@@ -22,6 +22,8 @@ interface FactoryProvider {
 
     val preferences: Preferences
 
+    val projectProvider: ProjectProvider
+
     fun newDomain(
             localFactory: Local,
             remoteUserFactory: RemoteUserFactory,
@@ -52,7 +54,7 @@ interface FactoryProvider {
         val uuid: String
     }
 
-    abstract class Database : ProjectProvider() {
+    abstract class Database : ProjectProvider.Database() {
 
         abstract fun getUserObservable(key: UserKey): Observable<Snapshot>
 
@@ -101,6 +103,11 @@ interface FactoryProvider {
         override val database = AndroidDatabaseWrapper
 
         override val preferences = com.krystianwsul.checkme.Preferences
+
+        override val projectProvider = object : ProjectProvider {
+
+            override val database = this@Impl.database
+        }
 
         override fun newDomain(
                 localFactory: Local,

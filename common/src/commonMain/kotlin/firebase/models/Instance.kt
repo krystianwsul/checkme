@@ -7,7 +7,11 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance<T : ProjectType> {
+class Instance<T : ProjectType> private constructor(
+        val project: Project<T>,
+        val task: Task<T>,
+        private var data: Data<T> // todo can a var be a delegate?
+) {
 
     companion object {
 
@@ -31,6 +35,7 @@ class Instance<T : ProjectType> {
             4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
          */
 
+        // todo just hash a data object
         fun getNotificationId(
                 scheduleDate: Date,
                 scheduleCustomTimeData: Pair<String, String>?,
@@ -57,38 +62,19 @@ class Instance<T : ProjectType> {
         }
     }
 
-    private val remoteProject: Project<T>
-
-    private var data: Data<T>
-
     private val shownHolder = ShownHolder()
 
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
-    val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, scheduleHourMinute))
+    val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute))
 
     val scheduleDate get() = data.scheduleDate
-
-    private val scheduleTime get() = data.scheduleTime
 
     val instanceDate get() = data.instanceDate
 
     val instanceTime get() = data.instanceTime
 
-    private val scheduleHourMinute
-        get() = data.let {
-            when (it) {
-                is Data.Real<*> -> it.instanceRecord.let { record ->
-                    record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) }
-                }
-                is Data.Virtual<*> -> it.scheduleDateTime
-                        .time
-                        .timePair
-                        .hourMinute
-            }
-        }
-
-    val scheduleDateTime get() = DateTime(scheduleDate, scheduleTime)
+    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
 
     val taskKey by lazy { task.taskKey }
 
@@ -106,7 +92,26 @@ class Instance<T : ProjectType> {
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
-    val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
+    val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, data.scheduleHourMinute, taskKey)
+
+    val hidden get() = data.hidden
+
+    // scenario already covered by task/schedule relevance
+    val customTimeKey get() = data.customTimeKey
+
+    val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
+
+    constructor(
+            project: Project<T>,
+            task: Task<T>,
+            instanceRecord: InstanceRecord<T>
+    ) : this(project, task, Data.Real(project, instanceRecord))
+
+    constructor(
+            project: Project<T>,
+            task: Task<T>,
+            scheduleDateTime: DateTime
+    ) : this(project, task, Data.Virtual(scheduleDateTime))
 
     fun exists() = (data is Data.Real)
 
@@ -117,9 +122,9 @@ class Instance<T : ProjectType> {
 
         return task.getChildTaskHierarchies()
                 .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
-                .map { Pair(it, it.childTask.getInstance(scheduleDateTime)) }
-                .filter { it.second.getParentInstance(now)?.instanceKey == instanceKey }
-                .associate { (taskHierarchy, childInstance) -> childInstance.instanceKey to Pair(childInstance, taskHierarchy) }
+                .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
+                .filter { it.first.getParentInstance(now)?.instanceKey == instanceKey }
+                .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
                 .values
                 .toList()
     }
@@ -171,23 +176,17 @@ class Instance<T : ProjectType> {
             return false
 
         val parentInstance = getParentInstance(now)
-        if (parentInstance != null) {
+        if (parentInstance != null)
             return parentInstance.isVisible(now, hack24)
-        } else {
-            val done = done
 
-            return if (done != null) {
-                val cutoff = if (hack24) {
-                    ExactTimeStamp(now.toDateTimeSoy() - 1.days)
-                } else {
-                    ExactTimeStamp.now
-                }
+        val done = done ?: return true
 
-                (done > cutoff)
-            } else {
-                true
-            }
-        }
+        val cutoff = if (hack24)
+            ExactTimeStamp(now.toDateTimeSoy() - 1.days)
+        else
+            now
+
+        return done > cutoff
     }
 
     fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
@@ -195,21 +194,25 @@ class Instance<T : ProjectType> {
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
-        fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
+        return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
+            parentTask.getInstance(scheduleDateTime)
+        } else {
+            fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
-        if (!parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
-            return null
-        }
 
-        return parentTask.getInstance(scheduleDateTime)
+            null
+        }
     }
 
-    override fun toString() = super.toString() + " name: " + name + ", schedule time: " + scheduleDateTime + " instance time: " + instanceDateTime + ", done: " + done
+    override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
 
     private class ParentInstanceException(message: String) : Exception(message)
 
-    val ordinal get() = getNullableOrdinal() ?: task.startExactTimeStamp.long.toDouble()
+    val ordinal
+        get() = data.ordinal ?: task.startExactTimeStamp
+                .long
+                .toDouble()
 
     fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
         createInstanceHierarchy(now)
@@ -224,8 +227,6 @@ class Instance<T : ProjectType> {
 
         task.updateOldestVisible(uuid, now)
     }
-
-    val hidden get() = data.hidden
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
 
@@ -247,50 +248,6 @@ class Instance<T : ProjectType> {
 
     fun setNotificationShown(shownFactory: ShownFactory, notificationShown: Boolean) {
         shownHolder.forceShown(shownFactory).notificationShown = notificationShown
-    }
-
-    val scheduleCustomTimeKey
-        get() = data.let {
-            when (it) {
-                is Data.Real<T> -> it.instanceRecord
-                        .scheduleKey
-                        .scheduleTimePair
-                        .customTimeKey
-                is Data.Virtual<T> -> it.scheduleDateTime
-                        .time
-                        .timePair
-                        .customTimeKey
-            }
-        }
-
-    val task: Task<T>
-
-    val project get() = remoteProject
-
-    val customTimeKey // scenario already covered by task/schedule relevance
-        get() = (data as? Data.Real<*>)?.instanceRecord
-                ?.instanceJsonTime
-                ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
-
-    constructor(
-            project: Project<T>,
-            task: Task<T>,
-            instanceRecord: InstanceRecord<T>
-    ) {
-        this.remoteProject = project
-        this.task = task
-        val realInstanceData = Data.Real(this, instanceRecord)
-        data = realInstanceData
-    }
-
-    constructor(
-            project: Project<T>,
-            task: Task<T>,
-            scheduleDateTime: DateTime
-    ) {
-        this.remoteProject = project
-        this.task = task
-        data = Data.Virtual(scheduleDateTime)
     }
 
     fun fixNotificationShown(shownFactory: ShownFactory, now: ExactTimeStamp) {
@@ -325,7 +282,7 @@ class Instance<T : ProjectType> {
     }
 
     private fun createInstanceRecord() = Data.Real(
-            this,
+            project,
             task.createRemoteInstanceRecord(this)
     ).also { data = it }
 
@@ -351,15 +308,13 @@ class Instance<T : ProjectType> {
 
     fun belongsToRemoteProject() = true
 
-    private fun getNullableOrdinal() = (data as? Data.Real<*>)?.instanceRecord?.ordinal
-
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
     fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
         val instanceTimePair = instanceTime.timePair
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
         return if (shared != null) {
-            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.customTimeId) as SharedCustomTime
+            val sharedCustomTime = project.getRemoteCustomTime(shared.customTimeId) as SharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
                 val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
@@ -378,31 +333,39 @@ class Instance<T : ProjectType> {
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date
-        abstract val scheduleTime: Time
-
         abstract val instanceDate: Date
+
+        abstract val scheduleTime: Time
         abstract val instanceTime: Time
 
         abstract val done: Long?
 
         abstract val hidden: Boolean
 
+        abstract val scheduleHourMinute: HourMinute?
+
+        abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>?
+
+        abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
+
+        abstract val ordinal: Double?
+
         class Real<T : ProjectType>(
-                private val instance: Instance<T>,
+                private val project: Project<T>,
                 val instanceRecord: InstanceRecord<T>
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId<T>) = instance.remoteProject.getRemoteCustomTime(customTimeId)
+            fun getCustomTime(customTimeId: CustomTimeId<T>) = project.getRemoteCustomTime(customTimeId)
 
-            override val scheduleDate get() = instanceRecord.let { Date(it.scheduleYear, it.scheduleMonth, it.scheduleDay) }
+            override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
+
+            override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
             override val scheduleTime
                 get() = instanceRecord.run {
                     scheduleCustomTimeId?.let { getCustomTime(it) }
                             ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
                 }
-
-            override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
             override val instanceTime
                 get() = instanceRecord.instanceJsonTime
@@ -417,21 +380,42 @@ class Instance<T : ProjectType> {
             override val done get() = instanceRecord.done
 
             override val hidden get() = instanceRecord.hidden
+
+            override val scheduleHourMinute
+                get() = instanceRecord.scheduleHour?.let { HourMinute(it, instanceRecord.scheduleMinute!!) }
+
+            override val customTimeKey
+                get() = instanceRecord.instanceJsonTime?.let {
+                    (it as? JsonTime.Custom)?.let { Pair(project.id, it.id) }
+                }
+
+            override val scheduleCustomTimeKey
+                get() = instanceRecord.scheduleKey
+                        .scheduleTimePair
+                        .customTimeKey
+
+            override val ordinal get() = instanceRecord.ordinal
         }
 
-        class Virtual<T : ProjectType>(val scheduleDateTime: DateTime) : Data<T>() {
+        class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() {
 
-            override val scheduleDate by lazy { scheduleDateTime.date }
+            override val scheduleDate = scheduleDateTime.date
+            override val instanceDate = scheduleDate
 
             override val scheduleTime = scheduleDateTime.time
-
-            override val instanceDate by lazy { scheduleDate }
-
             override val instanceTime = scheduleTime
 
             override val done: Long? = null
 
             override val hidden = false
+
+            override val scheduleHourMinute = scheduleTime.timePair.hourMinute
+
+            override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>? = null
+
+            override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
+
+            override val ordinal: Double? = null
         }
     }
 

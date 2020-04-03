@@ -35,13 +35,13 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
 
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        check(current(endExactTimeStamp))
+        requireCurrent(endExactTimeStamp)
 
         scheduleBridge.endTime = endExactTimeStamp.long
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         scheduleBridge.endTime = null
     }

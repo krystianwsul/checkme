@@ -46,7 +46,7 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
-        check(current(now))
+        requireCurrent(now)
 
         return getInstance(task).isVisible(now, hack24)
     }

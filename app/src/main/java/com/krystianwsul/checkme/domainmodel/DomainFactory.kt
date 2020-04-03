@@ -1295,23 +1295,22 @@ class DomainFactory(
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
-        var task = getTaskForce(taskKey)
-        check(task.current(now))
-
-        val finalProjectId = projectId ?: defaultProjectId
-
-        task = task.updateProject(this, now, finalProjectId)
-
-        task.setName(name, note)
-
-        if (!task.isRootTask(now))
-            task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
-
-        task.updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
-
         val imageUuid = imagePath?.value?.let { newUuid() }
-        if (imagePath != null)
-            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+
+        val task = getTaskForce(taskKey).run {
+            requireCurrent(now)
+            updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
+        }.apply {
+            setName(name, note)
+
+            if (!isRootTask(now))
+                getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
+
+            updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
+
+            if (imagePath != null)
+                setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+        }
 
         updateNotifications(now)
 
@@ -1350,7 +1349,7 @@ class DomainFactory(
                 .distinct()
                 .single()
 
-        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+        val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
         val imageUuid = imagePath?.let { newUuid() }
 
@@ -1363,8 +1362,6 @@ class DomainFactory(
                 imageUuid,
                 deviceDbInfo
         )
-
-        joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
@@ -1453,7 +1450,7 @@ class DomainFactory(
                 .distinct()
                 .single()
 
-        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+        val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
         val imageUuid = imagePath?.let { newUuid() }
 
@@ -1465,8 +1462,6 @@ class DomainFactory(
                 imageUuid,
                 deviceDbInfo
         )
-
-        joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
@@ -1502,18 +1497,14 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        var task = getTaskForce(taskKey)
-        check(task.current(now))
-
-        val finalProjectId = projectId ?: defaultProjectId
-
-        task = task.updateProject(this, now, finalProjectId)
-
-        task.setName(name, note)
-
-        task.getParentTaskHierarchy(now)?.setEndExactTimeStamp(now)
-
-        task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+        val task = getTaskForce(taskKey).run {
+            requireCurrent(now)
+            updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
+        }.apply {
+            setName(name, note)
+            getParentTaskHierarchy(now)?.setEndExactTimeStamp(now)
+            getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+        }
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
@@ -1550,7 +1541,7 @@ class DomainFactory(
         check(name.isNotEmpty())
 
         val parentTask = getTaskForce(parentTaskKey)
-        check(parentTask.current(now))
+        parentTask.requireCurrent(now)
 
         val imageUuid = imagePath?.let { newUuid() }
 
@@ -1580,7 +1571,7 @@ class DomainFactory(
             copyTaskKey: TaskKey? = null
     ): Task<T> {
         check(name.isNotEmpty())
-        check(parentTask.current(now))
+        parentTask.requireCurrent(now)
 
         val childTask = parentTask.createChildTask(now, name, note, imageJson)
 
@@ -1609,7 +1600,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val parentTask = getTaskForce(parentTaskKey)
-        check(parentTask.current(now))
+        parentTask.requireCurrent(now)
 
         check(joinTaskKeys.map { it.remoteProjectId }.distinct().size == 1)
 
@@ -1653,10 +1644,10 @@ class DomainFactory(
         check(name.isNotEmpty())
 
         val task = getTaskForce(taskKey)
-        check(task.current(now))
+        task.requireCurrent(now)
 
         val newParentTask = getTaskForce(parentTaskKey)
-        check(task.current(now))
+        newParentTask.requireCurrent(now)
 
         task.setName(name, note)
 
@@ -1716,9 +1707,9 @@ class DomainFactory(
         val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
 
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
-        val taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
 
-        check(taskHierarchy.current(now))
+        val taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
+        taskHierarchy.requireCurrent(now)
 
         taskHierarchy.ordinal = hierarchyData.ordinal
 
@@ -1733,7 +1724,7 @@ class DomainFactory(
         check(taskKeys.isNotEmpty())
 
         val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
-        check(tasks.all { it.current(now) })
+        tasks.forEach { it.requireCurrent(now) }
 
         fun parentPresent(task: Task<*>): Boolean = task.getParentTask(now)?.let {
             tasks.contains(it) || parentPresent(it)
@@ -1814,7 +1805,7 @@ class DomainFactory(
         taskUndoData.taskKeys
                 .map { getTaskForce(it) }
                 .forEach {
-                    check(!it.current(now))
+                    it.requireNotCurrent(now)
 
                     it.clearEndExactTimeStamp(uuid, now)
                 }
@@ -1822,7 +1813,7 @@ class DomainFactory(
         taskUndoData.taskHierarchyKeys
                 .map { remoteProjectFactory.getTaskHierarchy(it) }
                 .forEach {
-                    check(!it.current(now))
+                    it.requireNotCurrent(now)
 
                     it.clearEndExactTimeStamp(now)
                 }
@@ -1830,7 +1821,7 @@ class DomainFactory(
         taskUndoData.scheduleIds
                 .map { remoteProjectFactory.getSchedule(it) }
                 .forEach {
-                    check(!it.current(now))
+                    it.requireNotCurrent(now)
 
                     it.clearEndExactTimeStamp(now)
                 }
@@ -2096,12 +2087,14 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val remoteProjects = projectIds.map { remoteProjectFactory.getRemoteProjectForce(it) }.toSet()
-        check(remoteProjects.all { it.current(now) })
-
         val projectUndoData = ProjectUndoData()
 
-        remoteProjects.forEach { it.setEndExactTimeStamp(uuid, now, projectUndoData, removeInstances) }
+        val remoteProjects = projectIds.map { remoteProjectFactory.getRemoteProjectForce(it) }.toSet()
+
+        remoteProjects.forEach {
+            it.requireCurrent(now)
+            it.setEndExactTimeStamp(uuid, now, projectUndoData, removeInstances)
+        }
 
         updateNotifications(now)
 
@@ -2121,9 +2114,11 @@ class DomainFactory(
         val remoteProjects = projectUndoData.projectIds
                 .map { remoteProjectFactory.getRemoteProjectForce(it) }
                 .toSet()
-        check(remoteProjects.none { it.current(now) })
 
-        remoteProjects.forEach { it.clearEndExactTimeStamp(now) }
+        remoteProjects.forEach {
+            it.requireNotCurrent(now)
+            it.clearEndExactTimeStamp(now)
+        }
 
         processTaskUndoData(projectUndoData.taskUndoData, now)
 
@@ -2425,11 +2420,11 @@ class DomainFactory(
             now: ExactTimeStamp,
             removeInstanceKeys: List<InstanceKey>
     ) {
-        check(newParentTask.current(now))
+        newParentTask.requireCurrent(now)
         check(joinTasks.size > 1)
 
         for (joinTask in joinTasks) {
-            check(joinTask.current(now))
+            joinTask.requireCurrent(now)
 
             if (joinTask.isRootTask(now)) {
                 joinTask.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }

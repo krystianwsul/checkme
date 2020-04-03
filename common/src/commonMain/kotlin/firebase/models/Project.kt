@@ -217,7 +217,7 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
-        check(current(now))
+        requireCurrent(now)
 
         remoteTasks.values
                 .filter { it.current(now) }
@@ -235,7 +235,7 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         remoteProjectRecord.endTime = null
     }
@@ -268,7 +268,7 @@ abstract class Project<T : ProjectType> : Current {
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
         childTaskHierarchies.map { it.childTask }.forEach {
-            check(it.current(now))
+            it.requireCurrent(now)
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
         }

@@ -66,7 +66,7 @@ class Task<T : ProjectType>(
     ): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
-        check(current(exactTimeStamp))
+        requireCurrent(exactTimeStamp)
 
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
 
@@ -118,7 +118,7 @@ class Task<T : ProjectType>(
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
-        check(current(exactTimeStamp))
+        requireCurrent(exactTimeStamp)
 
         return getParentTask(exactTimeStamp) == null
     }
@@ -131,15 +131,15 @@ class Task<T : ProjectType>(
     ) {
         val now = endData.exactTimeStamp
 
-        check(current(now))
+        requireCurrent(now)
 
         taskUndoData?.taskKeys?.add(taskKey)
 
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
-            check(schedules.all { it.current(now) })
-
             schedules.forEach {
+                it.requireCurrent(now)
+
                 taskUndoData?.scheduleIds?.add(it.scheduleId)
 
                 it.setEndExactTimeStamp(now)
@@ -158,7 +158,7 @@ class Task<T : ProjectType>(
 
         if (!recursive) {
             getParentTaskHierarchy(now)?.let {
-                check(it.current(now))
+                it.requireCurrent(now)
 
                 taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
@@ -171,14 +171,14 @@ class Task<T : ProjectType>(
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T>? {
         val taskHierarchies = if (current(exactTimeStamp)) {
-            check(notDeleted(exactTimeStamp))
+            requireNotDeleted(exactTimeStamp)
 
             getParentTaskHierarchies().filter { it.current(exactTimeStamp) }
         } else {
             // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
             // żeby można było dodawać child instances do past parent instance
 
-            check(notDeleted(exactTimeStamp))
+            requireNotDeleted(exactTimeStamp)
 
             getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
         }
@@ -191,20 +191,18 @@ class Task<T : ProjectType>(
     }
 
     fun clearEndExactTimeStamp(uuid: String, now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         setMyEndExactTimeStamp(uuid, now, null)
     }
 
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T>? {
-        check(notDeleted(exactTimeStamp))
+        requireNotDeleted(exactTimeStamp)
 
-        return getParentTaskHierarchy(exactTimeStamp)?.let {
-            check(it.notDeleted(exactTimeStamp))
+        return getParentTaskHierarchy(exactTimeStamp)?.run {
+            requireNotDeleted(exactTimeStamp)
 
-            it.parentTask.also {
-                check(it.notDeleted(exactTimeStamp))
-            }
+            parentTask.apply { requireNotDeleted(exactTimeStamp) }
         }
     }
 
@@ -606,13 +604,14 @@ class Task<T : ProjectType>(
     }
 
     fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
-        check(current(exactTimeStamp))
+        requireCurrent(exactTimeStamp)
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
+        currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
 
-        check(currentSchedules.all { it.current(exactTimeStamp) })
-
-        return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { scheduleTextFactory.getScheduleText(it, remoteProject) }
+        return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") {
+            scheduleTextFactory.getScheduleText(it, remoteProject)
+        }
     }
 
     fun generateInstance(scheduleDateTime: DateTime) = Instance(remoteProject, this, scheduleDateTime)
@@ -622,13 +621,13 @@ class Task<T : ProjectType>(
             exactTimeStamp: ExactTimeStamp,
             showParent: Boolean = false
     ): String? {
-        check(current(exactTimeStamp))
+        requireCurrent(exactTimeStamp)
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
         val parentTask = getParentTask(exactTimeStamp)
 
         return if (parentTask == null) {
-            check(currentSchedules.all { it.current(exactTimeStamp) })
+            currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
 
             ScheduleGroup.getGroups(currentSchedules).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, remoteProject)

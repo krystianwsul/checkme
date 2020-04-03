@@ -34,13 +34,13 @@ class TaskHierarchy<T : ProjectType>(
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.id, remoteTaskHierarchyRecord.id) }
 
     fun setEndExactTimeStamp(now: ExactTimeStamp) {
-        check(current(now))
+        requireCurrent(now)
 
         remoteTaskHierarchyRecord.endTime = now.long
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         remoteTaskHierarchyRecord.endTime = null
     }

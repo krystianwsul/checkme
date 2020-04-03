@@ -9,5 +9,26 @@ interface Current {
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp } != false
 
-    fun current(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp && notDeleted(exactTimeStamp)
+    fun afterStart(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
+
+    fun current(exactTimeStamp: ExactTimeStamp) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
+
+    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp) {
+        if (!notDeleted(exactTimeStamp))
+            throwTime(exactTimeStamp)
+    }
+
+    fun requireCurrent(exactTimeStamp: ExactTimeStamp) {
+        if (!current(exactTimeStamp))
+            throwTime(exactTimeStamp)
+    }
+
+    fun requireNotCurrent(exactTimeStamp: ExactTimeStamp) {
+        if (current(exactTimeStamp))
+            throwTime(exactTimeStamp)
+    }
+
+    fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw TimeException("start: $startExactTimeStamp, end: $endExactTimeStamp, time: $exactTimeStamp")
+
+    private class TimeException(message: String) : Exception(message)
 }

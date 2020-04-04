@@ -15,7 +15,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         private val rootInstanceManager: RootInstanceManager<T>
-) {
+) : Current {
 
     companion object {
 

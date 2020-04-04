@@ -29,7 +29,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).max()!!
 
         val endExactTimeStamp = listOfNotNull(
-                getEndExactTimeStamp(),
+                endExactTimeStamp,
                 repeatingScheduleBridge.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
@@ -80,7 +80,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     ): Instance<T>?
 
     override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
-        check(current(now))
+        requireCurrent(now)
 
         return until?.let {
             getInstances(task, null, null).any { it.isVisible(now, hack24) }

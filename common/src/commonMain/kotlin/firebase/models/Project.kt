@@ -17,7 +17,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : ProjectType> {
+abstract class Project<T : ProjectType> : Current {
 
     abstract val projectRecord: ProjectRecord<T>
     abstract val rootInstanceManagers: Map<TaskKey, RootInstanceManager<T>>
@@ -36,9 +36,8 @@ abstract class Project<T : ProjectType> {
             projectRecord.name = name
         }
 
-    private val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
-
-    val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
+    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
 
     val taskKeys get() = remoteTasks.keys
 
@@ -89,7 +88,7 @@ abstract class Project<T : ProjectType> {
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp
     ): Task<T> {
-        val endTime = oldTask.getEndExactTimeStamp()?.long
+        val endTime = oldTask.endExactTimeStamp?.long
 
         val oldestVisible = oldTask.getOldestVisible()
 
@@ -180,9 +179,16 @@ abstract class Project<T : ProjectType> {
         check(remoteParentTaskId.isNotEmpty())
         check(remoteChildTaskId.isNotEmpty())
 
-        val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
+        val endTime = startTaskHierarchy.endExactTimeStamp?.long
 
-        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, now.long, endTime, startTaskHierarchy.ordinal)
+        val taskHierarchyJson = TaskHierarchyJson(
+                remoteParentTaskId,
+                remoteChildTaskId,
+                now.long,
+                endTime,
+                startTaskHierarchy.ordinal
+        )
+
         val remoteTaskHierarchyRecord = projectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)
@@ -223,14 +229,8 @@ abstract class Project<T : ProjectType> {
         projectRecord.delete()
     }
 
-    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val endExactTimeStamp = endExactTimeStamp
-
-        return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
-    }
-
     fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
-        check(current(now))
+        requireCurrent(now)
 
         remoteTasks.values
                 .filter { it.current(now) }
@@ -248,7 +248,7 @@ abstract class Project<T : ProjectType> {
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         projectRecord.endTime = null
     }
@@ -281,7 +281,7 @@ abstract class Project<T : ProjectType> {
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
         childTaskHierarchies.map { it.childTask }.forEach {
-            check(it.current(now))
+            it.requireCurrent(now)
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
         }

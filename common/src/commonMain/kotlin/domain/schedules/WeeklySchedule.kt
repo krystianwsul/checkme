@@ -41,7 +41,7 @@ class WeeklySchedule<T : ProjectType>(
             return null
 
         val scheduleDateTime = DateTime(date, time)
-        check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
+        task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
     }

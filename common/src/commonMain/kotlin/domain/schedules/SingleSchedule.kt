@@ -39,14 +39,14 @@ class SingleSchedule<T : ProjectType>(
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
             return emptySequence()
 
-        if (getEndExactTimeStamp()?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
+        if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
             return emptySequence()
 
         return sequenceOf(getInstance(task))
     }
 
     override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
-        check(current(now))
+        requireCurrent(now)
 
         return getInstance(task).isVisible(now, hack24)
     }

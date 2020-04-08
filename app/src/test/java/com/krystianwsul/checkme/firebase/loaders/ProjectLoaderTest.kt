@@ -98,7 +98,7 @@ class ProjectLoaderTest {
             exception: Exception
     ) : Exception("name: $name, value: $value", exception)
 
-    private lateinit var addProjectEmissionTester: EmissionTester<ProjectLoader.AddProjectEvent<ProjectType.Private>>
+    private lateinit var initialProjectEmissionTester: EmissionTester<ProjectLoader.InitialProjectEvent<ProjectType.Private>>
     private lateinit var addTaskEmissionTester: EmissionTester<ProjectLoader.AddTaskEvent<ProjectType.Private>>
     private lateinit var changeInstancesEmissionTester: EmissionTester<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
     private lateinit var changeProjectEmissionTester: EmissionTester<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
@@ -128,13 +128,13 @@ class ProjectLoaderTest {
                 AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
         )
 
-        addProjectEmissionTester = EmissionTester("addProject")
+        initialProjectEmissionTester = EmissionTester("addProject")
         addTaskEmissionTester = EmissionTester("addTask")
         changeInstancesEmissionTester = EmissionTester("changeInstances")
         changeProjectEmissionTester = EmissionTester("changeProject")
 
         projectLoader.addProjectEvent
-                .subscribe(addProjectEmissionTester)
+                .subscribe(initialProjectEmissionTester)
                 .addTo(compositeDisposable)
 
         projectLoader.addTaskEvents
@@ -154,7 +154,7 @@ class ProjectLoaderTest {
     fun after() {
         compositeDisposable.clear()
 
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
         addTaskEmissionTester.checkEmpty()
         changeInstancesEmissionTester.checkEmpty()
         changeProjectEmissionTester.checkEmpty()
@@ -169,7 +169,7 @@ class ProjectLoaderTest {
 
     @Test
     fun testEmptyProject() {
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
 
         acceptProject(PrivateProjectJson())
     }
@@ -178,9 +178,9 @@ class ProjectLoaderTest {
     fun testSingleTask() {
         val taskId = "taskKey"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
 
@@ -188,11 +188,11 @@ class ProjectLoaderTest {
     fun testSingleTaskRepeat() {
         val taskId = "taskKey"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
 
         changeProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed"))))
@@ -204,11 +204,11 @@ class ProjectLoaderTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
 
         addTaskEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(
@@ -225,11 +225,11 @@ class ProjectLoaderTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
 
         addTaskEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(
@@ -253,11 +253,11 @@ class ProjectLoaderTest {
     fun testSingleTaskRemoveTask() {
         val taskId = "taskKey"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
 
         changeProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson())
@@ -270,11 +270,11 @@ class ProjectLoaderTest {
     fun testSingleTaskEmitInstancesChangeTaskEmitInstances() {
         val taskId = "taskKey"
 
-        addProjectEmissionTester.addHandler { }
+        initialProjectEmissionTester.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        addProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionTester.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        addProjectEmissionTester.checkEmpty()
+        initialProjectEmissionTester.checkEmpty()
 
         changeInstancesEmissionTester.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))

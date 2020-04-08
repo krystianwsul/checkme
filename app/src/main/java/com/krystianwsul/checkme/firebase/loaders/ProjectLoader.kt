@@ -52,7 +52,7 @@ class ProjectLoader<T : ProjectType>(
                             databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
                         }
                         .zipSingle()
-                        .map { AddProjectEvent(projectManager, projectRecord, it.toMap()) }
+                        .map { InitialProjectEvent(projectManager, projectRecord, it.toMap()) }
             }
             .cache()
             .apply { domainDisposable += subscribe() }!!
@@ -89,6 +89,7 @@ class ProjectLoader<T : ProjectType>(
                 .merge()
     }.publishImmediate()
 
+    // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
             .filter { it.second.addedEntries.isEmpty() }
             .switchMap {
@@ -106,7 +107,7 @@ class ProjectLoader<T : ProjectType>(
             }
             .publishImmediate()
 
-    class AddProjectEvent<T : ProjectType>(
+    class InitialProjectEvent<T : ProjectType>(
             val projectManager: ProjectProvider.ProjectManager<T>,
             val projectRecord: ProjectRecord<T>,
             val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
@@ -115,17 +116,17 @@ class ProjectLoader<T : ProjectType>(
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfo: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
     )
 }

@@ -98,6 +98,13 @@ class SharedProjectsLoaderTest {
     }
 
     @Test
+    fun testInitialNoProjects() {
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectKeysRelay.accept(setOf())
+        initialProjectsEmissionChecker.checkEmpty()
+    }
+
+    @Test
     fun testInitialEmptyProject() {
         initialProjectsEmissionChecker.addHandler { }
 
@@ -118,4 +125,19 @@ class SharedProjectsLoaderTest {
         sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
     }
+
+    @Test
+    fun testInitialEmptyProjectAddEmptyProject() {
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1, projectKey2))
+        addProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+        addProjectEmissionChecker.checkEmpty()
+    }
+
+    // todo check removing project
 }

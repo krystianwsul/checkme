@@ -20,15 +20,16 @@ class SharedProjectsLoader(
     private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
     private fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }!!
 
-    private val projectDatabaseRxObservable = projectKeysObservable.processChangesSet(
-            {
-                DatabaseRx(
-                        domainDisposable,
-                        sharedProjectsProvider.getSharedProjectObservable(it)
-                )
-            },
-            { it.disposable.dispose() }
-    ).publishImmediate()
+    private val projectDatabaseRxObservable = projectKeysObservable.distinctUntilChanged()
+            .processChangesSet(
+                    {
+                        DatabaseRx(
+                                domainDisposable,
+                                sharedProjectsProvider.getSharedProjectObservable(it)
+                        )
+                    },
+                    { it.disposable.dispose() }
+            ).publishImmediate()
 
     private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
             { it.first },

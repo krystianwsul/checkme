@@ -15,13 +15,9 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.rxkotlin.plusAssign
 import org.junit.After
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -67,70 +63,12 @@ class ProjectLoaderTest {
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
             projectSnapshotRelay.accept(FactoryLoaderTest.ValueTestSnapshot(privateProjectJson, projectKey.key))
 
-    class EmissionTester<T : Any>(
-            name: String,
-            compositeDisposable: CompositeDisposable,
-            source: Observable<T>
-    ) {
-
-        private val handlers = mutableListOf<(T) -> Unit>()
-
-        constructor(
-                name: String,
-                compositeDisposable: CompositeDisposable,
-                source: Single<T>
-        ) : this(
-                name,
-                compositeDisposable,
-                source.toObservable()
-        )
-
-        init {
-            compositeDisposable += source.subscribe {
-                try {
-                    handlers.first().invoke(it)
-                    handlers.removeFirst()
-                } catch (exception: Exception) {
-                    throw EmissionException(name, it, exception)
-                }
-            }
-        }
-
-        fun addHandler(handler: (T) -> Unit) {
-            handlers += handler
-        }
-
-        fun checkEmpty() = assertTrue(handlers.isEmpty())
-
-        fun checkNotEmpty() = assertTrue(handlers.isNotEmpty())
-    }
-
-    private class EmissionException(
-            name: String,
-            value: Any,
-            exception: Exception
-    ) : Exception("name: $name, value: $value", exception)
-
-    private lateinit var initialProjectEmissionTester: EmissionTester<ProjectLoader.InitialProjectEvent<ProjectType.Private>>
-    private lateinit var addTaskEmissionTester: EmissionTester<ProjectLoader.AddTaskEvent<ProjectType.Private>>
-    private lateinit var changeInstancesEmissionTester: EmissionTester<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
-    private lateinit var changeProjectEmissionTester: EmissionTester<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ProjectLoader.InitialProjectEvent<ProjectType.Private>>
+    private lateinit var addTaskEmissionChecker: EmissionChecker<ProjectLoader.AddTaskEvent<ProjectType.Private>>
+    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
+    private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
 
     private val projectKey = ProjectKey.Private("userKey")
-
-    class RxErrorChecker {
-
-        private val errors = mutableListOf<Throwable>()
-
-        init {
-            RxJavaPlugins.setErrorHandler {
-                it.printStackTrace()
-                errors.add(it)
-            }
-        }
-
-        fun check() = assertTrue(errors.isEmpty())
-    }
 
     @Before
     fun before() {
@@ -149,20 +87,20 @@ class ProjectLoaderTest {
                 AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
         )
 
-        initialProjectEmissionTester = EmissionTester("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
-        addTaskEmissionTester = EmissionTester("addTask", compositeDisposable, projectLoader.addTaskEvents)
-        changeInstancesEmissionTester = EmissionTester("changeInstances", compositeDisposable, projectLoader.changeInstancesEvents)
-        changeProjectEmissionTester = EmissionTester("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
+        initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
+        addTaskEmissionChecker = EmissionChecker("addTask", compositeDisposable, projectLoader.addTaskEvents)
+        changeInstancesEmissionChecker = EmissionChecker("changeInstances", compositeDisposable, projectLoader.changeInstancesEvents)
+        changeProjectEmissionChecker = EmissionChecker("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
     }
 
     @After
     fun after() {
         compositeDisposable.clear()
 
-        initialProjectEmissionTester.checkEmpty()
-        addTaskEmissionTester.checkEmpty()
-        changeInstancesEmissionTester.checkEmpty()
-        changeProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
+        addTaskEmissionChecker.checkEmpty()
+        changeInstancesEmissionChecker.checkEmpty()
+        changeProjectEmissionChecker.checkEmpty()
 
         rxErrorChecker.check()
     }
@@ -174,7 +112,7 @@ class ProjectLoaderTest {
 
     @Test
     fun testEmptyProject() {
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
 
         acceptProject(PrivateProjectJson())
     }
@@ -183,9 +121,9 @@ class ProjectLoaderTest {
     fun testSingleTask() {
         val taskId = "taskKey"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
 
@@ -193,15 +131,15 @@ class ProjectLoaderTest {
     fun testSingleTaskRepeat() {
         val taskId = "taskKey"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        initialProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
 
-        changeProjectEmissionTester.addHandler { }
+        changeProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed"))))
-        changeProjectEmissionTester.checkEmpty()
+        changeProjectEmissionChecker.checkEmpty()
     }
 
     @Test
@@ -209,20 +147,20 @@ class ProjectLoaderTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-        initialProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
 
-        addTaskEmissionTester.addHandler { }
+        addTaskEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                         taskId1 to TaskJson("task1"),
                         taskId2 to TaskJson("task2")
         )))
-        addTaskEmissionTester.checkNotEmpty()
+        addTaskEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
-        addTaskEmissionTester.checkEmpty()
+        addTaskEmissionChecker.checkEmpty()
     }
 
     @Test
@@ -230,43 +168,43 @@ class ProjectLoaderTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-        initialProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
 
-        addTaskEmissionTester.addHandler { }
+        addTaskEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                         taskId1 to TaskJson("task1"),
                         taskId2 to TaskJson("task2")
         )))
-        addTaskEmissionTester.checkNotEmpty()
+        addTaskEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
-        addTaskEmissionTester.checkEmpty()
+        addTaskEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionTester.addHandler { }
+        changeInstancesEmissionChecker.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
-        changeInstancesEmissionTester.checkEmpty()
+        changeInstancesEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionTester.addHandler { }
+        changeInstancesEmissionChecker.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
-        changeInstancesEmissionTester.checkEmpty()
+        changeInstancesEmissionChecker.checkEmpty()
     }
 
     @Test
     fun testSingleTaskRemoveTask() {
         val taskId = "taskKey"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        initialProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
 
-        changeProjectEmissionTester.addHandler { }
+        changeProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson())
-        changeProjectEmissionTester.checkEmpty()
+        changeProjectEmissionChecker.checkEmpty()
 
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
@@ -275,22 +213,22 @@ class ProjectLoaderTest {
     fun testSingleTaskEmitInstancesChangeTaskEmitInstances() {
         val taskId = "taskKey"
 
-        initialProjectEmissionTester.addHandler { }
+        initialProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
-        initialProjectEmissionTester.checkNotEmpty()
+        initialProjectEmissionChecker.checkNotEmpty()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        initialProjectEmissionTester.checkEmpty()
+        initialProjectEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionTester.addHandler { }
+        changeInstancesEmissionChecker.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
-        changeInstancesEmissionTester.checkEmpty()
+        changeInstancesEmissionChecker.checkEmpty()
 
-        changeProjectEmissionTester.addHandler { }
+        changeProjectEmissionChecker.addHandler { }
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
-        changeProjectEmissionTester.checkEmpty()
+        changeProjectEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionTester.addHandler { }
+        changeInstancesEmissionChecker.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
-        changeInstancesEmissionTester.checkEmpty()
+        changeInstancesEmissionChecker.checkEmpty()
     }
 }

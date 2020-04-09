@@ -1,12 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.zipSingle
-import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -39,7 +36,7 @@ class SharedProjectsLoader(
                 ProjectLoader(
                         mapChanges.newMap
                                 .getValue(projectKey)
-                                .changes,
+                                .observable,
                         domainDisposable,
                         sharedProjectsProvider.projectProvider,
                         sharedProjectManager
@@ -56,7 +53,7 @@ class SharedProjectsLoader(
                         .map { it.initialProjectEvent }
                         .zipSingle()
             }
-            .map { InitialProjectsEvent(it.map { it.projectRecord to it.snapshotInfos }) }
+            .map { InitialProjectsEvent(it) }
             .cacheImmediate()
 
     // this is the event for adding new projects
@@ -94,6 +91,6 @@ class SharedProjectsLoader(
     }.publishImmediate()
 
     class InitialProjectsEvent(
-            val projectPairs: List<Pair<ProjectRecord<ProjectType.Shared>, Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>>>
+            val initialProjectEvents: List<ProjectLoader.InitialProjectEvent<ProjectType.Shared>>
     )
 }

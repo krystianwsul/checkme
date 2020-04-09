@@ -66,7 +66,7 @@ interface FactoryProvider {
 
         interface Snapshot {
 
-            val key: String?
+            val key: String
 
             val children: Iterable<Snapshot>
 
@@ -78,7 +78,7 @@ interface FactoryProvider {
 
             class Impl(private val dataSnapshot: DataSnapshot) : Snapshot {
 
-                override val key get() = dataSnapshot.key
+                override val key get() = dataSnapshot.key!!
 
                 override val children get() = dataSnapshot.children.map { Impl(it) }
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
-import com.google.firebase.database.GenericTypeIndicator
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.ProjectFactory
@@ -172,11 +171,14 @@ class FactoryLoaderTest {
                 projectId: String,
                 taskId: String,
                 map: Map<String, Map<String, InstanceJson>>
-        ) = rootInstanceObservables.getValue("$projectId-$taskId").accept(ValueTestSnapshot(map))
+        ) {
+            val key = "$projectId-$taskId"
+            rootInstanceObservables.getValue(key).accept(ValueTestSnapshot(map, key))
+        }
 
         override fun getFriendObservable(userKey: UserKey) = friendObservable
 
-        override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it) }!!
+        override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it, key.key) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
@@ -227,37 +229,6 @@ class FactoryLoaderTest {
     private val userInfo by lazy { UserInfo("email", "name") }
     private val deviceInfoWrapper by lazy { NullableWrapper(DeviceInfo(userInfo, "token")) }
 
-    open class TestSnapshot : FactoryProvider.Database.Snapshot {
-
-        override val key: String?
-            get() = TODO("Not yet implemented")
-
-        override val children: Iterable<FactoryProvider.Database.Snapshot>
-            get() = TODO("Not yet implemented")
-
-        override fun exists(): Boolean {
-            TODO("Not yet implemented")
-        }
-
-        override fun <T> getValue(valueType: Class<T>): T? {
-            TODO("Not yet implemented")
-        }
-
-        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T? {
-            TODO("Not yet implemented")
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    class ValueTestSnapshot(private val value: Any, override val key: String? = null) : TestSnapshot() {
-
-        override fun exists() = true
-
-        override fun <T> getValue(valueType: Class<T>) = value as T
-
-        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = value as T
-    }
-
     private val compositeDisposable = CompositeDisposable()
 
     private val privateProjectKey by lazy { userInfo.key.key }
@@ -305,7 +276,7 @@ class FactoryLoaderTest {
     private fun initializeEmpty() {
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestSnapshot(UserWrapper()))
+                .accept(ValueTestSnapshot(UserWrapper(), userInfo.key.key))
 
         testFactoryProvider.database
                 .privateProjectObservable
@@ -331,7 +302,7 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
+                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true)), userInfo.key.key))
 
         testFactoryProvider.database
                 .privateProjectObservable
@@ -359,7 +330,7 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
+                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true)), userInfo.key.key))
 
         testFactoryProvider.database
                 .friendObservable
@@ -401,7 +372,7 @@ class FactoryLoaderTest {
     fun testPrivateAndSharedInstances() {
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true))))
+                .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true)), userInfo.key.key))
 
         testFactoryProvider.database
                 .friendObservable

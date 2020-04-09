@@ -398,7 +398,7 @@ class ProjectFactory(
 
         class Change(val dataSnapshot: FactoryProvider.Database.Snapshot) : SharedProjectEvent() {
 
-            override val key = dataSnapshot.key!!
+            override val key = dataSnapshot.key
         }
 
         class Add(
@@ -406,7 +406,7 @@ class ProjectFactory(
                 val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
         ) : SharedProjectEvent() {
 
-            override val key = dataSnapshot.key!!
+            override val key = dataSnapshot.key
         }
 
         class Remove(override val key: String) : SharedProjectEvent()

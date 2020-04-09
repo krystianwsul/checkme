@@ -22,7 +22,7 @@ class AndroidSharedProjectManager(
     private fun FactoryProvider.Database.Snapshot.toRecord() = SharedProjectRecord(
             database,
             this@AndroidSharedProjectManager,
-            ProjectKey.Shared(key!!),
+            ProjectKey.Shared(key),
             getValue(JsonWrapper::class.java)!!
     )
 
@@ -30,7 +30,7 @@ class AndroidSharedProjectManager(
             this,
             children.mapNotNull {
                         try {
-                            ProjectKey.Shared(it.key!!) to Pair(it.toRecord(), false)
+                            ProjectKey.Shared(it.key) to Pair(it.toRecord(), false)
                         } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
                             MyCrashlytics.logException(onlyVisibilityPresentException)
 
@@ -49,7 +49,7 @@ class AndroidSharedProjectManager(
     override val databaseWrapper = database
 
     override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): SharedProjectRecord {
-        val key = ProjectKey.Shared(snapshot.key!!)
+        val key = ProjectKey.Shared(snapshot.key)
 
         return snapshot.toRecord().also {
             sharedProjectProperty[key] = Pair(it, false)

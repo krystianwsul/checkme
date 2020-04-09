@@ -4,6 +4,8 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
+import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.Observable
@@ -27,6 +29,14 @@ class SharedProjectsLoaderTest {
                 sharedProjectObservables[projectKey] = PublishRelay.create()
             return sharedProjectObservables.getValue(projectKey)
         }
+
+        fun acceptProject(
+                projectKey: ProjectKey.Shared,
+                projectJson: SharedProjectJson
+        ) = sharedProjectObservables.getValue(projectKey).accept(ValueTestSnapshot(
+                JsonWrapper(projectJson),
+                projectKey.key
+        ))
     }
 
     private val compositeDisposable = CompositeDisposable()
@@ -43,6 +53,8 @@ class SharedProjectsLoaderTest {
     private lateinit var addTaskEmissionChecker: EmissionChecker<ProjectLoader.AddTaskEvent<ProjectType.Shared>>
     private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Shared>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Shared>>
+
+    private val projectKey1 = ProjectKey.Shared("projectKey1")
 
     @Before
     fun before() {
@@ -82,5 +94,15 @@ class SharedProjectsLoaderTest {
     @Test
     fun testInitial() {
         assertNull(sharedProjectsLoader.initialProjectsEvent.tryGetCurrentValue())
+    }
+
+    @Test
+    fun testEmptyProject() {
+        initialProjectsEmissionChecker.addHandler { }
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+
+        initialProjectsEmissionChecker.checkEmpty()
     }
 }

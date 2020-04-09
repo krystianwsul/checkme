@@ -49,7 +49,10 @@ class ProjectLoaderTest {
                 projectId: String,
                 taskId: String,
                 map: Map<String, Map<String, InstanceJson>>
-        ) = rootInstanceObservables.getValue("$projectId-$taskId").accept(FactoryLoaderTest.ValueTestSnapshot(map))
+        ) {
+            val key = "$projectId-$taskId"
+            rootInstanceObservables.getValue(key).accept(ValueTestSnapshot(map, key))
+        }
     }
 
     private val compositeDisposable = CompositeDisposable()
@@ -61,7 +64,7 @@ class ProjectLoaderTest {
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
-            projectSnapshotRelay.accept(FactoryLoaderTest.ValueTestSnapshot(privateProjectJson, projectKey.key))
+            projectSnapshotRelay.accept(ValueTestSnapshot(privateProjectJson, projectKey.key))
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ProjectLoader.InitialProjectEvent<ProjectType.Private>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ProjectLoader.AddTaskEvent<ProjectType.Private>>

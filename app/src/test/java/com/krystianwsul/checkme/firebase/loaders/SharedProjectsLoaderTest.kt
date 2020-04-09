@@ -55,6 +55,7 @@ class SharedProjectsLoaderTest {
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Shared>>
 
     private val projectKey1 = ProjectKey.Shared("projectKey1")
+    private val projectKey2 = ProjectKey.Shared("projectKey2")
 
     @Before
     fun before() {
@@ -92,17 +93,29 @@ class SharedProjectsLoaderTest {
     }
 
     @Test
-    fun testInitial() {
+    fun testStart() {
         assertNull(sharedProjectsLoader.initialProjectsEvent.tryGetCurrentValue())
     }
 
     @Test
-    fun testEmptyProject() {
+    fun testInitialEmptyProject() {
         initialProjectsEmissionChecker.addHandler { }
 
         sharedProjectKeysRelay.accept(setOf(projectKey1))
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
 
+        initialProjectsEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialTwoEmptyProjects() {
+        initialProjectsEmissionChecker.addHandler { }
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1, projectKey2))
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        initialProjectsEmissionChecker.checkNotEmpty()
+
+        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
     }
 }

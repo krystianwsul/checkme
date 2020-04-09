@@ -127,6 +127,18 @@ class SharedProjectsLoaderTest {
     }
 
     @Test
+    fun testInitialNoProjectsAddEmptyProject() {
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectKeysRelay.accept(setOf())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        addProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        addProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
     fun testInitialEmptyProjectAddEmptyProject() {
         sharedProjectKeysRelay.accept(setOf(projectKey1))
         initialProjectsEmissionChecker.addHandler { }

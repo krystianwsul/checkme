@@ -53,19 +53,19 @@ class SharedProjectsLoader(
                 it.second
                         .newMap
                         .values
-                        .map { it.addProjectEvent }
+                        .map { it.initialProjectEvent }
                         .zipSingle()
             }
             .map { InitialProjectsEvent(it.map { it.projectRecord to it.snapshotInfos }) }
             .cacheImmediate()
 
     // this is the event for adding new projects
-    val addProjectEvents = projectLoadersObservable.skip(1)
-            .switchMapSingle {
+    val addProjectEvents: Observable<ProjectLoader.InitialProjectEvent<ProjectType.Shared>> = projectLoadersObservable.skip(1)
+            .switchMap {
                 it.second.addedEntries
                         .values
-                        .map { it.addProjectEvent }
-                        .zipSingle()
+                        .map { it.initialProjectEvent.toObservable() }
+                        .merge()
             }
             .publishImmediate()
 

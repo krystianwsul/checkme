@@ -15,10 +15,9 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Consumer
 import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import org.junit.After
 import org.junit.Assert.assertNull
@@ -29,7 +28,7 @@ import org.junit.Test
 @ExperimentalStdlibApi
 class ProjectLoaderTest {
 
-    private class TestProjectProvider : ProjectProvider {
+    class TestProjectProvider : ProjectProvider {
 
         private val rootInstanceObservables = mutableMapOf<String, PublishRelay<FactoryProvider.Database.Snapshot>>()
 
@@ -57,23 +56,37 @@ class ProjectLoaderTest {
         ) = rootInstanceObservables.getValue("$projectId-$taskId").accept(FactoryLoaderTest.ValueTestSnapshot(map))
     }
 
-    private lateinit var projectSnapshotRelay: BehaviorRelay<FactoryProvider.Database.Snapshot>
     private val compositeDisposable = CompositeDisposable()
+
+    private lateinit var rxErrorChecker: RxErrorChecker
+
+    private lateinit var projectSnapshotRelay: BehaviorRelay<FactoryProvider.Database.Snapshot>
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
             projectSnapshotRelay.accept(FactoryLoaderTest.ValueTestSnapshot(privateProjectJson, projectKey.key))
 
-    private inner class EmissionTester<T : Any>(
+    class EmissionTester<T : Any>(
             name: String,
-            private val publishRelay: PublishRelay<T> = PublishRelay.create()
-    ) : Consumer<T> by publishRelay {
+            compositeDisposable: CompositeDisposable,
+            source: Observable<T>
+    ) {
 
         private val handlers = mutableListOf<(T) -> Unit>()
 
+        constructor(
+                name: String,
+                compositeDisposable: CompositeDisposable,
+                source: Single<T>
+        ) : this(
+                name,
+                compositeDisposable,
+                source.toObservable()
+        )
+
         init {
-            compositeDisposable += publishRelay.subscribe {
+            compositeDisposable += source.subscribe {
                 try {
                     handlers.first().invoke(it)
                     handlers.removeFirst()
@@ -105,18 +118,26 @@ class ProjectLoaderTest {
 
     private val projectKey = ProjectKey.Private("userKey")
 
-    private lateinit var errors: MutableList<Throwable>
+    class RxErrorChecker {
+
+        private val errors = mutableListOf<Throwable>()
+
+        init {
+            RxJavaPlugins.setErrorHandler {
+                it.printStackTrace()
+                errors.add(it)
+            }
+        }
+
+        fun check() = assertTrue(errors.isEmpty())
+    }
 
     @Before
     fun before() {
         mockkStatic(Base64::class)
         every { Base64.encodeToString(any(), any()) } returns projectKey.key
 
-        errors = mutableListOf()
-        RxJavaPlugins.setErrorHandler {
-            it.printStackTrace()
-            errors.add(it)
-        }
+        rxErrorChecker = RxErrorChecker()
 
         projectSnapshotRelay = BehaviorRelay.create()
         projectProvider = TestProjectProvider()
@@ -128,26 +149,10 @@ class ProjectLoaderTest {
                 AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
         )
 
-        initialProjectEmissionTester = EmissionTester("addProject")
-        addTaskEmissionTester = EmissionTester("addTask")
-        changeInstancesEmissionTester = EmissionTester("changeInstances")
-        changeProjectEmissionTester = EmissionTester("changeProject")
-
-        projectLoader.addProjectEvent
-                .subscribe(initialProjectEmissionTester)
-                .addTo(compositeDisposable)
-
-        projectLoader.addTaskEvents
-                .subscribe(addTaskEmissionTester)
-                .addTo(compositeDisposable)
-
-        projectLoader.changeInstancesEvents
-                .subscribe(changeInstancesEmissionTester)
-                .addTo(compositeDisposable)
-
-        projectLoader.changeProjectEvents
-                .subscribe(changeProjectEmissionTester)
-                .addTo(compositeDisposable)
+        initialProjectEmissionTester = EmissionTester("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
+        addTaskEmissionTester = EmissionTester("addTask", compositeDisposable, projectLoader.addTaskEvents)
+        changeInstancesEmissionTester = EmissionTester("changeInstances", compositeDisposable, projectLoader.changeInstancesEvents)
+        changeProjectEmissionTester = EmissionTester("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
     }
 
     @After
@@ -159,12 +164,12 @@ class ProjectLoaderTest {
         changeInstancesEmissionTester.checkEmpty()
         changeProjectEmissionTester.checkEmpty()
 
-        assertTrue(errors.isEmpty())
+        rxErrorChecker.check()
     }
 
     @Test
     fun testInitial() {
-        assertNull(projectLoader.addProjectEvent.tryGetCurrentValue())
+        assertNull(projectLoader.initialProjectEvent.tryGetCurrentValue())
     }
 
     @Test

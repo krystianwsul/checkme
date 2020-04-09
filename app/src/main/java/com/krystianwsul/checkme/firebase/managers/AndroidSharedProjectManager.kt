@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
@@ -14,12 +15,12 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidSharedProjectManager(
-        children: Iterable<FactoryProvider.Database.Snapshot>,
-        private val factoryProvider: FactoryProvider
+        children: Iterable<FactoryProvider.Database.Snapshot>, // todo instances remove
+        private val database: DatabaseWrapper
 ) : SharedProjectManager<DomainFactory>(), ProjectProvider.ProjectManager<ProjectType.Shared> {
 
     private fun FactoryProvider.Database.Snapshot.toRecord() = SharedProjectRecord(
-            factoryProvider.database,
+            database,
             this@AndroidSharedProjectManager,
             ProjectKey.Shared(key!!),
             getValue(JsonWrapper::class.java)!!
@@ -45,7 +46,7 @@ class AndroidSharedProjectManager(
         it.mapValues { it.value.first }
     }!!
 
-    override val databaseWrapper = factoryProvider.database
+    override val databaseWrapper = database
 
     override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): SharedProjectRecord {
         val key = ProjectKey.Shared(snapshot.key!!)

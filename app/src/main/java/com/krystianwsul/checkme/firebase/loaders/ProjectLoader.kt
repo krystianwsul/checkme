@@ -41,7 +41,7 @@ class ProjectLoader<T : ProjectType>(
             .publishImmediate()
 
     // first snapshot of everything
-    val addProjectEvent = rootInstanceDatabaseRx.firstOrError()
+    val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
             .flatMap {
                 val projectRecord = it.first.first
 

@@ -92,7 +92,7 @@ class FactoryLoader(
                                     .map { it.value.first }
                                     .zipSingle()
                         }
-                        .map { AndroidSharedProjectManager(it, factoryProvider) }
+                        .map { AndroidSharedProjectManager(it, factoryProvider.database) }
                         .cacheImmediate()
 
                 val taskRecordObservable = Observables.combineLatest(

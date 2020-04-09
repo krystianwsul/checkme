@@ -49,6 +49,7 @@ class SharedProjectsLoaderTest {
     private lateinit var sharedProjectsLoader: SharedProjectsLoader
 
     private lateinit var initialProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.InitialProjectsEvent>
+    private lateinit var removeProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.RemoveProjectsEvent>
     private lateinit var addProjectEmissionChecker: EmissionChecker<ProjectLoader.InitialProjectEvent<ProjectType.Shared>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ProjectLoader.AddTaskEvent<ProjectType.Shared>>
     private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Shared>>
@@ -73,6 +74,7 @@ class SharedProjectsLoaderTest {
         )
 
         initialProjectsEmissionChecker = EmissionChecker("initialProjects", compositeDisposable, sharedProjectsLoader.initialProjectsEvent)
+        removeProjectsEmissionChecker = EmissionChecker("removeProjects", compositeDisposable, sharedProjectsLoader.removeProjectEvents)
         addProjectEmissionChecker = EmissionChecker("addProject", compositeDisposable, sharedProjectsLoader.addProjectEvents)
         addTaskEmissionChecker = EmissionChecker("addTask", compositeDisposable, sharedProjectsLoader.addTaskEvents)
         changeInstancesEmissionChecker = EmissionChecker("changeInstances", compositeDisposable, sharedProjectsLoader.changeInstancesEvents)
@@ -151,5 +153,20 @@ class SharedProjectsLoaderTest {
         addProjectEmissionChecker.checkEmpty()
     }
 
-    // todo check removing project
+    @Test
+    fun testProjectRemove() {
+        sharedProjectKeysRelay.accept(setOf(projectKey1, projectKey2))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        removeProjectsEmissionChecker.addHandler { }
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        removeProjectsEmissionChecker.checkEmpty()
+
+        removeProjectsEmissionChecker.addHandler { }
+        sharedProjectKeysRelay.accept(setOf())
+        removeProjectsEmissionChecker.checkEmpty()
+    }
 }

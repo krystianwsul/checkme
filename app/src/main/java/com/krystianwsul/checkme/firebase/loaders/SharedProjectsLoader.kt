@@ -57,8 +57,14 @@ class SharedProjectsLoader(
             .map { InitialProjectsEvent(it) }
             .cacheImmediate()
 
+    val removeProjectEvents = projectLoadersObservable.map {
+        RemoveProjectsEvent(it.second.removedEntries.keys)
+    }
+            .filter { it.projectKeys.isNotEmpty() }
+            .publishImmediate()
+
     // this is the event for adding new projects
-    val addProjectEvents: Observable<ProjectLoader.InitialProjectEvent<ProjectType.Shared>> = projectLoadersObservable.skip(1)
+    val addProjectEvents = projectLoadersObservable.skip(1)
             .switchMap {
                 it.second.addedEntries
                         .values
@@ -91,7 +97,7 @@ class SharedProjectsLoader(
                 .merge()
     }.publishImmediate()
 
-    class InitialProjectsEvent(
-            val initialProjectEvents: List<ProjectLoader.InitialProjectEvent<ProjectType.Shared>>
-    )
+    class InitialProjectsEvent(val initialProjectEvents: List<ProjectLoader.InitialProjectEvent<ProjectType.Shared>>)
+
+    class RemoveProjectsEvent(val projectKeys: Set<ProjectKey.Shared>)
 }

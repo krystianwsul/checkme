@@ -169,4 +169,16 @@ class SharedProjectsLoaderTest {
         sharedProjectKeysRelay.accept(setOf())
         removeProjectsEmissionChecker.checkEmpty()
     }
+
+    @Test
+    fun testEmptyProjectChange() {
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson(name = "asdf"))
+        changeProjectEmissionChecker.checkEmpty() // todo check if this is checked in ProjectLoaderTest
+    }
 }

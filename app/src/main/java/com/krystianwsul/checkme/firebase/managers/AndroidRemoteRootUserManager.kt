@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -10,13 +10,13 @@ import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 
 class AndroidRemoteRootUserManager(
-        children: Iterable<FactoryProvider.Database.Snapshot>,
+        children: Iterable<Snapshot>,
         override val databaseWrapper: DatabaseWrapper
 ) : RemoteRootUserManager() {
 
     companion object {
 
-        private fun Iterable<FactoryProvider.Database.Snapshot>.toRootUserRecords() = map {
+        private fun Iterable<Snapshot>.toRootUserRecords() = map {
             RootUserRecord(false, it.getValue(UserWrapper::class.java)!!)
         }.associateBy { it.id }
     }
@@ -34,7 +34,7 @@ class AndroidRemoteRootUserManager(
         }
     }
 
-    fun onNewSnapshot(children: Iterable<FactoryProvider.Database.Snapshot>) = children.toRootUserRecords().also {
+    fun onNewSnapshot(children: Iterable<Snapshot>) = children.toRootUserRecords().also {
         remoteRootUserRecords = it
     }
 }

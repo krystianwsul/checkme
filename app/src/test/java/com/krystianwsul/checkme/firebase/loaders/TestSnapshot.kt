@@ -2,12 +2,12 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.GenericTypeIndicator
 
-open class TestSnapshot : FactoryProvider.Database.Snapshot {
+open class TestSnapshot : Snapshot {
 
     override val key: String
         get() = TODO("Not yet implemented")
 
-    override val children: Iterable<FactoryProvider.Database.Snapshot>
+    override val children: Iterable<Snapshot>
         get() = TODO("Not yet implemented")
 
     override fun exists(): Boolean {

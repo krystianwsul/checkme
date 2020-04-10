@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -31,18 +29,18 @@ interface FactoryProvider {
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
             readTime: ExactTimeStamp,
-            friendSnapshot: Database.Snapshot
+            friendSnapshot: Snapshot
     ): Domain
 
     interface Domain {
 
-        fun updatePrivateProjectRecord(dataSnapshot: Database.Snapshot)
+        fun updatePrivateProjectRecord(dataSnapshot: Snapshot)
 
         fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent)
 
-        fun updateFriendRecords(dataSnapshot: Database.Snapshot)
+        fun updateFriendRecords(dataSnapshot: Snapshot)
 
-        fun updateUserRecord(dataSnapshot: Database.Snapshot)
+        fun updateUserRecord(dataSnapshot: Snapshot)
 
         fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent)
 
@@ -64,31 +62,6 @@ interface FactoryProvider {
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot>
 
-        interface Snapshot {
-
-            val key: String
-
-            val children: Iterable<Snapshot>
-
-            fun exists(): Boolean
-
-            fun <T> getValue(valueType: Class<T>): T?
-
-            fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
-
-            class Impl(private val dataSnapshot: DataSnapshot) : Snapshot {
-
-                override val key get() = dataSnapshot.key!!
-
-                override val children get() = dataSnapshot.children.map { Impl(it) }
-
-                override fun exists() = dataSnapshot.exists()
-
-                override fun <T> getValue(valueType: Class<T>) = dataSnapshot.getValue(valueType)
-
-                override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = dataSnapshot.getValue(genericTypeIndicator)
-            }
-        }
     }
 
     interface Preferences {
@@ -116,7 +89,7 @@ interface FactoryProvider {
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,
-                friendSnapshot: Database.Snapshot
+                friendSnapshot: Snapshot
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 remoteUserFactory,

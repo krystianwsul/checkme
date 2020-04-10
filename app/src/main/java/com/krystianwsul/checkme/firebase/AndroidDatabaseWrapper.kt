@@ -6,6 +6,7 @@ import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.utils.ProjectKey

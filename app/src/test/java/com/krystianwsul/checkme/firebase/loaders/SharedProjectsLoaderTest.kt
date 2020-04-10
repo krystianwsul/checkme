@@ -20,11 +20,11 @@ class SharedProjectsLoaderTest {
 
     private class TestSharedProjectsProvider : SharedProjectsProvider {
 
-        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<FactoryProvider.Database.Snapshot>>()
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
 
         override val projectProvider = ProjectLoaderTest.TestProjectProvider()
 
-        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<FactoryProvider.Database.Snapshot> {
+        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot> {
             if (!sharedProjectObservables.containsKey(projectKey))
                 sharedProjectObservables[projectKey] = PublishRelay.create()
             return sharedProjectObservables.getValue(projectKey)

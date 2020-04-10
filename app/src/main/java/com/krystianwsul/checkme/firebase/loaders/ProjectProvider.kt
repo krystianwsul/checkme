@@ -11,11 +11,11 @@ interface ProjectProvider {
 
     abstract class Database : DatabaseWrapper() {
 
-        abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot>
+        abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot>
     }
 
     interface ProjectManager<T : ProjectType> {
 
-        fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): ProjectRecord<T>
+        fun setProjectRecord(snapshot: Snapshot): ProjectRecord<T>
     }
 }

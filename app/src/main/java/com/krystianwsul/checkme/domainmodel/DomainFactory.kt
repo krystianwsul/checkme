@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.firebase.ProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -48,7 +49,7 @@ class DomainFactory(
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp,
-        friendSnapshot: FactoryProvider.Database.Snapshot
+        friendSnapshot: Snapshot
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -250,7 +251,7 @@ class DomainFactory(
     override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+    override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
         MyCrashlytics.log("updatePrivateProjectRecord")
 
         val start = ExactTimeStamp.now
@@ -299,7 +300,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+    override fun updateUserRecord(dataSnapshot: Snapshot) {
         MyCrashlytics.log("updateUserRecord")
 
         val runType = if (remoteUserFactory.isSaved) {
@@ -318,7 +319,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    override fun updateFriendRecords(dataSnapshot: FactoryProvider.Database.Snapshot) {
+    override fun updateFriendRecords(dataSnapshot: Snapshot) {
         MyCrashlytics.log("setFriendRecords")
 
         val runType = if (remoteFriendFactory.isSaved) {

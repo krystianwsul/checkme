@@ -56,7 +56,7 @@ fun <T, U, V> Observable<Map<T, U>>.processChangesMap(
 
 private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
 
-fun FactoryProvider.Database.Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
+fun Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
     timeMap.map { (timeString, instanceJson) ->
         AndroidRootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
     }

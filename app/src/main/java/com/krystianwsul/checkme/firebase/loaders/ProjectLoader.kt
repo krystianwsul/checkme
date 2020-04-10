@@ -12,7 +12,7 @@ import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 
 class ProjectLoader<T : ProjectType>(
-        snapshotObservable: Observable<FactoryProvider.Database.Snapshot>,
+        snapshotObservable: Observable<Snapshot>,
         private val domainDisposable: CompositeDisposable,
         projectProvider: ProjectProvider,
         projectManager: ProjectProvider.ProjectManager<T>

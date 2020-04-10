@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -258,7 +259,7 @@ class ProjectFactory(
         return local
     }
 
-    fun onNewPrivate(dataSnapshot: FactoryProvider.Database.Snapshot, now: ExactTimeStamp) {
+    fun onNewPrivate(dataSnapshot: Snapshot, now: ExactTimeStamp) {
         try {
             val remotePrivateProjectRecord = privateProjectManager.setProjectRecord(dataSnapshot)
 
@@ -396,13 +397,13 @@ class ProjectFactory(
 
         abstract val key: String
 
-        class Change(val dataSnapshot: FactoryProvider.Database.Snapshot) : SharedProjectEvent() {
+        class Change(val dataSnapshot: Snapshot) : SharedProjectEvent() {
 
             override val key = dataSnapshot.key
         }
 
         class Add(
-                val dataSnapshot: FactoryProvider.Database.Snapshot,
+                val dataSnapshot: Snapshot,
                 val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
         ) : SharedProjectEvent() {
 

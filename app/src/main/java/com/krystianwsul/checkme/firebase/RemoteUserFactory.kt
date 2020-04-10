@@ -3,13 +3,14 @@ package com.krystianwsul.checkme.firebase
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.models.MyUser
 
 class RemoteUserFactory(
         uuid: String,
-        userSnapshot: FactoryProvider.Database.Snapshot,
+        userSnapshot: Snapshot,
         deviceInfo: DeviceInfo,
         private val factoryProvider: FactoryProvider
 ) {
@@ -48,7 +49,7 @@ class RemoteUserFactory(
         factoryProvider.preferences.tab = remoteUser.defaultTab
     }
 
-    fun onNewSnapshot(dataSnapshot: FactoryProvider.Database.Snapshot) {
+    fun onNewSnapshot(dataSnapshot: Snapshot) {
         val remoteUserRecord = remoteUserManager.newSnapshot(dataSnapshot)
 
         remoteUser = MyUser(remoteUserRecord)

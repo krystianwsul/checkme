@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -15,11 +15,11 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidSharedProjectManager(
-        children: Iterable<FactoryProvider.Database.Snapshot>, // todo instances remove
+        children: Iterable<Snapshot>, // todo instances remove
         private val database: DatabaseWrapper
 ) : SharedProjectManager<DomainFactory>(), ProjectProvider.ProjectManager<ProjectType.Shared> {
 
-    private fun FactoryProvider.Database.Snapshot.toRecord() = SharedProjectRecord(
+    private fun Snapshot.toRecord() = SharedProjectRecord(
             database,
             this@AndroidSharedProjectManager,
             ProjectKey.Shared(key),
@@ -48,7 +48,7 @@ class AndroidSharedProjectManager(
 
     override val databaseWrapper = database
 
-    override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): SharedProjectRecord {
+    override fun setProjectRecord(snapshot: Snapshot): SharedProjectRecord {
         val key = ProjectKey.Shared(snapshot.key)
 
         return snapshot.toRecord().also {

@@ -26,11 +26,11 @@ class ProjectLoaderTest {
 
     class TestProjectProvider : ProjectProvider {
 
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<FactoryProvider.Database.Snapshot>>()
+        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot>>()
 
         override val database = object : ProjectProvider.Database() {
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<FactoryProvider.Database.Snapshot> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
                 if (!rootInstanceObservables.containsKey(taskFirebaseKey))
                     rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
                 return rootInstanceObservables.getValue(taskFirebaseKey)
@@ -59,7 +59,7 @@ class ProjectLoaderTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var projectSnapshotRelay: BehaviorRelay<FactoryProvider.Database.Snapshot>
+    private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot>
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 

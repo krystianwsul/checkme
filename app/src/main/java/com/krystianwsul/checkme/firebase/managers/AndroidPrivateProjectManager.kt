@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -22,7 +22,7 @@ class AndroidPrivateProjectManager(
 
     override val privateProjectRecords get() = listOf(privateProjectRecord)
 
-    private fun FactoryProvider.Database.Snapshot.toRecord() = PrivateProjectRecord(
+    private fun Snapshot.toRecord() = PrivateProjectRecord(
             databaseWrapper,
             userInfo.key.toPrivateProjectKey(),
             getValue(PrivateProjectJson::class.java)!!
@@ -30,7 +30,7 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun setProjectRecord(snapshot: FactoryProvider.Database.Snapshot): PrivateProjectRecord {
+    override fun setProjectRecord(snapshot: Snapshot): PrivateProjectRecord {
         privateProjectRecord = if (first) {
             first = false
 

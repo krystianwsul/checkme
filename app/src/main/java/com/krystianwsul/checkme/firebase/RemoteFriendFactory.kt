@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.common.firebase.json.UserJson
@@ -11,7 +12,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 class RemoteFriendFactory(
-        children: Iterable<FactoryProvider.Database.Snapshot>,
+        children: Iterable<Snapshot>,
         database: FactoryProvider.Database
 ) {
 
@@ -81,7 +82,7 @@ class RemoteFriendFactory(
         strangerProjectManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
     }
 
-    fun onNewSnapshot(children: Iterable<FactoryProvider.Database.Snapshot>) {
+    fun onNewSnapshot(children: Iterable<Snapshot>) {
         _friends = remoteFriendManager.onNewSnapshot(children).toRootUsers()
     }
 }

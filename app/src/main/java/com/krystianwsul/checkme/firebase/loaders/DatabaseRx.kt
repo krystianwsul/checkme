@@ -6,7 +6,7 @@ import io.reactivex.rxkotlin.plusAssign
 
 class DatabaseRx(
         domainDisposable: CompositeDisposable,
-        databaseObservable: Observable<FactoryProvider.Database.Snapshot>
+        databaseObservable: Observable<Snapshot>
 ) {
 
     val disposable = CompositeDisposable().also { domainDisposable += it }

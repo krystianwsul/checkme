@@ -63,7 +63,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateFriendRecords(dataSnapshot: FactoryProvider.Database.Snapshot) {
+        override fun updateFriendRecords(dataSnapshot: Snapshot) {
             TODO("Not yet implemented")
         }
 
@@ -71,7 +71,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+        override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
             TODO("Not yet implemented")
         }
 
@@ -79,15 +79,15 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+        override fun updateUserRecord(dataSnapshot: Snapshot) {
             TODO("Not yet implemented")
         }
     }
 
     private class ExpectTestDomain : TestDomain() {
 
-        private var userListener: ((dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit)? = null
-        private var privateListenerWrapper: ListenerWrapper<FactoryProvider.Database.Snapshot>? = null
+        private var userListener: ((dataSnapshot: Snapshot) -> Unit)? = null
+        private var privateListenerWrapper: ListenerWrapper<Snapshot>? = null
         private var sharedListener: ((sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit)? = null
         private var instanceListener: ((instanceEvent: ProjectFactory.InstanceEvent) -> Unit)? = null
 
@@ -96,13 +96,13 @@ class FactoryLoaderTest {
             var result: T? = null
         }
 
-        fun checkUser(listener: (dataSnapshot: FactoryProvider.Database.Snapshot) -> Unit) {
+        fun checkUser(listener: (dataSnapshot: Snapshot) -> Unit) {
             assertNull(userListener)
 
             userListener = listener
         }
 
-        fun checkPrivate(listener: ListenerWrapper<FactoryProvider.Database.Snapshot>.() -> Unit) {
+        fun checkPrivate(listener: ListenerWrapper<Snapshot>.() -> Unit) {
             assertNull(privateListenerWrapper)
 
             privateListenerWrapper = ListenerWrapper()
@@ -126,7 +126,7 @@ class FactoryLoaderTest {
             instanceListener = listener
         }
 
-        override fun updateUserRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+        override fun updateUserRecord(dataSnapshot: Snapshot) {
             assertNotNull(userListener)
 
             userListener!!(dataSnapshot)
@@ -134,7 +134,7 @@ class FactoryLoaderTest {
             userListener = null
         }
 
-        override fun updatePrivateProjectRecord(dataSnapshot: FactoryProvider.Database.Snapshot) {
+        override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
             assertNotNull(privateListenerWrapper)
             assertNull(privateListenerWrapper!!.result)
 
@@ -222,7 +222,7 @@ class FactoryLoaderTest {
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,
-                friendSnapshot: FactoryProvider.Database.Snapshot
+                friendSnapshot: Snapshot
         ) = domain
     }
 

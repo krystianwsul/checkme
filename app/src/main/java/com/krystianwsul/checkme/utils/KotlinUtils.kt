@@ -358,6 +358,8 @@ fun <T> Single<T>.tryGetCurrentValue(): T? {
     return value
 }
 
+fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
+
 fun <T> Observable<T>.tryGetCurrentValue(): T? {
     var value: T? = null
     subscribe { t -> value = t }.dispose()

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.UserJson
@@ -15,7 +15,7 @@ import kotlin.properties.Delegates.observable
 class RemoteMyUserManager(
         deviceInfo: DeviceInfo,
         private val uuid: String,
-        dataSnapshot: FactoryProvider.Database.Snapshot
+        dataSnapshot: Snapshot
 ) {
 
     var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
@@ -32,9 +32,9 @@ class RemoteMyUserManager(
     }
         private set
 
-    private fun FactoryProvider.Database.Snapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
+    private fun Snapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
 
-    fun newSnapshot(dataSnapshot: FactoryProvider.Database.Snapshot): MyUserRecord {
+    fun newSnapshot(dataSnapshot: Snapshot): MyUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()
         return remoteUserRecord
     }

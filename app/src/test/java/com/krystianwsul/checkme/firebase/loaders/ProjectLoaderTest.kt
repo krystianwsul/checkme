@@ -234,4 +234,30 @@ class ProjectLoaderTest {
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionChecker.checkEmpty()
     }
+
+    @Test
+    fun testChangeEmptyProject() {
+        initialProjectEmissionChecker.addHandler { }
+        acceptProject(PrivateProjectJson())
+        initialProjectEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+        acceptProject(PrivateProjectJson(name = "asdf"))
+        changeProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testChangeEmptyTask() {
+        val taskId = "taskKey"
+
+        initialProjectEmissionChecker.addHandler { }
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+        initialProjectEmissionChecker.checkNotEmpty()
+        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+        initialProjectEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
+        changeProjectEmissionChecker.checkEmpty()
+    }
 }

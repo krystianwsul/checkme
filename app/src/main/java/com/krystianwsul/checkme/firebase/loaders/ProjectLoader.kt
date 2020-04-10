@@ -98,12 +98,17 @@ class ProjectLoader<T : ProjectType>(
                 it.second
                         .newMap
                         .values
-                        .map { (_, databaseRx) ->
-                            databaseRx.latest()
-                                    .map { ChangeProjectEvent(projectRecord, it.toSnapshotInfos()) }
-                                    .toObservable()
+                        .let {
+                            if (it.isEmpty()) {
+                                Observable.just(ChangeProjectEvent(projectRecord, listOf()))
+                            } else {
+                                it.map { (_, databaseRx) ->
+                                    databaseRx.latest()
+                                            .map { ChangeProjectEvent(projectRecord, it.toSnapshotInfos()) }
+                                            .toObservable()
+                                }.merge()
+                            }
                         }
-                        .merge()
             }
             .publishImmediate()
 

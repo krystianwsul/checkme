@@ -4,8 +4,10 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.Observable
@@ -179,6 +181,104 @@ class SharedProjectsLoaderTest {
 
         changeProjectEmissionChecker.addHandler { }
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson(name = "asdf"))
-        changeProjectEmissionChecker.checkEmpty() // todo check if this is checked in ProjectLoaderTest
+        changeProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialEmptyAddTask() {
+        val taskId = "taskId"
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        addTaskEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task")))
+        )
+        addTaskEmissionChecker.checkNotEmpty()
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf())
+        addTaskEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialProjectRemoveTask() {
+        val taskId = "taskId"
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task")))
+        )
+        initialProjectsEmissionChecker.checkNotEmpty()
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        changeProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialNoProjectAddProjectWithTask() {
+        val taskId = "taskId"
+
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectKeysRelay.accept(setOf())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        addProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task")))
+        )
+        addProjectEmissionChecker.checkNotEmpty()
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf())
+        addProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialProjectChangeTask() {
+        val taskId = "taskId"
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task")))
+        )
+        initialProjectsEmissionChecker.checkNotEmpty()
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task change")))
+        )
+        changeProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testInitialProjectChangeInstance() {
+        val taskId = "taskId"
+
+        sharedProjectKeysRelay.accept(setOf(projectKey1))
+        initialProjectsEmissionChecker.addHandler { }
+        sharedProjectsProvider.acceptProject(
+                projectKey1,
+                SharedProjectJson(tasks = mutableMapOf(taskId to TaskJson(name = "task")))
+        )
+        initialProjectsEmissionChecker.checkNotEmpty()
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf())
+        initialProjectsEmissionChecker.checkEmpty()
+
+        changeInstancesEmissionChecker.addHandler { }
+        sharedProjectsProvider.projectProvider.acceptInstance(projectKey1.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
+        changeInstancesEmissionChecker.checkEmpty()
     }
 }

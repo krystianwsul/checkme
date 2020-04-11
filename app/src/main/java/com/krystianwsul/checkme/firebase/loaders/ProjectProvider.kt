@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -16,6 +17,10 @@ interface ProjectProvider {
 
     interface ProjectManager<T : ProjectType> {
 
+        val isSaved: Boolean
+
         fun setProjectRecord(snapshot: Snapshot): ProjectRecord<T>
+
+        fun save(extra: DomainFactory): Boolean
     }
 }

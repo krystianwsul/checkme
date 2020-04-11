@@ -260,4 +260,32 @@ class ProjectLoaderTest {
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
         changeProjectEmissionChecker.checkEmpty()
     }
+
+    @Test
+    fun testChangeTwoEmptyTasks() {
+        val taskId1 = "taskKey1"
+        val taskId2 = "taskKey2"
+
+        initialProjectEmissionChecker.addHandler { }
+
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
+                taskId1 to TaskJson("task1"),
+                taskId2 to TaskJson("task2")
+        )))
+
+        initialProjectEmissionChecker.checkNotEmpty()
+        projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
+        initialProjectEmissionChecker.checkNotEmpty()
+        projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
+        initialProjectEmissionChecker.checkEmpty()
+
+        changeProjectEmissionChecker.addHandler { }
+
+        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
+                taskId1 to TaskJson("task1 change"),
+                taskId2 to TaskJson("task2 change")
+        )))
+
+        changeProjectEmissionChecker.checkEmpty()
+    }
 }

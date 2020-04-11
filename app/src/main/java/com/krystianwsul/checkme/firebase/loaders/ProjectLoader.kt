@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
@@ -92,7 +93,7 @@ class ProjectLoader<T : ProjectType>(
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
             .filter { it.second.addedEntries.isEmpty() }
-            .switchMap {
+            .switchMapSingle {
                 val projectRecord = it.first.first
 
                 it.second
@@ -100,13 +101,18 @@ class ProjectLoader<T : ProjectType>(
                         .values
                         .let {
                             if (it.isEmpty()) {
-                                Observable.just(ChangeProjectEvent(projectRecord, listOf()))
+                                Single.just(ChangeProjectEvent(projectRecord, mapOf()))
                             } else {
-                                it.map { (_, databaseRx) ->
-                                    databaseRx.latest()
-                                            .map { ChangeProjectEvent(projectRecord, it.toSnapshotInfos()) }
-                                            .toObservable()
-                                }.merge()
+                                it.map { (taskRecord, databaseRx) ->
+                                    databaseRx.latest().map { taskRecord.taskKey to it }
+                                }
+                                        .zipSingle()
+                                        .map {
+                                            ChangeProjectEvent(
+                                                    projectRecord,
+                                                    it.toMap().mapValues { it.value.toSnapshotInfos() }
+                                            )
+                                        }
                             }
                         }
             }
@@ -132,6 +138,6 @@ class ProjectLoader<T : ProjectType>(
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
     )
 }

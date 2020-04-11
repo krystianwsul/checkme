@@ -20,7 +20,6 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType> : Current {
 
     abstract val projectRecord: ProjectRecord<T>
-    abstract val rootInstanceManagers: Map<TaskKey, RootInstanceManager<T>>
 
     protected abstract val remoteTasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
@@ -55,8 +54,6 @@ abstract class Project<T : ProjectType> : Current {
 
     fun newTask(taskJson: TaskJson): Task<T> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
-
-        check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
         val task = Task(
                 this,
@@ -113,7 +110,7 @@ abstract class Project<T : ProjectType> : Current {
 
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val newTask = Task(this, taskRecord, rootInstanceManagers.getValue(taskRecord.taskKey))
+        val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
         check(!remoteTasks.containsKey(newTask.id))
 
         remoteTasks[newTask.id] = newTask

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.ProjectFactory
+import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
@@ -25,7 +25,7 @@ interface FactoryProvider {
     fun newDomain(
             localFactory: Local,
             remoteUserFactory: RemoteUserFactory,
-            projectFactory: ProjectFactory,
+            projectsFactory: ProjectsFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
             readTime: ExactTimeStamp,
@@ -36,13 +36,13 @@ interface FactoryProvider {
 
         fun updatePrivateProjectRecord(dataSnapshot: Snapshot)
 
-        fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent)
+        fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent)
 
         fun updateFriendRecords(dataSnapshot: Snapshot)
 
         fun updateUserRecord(dataSnapshot: Snapshot)
 
-        fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent)
+        fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent)
 
         fun clearUserInfo()
     }
@@ -85,7 +85,7 @@ interface FactoryProvider {
         override fun newDomain(
                 localFactory: Local,
                 remoteUserFactory: RemoteUserFactory,
-                projectFactory: ProjectFactory,
+                projectsFactory: ProjectsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,
@@ -93,7 +93,7 @@ interface FactoryProvider {
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 remoteUserFactory,
-                projectFactory,
+                projectsFactory,
                 deviceDbInfo,
                 startTime,
                 readTime,

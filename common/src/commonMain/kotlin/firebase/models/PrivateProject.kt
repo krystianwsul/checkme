@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.*
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
-        override val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
+        rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
         private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>
 ) : Project<ProjectType.Private>() {
 

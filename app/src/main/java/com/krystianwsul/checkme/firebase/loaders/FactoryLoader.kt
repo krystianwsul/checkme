@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.ProjectFactory
+import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
@@ -136,7 +136,7 @@ class FactoryLoader(
                                     it.second
                                             .removedEntries
                                             .keys
-                                            .map { ProjectFactory.SharedProjectEvent.Remove(it.key) }
+                                            .map { ProjectsFactory.SharedProjectEvent.Remove(it.key) }
                             )
 
                             val addEvents = it.second
@@ -157,9 +157,9 @@ class FactoryLoader(
                                                 databaseRx.first,
                                                 snapshotInfoSingle
                                         ).flatMapMaybe { (dataSnapshot, snapshotInfos) ->
-                                            Maybe.fromCallable<ProjectFactory.SharedProjectEvent.Add> {
+                                            Maybe.fromCallable<ProjectsFactory.SharedProjectEvent.Add> {
                                                 dataSnapshot.takeIf { it.exists() }?.let {
-                                                    ProjectFactory.SharedProjectEvent.Add(dataSnapshot, snapshotInfos.toMap())
+                                                    ProjectsFactory.SharedProjectEvent.Add(dataSnapshot, snapshotInfos.toMap())
                                                 }
                                             }
                                         }.toObservable()
@@ -172,7 +172,7 @@ class FactoryLoader(
                                     .map {
                                         it.changes
                                                 .filter { it.exists() }
-                                                .map { ProjectFactory.SharedProjectEvent.Change(it) }
+                                                .map { ProjectsFactory.SharedProjectEvent.Change(it) }
                                     }
                                     .merge()
 
@@ -205,7 +205,7 @@ class FactoryLoader(
                             .map { (taskKey, pair) ->
                                 pair.second
                                         .changes
-                                        .map { ProjectFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
+                                        .map { ProjectsFactory.InstanceEvent(taskKey, it.toSnapshotInfos()) }
                             }
                             .merge()
                 }
@@ -214,7 +214,7 @@ class FactoryLoader(
                         sharedProjectManagerSingle,
                         rootInstanceManagerSingle
                 ) { sharedProjectManager, rootInstanceManagers ->
-                    ProjectFactory(
+                    ProjectsFactory(
                             deviceDbInfo,
                             localFactory,
                             privateProjectManager,

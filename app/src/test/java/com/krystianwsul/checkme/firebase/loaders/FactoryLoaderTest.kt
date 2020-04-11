@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.firebase.ProjectFactory
+import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -67,7 +67,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+        override fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent) {
             TODO("Not yet implemented")
         }
 
@@ -75,7 +75,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
+        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent) {
             TODO("Not yet implemented")
         }
 
@@ -88,8 +88,8 @@ class FactoryLoaderTest {
 
         private var userListener: ((dataSnapshot: Snapshot) -> Unit)? = null
         private var privateListenerWrapper: ListenerWrapper<Snapshot>? = null
-        private var sharedListener: ((sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit)? = null
-        private var instanceListener: ((instanceEvent: ProjectFactory.InstanceEvent) -> Unit)? = null
+        private var sharedListener: ((sharedProjectEvent: ProjectsFactory.SharedProjectEvent) -> Unit)? = null
+        private var instanceListener: ((instanceEvent: ProjectsFactory.InstanceEvent) -> Unit)? = null
 
         class ListenerWrapper<T> {
 
@@ -114,13 +114,13 @@ class FactoryLoaderTest {
             privateListenerWrapper = null
         }
 
-        fun checkShared(listener: (sharedProjectEvent: ProjectFactory.SharedProjectEvent) -> Unit) {
+        fun checkShared(listener: (sharedProjectEvent: ProjectsFactory.SharedProjectEvent) -> Unit) {
             assertNull(sharedListener)
 
             sharedListener = listener
         }
 
-        fun checkInstance(listener: (instanceEvent: ProjectFactory.InstanceEvent) -> Unit) {
+        fun checkInstance(listener: (instanceEvent: ProjectsFactory.InstanceEvent) -> Unit) {
             assertNull(instanceListener)
 
             instanceListener = listener
@@ -141,7 +141,7 @@ class FactoryLoaderTest {
             privateListenerWrapper!!.result = dataSnapshot
         }
 
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectFactory.SharedProjectEvent) {
+        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent) {
             assertNotNull(sharedListener)
 
             sharedListener!!(sharedProjectEvent)
@@ -149,7 +149,7 @@ class FactoryLoaderTest {
             sharedListener = null
         }
 
-        override fun updateInstanceRecords(instanceEvent: ProjectFactory.InstanceEvent) {
+        override fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent) {
             assertNotNull(instanceListener)
 
             instanceListener!!(instanceEvent)
@@ -218,7 +218,7 @@ class FactoryLoaderTest {
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
                 remoteUserFactory: RemoteUserFactory,
-                projectFactory: ProjectFactory,
+                projectsFactory: ProjectsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp,

@@ -72,10 +72,7 @@ class FactoryLoader(
                         .map { RemoteUserFactory(localFactory.uuid, it, deviceInfo, factoryProvider) }
                         .cacheImmediate()
 
-                val sharedProjectManager = AndroidSharedProjectManager(
-                        listOf(),
-                        factoryProvider.database
-                )
+                val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
                 val sharedProjectsLoader = SharedProjectsLoader(
                         userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },

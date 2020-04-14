@@ -11,8 +11,8 @@ abstract class SharedProjectManager<T> : SharedProjectRecord.Parent {
 
     val isSaved get() = sharedProjectRecords.any { it.value.second }
 
-    abstract var sharedProjectRecords: Map<ProjectKey.Shared, Pair<SharedProjectRecord, Boolean>>
-        protected set
+    var sharedProjectRecords = mutableMapOf<ProjectKey.Shared, Pair<SharedProjectRecord, Boolean>>()
+        private set
 
     abstract val databaseWrapper: DatabaseWrapper
 

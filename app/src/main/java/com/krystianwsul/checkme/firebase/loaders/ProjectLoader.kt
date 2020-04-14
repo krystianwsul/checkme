@@ -23,6 +23,14 @@ class ProjectLoader<T : ProjectType>(
     private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
 
     // todo instances feed this event back into domainFactory. use another event emitter in all record managers?
+
+    /*
+    todo instances Considering that unsaved tasks and instances are just added to the data model, I'm strongly
+    considering adding dummy projects as well.  That means that these events should go through the rest of the
+    pipeline, to properly set up database listeners and what-now.  That would mean ditching this nullability,
+    and moving the isSaved checks somewhere downstream... I think?  Though it would be nice to nip the whole isSaved
+    thing well ahead, ideally even before parsing to *Json if possible.
+     */
     private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }

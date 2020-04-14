@@ -20,7 +20,7 @@ abstract class ProjectFactory<T : ProjectType>(
         domainDisposable: CompositeDisposable
 ) {
 
-    protected val projectManager = initialProjectEvent.projectManager
+    private val projectManager = initialProjectEvent.projectManager
 
     protected var rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>>
         private set

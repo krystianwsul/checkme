@@ -15,10 +15,10 @@ abstract class RootInstanceManager<T : ProjectType>(
         protected val taskRecord: TaskRecord<T>
 ) : RootInstanceRecord.Parent {
 
-    abstract var rootInstanceRecords: MutableMap<InstanceKey, Pair<RootInstanceRecord<T>, Boolean>>
-        protected set
+    abstract val rootInstanceRecords: MutableMap<InstanceKey, RootInstanceRecord<T>>
 
-    val isSaved get() = rootInstanceRecords.any { it.value.second } // todo one value for whole manager
+    var isSaved = false
+        private set
 
     abstract val databaseWrapper: DatabaseWrapper
 
@@ -29,16 +29,15 @@ abstract class RootInstanceManager<T : ProjectType>(
     fun save(): Boolean {
         val values = mutableMapOf<String, Any?>()
 
-        val newRootInstanceRecords = rootInstanceRecords.mapValues {
-            Pair(it.value.first, it.value.first.getValues(values))
-        }.toMutableMap()
+        val newIsSaved = rootInstanceRecords.map { it.value.getValues(values) }.any { it }
 
         ErrorLogger.instance.log("RootInstanceManager.save values: $values")
 
+        check(newIsSaved == values.isNotEmpty())
         if (values.isNotEmpty()) {
             check(!isSaved)
 
-            rootInstanceRecords = newRootInstanceRecords
+            isSaved = newIsSaved
 
             databaseWrapper.updateInstances(taskRecord.rootInstanceKey, values, getDatabaseCallback())
         } else {
@@ -61,7 +60,7 @@ abstract class RootInstanceManager<T : ProjectType>(
     ).also {
         check(!rootInstanceRecords.containsKey(it.instanceKey))
 
-        rootInstanceRecords[it.instanceKey] = Pair(it, false)
+        rootInstanceRecords[it.instanceKey] = it
     }
 
     override fun removeRootInstanceRecord(instanceKey: InstanceKey) {

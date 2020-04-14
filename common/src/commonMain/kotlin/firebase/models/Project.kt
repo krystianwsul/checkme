@@ -96,8 +96,9 @@ abstract class Project<T : ProjectType> : Current {
             InstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
         }.toMutableMap()
 
-        val oldestVisibleMap = oldestVisible?.let { mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day))) }
-                ?: mapOf()
+        val oldestVisibleMap = oldestVisible?.let {
+            mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day)))
+        } ?: mapOf()
 
         val taskJson = TaskJson(
                 oldTask.name,

@@ -58,7 +58,9 @@ class ProjectsFactory(
 
         sharedProjectsLoader.addProjectEvents // todo instances pass these events to domainfactory
                 .subscribe {
-                    val projectKey = it.initialProjectEvent.projectRecord.projectKey
+                    val projectKey = it.initialProjectEvent
+                            .projectRecord
+                            .projectKey
 
                     check(!sharedProjectFactories.containsKey(projectKey))
 

@@ -19,8 +19,7 @@ class AndroidPrivateProjectManager(
         override val databaseWrapper: DatabaseWrapper
 ) : PrivateProjectManager<DomainFactory>(), ProjectProvider.ProjectManager<ProjectType.Private> {
 
-    lateinit var privateProjectRecord: PrivateProjectRecord
-        private set
+    private lateinit var privateProjectRecord: PrivateProjectRecord
 
     override val privateProjectRecords get() = listOf(privateProjectRecord)
 

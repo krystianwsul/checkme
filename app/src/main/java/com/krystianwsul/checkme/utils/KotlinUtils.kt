@@ -34,6 +34,8 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -370,3 +372,6 @@ fun <T> Observable<T>.getCurrentValue() = tryGetCurrentValue()!!
 
 fun <T, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
         map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()
+
+private fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) = publish().apply { compositeDisposable += connect() }!!
+private fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) = cache().apply { compositeDisposable += subscribe() }!!

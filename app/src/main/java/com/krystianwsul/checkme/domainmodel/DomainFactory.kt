@@ -1960,13 +1960,13 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateToken(source: SaveService.Source, token: String?) {
-        MyCrashlytics.log("DomainFactory.updateToken")
+    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
+        MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
         if (remoteUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
-        deviceDbInfo = deviceDbInfo.copy(deviceInfo = deviceDbInfo.deviceInfo.copy(token = token))
+        this.deviceDbInfo = deviceDbInfo
 
-        remoteUserFactory.remoteUser.setToken(uuid, token)
+        remoteUserFactory.remoteUser.setToken(deviceDbInfo)
         projectsFactory.updateDeviceInfo(deviceDbInfo)
 
         save(0, source)

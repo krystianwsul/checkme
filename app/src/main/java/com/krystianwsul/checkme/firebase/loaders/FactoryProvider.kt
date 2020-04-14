@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -53,6 +54,8 @@ interface FactoryProvider {
         fun updateUserRecord(dataSnapshot: Snapshot)
 
         fun clearUserInfo()
+
+        fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source)
     }
 
     interface Local : Instance.ShownFactory {

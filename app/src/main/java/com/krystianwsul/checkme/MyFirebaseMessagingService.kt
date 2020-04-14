@@ -30,9 +30,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        MyApplication.instance.token = token
-
-        DomainFactory.addFirebaseListener { it.updateToken(SaveService.Source.SERVICE, token) }
+        Preferences.token = token
     }
 
     private class UnknownMessageException(data: Map<String, String>) : Exception(getMessage(data)) {

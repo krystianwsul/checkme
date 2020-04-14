@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.MyUserRecord
@@ -13,8 +13,7 @@ import java.util.*
 import kotlin.properties.Delegates.observable
 
 class RemoteMyUserManager(
-        deviceInfo: DeviceInfo,
-        private val uuid: String,
+        deviceDbInfo: DeviceDbInfo,
         dataSnapshot: Snapshot
 ) {
 
@@ -23,7 +22,7 @@ class RemoteMyUserManager(
     var remoteUserRecord = if (!dataSnapshot.exists()) {
         val userWrapper = UserWrapper(
                 mutableMapOf(),
-                deviceInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
+                deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
         )
 
         MyUserRecord(true, userWrapper)

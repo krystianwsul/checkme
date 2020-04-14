@@ -366,5 +366,7 @@ fun <T> Observable<T>.tryGetCurrentValue(): T? {
     return value
 }
 
+fun <T> Observable<T>.getCurrentValue() = tryGetCurrentValue()!!
+
 fun <T, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
         map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()

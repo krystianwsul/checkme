@@ -1,8 +1,10 @@
 package com.krystianwsul.common.firebase
 
+import com.krystianwsul.common.domain.DeviceDbInfo
+
 interface MyUserProperties {
 
-    fun setToken(uuid: String, token: String?)
+    fun setToken(deviceDbInfo: DeviceDbInfo)
 
     var defaultReminder: Boolean
     var defaultTab: Int

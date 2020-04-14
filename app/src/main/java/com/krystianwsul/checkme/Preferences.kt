@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.deserialize
 import com.krystianwsul.checkme.utils.serialize
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import org.joda.time.LocalDateTime
@@ -18,6 +20,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val TAB_KEY = "tab"
     private const val KEY_SHORTCUTS = "shortcuts2"
     private const val KEY_TEMPORARY_NOTIFICATION_LOG = "temporaryNotificationLog"
+    private const val TOKEN_KEY = "token"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -47,6 +50,24 @@ object Preferences : FactoryProvider.Preferences {
     }
 
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
+
+    val tokenRelay = BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))
+
+    init {
+        tokenRelay.distinctUntilChanged()
+                .skip(1)
+                .subscribe {
+                    sharedPreferences.edit()
+                            .putString(TOKEN_KEY, it.value)
+                            .apply()
+                }
+    }
+
+    var token: String?
+        get() = tokenRelay.value!!.value
+        set(value) {
+            tokenRelay.accept(NullableWrapper(value))
+        }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

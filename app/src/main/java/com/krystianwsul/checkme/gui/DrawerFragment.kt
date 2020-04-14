@@ -4,9 +4,8 @@ import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
 import io.reactivex.rxkotlin.addTo
@@ -63,7 +62,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         R.id.main_drawer_settings -> startActivity(SettingsActivity.newIntent())
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_sign_out -> {
-                            DomainFactory.instance.updateToken(SaveService.Source.GUI, null)
+                            Preferences.token = null
 
                             MyApplication.instance.googleSignInClient.signOut()
                             FirebaseAuth.getInstance().signOut()

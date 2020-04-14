@@ -19,7 +19,7 @@ interface ProjectProvider {
 
         val isSaved: Boolean
 
-        fun setProjectRecord(snapshot: Snapshot): ProjectRecord<T>
+        fun setProjectRecord(snapshot: Snapshot): ProjectRecord<T>?
 
         fun save(extra: DomainFactory): Boolean
     }

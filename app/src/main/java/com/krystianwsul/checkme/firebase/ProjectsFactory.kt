@@ -2,75 +2,85 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
+import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
-import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.firebase.records.RootInstanceRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 
 class ProjectsFactory(
-        deviceDbInfo: DeviceDbInfo,
-        private val localFactory: FactoryProvider.Local,
-        private val privateProjectManager: AndroidPrivateProjectManager,
-        private val sharedProjectManager: AndroidSharedProjectManager,
-        private val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<*>>,
+        localFactory: FactoryProvider.Local,
+        privateProjectLoader: ProjectLoader<ProjectType.Private>,
+        privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
+        private val sharedProjectsLoader: SharedProjectsLoader,
+        sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
         now: ExactTimeStamp,
-        private val factoryProvider: FactoryProvider
+        private val factoryProvider: FactoryProvider,
+        private val domainDisposable: CompositeDisposable,
+        deviceDbInfo: () -> DeviceDbInfo
 ) : Project.Parent {
 
-    var privateProject: PrivateProject
-        private set
+    private val privateProjectFactory = PrivateProjectFactory(
+            privateProjectLoader,
+            privateInitialProjectEvent,
+            factoryProvider,
+            domainDisposable
+    )
 
-    val sharedProjects: MutableMap<ProjectKey.Shared, SharedProject>
-
-    private fun getPrivateRootInstanceManagers() = rootInstanceManagers.filter { it.key.projectKey is ProjectKey.Private }
-            .mapValues {
-                @Suppress("UNCHECKED_CAST")
-                it.value as RootInstanceManager<ProjectType.Private>
+    private var sharedProjectFactories = sharedInitialProjectsEvent.pairs
+            .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
+                sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
+                        sharedProjectLoader,
+                        sharedInitialProjectEvent,
+                        factoryProvider,
+                        domainDisposable,
+                        deviceDbInfo
+                )
             }
-            .toMap()
+            .toMutableMap()
 
-    private fun getSharedRootInstanceManagers(projectKey: ProjectKey.Shared) = rootInstanceManagers.filter { it.key.projectKey == projectKey }
-            .mapValues {
-                @Suppress("UNCHECKED_CAST")
-                it.value as RootInstanceManager<ProjectType.Shared>
-            }
-            .toMap()
+    val privateProject get() = privateProjectFactory.project as PrivateProject
+
+    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
 
     init {
-        privateProject = PrivateProject(
-                privateProjectManager.privateProjectRecord,
-                getPrivateRootInstanceManagers()
-        ) {
-            AndroidRootInstanceManager(it, listOf(), factoryProvider)
-        }.apply { fixNotificationShown(localFactory, now) }
+        privateProject.fixNotificationShown(localFactory, now)
 
-        sharedProjects = sharedProjectManager.sharedProjectRecords
-                .values
-                .associate { (sharedProjectRecord, _) ->
-                    sharedProjectRecord.projectKey to SharedProject(
-                            sharedProjectRecord,
-                            getSharedRootInstanceManagers(sharedProjectRecord.projectKey)
-                    ) {
-                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
-                    }.apply {
-                        fixNotificationShown(localFactory, now)
-                        updateDeviceDbInfo(deviceDbInfo)
+        sharedProjectsLoader.addProjectEvents // todo instances pass these events to domainfactory
+                .subscribe {
+                    val projectKey = it.initialProjectEvent.projectRecord.projectKey
+
+                    check(!sharedProjectFactories.containsKey(projectKey))
+
+                    sharedProjectFactories[projectKey] = SharedProjectFactory(
+                            it.projectLoader,
+                            it.initialProjectEvent,
+                            factoryProvider,
+                            domainDisposable,
+                            deviceDbInfo
+                    )
+                }
+                .addTo(domainDisposable)
+
+        sharedProjectsLoader.removeProjectEvents // todo instances pass these events to domainfactory
+                .subscribe {
+                    it.projectKeys.forEach {
+                        check(sharedProjectFactories.containsKey(it))
+
+                        sharedProjectFactories.remove(it)
                     }
                 }
-                .toMutableMap()
+                .addTo(domainDisposable)
     }
 
     val projects
@@ -78,15 +88,11 @@ class ProjectsFactory(
             put(privateProject.id, privateProject)
         }
 
-    var isPrivateSaved
-        get() = privateProjectManager.isSaved
-        set(value) {
-            privateProjectManager.isSaved = value
-        }
+    val isPrivateSaved get() = privateProjectFactory.isSaved
 
-    val isSharedSaved get() = sharedProjectManager.isSaved
+    val isSharedSaved get() = sharedProjectFactories.values.any { it.isSaved }
 
-    val isSaved get() = isPrivateSaved || isSharedSaved || rootInstanceManagers.any { it.value.isSaved }
+    val isSaved get() = isPrivateSaved || isSharedSaved
 
     val tasks get() = projects.values.flatMap { it.tasks }
 
@@ -116,169 +122,6 @@ class ProjectsFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onSharedProjectEvent(
-            deviceDbInfo: DeviceDbInfo,
-            sharedProjectEvent: SharedProjectEvent,
-            now: ExactTimeStamp
-    ): Boolean {
-        val projectKey = ProjectKey.Shared(sharedProjectEvent.key)
-        val projectPair = sharedProjectManager.sharedProjectRecords[projectKey]
-
-        if (projectPair?.second == true) {
-            sharedProjectManager.setSharedProjectRecord(projectKey, Pair(projectPair.first, false))
-
-            return true
-        } else {
-            when (sharedProjectEvent) {
-                is SharedProjectEvent.Add -> {
-                    try {
-                        val projectRecord = sharedProjectManager.setProjectRecord(sharedProjectEvent.dataSnapshot)
-
-                        rootInstanceManagers += projectRecord.taskRecords
-                                .values
-                                .map {
-                                    it.taskKey to AndroidRootInstanceManager(
-                                            it,
-                                            sharedProjectEvent.snapshotInfos[it.taskKey]
-                                                    ?: listOf(),
-                                            factoryProvider
-                                    )
-                                }
-
-                        sharedProjects[projectRecord.projectKey] = SharedProject(
-                                projectRecord,
-                                getSharedRootInstanceManagers(projectKey)
-                        ) {
-                            AndroidRootInstanceManager(it, listOf(), factoryProvider)
-                        }.apply {
-                            fixNotificationShown(localFactory, now)
-                            updateDeviceDbInfo(deviceDbInfo)
-                        }
-                    } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-                        // hack for oldestVisible being set on records removed by cloud function
-                    }
-                }
-                is SharedProjectEvent.Change -> {
-                    try {
-                        val projectRecord = sharedProjectManager.setProjectRecord(sharedProjectEvent.dataSnapshot)
-
-                        sharedProjects[projectRecord.projectKey] = SharedProject(
-                                projectRecord,
-                                getSharedRootInstanceManagers(projectRecord.projectKey)
-                        ) {
-                            AndroidRootInstanceManager(it, listOf(), factoryProvider)
-                        }.apply {
-                            fixNotificationShown(localFactory, now)
-                            updateDeviceDbInfo(deviceDbInfo)
-                        }
-                    } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-                        // hack for oldestVisible being set on records removed by cloud function
-                    }
-                }
-                is SharedProjectEvent.Remove -> {
-                    sharedProjectManager.deleteRemoteSharedProjectRecord(projectKey)
-                    sharedProjects.remove(projectKey)
-                }
-            }
-
-            return false
-        }
-    }
-
-    fun onInstanceEvent(instanceEvent: InstanceEvent, now: ExactTimeStamp): Boolean {
-        val taskKey = instanceEvent.taskKey
-        val projectKey = taskKey.projectKey
-        val rootInstanceManager = rootInstanceManagers[taskKey]
-
-        checkNotNull(rootInstanceManager)
-
-        val project = projects.getValue(projectKey)
-
-        val newKeys = instanceEvent.snapshotInfos.map {
-            val scheduleKey = RootInstanceRecord.dateTimeStringsToSchedulePair(
-                    project.projectRecord,
-                    it.snapshotKey.dateKey,
-                    it.snapshotKey.timeKey
-            ).first
-
-            InstanceKey(taskKey, scheduleKey)
-        }
-
-        val removedKeys = rootInstanceManager.rootInstanceRecords.keys - newKeys
-
-        removedKeys.forEach { rootInstanceManager.rootInstanceRecords.remove(it) }
-
-        val localChanges = instanceEvent.snapshotInfos
-                .map {
-                    val instanceKey = InstanceKey(taskKey, it.snapshotKey.getScheduleKey(project.projectRecord))
-                    val pair = rootInstanceManager.rootInstanceRecords[instanceKey]
-
-                    if (pair?.second == true) {
-                        rootInstanceManager.clearSaved(instanceKey)
-
-                        true
-                    } else {
-                        rootInstanceManager.newRootInstanceRecord(it)
-
-                        false
-                    }
-                }
-                .all { it }
-
-        val local = localChanges && removedKeys.isEmpty()
-
-        if (!local) {
-            when (projectKey) {
-                is ProjectKey.Private -> {
-                    check(privateProject.id == projectKey)
-
-                    privateProject = PrivateProject(
-                            privateProject.projectRecord,
-                            getPrivateRootInstanceManagers()
-                    ) {
-                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
-                    }.apply {
-                        fixNotificationShown(localFactory, now)
-                    }
-                }
-                is ProjectKey.Shared -> {
-                    val sharedProject = sharedProjects.getValue(projectKey)
-
-                    sharedProjects[projectKey] = SharedProject(
-                            sharedProject.projectRecord,
-                            getSharedRootInstanceManagers(projectKey)
-                    ) {
-                        AndroidRootInstanceManager(it, listOf(), factoryProvider)
-                    }.apply {
-                        fixNotificationShown(localFactory, now)
-                    }
-                }
-            }
-        }
-
-        return local
-    }
-
-    fun onNewPrivate(dataSnapshot: Snapshot, now: ExactTimeStamp) {
-        try {
-            val remotePrivateProjectRecord = privateProjectManager.setProjectRecord(dataSnapshot)
-
-            privateProject = PrivateProject(
-                    remotePrivateProjectRecord,
-                    getPrivateRootInstanceManagers()
-            ) {
-                AndroidRootInstanceManager(it, listOf(), factoryProvider)
-            }.apply { fixNotificationShown(localFactory, now) }
-        } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-            // hack for oldestVisible being set on records removed by cloud function
-
-            /*
-            todo: either set oldestVisible once you're sure the database has been updated, or find
-              a better mechanism than oldestVisible
-             */
-        }
-    }
-
     fun createScheduleRootTask(
             now: ExactTimeStamp,
             name: String,
@@ -288,7 +131,7 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
     ) = createTaskHelper(now, name, note, projectId, imageUuid, deviceDbInfo).apply {
-        createSchedules(privateProject.id.toUserKey(), now, scheduleDatas)
+        createSchedules(deviceDbInfo.key, now, scheduleDatas)
     }
 
     fun createTaskHelper(
@@ -327,25 +170,28 @@ class ProjectsFactory(
                 users = userJsons.mapKeys { it.key.key }.toMutableMap()
         )
 
-        val sharedProjectRecord = sharedProjectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
+        val sharedProjectRecord = sharedProjectsLoader.projectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
 
         val sharedProject = SharedProject(
                 sharedProjectRecord,
-                getSharedRootInstanceManagers(sharedProjectRecord.projectKey)
+                mapOf()
         ) { AndroidRootInstanceManager(it, listOf(), factoryProvider) }
 
         check(!projects.containsKey(sharedProject.id))
 
-        sharedProjects[sharedProject.id] = sharedProject
+        /*
+            todo instances once I have isSaved and local events figured out, find a way to transmit
+            this through the user manager and sequence of events in general.  And test it
+         */
+        //sharedProjects[sharedProject.id] = sharedProject
 
         return sharedProject
     }
 
     fun save(domainFactory: DomainFactory): Boolean {
-        val privateSaved = privateProjectManager.save(domainFactory)
-        val sharedSaved = sharedProjectManager.save(domainFactory)
-        val instanceSaved = rootInstanceManagers.map { it.value.save() }.any { it }
-        return privateSaved || sharedSaved || instanceSaved
+        val privateSaved = privateProjectFactory.save(domainFactory)
+        val sharedSaved = sharedProjectFactories.map { it.value.save(domainFactory) }.any { it }
+        return privateSaved || sharedSaved
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) = projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
@@ -380,10 +226,12 @@ class ProjectsFactory(
             ?.value
 
     override fun deleteProject(project: Project<*>) {
-        val projectId = project.id
+        // todo instances same as for createProject
 
-        check(projects.containsKey(projectId))
-        sharedProjects.remove(projectId)
+        //val projectId = project.id
+
+        //check(projects.containsKey(projectId))
+        //sharedProjects.remove(projectId)
     }
 
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) = projects.getValue(taskHierarchyKey.projectId).getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
@@ -392,29 +240,4 @@ class ProjectsFactory(
             .getTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
-
-    sealed class SharedProjectEvent {
-
-        abstract val key: String
-
-        class Change(val dataSnapshot: Snapshot) : SharedProjectEvent() {
-
-            override val key = dataSnapshot.key
-        }
-
-        class Add(
-                val dataSnapshot: Snapshot,
-                val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
-        ) : SharedProjectEvent() {
-
-            override val key = dataSnapshot.key
-        }
-
-        class Remove(override val key: String) : SharedProjectEvent()
-    }
-
-    class InstanceEvent(
-            val taskKey: TaskKey,
-            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
-    )
 }

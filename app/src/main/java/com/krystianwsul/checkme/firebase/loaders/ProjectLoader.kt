@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -16,12 +17,13 @@ class ProjectLoader<T : ProjectType>(
         snapshotObservable: Observable<Snapshot>,
         private val domainDisposable: CompositeDisposable,
         projectProvider: ProjectProvider,
-        projectManager: ProjectProvider.ProjectManager<T>
+        private val projectManager: ProjectProvider.ProjectManager<T>
 ) {
 
     private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
 
-    private val projectRecordObservable = snapshotObservable.map(projectManager::setProjectRecord)
+    // todo instances feed this event back into domainFactory. use another event emitter in all record managers?
+    private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
             .processChanges(

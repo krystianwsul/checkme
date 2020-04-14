@@ -48,11 +48,24 @@ class AndroidSharedProjectManager(
 
     override val databaseWrapper = database
 
-    override fun setProjectRecord(snapshot: Snapshot): SharedProjectRecord {
+    override fun setProjectRecord(snapshot: Snapshot): SharedProjectRecord? {
         val key = ProjectKey.Shared(snapshot.key)
+        val pair = sharedProjectRecords[key]
 
-        return snapshot.toRecord().also {
-            sharedProjectProperty[key] = Pair(it, false)
+        if (pair?.second == true) {
+            sharedProjectProperty[key] = Pair(pair.first, false)
+
+            return null
+        }
+
+        return try {
+            snapshot.toRecord().also {
+                sharedProjectProperty[key] = Pair(it, false)
+            }
+        } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
+            MyCrashlytics.logException(onlyVisibilityPresentException)
+
+            null
         }
     }
 

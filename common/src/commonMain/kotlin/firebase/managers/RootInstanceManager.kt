@@ -18,7 +18,7 @@ abstract class RootInstanceManager<T : ProjectType>(
     abstract var rootInstanceRecords: MutableMap<InstanceKey, Pair<RootInstanceRecord<T>, Boolean>>
         protected set
 
-    val isSaved get() = rootInstanceRecords.any { it.value.second }
+    val isSaved get() = rootInstanceRecords.any { it.value.second } // todo one value for whole manager
 
     abstract val databaseWrapper: DatabaseWrapper
 

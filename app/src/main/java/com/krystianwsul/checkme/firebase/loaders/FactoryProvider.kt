@@ -22,6 +22,16 @@ interface FactoryProvider {
 
     val projectProvider: ProjectProvider
 
+    val shownFactory: Instance.ShownFactory
+
+    val sharedProjectsProvider
+        get() = object : SharedProjectsProvider {
+
+            override val projectProvider = this@FactoryProvider.projectProvider
+
+            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = database.getSharedProjectObservable(projectKey)
+        }
+
     fun newDomain(
             localFactory: Local,
             remoteUserFactory: RemoteUserFactory,
@@ -34,15 +44,13 @@ interface FactoryProvider {
 
     interface Domain {
 
-        fun updatePrivateProjectRecord(dataSnapshot: Snapshot)
+        fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp)
 
-        fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent)
+        fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp)
 
         fun updateFriendRecords(dataSnapshot: Snapshot)
 
         fun updateUserRecord(dataSnapshot: Snapshot)
-
-        fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent)
 
         fun clearUserInfo()
     }
@@ -69,7 +77,7 @@ interface FactoryProvider {
         var tab: Int
     }
 
-    object Impl : FactoryProvider {
+    class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 

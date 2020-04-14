@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.disposables.CompositeDisposable
 
@@ -18,5 +19,7 @@ class PrivateProjectFactory(
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) = PrivateProject(
             projectRecord as PrivateProjectRecord,
             rootInstanceManagers
-    ) { newRootInstanceManager(it, listOf()) }
+    ) { newRootInstanceManager(it, listOf()) }.apply {
+        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
+    }
 }

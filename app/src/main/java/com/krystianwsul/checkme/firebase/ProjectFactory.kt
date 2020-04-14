@@ -16,11 +16,11 @@ import io.reactivex.rxkotlin.addTo
 abstract class ProjectFactory<T : ProjectType>(
         projectLoader: ProjectLoader<T>,
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T>,
-        private val factoryProvider: FactoryProvider,
+        protected val factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable
 ) {
 
-    private val projectManager = initialProjectEvent.projectManager
+    protected val projectManager = initialProjectEvent.projectManager
 
     protected var rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>>
         private set
@@ -45,7 +45,7 @@ abstract class ProjectFactory<T : ProjectType>(
             .toMap()
             .toMutableMap()
 
-    protected fun newRootInstanceManager(
+    protected fun newRootInstanceManager( // todo instances factor isSaved into all these
             taskRecord: TaskRecord<T>,
             snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
     ): AndroidRootInstanceManager<T> {
@@ -71,6 +71,8 @@ abstract class ProjectFactory<T : ProjectType>(
 
         projectLoader.changeProjectEvents
                 .subscribe {
+                    check(rootInstanceManagers.values.none { it.isSaved })
+
                     rootInstanceManagers = newRootInstanceManagers(it.projectRecord, it.snapshotInfos)
                     project = newProject(it.projectRecord)
                 }
@@ -78,6 +80,8 @@ abstract class ProjectFactory<T : ProjectType>(
 
         projectLoader.addTaskEvents
                 .subscribe {
+                    check(rootInstanceManagers[it.taskRecord.taskKey]?.isSaved != true)
+
                     newRootInstanceManager(it.taskRecord, it.snapshotInfos)
                     project = newProject(it.projectRecord)
                 }
@@ -85,8 +89,12 @@ abstract class ProjectFactory<T : ProjectType>(
 
         projectLoader.changeInstancesEvents
                 .subscribe {
-                    setRootInstanceManager(it.taskRecord, it.snapshotInfos)
-                    project = newProject(it.projectRecord)
+                    if (rootInstanceManagers[it.taskRecord.taskKey]?.isSaved == true) {
+                        // todo clear isSaved
+                    } else {
+                        setRootInstanceManager(it.taskRecord, it.snapshotInfos)
+                        project = newProject(it.projectRecord)
+                    }
                 }
                 .addTo(domainDisposable)
     }

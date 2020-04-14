@@ -98,7 +98,7 @@ class MyApplication : Application() {
         FactoryLoader(
                 localFactory,
                 deviceInfoRelay,
-                FactoryProvider.Impl
+                FactoryProvider.Impl(localFactory)
         ).domainFactoryObservable.subscribe {
             @Suppress("UNCHECKED_CAST")
             DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)

@@ -11,6 +11,7 @@ abstract class PrivateProjectManager<T> {
     var isSaved by Delegates.observable(false) { _, _, value ->
         ErrorLogger.instance.log("PrivateProjectManager.isSaved = $value")
     }
+        protected set
 
     abstract val databaseWrapper: DatabaseWrapper
 

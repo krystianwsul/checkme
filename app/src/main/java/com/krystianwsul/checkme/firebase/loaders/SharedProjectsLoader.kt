@@ -12,9 +12,9 @@ import io.reactivex.rxkotlin.plusAssign
 
 class SharedProjectsLoader(
         projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
-        sharedProjectManager: AndroidSharedProjectManager,
+        val projectManager: AndroidSharedProjectManager,
         private val domainDisposable: CompositeDisposable,
-        sharedProjectsProvider: SharedProjectsProvider
+        private val sharedProjectsProvider: SharedProjectsProvider
 ) {
 
     private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
@@ -40,22 +40,35 @@ class SharedProjectsLoader(
                                 .observable,
                         domainDisposable,
                         sharedProjectsProvider.projectProvider,
-                        sharedProjectManager
+                        projectManager
                 )
             }
     ).publishImmediate()
 
-    // this is the initial set of projects, plus their instances
     val initialProjectsEvent = projectLoadersObservable.firstOrError()
             .flatMap {
                 it.second
                         .newMap
                         .values
-                        .map { it.initialProjectEvent }
+                        .map { projectLoader -> projectLoader.initialProjectEvent.map { projectLoader to it } }
                         .zipSingle()
             }
             .map { InitialProjectsEvent(it) }
             .cacheImmediate()
+
+    // this is the event for adding new projects
+    val addProjectEvents: Observable<AddProjectEvent> = projectLoadersObservable.skip(1)
+            .switchMap {
+                it.second.addedEntries
+                        .values
+                        .map { projectLoader ->
+                            projectLoader.initialProjectEvent
+                                    .map { AddProjectEvent(projectLoader, it) }
+                                    .toObservable()
+                        }
+                        .merge()
+            }
+            .publishImmediate()
 
     val removeProjectEvents = projectLoadersObservable.map {
         RemoveProjectsEvent(it.second.removedEntries.keys)
@@ -63,41 +76,14 @@ class SharedProjectsLoader(
             .filter { it.projectKeys.isNotEmpty() }
             .publishImmediate()
 
-    // this is the event for adding new projects
-    val addProjectEvents = projectLoadersObservable.skip(1)
-            .switchMap {
-                it.second.addedEntries
-                        .values
-                        .map { it.initialProjectEvent.toObservable() }
-                        .merge()
-            }
-            .publishImmediate()
+    class InitialProjectsEvent(
+            val pairs: List<Pair<ProjectLoader<ProjectType.Shared>, ProjectLoader.InitialProjectEvent<ProjectType.Shared>>>
+    )
 
-    val addTaskEvents = projectLoadersObservable.switchMap {
-        it.second
-                .newMap
-                .values
-                .map { it.addTaskEvents }
-                .merge()
-    }.publishImmediate()
-
-    val changeInstancesEvents = projectLoadersObservable.switchMap {
-        it.second
-                .newMap
-                .values
-                .map { it.changeInstancesEvents }
-                .merge()
-    }.publishImmediate()
-
-    val changeProjectEvents = projectLoadersObservable.switchMap {
-        it.second
-                .newMap
-                .values
-                .map { it.changeProjectEvents }
-                .merge()
-    }.publishImmediate()
-
-    class InitialProjectsEvent(val initialProjectEvents: List<ProjectLoader.InitialProjectEvent<ProjectType.Shared>>)
+    class AddProjectEvent(
+            val projectLoader: ProjectLoader<ProjectType.Shared>,
+            val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared>
+    )
 
     class RemoveProjectsEvent(val projectKeys: Set<ProjectKey.Shared>)
 }

@@ -122,9 +122,6 @@ class DomainFactory(
     var remoteReadTimes: ReadTimes
         private set
 
-    var remoteUpdateTime: Long? = null
-        private set
-
     val remoteFriendFactory: RemoteFriendFactory
 
     private var aggregateData: AggregateData? = null
@@ -251,42 +248,27 @@ class DomainFactory(
     override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
-        MyCrashlytics.log("updatePrivateProjectRecord")
+    override fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp) {
+        MyCrashlytics.log("onPrivateProjectUpdated")
 
-        val start = ExactTimeStamp.now
-
-        val runType: RunType
-        if (projectsFactory.isPrivateSaved) {
-            projectsFactory.isPrivateSaved = false
-
-            runType = RunType.LOCAL
+        val runType = if (local) {
+            RunType.LOCAL
         } else {
-            projectsFactory.onNewPrivate(dataSnapshot, start)
-
-            val stop = ExactTimeStamp.now
-
-            remoteUpdateTime = stop.long - start.long
-
             TickHolder.getTickData()?.privateTriggered()
 
-            runType = RunType.REMOTE
+            RunType.REMOTE
         }
 
-        updateShortcuts(start)
+        updateShortcuts(now)
 
-        tryNotifyListeners(start, "DomainFactory.updatePrivateProjectRecord", runType)
+        tryNotifyListeners(now, "DomainFactory.onPrivateProjectUpdated", runType)
     }
 
     @Synchronized
-    override fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent) {
-        MyCrashlytics.log("updateSharedProjectRecord")
+    override fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp) {
+        MyCrashlytics.log("onSharedProjectsUpdated")
 
-        val now = ExactTimeStamp.now
-
-        val localChange = projectsFactory.onSharedProjectEvent(deviceDbInfo, sharedProjectEvent, now)
-
-        val runType = if (localChange) {
+        val runType = if (local) {
             RunType.LOCAL
         } else {
             TickHolder.getTickData()?.sharedTriggered()
@@ -296,7 +278,7 @@ class DomainFactory(
 
         updateShortcuts(now)
 
-        tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords", runType)
+        tryNotifyListeners(now, "DomainFactory.onSharedProjectsUpdated", runType)
     }
 
     @Synchronized
@@ -335,29 +317,6 @@ class DomainFactory(
         }
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
-    }
-
-    @Synchronized
-    override fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent) {
-        MyCrashlytics.log("updateSharedProjectRecord")
-
-        val now = ExactTimeStamp.now
-
-        val localChange = projectsFactory.onInstanceEvent(instanceEvent, now)
-
-        val runType = if (localChange) {
-            RunType.LOCAL
-        } else {
-            TickHolder.getTickData()?.sharedTriggered()
-
-            RunType.REMOTE
-        }
-
-        updateShortcuts(now)
-
-        tryNotifyListeners(now, "DomainFactory.updateInstanceRecords", runType)
-
-        updateShortcuts(now)
     }
 
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
@@ -487,7 +446,7 @@ class DomainFactory(
 
         val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
 
-        return ShowCustomTimeViewModel.Data(customTime.key, customTime.name, hourMinutes)
+        return ShowCustomTimeViewModel.Data(customTimeKey, customTime.name, hourMinutes)
     }
 
     @Synchronized
@@ -496,7 +455,9 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val entries = getCurrentRemoteCustomTimes(now).map { ShowCustomTimesViewModel.CustomTimeData(it.key, it.name) }.toMutableList()
+        val entries = getCurrentRemoteCustomTimes(now).map {
+            ShowCustomTimesViewModel.CustomTimeData(it.key, it.name)
+        }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
     }
@@ -1921,7 +1882,7 @@ class DomainFactory(
     fun setCustomTimesCurrent(
             dataId: Int,
             source: SaveService.Source,
-            customTimeIds: List<CustomTimeKey.Private>,
+            customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
             current: Boolean
     ) {
         MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")

@@ -52,12 +52,6 @@ class DebugFragment : AbstractFragment() {
                 append(domainFactory.remoteReadTimes.instantiateMillis)
                 append(")")
 
-                domainFactory.remoteUpdateTime?.let {
-                    append("\nremote update time: ")
-                    append(it)
-                    append("ms")
-                }
-
                 append("\n\ntasks: ")
                 append(domainFactory.taskCount)
                 append("\ninstances: ")

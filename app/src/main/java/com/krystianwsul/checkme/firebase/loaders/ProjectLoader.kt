@@ -29,7 +29,9 @@ class ProjectLoader<T : ProjectType>(
     considering adding dummy projects as well.  That means that these events should go through the rest of the
     pipeline, to properly set up database listeners and what-now.  That would mean ditching this nullability,
     and moving the isSaved checks somewhere downstream... I think?  Though it would be nice to nip the whole isSaved
-    thing well ahead, ideally even before parsing to *Json if possible.
+    thing well ahead, ideally even before parsing to *Json if possible.  If that's not an option, then I don't really
+    see a difference between nipping local events at the record vs. model stages, may as well go all the way if that
+    makes the code simpler; as long as I can feed the ChangeType into the DomainFactory correctly.
      */
     private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 

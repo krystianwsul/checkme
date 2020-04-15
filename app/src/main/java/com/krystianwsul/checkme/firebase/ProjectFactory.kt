@@ -79,6 +79,14 @@ abstract class ProjectFactory<T : ProjectType>(
             }
         }
 
+        /*
+        todo instances okay, so the LOCAL/REMOTE distinction has a few consequences:
+
+        1. remote sets TickData.private/shared as having had a remote event come in, freeing the lock
+        2. remote forces a notification refresh with sounds, local *might* do one silently
+        3. remote causes all domain listeners to update
+         */
+
         projectLoader.changeProjectEvents
                 .subscribe { (projectChangeType, changeProjectEvent) ->
                     val instanceChangeType = changeProjectEvent.projectRecord

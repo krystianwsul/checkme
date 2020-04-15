@@ -56,31 +56,35 @@ class ProjectsFactory(
     init {
         privateProject.fixNotificationShown(localFactory, now)
 
-        sharedProjectsLoader.addProjectEvents // todo instances pass these events to domainfactory
-                .subscribe {
-                    val projectKey = it.initialProjectEvent
+        sharedProjectsLoader.addProjectEvents
+                .subscribe { (changeType, addProjectEvent) ->
+                    val projectKey = addProjectEvent.initialProjectEvent
                             .projectRecord
                             .projectKey
 
                     check(!sharedProjectFactories.containsKey(projectKey))
 
                     sharedProjectFactories[projectKey] = SharedProjectFactory(
-                            it.projectLoader,
-                            it.initialProjectEvent,
+                            addProjectEvent.projectLoader,
+                            addProjectEvent.initialProjectEvent,
                             factoryProvider,
                             domainDisposable,
                             deviceDbInfo
                     )
+
+                    // todo instances local/remote
                 }
                 .addTo(domainDisposable)
 
-        sharedProjectsLoader.removeProjectEvents // todo instances pass these events to domainfactory
-                .subscribe {
-                    it.projectKeys.forEach {
+        sharedProjectsLoader.removeProjectEvents
+                .subscribe { (changeType, removeProjectEvent) ->
+                    removeProjectEvent.projectKeys.forEach {
                         check(sharedProjectFactories.containsKey(it))
 
                         sharedProjectFactories.remove(it)
                     }
+
+                    // todo instances local/remote
                 }
                 .addTo(domainDisposable)
     }

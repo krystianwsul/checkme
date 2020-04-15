@@ -1,14 +1,14 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.loaders.ChangeType
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
-import com.krystianwsul.checkme.firebase.loaders.reduce
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.reduce
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.disposables.CompositeDisposable
@@ -80,32 +80,44 @@ abstract class ProjectFactory<T : ProjectType>(
         }
 
         projectLoader.changeProjectEvents
-                .subscribe {
-                    val instanceChange = it.projectRecord // todo instances local/remote
+                .subscribe { (projectChangeType, changeProjectEvent) ->
+                    val instanceChangeType = changeProjectEvent.projectRecord
                             .taskRecords
                             .values
-                            .map { taskRecord ->
-                                updateRootInstanceManager(taskRecord, it.snapshotInfos.getValue(taskRecord.taskKey))
+                            .map {
+                                updateRootInstanceManager(it, changeProjectEvent.snapshotInfos.getValue(it.taskKey))
                             }
                             .reduce()
 
-                    project = newProject(it.projectRecord) // todo instances local/remote
+                    project = newProject(changeProjectEvent.projectRecord)
+
+                    // todo instances reevaluate these types
+                    val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
 
         projectLoader.addTaskEvents
-                .subscribe {
-                    val instanceChange = updateRootInstanceManager(it.taskRecord, it.snapshotInfos) // todo instances local/remote
+                .subscribe { (projectChangeType, addTaskEvent) ->
+                    val instanceChangeType = updateRootInstanceManager(addTaskEvent.taskRecord, addTaskEvent.snapshotInfos)
 
-                    project = newProject(it.projectRecord) // todo instances local/remote
+                    project = newProject(addTaskEvent.projectRecord)
+
+                    // todo instances reevaluate these types
+                    val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
 
         projectLoader.changeInstancesEvents
-                .subscribe {
-                    val instanceChange = updateRootInstanceManager(it.taskRecord, it.snapshotInfos) // todo instances local/remote
+                .subscribe { (projectChangeType, changeInstancesEvent) ->
+                    val instanceChangeType = updateRootInstanceManager(
+                            changeInstancesEvent.taskRecord,
+                            changeInstancesEvent.snapshotInfos
+                    )
 
-                    project = newProject(it.projectRecord) // todo instances local/remote
+                    project = newProject(changeInstancesEvent.projectRecord)
+
+                    // todo instances reevaluate these types
+                    val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
     }

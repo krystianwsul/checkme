@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.zipSingle
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.Observable
@@ -11,7 +13,7 @@ import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 
 class SharedProjectsLoader(
-        projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
+        projectKeysObservable: Observable<ChangeWrapper<Set<ProjectKey.Shared>>>,
         val projectManager: AndroidSharedProjectManager,
         private val domainDisposable: CompositeDisposable,
         private val sharedProjectsProvider: SharedProjectsProvider
@@ -21,22 +23,27 @@ class SharedProjectsLoader(
     private fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }!!
 
     private val projectDatabaseRxObservable = projectKeysObservable.distinctUntilChanged()
-            .processChangesSet(
-                    {
-                        DatabaseRx(
-                                domainDisposable,
-                                sharedProjectsProvider.getSharedProjectObservable(it)
+            .processChanges(
+                    { it.data },
+                    { (changeType, _), projectKey -> // todo instances unit test if this changeType needs to be propagated
+                        ChangeWrapper(
+                                changeType,
+                                DatabaseRx(
+                                        domainDisposable,
+                                        sharedProjectsProvider.getSharedProjectObservable(projectKey)
+                                )
                         )
                     },
-                    { it.disposable.dispose() }
+                    { it.data.disposable.dispose() }
             ).publishImmediate()
 
     private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
-            { it.first },
+            { it.first.data },
             { (_, mapChanges), projectKey ->
                 ProjectLoader(
                         mapChanges.newMap
                                 .getValue(projectKey)
+                                .data
                                 .observable,
                         domainDisposable,
                         sharedProjectsProvider.projectProvider,
@@ -53,17 +60,21 @@ class SharedProjectsLoader(
                         .map { projectLoader -> projectLoader.initialProjectEvent.map { projectLoader to it } }
                         .zipSingle()
             }
-            .map { InitialProjectsEvent(it) }
+            .map {
+                check(it.none { it.second.changeType == ChangeType.REMOTE })
+
+                InitialProjectsEvent(it.map { it.first to it.second.data })
+            }
             .cacheImmediate()
 
     // this is the event for adding new projects
-    val addProjectEvents: Observable<AddProjectEvent> = projectLoadersObservable.skip(1)
+    val addProjectEvents = projectLoadersObservable.skip(1)
             .switchMap {
                 it.second.addedEntries
                         .values
                         .map { projectLoader ->
                             projectLoader.initialProjectEvent
-                                    .map { AddProjectEvent(projectLoader, it) }
+                                    .map { (changeType, initialProjectEvent) -> ChangeWrapper(changeType, AddProjectEvent(projectLoader, initialProjectEvent)) }
                                     .toObservable()
                         }
                         .merge()
@@ -71,9 +82,14 @@ class SharedProjectsLoader(
             .publishImmediate()
 
     val removeProjectEvents = projectLoadersObservable.map {
-        RemoveProjectsEvent(it.second.removedEntries.keys)
+        ChangeWrapper(
+                it.first
+                        .first
+                        .changeType,
+                RemoveProjectsEvent(it.second.removedEntries.keys)
+        )
     }
-            .filter { it.projectKeys.isNotEmpty() }
+            .filter { it.data.projectKeys.isNotEmpty() }
             .publishImmediate()
 
     class InitialProjectsEvent(

@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -94,7 +94,9 @@ class FactoryLoader(
                 val projectsFactorySingle = Singles.zip(
                         privateProjectLoader.initialProjectEvent,
                         sharedProjectsLoader.initialProjectsEvent
-                ) { initialPrivateProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>, initialSharedProjectsEvent: SharedProjectsLoader.InitialProjectsEvent ->
+                ) { (changeType, initialPrivateProjectEvent), initialSharedProjectsEvent ->
+                    check(changeType == ChangeType.LOCAL)
+
                     ProjectsFactory(
                             localFactory,
                             privateProjectLoader,

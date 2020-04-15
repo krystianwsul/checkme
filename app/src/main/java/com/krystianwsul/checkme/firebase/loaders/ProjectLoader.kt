@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -33,9 +34,13 @@ class ProjectLoader<T : ProjectType>(
     see a difference between nipping local events at the record vs. model stages, may as well go all the way if that
     makes the code simpler; as long as I can feed the ChangeType into the DomainFactory correctly.
      */
-    private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) } // todo changewrapper
+    private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 
-    private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
+    private val rootInstanceDatabaseRx = projectRecordObservable.map {
+        it to it.data
+                .taskRecords
+                .mapKeys { it.value.taskKey }
+    }
             .processChanges(
                     { it.second.keys },
                     { (_, newData), taskKey ->
@@ -56,7 +61,7 @@ class ProjectLoader<T : ProjectType>(
     // first snapshot of everything
     val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
             .flatMap {
-                val projectRecord = it.first.first
+                val (changeType, projectRecord) = it.first.first
 
                 it.second
                         .newMap
@@ -65,7 +70,7 @@ class ProjectLoader<T : ProjectType>(
                             databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
                         }
                         .zipSingle()
-                        .map { InitialProjectEvent(projectManager, projectRecord, it.toMap()) }
+                        .map { ChangeWrapper(changeType, InitialProjectEvent(projectManager, projectRecord, it.toMap())) }
             }
             .cache()
             .apply { domainDisposable += subscribe() }!!
@@ -73,7 +78,7 @@ class ProjectLoader<T : ProjectType>(
     // Here we observe the initial instances for new tasks
     val addTaskEvents = rootInstanceDatabaseRx.skip(1)
             .switchMap {
-                val projectRecord = it.first.first
+                val (changeType, projectRecord) = it.first.first
 
                 it.second
                         .addedEntries
@@ -81,7 +86,12 @@ class ProjectLoader<T : ProjectType>(
                         .map { (taskRecord, databaseRx) ->
                             databaseRx.first
                                     .toObservable()
-                                    .map { AddTaskEvent(projectRecord, taskRecord, it.toSnapshotInfos()) }
+                                    .map {
+                                        ChangeWrapper(
+                                                changeType,
+                                                AddTaskEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                                        )
+                                    }
                         }
                         .merge()
             }
@@ -89,14 +99,14 @@ class ProjectLoader<T : ProjectType>(
 
     // Here we observe changes to all the previously subscribed instances
     val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
-        val projectRecord = it.first.first
+        val (changeType, projectRecord) = it.first.first
 
         it.second
                 .newMap
                 .values
                 .map { (taskRecord, databaseRx) ->
                     databaseRx.changes.map {
-                        ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                        ChangeWrapper(changeType, ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos()))
                     }
                 }
                 .merge()
@@ -106,7 +116,7 @@ class ProjectLoader<T : ProjectType>(
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
             .filter { it.second.addedEntries.isEmpty() }
             .switchMapSingle {
-                val projectRecord = it.first.first
+                val (changeType, projectRecord) = it.first.first
 
                 it.second
                         .newMap
@@ -126,7 +136,7 @@ class ProjectLoader<T : ProjectType>(
                                             )
                                         }
                             }
-                        }
+                        }.map { ChangeWrapper(changeType, it) }
             }
             .publishImmediate()
 

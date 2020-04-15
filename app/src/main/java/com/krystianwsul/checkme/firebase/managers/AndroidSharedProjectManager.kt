@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -26,24 +27,26 @@ class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
 
     override val databaseWrapper = database
 
-    override fun setProjectRecord(snapshot: Snapshot): SharedProjectRecord? {
+    override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<SharedProjectRecord>? {
         val key = ProjectKey.Shared(snapshot.key)
         val pair = sharedProjectRecords[key]
 
-        if (pair?.second == true) {
+        return if (pair?.second == true) {
             sharedProjectRecords[key] = Pair(pair.first, false)
 
-            return null
-        }
+            ChangeWrapper(ChangeType.LOCAL, pair.first)
+        } else {
+            try {
+                val sharedProjectRecord = snapshot.toRecord()
 
-        return try {
-            snapshot.toRecord().also {
-                sharedProjectRecords[key] = Pair(it, false)
+                sharedProjectRecords[key] = Pair(sharedProjectRecord, false)
+
+                ChangeWrapper(ChangeType.REMOTE, sharedProjectRecord)
+            } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
+                MyCrashlytics.logException(onlyVisibilityPresentException)
+
+                null
             }
-        } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-            MyCrashlytics.logException(onlyVisibilityPresentException)
-
-            null
         }
     }
 

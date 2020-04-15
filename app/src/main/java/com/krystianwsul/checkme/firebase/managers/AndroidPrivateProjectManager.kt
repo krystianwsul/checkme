@@ -1,16 +1,15 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
@@ -31,17 +30,15 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun setProjectRecord(snapshot: Snapshot): PrivateProjectRecord? {
+    override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<PrivateProjectRecord> {
         if (isSaved) {
             isSaved = false
 
-            return null
-        }
+            return ChangeWrapper(ChangeType.LOCAL, privateProjectRecord)
+        } else {
+            privateProjectRecord = if (first) {
+                first = false // for new users, the project may not exist yet
 
-        privateProjectRecord = if (first) {
-            first = false
-
-            try {
                 snapshot.takeIf { it.exists() }
                         ?.toRecord()
                         ?: PrivateProjectRecord(
@@ -49,16 +46,12 @@ class AndroidPrivateProjectManager(
                                 userInfo,
                                 PrivateProjectJson(startTime = ExactTimeStamp.now.long)
                         )
-            } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-                MyCrashlytics.logException(onlyVisibilityPresentException)
-
-                return null
+            } else {
+                snapshot.toRecord()
             }
-        } else {
-            snapshot.toRecord()
-        }
 
-        return privateProjectRecord
+            return ChangeWrapper(ChangeType.REMOTE, privateProjectRecord)
+        }
     }
 
     override fun getDatabaseCallback(

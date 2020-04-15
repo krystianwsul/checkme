@@ -63,5 +63,3 @@ fun Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap
 }
         ?.flatten()
         ?: listOf()
-
-fun Iterable<ChangeType>.reduce() = if (any { it == ChangeType.REMOTE }) ChangeType.REMOTE else ChangeType.LOCAL

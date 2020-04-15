@@ -18,7 +18,7 @@ abstract class RootInstanceManager<T : ProjectType>(
     abstract val rootInstanceRecords: MutableMap<InstanceKey, RootInstanceRecord<T>>
 
     var isSaved = false
-        private set
+        protected set
 
     abstract val databaseWrapper: DatabaseWrapper
 

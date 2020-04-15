@@ -33,7 +33,7 @@ class ProjectLoader<T : ProjectType>(
     see a difference between nipping local events at the record vs. model stages, may as well go all the way if that
     makes the code simpler; as long as I can feed the ChangeType into the DomainFactory correctly.
      */
-    private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
+    private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) } // todo changewrapper
 
     private val rootInstanceDatabaseRx = projectRecordObservable.map { it to it.taskRecords.mapKeys { it.value.taskKey } }
             .processChanges(

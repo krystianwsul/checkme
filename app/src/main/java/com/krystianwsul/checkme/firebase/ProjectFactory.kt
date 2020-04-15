@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.loaders.ChangeType
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
+import com.krystianwsul.checkme.firebase.loaders.reduce
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -45,56 +47,65 @@ abstract class ProjectFactory<T : ProjectType>(
             .toMap()
             .toMutableMap()
 
-    protected fun newRootInstanceManager( // todo instances factor isSaved into all these
+    protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
             snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
-        return setRootInstanceManager(taskRecord, snapshotInfos)
-    }
-
-    private fun setRootInstanceManager(
-            taskRecord: TaskRecord<T>,
-            snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
-    ) = AndroidRootInstanceManager(taskRecord, snapshotInfos, factoryProvider).apply {
-        rootInstanceManagers[taskRecord.taskKey] = this
+        return AndroidRootInstanceManager(taskRecord, snapshotInfos, factoryProvider).apply {
+            rootInstanceManagers[taskRecord.taskKey] = this
+        }
     }
 
     protected abstract fun newProject(projectRecord: ProjectRecord<T>): Project<T>
 
     init {
-        // todo instances figure out if I should be checking isSaved for all this
-
         rootInstanceManagers = newRootInstanceManagers(initialProjectEvent.projectRecord, initialProjectEvent.snapshotInfos)
         project = newProject(initialProjectEvent.projectRecord)
 
+        fun updateRootInstanceManager(
+                taskRecord: TaskRecord<T>,
+                snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+        ): ChangeType {
+            val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
+
+            return if (rootInstanceManager != null) {
+                rootInstanceManager.setSnapshotInfos(snapshotInfos)
+            } else {
+                newRootInstanceManager(taskRecord, snapshotInfos)
+
+                ChangeType.REMOTE
+            }
+        }
+
         projectLoader.changeProjectEvents
                 .subscribe {
-                    check(rootInstanceManagers.values.none { it.isSaved })
+                    val instanceChange = it.projectRecord // todo instances local/remote
+                            .taskRecords
+                            .values
+                            .map { taskRecord ->
+                                updateRootInstanceManager(taskRecord, it.snapshotInfos.getValue(taskRecord.taskKey))
+                            }
+                            .reduce()
 
-                    rootInstanceManagers = newRootInstanceManagers(it.projectRecord, it.snapshotInfos)
-                    project = newProject(it.projectRecord)
+                    project = newProject(it.projectRecord) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
 
         projectLoader.addTaskEvents
                 .subscribe {
-                    check(rootInstanceManagers[it.taskRecord.taskKey]?.isSaved != true)
+                    val instanceChange = updateRootInstanceManager(it.taskRecord, it.snapshotInfos) // todo instances local/remote
 
-                    newRootInstanceManager(it.taskRecord, it.snapshotInfos)
-                    project = newProject(it.projectRecord)
+                    project = newProject(it.projectRecord) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
 
         projectLoader.changeInstancesEvents
                 .subscribe {
-                    if (rootInstanceManagers[it.taskRecord.taskKey]?.isSaved == true) {
-                        // todo clear isSaved
-                    } else {
-                        setRootInstanceManager(it.taskRecord, it.snapshotInfos)
-                        project = newProject(it.projectRecord)
-                    }
+                    val instanceChange = updateRootInstanceManager(it.taskRecord, it.snapshotInfos) // todo instances local/remote
+
+                    project = newProject(it.projectRecord) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
     }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
+import com.krystianwsul.checkme.firebase.loaders.ChangeType
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -22,13 +23,25 @@ class AndroidRootInstanceManager<T : ProjectType>(
             this@AndroidRootInstanceManager
     )
 
-    override val rootInstanceRecords = snapshotInfos.map { it.toRecord() }
+    override var rootInstanceRecords = snapshotInfos.map { it.toRecord() }
             .associateBy { it.instanceKey }
             .toMutableMap()
 
     override val databaseWrapper = factoryProvider.database
 
     override fun getDatabaseCallback() = checkError("RootInstanceManager.save")
+
+    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>) = if (isSaved) {
+        isSaved = false
+
+        ChangeType.LOCAL
+    } else {
+        rootInstanceRecords = snapshotInfos.map { it.toRecord() }
+                .associateBy { it.instanceKey }
+                .toMutableMap()
+
+        ChangeType.REMOTE
+    }
 
     data class SnapshotKey(val dateKey: String, val timeKey: String)
 

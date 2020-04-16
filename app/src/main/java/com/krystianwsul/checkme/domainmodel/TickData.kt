@@ -33,6 +33,11 @@ sealed class TickData {
 
         override val waiting = false
 
+        /*
+            todo instances this made sense when there were only two database observers. Now that
+            there's one for private, and sets for both shared and instances, the mechanism will
+            need to be completely reworked.
+         */
         override fun privateTriggered() = Unit
         override fun sharedTriggered() = Unit
 

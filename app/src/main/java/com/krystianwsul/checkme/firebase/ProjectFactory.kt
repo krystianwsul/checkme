@@ -80,11 +80,9 @@ abstract class ProjectFactory<T : ProjectType>(
         }
 
         /*
-        todo instances okay, so the LOCAL/REMOTE distinction has a few consequences:
-
-        1. remote sets TickData.private/shared as having had a remote event come in, freeing the lock
-        2. remote forces a notification refresh with sounds, local *might* do one silently
-        3. remote causes all domain listeners to update
+        todo instances feed REMOTE into DomainFactory when there might be fresh data coming in from
+        Firebase, which might entail 1. changed reminders, and therefore a notification sound, or
+        2. new data, requiring an update to domain listeners.  So pretty much #2.
          */
 
         projectLoader.changeProjectEvents

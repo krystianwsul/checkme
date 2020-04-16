@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -16,8 +17,9 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
 
 class ProjectsFactory(
         localFactory: FactoryProvider.Local,
@@ -69,63 +71,63 @@ class ProjectsFactory(
             return result + addedSharedProjects
         }
 
+    val changeTypes: Observable<ChangeType> // todo instances check observed
+
     init {
         privateProject.fixNotificationShown(localFactory, now)
 
-        sharedProjectsLoader.addProjectEvents
-                .subscribe { (changeType, addProjectEvent) ->
-                    val projectKey = addProjectEvent.initialProjectEvent
-                            .projectRecord
-                            .projectKey
+        val addProjectChangeTypes = sharedProjectsLoader.addProjectEvents.map { (changeType, addProjectEvent) ->
+            val projectKey = addProjectEvent.initialProjectEvent
+                    .projectRecord
+                    .projectKey
 
-                    check(!sharedProjectFactories.containsKey(projectKey))
-                    check(!removedSharedProjects.contains(projectKey))
+            check(!sharedProjectFactories.containsKey(projectKey))
+            check(!removedSharedProjects.contains(projectKey))
 
-                    val sharedProjectFactory = SharedProjectFactory(
-                            addProjectEvent.projectLoader,
-                            addProjectEvent.initialProjectEvent,
-                            factoryProvider,
-                            domainDisposable,
-                            deviceDbInfo
-                    )
+            val sharedProjectFactory = SharedProjectFactory(
+                    addProjectEvent.projectLoader,
+                    addProjectEvent.initialProjectEvent,
+                    factoryProvider,
+                    domainDisposable,
+                    deviceDbInfo
+            )
 
-                    sharedProjectFactories[projectKey] = sharedProjectFactory
+            sharedProjectFactories[projectKey] = sharedProjectFactory
 
-                    if (addedSharedProjects.containsKey(projectKey)) {
-                        check(changeType == ChangeType.LOCAL)
+            if (addedSharedProjects.containsKey(projectKey)) {
+                check(changeType == ChangeType.LOCAL)
 
-                        val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
-                        val newRecord = sharedProjectFactory.project.projectRecord
+                val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
+                val newRecord = sharedProjectFactory.project.projectRecord
 
-                        check(oldRecord == newRecord) // todo unit test for this
+                check(oldRecord == newRecord) // todo unit test for this
 
-                        addedSharedProjects.remove(projectKey)
-                    }
+                addedSharedProjects.remove(projectKey)
+            }
 
-                    // todo instances local/remote
+            changeType
+        }
+
+        val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->
+            removeProjectEvent.projectKeys.forEach {
+                check(!addedSharedProjects.containsKey(it))
+                check(sharedProjectFactories.containsKey(it))
+
+                if (removedSharedProjects.contains(it)) {
+                    check(changeType == ChangeType.LOCAL)
+
+                    removedSharedProjects.remove(it)
+                } else {
+                    check(changeType == ChangeType.REMOTE)
                 }
-                .addTo(domainDisposable)
 
-        sharedProjectsLoader.removeProjectEvents
-                .subscribe { (changeType, removeProjectEvent) ->
-                    removeProjectEvent.projectKeys.forEach {
-                        check(!addedSharedProjects.containsKey(it))
-                        check(sharedProjectFactories.containsKey(it))
+                sharedProjectFactories.remove(it)
+            }
 
-                        if (removedSharedProjects.contains(it)) {
-                            check(changeType == ChangeType.LOCAL)
+            changeType
+        }
 
-                            removedSharedProjects.remove(it)
-                        } else {
-                            check(changeType == ChangeType.REMOTE)
-                        }
-
-                        sharedProjectFactories.remove(it)
-                    }
-
-                    // todo instances local/remote
-                }
-                .addTo(domainDisposable)
+        changeTypes = listOf(addProjectChangeTypes, removeProjectChangeTypes).merge().publishImmediate(domainDisposable)
     }
 
     val projects get() = sharedProjects + mapOf(privateProject.id to privateProject)

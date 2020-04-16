@@ -52,7 +52,7 @@ class SharedProjectsLoader(
             }
     ).publishImmediate()
 
-    val initialProjectsEvent = projectLoadersObservable.firstOrError() // todo instances check LOCAL/REMOTE consumed
+    val initialProjectsEvent = projectLoadersObservable.firstOrError()
             .flatMap {
                 it.second
                         .newMap
@@ -61,14 +61,14 @@ class SharedProjectsLoader(
                         .zipSingle()
             }
             .map {
-                check(it.none { it.second.changeType == ChangeType.REMOTE })
+                check(it.all { it.second.changeType == ChangeType.LOCAL })
 
                 InitialProjectsEvent(it.map { it.first to it.second.data })
             }
             .cacheImmediate()
 
     // this is the event for adding new projects
-    val addProjectEvents = projectLoadersObservable.skip(1) // todo instances check LOCAL/REMOTE consumed
+    val addProjectEvents = projectLoadersObservable.skip(1)
             .switchMap {
                 it.second.addedEntries
                         .values
@@ -88,7 +88,7 @@ class SharedProjectsLoader(
                         .changeType,
                 RemoveProjectsEvent(it.second.removedEntries.keys)
         )
-    } // todo instances check LOCAL/REMOTE consumed
+    }
             .filter { it.data.projectKeys.isNotEmpty() }
             .publishImmediate()
 

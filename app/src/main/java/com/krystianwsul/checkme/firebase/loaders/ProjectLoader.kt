@@ -99,7 +99,7 @@ class ProjectLoader<T : ProjectType>(
                     }
                 }
                 .merge()
-    }.publishImmediate() // todo instances check LOCAL/REMOTE consumed
+    }.publishImmediate()
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)

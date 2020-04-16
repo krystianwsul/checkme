@@ -79,7 +79,6 @@ class ProjectsFactory(
                             .projectKey
 
                     check(!sharedProjectFactories.containsKey(projectKey))
-                    // todo instances check if instances are handled in this respect
                     check(!removedSharedProjects.contains(projectKey))
 
                     val sharedProjectFactory = SharedProjectFactory(

@@ -103,7 +103,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
         projectLoader.addTaskEvents
                 .subscribe { (projectChangeType, addTaskEvent) ->
-                    val instanceChangeType = updateRootInstanceManager(addTaskEvent.taskRecord, addTaskEvent.snapshotInfos)
+                    val instanceChangeType = addTaskEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
 
                     project = newProject(addTaskEvent.projectRecord)
 
@@ -113,10 +113,9 @@ abstract class ProjectFactory<T : ProjectType>(
 
         projectLoader.changeInstancesEvents
                 .subscribe { (projectChangeType, changeInstancesEvent) ->
-                    val instanceChangeType = updateRootInstanceManager(
-                            changeInstancesEvent.taskRecord,
-                            changeInstancesEvent.snapshotInfos
-                    )
+                    val instanceChangeType = changeInstancesEvent.run {
+                        updateRootInstanceManager(taskRecord, snapshotInfos)
+                    }
 
                     project = newProject(changeInstancesEvent.projectRecord)
 

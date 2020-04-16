@@ -15,6 +15,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.Singles
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
@@ -126,24 +127,15 @@ class FactoryLoader(
                     )
                 }.cache()
 
-                /* todo instances feed local/remote private/shared project events into domainFactory
-                privateProjectDatabaseRx.changes
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
-
-                domainDisposable += sharedProjectEvents.subscribe {
-                    domainFactorySingle.subscribe { domainFactory -> domainFactory.updateSharedProjectRecords(it) }.addTo(domainDisposable)
-                }
-
-                rootInstanceEvents.switchMapSingle { domainFactorySingle.map { domainFactory -> Pair(domainFactory, it) } }
-                        .subscribe { (domainFactory, instanceEvent) ->
-                            domainFactory.updateInstanceRecords(instanceEvent)
-                        }
-                        .addTo(domainDisposable)
-
+                /*
+                    todo instances this could be moved into domainFactorySingle, but I'm keeping it
+                    here for symmetry with the other events below.  Re-evaluate after figuring out
+                    this situation with TickData, possibly unit test
                  */
+                domainDisposable += Observables.combineLatest(
+                        projectsFactorySingle.flatMapObservable { it.changeTypes },
+                        domainFactorySingle.toObservable()
+                ).subscribe { (changeType, domainFactory) -> domainFactory.onChange(changeType, ExactTimeStamp.now) }
 
                 friendDatabaseRx.changes
                         .subscribe {

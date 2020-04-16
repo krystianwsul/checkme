@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -48,6 +49,8 @@ interface FactoryProvider {
         fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp)
 
         fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp)
+
+        fun onChange(changeType: ChangeType, now: ExactTimeStamp)
 
         fun updateFriendRecords(dataSnapshot: Snapshot)
 

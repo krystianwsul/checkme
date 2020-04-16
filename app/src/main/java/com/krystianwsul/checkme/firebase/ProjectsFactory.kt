@@ -36,7 +36,7 @@ class ProjectsFactory(
 
     /*
     todo instances since this is initialized after the individual loaders, their events should probably
-    be replays instead of just publish.  Unit test to confirm.
+    be replays instead of just publish, including changeTypes.  Unit test to confirm.
      */
 
     private val privateProjectFactory = PrivateProjectFactory(
@@ -82,7 +82,7 @@ class ProjectsFactory(
             return result + addedSharedProjects
         }
 
-    val changeTypes: Observable<ChangeType> // todo instances check observed
+    val changeTypes: Observable<ChangeType>
 
     init {
         privateProject.fixNotificationShown(localFactory, now)

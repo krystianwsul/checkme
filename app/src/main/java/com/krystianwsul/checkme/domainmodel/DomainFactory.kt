@@ -32,6 +32,7 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
@@ -246,6 +247,22 @@ class DomainFactory(
 
     @Synchronized
     override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
+
+    @Synchronized
+    override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+        MyCrashlytics.log("onChange")
+
+        val runType = when (changeType) {
+            ChangeType.LOCAL -> RunType.LOCAL
+            ChangeType.REMOTE -> RunType.REMOTE
+        }
+
+        // todo instances figure out TickData, remove next two functions
+
+        updateShortcuts(now)
+
+        tryNotifyListeners(now, "DomainFactory.onChange", runType)
+    }
 
     @Synchronized
     override fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp) {

@@ -62,7 +62,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     protected abstract fun newProject(projectRecord: ProjectRecord<T>): Project<T>
 
-    val changeTypes: Observable<ChangeType> // todo instances check observed
+    val changeTypes: Observable<ChangeType>
 
     init {
         rootInstanceManagers = newRootInstanceManagers(initialProjectEvent.projectRecord, initialProjectEvent.snapshotInfos)

@@ -48,7 +48,7 @@ class ProjectLoader<T : ProjectType>(
             .publishImmediate()
 
     // first snapshot of everything
-    val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
+    val initialProjectEvent = rootInstanceDatabaseRx.firstOrError() // todo instances check LOCAL/REMOTE consumed
             .flatMap {
                 val (changeType, projectRecord) = it.first.first
 
@@ -65,7 +65,7 @@ class ProjectLoader<T : ProjectType>(
             .apply { domainDisposable += subscribe() }!!
 
     // Here we observe the initial instances for new tasks
-    val addTaskEvents = rootInstanceDatabaseRx.skip(1)
+    val addTaskEvents = rootInstanceDatabaseRx.skip(1) // todo instances check LOCAL/REMOTE consumed
             .switchMap {
                 val (changeType, projectRecord) = it.first.first
 
@@ -99,10 +99,10 @@ class ProjectLoader<T : ProjectType>(
                     }
                 }
                 .merge()
-    }.publishImmediate()
+    }.publishImmediate() // todo instances check LOCAL/REMOTE consumed
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
-    val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
+    val changeProjectEvents = rootInstanceDatabaseRx.skip(1) // todo instances check LOCAL/REMOTE consumed
             .filter { it.second.addedEntries.isEmpty() }
             .switchMapSingle {
                 val (changeType, projectRecord) = it.first.first

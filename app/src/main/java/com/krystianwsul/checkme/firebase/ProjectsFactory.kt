@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
+import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -33,6 +34,11 @@ class ProjectsFactory(
         deviceDbInfo: () -> DeviceDbInfo
 ) : Project.Parent {
 
+    /*
+    todo instances since this is initialized after the individual loaders, their events should probably
+    be replays instead of just publish.  Unit test to confirm.
+     */
+
     private val privateProjectFactory = PrivateProjectFactory(
             privateProjectLoader,
             privateInitialProjectEvent,
@@ -40,17 +46,22 @@ class ProjectsFactory(
             domainDisposable
     )
 
-    private var sharedProjectFactories = sharedInitialProjectsEvent.pairs
-            .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
-                sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
-                        sharedProjectLoader,
-                        sharedInitialProjectEvent,
-                        factoryProvider,
-                        domainDisposable,
-                        deviceDbInfo
-                )
-            }
-            .toMutableMap()
+    private val sharedProjectFactoriesProperty = MapRelayProperty(
+            this,
+            sharedInitialProjectsEvent.pairs
+                    .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
+                        sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
+                                sharedProjectLoader,
+                                sharedInitialProjectEvent,
+                                factoryProvider,
+                                domainDisposable,
+                                deviceDbInfo
+                        )
+                    }
+                    .toMutableMap()
+    )
+
+    private var sharedProjectFactories by sharedProjectFactoriesProperty
 
     val privateProject get() = privateProjectFactory.project as PrivateProject
 
@@ -92,7 +103,7 @@ class ProjectsFactory(
                     deviceDbInfo
             )
 
-            sharedProjectFactories[projectKey] = sharedProjectFactory
+            sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
             if (addedSharedProjects.containsKey(projectKey)) {
                 check(changeType == ChangeType.LOCAL)
@@ -121,13 +132,24 @@ class ProjectsFactory(
                     check(changeType == ChangeType.REMOTE)
                 }
 
-                sharedProjectFactories.remove(it)
+                sharedProjectFactoriesProperty.remove(it)
             }
 
             changeType
         }
 
-        changeTypes = listOf(addProjectChangeTypes, removeProjectChangeTypes).merge().publishImmediate(domainDisposable)
+        val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
+            it.values
+                    .map { it.changeTypes }
+                    .merge()
+        }
+
+        changeTypes = listOf(
+                privateProjectFactory.changeTypes,
+                sharedProjectFactoryChangeTypes,
+                addProjectChangeTypes,
+                removeProjectChangeTypes
+        ).merge().publishImmediate(domainDisposable) // todo instances unit test
     }
 
     val projects get() = sharedProjects + mapOf(privateProject.id to privateProject)

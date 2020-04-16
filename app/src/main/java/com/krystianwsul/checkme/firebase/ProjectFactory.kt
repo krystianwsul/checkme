@@ -97,7 +97,6 @@ abstract class ProjectFactory<T : ProjectType>(
 
                     project = newProject(changeProjectEvent.projectRecord)
 
-                    // todo instances reevaluate these types
                     val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
@@ -108,7 +107,6 @@ abstract class ProjectFactory<T : ProjectType>(
 
                     project = newProject(addTaskEvent.projectRecord)
 
-                    // todo instances reevaluate these types
                     val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)
@@ -122,7 +120,6 @@ abstract class ProjectFactory<T : ProjectType>(
 
                     project = newProject(changeInstancesEvent.projectRecord)
 
-                    // todo instances reevaluate these types
                     val changeType = ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances local/remote
                 }
                 .addTo(domainDisposable)

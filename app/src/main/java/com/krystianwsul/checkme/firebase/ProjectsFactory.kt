@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
@@ -51,7 +52,22 @@ class ProjectsFactory(
 
     val privateProject get() = privateProjectFactory.project as PrivateProject
 
-    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
+    private val factorySharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
+
+    private val addedSharedProjects = mutableMapOf<ProjectKey<ProjectType.Shared>, SharedProject>()
+    private val removedSharedProjects = mutableSetOf<ProjectKey<ProjectType.Shared>>()
+
+    val sharedProjects: Map<ProjectKey<ProjectType.Shared>, SharedProject>
+        get() {
+            check(factorySharedProjects.keys.containsAll(removedSharedProjects))
+
+            val result = factorySharedProjects.toMutableMap().apply {
+                keys.removeAll(removedSharedProjects)
+            }
+            check(result.keys.intersect(addedSharedProjects.keys).isEmpty())
+
+            return result + addedSharedProjects
+        }
 
     init {
         privateProject.fixNotificationShown(localFactory, now)
@@ -63,14 +79,29 @@ class ProjectsFactory(
                             .projectKey
 
                     check(!sharedProjectFactories.containsKey(projectKey))
+                    // todo instances check if instances are handled in this respect
+                    check(!removedSharedProjects.contains(projectKey))
 
-                    sharedProjectFactories[projectKey] = SharedProjectFactory(
+                    val sharedProjectFactory = SharedProjectFactory(
                             addProjectEvent.projectLoader,
                             addProjectEvent.initialProjectEvent,
                             factoryProvider,
                             domainDisposable,
                             deviceDbInfo
                     )
+
+                    sharedProjectFactories[projectKey] = sharedProjectFactory
+
+                    if (addedSharedProjects.containsKey(projectKey)) {
+                        check(changeType == ChangeType.LOCAL)
+
+                        val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
+                        val newRecord = sharedProjectFactory.project.projectRecord
+
+                        check(oldRecord == newRecord) // todo unit test for this
+
+                        addedSharedProjects.remove(projectKey)
+                    }
 
                     // todo instances local/remote
                 }
@@ -79,7 +110,16 @@ class ProjectsFactory(
         sharedProjectsLoader.removeProjectEvents
                 .subscribe { (changeType, removeProjectEvent) ->
                     removeProjectEvent.projectKeys.forEach {
+                        check(!addedSharedProjects.containsKey(it))
                         check(sharedProjectFactories.containsKey(it))
+
+                        if (removedSharedProjects.contains(it)) {
+                            check(changeType == ChangeType.LOCAL)
+
+                            removedSharedProjects.remove(it)
+                        } else {
+                            check(changeType == ChangeType.REMOTE)
+                        }
 
                         sharedProjectFactories.remove(it)
                     }
@@ -89,10 +129,7 @@ class ProjectsFactory(
                 .addTo(domainDisposable)
     }
 
-    val projects
-        get() = sharedProjects.toMutableMap<ProjectKey<*>, Project<*>>().apply {
-            put(privateProject.id, privateProject)
-        }
+    val projects get() = sharedProjects + mapOf(privateProject.id to privateProject)
 
     val isPrivateSaved get() = privateProjectFactory.isSaved
 
@@ -185,11 +222,7 @@ class ProjectsFactory(
 
         check(!projects.containsKey(sharedProject.id))
 
-        /*
-            todo instances once I have isSaved and local events figured out, find a way to transmit
-            this through the user manager and sequence of events in general.  And test it
-         */
-        //sharedProjects[sharedProject.id] = sharedProject
+        addedSharedProjects[sharedProject.id] = sharedProject
 
         return sharedProject
     }
@@ -232,12 +265,12 @@ class ProjectsFactory(
             ?.value
 
     override fun deleteProject(project: Project<*>) {
-        // todo instances same as for createProject
+        val projectKey = project.id as ProjectKey.Shared
 
-        //val projectId = project.id
+        check(sharedProjects.containsKey(projectKey))
+        check(!removedSharedProjects.contains(projectKey))
 
-        //check(projects.containsKey(projectId))
-        //sharedProjects.remove(projectId)
+        removedSharedProjects.add(projectKey)
     }
 
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) = projects.getValue(taskHierarchyKey.projectId).getTaskHierarchy(taskHierarchyKey.taskHierarchyId)

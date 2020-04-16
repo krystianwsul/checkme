@@ -25,7 +25,7 @@ abstract class Project<T : ProjectType> : Current {
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
 
-    abstract val id: ProjectKey<T>
+    abstract val id: ProjectKey<T> // todo rename to projectKey
 
     var name
         get() = projectRecord.name

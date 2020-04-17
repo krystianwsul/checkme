@@ -26,7 +26,7 @@ class RemoteUserFactory(
             remoteUserManager.isSaved = value
         }
 
-    private val projectIdTrigger = BehaviorRelay.createDefault(ChangeType.LOCAL)
+    private val projectIdTrigger = BehaviorRelay.createDefault(ChangeType.REMOTE)
 
     init {
         setTab()

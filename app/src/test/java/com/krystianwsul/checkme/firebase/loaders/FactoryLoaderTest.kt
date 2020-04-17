@@ -5,10 +5,11 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
@@ -18,6 +19,7 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -63,19 +65,23 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
+        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp) {
+            TODO("Not yet implemented")
+        }
+
         override fun updateFriendRecords(dataSnapshot: Snapshot) {
-            TODO("Not yet implemented")
-        }
-
-        override fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent) {
-            TODO("Not yet implemented")
-        }
-
-        override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
-            TODO("Not yet implemented")
-        }
-
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent) {
             TODO("Not yet implemented")
         }
 
@@ -87,9 +93,7 @@ class FactoryLoaderTest {
     private class ExpectTestDomain : TestDomain() {
 
         private var userListener: ((dataSnapshot: Snapshot) -> Unit)? = null
-        private var privateListenerWrapper: ListenerWrapper<Snapshot>? = null
-        private var sharedListener: ((sharedProjectEvent: ProjectsFactory.SharedProjectEvent) -> Unit)? = null
-        private var instanceListener: ((instanceEvent: ProjectsFactory.InstanceEvent) -> Unit)? = null
+        private var changeListenerWrapper: ListenerWrapper<ChangeType>? = null
 
         class ListenerWrapper<T> {
 
@@ -102,28 +106,23 @@ class FactoryLoaderTest {
             userListener = listener
         }
 
-        fun checkPrivate(listener: ListenerWrapper<Snapshot>.() -> Unit) {
-            assertNull(privateListenerWrapper)
+        fun checkChange(listener: ListenerWrapper<ChangeType>.() -> Unit) {
+            assertNull(changeListenerWrapper)
 
-            privateListenerWrapper = ListenerWrapper()
+            changeListenerWrapper = ListenerWrapper()
 
-            privateListenerWrapper!!.listener()
+            changeListenerWrapper!!.listener()
 
-            assertNotNull(privateListenerWrapper!!.result)
+            assertNotNull(changeListenerWrapper!!.result)
 
-            privateListenerWrapper = null
+            changeListenerWrapper = null
         }
 
-        fun checkShared(listener: (sharedProjectEvent: ProjectsFactory.SharedProjectEvent) -> Unit) {
-            assertNull(sharedListener)
+        override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+            assertNotNull(changeListenerWrapper)
+            assertNull(changeListenerWrapper!!.result)
 
-            sharedListener = listener
-        }
-
-        fun checkInstance(listener: (instanceEvent: ProjectsFactory.InstanceEvent) -> Unit) {
-            assertNull(instanceListener)
-
-            instanceListener = listener
+            changeListenerWrapper!!.result = changeType
         }
 
         override fun updateUserRecord(dataSnapshot: Snapshot) {
@@ -132,29 +131,6 @@ class FactoryLoaderTest {
             userListener!!(dataSnapshot)
 
             userListener = null
-        }
-
-        override fun updatePrivateProjectRecord(dataSnapshot: Snapshot) {
-            assertNotNull(privateListenerWrapper)
-            assertNull(privateListenerWrapper!!.result)
-
-            privateListenerWrapper!!.result = dataSnapshot
-        }
-
-        override fun updateSharedProjectRecords(sharedProjectEvent: ProjectsFactory.SharedProjectEvent) {
-            assertNotNull(sharedListener)
-
-            sharedListener!!(sharedProjectEvent)
-
-            sharedListener = null
-        }
-
-        override fun updateInstanceRecords(instanceEvent: ProjectsFactory.InstanceEvent) {
-            assertNotNull(instanceListener)
-
-            instanceListener!!(instanceEvent)
-
-            instanceListener = null
         }
     }
 
@@ -215,6 +191,8 @@ class FactoryLoaderTest {
 
         val domain = ExpectTestDomain()
 
+        override val shownFactory = mockk<Instance.ShownFactory>()
+
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
                 remoteUserFactory: RemoteUserFactory,
@@ -227,7 +205,10 @@ class FactoryLoaderTest {
     }
 
     private val userInfo by lazy { UserInfo("email", "name") }
-    private val deviceInfoWrapper by lazy { NullableWrapper(DeviceInfo(userInfo, "token")) }
+    private val userInfoWrapper by lazy { NullableWrapper(userInfo) }
+
+    private val token = "token"
+    private val tokenWrapper = NullableWrapper(token)
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -236,7 +217,8 @@ class FactoryLoaderTest {
     private val privateTaskKey = "privateTask"
     private val sharedTaskKey = "sharedTask"
 
-    private lateinit var deviceInfoObservable: PublishRelay<NullableWrapper<DeviceInfo>>
+    private lateinit var userInfoObservable: PublishRelay<NullableWrapper<UserInfo>>
+    private lateinit var tokenObservable: PublishRelay<NullableWrapper<String>>
     private lateinit var testFactoryProvider: TestFactoryProvider
     private lateinit var factoryLoader: FactoryLoader
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
@@ -254,16 +236,18 @@ class FactoryLoaderTest {
             errors.add(it)
         }
 
-        deviceInfoObservable = PublishRelay.create()
+        userInfoObservable = PublishRelay.create()
+        tokenObservable = PublishRelay.create()
         testFactoryProvider = TestFactoryProvider()
-        factoryLoader = FactoryLoader(local, deviceInfoObservable, testFactoryProvider)
+        factoryLoader = FactoryLoader(local, userInfoObservable, testFactoryProvider, tokenObservable)
         domainFactoryRelay = BehaviorRelay.create()
 
         factoryLoader.domainFactoryObservable
                 .subscribe(domainFactoryRelay)
                 .addTo(compositeDisposable)
 
-        deviceInfoObservable.accept(deviceInfoWrapper)
+        userInfoObservable.accept(userInfoWrapper)
+        tokenObservable.accept(tokenWrapper)
     }
 
     @After
@@ -411,12 +395,13 @@ class FactoryLoaderTest {
         initializeEmpty()
 
         testFactoryProvider.apply {
-            domain.checkPrivate {
+            domain.checkChange {
                 database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson())))
             }
 
-            domain.checkInstance { }
-            database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))
+            domain.checkChange {
+                database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))
+            }
         }
     }
 }

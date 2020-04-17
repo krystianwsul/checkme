@@ -4,6 +4,7 @@ import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -66,10 +67,10 @@ class ProjectLoaderTest {
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
             projectSnapshotRelay.accept(ValueTestSnapshot(privateProjectJson, projectKey.key))
 
-    private lateinit var initialProjectEmissionChecker: EmissionChecker<ProjectLoader.InitialProjectEvent<ProjectType.Private>>
-    private lateinit var addTaskEmissionChecker: EmissionChecker<ProjectLoader.AddTaskEvent<ProjectType.Private>>
-    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
-    private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private>>>
+    private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>
+    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>>
+    private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
 

@@ -60,7 +60,7 @@ class SharedProjectsLoader(
     private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
             { it.projectKeys },
             { mapChanges, projectKey ->
-                ProjectLoader(
+                ProjectLoader.Impl(
                         mapChanges.newMap
                                 .getValue(projectKey)
                                 .databaseRx

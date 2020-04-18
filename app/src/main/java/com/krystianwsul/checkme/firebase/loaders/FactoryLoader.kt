@@ -65,7 +65,7 @@ class FactoryLoader(
                         factoryProvider.database
                 )
 
-                val privateProjectLoader = ProjectLoader(
+                val privateProjectLoader = ProjectLoader.Impl(
                         privateProjectDatabaseRx.observable,
                         domainDisposable,
                         factoryProvider.projectProvider,

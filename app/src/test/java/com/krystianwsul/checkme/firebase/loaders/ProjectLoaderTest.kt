@@ -86,7 +86,7 @@ class ProjectLoaderTest {
         projectProvider = TestProjectProvider()
         projectManager = AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
 
-        projectLoader = ProjectLoader(
+        projectLoader = ProjectLoader.Impl(
                 projectSnapshotRelay,
                 compositeDisposable,
                 projectProvider,

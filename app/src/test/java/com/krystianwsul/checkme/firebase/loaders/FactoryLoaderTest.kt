@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import android.util.Base64
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.ProjectsFactory
@@ -18,9 +17,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.plugins.RxJavaPlugins
@@ -227,8 +224,7 @@ class FactoryLoaderTest {
     
     @Before
     fun before() {
-        mockkStatic(Base64::class)
-        every { Base64.encodeToString(any(), any()) } returns "key"
+        mockBase64()
 
         errors = mutableListOf()
         RxJavaPlugins.setErrorHandler {

@@ -87,8 +87,6 @@ class SharedProjectsLoaderTest {
 
     private val projectKey1 = ProjectKey.Shared("projectKey1")
     private val projectKey2 = ProjectKey.Shared("projectKey2")
-    private val projectKey3 = ProjectKey.Shared("projectKey3")
-    private val projectKey4 = ProjectKey.Shared("projectKey4")
 
     @Test
     fun testInitialEmpty() {

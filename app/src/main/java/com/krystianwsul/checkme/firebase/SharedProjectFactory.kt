@@ -23,6 +23,6 @@ class SharedProjectFactory(
             rootInstanceManagers
     ) { newRootInstanceManager(it, listOf()) }.apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
-        updateDeviceDbInfo(deviceDbInfo()) // todo move making deviceInfo out of domainFactory, and feed changes into it (and here) instead
+        updateDeviceDbInfo(deviceDbInfo())
     }
 }

@@ -8,7 +8,7 @@ import org.junit.Assert
 
 @ExperimentalStdlibApi
 class EmissionChecker<T : Any>(
-        name: String,
+        val name: String,
         compositeDisposable: CompositeDisposable,
         source: Observable<T>
 ) {
@@ -40,7 +40,7 @@ class EmissionChecker<T : Any>(
         handlers += handler
     }
 
-    fun checkEmpty() = Assert.assertTrue(handlers.isEmpty())
+    fun checkEmpty() = Assert.assertTrue("$name is not empty", handlers.isEmpty())
 
     fun checkNotEmpty() = Assert.assertTrue(handlers.isNotEmpty())
 

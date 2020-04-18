@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -48,6 +49,7 @@ class ProjectsFactoryTest {
     @Before
     fun before() {
         mockBase64()
+        ErrorLogger.instance = mockk(relaxed = true)
 
         rxErrorChecker = RxErrorChecker()
 
@@ -91,7 +93,7 @@ class ProjectsFactoryTest {
     }
 
     @Test
-    fun projectEventsBeforeProjectsFactory() {
+    fun testProjectEventsBeforeProjectsFactory() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
 
@@ -122,5 +124,45 @@ class ProjectsFactoryTest {
 
         assertEquals(name, projectsFactory.privateProject.name)
         assertTrue(projectsFactory.sharedProjects.isNotEmpty())
+    }
+
+    @Test
+    fun testLocalPrivateProjectChange() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = ProjectsFactory(
+                mockk(),
+                privateProjectLoader,
+                initialProjectEvent!!,
+                sharedProjectsLoader,
+                initialProjectsEvent!!,
+                ExactTimeStamp.now,
+                factoryProvider,
+                compositeDisposable
+        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val name1 = "name1"
+
+        emissionChecker.checkRemote()
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name1), privateProjectKey.key))
+        emissionChecker.checkEmpty()
+        assertEquals(projectsFactory.privateProject.name, name1)
+
+        val name2 = "name2"
+
+        privateProjectManager.privateProjectRecords
+                .single()
+                .name = name2
+        privateProjectManager.save(mockk(relaxed = true))
+
+        emissionChecker.checkLocal()
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name2), privateProjectKey.key))
+        emissionChecker.checkEmpty()
+        assertEquals(projectsFactory.privateProject.name, name2)
     }
 }

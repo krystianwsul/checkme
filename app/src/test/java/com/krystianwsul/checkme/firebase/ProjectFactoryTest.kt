@@ -67,9 +67,7 @@ class ProjectFactoryTest {
                 TODO("Not yet implemented")
             }
 
-            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-                TODO("Not yet implemented")
-            }
+            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
         override val nullableInstance: FactoryProvider.Domain?

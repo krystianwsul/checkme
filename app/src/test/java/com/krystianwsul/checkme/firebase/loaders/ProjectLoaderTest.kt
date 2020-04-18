@@ -6,8 +6,8 @@ import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
@@ -15,12 +15,12 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -43,9 +43,7 @@ class ProjectLoaderTest {
                 TODO("Not yet implemented")
             }
 
-            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-                TODO("Not yet implemented")
-            }
+            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
         fun acceptInstance(
@@ -64,6 +62,7 @@ class ProjectLoaderTest {
 
     private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot>
     private lateinit var projectProvider: TestProjectProvider
+    private lateinit var projectManager: AndroidPrivateProjectManager
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
@@ -85,12 +84,13 @@ class ProjectLoaderTest {
 
         projectSnapshotRelay = BehaviorRelay.create()
         projectProvider = TestProjectProvider()
+        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
 
         projectLoader = ProjectLoader(
                 projectSnapshotRelay,
                 compositeDisposable,
                 projectProvider,
-                AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
+                projectManager
         )
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
@@ -114,12 +114,6 @@ class ProjectLoaderTest {
     @Test
     fun testInitial() {
         assertNull(projectLoader.initialProjectEvent.tryGetCurrentValue())
-    }
-
-    private fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkRemote() {
-        addHandler {
-            assertTrue(it.changeType == ChangeType.REMOTE)
-        }
     }
 
     @Test
@@ -295,6 +289,24 @@ class ProjectLoaderTest {
                 taskId2 to TaskJson("task2 change")
         )))
 
+        changeProjectEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testLocalEvent() {
+        ErrorLogger.instance = mockk(relaxed = true)
+
+        initialProjectEmissionChecker.checkRemote()
+        acceptProject(PrivateProjectJson())
+        initialProjectEmissionChecker.checkEmpty()
+
+        val name = "project"
+
+        projectManager.privateProjectRecords.first().name = name
+        projectManager.save(mockk(relaxed = true))
+
+        changeProjectEmissionChecker.checkLocal()
+        acceptProject(PrivateProjectJson(name = name))
         changeProjectEmissionChecker.checkEmpty()
     }
 }

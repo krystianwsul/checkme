@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -55,9 +56,7 @@ class ProjectFactoryTest {
                 TODO("Not yet implemented")
             }
 
-            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-                TODO("Not yet implemented")
-            }
+            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
         override val nullableInstance: FactoryProvider.Domain?
@@ -137,5 +136,33 @@ class ProjectFactoryTest {
     @Test
     fun testInitial() {
         projectObservable.accept(ValueTestSnapshot(PrivateProjectJson(), projectKey.key))
+    }
+
+    @Test
+    fun testRemote() {
+        testInitial()
+
+        changeTypesEmissionChecker.checkRemote()
+        projectObservable.accept(ValueTestSnapshot(PrivateProjectJson("project a"), projectKey.key))
+        changeTypesEmissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testLocal() {
+        ErrorLogger.instance = mockk(relaxed = true)
+
+        testInitial()
+
+        val name = "project a"
+
+        projectManager.privateProjectRecords
+                .single()
+                .name = name
+
+        projectManager.save(mockk(relaxed = true))
+
+        changeTypesEmissionChecker.checkLocal()
+        projectObservable.accept(ValueTestSnapshot(PrivateProjectJson(name), projectKey.key))
+        changeTypesEmissionChecker.checkEmpty()
     }
 }

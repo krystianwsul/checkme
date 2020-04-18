@@ -10,11 +10,16 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
-import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.disposables.CompositeDisposable
@@ -164,5 +169,64 @@ class ProjectsFactoryTest {
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name2), privateProjectKey.key))
         emissionChecker.checkEmpty()
         assertEquals(projectsFactory.privateProject.name, name2)
+    }
+
+    @Test
+    fun testLocalPrivateInstanceChange() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        privateProjectRelay.accept(ValueTestSnapshot(
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                privateProjectKey.key
+        ))
+
+        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = ProjectsFactory(
+                mockk(),
+                privateProjectLoader,
+                initialProjectEvent!!,
+                sharedProjectsLoader,
+                initialProjectsEvent!!,
+                ExactTimeStamp.now,
+                factoryProvider,
+                compositeDisposable
+        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val date = Date.today()
+        val hourMinute = HourMinute.now
+
+        val instance = projectsFactory.privateProject
+                .tasks
+                .single()
+                .getInstance(DateTime(date, Time.Normal(hourMinute)))
+
+        val done = ExactTimeStamp.now
+
+        instance.setDone("uuid", mockk(), true, done)
+        projectsFactory.save(mockk(relaxed = true))
+
+        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
+
+        emissionChecker.checkLocal()
+        factoryProvider.projectProvider.acceptInstance(
+                privateProjectKey.key,
+                taskKey.taskId,
+                mapOf(
+                        InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
+                                Pair(
+                                        InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
+                                        InstanceJson(done = done.long)
+                                )
+                        )
+                )
+        )
+        emissionChecker.checkEmpty()
     }
 }

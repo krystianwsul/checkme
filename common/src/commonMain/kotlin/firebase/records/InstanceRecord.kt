@@ -32,14 +32,14 @@ abstract class InstanceRecord<T : ProjectType>(
         private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
 
         @JvmStatic
-        protected fun scheduleKeyToDateString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleDate.run {
+        fun scheduleKeyToDateString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleDate.run {
             fun Int.pad() = pad(padding)
 
             "$year-${month.pad()}-${day.pad()}"
         }
 
         @JvmStatic
-        protected fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
+        fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
             fun Int.pad() = pad(padding)
 
             customTimeKey?.customTimeId ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }

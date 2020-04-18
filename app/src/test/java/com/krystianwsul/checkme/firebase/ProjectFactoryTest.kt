@@ -28,7 +28,7 @@ import org.junit.Test
 @ExperimentalStdlibApi
 class ProjectFactoryTest {
 
-    private class TestFactoryProvider : FactoryProvider {
+    class TestFactoryProvider : FactoryProvider {
 
         override val projectProvider = ProjectLoaderTest.TestProjectProvider()
 
@@ -47,28 +47,17 @@ class ProjectFactoryTest {
         }
     }
 
-    private val projectKey = ProjectKey.Private("projectKey")
-
-    private class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private> {
+    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private> {
 
         private val userInfo = UserInfo("email", "name")
 
-        val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
+        private val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
 
-        val projectRecord = PrivateProjectRecord(
-                mockk(),
-                projectKey,
-                PrivateProjectJson()
-        )
+        val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
-        override val initialProjectEvent = Single.just(ChangeWrapper(
-                ChangeType.REMOTE,
-                ProjectLoader.InitialProjectEvent(
-                        projectManager,
-                        projectRecord,
-                        mapOf()
-                )
-        ))
+        val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
+
+        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
 
         override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()
 
@@ -88,6 +77,7 @@ class ProjectFactoryTest {
 
     private lateinit var changeTypesEmissionChecker: EmissionChecker<ChangeType>
 
+    private val projectKey = ProjectKey.Private("projectKey")
     private val taskKey = TaskKey(projectKey, "taskKey")
 
     @Before

@@ -34,11 +34,6 @@ class ProjectsFactory(
         deviceDbInfo: () -> DeviceDbInfo
 ) : Project.Parent {
 
-    /*
-    todo instances since this is initialized after the individual loaders, their events should probably
-    be replays instead of just publish, including changeTypes.  Unit test to confirm.
-     */
-
     private val privateProjectFactory = PrivateProjectFactory(
             privateProjectLoader,
             privateInitialProjectEvent,

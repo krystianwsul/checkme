@@ -58,7 +58,7 @@ interface ProjectLoader<T : ProjectType> {
             private val projectManager: ProjectProvider.ProjectManager<T>
     ) : ProjectLoader<T> {
 
-        private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
+        private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
         private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 
@@ -95,7 +95,7 @@ interface ProjectLoader<T : ProjectType> {
                         },
                         { it.databaseRx.disposable.dispose() }
                 )
-                .publishImmediate()
+                .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
@@ -132,7 +132,7 @@ interface ProjectLoader<T : ProjectType> {
                             }
                             .merge()
                 }
-                .publishImmediate()
+                .replayImmediate()
 
         // Here we observe changes to all the previously subscribed instances
         override val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
@@ -146,7 +146,7 @@ interface ProjectLoader<T : ProjectType> {
                         }
                     }
                     .merge()
-        }.publishImmediate()
+        }.replayImmediate()
 
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
@@ -173,6 +173,6 @@ interface ProjectLoader<T : ProjectType> {
                                 }
                             }.map { ChangeWrapper(changeType, it) }
                 }
-                .publishImmediate()
+                .replayImmediate()
     }
 }

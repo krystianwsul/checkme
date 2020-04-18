@@ -32,11 +32,55 @@ class ProjectsFactoryTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
+    private lateinit var privateProjectRelay: PublishRelay<Snapshot>
+    private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
+    private lateinit var privateProjectManager: AndroidPrivateProjectManager
+    private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private>
+    private lateinit var projectKeysRelay: PublishRelay<ChangeWrapper<Set<ProjectKey.Shared>>>
+    private lateinit var sharedProjectManager: AndroidSharedProjectManager
+    private lateinit var sharedProjectsLoader: SharedProjectsLoader.Impl
+
+    private var initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>? = null
+    private var initialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent? = null
+
+    private val userInfo = UserInfo("email", "name")
+
     @Before
     fun before() {
         mockBase64()
 
         rxErrorChecker = RxErrorChecker()
+
+        privateProjectRelay = PublishRelay.create()
+        factoryProvider = ProjectFactoryTest.TestFactoryProvider()
+        privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
+
+        privateProjectLoader = ProjectLoader.Impl(
+                privateProjectRelay,
+                compositeDisposable,
+                factoryProvider.projectProvider,
+                privateProjectManager
+        )
+
+        initialProjectEvent = null
+        privateProjectLoader.initialProjectEvent
+                .subscribeBy { initialProjectEvent = it.data }
+                .addTo(compositeDisposable)
+
+        projectKeysRelay = PublishRelay.create()
+        sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
+
+        sharedProjectsLoader = SharedProjectsLoader.Impl(
+                projectKeysRelay,
+                sharedProjectManager,
+                compositeDisposable,
+                factoryProvider.sharedProjectsProvider
+        )
+
+        initialProjectsEvent = null
+        sharedProjectsLoader.initialProjectsEvent
+                .subscribeBy { initialProjectsEvent = it }
+                .addTo(compositeDisposable)
     }
 
     @After
@@ -48,42 +92,6 @@ class ProjectsFactoryTest {
 
     @Test
     fun projectEventsBeforeProjectsFactory() {
-        val privateProjectRelay = PublishRelay.create<Snapshot>()
-
-        val factoryProvider = ProjectFactoryTest.TestFactoryProvider()
-
-        val userInfo = UserInfo("email", "name")
-
-        val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
-
-        val privateProjectLoader = ProjectLoader.Impl(
-                privateProjectRelay,
-                compositeDisposable,
-                factoryProvider.projectProvider,
-                privateProjectManager
-        )
-
-        var initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>? = null
-        privateProjectLoader.initialProjectEvent
-                .subscribeBy { initialProjectEvent = it.data }
-                .addTo(compositeDisposable)
-
-        val projectKeysRelay = PublishRelay.create<ChangeWrapper<Set<ProjectKey.Shared>>>()
-
-        val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
-
-        val sharedProjectsLoader = SharedProjectsLoader.Impl(
-                projectKeysRelay,
-                sharedProjectManager,
-                compositeDisposable,
-                factoryProvider.sharedProjectsProvider
-        )
-
-        var initialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent? = null
-        sharedProjectsLoader.initialProjectsEvent
-                .subscribeBy { initialProjectsEvent = it }
-                .addTo(compositeDisposable)
-
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
 

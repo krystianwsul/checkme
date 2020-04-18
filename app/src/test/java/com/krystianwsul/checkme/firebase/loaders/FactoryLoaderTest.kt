@@ -69,7 +69,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
             TODO("Not yet implemented")
         }
 
@@ -118,7 +118,7 @@ class FactoryLoaderTest {
             changeListenerWrapper = null
         }
 
-        override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
             assertNotNull(changeListenerWrapper)
             assertNull(changeListenerWrapper!!.result)
 

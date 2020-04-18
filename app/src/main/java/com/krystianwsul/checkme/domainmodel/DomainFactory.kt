@@ -249,7 +249,7 @@ class DomainFactory(
     override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    override fun onChange(changeType: ChangeType, now: ExactTimeStamp) {
+    override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
         MyCrashlytics.log("onChange")
 
         val runType = when (changeType) {

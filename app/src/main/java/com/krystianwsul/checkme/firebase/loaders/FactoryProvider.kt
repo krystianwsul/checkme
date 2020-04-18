@@ -50,7 +50,7 @@ interface FactoryProvider {
 
         fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp)
 
-        fun onChange(changeType: ChangeType, now: ExactTimeStamp)
+        fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp)
 
         fun updateFriendRecords(dataSnapshot: Snapshot)
 

@@ -135,7 +135,7 @@ class FactoryLoader(
                 domainDisposable += Observables.combineLatest(
                         projectsFactorySingle.flatMapObservable { it.changeTypes },
                         domainFactorySingle.toObservable()
-                ).subscribe { (changeType, domainFactory) -> domainFactory.onChange(changeType, ExactTimeStamp.now) }
+                ).subscribe { (changeType, domainFactory) -> domainFactory.onProjectsInstancesChange(changeType, ExactTimeStamp.now) }
 
                 friendDatabaseRx.changes
                         .subscribe {

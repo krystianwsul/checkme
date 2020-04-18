@@ -85,7 +85,7 @@ class FactoryLoader(
 
                 val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
-                val sharedProjectsLoader = SharedProjectsLoader(
+                val sharedProjectsLoader = SharedProjectsLoader.Impl(
                         userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },
                         sharedProjectManager,
                         domainDisposable,

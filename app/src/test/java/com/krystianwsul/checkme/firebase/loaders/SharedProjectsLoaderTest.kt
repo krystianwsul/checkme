@@ -62,7 +62,7 @@ class SharedProjectsLoaderTest {
 
         projectManager = AndroidSharedProjectManager(sharedProjectsProvider.projectProvider.database)
 
-        sharedProjectsLoader = SharedProjectsLoader(
+        sharedProjectsLoader = SharedProjectsLoader.Impl(
                 projectKeysRelay,
                 projectManager,
                 compositeDisposable,

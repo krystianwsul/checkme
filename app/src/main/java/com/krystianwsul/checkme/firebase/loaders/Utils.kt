@@ -9,7 +9,7 @@ fun <T, U, V> Observable<T>.processChanges(
         keyGetter: (T) -> Set<U>,
         adder: (T, U) -> V,
         remover: ((V) -> Unit)? = null
-): Observable<Pair<T, MapChanges<U, V>>> = scan(Pair<T?, MapChanges<U, V>>(null, MapChanges())) { (_, oldMapChanges), newData ->
+): Observable<MapChanges<T, U, V>> = scan(Pair<T?, MapChanges.Tmp<U, V>>(null, MapChanges.Tmp())) { (_, oldMapChanges), newData ->
     val oldMap = oldMapChanges.newMap
     val newKeys = keyGetter(newData)
 
@@ -27,14 +27,14 @@ fun <T, U, V> Observable<T>.processChanges(
 
     remover?.let { removedEntries.values.forEach(it) }
 
-    newData to MapChanges(
+    newData to MapChanges.Tmp(
             removedEntries,
             addedKeys.entries(newMap),
             unchangedKeys.entries(newMap),
             oldMap,
             newMap
     )
-}.skip(1).map { Pair(it.first!!, it.second) }
+}.skip(1).map { MapChanges(it.first!!, it.second) }
 
 fun <T, U> Observable<Set<T>>.processChangesSet(
         adder: (T) -> U,

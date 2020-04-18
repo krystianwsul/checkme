@@ -1,10 +1,15 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-@Suppress("unused")
-class MapChanges<T, U>(
-        val removedEntries: Map<T, U> = mapOf(),
-        val addedEntries: Map<T, U> = mapOf(),
-        val unchangedEntries: Map<T, U> = mapOf(),
-        val oldMap: Map<T, U> = mapOf(),
-        val newMap: Map<T, U> = mapOf()
-)
+class MapChanges<T, U, V>(
+        val original: T,
+        private val tmp: Tmp<U, V>
+) : MapChangesProperties<U, V> by tmp {
+
+    class Tmp<U, V>(
+            override val removedEntries: Map<U, V> = mapOf(),
+            override val addedEntries: Map<U, V> = mapOf(),
+            override val unchangedEntries: Map<U, V> = mapOf(),
+            override val oldMap: Map<U, V> = mapOf(),
+            override val newMap: Map<U, V> = mapOf()
+    ) : MapChangesProperties<U, V>
+}

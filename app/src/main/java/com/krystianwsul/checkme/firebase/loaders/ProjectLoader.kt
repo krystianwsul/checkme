@@ -63,10 +63,9 @@ class ProjectLoader<T : ProjectType>(
     // first snapshot of everything
     val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
             .flatMap {
-                val (changeType, projectRecord) = it.first.changeWrapper
+                val (changeType, projectRecord) = it.original.changeWrapper
 
-                it.second
-                        .newMap
+                it.newMap
                         .values
                         .map { (taskRecord, databaseRx) ->
                             databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
@@ -80,10 +79,9 @@ class ProjectLoader<T : ProjectType>(
     // Here we observe the initial instances for new tasks
     val addTaskEvents = rootInstanceDatabaseRx.skip(1)
             .switchMap {
-                val (changeType, projectRecord) = it.first.changeWrapper
+                val (changeType, projectRecord) = it.original.changeWrapper
 
-                it.second
-                        .addedEntries
+                it.addedEntries
                         .values
                         .map { (taskRecord, databaseRx) ->
                             databaseRx.first
@@ -101,10 +99,9 @@ class ProjectLoader<T : ProjectType>(
 
     // Here we observe changes to all the previously subscribed instances
     val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
-        val (changeType, projectRecord) = it.first.changeWrapper
+        val (changeType, projectRecord) = it.original.changeWrapper
 
-        it.second
-                .newMap
+        it.newMap
                 .values
                 .map { (taskRecord, databaseRx) ->
                     databaseRx.changes.map {
@@ -116,12 +113,11 @@ class ProjectLoader<T : ProjectType>(
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
-            .filter { it.second.addedEntries.isEmpty() }
+            .filter { it.addedEntries.isEmpty() }
             .switchMapSingle {
-                val (changeType, projectRecord) = it.first.changeWrapper
+                val (changeType, projectRecord) = it.original.changeWrapper
 
-                it.second
-                        .newMap
+                it.newMap
                         .values
                         .let {
                             if (it.isEmpty()) {

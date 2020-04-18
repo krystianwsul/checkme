@@ -24,14 +24,20 @@ class SharedProjectsLoader(
 
     private data class ProjectData(
             val userChangeType: ChangeType,
+            val projectKeys: Set<ProjectKey.Shared>,
+            val newMap: Map<ProjectKey.Shared, ProjectEntry>
+    )
+
+    private data class ProjectEntry(
+            val userChangeType: ChangeType,
             val databaseRx: DatabaseRx
     )
 
     private val projectDatabaseRxObservable = projectKeysObservable.distinctUntilChanged()
             .processChanges(
                     { it.data },
-                    { (changeType, _), projectKey -> // todo instances unit test if this changeType needs to be propagated
-                        ProjectData(
+                    { (changeType, _), projectKey ->
+                        ProjectEntry(
                                 changeType,
                                 DatabaseRx(
                                         domainDisposable,
@@ -40,16 +46,20 @@ class SharedProjectsLoader(
                         )
                     },
                     { it.databaseRx.disposable.dispose() }
-            ).publishImmediate()
+            )
+            .map { ProjectData(it.original.changeType, it.original.data, it.newMap) }
+            .publishImmediate()
 
     private data class LoaderData(
             val userChangeType: ChangeType,
-            val mapChanges: MapChanges<ProjectKey.Shared, ProjectLoader<ProjectType.Shared>>
+            val newLoaderMap: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared>>,
+            val addedLoaderEntries: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared>>,
+            val removedProjectKeys: Set<ProjectKey.Shared>
     )
 
     private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
-            { it.first.data },
-            { (_, mapChanges), projectKey ->
+            { it.projectKeys },
+            { mapChanges, projectKey ->
                 ProjectLoader(
                         mapChanges.newMap
                                 .getValue(projectKey)
@@ -63,18 +73,17 @@ class SharedProjectsLoader(
     )
             .map {
                 LoaderData(
-                        it.first
-                                .first
-                                .changeType,
-                        it.second
+                        it.original.userChangeType,
+                        it.newMap,
+                        it.addedEntries,
+                        it.removedEntries.keys
                 )
             }
             .publishImmediate()
 
     val initialProjectsEvent = projectLoadersObservable.firstOrError()
             .flatMap {
-                it.mapChanges
-                        .newMap
+                it.newLoaderMap
                         .values
                         .map { projectLoader -> projectLoader.initialProjectEvent.map { projectLoader to it } }
                         .zipSingle()
@@ -89,8 +98,7 @@ class SharedProjectsLoader(
     // this is the event for adding new projects
     val addProjectEvents = projectLoadersObservable.skip(1)
             .switchMap {
-                it.mapChanges
-                        .addedEntries
+                it.addedLoaderEntries
                         .values
                         .map { projectLoader ->
                             projectLoader.initialProjectEvent
@@ -104,7 +112,7 @@ class SharedProjectsLoader(
     val removeProjectEvents = projectLoadersObservable.map {
         ChangeWrapper(
                 it.userChangeType,
-                RemoveProjectsEvent(it.mapChanges.removedEntries.keys)
+                RemoveProjectsEvent(it.removedProjectKeys)
         )
     }
             .filter { it.data.projectKeys.isNotEmpty() }

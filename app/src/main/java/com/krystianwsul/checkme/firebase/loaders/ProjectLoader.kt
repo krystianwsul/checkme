@@ -25,17 +25,30 @@ class ProjectLoader<T : ProjectType>(
 
     private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
 
+    private data class ProjectData<T : ProjectType>(
+            val changeWrapper: ChangeWrapper<out ProjectRecord<T>>,
+            val taskMap: Map<TaskKey, TaskRecord<T>>
+    )
+
+    private data class InstanceData<T : ProjectType>(
+            val taskRecord: TaskRecord<T>,
+            val databaseRx: DatabaseRx
+    )
+
     private val rootInstanceDatabaseRx = projectRecordObservable.map {
-        it to it.data
-                .taskRecords
-                .mapKeys { it.value.taskKey }
+        ProjectData(
+                it,
+                it.data
+                        .taskRecords
+                        .mapKeys { it.value.taskKey }
+        )
     }
             .processChanges(
-                    { it.second.keys },
+                    { it.taskMap.keys },
                     { (_, newData), taskKey ->
                         val taskRecord = newData.getValue(taskKey)
 
-                        Pair(
+                        InstanceData(
                                 taskRecord,
                                 DatabaseRx(
                                         domainDisposable,
@@ -43,14 +56,14 @@ class ProjectLoader<T : ProjectType>(
                                 )
                         )
                     },
-                    { it.second.disposable.dispose() }
+                    { it.databaseRx.disposable.dispose() }
             )
             .publishImmediate()
 
     // first snapshot of everything
     val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
             .flatMap {
-                val (changeType, projectRecord) = it.first.first
+                val (changeType, projectRecord) = it.first.changeWrapper
 
                 it.second
                         .newMap
@@ -67,7 +80,7 @@ class ProjectLoader<T : ProjectType>(
     // Here we observe the initial instances for new tasks
     val addTaskEvents = rootInstanceDatabaseRx.skip(1)
             .switchMap {
-                val (changeType, projectRecord) = it.first.first
+                val (changeType, projectRecord) = it.first.changeWrapper
 
                 it.second
                         .addedEntries
@@ -88,7 +101,7 @@ class ProjectLoader<T : ProjectType>(
 
     // Here we observe changes to all the previously subscribed instances
     val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
-        val (changeType, projectRecord) = it.first.first
+        val (changeType, projectRecord) = it.first.changeWrapper
 
         it.second
                 .newMap
@@ -105,7 +118,7 @@ class ProjectLoader<T : ProjectType>(
     val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
             .filter { it.second.addedEntries.isEmpty() }
             .switchMapSingle {
-                val (changeType, projectRecord) = it.first.first
+                val (changeType, projectRecord) = it.first.changeWrapper
 
                 it.second
                         .newMap

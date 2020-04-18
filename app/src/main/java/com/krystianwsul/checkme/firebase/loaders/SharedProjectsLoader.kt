@@ -89,7 +89,7 @@ class SharedProjectsLoader(
                         .zipSingle()
             }
             .map {
-                check(it.all { it.second.changeType == ChangeType.LOCAL })
+                check(it.all { it.second.changeType == ChangeType.REMOTE })
 
                 InitialProjectsEvent(it.map { it.first to it.second.data })
             }

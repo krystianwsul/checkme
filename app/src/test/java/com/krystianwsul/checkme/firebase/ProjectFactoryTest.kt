@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
@@ -16,7 +19,9 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -30,9 +35,42 @@ class ProjectFactoryTest {
 
     class TestFactoryProvider : FactoryProvider {
 
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
+
         override val projectProvider = ProjectLoaderTest.TestProjectProvider()
 
-        override val database = mockk<FactoryProvider.Database>()
+        override val database = object : FactoryProvider.Database() {
+
+            override fun getFriendObservable(userKey: UserKey): Observable<Snapshot> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot> {
+                if (!sharedProjectObservables.containsKey(projectKey))
+                    sharedProjectObservables[projectKey] = PublishRelay.create()
+                return sharedProjectObservables.getValue(projectKey)
+            }
+
+            override fun getUserObservable(key: UserKey): Observable<Snapshot> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getNewId(path: String): String {
+                TODO("Not yet implemented")
+            }
+
+            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+                TODO("Not yet implemented")
+            }
+        }
 
         override val nullableInstance: FactoryProvider.Domain?
             get() = TODO("Not yet implemented")
@@ -44,6 +82,16 @@ class ProjectFactoryTest {
 
         override fun newDomain(localFactory: FactoryProvider.Local, remoteUserFactory: RemoteUserFactory, projectsFactory: ProjectsFactory, deviceDbInfo: DeviceDbInfo, startTime: ExactTimeStamp, readTime: ExactTimeStamp, friendSnapshot: Snapshot): FactoryProvider.Domain {
             TODO("Not yet implemented")
+        }
+
+        fun acceptSharedProject(
+                projectKey: ProjectKey.Shared,
+                projectJson: SharedProjectJson
+        ) {
+            sharedProjectObservables.getValue(projectKey).accept(ValueTestSnapshot(
+                    JsonWrapper(projectJson),
+                    projectKey.key
+            ))
         }
     }
 
@@ -96,7 +144,7 @@ class ProjectFactoryTest {
                             it.data,
                             factoryProvider,
                             compositeDisposable
-                    )
+                    ) { mockk() }
 
                     changeTypesEmissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
                 }

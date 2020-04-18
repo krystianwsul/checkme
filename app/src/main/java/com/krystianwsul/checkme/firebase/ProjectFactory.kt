@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.publishImmediate
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -21,7 +22,8 @@ abstract class ProjectFactory<T : ProjectType>(
         projectLoader: ProjectLoader<T>,
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T>,
         protected val factoryProvider: FactoryProvider,
-        domainDisposable: CompositeDisposable
+        domainDisposable: CompositeDisposable,
+        protected val deviceDbInfo: () -> DeviceDbInfo
 ) {
 
     private val projectManager = initialProjectEvent.projectManager

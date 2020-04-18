@@ -15,8 +15,14 @@ class SharedProjectFactory(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
-        private val deviceDbInfo: () -> DeviceDbInfo
-) : ProjectFactory<ProjectType.Shared>(projectLoader, initialProjectEvent, factoryProvider, domainDisposable) {
+        deviceDbInfo: () -> DeviceDbInfo
+) : ProjectFactory<ProjectType.Shared>(
+        projectLoader,
+        initialProjectEvent,
+        factoryProvider,
+        domainDisposable,
+        deviceDbInfo
+) {
 
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) = SharedProject(
             projectRecord as SharedProjectRecord,

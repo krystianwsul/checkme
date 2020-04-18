@@ -38,7 +38,8 @@ class ProjectsFactory(
             privateProjectLoader,
             privateInitialProjectEvent,
             factoryProvider,
-            domainDisposable
+            domainDisposable,
+            deviceDbInfo
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(

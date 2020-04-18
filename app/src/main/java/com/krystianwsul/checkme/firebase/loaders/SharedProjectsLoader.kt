@@ -30,7 +30,7 @@ interface SharedProjectsLoader {
             private val sharedProjectsProvider: SharedProjectsProvider
     ) : SharedProjectsLoader {
 
-        private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
+        private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
         private fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }!!
 
         private data class ProjectData(
@@ -59,7 +59,7 @@ interface SharedProjectsLoader {
                         { it.databaseRx.disposable.dispose() }
                 )
                 .map { ProjectData(it.original.changeType, it.original.data, it.newMap) }
-                .publishImmediate()
+                .replayImmediate()
 
         private data class LoaderData(
                 val userChangeType: ChangeType,
@@ -90,7 +90,7 @@ interface SharedProjectsLoader {
                             it.removedEntries.keys
                     )
                 }
-                .publishImmediate()
+                .replayImmediate()
 
         override val initialProjectsEvent = projectLoadersObservable.firstOrError()
                 .flatMap {
@@ -117,7 +117,7 @@ interface SharedProjectsLoader {
                             }
                             .merge()
                 }
-                .publishImmediate()
+                .replayImmediate()
 
         override val removeProjectEvents = projectLoadersObservable.map {
             ChangeWrapper(
@@ -126,7 +126,7 @@ interface SharedProjectsLoader {
             )
         }
                 .filter { it.data.projectKeys.isNotEmpty() }
-                .publishImmediate()
+                .replayImmediate()
     }
 
     class InitialProjectsEvent(

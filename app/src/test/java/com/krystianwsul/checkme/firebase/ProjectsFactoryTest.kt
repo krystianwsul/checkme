@@ -10,15 +10,18 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -81,13 +84,22 @@ class ProjectsFactoryTest {
                 .subscribeBy { initialProjectsEvent = it }
                 .addTo(compositeDisposable)
 
-        val privateProjectKey = ProjectKey.Private("projectKey")
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         val name = "privateProject"
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name), privateProjectKey.key))
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
 
         val projectsFactory = ProjectsFactory(
                 mockk(),
@@ -98,8 +110,9 @@ class ProjectsFactoryTest {
                 ExactTimeStamp.now,
                 factoryProvider,
                 compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(UserInfo("email", "name"), "token"), "uuid") }
+        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
 
         assertEquals(name, projectsFactory.privateProject.name)
+        assertTrue(projectsFactory.sharedProjects.isNotEmpty())
     }
 }

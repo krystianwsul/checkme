@@ -505,4 +505,85 @@ class ProjectsFactoryTest {
             projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
         }
     }
+
+    @Test
+    fun testChangeSharedProjectRemote() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
+
+        initProjectsFactory()
+
+        val name = "name"
+
+        emissionChecker.checkRemote {
+            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
+                    name = name,
+                    users = mutableMapOf(
+                            userInfo.key.key to mockk(relaxed = true) {
+                                every { tokens } returns mutableMapOf()
+                            }
+                    )
+            ))
+        }
+        assertEquals(
+                projectsFactory.sharedProjects
+                        .values
+                        .single()
+                        .name,
+                name
+        )
+    }
+
+    @Test
+    fun testChangeSharedProjectLocal() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
+
+        initProjectsFactory()
+
+        val name = "name"
+
+        projectsFactory.sharedProjects
+                .values
+                .single()
+                .name = name
+
+        projectsFactory.save()
+
+        emissionChecker.checkLocal {
+            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
+                    name = name,
+                    users = mutableMapOf(
+                            userInfo.key.key to mockk(relaxed = true) {
+                                every { tokens } returns mutableMapOf()
+                            }
+                    )
+            ))
+        }
+        assertEquals(
+                projectsFactory.sharedProjects
+                        .values
+                        .single()
+                        .name,
+                name
+        )
+    }
 }

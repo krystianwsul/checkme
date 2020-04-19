@@ -9,7 +9,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.firebase.reduce
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
@@ -85,19 +84,18 @@ abstract class ProjectFactory<T : ProjectType>(
         }
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map { (projectChangeType, changeProjectEvent) ->
-            val instanceChangeType = changeProjectEvent.projectRecord
+            changeProjectEvent.projectRecord
                     .taskRecords
                     .values
-                    .map { updateRootInstanceManager(it, changeProjectEvent.snapshotInfos.getValue(it.taskKey)) }
-                    .reduce()
+                    .forEach { updateRootInstanceManager(it, changeProjectEvent.snapshotInfos.getValue(it.taskKey)) }
 
             project = newProject(changeProjectEvent.projectRecord)
 
-            ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances test this too
+            projectChangeType
         }
 
         val addTaskChangeTypes = projectLoader.addTaskEvents.map { (projectChangeType, addTaskEvent) ->
-            addTaskEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
+            addTaskEvent.apply { updateRootInstanceManager(taskRecord, snapshotInfos) }
 
             project = newProject(addTaskEvent.projectRecord)
 
@@ -109,7 +107,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
             project = newProject(changeInstancesEvent.projectRecord)
 
-            instanceChangeType // todo instances test both independent instance changes, and along with project change
+            instanceChangeType
         }
 
         changeTypes = listOf(

@@ -29,6 +29,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlin.random.Random
 
 @ExperimentalStdlibApi
 class ProjectFactoryTest {
@@ -63,9 +64,7 @@ class ProjectFactoryTest {
                 TODO("Not yet implemented")
             }
 
-            override fun getNewId(path: String): String {
-                TODO("Not yet implemented")
-            }
+            override fun getNewId(path: String) = Random.nextInt().toString()
 
             override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
@@ -97,11 +96,11 @@ class ProjectFactoryTest {
 
         private val userInfo = UserInfo("email", "name")
 
-        private val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
+        override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
 
         val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
-        val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
+        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
 

@@ -10,10 +10,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.SharedProjectJson
-import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -227,6 +224,82 @@ class ProjectsFactoryTest {
                         )
                 )
         )
+        emissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testAddSharedProjectRemote() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = ProjectsFactory(
+                mockk(),
+                privateProjectLoader,
+                initialProjectEvent!!,
+                sharedProjectsLoader,
+                initialProjectsEvent!!,
+                ExactTimeStamp.now,
+                factoryProvider,
+                compositeDisposable
+        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+
+        emissionChecker.checkRemote()
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
+        emissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testAddSharedProjectLocal() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = ProjectsFactory(
+                mockk(),
+                privateProjectLoader,
+                initialProjectEvent!!,
+                sharedProjectsLoader,
+                initialProjectsEvent!!,
+                ExactTimeStamp.now,
+                factoryProvider,
+                compositeDisposable
+        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val sharedProject = projectsFactory.createProject(
+                "sharedProject",
+                ExactTimeStamp.now,
+                setOf(),
+                mockk(relaxed = true) {
+                    every { userJson } returns UserJson()
+                },
+                userInfo,
+                mockk(relaxed = true)
+        )
+        projectsFactory.save(mockk(relaxed = true))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.id)))
+
+        emissionChecker.checkLocal()
+        factoryProvider.acceptSharedProject(sharedProject.id, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
         emissionChecker.checkEmpty()
     }
 }

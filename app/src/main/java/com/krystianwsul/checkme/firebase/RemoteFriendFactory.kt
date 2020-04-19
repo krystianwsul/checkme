@@ -42,13 +42,12 @@ class RemoteFriendFactory(
         return remoteFriendManager.save()
     }
 
-    fun getUserJsons(friendIds: Set<UserKey>): MutableMap<UserKey, UserJson> {
+    fun getUserJsons(friendIds: Set<UserKey>): Map<UserKey, UserJson> {
         check(friendIds.all { _friends.containsKey(it) })
 
         return _friends.entries
                 .filter { friendIds.contains(it.key) }
                 .associateBy({ it.key }, { it.value.userJson })
-                .toMutableMap()
     }
 
     fun getFriend(friendId: UserKey): RootUser {

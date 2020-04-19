@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
@@ -120,9 +119,5 @@ abstract class ProjectFactory<T : ProjectType>(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    fun save(domainFactory: DomainFactory): Boolean {
-        val projectSaved = projectManager.save(domainFactory)
-        val instancesSaved = rootInstanceManagers.map { it.value.save() }.any { it }
-        return projectSaved || instancesSaved
-    }
+    fun saveInstances() = rootInstanceManagers.map { it.value.save() }.any { it }
 }

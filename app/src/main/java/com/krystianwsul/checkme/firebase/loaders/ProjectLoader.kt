@@ -16,6 +16,8 @@ import io.reactivex.rxkotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType> {
 
+    val projectManager: ProjectProvider.ProjectManager<T>
+
     // first snapshot of everything
     val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T>>>
 
@@ -55,7 +57,7 @@ interface ProjectLoader<T : ProjectType> {
             snapshotObservable: Observable<Snapshot>,
             private val domainDisposable: CompositeDisposable,
             projectProvider: ProjectProvider,
-            private val projectManager: ProjectProvider.ProjectManager<T>
+            override val projectManager: ProjectProvider.ProjectManager<T>
     ) : ProjectLoader<T> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!

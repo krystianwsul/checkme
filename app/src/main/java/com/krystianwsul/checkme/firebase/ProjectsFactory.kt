@@ -24,7 +24,7 @@ import io.reactivex.rxkotlin.merge
 
 class ProjectsFactory(
         localFactory: FactoryProvider.Local,
-        privateProjectLoader: ProjectLoader<ProjectType.Private>,
+        private val privateProjectLoader: ProjectLoader<ProjectType.Private>,
         privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
         private val sharedProjectsLoader: SharedProjectsLoader,
         sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
@@ -107,7 +107,7 @@ class ProjectsFactory(
                 val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
                 val newRecord = sharedProjectFactory.project.projectRecord
 
-                check(oldRecord == newRecord) // todo unit test for this
+                check(oldRecord == newRecord)
 
                 addedSharedProjects.remove(projectKey)
             }
@@ -223,7 +223,7 @@ class ProjectsFactory(
         val friendIds = recordOf.toMutableSet()
         friendIds.remove(userInfo.key)
 
-        val userJsons = friendFactory.getUserJsons(friendIds)
+        val userJsons = friendFactory.getUserJsons(friendIds).toMutableMap()
         userJsons[userInfo.key] = rootUser.userJson
 
         val sharedProjectJson = SharedProjectJson(
@@ -247,9 +247,18 @@ class ProjectsFactory(
     }
 
     fun save(domainFactory: DomainFactory): Boolean {
-        val privateSaved = privateProjectFactory.save(domainFactory)
-        val sharedSaved = sharedProjectFactories.map { it.value.save(domainFactory) }.any { it }
-        return privateSaved || sharedSaved
+        val privateProjectSaved = privateProjectLoader.projectManager.save(domainFactory)
+        val privateInstancesSaved = privateProjectFactory.saveInstances()
+
+        val sharedProjectsSaved = sharedProjectsLoader.projectManager.save(domainFactory)
+        val sharedInstancesSaved = sharedProjectFactories.map { it.value.saveInstances() }.any { it }
+
+        return listOf(
+                privateProjectSaved,
+                privateInstancesSaved,
+                sharedProjectsSaved,
+                sharedInstancesSaved
+        ).any { it }
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) = projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)

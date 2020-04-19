@@ -33,7 +33,6 @@ class FactoryLoader(
         val domainDisposable = CompositeDisposable()
 
         fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
-        fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }
 
         domainFactoryObservable = userInfoObservable.switchMapSingle {
             domainDisposable.clear()
@@ -43,7 +42,7 @@ class FactoryLoader(
 
                 val deviceInfoObservable = tokenObservable.map { DeviceInfo(userInfo, it.value) }
                         .replay(1)
-                        .publishImmediate()
+                        .apply { domainDisposable += connect() }
 
                 fun getDeviceInfo() = deviceInfoObservable.getCurrentValue()
                 fun getDeviceDbInfo() = DeviceDbInfo(getDeviceInfo(), localFactory.uuid)
@@ -96,7 +95,7 @@ class FactoryLoader(
                         privateProjectLoader.initialProjectEvent,
                         sharedProjectsLoader.initialProjectsEvent
                 ) { (changeType, initialPrivateProjectEvent), initialSharedProjectsEvent ->
-                    check(changeType == ChangeType.LOCAL)
+                    check(changeType == ChangeType.REMOTE)
 
                     ProjectsFactory(
                             localFactory,
@@ -125,7 +124,7 @@ class FactoryLoader(
                             ExactTimeStamp.now,
                             friends
                     )
-                }.cache()
+                }.cacheImmediate()
 
                 /*
                     todo instances this could be moved into domainFactorySingle, but I'm keeping it

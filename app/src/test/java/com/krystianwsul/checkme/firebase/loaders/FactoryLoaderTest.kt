@@ -62,19 +62,9 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
-            TODO("Not yet implemented")
-        }
+        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = Unit
 
         override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp) {
             TODO("Not yet implemented")
         }
 
@@ -95,12 +85,6 @@ class FactoryLoaderTest {
         class ListenerWrapper<T> {
 
             var result: T? = null
-        }
-
-        fun checkUser(listener: (dataSnapshot: Snapshot) -> Unit) {
-            assertNull(userListener)
-
-            userListener = listener
         }
 
         fun checkChange(listener: ListenerWrapper<ChangeType>.() -> Unit) {
@@ -215,7 +199,7 @@ class FactoryLoaderTest {
     private val sharedTaskKey = "sharedTask"
 
     private lateinit var userInfoObservable: PublishRelay<NullableWrapper<UserInfo>>
-    private lateinit var tokenObservable: PublishRelay<NullableWrapper<String>>
+    private lateinit var tokenObservable: BehaviorRelay<NullableWrapper<String>>
     private lateinit var testFactoryProvider: TestFactoryProvider
     private lateinit var factoryLoader: FactoryLoader
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
@@ -233,7 +217,7 @@ class FactoryLoaderTest {
         }
 
         userInfoObservable = PublishRelay.create()
-        tokenObservable = PublishRelay.create()
+        tokenObservable = BehaviorRelay.createDefault(tokenWrapper)
         testFactoryProvider = TestFactoryProvider()
         factoryLoader = FactoryLoader(local, userInfoObservable, testFactoryProvider, tokenObservable)
         domainFactoryRelay = BehaviorRelay.create()
@@ -243,7 +227,6 @@ class FactoryLoaderTest {
                 .addTo(compositeDisposable)
 
         userInfoObservable.accept(userInfoWrapper)
-        tokenObservable.accept(tokenWrapper)
     }
 
     @After
@@ -391,9 +374,7 @@ class FactoryLoaderTest {
         initializeEmpty()
 
         testFactoryProvider.apply {
-            domain.checkChange {
-                database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson())))
-            }
+            database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson("task"))))
 
             domain.checkChange {
                 database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))

@@ -36,10 +36,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     // todo same change as for projects
     fun addFriend(userKey: UserKey) = getUserQuery(userKey).child("friendOf/${userInfo.key.key}").setValue(true)
 
-    fun addFriends(friendKeys: Set<UserKey>) = rootReference.child(USERS_KEY).updateChildren(
-            friendKeys.map { "${it.key}/friendOf/${userInfo.key.key}" to true }.toMap()
-    )
-
     private fun getFriendQuery(userKey: UserKey) = rootReference.child(USERS_KEY)
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
@@ -57,16 +53,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).snapshotChanges()
 
-    override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.child(path)
-                .updateChildren(values)
-                .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
+    override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
+        rootReference.updateChildren(values).addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
     override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).snapshotChanges()
-
-    fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
     override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshotChanges()
 

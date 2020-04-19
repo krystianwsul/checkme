@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
@@ -232,19 +231,12 @@ class ProjectsFactory(
         return sharedProject
     }
 
-    fun save(domainFactory: DomainFactory): Boolean {
-        val privateProjectSaved = privateProjectLoader.projectManager.save(domainFactory)
-        val privateInstancesSaved = privateProjectFactory.saveInstances()
+    fun save(values: MutableMap<String, Any?>) {
+        privateProjectLoader.projectManager.save(values)
+        privateProjectFactory.saveInstances(values)
 
-        val sharedProjectsSaved = sharedProjectsLoader.projectManager.save(domainFactory)
-        val sharedInstancesSaved = sharedProjectFactories.map { it.value.saveInstances() }.any { it }
-
-        return listOf(
-                privateProjectSaved,
-                privateInstancesSaved,
-                sharedProjectsSaved,
-                sharedInstancesSaved
-        ).any { it }
+        sharedProjectsLoader.projectManager.save(values)
+        sharedProjectFactories.forEach { it.value.saveInstances(values) }
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) = projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)

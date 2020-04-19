@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.records.RootInstanceRecord
@@ -22,29 +21,21 @@ abstract class RootInstanceManager<T : ProjectType>(
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    protected abstract fun getDatabaseCallback(): DatabaseCallback
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = mutableMapOf<String, Any?>()
 
-    open val saveCallback: (() -> Unit)? = null
+        val newIsSaved = rootInstanceRecords.map { it.value.getValues(myValues) }.any { it }
 
-    fun save(): Boolean {
-        val values = mutableMapOf<String, Any?>()
+        ErrorLogger.instance.log("RootInstanceManager.save values: $myValues")
 
-        val newIsSaved = rootInstanceRecords.map { it.value.getValues(values) }.any { it }
-
-        ErrorLogger.instance.log("RootInstanceManager.save values: $values")
-
-        check(newIsSaved == values.isNotEmpty())
-        if (values.isNotEmpty()) {
+        check(newIsSaved == myValues.isNotEmpty())
+        if (myValues.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = newIsSaved
-
-            databaseWrapper.updateInstances(taskRecord.rootInstanceKey, values, getDatabaseCallback())
-        } else {
-            saveCallback?.invoke()
         }
 
-        return isSaved
+        values += myValues.mapKeys { "${DatabaseWrapper.KEY_INSTANCES}/${it.key}" }
     }
 
     fun newRootInstanceRecord(

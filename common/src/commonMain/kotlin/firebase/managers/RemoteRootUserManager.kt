@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
@@ -14,29 +13,19 @@ abstract class RemoteRootUserManager {
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    protected abstract fun getDatabaseCallback(): DatabaseCallback
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = mutableMapOf<String, Any?>()
 
-    open val saveCallback: (() -> Unit)? = null
+        remoteRootUserRecords.values.forEach { it.getValues(myValues) }
 
-    fun save(): Boolean {
-        val values = mutableMapOf<String, Any?>()
+        ErrorLogger.instance.log("RemoteFriendManager.save values: $myValues")
 
-        remoteRootUserRecords.values.forEach { it.getValues(values) }
-
-        if (values.isNotEmpty()) {
+        if (myValues.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true
         }
 
-        ErrorLogger.instance.log("RemoteFriendManager.save values: $values")
-
-        if (values.isNotEmpty()) {
-            databaseWrapper.updateFriends(values, getDatabaseCallback())
-        } else {
-            saveCallback?.invoke()
-        }
-
-        return isSaved
+        values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }
     }
 }

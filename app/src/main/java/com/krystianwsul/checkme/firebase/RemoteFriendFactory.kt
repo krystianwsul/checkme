@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
@@ -36,10 +35,9 @@ class RemoteFriendFactory(
 
     val friends: Collection<RootUser> get() = _friends.values
 
-    fun save(domainFactory: DomainFactory): Boolean {
-        strangerProjectManager.save(domainFactory)
-
-        return remoteFriendManager.save()
+    fun save(values: MutableMap<String, Any?>) {
+        strangerProjectManager.save(values)
+        remoteFriendManager.save(values)
     }
 
     fun getUserJsons(friendIds: Set<UserKey>): Map<UserKey, UserJson> {

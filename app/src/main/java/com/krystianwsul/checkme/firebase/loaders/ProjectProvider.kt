@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -22,6 +21,6 @@ interface ProjectProvider {
 
         fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<out ProjectRecord<T>>?
 
-        fun save(extra: DomainFactory): Boolean
+        fun save(values: MutableMap<String, Any?>)
     }
 }

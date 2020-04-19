@@ -16,7 +16,7 @@ abstract class DatabaseWrapper {
 
     protected abstract fun getNewId(path: String): String
 
-    protected abstract fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) // todo instances replace with one update function
+    abstract fun update(values: Map<String, Any?>, callback: DatabaseCallback)
 
     fun getPrivateScheduleRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
 
@@ -35,25 +35,4 @@ abstract class DatabaseWrapper {
     fun newSharedTaskHierarchyRecordId(projectId: ProjectKey<ProjectType.Shared>) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
 
     fun newSharedCustomTimeRecordId(projectId: ProjectKey<ProjectType.Shared>) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
-
-    fun updateRecords(
-            values: Map<String, Any?>,
-            callback: DatabaseCallback
-    ) = update(RECORDS_KEY, values, callback)
-
-    fun updatePrivateProjects(
-            values: Map<String, Any?>,
-            callback: DatabaseCallback
-    ) = update(PRIVATE_PROJECTS_KEY, values, callback)
-
-    fun updateFriends(
-            values: Map<String, Any?>,
-            callback: DatabaseCallback
-    ) = update(USERS_KEY, values, callback)
-
-    fun updateInstances(
-            taskFirebaseKey: String,
-            values: Map<String, Any?>,
-            callback: DatabaseCallback
-    ) = update("$KEY_INSTANCES/$taskFirebaseKey", values, callback)
 }

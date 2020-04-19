@@ -117,5 +117,5 @@ abstract class ProjectFactory<T : ProjectType>(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    fun saveInstances() = rootInstanceManagers.map { it.value.save() }.any { it }
+    fun saveInstances(values: MutableMap<String, Any?>) = rootInstanceManagers.forEach { it.value.save(values) }
 }

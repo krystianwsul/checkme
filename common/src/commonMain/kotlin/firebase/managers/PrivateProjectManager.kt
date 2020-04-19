@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import kotlin.properties.Delegates
@@ -17,26 +16,19 @@ abstract class PrivateProjectManager<T> {
 
     abstract val privateProjectRecords: List<PrivateProjectRecord>
 
-    protected abstract fun getDatabaseCallback(extra: T, values: Map<String, Any?>): DatabaseCallback
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = mutableMapOf<String, Any?>()
 
-    open val saveCallback: (() -> Unit)? = null
+        privateProjectRecords.forEach { it.getValues(myValues) }
 
-    fun save(extra: T): Boolean {
-        val values = mutableMapOf<String, Any?>()
+        ErrorLogger.instance.log("RemotePrivateProjectManager.save values: $myValues")
 
-        privateProjectRecords.forEach { it.getValues(values) }
-
-        ErrorLogger.instance.log("RemotePrivateProjectManager.save values: $values")
-
-        if (values.isNotEmpty()) {
+        if (myValues.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true
-            databaseWrapper.updatePrivateProjects(values, getDatabaseCallback(extra, values))
-        } else {
-            saveCallback?.invoke()
-        }
 
-        return isSaved
+            values += myValues.mapKeys { "${DatabaseWrapper.PRIVATE_PROJECTS_KEY}/${it.key}" }
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
@@ -53,5 +52,5 @@ class RemoteUserFactory(
         projectIdTrigger.accept(ChangeType.REMOTE)
     }
 
-    fun save(domainFactory: DomainFactory) = remoteUserManager.save(domainFactory)
+    fun save(values: MutableMap<String, Any?>) = remoteUserManager.save(values)
 }

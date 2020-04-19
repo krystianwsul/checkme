@@ -1,10 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -15,7 +13,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
-        SharedProjectManager<DomainFactory>(),
+        SharedProjectManager(),
         ProjectProvider.ProjectManager<ProjectType.Shared> {
 
     private fun Snapshot.toRecord() = SharedProjectRecord(
@@ -49,8 +47,6 @@ class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
             }
         }
     }
-
-    override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
     override fun setSharedProjectRecord(projectKey: ProjectKey.Shared, pair: Pair<SharedProjectRecord, Boolean>) {
         sharedProjectRecords[projectKey] = pair

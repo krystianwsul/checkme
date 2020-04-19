@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.MyUserRecord
@@ -38,20 +36,19 @@ class RemoteMyUserManager(
         return remoteUserRecord
     }
 
-    fun save(domainFactory: DomainFactory): Boolean {
-        val values = HashMap<String, Any?>()
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = HashMap<String, Any?>()
 
-        remoteUserRecord.getValues(values)
+        remoteUserRecord.getValues(myValues)
 
-        MyCrashlytics.log("RemoteUserManager.save values: $values")
+        MyCrashlytics.log("RemoteUserManager.save values: $myValues")
 
-        if (values.isNotEmpty()) {
+        if (myValues.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true
-            AndroidDatabaseWrapper.updateFriends(values).checkError(domainFactory, "RemoteUserManager.save", values)
-        }
 
-        return isSaved
+            values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }
+        }
     }
 }

@@ -33,6 +33,7 @@ import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
@@ -197,10 +198,16 @@ class DomainFactory(
     fun save(
             dataId: Int,
             source: SaveService.Source,
-            forceDomainChanged: Boolean = false
-    ) = save(setOf(dataId), source, forceDomainChanged)
+            forceDomainChanged: Boolean = false,
+            values: MutableMap<String, Any?> = mutableMapOf()
+    ) = save(setOf(dataId), source, forceDomainChanged, values)
 
-    fun save(dataIds: Set<Int>, source: SaveService.Source, forceDomainChanged: Boolean = false) {
+    fun save(
+            dataIds: Set<Int>,
+            source: SaveService.Source,
+            forceDomainChanged: Boolean = false,
+            values: MutableMap<String, Any?> = mutableMapOf()
+    ) {
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
@@ -211,11 +218,14 @@ class DomainFactory(
         }
 
         val localChanges = localFactory.save(source)
-        val remoteChanges = projectsFactory.save(this)
-        val userChanges = remoteUserFactory.save(this)
-        val friendChanges = remoteFriendFactory.save(this)
+        projectsFactory.save(values)
+        remoteUserFactory.save(values)
+        remoteFriendFactory.save(values)
 
-        val changes = localChanges || remoteChanges || userChanges || friendChanges
+        val changes = localChanges || values.isNotEmpty()
+
+        if (values.isNotEmpty())
+            AndroidDatabaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
         if (changes || forceDomainChanged)
             domainChanged.accept(dataIds)
@@ -1936,9 +1946,11 @@ class DomainFactory(
 
         userKeys.forEach { remoteUserFactory.remoteUser.addFriend(it) }
 
-        AndroidDatabaseWrapper.addFriends(userKeys).checkError(this, "DomainFactory.addFriends")
+        val values = userKeys.associate {
+            "${DatabaseWrapper.USERS_KEY}/${it.key}/friendOf/${deviceDbInfo.key.key}" to true
+        }.toMutableMap<String, Any?>()
 
-        save(0, source)
+        save(0, source, values = values)
     }
 
     @Synchronized

@@ -484,4 +484,25 @@ class ProjectsFactoryTest {
             )))
         }
     }
+
+    @Test
+    fun testRemoveSharedProjectRemote() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
+
+        initProjectsFactory()
+
+        emissionChecker.checkRemote {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        }
+    }
 }

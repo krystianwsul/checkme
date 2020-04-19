@@ -32,7 +32,7 @@ class ProjectsFactory(
         private val factoryProvider: FactoryProvider,
         private val domainDisposable: CompositeDisposable,
         deviceDbInfo: () -> DeviceDbInfo
-) : Project.Parent {
+) {
 
     private val privateProjectFactory = PrivateProjectFactory(
             privateProjectLoader,
@@ -64,18 +64,12 @@ class ProjectsFactory(
     private val factorySharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
 
     private val addedSharedProjects = mutableMapOf<ProjectKey<ProjectType.Shared>, SharedProject>()
-    private val removedSharedProjects = mutableSetOf<ProjectKey<ProjectType.Shared>>()
 
     val sharedProjects: Map<ProjectKey<ProjectType.Shared>, SharedProject>
         get() {
-            check(factorySharedProjects.keys.containsAll(removedSharedProjects))
+            check(factorySharedProjects.keys.intersect(addedSharedProjects.keys).isEmpty())
 
-            val result = factorySharedProjects.toMutableMap().apply {
-                keys.removeAll(removedSharedProjects)
-            }
-            check(result.keys.intersect(addedSharedProjects.keys).isEmpty())
-
-            return result + addedSharedProjects
+            return factorySharedProjects + addedSharedProjects
         }
 
     val changeTypes: Observable<ChangeType>
@@ -89,7 +83,6 @@ class ProjectsFactory(
                     .projectKey
 
             check(!sharedProjectFactories.containsKey(projectKey))
-            check(!removedSharedProjects.contains(projectKey))
 
             val sharedProjectFactory = SharedProjectFactory(
                     addProjectEvent.projectLoader,
@@ -116,17 +109,11 @@ class ProjectsFactory(
         }
 
         val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->
+            check(changeType == ChangeType.REMOTE)
+
             removeProjectEvent.projectKeys.forEach {
                 check(!addedSharedProjects.containsKey(it))
                 check(sharedProjectFactories.containsKey(it))
-
-                if (removedSharedProjects.contains(it)) {
-                    check(changeType == ChangeType.LOCAL)
-
-                    removedSharedProjects.remove(it)
-                } else {
-                    check(changeType == ChangeType.REMOTE)
-                }
 
                 sharedProjectFactoriesProperty.remove(it)
             }
@@ -291,15 +278,6 @@ class ProjectsFactory(
     fun getProjectIfPresent(projectId: String) = projects.entries
             .singleOrNull { it.key.key == projectId }
             ?.value
-
-    override fun deleteProject(project: Project<*>) {
-        val projectKey = project.projectKey as ProjectKey.Shared
-
-        check(sharedProjects.containsKey(projectKey))
-        check(!removedSharedProjects.contains(projectKey))
-
-        removedSharedProjects.add(projectKey)
-    }
 
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) = projects.getValue(taskHierarchyKey.projectId).getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
 

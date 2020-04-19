@@ -17,7 +17,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             .push()
             .key as String
 
-    override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+    override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         check(values.values.all { it == null })
 
         val dynamicValues: dynamic = object {}
@@ -26,7 +26,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             dynamicValues[it.key] = it.value
         }
 
-        rootReference.child(path).update(dynamicValues) { error ->
+        rootReference.update(dynamicValues) { error ->
             callback("error: " + error?.toString(), error == null, null)
         }
     }
@@ -70,7 +70,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     @Serializable
     private class Users(val userWrappers: Map<String, UserWrapper>)
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
+    @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION")
     fun <T> parse(
             serializer: DeserializationStrategy<T>,
             data: dynamic

@@ -36,11 +36,10 @@ abstract class SharedProjectManager : SharedProjectRecord.Parent {
     fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!sharedProjectRecords.containsKey(it.projectKey))
 
-        setSharedProjectRecord(it.projectKey, Pair(it, false))
+        sharedProjectRecords[it.projectKey] = Pair(it, false)
     }
 
-    abstract fun setSharedProjectRecord(
-            projectKey: ProjectKey.Shared,
-            pair: Pair<SharedProjectRecord, Boolean>
-    )
+    override fun deleteRemoteSharedProjectRecord(projectKey: ProjectKey.Shared) {
+        check(sharedProjectRecords.remove(projectKey) != null)
+    }
 }

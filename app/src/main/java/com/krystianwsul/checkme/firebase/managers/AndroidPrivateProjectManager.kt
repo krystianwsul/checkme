@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.domain.UserInfo
@@ -15,7 +14,7 @@ import com.krystianwsul.common.utils.ProjectType
 class AndroidPrivateProjectManager(
         private val userInfo: UserInfo,
         override val databaseWrapper: DatabaseWrapper
-) : PrivateProjectManager<DomainFactory>(), ProjectProvider.ProjectManager<ProjectType.Private> {
+) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private> {
 
     private lateinit var privateProjectRecord: PrivateProjectRecord
 

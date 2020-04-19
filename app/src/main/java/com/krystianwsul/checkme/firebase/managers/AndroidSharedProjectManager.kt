@@ -47,12 +47,4 @@ class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
             }
         }
     }
-
-    override fun setSharedProjectRecord(projectKey: ProjectKey.Shared, pair: Pair<SharedProjectRecord, Boolean>) {
-        sharedProjectRecords[projectKey] = pair
-    }
-
-    override fun deleteRemoteSharedProjectRecord(projectKey: ProjectKey.Shared) {
-        check(sharedProjectRecords.remove(projectKey) != null)
-    }
 }

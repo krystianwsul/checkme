@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import kotlin.properties.Delegates
 
-abstract class PrivateProjectManager<T> {
+abstract class PrivateProjectManager {
 
     var isSaved by Delegates.observable(false) { _, _, value ->
         ErrorLogger.instance.log("PrivateProjectManager.isSaved = $value")

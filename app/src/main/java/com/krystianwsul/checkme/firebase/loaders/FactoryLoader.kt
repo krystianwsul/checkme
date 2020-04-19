@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ProjectsFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -148,14 +149,14 @@ class FactoryLoader(
                         }
                         .addTo(domainDisposable)
 
-                tokenObservable.flatMapSingle { tokenWrapper -> domainFactorySingle.map { Pair(tokenWrapper, it) } }
-                        .subscribe { (tokenWrapper, domainFactory) ->
-                            domainFactory.updateDeviceDbInfo(
-                                    DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
-                                    SaveService.Source.GUI
-                            )
-                        }
-                        .addTo(domainDisposable)
+                domainDisposable += tokenObservable.subscribe { tokenWrapper ->
+                    DomainFactory.addFirebaseListener { domainFactory ->
+                        domainFactory.updateDeviceDbInfo(
+                                DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
+                                SaveService.Source.GUI
+                        )
+                    }
+                }
 
                 domainFactorySingle.map { NullableWrapper(it) }
             } else {

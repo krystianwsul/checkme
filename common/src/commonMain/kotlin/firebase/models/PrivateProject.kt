@@ -15,7 +15,7 @@ class PrivateProject(
         private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>
 ) : Project<ProjectType.Private>() {
 
-    override val id = projectRecord.projectKey
+    override val projectKey = projectRecord.projectKey
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
     override val remoteTasks: MutableMap<String, Task<ProjectType.Private>>
@@ -73,7 +73,7 @@ class PrivateProject(
     override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>) = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
-            if (customTime.ownerKey?.toPrivateProjectKey() == id) {
+            if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {
                 customTimes.single { it.id == customTime.privateKey }
             } else {
                 val customTimeJson = PrivateCustomTimeJson(

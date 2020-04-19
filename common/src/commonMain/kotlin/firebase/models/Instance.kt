@@ -386,7 +386,7 @@ class Instance<T : ProjectType> private constructor(
 
             override val customTimeKey
                 get() = instanceRecord.instanceJsonTime?.let {
-                    (it as? JsonTime.Custom)?.let { Pair(project.id, it.id) }
+                    (it as? JsonTime.Custom)?.let { Pair(project.projectKey, it.id) }
                 }
 
             override val scheduleCustomTimeKey

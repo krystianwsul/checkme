@@ -179,7 +179,7 @@ class DomainFactory(
         updateFriends()
     }
 
-    private val defaultProjectId by lazy { projectsFactory.privateProject.id }
+    private val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
 
     // misc
 
@@ -815,7 +815,7 @@ class DomainFactory(
 
                 parentKey = task.project
                         .takeIf { it is SharedProject }
-                        ?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
+                        ?.let { CreateTaskViewModel.ParentKey.Project(it.projectKey) }
 
                 if (schedules.isNotEmpty()) {
                     scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {
@@ -959,7 +959,7 @@ class DomainFactory(
                 .associate {
                     val users = it.users.joinToString(", ") { it.name }
 
-                    it.id to ProjectListViewModel.ProjectData(it.id, it.name, users)
+                    it.projectKey to ProjectListViewModel.ProjectData(it.projectKey, it.name, users)
                 }
                 .toSortedMap()
 
@@ -2072,8 +2072,8 @@ class DomainFactory(
                 remoteFriendFactory
         )
 
-        remoteUserFactory.remoteUser.addProject(remoteProject.id)
-        remoteFriendFactory.updateProjects(remoteProject.id, friends, setOf())
+        remoteUserFactory.remoteUser.addProject(remoteProject.projectKey)
+        remoteFriendFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
         save(dataId, source)
 
@@ -2261,7 +2261,7 @@ class DomainFactory(
                                 childTask.getScheduleText(ScheduleText, now),
                                 childTask.note,
                                 CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                                (childTask.project as? SharedProject)?.id
+                                (childTask.project as? SharedProject)?.projectKey
                         )
 
                         taskParentKey to parentTreeData
@@ -2326,7 +2326,7 @@ class DomainFactory(
                 .values
                 .filter { it.current(now) }
                 .map {
-                    val projectParentKey = CreateTaskViewModel.ParentKey.Project(it.id)
+                    val projectParentKey = CreateTaskViewModel.ParentKey.Project(it.projectKey)
 
                     val users = it.users.joinToString(", ") { it.name }
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(
@@ -2335,8 +2335,8 @@ class DomainFactory(
                             projectParentKey,
                             users,
                             null,
-                            CreateTaskViewModel.SortKey.ProjectSortKey(it.id),
-                            it.id
+                            CreateTaskViewModel.SortKey.ProjectSortKey(it.projectKey),
+                            it.projectKey
                     )
 
                     projectParentKey to parentTreeData
@@ -2363,7 +2363,7 @@ class DomainFactory(
                             it.getScheduleText(ScheduleText, now),
                             it.note,
                             CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                            (it.project as? SharedProject)?.id
+                            (it.project as? SharedProject)?.projectKey
                     )
 
                     taskParentKey to parentTreeData
@@ -2636,7 +2636,7 @@ class DomainFactory(
                 hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
             }
 
-            val taskKey = TaskKey(project.id, instanceShownRecord.taskId)
+            val taskKey = TaskKey(project.projectKey, instanceShownRecord.taskId)
             InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
         }
 

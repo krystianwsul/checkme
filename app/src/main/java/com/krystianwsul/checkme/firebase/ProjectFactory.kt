@@ -93,15 +93,15 @@ abstract class ProjectFactory<T : ProjectType>(
 
             project = newProject(changeProjectEvent.projectRecord)
 
-            ChangeType.reduce(projectChangeType, instanceChangeType)
+            ChangeType.reduce(projectChangeType, instanceChangeType) // todo instances test this too
         }
 
         val addTaskChangeTypes = projectLoader.addTaskEvents.map { (projectChangeType, addTaskEvent) ->
-            val instanceChangeType = addTaskEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
+            addTaskEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
 
             project = newProject(addTaskEvent.projectRecord)
 
-            ChangeType.reduce(projectChangeType, instanceChangeType)
+            projectChangeType
         }
 
         val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.map { (_, changeInstancesEvent) ->

@@ -48,6 +48,8 @@ class ProjectsFactoryTest {
 
     private val userInfo = UserInfo("email", "name")
 
+    private fun ProjectsFactory.save() = save(mockk(relaxed = true))
+
     @Before
     fun before() {
         mockBase64()
@@ -153,12 +155,104 @@ class ProjectsFactoryTest {
         privateProjectManager.privateProjectRecords
                 .single()
                 .name = name2
-        privateProjectManager.save(mockk(relaxed = true))
+        privateProjectManager.save(mockk(relaxed = true)) // todo instances save whole projectsFactory
 
         emissionChecker.checkLocal()
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name2), privateProjectKey.key))
         emissionChecker.checkEmpty()
         assertEquals(projectsFactory.privateProject.name, name2)
+    }
+
+    @Test
+    fun testRemotePrivateTaskChangeNoInstances() {
+        val privateProjectKey = ProjectKey.Private("key")
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = initProjectsFactory()
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                privateProjectKey.key
+        ))
+
+        emissionChecker.checkRemote()
+        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+
+        emissionChecker.checkEmpty()
+        assertEquals(projectsFactory.privateProject.tasks.size, 1)
+    }
+
+    @Test
+    fun testRemotePrivateTaskChangeWithInstances() {
+        val privateProjectKey = ProjectKey.Private("key")
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = initProjectsFactory()
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                privateProjectKey.key
+        ))
+
+        val date = Date.today()
+        val hourMinute = HourMinute.now
+        val done = ExactTimeStamp.now
+        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
+
+        emissionChecker.checkRemote()
+        factoryProvider.projectProvider.acceptInstance(
+                privateProjectKey.key,
+                taskKey.taskId,
+                mapOf(
+                        InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
+                                Pair(
+                                        InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
+                                        InstanceJson(done = done.long)
+                                )
+                        )
+                )
+        )
+        emissionChecker.checkEmpty()
+        assertEquals(projectsFactory.privateProject.tasks.size, 1)
+    }
+
+    @Test
+    fun testLocalPrivateTaskChangeNoInstances() {
+        val privateProjectKey = ProjectKey.Private("key")
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = initProjectsFactory()
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val taskJson = TaskJson("task")
+
+        val taskKey = projectsFactory.privateProject
+                .newTask(taskJson)
+                .taskKey
+
+        projectsFactory.save()
+
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                tasks = mutableMapOf(taskKey.taskId to taskJson)),
+                privateProjectKey.key
+        ))
+
+        emissionChecker.checkLocal()
+        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+        emissionChecker.checkEmpty()
     }
 
     @Test
@@ -191,7 +285,7 @@ class ProjectsFactoryTest {
         val done = ExactTimeStamp.now
 
         instance.setDone("uuid", mockk(relaxed = true), true, done)
-        projectsFactory.save(mockk(relaxed = true))
+        projectsFactory.save()
 
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
 
@@ -296,12 +390,12 @@ class ProjectsFactoryTest {
                 userInfo,
                 mockk(relaxed = true)
         )
-        projectsFactory.save(mockk(relaxed = true))
+        projectsFactory.save()
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.id)))
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))
 
         emissionChecker.checkLocal()
-        factoryProvider.acceptSharedProject(sharedProject.id, SharedProjectJson(users = mutableMapOf(
+        factoryProvider.acceptSharedProject(sharedProject.projectKey, SharedProjectJson(users = mutableMapOf(
                 userInfo.key.key to mockk(relaxed = true) {
                     every { tokens } returns mutableMapOf()
                 }

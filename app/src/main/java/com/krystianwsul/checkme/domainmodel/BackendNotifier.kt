@@ -41,7 +41,7 @@ object BackendNotifier {
             else -> throw IllegalArgumentException()
         }
 
-        val projectIds = projects.map { it.id }.toSet()
+        val projectIds = projects.map { it.projectKey }.toSet()
 
         val url = getUrl(projectIds, production, userKeys, deviceInfo.token!!)
         check(url.isNotEmpty())

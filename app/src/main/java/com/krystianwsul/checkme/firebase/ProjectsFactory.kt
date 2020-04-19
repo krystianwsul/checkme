@@ -148,7 +148,7 @@ class ProjectsFactory(
         ).merge().publishImmediate(domainDisposable) // todo instances unit test
     }
 
-    val projects get() = sharedProjects + mapOf(privateProject.id to privateProject)
+    val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
     val isPrivateSaved get() = privateProjectFactory.isSaved
 
@@ -173,7 +173,7 @@ class ProjectsFactory(
     val taskKeys
         get() = projects.values
                 .flatMap {
-                    val projectId = it.id
+                    val projectId = it.projectKey
 
                     it.taskIds.map { TaskKey(projectId, it) }
                 }
@@ -239,9 +239,9 @@ class ProjectsFactory(
                 mapOf()
         ) { AndroidRootInstanceManager(it, listOf(), factoryProvider) }
 
-        check(!projects.containsKey(sharedProject.id))
+        check(!projects.containsKey(sharedProject.projectKey))
 
-        addedSharedProjects[sharedProject.id] = sharedProject
+        addedSharedProjects[sharedProject.projectKey] = sharedProject
 
         return sharedProject
     }
@@ -293,7 +293,7 @@ class ProjectsFactory(
             ?.value
 
     override fun deleteProject(project: Project<*>) {
-        val projectKey = project.id as ProjectKey.Shared
+        val projectKey = project.projectKey as ProjectKey.Shared
 
         check(sharedProjects.containsKey(projectKey))
         check(!removedSharedProjects.contains(projectKey))

@@ -44,7 +44,7 @@ sealed class Time {
 
         override val timePair by lazy { TimePair(key, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 
-        val projectId by lazy { project.id }
+        val projectId by lazy { project.projectKey }
 
         override fun getHourMinute(dayOfWeek: DayOfWeek) = when (dayOfWeek) {
             DayOfWeek.SUNDAY -> HourMinute(customTimeRecord.sundayHour, customTimeRecord.sundayMinute)

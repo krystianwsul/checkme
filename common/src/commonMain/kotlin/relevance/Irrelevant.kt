@@ -91,10 +91,10 @@ object Irrelevant {
         }
 
         val remoteProjects = listOf(project)
-        val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
+        val remoteProjectRelevances = remoteProjects.map { it.projectKey to RemoteProjectRelevance(it) }.toMap()
 
         remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
-                .map { remoteProjectRelevances.getValue(it.id) }
+                .map { remoteProjectRelevances.getValue(it.projectKey) }
                 .forEach { it.setRelevant() }
 
         taskRelevances.values

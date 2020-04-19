@@ -59,7 +59,7 @@ class InstanceRelevance(val instance: Instance<*>) {
         if (pair != null)
             remoteCustomTimeRelevances.getValue(pair).setRelevant()
 
-        remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
+        remoteProjectRelevances.getValue(remoteProject.projectKey).setRelevant()
 
         (instance.scheduleCustomTimeKey)?.let {
             remoteCustomTimeRelevances.getValue(it).setRelevant()

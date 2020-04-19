@@ -55,7 +55,7 @@ object RelevanceChecker {
                 val now = ExactTimeStamp.now
 
                 privateProjects.forEach {
-                    response += "checking relevance for private project ${it.id}"
+                    response += "checking relevance for private project ${it.projectKey}"
 
                     Irrelevant.setIrrelevant(
                             object : Project.Parent {
@@ -87,15 +87,15 @@ object RelevanceChecker {
                 val parent = object : Project.Parent {
 
                     override fun deleteProject(project: Project<*>) {
-                        check(sharedProjects.contains(project.id))
+                        check(sharedProjects.contains(project.projectKey))
 
-                        sharedProjects.remove(project.id)
+                        sharedProjects.remove(project.projectKey)
                     }
                 }
 
                 val sharedProjectsRemoved = sharedProjects.values
                         .map {
-                            response += "checking relevance for shared project ${it.id}: ${it.name}"
+                            response += "checking relevance for shared project ${it.projectKey}: ${it.name}"
 
                             Irrelevant.setIrrelevant(parent, it, now).removedSharedProjects
                         }
@@ -109,7 +109,7 @@ object RelevanceChecker {
                                 .values
                                 .map { RootUser(it) }
 
-                        val removedSharedProjectKeys = sharedProjectsRemoved.map { it.id }
+                        val removedSharedProjectKeys = sharedProjectsRemoved.map { it.projectKey }
 
                         rootUsers.forEach { remoteUser ->
                             removedSharedProjectKeys.forEach {

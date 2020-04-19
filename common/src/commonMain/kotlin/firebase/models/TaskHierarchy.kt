@@ -16,8 +16,8 @@ class TaskHierarchy<T : ProjectType>(
     override val startExactTimeStamp by lazy { ExactTimeStamp(remoteTaskHierarchyRecord.startTime) }
     override val endExactTimeStamp get() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 
-    val parentTaskKey by lazy { TaskKey(project.id, remoteTaskHierarchyRecord.parentTaskId) }
-    val childTaskKey by lazy { TaskKey(project.id, remoteTaskHierarchyRecord.childTaskId) }
+    val parentTaskKey by lazy { TaskKey(project.projectKey, remoteTaskHierarchyRecord.parentTaskId) }
+    val childTaskKey by lazy { TaskKey(project.projectKey, remoteTaskHierarchyRecord.childTaskId) }
 
     val id by lazy { remoteTaskHierarchyRecord.id }
 
@@ -31,7 +31,7 @@ class TaskHierarchy<T : ProjectType>(
         get() = remoteTaskHierarchyRecord.ordinal ?: remoteTaskHierarchyRecord.startTime.toDouble()
         set(ordinal) = remoteTaskHierarchyRecord.setOrdinal(ordinal)
 
-    val taskHierarchyKey by lazy { TaskHierarchyKey(project.id, remoteTaskHierarchyRecord.id) }
+    val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, remoteTaskHierarchyRecord.id) }
 
     fun setEndExactTimeStamp(now: ExactTimeStamp) {
         requireCurrent(now)

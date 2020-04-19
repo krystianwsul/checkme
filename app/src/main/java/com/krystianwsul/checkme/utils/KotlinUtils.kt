@@ -162,7 +162,7 @@ private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
         ExactTimeStamp.now,
-        projectsFactory.privateProject.taskKeys
+        projectsFactory.privateProject.taskIds
 )
 
 private fun onComplete(

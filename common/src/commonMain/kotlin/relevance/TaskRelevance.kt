@@ -66,6 +66,6 @@ class TaskRelevance(val task: Task<*>) {
                 .map { remoteCustomTimeRelevances.getValue(it) }
                 .forEach { it.setRelevant() }
 
-        remoteProjectRelevances.getValue(task.project.id).setRelevant()
+        remoteProjectRelevances.getValue(task.project.projectKey).setRelevant()
     }
 }

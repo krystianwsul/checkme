@@ -41,7 +41,7 @@ class Task<T : ProjectType>(
 
     val note get() = taskRecord.note
 
-    val taskKey get() = TaskKey(project.id, taskRecord.id)
+    val taskKey get() = TaskKey(project.projectKey, taskRecord.id)
 
     val id get() = taskRecord.id
 
@@ -624,7 +624,7 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp,
             projectId: ProjectKey<*>
     ): Task<*> {
-        return if (projectId == project.id)
+        return if (projectId == project.projectKey)
             this
         else
             projectUpdater.convert(now, this, projectId)

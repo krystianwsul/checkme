@@ -25,7 +25,7 @@ abstract class Project<T : ProjectType> : Current {
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
 
-    abstract val id: ProjectKey<T> // todo rename to projectKey
+    abstract val projectKey: ProjectKey<T>
 
     var name
         get() = projectRecord.name
@@ -38,11 +38,9 @@ abstract class Project<T : ProjectType> : Current {
     override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
 
-    val taskKeys get() = remoteTasks.keys
-
-    val tasks get() = remoteTasks.values
-
-    val taskIds get() = remoteTasks.keys
+    // don't want these to be mutable
+    val taskIds: Set<String> get() = remoteTasks.keys
+    val tasks: Collection<Task<T>> get() = remoteTasks.values
 
     abstract val customTimes: Collection<Time.Custom<T>>
 
@@ -207,7 +205,7 @@ abstract class Project<T : ProjectType> : Current {
     fun getTaskIfPresent(taskId: String) = remoteTasks[taskId]
 
     fun getTaskForce(taskId: String) = remoteTasks[taskId]
-            ?: throw MissingTaskException(id, taskId)
+            ?: throw MissingTaskException(projectKey, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> {
         check(childTaskKey.taskId.isNotEmpty())
@@ -240,7 +238,7 @@ abstract class Project<T : ProjectType> : Current {
                     )
                 }
 
-        projectUndoData.projectIds.add(id)
+        projectUndoData.projectIds.add(projectKey)
 
         projectRecord.endTime = now.long
     }

@@ -17,7 +17,7 @@ class SharedProject(
         private val _newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>
 ) : Project<ProjectType.Shared>() {
 
-    override val id = projectRecord.projectKey
+    override val projectKey = projectRecord.projectKey
 
     private val remoteUsers = projectRecord.remoteUserRecords
             .values
@@ -160,7 +160,7 @@ class SharedProject(
 
         return when (customTime) {
             is PrivateCustomTime -> getSharedTimeIfPresent(customTime.key, ownerKey)
-            is SharedCustomTime -> customTime.takeIf { it.projectId == id }
+            is SharedCustomTime -> customTime.takeIf { it.projectId == projectKey }
             else -> throw IllegalArgumentException()
         } ?: copy()
     }

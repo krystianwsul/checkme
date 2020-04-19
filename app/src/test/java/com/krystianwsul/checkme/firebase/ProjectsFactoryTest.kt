@@ -323,6 +323,31 @@ class ProjectsFactoryTest {
     }
 
     @Test
+    fun testPrivateRemoveTask() {
+        val privateProjectKey = ProjectKey.Private("key")
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        privateProjectRelay.accept(ValueTestSnapshot(
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                privateProjectKey.key)
+        )
+
+        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        initProjectsFactory()
+
+        emissionChecker.checkRemote {
+            privateProjectRelay.accept(ValueTestSnapshot(
+                    PrivateProjectJson(),
+                    privateProjectKey.key
+            ))
+        }
+        assertTrue(projectsFactory.privateProject.tasks.isEmpty())
+    }
+
+    @Test
     fun testLocalPrivateInstanceChange() {
         val privateProjectKey = ProjectKey.Private("key")
 

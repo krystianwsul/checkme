@@ -94,9 +94,20 @@ class ProjectsFactoryTest {
         rxErrorChecker.check()
     }
 
+    private fun initProjectsFactory() = ProjectsFactory(
+            mockk(),
+            privateProjectLoader,
+            initialProjectEvent!!,
+            sharedProjectsLoader,
+            initialProjectsEvent!!,
+            ExactTimeStamp.now,
+            factoryProvider,
+            compositeDisposable
+    ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+
     @Test
     fun testProjectEventsBeforeProjectsFactory() {
-        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        val privateProjectKey = ProjectKey.Private("key")
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
@@ -113,16 +124,7 @@ class ProjectsFactoryTest {
                 }
         )))
 
-        val projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.now,
-                factoryProvider,
-                compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        val projectsFactory = initProjectsFactory()
 
         assertEquals(name, projectsFactory.privateProject.name)
         assertTrue(projectsFactory.sharedProjects.isNotEmpty())
@@ -135,16 +137,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
-        val projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.now,
-                factoryProvider,
-                compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        val projectsFactory = initProjectsFactory()
 
         val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
 
@@ -170,7 +163,7 @@ class ProjectsFactoryTest {
 
     @Test
     fun testLocalPrivateInstanceChange() {
-        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        val privateProjectKey = ProjectKey.Private("key")
 
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
@@ -183,16 +176,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
-        val projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.now,
-                factoryProvider,
-                compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        val projectsFactory = initProjectsFactory()
 
         val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
 
@@ -206,12 +190,52 @@ class ProjectsFactoryTest {
 
         val done = ExactTimeStamp.now
 
-        instance.setDone("uuid", mockk(), true, done)
+        instance.setDone("uuid", mockk(relaxed = true), true, done)
         projectsFactory.save(mockk(relaxed = true))
 
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
 
         emissionChecker.checkLocal()
+        factoryProvider.projectProvider.acceptInstance(
+                privateProjectKey.key,
+                taskKey.taskId,
+                mapOf(
+                        InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
+                                Pair(
+                                        InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
+                                        InstanceJson(done = done.long)
+                                )
+                        )
+                )
+        )
+        emissionChecker.checkEmpty()
+    }
+
+    @Test
+    fun testRemotePrivateInstanceChange() {
+        val privateProjectKey = ProjectKey.Private("key")
+
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        privateProjectRelay.accept(ValueTestSnapshot(
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                privateProjectKey.key
+        ))
+
+        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+
+        val projectsFactory = initProjectsFactory()
+
+        val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+
+        val date = Date.today()
+        val hourMinute = HourMinute.now
+        val done = ExactTimeStamp.now
+        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
+
+        emissionChecker.checkRemote()
         factoryProvider.projectProvider.acceptInstance(
                 privateProjectKey.key,
                 taskKey.taskId,
@@ -234,16 +258,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
-        val projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.now,
-                factoryProvider,
-                compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        val projectsFactory = initProjectsFactory()
 
         val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
 
@@ -267,16 +282,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
-        val projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.now,
-                factoryProvider,
-                compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        val projectsFactory = initProjectsFactory()
 
         val emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
 

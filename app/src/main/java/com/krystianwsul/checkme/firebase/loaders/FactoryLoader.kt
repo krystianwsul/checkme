@@ -127,11 +127,6 @@ class FactoryLoader(
                     )
                 }.cacheImmediate()
 
-                /*
-                    todo instances this could be moved into domainFactorySingle, but I'm keeping it
-                    here for symmetry with the other events below.  Re-evaluate after figuring out
-                    this situation with TickData, possibly unit test
-                 */
                 domainDisposable += Observables.combineLatest(
                         projectsFactorySingle.flatMapObservable { it.changeTypes },
                         domainFactorySingle.toObservable()

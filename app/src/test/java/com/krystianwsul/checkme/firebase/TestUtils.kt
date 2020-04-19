@@ -6,17 +6,19 @@ import org.junit.Assert
 
 
 @ExperimentalStdlibApi
-fun EmissionChecker<ChangeType>.checkChangeType(changeType: ChangeType) {
+fun EmissionChecker<ChangeType>.checkChangeType(changeType: ChangeType, action: () -> Unit) {
     addHandler {
         Assert.assertTrue(
                 "$name expected $changeType: actual: ${it}",
                 it == changeType
         )
     }
+    action()
+    checkEmpty()
 }
 
 @ExperimentalStdlibApi
-fun EmissionChecker<ChangeType>.checkRemote() = checkChangeType(ChangeType.REMOTE)
+fun EmissionChecker<ChangeType>.checkRemote(action: () -> Unit) = checkChangeType(ChangeType.REMOTE, action)
 
 @ExperimentalStdlibApi
-fun EmissionChecker<ChangeType>.checkLocal() = checkChangeType(ChangeType.LOCAL)
+fun EmissionChecker<ChangeType>.checkLocal(action: () -> Unit) = checkChangeType(ChangeType.LOCAL, action)

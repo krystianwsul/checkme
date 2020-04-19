@@ -90,92 +90,92 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialEmpty() {
-        initialProjectsEmissionChecker.checkOne()
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        }
     }
 
     @Test
     fun testInitialProject() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.checkOne()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
     }
 
     @Test
     fun testInitialEmptyAdd() {
-        initialProjectsEmissionChecker.checkOne()
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        }
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        addProjectEmissionChecker.checkRemote()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        addProjectEmissionChecker.checkEmpty()
+        addProjectEmissionChecker.checkRemote {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
     }
 
     @Test
     fun testInitialProjectAdd() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.checkOne()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1, projectKey2)))
 
-        addProjectEmissionChecker.checkRemote()
-        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
-        addProjectEmissionChecker.checkEmpty()
+        addProjectEmissionChecker.checkRemote {
+            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+        }
     }
 
     @Test
     fun testInitialProjectRemove() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.checkOne()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
 
-        removeProjectsEmissionChecker.checkLocal()
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf()))
-        removeProjectsEmissionChecker.checkEmpty()
+        removeProjectsEmissionChecker.checkLocal {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf()))
+        }
     }
 
     @Test
     fun testInitialProjectSwap1() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.checkOne()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
 
-        removeProjectsEmissionChecker.checkLocal()
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(projectKey2)))
-        removeProjectsEmissionChecker.checkEmpty()
+        removeProjectsEmissionChecker.checkLocal {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(projectKey2)))
+        }
 
-        addProjectEmissionChecker.checkRemote()
-        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
-        addProjectEmissionChecker.checkEmpty()
+        addProjectEmissionChecker.checkRemote {
+            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+        }
     }
 
     @Test
     fun testInitialProjectSwap2() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.checkOne()
-        sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
-        initialProjectsEmissionChecker.checkEmpty()
+        initialProjectsEmissionChecker.checkOne {
+            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+        }
 
-        removeProjectsEmissionChecker.checkRemote()
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey2)))
-        removeProjectsEmissionChecker.checkEmpty()
+        removeProjectsEmissionChecker.checkRemote {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey2)))
+        }
 
-        addProjectEmissionChecker.checkRemote()
-        sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
-        addProjectEmissionChecker.checkEmpty()
+        addProjectEmissionChecker.checkRemote {
+            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+        }
     }
 }

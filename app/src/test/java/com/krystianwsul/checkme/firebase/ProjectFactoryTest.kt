@@ -164,19 +164,19 @@ class ProjectFactoryTest {
 
     @Test
     fun testAddTask() {
-        changeTypesEmissionChecker.checkOne() // todo instances figure out local/remote after ProjectsFactoryTest
-        projectLoader.addTaskEvents.accept(ChangeWrapper(
-                ChangeType.REMOTE,
-                ProjectLoader.AddTaskEvent(
-                        projectLoader.projectRecord,
-                        TaskRecord(
-                                taskKey.taskId,
-                                projectLoader.projectRecord,
-                                TaskJson("task")
-                        ),
-                        listOf()
-                )
-        ))
-        changeTypesEmissionChecker.checkEmpty()
+        changeTypesEmissionChecker.checkOne {
+            projectLoader.addTaskEvents.accept(ChangeWrapper(
+                    ChangeType.REMOTE,
+                    ProjectLoader.AddTaskEvent(
+                            projectLoader.projectRecord,
+                            TaskRecord(
+                                    taskKey.taskId,
+                                    projectLoader.projectRecord,
+                                    TaskJson("task")
+                            ),
+                            listOf()
+                    )
+            ))
+        } // todo instances figure out local/remote after ProjectsFactoryTest
     }
 }

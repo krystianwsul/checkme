@@ -8,23 +8,29 @@ import io.mockk.mockkStatic
 import org.junit.Assert.assertTrue
 
 @ExperimentalStdlibApi
-fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkChangeType(changeType: ChangeType) {
+fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkChangeType(changeType: ChangeType, action: () -> Unit) {
     addHandler {
         assertTrue(
                 "$name expected $changeType: actual: ${it.changeType}",
                 it.changeType == changeType
         )
     }
+    action()
+    checkEmpty()
 }
 
 @ExperimentalStdlibApi
-fun <T : Any> EmissionChecker<T>.checkOne() = addHandler { }
+fun <T : Any> EmissionChecker<T>.checkOne(action: () -> Unit) {
+    addHandler { }
+    action()
+    checkEmpty()
+}
 
 @ExperimentalStdlibApi
-fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkRemote() = checkChangeType(ChangeType.REMOTE)
+fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkRemote(action: () -> Unit) = checkChangeType(ChangeType.REMOTE, action)
 
 @ExperimentalStdlibApi
-fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkLocal() = checkChangeType(ChangeType.LOCAL)
+fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkLocal(action: () -> Unit) = checkChangeType(ChangeType.LOCAL, action)
 
 fun mockBase64() {
     mockkStatic(Base64::class)

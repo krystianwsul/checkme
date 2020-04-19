@@ -42,8 +42,6 @@ class EmissionChecker<T : Any>(
 
     fun checkEmpty() = Assert.assertTrue("$name is not empty", handlers.isEmpty())
 
-    fun checkNotEmpty() = Assert.assertTrue(handlers.isNotEmpty())
-
     private class EmissionException(
             name: String,
             value: Any,

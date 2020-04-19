@@ -257,45 +257,9 @@ class DomainFactory(
             ChangeType.REMOTE -> RunType.REMOTE
         }
 
-        // todo instances figure out TickData, remove next two functions
-
         updateShortcuts(now)
 
         tryNotifyListeners(now, "DomainFactory.onChange", runType)
-    }
-
-    @Synchronized
-    override fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp) {
-        MyCrashlytics.log("onPrivateProjectUpdated")
-
-        val runType = if (local) {
-            RunType.LOCAL
-        } else {
-            TickHolder.getTickData()?.privateTriggered()
-
-            RunType.REMOTE
-        }
-
-        updateShortcuts(now)
-
-        tryNotifyListeners(now, "DomainFactory.onPrivateProjectUpdated", runType)
-    }
-
-    @Synchronized
-    override fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp) {
-        MyCrashlytics.log("onSharedProjectsUpdated")
-
-        val runType = if (local) {
-            RunType.LOCAL
-        } else {
-            TickHolder.getTickData()?.sharedTriggered()
-
-            RunType.REMOTE
-        }
-
-        updateShortcuts(now)
-
-        tryNotifyListeners(now, "DomainFactory.onSharedProjectsUpdated", runType)
     }
 
     @Synchronized

@@ -46,10 +46,6 @@ interface FactoryProvider {
 
     interface Domain {
 
-        fun onPrivateProjectUpdated(local: Boolean, now: ExactTimeStamp)
-
-        fun onSharedProjectsUpdated(local: Boolean, now: ExactTimeStamp)
-
         fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp)
 
         fun updateFriendRecords(dataSnapshot: Snapshot)

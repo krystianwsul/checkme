@@ -69,18 +69,16 @@ class Instance<T : ProjectType> private constructor(
     val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute))
 
     val scheduleDate get() = data.scheduleDate
+    val scheduleTime get() = data.scheduleTime
+    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
 
     val instanceDate get() = data.instanceDate
-
     val instanceTime get() = data.instanceTime
-
-    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
+    val instanceDateTime get() = DateTime(instanceDate, instanceTime)
 
     val taskKey by lazy { task.taskKey }
 
     val done get() = data.done?.let { ExactTimeStamp(it) }
-
-    val instanceDateTime get() = DateTime(instanceDate, instanceTime)
 
     val name get() = task.name
 

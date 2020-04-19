@@ -50,12 +50,12 @@ abstract class RootInstanceManager<T : ProjectType>(
     fun newRootInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            customTimeId: CustomTimeId<T>?
+            scheduleCustomTimeId: CustomTimeId<T>?
     ) = RootInstanceRecord(
             taskRecord,
             instanceJson,
             scheduleKey,
-            customTimeId,
+            scheduleCustomTimeId,
             this
     ).also {
         check(!rootInstanceRecords.containsKey(it.instanceKey))

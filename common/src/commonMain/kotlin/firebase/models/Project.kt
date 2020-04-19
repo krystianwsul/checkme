@@ -77,6 +77,7 @@ abstract class Project<T : ProjectType> : Current {
         taskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
 
+    @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
             oldTask: Task<*>,
@@ -87,16 +88,19 @@ abstract class Project<T : ProjectType> : Current {
 
         val oldestVisible = oldTask.getOldestVisible()
 
-        val instanceJsons = instances.associate { // todo instances conditionally write to rootInstanceManager
-            val instanceJson = getInstanceJson(deviceDbInfo.key, it)
-            val scheduleKey = it.scheduleKey
-
-            InstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
-        }.toMutableMap()
+        val instanceDatas = instances.map { it to getInstanceJson(deviceDbInfo.key, it) }
 
         val oldestVisibleMap = oldestVisible?.let {
             mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day)))
         } ?: mapOf()
+
+        val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
+            mutableMapOf()
+        } else {
+            instanceDatas.associate {
+                InstanceRecord.scheduleKeyToString(it.first.scheduleKey) to it.second
+            }.toMutableMap()
+        }
 
         val taskJson = TaskJson(
                 oldTask.name,
@@ -112,6 +116,16 @@ abstract class Project<T : ProjectType> : Current {
         val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
         check(!remoteTasks.containsKey(newTask.id))
 
+        if (Task.USE_ROOT_INSTANCES) {
+            instanceDatas.forEach {
+                newTask.rootInstanceManager.newRootInstanceRecord(
+                        it.second,
+                        it.first.scheduleKey,
+                        getOrCopyAndDestructureTime(deviceDbInfo.key, it.first.scheduleTime).first
+                )
+            }
+        }
+
         remoteTasks[newTask.id] = newTask
 
         newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now))
@@ -119,7 +133,7 @@ abstract class Project<T : ProjectType> : Current {
         return newTask
     }
 
-    abstract fun getOrCreateCustomTime(
+    protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
             customTime: Time.Custom<*>
     ): Time.Custom<T>
@@ -131,11 +145,12 @@ abstract class Project<T : ProjectType> : Current {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun getOrCopyAndDestructureTime(
             ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is Time.Custom<*> -> Triple(newTime.key.customTimeId, null, null)
+        is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId<T>, null, null)
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
     }
 
@@ -153,8 +168,8 @@ abstract class Project<T : ProjectType> : Current {
 
         val instanceTimeString = when (newInstanceTime) {
             is Time.Custom<*> -> newInstanceTime.key
-                        .customTimeId
-                        .value
+                    .customTimeId
+                    .value
             is Time.Normal -> newInstanceTime.hourMinute.toJson()
         }
 

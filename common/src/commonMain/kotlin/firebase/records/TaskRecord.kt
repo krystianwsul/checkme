@@ -33,8 +33,7 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T>> = HashMap()
 
-    override val createObject: TaskJson
-        // because of duplicate functionality when converting local task
+    override val createObject: TaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
                 taskJson.instances = instanceRecords.entries

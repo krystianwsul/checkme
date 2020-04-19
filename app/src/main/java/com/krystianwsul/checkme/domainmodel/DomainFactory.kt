@@ -250,7 +250,7 @@ class DomainFactory(
 
     @Synchronized
     override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
-        MyCrashlytics.log("onChange")
+        MyCrashlytics.log("DomainFactory.onChange")
 
         val runType = when (changeType) {
             ChangeType.LOCAL -> RunType.LOCAL
@@ -264,7 +264,7 @@ class DomainFactory(
 
     @Synchronized
     override fun updateUserRecord(dataSnapshot: Snapshot) {
-        MyCrashlytics.log("updateUserRecord")
+        MyCrashlytics.log("DomainFactory.updateUserRecord")
 
         val runType = if (remoteUserFactory.isSaved) {
             remoteUserFactory.isSaved = false
@@ -283,7 +283,7 @@ class DomainFactory(
 
     @Synchronized
     override fun updateFriendRecords(dataSnapshot: Snapshot) {
-        MyCrashlytics.log("setFriendRecords")
+        MyCrashlytics.log("DomainFactory.setFriendRecords")
 
         val runType = if (remoteFriendFactory.isSaved) {
             remoteFriendFactory.isSaved = false
@@ -301,7 +301,7 @@ class DomainFactory(
     }
 
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
-        MyCrashlytics.log("tryNotifyListeners $source $runType")
+        MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
         if (projectsFactory.isSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return

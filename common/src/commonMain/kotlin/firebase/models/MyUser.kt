@@ -6,7 +6,9 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 
-class MyUser(private val remoteMyUserRecord: MyUserRecord) : RootUser(remoteMyUserRecord), MyUserProperties by remoteMyUserRecord {
+class MyUser(private val remoteMyUserRecord: MyUserRecord) :
+        RootUser(remoteMyUserRecord),
+        MyUserProperties by remoteMyUserRecord {
 
     override var photoUrl
         get() = super.photoUrl

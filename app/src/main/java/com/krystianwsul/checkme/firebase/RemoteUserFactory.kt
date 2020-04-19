@@ -33,7 +33,9 @@ class RemoteUserFactory(
 
         remoteUser.setToken(deviceDbInfo)
 
-        remoteUser.projectChangeListener = { projectIdTrigger.accept(ChangeType.LOCAL) }
+        remoteUser.projectChangeListener = {
+            projectIdTrigger.accept(ChangeType.LOCAL)
+        }
     }
 
     val sharedProjectKeysObservable = projectIdTrigger.map {

@@ -109,7 +109,7 @@ class FactoryLoader(
                             domainDisposable,
                             ::getDeviceDbInfo
                     )
-                }
+                }.cacheImmediate()
 
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,

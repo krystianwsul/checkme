@@ -16,7 +16,7 @@ abstract class DatabaseWrapper {
 
     protected abstract fun getNewId(path: String): String
 
-    protected abstract fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback)
+    protected abstract fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) // todo instances replace with one update function
 
     fun getPrivateScheduleRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
 

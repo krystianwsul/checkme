@@ -163,10 +163,8 @@ class ProjectsFactoryTest {
 
         val name2 = "name2"
 
-        privateProjectManager.privateProjectRecords
-                .single()
-                .name = name2
-        privateProjectManager.save(mockk(relaxed = true)) // todo instances save whole projectsFactory
+        projectsFactory.privateProject.name = name2
+        projectsFactory.save()
 
         emissionChecker.checkLocal {
             privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(name2), privateProjectKey.key))

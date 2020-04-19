@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -38,16 +37,5 @@ class AndroidRootInstanceManager<T : ProjectType>(
                 .toMutableMap()
 
         ChangeType.REMOTE
-    }
-
-    data class SnapshotKey(val dateKey: String, val timeKey: String)
-
-    data class SnapshotInfo(val snapshotKey: SnapshotKey, val instanceJson: InstanceJson) {
-
-        constructor(
-                dateKey: String,
-                timeKey: String,
-                instanceJson: InstanceJson
-        ) : this(SnapshotKey(dateKey, timeKey), instanceJson)
     }
 }

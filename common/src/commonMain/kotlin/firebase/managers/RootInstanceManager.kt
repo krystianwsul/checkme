@@ -59,4 +59,15 @@ abstract class RootInstanceManager<T : ProjectType>(
 
         rootInstanceRecords.remove(instanceKey)
     }
+
+    data class SnapshotKey(val dateKey: String, val timeKey: String)
+
+    data class SnapshotInfo(val snapshotKey: SnapshotKey, val instanceJson: InstanceJson) {
+
+        constructor(
+                dateKey: String,
+                timeKey: String,
+                instanceJson: InstanceJson
+        ) : this(SnapshotKey(dateKey, timeKey), instanceJson)
+    }
 }

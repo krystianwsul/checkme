@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -33,24 +33,24 @@ interface ProjectLoader<T : ProjectType> {
     class InitialProjectEvent<T : ProjectType>(
             val projectManager: ProjectProvider.ProjectManager<T>,
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
+            val snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
     )
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: List<RootInstanceManager.SnapshotInfo>
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+            val snapshotInfos: List<RootInstanceManager.SnapshotInfo>
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
+            val snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
     )
 
     class Impl<T : ProjectType>(

@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -36,7 +37,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
-            snapshotInfos: Map<TaskKey, List<AndroidRootInstanceManager.SnapshotInfo>>
+            snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
     ) = projectRecord.taskRecords
             .values
             .map {
@@ -51,7 +52,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
-            snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+            snapshotInfos: List<RootInstanceManager.SnapshotInfo>
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
@@ -70,7 +71,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
         fun updateRootInstanceManager(
                 taskRecord: TaskRecord<T>,
-                snapshotInfos: List<AndroidRootInstanceManager.SnapshotInfo>
+                snapshotInfos: List<RootInstanceManager.SnapshotInfo>
         ): ChangeType {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 

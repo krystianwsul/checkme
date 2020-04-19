@@ -70,7 +70,7 @@ class ProjectLoaderTest {
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private>>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>
-    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>>
+    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
@@ -189,11 +189,11 @@ class ProjectLoaderTest {
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
         addTaskEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionChecker.checkRemote()
+        changeInstancesEmissionChecker.addHandler { }
         projectProvider.acceptInstance(projectKey.key, taskId1, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionChecker.checkRemote()
+        changeInstancesEmissionChecker.checkOne()
         projectProvider.acceptInstance(projectKey.key, taskId2, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionChecker.checkEmpty()
     }
@@ -225,7 +225,7 @@ class ProjectLoaderTest {
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
         initialProjectEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionChecker.checkRemote()
+        changeInstancesEmissionChecker.checkOne()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionChecker.checkEmpty()
 
@@ -233,7 +233,7 @@ class ProjectLoaderTest {
         acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
         changeProjectEmissionChecker.checkEmpty()
 
-        changeInstancesEmissionChecker.checkRemote()
+        changeInstancesEmissionChecker.checkOne()
         projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         changeInstancesEmissionChecker.checkEmpty()
     }

@@ -106,7 +106,7 @@ class ProjectFactoryTest {
 
         override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()
 
-        override val changeInstancesEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>>()
+        override val changeInstancesEvents = PublishRelay.create<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()
 
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()
     }
@@ -164,7 +164,7 @@ class ProjectFactoryTest {
 
     @Test
     fun testAddTask() {
-        changeTypesEmissionChecker.addHandler { } // todo instances figure out local/remote after ProjectsFactoryTest
+        changeTypesEmissionChecker.checkOne() // todo instances figure out local/remote after ProjectsFactoryTest
         projectLoader.addTaskEvents.accept(ChangeWrapper(
                 ChangeType.REMOTE,
                 ProjectLoader.AddTaskEvent(

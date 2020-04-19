@@ -25,7 +25,7 @@ interface ProjectLoader<T : ProjectType> {
     val addTaskEvents: Observable<ChangeWrapper<AddTaskEvent<T>>>
 
     // Here we observe changes to all the previously subscribed instances
-    val changeInstancesEvents: Observable<ChangeWrapper<ChangeInstancesEvent<T>>>
+    val changeInstancesEvents: Observable<ChangeInstancesEvent<T>>
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
@@ -138,13 +138,15 @@ interface ProjectLoader<T : ProjectType> {
 
         // Here we observe changes to all the previously subscribed instances
         override val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
-            val (changeType, projectRecord) = it.original.changeWrapper
+            val projectRecord = it.original
+                    .changeWrapper
+                    .data
 
             it.newMap
                     .values
                     .map { (taskRecord, databaseRx) ->
                         databaseRx.changes.map {
-                            ChangeWrapper(changeType, ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos()))
+                            ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
                         }
                     }
                     .merge()

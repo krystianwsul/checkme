@@ -18,6 +18,9 @@ fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkChangeType(changeType: Chan
 }
 
 @ExperimentalStdlibApi
+fun <T : Any> EmissionChecker<T>.checkOne() = addHandler { }
+
+@ExperimentalStdlibApi
 fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkRemote() = checkChangeType(ChangeType.REMOTE)
 
 @ExperimentalStdlibApi

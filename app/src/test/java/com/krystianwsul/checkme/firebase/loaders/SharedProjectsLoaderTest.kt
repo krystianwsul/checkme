@@ -90,7 +90,7 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialEmpty() {
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
         initialProjectsEmissionChecker.checkEmpty()
     }
@@ -99,14 +99,14 @@ class SharedProjectsLoaderTest {
     fun testInitialProject() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
     }
 
     @Test
     fun testInitialEmptyAdd() {
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
         initialProjectsEmissionChecker.checkEmpty()
 
@@ -121,7 +121,7 @@ class SharedProjectsLoaderTest {
     fun testInitialProjectAdd() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
 
@@ -136,7 +136,7 @@ class SharedProjectsLoaderTest {
     fun testInitialProjectRemove() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
 
@@ -149,7 +149,7 @@ class SharedProjectsLoaderTest {
     fun testInitialProjectSwap1() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
 
@@ -166,7 +166,7 @@ class SharedProjectsLoaderTest {
     fun testInitialProjectSwap2() {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
 
-        initialProjectsEmissionChecker.addHandler { }
+        initialProjectsEmissionChecker.checkOne()
         sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         initialProjectsEmissionChecker.checkEmpty()
 

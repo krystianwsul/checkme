@@ -102,7 +102,7 @@ abstract class ProjectFactory<T : ProjectType>(
             projectChangeType
         }
 
-        val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.map { (_, changeInstancesEvent) ->
+        val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.map { changeInstancesEvent ->
             val instanceChangeType = changeInstancesEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
 
             project = newProject(changeInstancesEvent.projectRecord)

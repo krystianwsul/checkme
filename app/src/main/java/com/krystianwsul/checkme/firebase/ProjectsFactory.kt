@@ -43,7 +43,6 @@ class ProjectsFactory(
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(
-            this,
             sharedInitialProjectsEvent.pairs
                     .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
                         sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(

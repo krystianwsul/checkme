@@ -5,10 +5,7 @@ import io.reactivex.Observable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-open class RelayProperty<R, T : Any>(
-        @Suppress("UNUSED_PARAMETER") owner: R,
-        initialValue: T
-) : ReadWriteProperty<R, T> {
+open class RelayProperty<T : Any>(initialValue: T) : ReadWriteProperty<Any, T> {
 
     private val relay = BehaviorRelay.createDefault(initialValue)
 
@@ -24,9 +21,9 @@ open class RelayProperty<R, T : Any>(
         value = mutator(value)
     }
 
-    override fun getValue(thisRef: R, property: KProperty<*>) = value
+    override fun getValue(thisRef: Any, property: KProperty<*>) = value
 
-    override fun setValue(thisRef: R, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         this.value = value
     }
 }

@@ -1,9 +1,7 @@
 package com.krystianwsul.checkme.utils
 
-class MapRelayProperty<R, KEY : Any, VALUE : Any>(
-        owner: R,
-        initialValue: Map<KEY, VALUE>
-) : RelayProperty<R, Map<KEY, VALUE>>(owner, initialValue) {
+class MapRelayProperty<KEY : Any, VALUE : Any>(initialValue: Map<KEY, VALUE>) :
+        RelayProperty<Map<KEY, VALUE>>(initialValue) {
 
     operator fun set(key: KEY, value: VALUE) = mutate {
         toMutableMap().also { it[key] = value }

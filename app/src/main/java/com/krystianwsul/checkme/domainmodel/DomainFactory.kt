@@ -892,7 +892,8 @@ class DomainFactory(
                             task.getImage(deviceDbInfo),
                             task.current(now),
                             task.hasInstances(now),
-                            false)
+                            false
+                    )
                 }
                 .sortedDescending()
                 .toMutableList()

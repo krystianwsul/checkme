@@ -177,6 +177,6 @@ class ProjectFactoryTest {
                             listOf()
                     )
             ))
-        } // todo instances figure out local/remote after ProjectsFactoryTest
+        }
     }
 }

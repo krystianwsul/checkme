@@ -131,7 +131,7 @@ class ProjectsFactory(
                 sharedProjectFactoryChangeTypes,
                 addProjectChangeTypes,
                 removeProjectChangeTypes
-        ).merge().publishImmediate(domainDisposable) // todo instances unit test
+        ).merge().publishImmediate(domainDisposable)
     }
 
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)

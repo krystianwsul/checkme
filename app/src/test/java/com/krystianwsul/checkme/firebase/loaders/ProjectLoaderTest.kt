@@ -25,7 +25,7 @@ import org.junit.Before
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectLoaderTest {
+class ProjectLoaderTest { // todo instances copy tests, set USE_ROOT_INSTANCES = false
 
     class TestProjectProvider : ProjectProvider {
 

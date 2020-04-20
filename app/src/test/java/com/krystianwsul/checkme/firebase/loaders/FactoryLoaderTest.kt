@@ -149,7 +149,7 @@ class FactoryLoaderTest {
 
         override fun getNewId(path: String) = "id"
 
-        override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
+        override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
     }
 
     private class TestPreferences : FactoryProvider.Preferences {

@@ -66,7 +66,7 @@ class ProjectFactoryTest {
 
             override fun getNewId(path: String) = Random.nextInt().toString()
 
-            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
+            override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
         override val nullableInstance: FactoryProvider.Domain?

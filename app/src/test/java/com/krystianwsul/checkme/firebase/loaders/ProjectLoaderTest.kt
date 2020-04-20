@@ -44,7 +44,7 @@ class ProjectLoaderTest { // todo instances copy tests, set USE_ROOT_INSTANCES =
                 TODO("Not yet implemented")
             }
 
-            override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) = Unit
+            override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
         fun acceptInstance(

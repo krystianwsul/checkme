@@ -9,6 +9,7 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
+import kotlinx.serialization.Serializable
 
 abstract class RootInstanceManager<T : ProjectType>(
         protected val taskRecord: TaskRecord<T>
@@ -60,8 +61,10 @@ abstract class RootInstanceManager<T : ProjectType>(
         rootInstanceRecords.remove(instanceKey)
     }
 
+    @Serializable
     data class SnapshotKey(val dateKey: String, val timeKey: String)
 
+    @Serializable
     data class SnapshotInfo(val snapshotKey: SnapshotKey, val instanceJson: InstanceJson) {
 
         constructor(

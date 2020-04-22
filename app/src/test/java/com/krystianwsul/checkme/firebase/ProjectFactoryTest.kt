@@ -60,7 +60,7 @@ class ProjectFactoryTest {
                 return sharedProjectObservables.getValue(projectKey)
             }
 
-            override fun getUserObservable(key: UserKey): Observable<Snapshot> {
+            override fun getUserObservable(userKey: UserKey): Observable<Snapshot> {
                 TODO("Not yet implemented")
             }
 

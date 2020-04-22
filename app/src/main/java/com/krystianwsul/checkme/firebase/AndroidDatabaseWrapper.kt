@@ -22,8 +22,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .getString(R.string.firebase_root)
     }
 
-    private val userInfo get() = MyApplication.instance.userInfo
-
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
                 .reference
@@ -33,15 +31,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
 
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
-
-    private fun getFriendQuery(userKey: UserKey) = rootReference.child(USERS_KEY)
-            .orderByChild("friendOf/${userKey.key}")
-            .equalTo(true)
+    fun getUserSingle(userKey: UserKey) = getUserQuery(userKey).snapshot()
+    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
 
     private fun Query.snapshot() = data().map<Snapshot>(Snapshot::Impl)
     private fun Query.snapshotChanges() = dataChanges().map<Snapshot>(Snapshot::Impl)!!
-
-    override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).snapshotChanges()
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()
@@ -61,7 +55,4 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
     override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).snapshotChanges()
-
-    fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshot()
-    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshotChanges()
 }

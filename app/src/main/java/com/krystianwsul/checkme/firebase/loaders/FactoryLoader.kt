@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.DatabaseEvent
+import com.krystianwsul.checkme.firebase.ProjectsFactory
+import com.krystianwsul.checkme.firebase.RemoteFriendFactory
+import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -119,7 +122,8 @@ class FactoryLoader(
                     addedKeys.forEach {
                         check(!newMap.containsKey(it))
 
-                        newMap[it] = AndroidDatabaseWrapper.getUserObservable(it)
+                        newMap[it] = factoryProvider.database
+                                .getUserObservable(it)
                                 .publish()
                                 .apply { connect() }
                     }
@@ -142,7 +146,7 @@ class FactoryLoader(
                         .flatMap { (old, new) ->
                             check(old.isEmpty())
 
-                            new.map { AndroidDatabaseWrapper.getUserSingle(it) }.zipSingle()
+                            new.map { factoryProvider.database.getUserSingle(it) }.zipSingle()
                         }
                         .cache()
 

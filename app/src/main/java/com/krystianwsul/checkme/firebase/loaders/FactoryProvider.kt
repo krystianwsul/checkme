@@ -11,6 +11,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
+import io.reactivex.Single
 
 interface FactoryProvider {
 
@@ -62,11 +63,10 @@ interface FactoryProvider {
 
     abstract class Database : ProjectProvider.Database() {
 
-        abstract fun getUserObservable(key: UserKey): Observable<Snapshot>
+        abstract fun getUserSingle(userKey: UserKey): Single<Snapshot>
+        abstract fun getUserObservable(userKey: UserKey): Observable<Snapshot>
 
         abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot>
-
-        abstract fun getFriendObservable(userKey: UserKey): Observable<Snapshot>
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot>
 

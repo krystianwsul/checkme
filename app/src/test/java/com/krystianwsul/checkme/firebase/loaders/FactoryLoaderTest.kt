@@ -139,7 +139,7 @@ class FactoryLoaderTest {
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
-        override fun getUserObservable(key: UserKey) = userObservable
+        override fun getUserObservable(userKey: UserKey) = userObservable
 
         override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
             if (!rootInstanceObservables.containsKey(taskFirebaseKey))

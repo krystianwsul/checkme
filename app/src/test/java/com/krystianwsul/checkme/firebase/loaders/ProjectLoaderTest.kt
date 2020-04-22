@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
@@ -22,6 +23,7 @@ import io.reactivex.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
@@ -75,6 +77,11 @@ class ProjectLoaderTest { // todo instances copy tests, set USE_ROOT_INSTANCES =
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
+
+    @BeforeClass
+    fun beforeClass() {
+        Task.USE_ROOT_INSTANCES = true
+    }
 
     @Before
     fun before() {

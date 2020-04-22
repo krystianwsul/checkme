@@ -11,6 +11,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -26,6 +27,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
@@ -55,6 +57,11 @@ class ProjectsFactoryTest {
     private val userInfo = UserInfo("email", "name")
 
     private fun ProjectsFactory.save() = save(mockk(relaxed = true))
+
+    @BeforeClass
+    fun beforeClass() {
+        Task.USE_ROOT_INSTANCES = true
+    }
 
     @Before
     fun before() {

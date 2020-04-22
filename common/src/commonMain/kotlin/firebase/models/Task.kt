@@ -19,7 +19,7 @@ class Task<T : ProjectType>(
 
     companion object {
 
-        const val USE_ROOT_INSTANCES = true // todo instances
+        var USE_ROOT_INSTANCES = true // todo instances
     }
 
     private val _existingInstances = taskRecord.instanceRecords

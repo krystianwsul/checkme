@@ -6,11 +6,13 @@ import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
@@ -52,6 +54,11 @@ class SharedProjectsLoaderTest {
     private lateinit var initialProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.InitialProjectsEvent>
     private lateinit var addProjectEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.AddProjectEvent>>
     private lateinit var removeProjectsEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.RemoveProjectsEvent>>
+
+    @BeforeClass
+    fun beforeClass() {
+        Task.USE_ROOT_INSTANCES = true
+    }
 
     @Before
     fun before() {

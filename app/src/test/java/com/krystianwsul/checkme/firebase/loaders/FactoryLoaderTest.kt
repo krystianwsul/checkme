@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeId
@@ -28,6 +29,7 @@ import io.reactivex.rxkotlin.addTo
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class FactoryLoaderTest {
@@ -209,6 +211,11 @@ class FactoryLoaderTest {
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
 
     private lateinit var errors: MutableList<Throwable>
+
+    @BeforeClass
+    fun beforeClass() {
+        Task.USE_ROOT_INSTANCES = true
+    }
     
     @Before
     fun before() {

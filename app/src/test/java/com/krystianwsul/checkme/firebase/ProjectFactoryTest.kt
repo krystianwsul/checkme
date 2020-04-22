@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -28,6 +29,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import kotlin.random.Random
 
@@ -124,6 +126,11 @@ class ProjectFactoryTest {
 
     private val projectKey = ProjectKey.Private("projectKey")
     private val taskKey = TaskKey(projectKey, "taskKey")
+
+    @BeforeClass
+    fun beforeClass() {
+        Task.USE_ROOT_INSTANCES = true
+    }
 
     @Before
     fun before() {

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
@@ -33,16 +34,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
 
-    // todo same change as for projects
-    fun addFriend(userKey: UserKey) = getUserQuery(userKey).child("friendOf/${userInfo.key.key}").setValue(true)
-
     private fun getFriendQuery(userKey: UserKey) = rootReference.child(USERS_KEY)
             .orderByChild("friendOf/${userKey.key}")
             .equalTo(true)
 
-    private fun Query.snapshotChanges() = dataChanges().map<Snapshot> {
-        Snapshot.Impl(it)
-    }!!
+    private fun Query.snapshot() = data().map<Snapshot>(Snapshot::Impl)
+    private fun Query.snapshotChanges() = dataChanges().map<Snapshot>(Snapshot::Impl)!!
 
     override fun getFriendObservable(userKey: UserKey) = getFriendQuery(userKey).snapshotChanges()
 
@@ -62,8 +59,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
     override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).snapshotChanges()
 
-    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshotChanges()
-
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
     override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).snapshotChanges()
+
+    fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshot()
+    override fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").snapshotChanges()
 }

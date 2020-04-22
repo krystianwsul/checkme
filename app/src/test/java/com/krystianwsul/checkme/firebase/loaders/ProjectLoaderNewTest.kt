@@ -27,7 +27,16 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectLoaderTest { // todo instances copy tests, set USE_ROOT_INSTANCES = false
+class ProjectLoaderNewTest { // todo instances copy tests, set USE_ROOT_INSTANCES = false
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun beforeClassStatic() {
+            Task.USE_ROOT_INSTANCES = true
+        }
+    }
 
     class TestProjectProvider : ProjectProvider {
 
@@ -77,11 +86,6 @@ class ProjectLoaderTest { // todo instances copy tests, set USE_ROOT_INSTANCES =
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
-
-    @BeforeClass
-    fun beforeClass() {
-        Task.USE_ROOT_INSTANCES = true
-    }
 
     @Before
     fun before() {

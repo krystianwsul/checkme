@@ -150,7 +150,7 @@ class FactoryLoader(
                         }
                         .cache()
 
-                val friendFactorySingle = friendSingle.map { RemoteFriendFactory(it, factoryProvider.database) }
+                val friendFactorySingle = friendSingle.map { RemoteFriendFactory(it) }
 
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,

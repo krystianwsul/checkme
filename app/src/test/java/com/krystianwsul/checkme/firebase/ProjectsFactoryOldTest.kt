@@ -31,14 +31,23 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectsFactoryTest {
+class ProjectsFactoryOldTest {
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun beforeClassStatic() {
+            Task.USE_ROOT_INSTANCES = true
+        }
+    }
 
     private val compositeDisposable = CompositeDisposable()
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
     private lateinit var privateProjectRelay: PublishRelay<Snapshot>
-    private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
+    private lateinit var factoryProvider: ProjectFactoryOldTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
     private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private>
     private lateinit var projectKeysRelay: PublishRelay<ChangeWrapper<Set<ProjectKey.Shared>>>
@@ -58,11 +67,6 @@ class ProjectsFactoryTest {
 
     private fun ProjectsFactory.save() = save(mockk(relaxed = true))
 
-    @BeforeClass
-    fun beforeClass() {
-        Task.USE_ROOT_INSTANCES = true
-    }
-
     @Before
     fun before() {
         mockBase64()
@@ -71,7 +75,7 @@ class ProjectsFactoryTest {
         rxErrorChecker = RxErrorChecker()
 
         privateProjectRelay = PublishRelay.create()
-        factoryProvider = ProjectFactoryTest.TestFactoryProvider()
+        factoryProvider = ProjectFactoryOldTest.TestFactoryProvider()
         privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
         privateProjectLoader = ProjectLoader.Impl(

@@ -32,7 +32,16 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
-class FactoryLoaderTest {
+class FactoryLoaderNewTest {
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun beforeClassStatic() {
+            Task.USE_ROOT_INSTANCES = true
+        }
+    }
 
     private val local = object : FactoryProvider.Local {
 
@@ -211,11 +220,6 @@ class FactoryLoaderTest {
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
 
     private lateinit var errors: MutableList<Throwable>
-
-    @BeforeClass
-    fun beforeClass() {
-        Task.USE_ROOT_INSTANCES = true
-    }
     
     @Before
     fun before() {

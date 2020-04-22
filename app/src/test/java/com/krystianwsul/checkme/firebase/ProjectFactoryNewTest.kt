@@ -34,13 +34,22 @@ import org.junit.Test
 import kotlin.random.Random
 
 @ExperimentalStdlibApi
-class ProjectFactoryTest {
+class ProjectFactoryNewTest {
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun beforeClassStatic() {
+            Task.USE_ROOT_INSTANCES = true
+        }
+    }
 
     class TestFactoryProvider : FactoryProvider {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
 
-        override val projectProvider = ProjectLoaderTest.TestProjectProvider()
+        override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
@@ -126,11 +135,6 @@ class ProjectFactoryTest {
 
     private val projectKey = ProjectKey.Private("projectKey")
     private val taskKey = TaskKey(projectKey, "taskKey")
-
-    @BeforeClass
-    fun beforeClass() {
-        Task.USE_ROOT_INSTANCES = true
-    }
 
     @Before
     fun before() {

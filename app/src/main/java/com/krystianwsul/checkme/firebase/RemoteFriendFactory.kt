@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
@@ -11,10 +10,7 @@ import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-class RemoteFriendFactory(
-        children: Iterable<Snapshot>,
-        database: FactoryProvider.Database
-) {
+class RemoteFriendFactory(children: Iterable<Snapshot>) {
 
     companion object {
 
@@ -23,7 +19,7 @@ class RemoteFriendFactory(
                 .toMutableMap()
     }
 
-    private val remoteFriendManager = AndroidRemoteRootUserManager(children, database)
+    private val remoteFriendManager = AndroidRemoteRootUserManager(children)
     private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = remoteFriendManager.remoteRootUserRecords.toRootUsers()

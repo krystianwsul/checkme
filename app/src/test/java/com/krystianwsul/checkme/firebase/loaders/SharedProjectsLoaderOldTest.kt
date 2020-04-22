@@ -16,13 +16,22 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class SharedProjectsLoaderTest {
+class SharedProjectsLoaderOldTest {
+
+    companion object {
+
+        @BeforeClass
+        @JvmStatic
+        fun beforeClassStatic() {
+            Task.USE_ROOT_INSTANCES = true
+        }
+    }
 
     private class TestSharedProjectsProvider : SharedProjectsProvider {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
 
-        override val projectProvider = ProjectLoaderTest.TestProjectProvider()
+        override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot> {
             if (!sharedProjectObservables.containsKey(projectKey))
@@ -54,11 +63,6 @@ class SharedProjectsLoaderTest {
     private lateinit var initialProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.InitialProjectsEvent>
     private lateinit var addProjectEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.AddProjectEvent>>
     private lateinit var removeProjectsEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.RemoveProjectsEvent>>
-
-    @BeforeClass
-    fun beforeClass() {
-        Task.USE_ROOT_INSTANCES = true
-    }
 
     @Before
     fun before() {

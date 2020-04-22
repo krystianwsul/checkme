@@ -1,16 +1,12 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class AndroidRemoteRootUserManager(
-        children: Iterable<Snapshot>,
-        override val databaseWrapper: DatabaseWrapper
-) : RemoteRootUserManager() {
+class AndroidRemoteRootUserManager(children: Iterable<Snapshot>) : RemoteRootUserManager() {
 
     companion object {
 

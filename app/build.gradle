@@ -24,11 +24,11 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
-        minSdkVersion 22
+        minSdkVersion 22 // todo instances 23
         targetSdkVersion 29
 
-        versionCode 217
-        versionName "0.25.2"
+        versionCode 218
+        versionName "0.26.0"
     }
     buildTypes {
         release {

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import com.badoo.reaktive.rxjavainterop.asRxJava2Observable
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
@@ -8,6 +9,7 @@ import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.MyUser
+import io.reactivex.Observable
 
 class RemoteUserFactory(
         userSnapshot: Snapshot,
@@ -31,26 +33,24 @@ class RemoteUserFactory(
             remoteUserManager.isSaved = value
         }
 
-    private val projectIdTrigger = BehaviorRelay.createDefault(ChangeType.REMOTE)
-    private val friendKeyTrigger = BehaviorRelay.createDefault(Unit)
-
     init {
         setTab()
 
         remoteUser.setToken(deviceDbInfo)
-
-        remoteUser.projectChangeListener = {
-            projectIdTrigger.accept(ChangeType.LOCAL)
-        }
-        remoteUser.friendChangeListener = { friendKeyTrigger.accept(Unit) }
     }
 
-    val sharedProjectKeysObservable = projectIdTrigger.map {
-        ChangeWrapper(it, remoteUser.projectIds)
-    }.distinctUntilChanged()!!
+    val sharedProjectKeysObservable = Observable.merge(
+            remoteUserRelay.map { ChangeType.REMOTE },
+            remoteUserRelay.switchMap { it.projectChanges.asRxJava2Observable() }.map { ChangeType.LOCAL }
+    )
+            .map { ChangeWrapper(it, remoteUser.projectIds) }
+            .distinctUntilChanged()!!
 
-    val friendKeysObservable = friendKeyTrigger.switchMap {
-        remoteUserRelay.map { it.friends }
+    val friendKeysObservable = remoteUserRelay.switchMap { myUser ->
+        myUser.friendChanges
+                .asRxJava2Observable()
+                .startWith(Unit)
+                .map { myUser.friends }
     }.distinctUntilChanged()!!
 
     private fun setTab() {
@@ -60,8 +60,6 @@ class RemoteUserFactory(
     fun onNewSnapshot(dataSnapshot: Snapshot) {
         remoteUser = MyUser(remoteUserManager.newSnapshot(dataSnapshot))
         setTab()
-
-        projectIdTrigger.accept(ChangeType.REMOTE)
     }
 
     fun save(values: MutableMap<String, Any?>) = remoteUserManager.save(values)

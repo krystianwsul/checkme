@@ -25,6 +25,7 @@ allprojects {
         maven { url "https://jitpack.io" }
         maven { url 'https://maven.google.com' }
         google()
+        maven { url "https://dl.bintray.com/badoo/maven" }
     }
 }
 
@@ -39,4 +40,5 @@ ext {
     rxJavaVersion = '2.2.19'
     serializationVersion = '0.20.0'
     klockVersion = '1.7.3'
+    reaktiveVersion = '1.1.12'
 }

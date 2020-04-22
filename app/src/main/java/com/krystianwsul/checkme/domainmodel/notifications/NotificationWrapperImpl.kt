@@ -187,7 +187,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = false,
                 sortKey = sortKey,
                 largeIcon = largeIcon,
-                notificationHash = notificationHash)
+                notificationHash = notificationHash
+        )
     }
 
     private fun getInstanceText(instance: Instance<*>, now: ExactTimeStamp): String {
@@ -211,7 +212,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES
 
-    private fun getInboxStyle(lines: List<String>, group: Boolean): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
+    private fun getInboxStyle(
+            lines: List<String>,
+            group: Boolean
+    ): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val inboxStyle = NotificationCompat.InboxStyle()
@@ -244,7 +248,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash): NotificationCompat.Builder {
+            notificationHash: NotificationHash
+    ): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
         val builder = newBuilder(silent)
@@ -284,8 +289,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return builder
     }
 
-    protected open fun unchanged(notificationHash: NotificationHash) = false
-
     protected open fun notify(
             title: String,
             text: String?,
@@ -300,8 +303,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash) {
-        if (unchanged(notificationHash)) {
+            notificationHash: NotificationHash
+    ) {
+        val unchanged = notificationManager.activeNotifications
+                ?.singleOrNull { it.id == notificationHash.id }
+                ?.let { it.notification.extras.getInt(KEY_HASH_CODE) == notificationHash.hashCode() }
+                ?: false
+
+        if (unchanged) {
             Preferences.tickLog.logLineHour("skipping notification update for $title")
             return
         }
@@ -319,7 +328,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary,
                 sortKey,
                 largeIcon,
-                notificationHash).build()
+                notificationHash
+        ).build()
 
         @Suppress("Deprecation")
         if (!silent)
@@ -338,7 +348,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private inner class GroupData(
             instances: Collection<com.krystianwsul.common.firebase.models.Instance<*>>,
             private val now: ExactTimeStamp,
-            val silent: Boolean) {
+            val silent: Boolean
+    ) {
 
         val instances = instances.map(::Instance)
 
@@ -380,7 +391,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 null,
                 styleHash,
                 "0",
-                null)
+                null
+        )
 
         notify(
                 title,
@@ -396,7 +408,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = true,
                 sortKey = "0",
                 largeIcon = null,
-                notificationHash = notificationHash)
+                notificationHash = notificationHash
+        )
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
@@ -409,11 +422,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun updateAlarm(nextAlarm: TimeStamp?) {
         val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent(), PendingIntent.FLAG_UPDATE_CURRENT)!!
         alarmManager.cancel(pendingIntent)
-        nextAlarm?.let { setExact(it.long, pendingIntent) }
-    }
-
-    protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+        nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
     }
 
     override fun logNotificationIds(source: String) = Unit
@@ -473,7 +482,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val timeStamp: Long?,
             val style: Style?,
             val sortKey: String,
-            val uuid: String?) {
+            val uuid: String?
+    ) {
 
         interface Style {
 

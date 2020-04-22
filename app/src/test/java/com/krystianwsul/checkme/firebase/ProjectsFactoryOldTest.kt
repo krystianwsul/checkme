@@ -10,13 +10,14 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -194,13 +195,11 @@ class ProjectsFactoryOldTest {
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
-                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
-                privateProjectKey.key
-        ))
-
         emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+            privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                    tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                    privateProjectKey.key
+            ))
         }
         assertEquals(projectsFactory.privateProject.tasks.size, 1)
     }
@@ -216,29 +215,11 @@ class ProjectsFactoryOldTest {
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
-                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
-                privateProjectKey.key
-        ))
-
-        val date = Date.today()
-        val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.now
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
         emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(
-                    privateProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
-                                    )
-                            )
-                    )
-            )
+            privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                    tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                    privateProjectKey.key
+            ))
         }
         assertEquals(projectsFactory.privateProject.tasks.size, 1)
     }
@@ -261,13 +242,11 @@ class ProjectsFactoryOldTest {
 
         projectsFactory.save()
 
-        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
-                tasks = mutableMapOf(taskKey.taskId to taskJson)),
-                privateProjectKey.key
-        ))
-
         emissionChecker.checkLocal {
-            factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+            privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
+                    tasks = mutableMapOf(taskKey.taskId to taskJson)),
+                    privateProjectKey.key
+            ))
         }
     }
 
@@ -280,8 +259,6 @@ class ProjectsFactoryOldTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
                 privateProjectKey.key)
         )
-
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -307,8 +284,6 @@ class ProjectsFactoryOldTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
                 privateProjectKey.key)
         )
-
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -341,8 +316,6 @@ class ProjectsFactoryOldTest {
                 privateProjectKey.key)
         )
 
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
@@ -367,8 +340,6 @@ class ProjectsFactoryOldTest {
                 privateProjectKey.key
         ))
 
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
@@ -385,23 +356,6 @@ class ProjectsFactoryOldTest {
 
         instance.setDone("uuid", mockk(relaxed = true), true, done)
         projectsFactory.save()
-
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
-        emissionChecker.checkLocal {
-            factoryProvider.projectProvider.acceptInstance(
-                    privateProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
-                                    )
-                            )
-                    )
-            )
-        }
     }
 
     @Test
@@ -415,31 +369,9 @@ class ProjectsFactoryOldTest {
                 privateProjectKey.key
         ))
 
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
-
-        val date = Date.today()
-        val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.now
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
-        emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(
-                    privateProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
-                                    )
-                            )
-                    )
-            )
-        }
     }
 
     @Test

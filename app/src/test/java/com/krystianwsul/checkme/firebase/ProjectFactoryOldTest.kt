@@ -41,7 +41,7 @@ class ProjectFactoryOldTest {
         @BeforeClass
         @JvmStatic
         fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
+            Task.USE_ROOT_INSTANCES = false
         }
     }
 
@@ -117,7 +117,7 @@ class ProjectFactoryOldTest {
 
         override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()
 
-        override val changeInstancesEvents = PublishRelay.create<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()
+        override val changeInstancesEvents = Observable.never<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()!!
 
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()
     }

@@ -25,7 +25,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectLoaderOldTest { // todo instances copy tests, set USE_ROOT_INSTANCES = false
+class ProjectLoaderOldTest {
 
     companion object {
 

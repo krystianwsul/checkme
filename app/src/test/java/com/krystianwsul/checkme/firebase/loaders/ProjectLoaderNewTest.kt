@@ -27,7 +27,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectLoaderNewTest { // todo instances copy tests, set USE_ROOT_INSTANCES = false
+class ProjectLoaderNewTest {
 
     companion object {
 
@@ -44,7 +44,6 @@ class ProjectLoaderNewTest { // todo instances copy tests, set USE_ROOT_INSTANCE
 
         override val database = object : ProjectProvider.Database() {
 
-            // todo instances for copied test, remove this and similar
             override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
                 if (!rootInstanceObservables.containsKey(taskFirebaseKey))
                     rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()

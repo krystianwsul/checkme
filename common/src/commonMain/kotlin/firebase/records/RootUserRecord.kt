@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 
@@ -16,12 +15,13 @@ open class RootUserRecord(
     companion object {
 
         const val USER_DATA = "userData"
-        private const val FRIEND_OF = "friendOf"
         private const val FRIENDS = "friends"
         const val PROJECTS = "projects"
     }
 
     final override val userJson by lazy { createObject.userData }
+
+    override val userWrapper by lazy { createObject }
 
     override val id by lazy { UserData.getKey(userJson.email) }
 
@@ -49,6 +49,8 @@ open class RootUserRecord(
         val friendId = userKey.key
         check(!createObject.friends.containsKey(friendId))
 
+        createObject.friends[friendId] = true
+
         addValue("$key/$FRIENDS/$friendId", true)
     }
 
@@ -64,18 +66,6 @@ open class RootUserRecord(
         addValue("$key/$FRIENDS/$friendId", null)
     }
 
-    override fun removeFriendOf(userKey: UserKey) {
-        val friendId = userKey.key
-
-        val friendOf = createObject.friendOf
-        check(friendOf.containsKey(friendId))
-        checkNotNull(friendOf[friendId])
-
-        friendOf.remove(friendId)
-
-        addValue("$key/$FRIEND_OF/$friendId", null)
-    }
-
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
     override fun addProject(projectKey: ProjectKey.Shared) {
@@ -88,7 +78,7 @@ open class RootUserRecord(
         }
     }
 
-    override fun removeProject(projectKey: ProjectKey<ProjectType.Shared>): Boolean {
+    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
         val projectId = projectKey.key
 
         return if (createObject.projects.containsKey(projectId)) {

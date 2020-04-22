@@ -17,7 +17,13 @@ class RemoteUserFactory(
 
     private val remoteUserManager = RemoteMyUserManager(deviceDbInfo, userSnapshot)
 
-    var remoteUser = MyUser(remoteUserManager.remoteUserRecord)
+    private val remoteUserRelay = BehaviorRelay.createDefault(MyUser(remoteUserManager.remoteUserRecord))
+
+    var remoteUser
+        get() = remoteUserRelay.value!!
+        set(value) {
+            remoteUserRelay.accept(value)
+        }
 
     var isSaved
         get() = remoteUserManager.isSaved
@@ -26,6 +32,7 @@ class RemoteUserFactory(
         }
 
     private val projectIdTrigger = BehaviorRelay.createDefault(ChangeType.REMOTE)
+    private val friendKeyTrigger = BehaviorRelay.createDefault(Unit)
 
     init {
         setTab()
@@ -35,10 +42,15 @@ class RemoteUserFactory(
         remoteUser.projectChangeListener = {
             projectIdTrigger.accept(ChangeType.LOCAL)
         }
+        remoteUser.friendChangeListener = { friendKeyTrigger.accept(Unit) }
     }
 
     val sharedProjectKeysObservable = projectIdTrigger.map {
         ChangeWrapper(it, remoteUser.projectIds)
+    }.distinctUntilChanged()!!
+
+    val friendKeysObservable = friendKeyTrigger.switchMap {
+        remoteUserRelay.map { it.friends }
     }.distinctUntilChanged()!!
 
     private fun setTab() {

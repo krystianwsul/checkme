@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 
 class MyUser(private val remoteMyUserRecord: MyUserRecord) :
@@ -17,6 +17,7 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
         }
 
     var projectChangeListener: (() -> Unit)? = null // because I can't add a relay to common
+    var friendChangeListener: (() -> Unit)? = null
 
     override fun addProject(projectKey: ProjectKey.Shared) {
         super.addProject(projectKey)
@@ -24,11 +25,23 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
         projectChangeListener?.invoke()
     }
 
-    override fun removeProject(projectKey: ProjectKey<ProjectType.Shared>): Boolean {
+    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
         val result = super.removeProject(projectKey)
 
         projectChangeListener?.invoke()
 
         return result
+    }
+
+    override fun addFriend(userKey: UserKey) {
+        super.addFriend(userKey)
+
+        friendChangeListener?.invoke()
+    }
+
+    override fun removeFriend(userKey: UserKey) {
+        super.removeFriend(userKey)
+
+        friendChangeListener?.invoke()
     }
 }

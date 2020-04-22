@@ -104,7 +104,7 @@ object RelevanceChecker {
 
                         val rootUsers = rootUserManager.remoteRootUserRecords
                                 .values
-                                .map { RootUser(it) }
+                                .map { RootUser(it.first) }
 
                         val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 

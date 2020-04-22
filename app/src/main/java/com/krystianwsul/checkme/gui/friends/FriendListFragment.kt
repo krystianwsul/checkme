@@ -239,7 +239,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
             val userListDatas = selectedUserDataWrappers.map { it.userListData }
             data!!.userListDatas.removeAll(userListDatas)
 
-            val friendIds = userListDatas.map { it.id }.toSet()
+            val userPairs = userListDatas.associate { it.id to it.userWrapper }
+            val friendIds = userPairs.map { it.key }.toSet()
 
             DomainFactory.instance.removeFriends(SaveService.Source.GUI, friendIds)
 
@@ -248,7 +249,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DomainFactory.instance.addFriends(SaveService.Source.GUI, friendIds)
+                DomainFactory.instance.addFriends(SaveService.Source.GUI, userPairs)
             }
         }
     }

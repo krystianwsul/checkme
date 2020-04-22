@@ -9,7 +9,8 @@ import com.krystianwsul.common.utils.toBase64
 data class UserData(
         val email: String = "",
         val name: String = "",
-        val photoUrl: String? = null) : Parcelable {
+        val photoUrl: String? = null
+) : Parcelable {
 
     companion object {
 

@@ -10,5 +10,7 @@ class JsRootUserManager(
         userWrappers: Map<String, UserWrapper>
 ) : RemoteRootUserManager() {
 
-    override val remoteRootUserRecords = userWrappers.map { RootUserRecord(false, it.value) }.associateBy { it.id }
+    override var remoteRootUserRecords = userWrappers.map { RootUserRecord(false, it.value) to false }
+            .associateBy { it.first.id }
+            .toMutableMap()
 }

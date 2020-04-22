@@ -18,10 +18,7 @@ class RemoteMyUserManager(
     var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
 
     var remoteUserRecord = if (!dataSnapshot.exists()) {
-        val userWrapper = UserWrapper(
-                mutableMapOf(),
-                deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
-        )
+        val userWrapper = UserWrapper(deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) })
 
         MyUserRecord(true, userWrapper)
     } else {

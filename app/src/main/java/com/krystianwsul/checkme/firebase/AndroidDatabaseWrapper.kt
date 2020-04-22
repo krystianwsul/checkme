@@ -54,7 +54,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).snapshotChanges()
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.updateChildren(values).addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
+        rootReference.updateChildren(values).addOnCompleteListener {
+            callback(it.getMessage(), it.isSuccessful, it.exception)
+        }
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) = rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")

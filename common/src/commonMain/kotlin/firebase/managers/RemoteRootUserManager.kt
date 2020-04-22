@@ -11,8 +11,6 @@ abstract class RemoteRootUserManager {
 
     abstract var remoteRootUserRecords: MutableMap<UserKey, Pair<RootUserRecord, Boolean>>
 
-    abstract val databaseWrapper: DatabaseWrapper // todo instances unused
-
     fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 

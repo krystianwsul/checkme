@@ -11,16 +11,26 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlinx.serialization.Serializable
 
-abstract class RootInstanceManager<T : ProjectType>(
-        protected val taskRecord: TaskRecord<T>
+open class RootInstanceManager<T : ProjectType>(
+        protected val taskRecord: TaskRecord<T>,
+        snapshotInfos: List<SnapshotInfo>,
+        val databaseWrapper: DatabaseWrapper
 ) : RootInstanceRecord.Parent {
 
-    abstract val rootInstanceRecords: MutableMap<InstanceKey, RootInstanceRecord<T>>
+    protected fun SnapshotInfo.toRecord() = RootInstanceRecord(
+            taskRecord,
+            instanceJson,
+            snapshotKey.dateKey,
+            snapshotKey.timeKey,
+            this@RootInstanceManager
+    )
+
+    var rootInstanceRecords = snapshotInfos.map { it.toRecord() }
+            .associateBy { it.instanceKey }
+            .toMutableMap()
 
     var isSaved = false
         protected set
-
-    abstract val databaseWrapper: DatabaseWrapper
 
     fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()

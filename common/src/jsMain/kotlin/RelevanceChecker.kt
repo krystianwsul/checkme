@@ -11,7 +11,6 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import firebase.JsDatabaseWrapper
 import firebase.managers.JsPrivateProjectManager
-import firebase.managers.JsRootInstanceManager
 import firebase.managers.JsRootUserManager
 import firebase.managers.JsSharedProjectManager
 
@@ -41,11 +40,11 @@ object RelevanceChecker {
 
             fun <T : ProjectType> getInstances(
                     projectRecord: ProjectRecord<T>,
-                    callback: (Map<TaskKey, JsRootInstanceManager<T>>) -> Unit
+                    callback: (Map<TaskKey, RootInstanceManager<T>>) -> Unit
             ) {
                 val results = projectRecord.taskRecords
                         .values
-                        .associate { it.taskKey to null as JsRootInstanceManager<T>? }
+                        .associate { it.taskKey to null as RootInstanceManager<T>? }
                         .toMutableMap()
 
                 projectRecord.taskRecords
@@ -54,7 +53,7 @@ object RelevanceChecker {
                             databaseWrapper.getInstances(taskRecord.rootInstanceKey) {
                                 check(results[taskRecord.taskKey] == null)
 
-                                results[taskRecord.taskKey] = JsRootInstanceManager(
+                                results[taskRecord.taskKey] = RootInstanceManager(
                                         taskRecord,
                                         it.values.flatMap { it.values },
                                         databaseWrapper

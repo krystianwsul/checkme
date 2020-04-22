@@ -39,7 +39,7 @@ class FactoryLoaderOldTest {
         @BeforeClass
         @JvmStatic
         fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
+            Task.USE_ROOT_INSTANCES = false
         }
     }
 
@@ -135,17 +135,6 @@ class FactoryLoaderOldTest {
         val sharedProjectObservable = PublishRelay.create<Snapshot>()
         val userObservable = PublishRelay.create<Snapshot>()
 
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot>>()
-
-        fun acceptInstance(
-                projectId: String,
-                taskId: String,
-                map: Map<String, Map<String, InstanceJson>>
-        ) {
-            val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(ValueTestSnapshot(map, key))
-        }
-
         override fun getUserSingle(userKey: UserKey): Single<Snapshot> {
             TODO("Not yet implemented")
         }
@@ -156,11 +145,7 @@ class FactoryLoaderOldTest {
 
         override fun getUserObservable(userKey: UserKey) = userObservable
 
-        override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
-            if (!rootInstanceObservables.containsKey(taskFirebaseKey))
-                rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-            return rootInstanceObservables.getValue(taskFirebaseKey)
-        }
+        override fun getRootInstanceObservable(taskFirebaseKey: String) = Observable.just<Snapshot>(EmptyTestSnapshot())
 
         override fun getNewId(path: String) = "id"
 
@@ -322,15 +307,6 @@ class FactoryLoaderOldTest {
                         sharedProjectKey
                 ))
 
-        assertNull(domainFactoryRelay.value)
-
-        val privateProjectKey = userInfo.key.key
-
-        testFactoryProvider.database.apply {
-            acceptInstance(privateProjectKey, privateTaskKey, mapOf())
-            acceptInstance(sharedProjectKey, sharedTaskKey, mapOf())
-        }
-
         assertNotNull(domainFactoryRelay.value)
     }
 
@@ -356,15 +332,6 @@ class FactoryLoaderOldTest {
                         sharedProjectKey
                 ))
 
-        assertNull(domainFactoryRelay.value)
-
-        val map = mapOf("2020-03-25" to mapOf("14-47" to InstanceJson()))
-
-        testFactoryProvider.database.apply {
-            acceptInstance(privateProjectKey, privateTaskKey, map)
-            acceptInstance(sharedProjectKey, sharedTaskKey, map)
-        }
-
         assertNotNull(domainFactoryRelay.value)
     }
 
@@ -373,10 +340,9 @@ class FactoryLoaderOldTest {
         initializeEmpty()
 
         testFactoryProvider.apply {
-            database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson("task"))))
 
             domain.checkChange {
-                database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))
+                database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson("task"))))
             }
         }
     }

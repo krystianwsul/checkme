@@ -23,7 +23,7 @@ class SharedProjectsLoaderOldTest {
         @BeforeClass
         @JvmStatic
         fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
+            Task.USE_ROOT_INSTANCES = false
         }
     }
 

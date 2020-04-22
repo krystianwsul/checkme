@@ -9,10 +9,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.ProjectsFactory
-import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
@@ -33,9 +30,9 @@ import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -48,10 +45,10 @@ class DomainFactory(
         private val localFactory: LocalFactory,
         private val remoteUserFactory: RemoteUserFactory,
         val projectsFactory: ProjectsFactory,
+        val remoteFriendFactory: RemoteFriendFactory,
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
-        readTime: ExactTimeStamp,
-        friendSnapshot: Snapshot
+        readTime: ExactTimeStamp
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -124,8 +121,6 @@ class DomainFactory(
     var remoteReadTimes: ReadTimes
         private set
 
-    val remoteFriendFactory: RemoteFriendFactory
-
     private var aggregateData: AggregateData? = null
 
     val domainChanged = BehaviorRelay.createDefault(setOf<Int>())
@@ -152,21 +147,8 @@ class DomainFactory(
 
     val isSaved = BehaviorRelay.createDefault(false)
 
-    private fun updateFriends() { // todo friends remove
-        val newFriends = remoteFriendFactory.friends.map { it.id }
-        val oldFriends = remoteUserFactory.remoteUser.friends
-
-        val addedFriends = newFriends - oldFriends
-        val removedFriends = oldFriends - newFriends
-
-        addedFriends.forEach { remoteUserFactory.remoteUser.addFriend(it) }
-        removedFriends.forEach { remoteUserFactory.remoteUser.removeFriend(it) }
-    }
-
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
-
-        remoteFriendFactory = RemoteFriendFactory(friendSnapshot.children, AndroidDatabaseWrapper)
 
         val now = ExactTimeStamp.now
 
@@ -177,7 +159,6 @@ class DomainFactory(
         firstRun = false
 
         updateShortcuts(now)
-        updateFriends()
     }
 
     private val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -283,8 +264,6 @@ class DomainFactory(
         } else {
             remoteUserFactory.onNewSnapshot(dataSnapshot)
 
-            updateFriends()
-
             RunType.REMOTE
         }
 
@@ -292,20 +271,12 @@ class DomainFactory(
     }
 
     @Synchronized
-    override fun updateFriendRecords(dataSnapshot: Snapshot) {
-        MyCrashlytics.log("DomainFactory.setFriendRecords")
+    override fun updateFriendRecords(databaseEvent: DatabaseEvent) {
+        MyCrashlytics.log("updateFriendRecords")
 
-        val runType = if (remoteFriendFactory.isSaved) {
-            remoteFriendFactory.isSaved = false
+        val localChange = remoteFriendFactory.onDatabaseEvent(databaseEvent)
 
-            RunType.LOCAL
-        } else {
-            remoteFriendFactory.onNewSnapshot(dataSnapshot.children)
-
-            updateFriends()
-
-            RunType.REMOTE
-        }
+        val runType = if (localChange) RunType.LOCAL else RunType.REMOTE
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
     }
@@ -948,7 +919,7 @@ class DomainFactory(
         val friends = remoteFriendFactory.friends
 
         val userListDatas = friends.map {
-            FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl)
+            FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl, it.userWrapper)
         }.toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
@@ -1919,38 +1890,33 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.removeFriends")
         check(!remoteFriendFactory.isSaved)
 
-        keys.forEach {
-            remoteUserFactory.remoteUser.removeFriend(it)
-            remoteFriendFactory.removeFriend(deviceDbInfo.key, it)
-        }
+        keys.forEach { remoteUserFactory.remoteUser.removeFriend(it) }
 
         save(0, source)
     }
 
     @Synchronized
-    fun addFriend(source: SaveService.Source, userKey: UserKey) {
+    fun addFriend(source: SaveService.Source, userKey: UserKey, userWrapper: UserWrapper) {
         MyCrashlytics.log("DomainFactory.addFriend")
         check(!remoteUserFactory.isSaved)
 
         remoteUserFactory.remoteUser.addFriend(userKey)
-
-        AndroidDatabaseWrapper.addFriend(userKey).checkError(this, "DomainFactory.addFriend")
+        remoteFriendFactory.addFriend(userKey, userWrapper)
 
         save(0, source)
     }
 
     @Synchronized
-    fun addFriends(source: SaveService.Source, userKeys: Set<UserKey>) {
+    fun addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) {
         MyCrashlytics.log("DomainFactory.addFriends")
         check(!remoteUserFactory.isSaved)
 
-        userKeys.forEach { remoteUserFactory.remoteUser.addFriend(it) }
+        userMap.forEach {
+            remoteUserFactory.remoteUser.addFriend(it.key)
+            remoteFriendFactory.addFriend(it.key, it.value)
+        }
 
-        val values = userKeys.associate {
-            "${DatabaseWrapper.USERS_KEY}/${it.key}/friendOf/${deviceDbInfo.key.key}" to true
-        }.toMutableMap<String, Any?>()
-
-        save(0, source, values = values)
+        save(0, source)
     }
 
     @Synchronized

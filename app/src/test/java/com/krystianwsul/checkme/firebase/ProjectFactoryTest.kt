@@ -42,7 +42,7 @@ class ProjectFactoryTest {
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getFriendObservable(userKey: UserKey): Observable<Snapshot> {
+            override fun getUserSingle(userKey: UserKey): Single<Snapshot> {
                 TODO("Not yet implemented")
             }
 
@@ -77,7 +77,7 @@ class ProjectFactoryTest {
 
         override val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
 
-        override fun newDomain(localFactory: FactoryProvider.Local, remoteUserFactory: RemoteUserFactory, projectsFactory: ProjectsFactory, deviceDbInfo: DeviceDbInfo, startTime: ExactTimeStamp, readTime: ExactTimeStamp, friendSnapshot: Snapshot): FactoryProvider.Domain {
+        override fun newDomain(localFactory: FactoryProvider.Local, remoteUserFactory: RemoteUserFactory, projectsFactory: ProjectsFactory, remoteFriendFactory: RemoteFriendFactory, deviceDbInfo: DeviceDbInfo, startTime: ExactTimeStamp, readTime: ExactTimeStamp): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }
 

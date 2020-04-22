@@ -2,7 +2,9 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.ProjectsFactory
+import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -19,6 +21,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxkotlin.addTo
@@ -68,11 +71,11 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateFriendRecords(dataSnapshot: Snapshot) {
+        override fun updateUserRecord(dataSnapshot: Snapshot) {
             TODO("Not yet implemented")
         }
 
-        override fun updateUserRecord(dataSnapshot: Snapshot) {
+        override fun updateFriendRecords(databaseEvent: DatabaseEvent) {
             TODO("Not yet implemented")
         }
     }
@@ -117,7 +120,6 @@ class FactoryLoaderTest {
 
     private class TestDatabase : FactoryProvider.Database() {
 
-        val friendObservable = PublishRelay.create<Snapshot>()
         val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
         val sharedProjectObservable = PublishRelay.create<Snapshot>()
         val userObservable = PublishRelay.create<Snapshot>()
@@ -133,7 +135,9 @@ class FactoryLoaderTest {
             rootInstanceObservables.getValue(key).accept(ValueTestSnapshot(map, key))
         }
 
-        override fun getFriendObservable(userKey: UserKey) = friendObservable
+        override fun getUserSingle(userKey: UserKey): Single<Snapshot> {
+            TODO("Not yet implemented")
+        }
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it, key.key) }!!
 
@@ -178,10 +182,10 @@ class FactoryLoaderTest {
                 localFactory: FactoryProvider.Local,
                 remoteUserFactory: RemoteUserFactory,
                 projectsFactory: ProjectsFactory,
+                remoteFriendFactory: RemoteFriendFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp,
-                friendSnapshot: Snapshot
+                readTime: ExactTimeStamp
         ) = domain
     }
 
@@ -241,15 +245,11 @@ class FactoryLoaderTest {
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper(), userInfo.key.key))
 
-        testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
-
         assertNull(domainFactoryRelay.value)
 
         testFactoryProvider.database
-                .friendObservable
-                .accept(TestSnapshot())
+                .privateProjectObservable
+                .accept(PrivateProjectJson())
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -271,18 +271,14 @@ class FactoryLoaderTest {
                 .privateProjectObservable
                 .accept(PrivateProjectJson())
 
+        assertNull(domainFactoryRelay.value)
+
         testFactoryProvider.database
                 .sharedProjectObservable
                 .accept(ValueTestSnapshot(
                         JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
                         sharedProjectKey
                 ))
-
-        assertNull(domainFactoryRelay.value)
-
-        testFactoryProvider.database
-                .friendObservable
-                .accept(TestSnapshot())
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -294,10 +290,6 @@ class FactoryLoaderTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true)), userInfo.key.key))
-
-        testFactoryProvider.database
-                .friendObservable
-                .accept(TestSnapshot())
 
         val privateTaskKey = "privateTask"
 
@@ -336,10 +328,6 @@ class FactoryLoaderTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(ValueTestSnapshot(UserWrapper(projects = mutableMapOf(sharedProjectKey to true)), userInfo.key.key))
-
-        testFactoryProvider.database
-                .friendObservable
-                .accept(TestSnapshot())
 
         testFactoryProvider.database
                 .privateProjectObservable

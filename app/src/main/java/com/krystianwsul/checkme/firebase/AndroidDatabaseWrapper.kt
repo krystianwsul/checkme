@@ -31,7 +31,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
 
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
-    fun getUserSingle(userKey: UserKey) = getUserQuery(userKey).snapshot()
+    override fun getUserSingle(userKey: UserKey) = getUserQuery(userKey).snapshot()
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
 
     private fun Query.snapshot() = data().map<Snapshot>(Snapshot::Impl)

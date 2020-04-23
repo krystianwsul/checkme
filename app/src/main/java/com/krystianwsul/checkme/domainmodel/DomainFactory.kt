@@ -746,9 +746,7 @@ class DomainFactory(
             checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas)
         } ?: true
 
-        var taskData: CreateTaskViewModel.TaskData? = null
-        val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
-        if (taskKey != null) {
+        val taskData = if (taskKey != null) {
             val task = getTaskForce(taskKey)
 
             val parentKey: CreateTaskViewModel.ParentKey?
@@ -757,10 +755,9 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map {
+                customTimes += schedules.mapNotNull { it.customTimeKey }.map {
                     it to task.project.getCustomTime(it.customTimeId)
                 }
-                )
 
                 parentKey = task.project
                         .takeIf { it is SharedProject }
@@ -777,40 +774,32 @@ class DomainFactory(
                 includeTaskKeys.add(parentTask.taskKey)
             }
 
-            val projectName = task.project.name
-
-            taskData = CreateTaskViewModel.TaskData(
+            CreateTaskViewModel.TaskData(
                     task.name,
                     parentKey,
                     scheduleDataWrappers,
                     task.note,
-                    projectName,
+                    task.project.name,
                     task.getImage(deviceDbInfo)
             )
-
-            parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
-            check(checkHintPresent(parentTreeDatas))
         } else {
-            parentTreeDatas = if (joinTaskKeys != null) {
-                check(joinTaskKeys.size > 1)
-
-                val projectId = joinTaskKeys.map { it.projectKey }
-                        .distinct()
-                        .single()
-
-                val remoteProject = projectsFactory.getProjectForce(projectId)
-
-                getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys, includeTaskKeys)
-            } else {
-                getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
-            }
-
-            check(checkHintPresent(parentTreeDatas))
+            null
         }
 
-        val customTimeDatas = customTimes.values.associate { it.key to CreateTaskViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap()) }
+        val parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
 
-        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
+        check(checkHintPresent(parentTreeDatas))
+
+        val customTimeDatas = customTimes.values.associate {
+            it.key to CreateTaskViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
+        }
+
+        return CreateTaskViewModel.Data(
+                taskData,
+                parentTreeDatas,
+                customTimeDatas,
+                remoteUserFactory.remoteUser.defaultReminder
+        )
     }
 
     @Synchronized
@@ -1299,9 +1288,7 @@ class DomainFactory(
         check(scheduleDatas.isNotEmpty())
         check(joinTaskKeys.size > 1)
 
-        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
-                .distinct()
-                .single()
+        val finalProjectId = projectId ?: defaultProjectId
 
         val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 

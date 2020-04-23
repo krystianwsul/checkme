@@ -349,42 +349,30 @@ class GroupListFragment @JvmOverloads constructor(
             if (selectedDatas.size == 1) {
                 val instanceData = selectedDatas.single()
 
-                itemVisibilities.addAll(listOf(
+                itemVisibilities += listOf(
                         R.id.action_group_show_task to true,
                         R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
                         R.id.action_group_add_task to instanceData.taskCurrent,
                         R.id.actionGroupCopyTask to instanceData.taskCurrent
-                ))
+                )
             } else {
                 check(selectedDatas.size > 1)
 
-                itemVisibilities.addAll(listOf(
+                itemVisibilities += listOf(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
                         R.id.action_group_add_task to false,
                         R.id.actionGroupCopyTask to false
-                ))
+                )
 
-                if (selectedDatas.all { it.taskCurrent }) {
-                    val projectIdCount = selectedDatas.asSequence()
-                            .map { it.taskKey.projectKey }
-                            .distinct()
-                            .count()
+                val allCurrent = selectedDatas.all { it.taskCurrent }
 
-                    check(projectIdCount > 0)
-
-                    itemVisibilities.addAll(listOf(
-                            R.id.action_group_join to (projectIdCount == 1),
-                            R.id.action_group_delete_task to true
-                    ))
-                } else {
-                    itemVisibilities.addAll(listOf(
-                            R.id.action_group_join to false,
-                            R.id.action_group_delete_task to false
-                    ))
-                }
+                itemVisibilities += listOf(
+                        R.id.action_group_join to allCurrent,
+                        R.id.action_group_delete_task to allCurrent
+                )
             }
 
             return itemVisibilities

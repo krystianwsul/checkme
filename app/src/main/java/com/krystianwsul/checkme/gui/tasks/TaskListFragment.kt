@@ -132,20 +132,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val single = selectedNodes.size < 2
 
-            val childTaskDatas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
-
-            val projectIdCount = childTaskDatas.map { it.taskKey.projectKey }
-                    .distinct()
-                    .count()
-
-            check(projectIdCount > 0)
+            val singleData = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }.singleOrNull()
 
             return listOf(
-                    R.id.action_task_join to (!single && projectIdCount == 1),
+                    R.id.action_task_join to !single,
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
-                    R.id.action_task_show_instances to (childTaskDatas.singleOrNull()?.hasInstances == true),
-                    R.id.actionTaskCopy to (childTaskDatas.singleOrNull()?.current == true)
+                    R.id.action_task_show_instances to (singleData?.hasInstances == true),
+                    R.id.actionTaskCopy to (singleData?.current == true)
             )
         }
 

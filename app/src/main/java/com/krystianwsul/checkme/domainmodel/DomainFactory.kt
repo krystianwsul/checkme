@@ -857,10 +857,10 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val childTaskDatas = getTasks().map {
-                    val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
-                    Pair(it, hierarchyExactTimeStamp)
-                }
-                .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
+            val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
+            Pair(it, hierarchyExactTimeStamp)
+        }
+                .filter { (task, hierarchyExactTimeStamp) -> task.current(now) && task.isRootTask(hierarchyExactTimeStamp) }
                 .map { (task, hierarchyExactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
                             task.name,
@@ -871,7 +871,7 @@ class DomainFactory(
                             task.taskKey,
                             null,
                             task.getImage(deviceDbInfo),
-                            task.current(now),
+                            true,
                             task.hasInstances(now),
                             false
                     )

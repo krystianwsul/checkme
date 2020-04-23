@@ -512,22 +512,48 @@ class GroupListFragment @JvmOverloads constructor(
         super.onDetachedFromWindow()
     }
 
-    fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) {
+    fun setAll(
+            timeRange: MainActivity.TimeRange,
+            position: Int,
+            dataId: Int,
+            immediate: Boolean,
+            dataWrapper: DataWrapper
+    ) {
         check(position >= 0)
 
-        val differentPage = (parametersRelay.value as? Parameters.All)?.let { it.timeRange != timeRange || it.position != position }
-                ?: false
+        val differentPage = (parametersRelay.value as? Parameters.All)?.let {
+            it.timeRange != timeRange || it.position != position
+        } ?: false
 
         parametersRelay.accept(Parameters.All(dataId, immediate, dataWrapper, position, timeRange, differentPage))
     }
 
-    fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TimeStamp(dataId, immediate, dataWrapper, timeStamp))
+    fun setTimeStamp(
+            timeStamp: TimeStamp,
+            dataId: Int,
+            immediate: Boolean,
+            dataWrapper: DataWrapper
+    ) = parametersRelay.accept(Parameters.TimeStamp(dataId, immediate, dataWrapper, timeStamp))
 
-    fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKey(dataId, immediate, dataWrapper, instanceKey))
+    fun setInstanceKey(
+            instanceKey: InstanceKey,
+            dataId: Int,
+            immediate: Boolean,
+            dataWrapper: DataWrapper
+    ) = parametersRelay.accept(Parameters.InstanceKey(dataId, immediate, dataWrapper, instanceKey))
 
-    fun setInstanceKeys(dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKeys(dataId, immediate, dataWrapper))
+    fun setInstanceKeys(
+            dataId: Int,
+            immediate: Boolean,
+            dataWrapper: DataWrapper
+    ) = parametersRelay.accept(Parameters.InstanceKeys(dataId, immediate, dataWrapper))
 
-    fun setTaskKey(taskKey: TaskKey, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey))
+    fun setTaskKey(
+            taskKey: TaskKey,
+            dataId: Int,
+            immediate: Boolean,
+            dataWrapper: DataWrapper
+    ) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey))
 
     private fun useGroups() = parameters is Parameters.All
 

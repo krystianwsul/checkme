@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.gui.instances
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -12,6 +14,7 @@ import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
@@ -52,6 +55,11 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         }
     }
 
+    private val receiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = showTaskInstancesViewModel.refresh()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
@@ -67,18 +75,28 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             start(taskKey)
 
-            createDisposable += data.subscribe { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper) }
+            createDisposable += data.subscribe {
+                groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper)
+            }
         }
 
         initBottomBar()
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+
+        startDate(receiver)
     }
 
     override fun onStart() {
         super.onStart()
 
         groupListFragment.checkCreatedTaskKey()
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(receiver)
+
+        super.onDestroy()
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit

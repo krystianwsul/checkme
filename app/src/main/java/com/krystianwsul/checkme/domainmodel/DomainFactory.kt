@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.newUuid
+import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -418,7 +419,24 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val entries = getCurrentRemoteCustomTimes(now).map {
-            ShowCustomTimesViewModel.CustomTimeData(it.key, it.name)
+            val days = it.hourMinutes
+                    .entries
+                    .groupBy { it.value }
+                    .mapValues { it.value.map { it.key } }
+                    .entries
+                    .sortedBy { it.key }
+
+            val details = days.joinToString("; ") {
+                it.value
+                        .toSet()
+                        .prettyPrint() + it.key
+            }
+
+            ShowCustomTimesViewModel.CustomTimeData(
+                    it.key,
+                    it.name,
+                    details
+            )
         }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)

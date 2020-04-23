@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
-
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -258,7 +257,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             return treeNode
         }
 
-        override val name get() = NameData(customTimeData.name)
+        override val name = NameData(customTimeData.name)
+
+        override val details = Pair(customTimeData.details, colorSecondary)
 
         override val isSelectable = true
 

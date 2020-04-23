@@ -15,7 +15,7 @@ class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>(
 
     data class Data(val entries: MutableList<CustomTimeData>) : DomainData()
 
-    data class CustomTimeData(val id: CustomTimeKey.Private, val name: String) {
+    data class CustomTimeData(val id: CustomTimeKey.Private, val name: String, val details: String) {
 
         init {
             check(name.isNotEmpty())

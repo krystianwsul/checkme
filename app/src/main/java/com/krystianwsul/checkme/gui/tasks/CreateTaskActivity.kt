@@ -269,7 +269,10 @@ class CreateTaskActivity : NavBarActivity() {
                     hasValueSchedule() -> {
                         check(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
+                        val projectId = if (hasValueParentInGeneral())
+                            (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId
+                        else
+                            null
 
                         when {
                             copy -> {
@@ -308,18 +311,20 @@ class CreateTaskActivity : NavBarActivity() {
                                 check(data!!.taskData == null)
                                 check(taskKeys!!.size > 1)
 
-                                DomainFactory.instance.createScheduleJoinRootTask(
-                                        ExactTimeStamp.now,
-                                        data!!.dataId,
-                                        SaveService.Source.GUI,
-                                        name,
-                                        scheduleDatas,
-                                        taskKeys!!,
-                                        note,
-                                        projectId,
-                                        writeImagePath?.value,
-                                        removeInstanceKeys
-                                ).also { createdTaskKey = it }
+                                DomainFactory.instance
+                                        .createScheduleJoinRootTask(
+                                                ExactTimeStamp.now,
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                scheduleDatas,
+                                                taskKeys!!,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value,
+                                                removeInstanceKeys
+                                        )
+                                        .also { createdTaskKey = it }
                             }
                             else -> {
                                 check(data!!.taskData == null)
@@ -493,6 +498,7 @@ class CreateTaskActivity : NavBarActivity() {
             }
             else -> throw UnsupportedOperationException()
         }
+
         return true
     }
 

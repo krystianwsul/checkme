@@ -791,16 +791,13 @@ class DomainFactory(
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
         } else {
-            var projectId: ProjectKey<*>? = null
-            if (joinTaskKeys != null) {
+            parentTreeDatas = if (joinTaskKeys != null) {
                 check(joinTaskKeys.size > 1)
 
-                val projectIds = joinTaskKeys.map { it.projectKey }.distinct()
+                val projectId = joinTaskKeys.map { it.projectKey }
+                        .distinct()
+                        .single()
 
-                projectId = projectIds.single()
-            }
-
-            parentTreeDatas = if (projectId != null) {
                 val remoteProject = projectsFactory.getProjectForce(projectId)
 
                 getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys, includeTaskKeys)

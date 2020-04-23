@@ -17,7 +17,8 @@ import java.util.*
 class NotDoneGroupNode(
         indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
-        val instanceDatas: MutableList<GroupListFragment.InstanceData>) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
+        val instanceDatas: MutableList<GroupListFragment.InstanceData>
+) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -147,27 +148,27 @@ class NotDoneGroupNode(
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override val details
-        get(): Pair<String, Int>? {
-            if (singleInstance()) {
-                return if (singleInstanceData.displayText.isNullOrEmpty()) {
-                    null
-                } else {
-                    Pair(singleInstanceData.displayText!!, if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary)
-                }
+        get() = if (singleInstance()) {
+            if (singleInstanceData.displayText.isNullOrEmpty()) {
+                null
             } else {
-                val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
-
-                val date = exactTimeStamp.date
-                val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-                val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
-
-                val timeText = customTimeData?.Name ?: hourMinute.toString()
-
-                val text = date.getDisplayText() + ", " + timeText
-
-                return Pair(text, colorSecondary)
+                Pair(
+                        singleInstanceData.displayText!!,
+                        if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary
+                )
             }
+        } else {
+            val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
+
+            val date = exactTimeStamp.date
+            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+
+            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.Name
+                    ?: hourMinute.toString()
+
+            val text = date.getDisplayText() + ", " + timeText
+
+            Pair(text, colorSecondary)
         }
 
     override val children
@@ -366,11 +367,29 @@ class NotDoneGroupNode(
         }
     }
 
-    override val id: Any = if (singleInstance()) Id(singleInstanceData.instanceKey) else exactTimeStamp
+    override val id: Any = if (singleInstance())
+        SingleId(singleInstanceData.instanceKey)
+    else
+        GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)
 
     override val toggleDescendants get() = !singleInstance()
 
-    data class Id(val instanceKey: InstanceKey)
+    data class SingleId(val instanceKey: InstanceKey)
+
+    class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp) {
+
+        override fun hashCode() = 1
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this)
+                return true
+
+            if (other !is GroupId)
+                return false
+
+            return instanceKeys == other.instanceKeys || exactTimeStamp == other.exactTimeStamp
+        }
+    }
 
     class NotDoneInstanceNode(
             indentation: Int,

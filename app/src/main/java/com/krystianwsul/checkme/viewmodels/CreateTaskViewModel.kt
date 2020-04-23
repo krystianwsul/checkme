@@ -88,9 +88,11 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
+                @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogFragment.ScheduleDialogData(
                         scheduleData.date,
-                        hashSetOf(scheduleData.date.dayOfWeek),
+                        mutableSetOf(scheduleData.date.dayOfWeek),
+                        true,
                         true,
                         monthDayNumber,
                         monthWeekNumber,
@@ -123,9 +125,12 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
+                val days = scheduleData.daysOfWeek.toMutableSet()
+
                 return ScheduleDialogFragment.ScheduleDialogData(
                         date,
-                        scheduleData.daysOfWeek.toHashSet(),
+                        days,
+                        days == DayOfWeek.set,
                         true,
                         monthDayNumber,
                         monthWeekNumber,
@@ -152,9 +157,11 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
 
+                @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogFragment.ScheduleDialogData(
                         date,
-                        hashSetOf(date.dayOfWeek),
+                        mutableSetOf(date.dayOfWeek),
+                        true,
                         true,
                         scheduleData.dayOfMonth,
                         (scheduleData.dayOfMonth - 1) / 7 + 1,
@@ -186,9 +193,11 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 else
                     Month(date.month).days(date.year) - date.day + 1
 
+                @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogFragment.ScheduleDialogData(
                         date,
-                        hashSetOf(scheduleData.dayOfWeek),
+                        mutableSetOf(scheduleData.dayOfWeek),
+                        true,
                         false,
                         listOf(dayNumber, ScheduleDialogFragment.ScheduleDialogData.MAX_MONTH_DAY).min()!!,
                         scheduleData.dayOfMonth,

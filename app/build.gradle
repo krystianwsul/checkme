@@ -53,6 +53,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
     packagingOptions {
         exclude '/META-INF/kotlinx-serialization-runtime.kotlin_module'
     }
@@ -62,6 +66,7 @@ ext {
     powermockVersion = '2.0.7'
     lifecycleVersion = '2.2.0'
     glideVersion = '4.11.0'
+    ktxVersion = '1.2.0'
 }
 
 androidExtensions {
@@ -148,6 +153,8 @@ dependencies {
 
     implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
     implementation "com.badoo.reaktive:rxjava2-interop:$reaktiveVersion"
+
+    implementation "androidx.core:core-ktx:$ktxVersion"
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -21,7 +21,11 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.newUuid
-import com.krystianwsul.checkme.utils.time.*
+import com.krystianwsul.checkme.utils.prettyPrint
+import com.krystianwsul.checkme.utils.time.calendar
+import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.checkme.utils.time.toDateTimeSoy
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -127,23 +131,6 @@ class DomainFactory(
 
     var deviceDbInfo = _deviceDbInfo
         private set
-
-    val irrelevantSummary
-        get() = "remove older than: " + org.joda.time.DateTime.now().minusDays(2).toExactTimeStamp().date + "\n\n" + getExistingInstances().asSequence()
-                .let { existingInstances ->
-                    listOf(
-                            "done" to existingInstances.filter { it.done != null }
-                                    .sortedBy { it.done!! }
-                                    .map { it.done!!.toString() + ": " + it.name }
-                            /*
-                            ,
-                            "schedule" to existingInstances.sortedBy { it.scheduleDateTime }.map { it.scheduleDateTime.toString() + ": " + it.name + "(done ${it.done})" },
-                            "instance" to existingInstances.sortedBy { it.instanceDateTime }.map { it.instanceDateTime.toString() + ": " + it.name + "(done ${it.done})" }
-                            */
-                    ).joinToString("\n\n") { (desc, instances) ->
-                        "oldest by $desc:\n" + instances.take(10).joinToString("\n")
-                    }
-                }
 
     val isSaved = BehaviorRelay.createDefault(false)
 
@@ -418,7 +405,24 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val entries = getCurrentRemoteCustomTimes(now).map {
-            ShowCustomTimesViewModel.CustomTimeData(it.key, it.name)
+            val days = it.hourMinutes
+                    .entries
+                    .groupBy { it.value }
+                    .mapValues { it.value.map { it.key } }
+                    .entries
+                    .sortedBy { it.key }
+
+            val details = days.joinToString("; ") {
+                it.value
+                        .toSet()
+                        .prettyPrint() + it.key
+            }
+
+            ShowCustomTimesViewModel.CustomTimeData(
+                    it.key,
+                    it.name,
+                    details
+            )
         }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
@@ -745,9 +749,7 @@ class DomainFactory(
             checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas)
         } ?: true
 
-        var taskData: CreateTaskViewModel.TaskData? = null
-        val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
-        if (taskKey != null) {
+        val taskData = if (taskKey != null) {
             val task = getTaskForce(taskKey)
 
             val parentKey: CreateTaskViewModel.ParentKey?
@@ -756,10 +758,9 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map {
+                customTimes += schedules.mapNotNull { it.customTimeKey }.map {
                     it to task.project.getCustomTime(it.customTimeId)
                 }
-                )
 
                 parentKey = task.project
                         .takeIf { it is SharedProject }
@@ -776,43 +777,32 @@ class DomainFactory(
                 includeTaskKeys.add(parentTask.taskKey)
             }
 
-            val projectName = task.project.name
-
-            taskData = CreateTaskViewModel.TaskData(
+            CreateTaskViewModel.TaskData(
                     task.name,
                     parentKey,
                     scheduleDataWrappers,
                     task.note,
-                    projectName,
+                    task.project.name,
                     task.getImage(deviceDbInfo)
             )
-
-            parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
-            check(checkHintPresent(parentTreeDatas))
         } else {
-            var projectId: ProjectKey<*>? = null
-            if (joinTaskKeys != null) {
-                check(joinTaskKeys.size > 1)
-
-                val projectIds = joinTaskKeys.map { it.projectKey }.distinct()
-
-                projectId = projectIds.single()
-            }
-
-            parentTreeDatas = if (projectId != null) {
-                val remoteProject = projectsFactory.getProjectForce(projectId)
-
-                getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys, includeTaskKeys)
-            } else {
-                getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
-            }
-
-            check(checkHintPresent(parentTreeDatas))
+            null
         }
 
-        val customTimeDatas = customTimes.values.associate { it.key to CreateTaskViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap()) }
+        val parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
 
-        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
+        check(checkHintPresent(parentTreeDatas))
+
+        val customTimeDatas = customTimes.values.associate {
+            it.key to CreateTaskViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
+        }
+
+        return CreateTaskViewModel.Data(
+                taskData,
+                parentTreeDatas,
+                customTimeDatas,
+                remoteUserFactory.remoteUser.defaultReminder
+        )
     }
 
     @Synchronized
@@ -868,7 +858,7 @@ class DomainFactory(
             val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
             Pair(it, hierarchyExactTimeStamp)
         }
-                .filter { (task, hierarchyExactTimeStamp) -> task.current(now) && task.isRootTask(hierarchyExactTimeStamp) }
+                .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
                 .map { (task, hierarchyExactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
                             task.name,
@@ -879,7 +869,7 @@ class DomainFactory(
                             task.taskKey,
                             null,
                             task.getImage(deviceDbInfo),
-                            true,
+                            task.current(now),
                             task.hasInstances(now),
                             false
                     )
@@ -1306,9 +1296,7 @@ class DomainFactory(
         check(scheduleDatas.isNotEmpty())
         check(joinTaskKeys.size > 1)
 
-        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
-                .distinct()
-                .single()
+        val finalProjectId = projectId ?: defaultProjectId
 
         val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 

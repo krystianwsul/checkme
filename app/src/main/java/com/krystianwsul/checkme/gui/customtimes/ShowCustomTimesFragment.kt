@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
-
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -58,7 +57,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_custom_times, listener::initBottomBar) }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val customTimeIds = selectedIds
             check(customTimeIds.isNotEmpty())
 
@@ -76,6 +75,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                 }
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
@@ -258,7 +259,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             return treeNode
         }
 
-        override val name get() = NameData(customTimeData.name)
+        override val name = NameData(customTimeData.name)
+
+        override val details = Pair(customTimeData.details, colorSecondary)
 
         override val isSelectable = true
 

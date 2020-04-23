@@ -5,4 +5,5 @@ import androidx.annotation.ColorInt
 data class NameData(
         val text: String,
         @ColorInt val color: Int = GroupHolderNode.colorPrimary,
-        val unlimitedLines: Boolean = false)
+        val unlimitedLines: Boolean = false
+)

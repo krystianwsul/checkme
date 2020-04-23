@@ -63,7 +63,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar) }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val projectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toHashSet()
@@ -80,6 +80,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 }
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {

@@ -63,7 +63,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar) }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val selectedUserDataEmails = treeViewAdapter.selectedNodes
             check(selectedUserDataEmails.isNotEmpty())
 
@@ -75,6 +75,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
                 }
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {

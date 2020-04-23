@@ -17,7 +17,8 @@ import java.util.*
 class NotDoneGroupNode(
         indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
-        val instanceDatas: MutableList<GroupListFragment.InstanceData>) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
+        val instanceDatas: MutableList<GroupListFragment.InstanceData>
+) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -54,41 +55,30 @@ class NotDoneGroupNode(
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
-            nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
-        val expanded: Boolean
-        val doneExpanded: Boolean
-        if (instanceDatas.size == 1) {
-            val instanceData = instanceDatas.single()
+            nodeContainer: NodeContainer<NodeHolder>
+    ): TreeNode<NodeHolder> {
+        check(instanceDatas.isNotEmpty())
 
-            if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
-                expanded = true
-                doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
-            } else {
-                expanded = false
-                doneExpanded = false
-            }
-        } else {
-            expanded = expandedGroups.contains(exactTimeStamp.toTimeStamp())
-            doneExpanded = false
-        }
+        val instanceData = instanceDatas.singleOrNull()
 
-        val selected = if (instanceDatas.size == 1) {
-            selectedInstances.contains(instanceDatas.single().instanceKey)
-        } else {
-            check(instanceDatas.size > 1)
+        val (expanded, doneExpanded) = instanceData?.run {
+            if (expandedInstances.containsKey(instanceKey) && children.isNotEmpty())
+                true to expandedInstances.getValue(instanceKey)
+            else
+                false to false
+        } ?: expandedGroups.contains(exactTimeStamp.toTimeStamp()) to false
 
-            selectedGroups.contains(exactTimeStamp.long)
-        }
+        val selected = instanceData?.let {
+            selectedInstances.contains(it.instanceKey)
+        } ?: selectedGroups.contains(exactTimeStamp.long)
 
         treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
-        if (instanceDatas.size == 1) {
+        if (instanceData != null) {
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
-                    instanceDatas.single()
-                            .children
-                            .values,
+                    instanceData.children.values,
                     expandedGroups,
                     expandedInstances,
                     doneExpanded,
@@ -98,14 +88,20 @@ class NotDoneGroupNode(
                     false,
                     listOf(),
                     listOf(),
-                    null))
+                    null
+            ))
         } else {
-            val notDoneInstanceTreeNodes = instanceDatas.map {
-                val childSelected = selectedInstances.contains(it.instanceKey)
-                newChildTreeNode(it, expandedInstances, childSelected, selectedInstances, selectedGroups)
-            }
-
-            treeNode.setChildTreeNodes(notDoneInstanceTreeNodes)
+            treeNode.setChildTreeNodes(
+                    instanceDatas.map {
+                        newChildTreeNode(
+                                it,
+                                expandedInstances,
+                                selectedInstances.contains(it.instanceKey),
+                                selectedInstances,
+                                selectedGroups
+                        )
+                    }
+            )
         }
 
         return treeNode
@@ -132,42 +128,40 @@ class NotDoneGroupNode(
     }
 
     override val name
-        get(): NameData? {
-            return if (singleInstance()) {
-                NameData(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary)
+        get() = if (singleInstance()) {
+            NameData(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary)
+        } else {
+            if (treeNode.isExpanded) {
+                null
             } else {
-                if (treeNode.isExpanded) {
-                    null
-                } else {
-                    NameData(instanceDatas.sorted().joinToString(", ") { it.name })
-                }
+                NameData(instanceDatas.sorted().joinToString(", ") { it.name })
             }
         }
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override val details
-        get(): Pair<String, Int>? {
-            if (singleInstance()) {
-                return if (singleInstanceData.displayText.isNullOrEmpty()) {
-                    null
-                } else {
-                    Pair(singleInstanceData.displayText!!, if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary)
-                }
+        get() = if (singleInstance()) {
+            if (singleInstanceData.displayText.isNullOrEmpty()) {
+                null
             } else {
-                val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
-
-                val date = exactTimeStamp.date
-                val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-                val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
-
-                val timeText = customTimeData?.Name ?: hourMinute.toString()
-
-                val text = date.getDisplayText() + ", " + timeText
-
-                return Pair(text, colorSecondary)
+                Pair(
+                        singleInstanceData.displayText!!,
+                        if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary
+                )
             }
+        } else {
+            val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
+
+            val date = exactTimeStamp.date
+            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+
+            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.Name
+                    ?: hourMinute.toString()
+
+            val text = date.getDisplayText() + ", " + timeText
+
+            Pair(text, colorSecondary)
         }
 
     override val children
@@ -202,7 +196,6 @@ class NotDoneGroupNode(
                     groupListFragment.listener.showSnackbarDone(1) {
                         DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
                     }
-
                 }
             }
         } else {
@@ -285,7 +278,8 @@ class NotDoneGroupNode(
                     false,
                     listOf(),
                     listOf(),
-                    null)
+                    null
+            )
 
             childTreeNodes.forEach { treeNode.add(it, x) }
         }
@@ -336,10 +330,17 @@ class NotDoneGroupNode(
             expandedInstances: Map<InstanceKey, Boolean>,
             selected: Boolean,
             selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>): TreeNode<NodeHolder> {
+            selectedGroups: List<Long>
+    ): TreeNode<NodeHolder> {
         val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selected, selectedInstances, selectedGroups, treeNode)
+        val childTreeNode = notDoneInstanceNode.initialize(
+                expandedInstances,
+                selected,
+                selectedInstances,
+                selectedGroups,
+                treeNode
+        )
 
         notDoneInstanceNodes.add(notDoneInstanceNode)
 
@@ -366,20 +367,42 @@ class NotDoneGroupNode(
         }
     }
 
-    override val id: Any = if (singleInstance()) Id(singleInstanceData.instanceKey) else exactTimeStamp
+    override val id: Any = if (singleInstance())
+        SingleId(singleInstanceData.instanceKey)
+    else
+        GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)
 
     override val toggleDescendants get() = !singleInstance()
 
-    data class Id(val instanceKey: InstanceKey)
+    data class SingleId(val instanceKey: InstanceKey)
+
+    class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp) {
+
+        override fun hashCode() = 1
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this)
+                return true
+
+            if (other !is GroupId)
+                return false
+
+            return instanceKeys == other.instanceKeys || exactTimeStamp == other.exactTimeStamp
+        }
+    }
 
     class NotDoneInstanceNode(
             indentation: Int,
             val instanceData: GroupListFragment.InstanceData,
-            private val parentNotDoneGroupNode: NotDoneGroupNode) : GroupHolderNode(indentation), NodeCollectionParent {
+            private val parentNotDoneGroupNode: NotDoneGroupNode
+    ) : GroupHolderNode(indentation), NodeCollectionParent {
 
         companion object {
 
-            fun getChildrenNew(treeNode: TreeNode<NodeHolder>, instanceData: GroupListFragment.InstanceData) = instanceData.children
+            fun getChildrenNew(
+                    treeNode: TreeNode<NodeHolder>,
+                    instanceData: GroupListFragment.InstanceData
+            ) = instanceData.children
                     .values
                     .filter { it.done == null }
                     .let {
@@ -417,15 +440,12 @@ class NotDoneGroupNode(
                 selected: Boolean,
                 selectedInstances: List<InstanceKey>,
                 selectedGroups: List<Long>,
-                notDoneGroupTreeNode: TreeNode<NodeHolder>): TreeNode<NodeHolder> {
-            val expanded: Boolean
-            val doneExpanded: Boolean
-            if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
-                expanded = true
-                doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
+                notDoneGroupTreeNode: TreeNode<NodeHolder>
+        ): TreeNode<NodeHolder> {
+            val (expanded, doneExpanded) = if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
+                true to expandedInstances.getValue(instanceData.instanceKey)
             } else {
-                expanded = false
-                doneExpanded = false
+                false to false
             }
 
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
@@ -442,9 +462,10 @@ class NotDoneGroupNode(
                     false,
                     listOf(),
                     listOf(),
-                    null))
+                    null
+            ))
 
-            return this.treeNode
+            return treeNode
         }
 
         fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
@@ -507,11 +528,9 @@ class NotDoneGroupNode(
         data class Id(val instanceKey: InstanceKey)
     }
 
-    override fun ordinalDesc(): String? {
-        return if (singleInstance()) {
-            singleInstanceData.run { hierarchyData?.let { name + " " + it.ordinal } }
-        } else {
-            null
-        }
+    override fun ordinalDesc() = if (singleInstance()) {
+        singleInstanceData.run { hierarchyData?.let { name + " " + it.ordinal } }
+    } else {
+        null
     }
 }

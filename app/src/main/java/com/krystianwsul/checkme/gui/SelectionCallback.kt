@@ -98,14 +98,16 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         getTreeViewAdapter().updateDisplayedNodes {
-            onMenuClick(item.itemId, TreeViewAdapter.Placeholder)
+            val close = onMenuClick(item.itemId, TreeViewAdapter.Placeholder)
 
             check(!removingLast)
             check(!menuClick)
 
-            menuClick = true
-            actionMode?.finish()
-            menuClick = false
+            if (close) {
+                menuClick = true
+                actionMode?.finish()
+                menuClick = false
+            }
         }
 
         return true
@@ -117,9 +119,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         when {
             removingLast -> actionMode = null
             menuClick -> countdown()
-            else -> getTreeViewAdapter().updateDisplayedNodes {
-                countdown()
-            }
+            else -> getTreeViewAdapter().updateDisplayedNodes { countdown() }
         }
 
         bottomBarData.apply {
@@ -219,7 +219,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun unselect(x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder)
+    protected abstract fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean
 
     @CallSuper
     protected open fun onFirstAdded(x: TreeViewAdapter.Placeholder) = updateMenu()

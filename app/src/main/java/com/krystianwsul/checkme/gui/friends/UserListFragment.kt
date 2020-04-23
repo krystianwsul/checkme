@@ -63,12 +63,14 @@ class UserListFragment : AbstractFragment(), FabUser {
             Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar)
         }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             check(itemId == R.id.action_friends_delete)
 
             (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 
             updateSelectAll()
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {

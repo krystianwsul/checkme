@@ -245,6 +245,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.action_save).isVisible = data != null
+        menu.findItem(R.id.action_save_and_open).isVisible = data != null && data!!.taskData == null
 
         return true
     }
@@ -252,237 +253,271 @@ class CreateTaskActivity : NavBarActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         check(!hasValueParentTask() || !hasValueSchedule())
 
-        when (item.itemId) {
-            R.id.action_save -> {
-                checkNotNull(data)
-                checkNotNull(toolbarEditText)
+        fun save(andOpen: Boolean) {
+            checkNotNull(data)
+            checkNotNull(toolbarEditText)
 
-                if (!updateError()) {
-                    val name = toolbarEditText.text.toString().trim { it <= ' ' }
-                    check(!TextUtils.isEmpty(name))
+            if (!updateError()) {
+                val name = toolbarEditText.text.toString().trim { it <= ' ' }
+                check(!TextUtils.isEmpty(name))
 
-                    createTaskViewModel.stop()
+                createTaskViewModel.stop()
 
-                    val writeImagePath = imageUrl.value!!.writeImagePath
+                val writeImagePath = imageUrl.value!!.writeImagePath
 
-                    val taskKey: TaskKey = when {
-                        hasValueSchedule() -> {
-                            check(!hasValueParentTask())
+                val taskKey: TaskKey = when {
+                    hasValueSchedule() -> {
+                        check(!hasValueParentTask())
 
-                            val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
+                        val projectId = if (hasValueParentInGeneral())
+                            (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId
+                        else
+                            null
 
-                            when {
-                                copy -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
+                        when {
+                            copy -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
 
-                                    DomainFactory.instance.createScheduleRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            scheduleDatas,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value,
-                                            taskKey!!
-                                    ).also { createdTaskKey = it }
-                                }
-                                taskKey != null -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.updateScheduleTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            taskKey!!,
-                                            name,
-                                            scheduleDatas,
-                                            note,
-                                            projectId,
-                                            writeImagePath
-                                    )
-                                }
-                                taskKeys != null -> {
-                                    check(data!!.taskData == null)
-                                    check(taskKeys!!.size > 1)
-
-                                    DomainFactory.instance.createScheduleJoinRootTask(
-                                            ExactTimeStamp.now,
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            scheduleDatas,
-                                            taskKeys!!,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value,
-                                            removeInstanceKeys
-                                    ).also { createdTaskKey = it }
-                                }
-                                else -> {
-                                    check(data!!.taskData == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.createScheduleRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            scheduleDatas,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value
-                                    ).also { createdTaskKey = it }
-                                }
+                                DomainFactory.instance
+                                        .createScheduleRootTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                scheduleDatas,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value,
+                                                taskKey!!
+                                        )
+                                        .also { createdTaskKey = it }
                             }
-                        }
-                        hasValueParentTask() -> {
-                            checkNotNull(stateData.parent)
+                            taskKey != null -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
 
-                            val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
-
-                            if (intent.action == Intent.ACTION_SEND)
-                                ShortcutManager.addShortcut(parentTaskKey)
-
-                            when {
-                                copy -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.createChildTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            parentTaskKey,
-                                            name,
-                                            note,
-                                            writeImagePath?.value,
-                                            taskKey!!
-                                    ).also { createdTaskKey = it }
-                                }
-                                taskKey != null -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.updateChildTask(
-                                            ExactTimeStamp.now,
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            taskKey!!,
-                                            name,
-                                            parentTaskKey,
-                                            note,
-                                            writeImagePath
-                                    )
-                                }
-                                taskKeys != null -> {
-                                    check(data!!.taskData == null)
-                                    check(taskKeys!!.size > 1)
-
-                                    DomainFactory.instance.createJoinChildTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            parentTaskKey,
-                                            name,
-                                            taskKeys!!,
-                                            note,
-                                            writeImagePath?.value,
-                                            removeInstanceKeys
-                                    ).also { createdTaskKey = it }
-                                }
-                                else -> {
-                                    check(data!!.taskData == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.createChildTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            parentTaskKey,
-                                            name,
-                                            note,
-                                            writeImagePath?.value
-                                    ).also { createdTaskKey = it }
-                                }
+                                DomainFactory.instance.updateScheduleTask(
+                                        data!!.dataId,
+                                        SaveService.Source.GUI,
+                                        taskKey!!,
+                                        name,
+                                        scheduleDatas,
+                                        note,
+                                        projectId,
+                                        writeImagePath
+                                )
                             }
-                        }
-                        else -> {  // no reminder
-                            val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
+                            taskKeys != null -> {
+                                check(data!!.taskData == null)
+                                check(taskKeys!!.size > 1)
 
-                            when {
-                                copy -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
+                                DomainFactory.instance
+                                        .createScheduleJoinRootTask(
+                                                ExactTimeStamp.now,
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                scheduleDatas,
+                                                taskKeys!!,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value,
+                                                removeInstanceKeys
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                            else -> {
+                                check(data!!.taskData == null)
+                                check(removeInstanceKeys.isEmpty())
 
-                                    DomainFactory.instance.createRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value,
-                                            taskKey!!
-                                    ).also { createdTaskKey = it }
-                                }
-                                taskKey != null -> {
-                                    checkNotNull(data!!.taskData)
-                                    check(taskKeys == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.updateRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            taskKey!!,
-                                            name,
-                                            note,
-                                            projectId,
-                                            writeImagePath
-                                    )
-                                }
-                                taskKeys != null -> {
-                                    check(data!!.taskData == null)
-
-                                    DomainFactory.instance.createJoinRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            taskKeys!!,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value,
-                                            removeInstanceKeys
-                                    ).also { createdTaskKey = it }
-                                }
-                                else -> {
-                                    check(data!!.taskData == null)
-                                    check(removeInstanceKeys.isEmpty())
-
-                                    DomainFactory.instance.createRootTask(
-                                            data!!.dataId,
-                                            SaveService.Source.GUI,
-                                            name,
-                                            note,
-                                            projectId,
-                                            writeImagePath?.value
-                                    ).also { createdTaskKey = it }
-                                }
+                                DomainFactory.instance
+                                        .createScheduleRootTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                scheduleDatas,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value
+                                        )
+                                        .also { createdTaskKey = it }
                             }
                         }
                     }
+                    hasValueParentTask() -> {
+                        checkNotNull(stateData.parent)
 
-                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                        val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
-                    finish()
+                        if (intent.action == Intent.ACTION_SEND)
+                            ShortcutManager.addShortcut(parentTaskKey)
+
+                        when {
+                            copy -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance
+                                        .createChildTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                parentTaskKey,
+                                                name,
+                                                note,
+                                                writeImagePath?.value,
+                                                taskKey!!
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                            taskKey != null -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance.updateChildTask(
+                                        ExactTimeStamp.now,
+                                        data!!.dataId,
+                                        SaveService.Source.GUI,
+                                        taskKey!!,
+                                        name,
+                                        parentTaskKey,
+                                        note,
+                                        writeImagePath
+                                )
+                            }
+                            taskKeys != null -> {
+                                check(data!!.taskData == null)
+                                check(taskKeys!!.size > 1)
+
+                                DomainFactory.instance
+                                        .createJoinChildTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                parentTaskKey,
+                                                name,
+                                                taskKeys!!,
+                                                note,
+                                                writeImagePath?.value,
+                                                removeInstanceKeys
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                            else -> {
+                                check(data!!.taskData == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance
+                                        .createChildTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                parentTaskKey,
+                                                name,
+                                                note,
+                                                writeImagePath?.value
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                        }
+                    }
+                    else -> {  // no reminder
+                        val projectId = if (hasValueParentInGeneral())
+                            (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId
+                        else
+                            null
+
+                        when {
+                            copy -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance
+                                        .createRootTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value,
+                                                taskKey!!
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                            taskKey != null -> {
+                                checkNotNull(data!!.taskData)
+                                check(taskKeys == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance.updateRootTask(
+                                        data!!.dataId,
+                                        SaveService.Source.GUI,
+                                        taskKey!!,
+                                        name,
+                                        note,
+                                        projectId,
+                                        writeImagePath
+                                )
+                            }
+                            taskKeys != null -> {
+                                check(data!!.taskData == null)
+
+                                DomainFactory.instance
+                                        .createJoinRootTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                taskKeys!!,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value,
+                                                removeInstanceKeys
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                            else -> {
+                                check(data!!.taskData == null)
+                                check(removeInstanceKeys.isEmpty())
+
+                                DomainFactory.instance
+                                        .createRootTask(
+                                                data!!.dataId,
+                                                SaveService.Source.GUI,
+                                                name,
+                                                note,
+                                                projectId,
+                                                writeImagePath?.value
+                                        )
+                                        .also { createdTaskKey = it }
+                            }
+                        }
+                    }
                 }
+
+                if (andOpen)
+                    startActivity(ShowTaskActivity.newIntent(taskKey))
+
+                setResult(
+                        Activity.RESULT_OK,
+                        Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) }
+                )
+
+                finish()
             }
+        }
+
+        when (item.itemId) {
+            R.id.action_save -> save(false)
+            R.id.action_save_and_open -> save(true)
             android.R.id.home -> {
                 if (tryClose())
                     finish()
             }
             else -> throw UnsupportedOperationException()
         }
+
         return true
     }
 
@@ -677,10 +712,10 @@ class CreateTaskActivity : NavBarActivity() {
 
         toolbarEditText.run {
             if (savedInstanceState == null) {
-                if (this@CreateTaskActivity.data!!.taskData != null) {
+                if (data.taskData != null) {
                     checkNotNull(taskKey)
 
-                    setText(this@CreateTaskActivity.data!!.taskData!!.name)
+                    setText(data.taskData.name)
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
@@ -691,15 +726,15 @@ class CreateTaskActivity : NavBarActivity() {
 
             addTextChangedListener(object : TextWatcher {
 
-                private var mSkip = savedInstanceState != null
+                private var skip = savedInstanceState != null
 
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
                 override fun afterTextChanged(s: Editable) {
-                    if (mSkip) {
-                        mSkip = false
+                    if (skip) {
+                        skip = false
                         return
                     }
 
@@ -723,7 +758,7 @@ class CreateTaskActivity : NavBarActivity() {
                 noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
             }
         } else {
-            this.data!!.run {
+            data.run {
                 if (taskData?.parentKey != null) {
                     check(parentHint == null)
                     check(taskKeys == null)
@@ -735,6 +770,11 @@ class CreateTaskActivity : NavBarActivity() {
 
                     MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentHint")
                     parentKey = CreateTaskViewModel.ParentKey.Task(parentHint)
+                } else {
+                    parentKey = taskKeys?.map { it.projectKey }
+                            ?.distinct()
+                            ?.singleOrNull()
+                            ?.let { CreateTaskViewModel.ParentKey.Project(it) }
                 }
 
                 taskData?.let { note = it.note }

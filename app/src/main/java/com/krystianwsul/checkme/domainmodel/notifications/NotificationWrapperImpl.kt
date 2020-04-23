@@ -159,7 +159,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val timeStampLong = instanceData.timeStampLong
 
-        val sortKey = timeStampLong.toString() + instanceData.startExactTimeStamp
+        val sortKey = timeStampLong.toString() + doubleToString(instanceData.ordinal)
 
         val largeIcon = ImageManager.getLargeIcon(instanceData.uuid)
 
@@ -189,6 +189,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 largeIcon = largeIcon,
                 notificationHash = notificationHash
         )
+    }
+
+    private fun doubleToString(d: Double): String {
+        val bits = java.lang.Double.doubleToLongBits(d)
+        val s = bits.toString()
+        return (if (bits < 0) "--------------------" else "00000000000000000000").substring(s.length) + s
     }
 
     private fun getInstanceText(instance: Instance<*>, now: ExactTimeStamp): String {
@@ -514,9 +520,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .timeStamp
                 .long
 
-        val startExactTimeStamp = instance.task
-                .startExactTimeStamp
-                .toString()
+        val ordinal = instance.ordinal
 
         val name = instance.name
 

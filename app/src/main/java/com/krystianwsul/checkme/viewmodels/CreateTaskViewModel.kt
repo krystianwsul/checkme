@@ -23,7 +23,11 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, joinTaskKeys, parentTaskKeyHint)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
+                taskKey,
+                joinTaskKeys,
+                parentTaskKeyHint
+        )
     }
 
     fun start(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?) {

@@ -35,7 +35,7 @@ task clean(type: Delete) {
 
 ext {
     appCompatVersion = '1.1.0'
-    materialVersion = '1.2.0-alpha05'
+    materialVersion = '1.2.0-alpha06'
     jodaVersion = '2.10.3'
     rxJavaVersion = '2.2.19'
     serializationVersion = '0.20.0'

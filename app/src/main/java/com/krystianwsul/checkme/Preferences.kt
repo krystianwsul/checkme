@@ -20,6 +20,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val TAB_KEY = "tab"
     private const val KEY_SHORTCUTS = "shortcuts2"
     private const val KEY_TEMPORARY_NOTIFICATION_LOG = "temporaryNotificationLog"
+    private const val KEY_MAIN_TABS_LOG = "mainTabsLog"
     private const val TOKEN_KEY = "token"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
@@ -53,6 +54,8 @@ object Preferences : FactoryProvider.Preferences {
 
     val tokenRelay = BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))
 
+    val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
+
     init {
         tokenRelay.distinctUntilChanged()
                 .skip(1)
@@ -81,7 +84,7 @@ object Preferences : FactoryProvider.Preferences {
                 .apply()
     }
 
-    class Logger(key: String) {
+    class Logger(key: String, private val length: Int = 100) {
 
         private var logString by ReadWriteStrPref(key)
 
@@ -99,7 +102,7 @@ object Preferences : FactoryProvider.Preferences {
             MyCrashlytics.log("Preferences.logLine: $line")
 
             logString = logString.split('\n')
-                    .take(100)
+                    .take(length)
                     .toMutableList()
                     .apply { add(0, line) }
                     .joinToString("\n")

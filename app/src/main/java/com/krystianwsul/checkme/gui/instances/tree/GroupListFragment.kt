@@ -144,13 +144,13 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_groups_bottom, listener::initBottomBar) }
 
-        override fun onMenuClick(@IdRes itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(@IdRes itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val treeNodes = treeViewAdapter.selectedNodes
 
             val selectedDatas = nodesToSelectedDatas(treeNodes, true)
             if (selectedDatas.isEmpty()) {
                 MyCrashlytics.logException(NoSelectionException("menuItem.id: ${activity.normalizedId(itemId)}, selectedDatas: $selectedDatas, selectedNodes: $treeNodes"))
-                return
+                return true
             }
 
             when (itemId) {
@@ -169,7 +169,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
 
-                    EditInstancesFragment.newInstance(instanceKeys).show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
+                    EditInstancesFragment.newInstance(instanceKeys)
+                            .also { it.listener = this@GroupListFragment::onEditInstances }
+                            .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
+
+                    return false
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {
@@ -310,6 +314,8 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
@@ -343,42 +349,30 @@ class GroupListFragment @JvmOverloads constructor(
             if (selectedDatas.size == 1) {
                 val instanceData = selectedDatas.single()
 
-                itemVisibilities.addAll(listOf(
+                itemVisibilities += listOf(
                         R.id.action_group_show_task to true,
                         R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
                         R.id.action_group_add_task to instanceData.taskCurrent,
                         R.id.actionGroupCopyTask to instanceData.taskCurrent
-                ))
+                )
             } else {
                 check(selectedDatas.size > 1)
 
-                itemVisibilities.addAll(listOf(
+                itemVisibilities += listOf(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
                         R.id.action_group_add_task to false,
                         R.id.actionGroupCopyTask to false
-                ))
+                )
 
-                if (selectedDatas.all { it.taskCurrent }) {
-                    val projectIdCount = selectedDatas.asSequence()
-                            .map { it.taskKey.projectKey }
-                            .distinct()
-                            .count()
+                val allCurrent = selectedDatas.all { it.taskCurrent }
 
-                    check(projectIdCount > 0)
-
-                    itemVisibilities.addAll(listOf(
-                            R.id.action_group_join to (projectIdCount == 1),
-                            R.id.action_group_delete_task to true
-                    ))
-                } else {
-                    itemVisibilities.addAll(listOf(
-                            R.id.action_group_join to false,
-                            R.id.action_group_delete_task to false
-                    ))
-                }
+                itemVisibilities += listOf(
+                        R.id.action_group_join to allCurrent,
+                        R.id.action_group_delete_task to allCurrent
+                )
             }
 
             return itemVisibilities
@@ -502,6 +496,8 @@ class GroupListFragment @JvmOverloads constructor(
         compositeDisposable += observable.subscribe { initialize() }
 
         activity.startTicks(receiver)
+
+        (activity.supportFragmentManager.findFragmentByTag(EDIT_INSTANCES_TAG) as? EditInstancesFragment)?.listener = this::onEditInstances
     }
 
     override fun onDetachedFromWindow() {
@@ -790,6 +786,10 @@ class GroupListFragment @JvmOverloads constructor(
                         else -> false
                     }
                 }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+    }
+
+    private fun onEditInstances() {
+        selectionCallback.actionMode!!.finish()
     }
 
     class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {

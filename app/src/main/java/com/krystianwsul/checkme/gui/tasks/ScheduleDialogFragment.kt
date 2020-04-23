@@ -9,9 +9,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.transition.TransitionManager
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
@@ -61,7 +64,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private lateinit var customView: View
+    private lateinit var customView: ViewGroup
     private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
     private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
@@ -202,7 +205,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        position = arguments!!.getInt(KEY_POSITION, -1).takeUnless { it == -1 }
+        position = requireArguments().getInt(KEY_POSITION, -1).takeUnless { it == -1 }
     }
 
     @SuppressLint("InflateParams")
@@ -246,7 +249,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             scheduleDialogCancel.setOnClickListener { dialog!!.cancel() }
-        }
+        } as ViewGroup
 
         return TransparentNavigationDialog().apply {
             setCancelable(true)
@@ -258,8 +261,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        scheduleDialogData = (savedInstanceState
-                ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
+        scheduleDialogData = (savedInstanceState ?: requireArguments()).run {
+            getParcelable(SCHEDULE_DIALOG_DATA_KEY)!!
+        }
 
         customView.scheduleType.run {
             setItems(resources.getStringArray(R.array.schedule_types).toList())
@@ -331,6 +335,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 it.listener = data.listener
             }
         }
+
+        customView.scheduleDialogAllDays.apply {
+            setOnCheckedChangeListener { _, isChecked ->
+                scheduleDialogData.allDays = isChecked
+
+                updateFields()
+            }
+        }
+
+        customView.scheduleDialogAllDays.isChecked = scheduleDialogData.allDays
 
         scheduleDialogData.daysOfWeek.forEach { scheduleDialogDays.getValue(it).isChecked = true }
         scheduleDialogDays.forEach { (day, view) ->
@@ -526,6 +540,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private fun updateFields() {
         checkNotNull(customTimeDatas)
 
+        TransitionManager.beginDelayedTransition(customView)
+
         val customTimeData = scheduleDialogData.timePairPersist
                 .customTimeKey
                 ?.let { customTimeDatas!!.getValue(it) }
@@ -577,6 +593,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
+        scheduleDialogDays.values.forEach { it.isVisible = !scheduleDialogData.allDays }
+
         checkValid()
     }
 
@@ -589,7 +607,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     @Parcelize
     class ScheduleDialogData(
             var date: Date,
-            var daysOfWeek: HashSet<DayOfWeek>,
+            var daysOfWeek: MutableSet<DayOfWeek>,
+            var allDays: Boolean,
             var monthlyDay: Boolean,
             var monthDayNumber: Int,
             var monthWeekNumber: Int,
@@ -619,7 +638,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     timePairPersist.timePair
             ))
             ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
-                    daysOfWeek,
+                    if (allDays) DayOfWeek.set else daysOfWeek,
                     timePairPersist.timePair,
                     from,
                     until

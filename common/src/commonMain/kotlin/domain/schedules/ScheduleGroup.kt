@@ -12,8 +12,6 @@ sealed class ScheduleGroup<T : ProjectType> {
 
     companion object {
 
-        private val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
-
         fun <T : ProjectType> getGroups(schedules: List<Schedule<out T>>): List<ScheduleGroup<T>> {
             fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
                 getHourMinute(day).let { it.hour * 60 + it.minute }
@@ -40,7 +38,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                     .sortedWith(compareBy(
                             { !it.beginningOfMonth },
                             { it.dayOfMonth },
-                            { it.time.getTimeFloat(allDaysOfWeek) }))
+                            { it.time.getTimeFloat(DayOfWeek.set) }))
                     .map { MonthlyDay(it) }
 
             val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule<T>>()
@@ -48,7 +46,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                             { !it.beginningOfMonth },
                             { it.dayOfMonth },
                             { it.dayOfWeek },
-                            { it.time.getTimeFloat(allDaysOfWeek) }))
+                            { it.time.getTimeFloat(DayOfWeek.set) }))
                     .map { MonthlyWeek(it) }
 
             return singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules

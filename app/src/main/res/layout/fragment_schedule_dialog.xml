@@ -48,6 +48,12 @@
             android:visibility="gone">
 
             <CheckBox
+                android:id="@+id/scheduleDialogAllDays"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/allDays" />
+
+            <CheckBox
                 android:id="@+id/scheduleDialogSunday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

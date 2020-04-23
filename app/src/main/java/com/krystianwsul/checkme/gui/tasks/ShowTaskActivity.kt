@@ -76,6 +76,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
+        toolbar.inflateMenu(R.menu.empty_menu)
+
         initBottomBar()
 
         taskKey = (savedInstanceState ?: intent.extras!!).getParcelable(TASK_KEY_KEY)!!

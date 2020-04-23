@@ -61,6 +61,9 @@ class DebugFragment : AbstractFragment() {
                 append("\ninstance shown: ")
                 append(domainFactory.instanceShownCount)
 
+                append("\n\n")
+                append(Preferences.mainTabsLog.log)
+
                 val t1 = ExactTimeStamp.now
                 DomainFactory.instance.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
                 val t2 = ExactTimeStamp.now

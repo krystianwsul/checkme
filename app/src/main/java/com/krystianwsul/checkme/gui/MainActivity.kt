@@ -413,6 +413,8 @@ class MainActivity :
 
         mainDaysPager.run {
             pageSelections().subscribe {
+                Preferences.mainTabsLog.logLineHour("pageSelections $it")
+
                 daysPosition.accept(it)
 
                 updateBottomMenu()
@@ -487,8 +489,12 @@ class MainActivity :
 
                 override fun onTabSelected(tab: TabLayout.Tab) {
                     if (state == PagerScrollState.PagerTarget) {
+                        Preferences.mainTabsLog.logLineHour("onTabSelected ignoring")
+
                         state = PagerScrollState.Settled
                     } else {
+                        Preferences.mainTabsLog.logLineHour("onTabSelected ${tab.position}")
+
                         state = PagerScrollState.TabTarget(tab.position)
                         mainDaysPager.smoothScrollToPosition(tab.position)
                     }

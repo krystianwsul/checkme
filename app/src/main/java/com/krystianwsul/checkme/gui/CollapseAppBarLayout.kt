@@ -1,11 +1,13 @@
 package com.krystianwsul.checkme.gui
 
 import android.content.Context
+import android.text.StaticLayout
 import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.appbar.AppBarLayout
-import com.krystianwsul.checkme.R
+import com.google.android.material.internal.CollapsingTextHelper
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.getPrivateField
 import kotlinx.android.synthetic.main.toolbar_collapse.view.*
 
 class CollapseAppBarLayout : AppBarLayout {
@@ -24,8 +26,11 @@ class CollapseAppBarLayout : AppBarLayout {
             it.text = text
 
             it.addOneShotGlobalLayoutListener {
+                val collapsingTextHelper: CollapsingTextHelper = toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
+                val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
+
                 layoutParams = layoutParams.apply {
-                    height = resources.getDimension(R.dimen.collapseAppBarHeight).toInt() + it.height
+                    height = textLayout.height + 140 + it.height
                 }
             }
         }

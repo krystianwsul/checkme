@@ -22,7 +22,10 @@ import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.prettyPrint
-import com.krystianwsul.checkme.utils.time.*
+import com.krystianwsul.checkme.utils.time.calendar
+import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.checkme.utils.time.toDateTimeSoy
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -128,23 +131,6 @@ class DomainFactory(
 
     var deviceDbInfo = _deviceDbInfo
         private set
-
-    val irrelevantSummary
-        get() = "remove older than: " + org.joda.time.DateTime.now().minusDays(2).toExactTimeStamp().date + "\n\n" + getExistingInstances().asSequence()
-                .let { existingInstances ->
-                    listOf(
-                            "done" to existingInstances.filter { it.done != null }
-                                    .sortedBy { it.done!! }
-                                    .map { it.done!!.toString() + ": " + it.name }
-                            /*
-                            ,
-                            "schedule" to existingInstances.sortedBy { it.scheduleDateTime }.map { it.scheduleDateTime.toString() + ": " + it.name + "(done ${it.done})" },
-                            "instance" to existingInstances.sortedBy { it.instanceDateTime }.map { it.instanceDateTime.toString() + ": " + it.name + "(done ${it.done})" }
-                            */
-                    ).joinToString("\n\n") { (desc, instances) ->
-                        "oldest by $desc:\n" + instances.take(10).joinToString("\n")
-                    }
-                }
 
     val isSaved = BehaviorRelay.createDefault(false)
 

@@ -356,7 +356,13 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                 val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
-                instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
+                instanceKey = instanceKey.scheduleKey.run {
+                    InstanceKey(
+                            taskKey,
+                            scheduleDate,
+                            scheduleTimePair.run { TimePair(customTimeKey, hourMinute) }
+                    )
+                }
             } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
                 if (!this.data!!.exists) {
                     finish()

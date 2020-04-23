@@ -147,6 +147,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return dateError.isNullOrEmpty() && timeError.isNullOrEmpty()
         } else {
+            customView.scheduleDialogDateLayout.error = null
+            customView.scheduleDialogTimeLayout.error = null
+
             var valid = true
 
             customView.scheduleDialogFromLayout.error = null
@@ -204,7 +207,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(arguments!!.containsKey(SHOW_DELETE_KEY))
+        check(requireArguments().containsKey(SHOW_DELETE_KEY))
 
         customView = requireActivity().layoutInflater.inflate(R.layout.fragment_schedule_dialog, null).apply {
             scheduleDialogDays = mapOf(

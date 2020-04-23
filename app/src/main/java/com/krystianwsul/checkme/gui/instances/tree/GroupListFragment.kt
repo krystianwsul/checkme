@@ -144,13 +144,13 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_groups_bottom, listener::initBottomBar) }
 
-        override fun onMenuClick(@IdRes itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(@IdRes itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val treeNodes = treeViewAdapter.selectedNodes
 
             val selectedDatas = nodesToSelectedDatas(treeNodes, true)
             if (selectedDatas.isEmpty()) {
                 MyCrashlytics.logException(NoSelectionException("menuItem.id: ${activity.normalizedId(itemId)}, selectedDatas: $selectedDatas, selectedNodes: $treeNodes"))
-                return
+                return true
             }
 
             when (itemId) {
@@ -169,7 +169,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
 
-                    EditInstancesFragment.newInstance(instanceKeys).show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
+                    EditInstancesFragment.newInstance(instanceKeys)
+                            .also { it.listener = this@GroupListFragment::onEditInstances }
+                            .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
+
+                    return false
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {
@@ -310,6 +314,8 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
@@ -502,6 +508,8 @@ class GroupListFragment @JvmOverloads constructor(
         compositeDisposable += observable.subscribe { initialize() }
 
         activity.startTicks(receiver)
+
+        (activity.supportFragmentManager.findFragmentByTag(EDIT_INSTANCES_TAG) as? EditInstancesFragment)?.listener = this::onEditInstances
     }
 
     override fun onDetachedFromWindow() {
@@ -790,6 +798,10 @@ class GroupListFragment @JvmOverloads constructor(
                         else -> false
                     }
                 }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+    }
+
+    private fun onEditInstances() {
+        selectionCallback.actionMode!!.finish()
     }
 
     class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {

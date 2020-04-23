@@ -113,6 +113,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var myView: View
 
+    var listener: (() -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -134,7 +136,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             initialDate = savedInstanceState.getParcelable(INITIAL_DATE_KEY)!!
         }
 
-        val instanceKeys = arguments!!.getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!
+        val instanceKeys = requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!
         check(instanceKeys.isNotEmpty())
 
         editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply { start(instanceKeys) }
@@ -162,9 +164,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
 
                         dismiss()
+
+                        listener?.invoke()
                     }
 
-                    editInstanceCancel.setOnClickListener { dialog!!.cancel() }
+                    editInstanceCancel.setOnClickListener { requireDialog().cancel() }
                 }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {

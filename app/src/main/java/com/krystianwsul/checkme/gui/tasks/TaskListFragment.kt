@@ -88,7 +88,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
             val selected = treeViewAdapter.selectedNodes
             check(selected.isNotEmpty())
 
@@ -112,6 +112,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 R.id.actionTaskCopy -> startActivity(CreateTaskActivity.getCopyIntent(taskKeys.single()))
                 else -> throw UnsupportedOperationException()
             }
+
+            return true
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {

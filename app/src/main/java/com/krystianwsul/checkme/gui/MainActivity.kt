@@ -2,8 +2,10 @@ package com.krystianwsul.checkme.gui
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -150,6 +152,16 @@ class MainActivity :
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+        }
+    }
+
+    private val dateReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            mainDaysPager.currentPosition.let {
+                if (it > 0)
+                    mainDaysPager.smoothScrollToPosition(it - 1)
+            }
         }
     }
 
@@ -488,17 +500,7 @@ class MainActivity :
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
-        /* todo move into progress subclass
-        DomainFactory.isSaved
-                .subscribe {
-                    val list = listOf(Pair(mainDaysProgress, HideType.INVISIBLE))
-                    if (it)
-                        animateVisibility2(list, listOf())
-                    else
-                        animateVisibility2(listOf(), list)
-                }
-                .addTo(createDisposable)
-                */
+        registerReceiver(dateReceiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
     }
 
     private sealed class PagerScrollState {
@@ -743,6 +745,8 @@ class MainActivity :
     override fun onDestroy() {
         onPageChangeDisposable?.dispose()
         onPageChangeDisposable = null
+
+        unregisterReceiver(dateReceiver)
 
         super.onDestroy()
     }

@@ -4,11 +4,11 @@ import com.krystianwsul.common.utils.*
 
 @Parcelize
 data class TimePair(
-        val customTimeKey: CustomTimeKey<*, *>?,
+        val customTimeKey: CustomTimeKey<*>?,
         val hourMinute: HourMinute?
 ) : Parcelable, Serializable {
 
-    constructor(customTimeKey: CustomTimeKey<*, *>) : this(customTimeKey, null)
+    constructor(customTimeKey: CustomTimeKey<*>) : this(customTimeKey, null)
 
     constructor(hourMinute: HourMinute) : this(null, hourMinute)
 
@@ -26,23 +26,23 @@ data class TimePair(
         }
     }
 
-    fun destructureRemote(): Triple<RemoteCustomTimeId?, Int?, Int?> {
-        val remoteCustomTimeId: RemoteCustomTimeId?
+    fun destructureRemote(): Triple<CustomTimeId<*>?, Int?, Int?> {
+        val customTimeId: CustomTimeId<*>?
         val hour: Int?
         val minute: Int?
 
         if (customTimeKey != null) {
             check(hourMinute == null)
 
-            remoteCustomTimeId = customTimeKey.remoteCustomTimeId
+            customTimeId = customTimeKey.customTimeId
             hour = null
             minute = null
         } else {
-            remoteCustomTimeId = null
+            customTimeId = null
             hour = hourMinute!!.hour
             minute = hourMinute.minute
         }
 
-        return Triple(remoteCustomTimeId, hour, minute)
+        return Triple(customTimeId, hour, minute)
     }
 }

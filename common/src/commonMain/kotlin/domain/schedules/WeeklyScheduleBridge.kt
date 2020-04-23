@@ -1,6 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-interface WeeklyScheduleBridge : RepeatingScheduleBridge {
+import com.krystianwsul.common.utils.ProjectType
+
+interface WeeklyScheduleBridge<T : ProjectType> : RepeatingScheduleBridge<T> {
 
     val daysOfWeek: Set<Int>
 }

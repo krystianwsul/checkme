@@ -1,8 +1,8 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.firebase.models.RemoteCustomTime
+import com.krystianwsul.common.time.Time
 
-class RemoteCustomTimeRelevance(val remoteCustomTime: RemoteCustomTime<*, *>) {
+class RemoteCustomTimeRelevance(val customTime: Time.Custom<*>) {
 
     var relevant = false
         private set

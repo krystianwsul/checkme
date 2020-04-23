@@ -82,9 +82,13 @@ abstract class RemoteRecord(create: Boolean) {
     }
 
     protected inner class Committer<T>(
-            private val innerProperty: KMutableProperty0<T>,
+            private val innerPropertyGetter: () -> KMutableProperty0<T>,
             private val path: String? = null
     ) : ReadWriteProperty<RemoteRecord, T> {
+
+        constructor(innerProperty: KMutableProperty0<T>, path: String? = null) : this({ innerProperty }, path)
+
+        private val innerProperty get() = innerPropertyGetter()
 
         override fun getValue(thisRef: RemoteRecord, property: KProperty<*>) = innerProperty.get()
 

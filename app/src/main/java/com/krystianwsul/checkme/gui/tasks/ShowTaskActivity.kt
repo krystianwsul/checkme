@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -13,6 +15,7 @@ import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -64,6 +67,11 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         setSnackbar(taskUndoData)
     }
 
+    private val receiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
@@ -87,12 +95,20 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+
+        startDate(receiver)
     }
 
     override fun onStart() {
         super.onStart()
 
         taskListFragment.checkCreatedTaskKey()
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(receiver)
+
+        super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

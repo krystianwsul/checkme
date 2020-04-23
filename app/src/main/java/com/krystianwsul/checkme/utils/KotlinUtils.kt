@@ -34,6 +34,8 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -154,13 +156,17 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 }
 
+fun Context.startDate(receiver: BroadcastReceiver) {
+    registerReceiver(receiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
+}
+
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }!!
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
         ExactTimeStamp.now,
-        remoteProjectFactory.remotePrivateProject.taskKeys
+        projectsFactory.privateProject.taskIds
 )
 
 private fun onComplete(
@@ -193,6 +199,17 @@ fun checkError(domainFactory: DomainFactory, caller: String, values: Map<String,
     }
 }
 
+fun checkError(caller: String): DatabaseCallback {
+    return { databaseMessage, successful, exception ->
+        val message = "firebase write: $caller $databaseMessage"
+        if (successful) {
+            MyCrashlytics.log(message)
+        } else {
+            MyCrashlytics.logException(FirebaseWriteException(message, exception))
+        }
+    }
+}
+
 fun Task<Void>.getMessage() = "isCanceled: $isCanceled, isComplete: $isComplete, isSuccessful: $isSuccessful, exception: $exception"
 
 fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
@@ -219,7 +236,10 @@ val Menu.items get() = MenuItemsIterable(this)
 
 fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenuHack: Boolean = false, onEnd: (() -> Unit)? = null) {
     if (replaceMenuHack) {
-        fun getViews(ids: List<Int>) = ids.mapNotNull { findViewById<View>(it) }
+        fun getViews(ids: List<Int>) = ids.mapNotNull {
+            @Suppress("RemoveExplicitTypeArguments")
+            findViewById<View>(it)
+        }
 
         val hideItems = itemVisibilities.filterNot { it.second }.map { it.first }
         val hideViews = getViews(hideItems)
@@ -318,10 +338,14 @@ val Resources.isLandscape get() = configuration.orientation == Configuration.ORI
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
 
-fun <T : Any> List<Single<T>>.zipSingle() = Single.zip(this) {
-    it.map {
-        @Suppress("UNCHECKED_CAST")
-        it as T
+fun <T : Any> List<Single<T>>.zipSingle() = if (isEmpty()) {
+    Single.just(listOf())
+} else {
+    Single.zip(this) {
+        it.map {
+            @Suppress("UNCHECKED_CAST")
+            it as T
+        }
     }
 }
 
@@ -333,3 +357,25 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
         it.get(this) as U
     }
 }
+
+fun <T> Single<T>.tryGetCurrentValue(): T? {
+    var value: T? = null
+    subscribe { t -> value = t }.dispose()
+    return value
+}
+
+fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
+
+fun <T> Observable<T>.tryGetCurrentValue(): T? {
+    var value: T? = null
+    subscribe { t -> value = t }.dispose()
+    return value
+}
+
+fun <T> Observable<T>.getCurrentValue() = tryGetCurrentValue()!!
+
+fun <T, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
+        map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()
+
+fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) = publish().apply { compositeDisposable += connect() }!!
+fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) = cache().apply { compositeDisposable += subscribe() }!!

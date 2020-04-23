@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -44,6 +45,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -94,7 +96,7 @@ class MainActivity :
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val visibleTab = BehaviorRelay.createDefault(Tab.values()[Preferences.tab])
+    val visibleTab = BehaviorRelay.create<Tab>()
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -149,6 +151,19 @@ class MainActivity :
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+        }
+    }
+
+    private val dateReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            mainDaysPager.currentPosition.let {
+                if (it > 0)
+                    mainDaysPager.smoothScrollToPosition(it - 1)
+            }
+
+            dayViewModel.refresh()
+            mainViewModel.refresh()
         }
     }
 
@@ -217,10 +232,12 @@ class MainActivity :
                 .replay(1)
                 .apply { connect() }
 
+        val overrideTab: Tab?
+
         if (savedInstanceState != null) {
             savedInstanceState.run {
                 check(containsKey(VISIBLE_TAB_KEY))
-                visibleTab.accept(getSerializable(VISIBLE_TAB_KEY) as Tab)
+                overrideTab = getSerializable(VISIBLE_TAB_KEY) as Tab
 
                 check(containsKey(TIME_RANGE_KEY))
                 timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
@@ -252,13 +269,13 @@ class MainActivity :
             states = mutableMapOf()
 
             when (intent.action) {
-                ACTION_INSTANCES -> visibleTab.accept(Tab.INSTANCES)
-                ACTION_TASKS -> visibleTab.accept(Tab.TASKS)
+                ACTION_INSTANCES -> overrideTab = Tab.INSTANCES
+                ACTION_TASKS -> overrideTab = Tab.TASKS
                 ACTION_SEARCH -> {
                     check(restoreInstances.value!!.value == null)
 
                     restoreInstances.accept(NullableWrapper(false))
-                    visibleTab.accept(Tab.TASKS)
+                    overrideTab = Tab.TASKS
 
                     mainSearchToolbar.visibility = View.VISIBLE
                     mainSearchText.apply {
@@ -267,6 +284,7 @@ class MainActivity :
                         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                     }
                 }
+                else -> overrideTab = null
             }
 
             showDeleted.accept(false)
@@ -326,9 +344,7 @@ class MainActivity :
                                     showTab(Tab.TASKS, changingSearch = true)
                                     true
                                 }
-                                Tab.TASKS -> {
-                                    false
-                                }
+                                Tab.TASKS -> false
                                 else -> throw IllegalArgumentException()
                             }))
 
@@ -370,8 +386,6 @@ class MainActivity :
             }
         }
 
-        initBottomBar()
-
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
             taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
@@ -411,7 +425,9 @@ class MainActivity :
 
         mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
-        showTab(visibleTab.value!!, true)
+        showTab(overrideTab ?: Tab.values()[Preferences.tab], true)
+
+        initBottomBar()
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
@@ -440,11 +456,9 @@ class MainActivity :
 
             createDisposable += data.subscribe { taskListFragment.setAllTasks(TaskListFragment.Data(it.dataId, it.immediate, it.taskData)) }
 
-            if (savedInstanceState == null) {
+            if (overrideTab == null) {
                 data.firstOrError()
-                        .subscribe { mainData ->
-                            visibleTab.accept(Tab.values()[mainData.defaultTab])
-                        }
+                        .subscribeBy { showTab(Tab.values()[it.defaultTab]) }
                         .addTo(createDisposable)
             }
         }
@@ -488,17 +502,7 @@ class MainActivity :
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
-        /* todo move into progress subclass
-        DomainFactory.isSaved
-                .subscribe {
-                    val list = listOf(Pair(mainDaysProgress, HideType.INVISIBLE))
-                    if (it)
-                        animateVisibility2(list, listOf())
-                    else
-                        animateVisibility2(listOf(), list)
-                }
-                .addTo(createDisposable)
-                */
+        startDate(dateReceiver)
     }
 
     private sealed class PagerScrollState {
@@ -743,6 +747,8 @@ class MainActivity :
     override fun onDestroy() {
         onPageChangeDisposable?.dispose()
         onPageChangeDisposable = null
+
+        unregisterReceiver(dateReceiver)
 
         super.onDestroy()
     }

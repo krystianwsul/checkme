@@ -16,16 +16,18 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
-import com.krystianwsul.checkme.firebase.FactoryListener
+import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.domain.UserInfo
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
+import com.uber.rxdogtag.RxDogTag
 import io.reactivex.Maybe
 import net.danlew.android.joda.JodaTimeAndroid
 import java.io.File
@@ -33,8 +35,6 @@ import java.io.File
 class MyApplication : Application() {
 
     companion object {
-
-        private const val TOKEN_KEY = "token"
 
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: MyApplication
@@ -47,18 +47,12 @@ class MyApplication : Application() {
         lateinit var sharedPreferences: SharedPreferences
     }
 
-    var token: String?
-        get() = sharedPreferences.getString(TOKEN_KEY, null)
-        set(value) = sharedPreferences.edit()
-                .putString(TOKEN_KEY, value)
-                .apply()
-
     val googleSignInClient by lazy { getClient() }
 
-    private val deviceInfoRelay = BehaviorRelay.createDefault(NullableWrapper<DeviceInfo>())
+    private val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
 
-    val hasUserInfo get() = deviceInfoRelay.value!!.value != null
-    val userInfo get() = deviceInfoRelay.value!!.value!!
+    val hasUserInfo get() = userInfoRelay.value!!.value != null
+    val userInfo get() = userInfoRelay.value!!.value!!
 
     @SuppressLint("CheckResult")
     override fun onCreate() {
@@ -67,6 +61,8 @@ class MyApplication : Application() {
         instance = this
         context = this
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        RxDogTag.install()
 
         JodaTimeAndroid.init(this)
 
@@ -81,25 +77,30 @@ class MyApplication : Application() {
                 .authStateChanges()
                 .map { NullableWrapper(it.currentUser) }
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
-                .map { NullableWrapper(it.value?.let { DeviceInfo(it.toUserInfo(), token) }) }
+                .map { NullableWrapper(it.value?.toUserInfo()) }
                 .distinctUntilChanged()
-                .subscribe(deviceInfoRelay)
+                .subscribe { userInfoRelay.accept(it) }
 
-        deviceInfoRelay.firstOrError()
+        userInfoRelay.firstOrError()
                 .filter { it.value != null }
                 .subscribe { DomainFactory.firstRun = true }
 
         val localFactory = LocalFactory(PersistenceManager.instance)
 
-        FactoryListener(
+        FactoryLoader(
                 localFactory,
-                deviceInfoRelay
-        ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
+                userInfoRelay,
+                FactoryProvider.Impl(localFactory),
+                Preferences.tokenRelay
+        ).domainFactoryObservable.subscribe {
+            @Suppress("UNCHECKED_CAST")
+            DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
+        }
 
-        if (token == null)
+        if (Preferences.token == null)
             FirebaseInstanceId.getInstance()
                     .instanceId
-                    .addOnSuccessListener { token = it.token }
+                    .addOnSuccessListener { Preferences.token = it.token }
 
         //writeHashes()
 
@@ -108,7 +109,7 @@ class MyApplication : Application() {
                     .setANRListener { MyCrashlytics.logException(it) }
                     .start()
 
-        deviceInfoRelay.switchMapMaybe {
+        userInfoRelay.switchMapMaybe {
             it.value?.let {
                 googleSignInClient.silentSignIn()
                         .toSingle()

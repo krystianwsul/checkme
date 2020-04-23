@@ -1,17 +1,15 @@
 package com.krystianwsul.common.domain
 
-import com.krystianwsul.common.firebase.models.RemoteInstance
-import com.krystianwsul.common.firebase.models.RemoteTask
-import com.krystianwsul.common.firebase.models.RemoteTaskHierarchy
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.TaskHierarchy
+import com.krystianwsul.common.utils.ProjectType
 
-import com.krystianwsul.common.utils.RemoteCustomTimeId
+class RemoteToRemoteConversion<T : ProjectType> {
 
-class RemoteToRemoteConversion<S : RemoteCustomTimeId, T : ProjectKey> {
+    val startTasks = mutableMapOf<String, Pair<Task<T>, List<Instance<T>>>>()
+    val startTaskHierarchies = mutableListOf<TaskHierarchy<T>>()
 
-    val startTasks = mutableMapOf<String, Pair<RemoteTask<S, T>, List<RemoteInstance<S, T>>>>()
-    val startTaskHierarchies = mutableListOf<RemoteTaskHierarchy<S, T>>()
-
-    val endTasks = HashMap<String, RemoteTask<*, *>>()
-    val endTaskHierarchies = ArrayList<RemoteTaskHierarchy<*, *>>()
+    val endTasks = HashMap<String, Task<*>>()
+    val endTaskHierarchies = ArrayList<TaskHierarchy<*>>()
 }

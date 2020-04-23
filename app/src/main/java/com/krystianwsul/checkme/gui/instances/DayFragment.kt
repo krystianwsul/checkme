@@ -24,7 +24,11 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 
-class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+class DayFragment @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+) : LinearLayoutCompat(context, attrs, defStyleAttr) {
     // todo consider subclass
 
     companion object {
@@ -158,7 +162,6 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
                 .filter { it }
                 .subscribe { groupListFragment.checkCreatedTaskKey() }
                 .addTo(compositeDisposable)
-
     }
 
     override fun onDetachedFromWindow() {

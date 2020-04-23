@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.Parcelize
 
 @Parcelize
 class TimePairPersist private constructor(
-        var customTimeKey: CustomTimeKey<*, *>?,
+        var customTimeKey: CustomTimeKey<*>?,
         private var _hourMinute: HourMinute
 ) : Parcelable {
 

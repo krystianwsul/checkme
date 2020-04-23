@@ -1,39 +1,15 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.schedules.WeeklyScheduleBridge
-import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteWeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.ScheduleId
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.ProjectType
 
-class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
-        remoteProjectRecord: RemoteProjectRecord<T, *, *>,
+class RemoteWeeklyScheduleBridge<T : ProjectType>(
         private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord<T>
-) : RemoteScheduleBridge<T>(remoteProjectRecord, remoteWeeklyScheduleRecord), WeeklyScheduleBridge {
+) : RemoteScheduleBridge<T>(remoteWeeklyScheduleRecord), WeeklyScheduleBridge<T> {
 
     override val daysOfWeek get() = setOf(remoteWeeklyScheduleRecord.dayOfWeek)
-
-    override val hour get() = remoteWeeklyScheduleRecord.hour
-
-    override val minute get() = remoteWeeklyScheduleRecord.minute
-
-    override val startTime by lazy { remoteWeeklyScheduleRecord.startTime }
-
-    override var endTime
-        get() = remoteWeeklyScheduleRecord.endTime
-        set(value) {
-            remoteWeeklyScheduleRecord.endTime = value
-        }
-
-    override val rootTaskKey get() = remoteWeeklyScheduleRecord.run { TaskKey(projectId, taskId) }
-
-    override fun delete() = remoteWeeklyScheduleRecord.delete()
-
-    override val remoteCustomTimeKey get() = remoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
-
-    override val scheduleId get() = ScheduleId.Remote(remoteWeeklyScheduleRecord.projectId, remoteWeeklyScheduleRecord.taskId, remoteWeeklyScheduleRecord.id)
 
     override val from by lazy {
         remoteWeeklyScheduleRecord.from?.let { Date.fromJson(it) }

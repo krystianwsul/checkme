@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -17,7 +18,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             .push()
             .key as String
 
-    override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+    override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         check(values.values.all { it == null })
 
         val dynamicValues: dynamic = object {}
@@ -26,7 +27,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             dynamicValues[it.key] = it.value
         }
 
-        rootReference.child(path).update(dynamicValues) { error ->
+        rootReference.update(dynamicValues) { error ->
             callback("error: " + error?.toString(), error == null, null)
         }
     }
@@ -70,8 +71,21 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     @Serializable
     private class Users(val userWrappers: Map<String, UserWrapper>)
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    fun <T> parse(
+    fun getInstances(taskFirebaseKey: String, callback: (Map<String, Map<String, RootInstanceManager.SnapshotInfo>>) -> Unit) {
+        rootReference.child("$KEY_INSTANCES/$taskFirebaseKey").once("value") { snapshot ->
+            callback(parse(Instances.serializer(), object {
+
+                @Suppress("unused")
+                val snapshotInfos = snapshot
+            }).snapshotInfos)
+        }
+    }
+
+    @Serializable
+    private class Instances(val snapshotInfos: Map<String, Map<String, RootInstanceManager.SnapshotInfo>>)
+
+    @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION")
+    private fun <T> parse(
             serializer: DeserializationStrategy<T>,
             data: dynamic
     ) = Json.nonstrict.parse(serializer, JSON.stringify(data))

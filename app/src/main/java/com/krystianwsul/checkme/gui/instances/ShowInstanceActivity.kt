@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -69,9 +70,14 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     override val snackbarParent get() = showInstanceCoordinator!!
 
-    private val broadcastReceiver = object : BroadcastReceiver() {
+    private val ticksReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) = updateBottomMenu()
+    }
+
+    private val dateReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = showInstanceViewModel.refresh()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -162,6 +168,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+
+        startDate(dateReceiver)
     }
 
     private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
@@ -209,13 +217,13 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     override fun onStart() {
         super.onStart()
 
-        startTicks(broadcastReceiver)
+        startTicks(ticksReceiver)
 
         groupListFragment.checkCreatedTaskKey()
     }
 
     override fun onStop() {
-        unregisterReceiver(broadcastReceiver)
+        unregisterReceiver(ticksReceiver)
 
         super.onStop()
     }
@@ -347,6 +355,12 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
             showInstanceViewModel.start(instanceKey)
         }
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(dateReceiver)
+
+        super.onDestroy()
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)

@@ -1,15 +1,18 @@
 package com.krystianwsul.common.time
 
-sealed class JsonTime<out T> {
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.ProjectType
+
+sealed class JsonTime<out T : ProjectType> {
 
     abstract fun toJson(): String
 
-    data class Custom<T>(val id: T) : JsonTime<T>() {
+    data class Custom<T : ProjectType>(val id: CustomTimeId<T>) : JsonTime<T>() {
 
         override fun toJson() = id.toString()
     }
 
-    data class Normal<T>(val hourMinute: HourMinute) : JsonTime<T>() {
+    data class Normal<T : ProjectType>(val hourMinute: HourMinute) : JsonTime<T>() {
 
         override fun toJson() = hourMinute.toJson()
     }

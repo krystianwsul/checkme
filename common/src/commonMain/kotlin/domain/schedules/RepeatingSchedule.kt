@@ -1,24 +1,25 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
-import com.krystianwsul.common.domain.Task
-import com.krystianwsul.common.firebase.models.RemoteTask
+
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
+import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
 
-abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask) {
+abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
-    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge
+    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T>
 
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until
 
-    override fun getInstances(
-            task: Task,
+    override fun <T : ProjectType> getInstances(
+            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
-    ): Sequence<Instance> {
+    ): Sequence<Instance<T>> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
@@ -28,7 +29,7 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
         ).max()!!
 
         val endExactTimeStamp = listOfNotNull(
-                getEndExactTimeStamp(),
+                endExactTimeStamp,
                 repeatingScheduleBridge.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
@@ -42,7 +43,7 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
 
         check(startExactTimeStamp < endExactTimeStamp)
 
-        val nullableSequence: Sequence<Instance?>
+        val nullableSequence: Sequence<Instance<*>?>
 
         if (startExactTimeStamp.date == endExactTimeStamp.date) {
             nullableSequence = sequenceOf(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, endExactTimeStamp.hourMilli))
@@ -71,10 +72,15 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
         return nullableSequence.filterNotNull()
     }
 
-    protected abstract fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance?
+    protected abstract fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
+            date: Date,
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
+    ): Instance<T>?
 
-    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
-        check(current(now))
+    override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
+        requireCurrent(now)
 
         return until?.let {
             getInstances(task, null, null).any { it.isVisible(now, hack24) }

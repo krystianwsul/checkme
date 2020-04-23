@@ -1,32 +1,35 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.common.domain.Instance
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
 @SuppressLint("UseSparseArrays")
-class LocalFactory(private val persistenceManager: PersistenceManager = PersistenceManager.instance) : Instance.ShownFactory {
+class LocalFactory(
+        private val persistenceManager: PersistenceManager = PersistenceManager.instance
+) : Instance.ShownFactory, FactoryProvider.Local {
 
     val instanceShownRecords: Collection<InstanceShownRecord>
         get() = persistenceManager.instanceShownRecords
 
-    val uuid get() = persistenceManager.uuid
+    override val uuid get() = persistenceManager.uuid
 
     fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
     override fun getShown(
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             taskId: String,
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
-            scheduleCustomTimeId: RemoteCustomTimeId?,
+            scheduleCustomTimeId: CustomTimeId<*>?,
             scheduleHour: Int?,
             scheduleMinute: Int?
     ): InstanceShownRecord? {
@@ -66,16 +69,16 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     override fun createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
-            projectId: ProjectKey
+            projectId: ProjectKey<*>
     ): InstanceShownRecord {
-        val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
+        val (customTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
                 .destructureRemote()
 
         return persistenceManager.createInstanceShownRecord(
                 remoteTaskId,
                 scheduleDateTime.date,
-                remoteCustomTimeId,
+                customTimeId,
                 hour,
                 minute,
                 projectId

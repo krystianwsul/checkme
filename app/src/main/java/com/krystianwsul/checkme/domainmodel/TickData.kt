@@ -16,9 +16,6 @@ sealed class TickData {
 
     abstract val waiting: Boolean
 
-    abstract fun privateTriggered()
-    abstract fun sharedTriggered()
-
     abstract fun release()
 
     override fun toString() = super.toString() + " silent: $silent, source: $source"
@@ -33,9 +30,6 @@ sealed class TickData {
 
         override val waiting = false
 
-        override fun privateTriggered() = Unit
-        override fun sharedTriggered() = Unit
-
         override fun release() {
             shouldClear = true
         }
@@ -44,8 +38,9 @@ sealed class TickData {
     class Lock(
             override val silent: Boolean,
             override val source: String,
-            var waitingForPrivate: Boolean = true,
-            var waitingForShared: Boolean = true
+            val expires: ExactTimeStamp = DateTime.now()
+                    .plusMillis(DURATION)
+                    .toExactTimeStamp()
     ) : TickData() {
 
         companion object {
@@ -56,30 +51,18 @@ sealed class TickData {
         }
 
         private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
-            acquire(DURATION.toLong())
+            acquire(expires.long - ExactTimeStamp.now.long)
         }
-
-        private val expires = DateTime.now()
-                .plusMillis(DURATION)
-                .toExactTimeStamp()
 
         override val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
 
-        override val waiting get() = waitingForPrivate || waitingForShared
-
-        override fun privateTriggered() {
-            waitingForPrivate = false
-        }
-
-        override fun sharedTriggered() {
-            waitingForShared = false
-        }
+        override val waiting = true
 
         override fun release() {
             if (wakelock.isHeld)
                 wakelock.release()
         }
 
-        override fun toString() = super.toString() + ", waitingForPrivate: $waitingForPrivate, waitingForShared: $waitingForShared, expires: $expires"
+        override fun toString() = super.toString() + ", expires: $expires"
     }
 }

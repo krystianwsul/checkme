@@ -1,6 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-interface SingleScheduleBridge : ScheduleBridge {
+import com.krystianwsul.common.utils.ProjectType
+
+interface SingleScheduleBridge<T : ProjectType> : ScheduleBridge<T> {
 
     val year: Int
 

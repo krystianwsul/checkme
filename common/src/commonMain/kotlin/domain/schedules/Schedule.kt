@@ -1,63 +1,58 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
-import com.krystianwsul.common.domain.Task
-import com.krystianwsul.common.firebase.models.RemoteTask
+
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.Current
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule(private val rootTask: RemoteTask<*, *>) {
+abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Current {
 
-    protected abstract val scheduleBridge: ScheduleBridge
+    protected abstract val scheduleBridge: ScheduleBridge<T>
 
-    protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
+    override val endExactTimeStamp get() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
     val startTime by lazy { scheduleBridge.startTime }
-
-    protected fun getEndExactTimeStamp() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
     val endTime get() = scheduleBridge.endTime
 
     val customTimeKey get() = scheduleBridge.customTimeKey
-
-    val remoteCustomTimeKey get() = scheduleBridge.remoteCustomTimeKey
 
     abstract val scheduleType: ScheduleType
 
     val timePair get() = scheduleBridge.timePair
 
     val time
-        get() = timePair.run {
-            customTimeKey?.let {
-                rootTask.remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
-            } ?: NormalTime(hourMinute!!)
-        }
+        get() = customTimeKey?.let {
+            rootTask.project.getCustomTime(it.customTimeId)
+        } ?: Time.Normal(timePair.hourMinute!!)
+
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        check(current(endExactTimeStamp))
+        requireCurrent(endExactTimeStamp)
 
         scheduleBridge.endTime = endExactTimeStamp.long
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
+        requireNotCurrent(now)
 
         scheduleBridge.endTime = null
     }
 
-    fun current(exactTimeStamp: ExactTimeStamp) =
-            startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
-
-    abstract fun getInstances(
-            task: Task,
+    abstract fun <T : ProjectType> getInstances(
+            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance>
+    ): Sequence<Instance<T>>
 
-    abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean
+    abstract fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean
 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 

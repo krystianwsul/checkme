@@ -1,42 +1,31 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
 abstract class RemoteRootUserManager {
 
-    var isSaved = false
+    val isSaved get() = remoteRootUserRecords.values.any { it.second }
 
-    abstract val remoteRootUserRecords: Map<UserKey, RemoteRootUserRecord>
+    abstract var remoteRootUserRecords: MutableMap<UserKey, Pair<RootUserRecord, Boolean>>
 
-    abstract val databaseWrapper: DatabaseWrapper
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = mutableMapOf<String, Any?>()
 
-    protected abstract fun getDatabaseCallback(): DatabaseCallback
+        val newRemoteRootUserRecords = remoteRootUserRecords.mapValues {
+            Pair(it.value.first, it.value.first.getValues(myValues))
+        }.toMutableMap()
 
-    open val saveCallback: (() -> Unit)? = null
+        ErrorLogger.instance.log("RemoteFriendManager.save values: $myValues")
 
-    fun save(): Boolean {
-        val values = mutableMapOf<String, Any?>()
-
-        remoteRootUserRecords.values.forEach { it.getValues(values) }
-
-        if (values.isNotEmpty()) {
+        if (myValues.isNotEmpty()) {
             check(!isSaved)
 
-            isSaved = true
+            remoteRootUserRecords = newRemoteRootUserRecords
         }
 
-        ErrorLogger.instance.log("RemoteFriendManager.save values: $values")
-
-        if (values.isNotEmpty()) {
-            databaseWrapper.updateFriends(values, getDatabaseCallback())
-        } else {
-            saveCallback?.invoke()
-        }
-
-        return isSaved
+        values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }
     }
 }

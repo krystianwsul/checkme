@@ -7,27 +7,27 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
-import com.krystianwsul.common.firebase.models.RemoteProject
-import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import java.util.*
 
 sealed class ScheduleText {
 
-    companion object : RemoteTask.ScheduleTextFactory {
+    companion object : Task.ScheduleTextFactory {
 
         override fun getScheduleText(
-                scheduleGroup: ScheduleGroup,
-                remoteProject: RemoteProject<*, *>
+                scheduleGroup: ScheduleGroup<*>,
+                project: Project<*>
         ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
-        }.getScheduleText(remoteProject)
+        }.getScheduleText(project)
 
         fun fromUntil(from: Date?, until: Date?): String {
             fun getString(@StringRes id: Int) = MyApplication.instance
@@ -48,15 +48,15 @@ sealed class ScheduleText {
         }
     }
 
-    abstract fun getScheduleText(remoteProject: RemoteProject<*, *>): String
+    abstract fun getScheduleText(project: Project<*>): String
 
-    protected fun timePairCallback(timePair: TimePair, remoteProject: RemoteProject<*, *>): String {
+    protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
         return (timePair.customTimeKey?.let {
-            remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
-        } ?: NormalTime(timePair.hourMinute!!)).toString()
+            project.getCustomTime(it.customTimeId)
+        } ?: Time.Normal(timePair.hourMinute!!)).toString()
     }
 
-    class Single(private val scheduleGroup: ScheduleGroup.Single) : ScheduleText() {
+    class Single(private val scheduleGroup: ScheduleGroup.Single<*>) : ScheduleText() {
 
         companion object {
 
@@ -66,12 +66,12 @@ sealed class ScheduleText {
             ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, remoteProject)
+        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, project)
         }
     }
 
-    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {
+    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly<*>) : ScheduleText() {
 
         companion object {
 
@@ -85,14 +85,14 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*, *>): String {
+        override fun getScheduleText(project: Project<*>): String {
             return Companion.getScheduleText(scheduleGroup.scheduleData) {
-                timePairCallback(it, remoteProject)
+                timePairCallback(it, project)
             }
         }
     }
 
-    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay) : ScheduleText() {
+    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay<*>) : ScheduleText() {
 
         companion object {
 
@@ -106,12 +106,12 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, remoteProject)
+        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, project)
         }
     }
 
-    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek) : ScheduleText() {
+    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek<*>) : ScheduleText() {
 
         companion object {
 
@@ -125,8 +125,8 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, remoteProject)
+        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, project)
         }
     }
 }

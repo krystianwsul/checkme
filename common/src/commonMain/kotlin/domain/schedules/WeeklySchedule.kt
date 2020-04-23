@@ -1,16 +1,17 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
-import com.krystianwsul.common.domain.Task
-import com.krystianwsul.common.firebase.models.RemoteTask
+
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 
-class WeeklySchedule(
-        rootTask: RemoteTask<*, *>,
-        override val repeatingScheduleBridge: WeeklyScheduleBridge
-) : RepeatingSchedule(rootTask) {
+class WeeklySchedule<T : ProjectType>(
+        rootTask: Task<T>,
+        override val repeatingScheduleBridge: WeeklyScheduleBridge<T>
+) : RepeatingSchedule<T>(rootTask) {
 
     val daysOfWeek
         get() = repeatingScheduleBridge.daysOfWeek
@@ -20,7 +21,12 @@ class WeeklySchedule(
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
-    override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
+    override fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
+            date: Date,
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
+    ): Instance<T>? {
         val day = date.dayOfWeek
 
         if (!daysOfWeek.contains(day))
@@ -35,7 +41,7 @@ class WeeklySchedule(
             return null
 
         val scheduleDateTime = DateTime(date, time)
-        check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
+        task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
     }

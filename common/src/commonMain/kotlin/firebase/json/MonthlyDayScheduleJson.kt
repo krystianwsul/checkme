@@ -9,9 +9,9 @@ data class MonthlyDayScheduleJson @JvmOverloads constructor(
         override var endTime: Long? = null,
         val dayOfMonth: Int = 0,
         val beginningOfMonth: Boolean = false,
-        val customTimeId: String? = null,
-        val hour: Int? = null,
-        val minute: Int? = null,
+        override val customTimeId: String? = null,
+        override val hour: Int? = null,
+        override val minute: Int? = null,
         val from: String? = null,
         val until: String? = null
 ) : ScheduleJson

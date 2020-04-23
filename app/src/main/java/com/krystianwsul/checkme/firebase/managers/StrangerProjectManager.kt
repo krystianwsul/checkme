@@ -1,35 +1,32 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 class StrangerProjectManager {
 
-    private var strangerProjects: Pair<ProjectKey, List<Pair<UserKey, Boolean>>>? = null
+    private var strangerProjects: Pair<ProjectKey<*>, List<Pair<UserKey, Boolean>>>? = null
 
-    fun save(domainFactory: DomainFactory) {
-        val values = mutableMapOf<String, Any?>()
+    fun save(values: MutableMap<String, Any?>) {
+        val myValues = mutableMapOf<String, Any?>()
 
         strangerProjects?.let { (projectId, userValues) ->
             userValues.forEach { (userId, add) ->
-                values["$userId/${RemoteRootUserRecord.PROJECTS}/$projectId"] = if (add) true else null
+                myValues["$userId/${RootUserRecord.PROJECTS}/$projectId"] = if (add) true else null
             }
         }
         strangerProjects = null
 
-        MyCrashlytics.log("StrangerProjectManager.save values: $values")
+        MyCrashlytics.log("StrangerProjectManager.save values: $myValues")
 
-        if (values.isNotEmpty())
-            AndroidDatabaseWrapper.updateFriends(values).checkError(domainFactory, "StrangerProjectManager.save")
+        values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }
     }
 
     fun updateStrangerProjects(
-            projectId: ProjectKey,
+            projectId: ProjectKey<*>,
             addedStrangers: Set<UserKey>,
             removedStrangers: Set<UserKey>
     ) {

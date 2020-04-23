@@ -1,14 +1,14 @@
 package com.krystianwsul.checkme.firebase
 
-import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 
 sealed class DatabaseEvent {
 
     abstract val key: String
 
-    class AddChange(val dataSnapshot: DataSnapshot) : DatabaseEvent() {
+    class AddChange(val dataSnapshot: Snapshot) : DatabaseEvent() {
 
-        override val key = dataSnapshot.key!!
+        override val key = dataSnapshot.key
     }
 
     class Remove(override val key: String) : DatabaseEvent()

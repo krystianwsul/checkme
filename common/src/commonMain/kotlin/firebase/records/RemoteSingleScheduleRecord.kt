@@ -2,38 +2,38 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
-import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.ProjectType
 
 
-class RemoteSingleScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<T> {
+class RemoteSingleScheduleRecord<T : ProjectType> : RemoteScheduleRecord<T> {
 
     private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }
-
-    override val startTime by lazy { singleScheduleJson.startTime }
-
-    override var endTime by Committer(singleScheduleJson::endTime, "$key/singleScheduleJson")
 
     val year by lazy { singleScheduleJson.year }
     val month by lazy { singleScheduleJson.month }
     val day by lazy { singleScheduleJson.day }
 
-    override val customTimeId by lazy {
-        singleScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
-    }
-
-    val hour by lazy { singleScheduleJson.hour }
-    val minute by lazy { singleScheduleJson.minute }
-
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(id, remoteTaskRecord, scheduleWrapper)
+    ) : super(
+            id,
+            taskRecord,
+            scheduleWrapper,
+            scheduleWrapper.singleScheduleJson!!,
+            "singleScheduleJson"
+    )
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            taskRecord: TaskRecord<T>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(remoteTaskRecord, scheduleWrapper)
+    ) : super(
+            taskRecord,
+            scheduleWrapper,
+            scheduleWrapper.singleScheduleJson!!,
+            "singleScheduleJson"
+    )
 
-    override fun deleteFromParent() = check(remoteTaskRecord.remoteSingleScheduleRecords.remove(id) == this)
+    override fun deleteFromParent() = check(taskRecord.remoteSingleScheduleRecords.remove(id) == this)
 }

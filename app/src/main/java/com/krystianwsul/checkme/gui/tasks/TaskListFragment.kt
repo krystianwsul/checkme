@@ -132,7 +132,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val childTaskDatas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
-            val projectIdCount = childTaskDatas.map { it.taskKey.remoteProjectId }
+            val projectIdCount = childTaskDatas.map { it.taskKey.projectKey }
                     .distinct()
                     .count()
 
@@ -674,7 +674,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val imageState: ImageState?,
             val current: Boolean,
             val hasInstances: Boolean,
-            val alwaysShow: Boolean) : Comparable<ChildTaskData> {
+            val alwaysShow: Boolean
+    ) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)

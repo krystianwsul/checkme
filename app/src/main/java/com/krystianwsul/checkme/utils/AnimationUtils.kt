@@ -119,11 +119,6 @@ fun View.cancelAnimations() {
     animate().cancel()
 }
 
-fun View.resetAlpha() {
-    cancelAnimations()
-    alpha = 1f
-}
-
 enum class HideType(val visibility: Int, val opposite: Int) {
 
     GONE(View.GONE, View.INVISIBLE),

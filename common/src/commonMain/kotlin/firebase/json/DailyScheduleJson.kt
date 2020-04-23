@@ -7,7 +7,7 @@ import kotlin.jvm.JvmOverloads
 data class DailyScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
         override var endTime: Long? = null,
-        val customTimeId: String? = null,
-        val hour: Int? = null,
-        val minute: Int? = null
+        override val customTimeId: String? = null,
+        override val hour: Int? = null,
+        override val minute: Int? = null
 ) : ScheduleJson

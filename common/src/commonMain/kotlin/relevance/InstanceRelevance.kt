@@ -1,11 +1,12 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.domain.Instance
+
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
 
-class InstanceRelevance(val instance: Instance) {
+class InstanceRelevance(val instance: Instance<*>) {
 
     var relevant = false
         private set
@@ -43,18 +44,25 @@ class InstanceRelevance(val instance: Instance) {
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<ProjectKey, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>) {
+    fun setRemoteRelevant(
+            remoteCustomTimeRelevances: Map<CustomTimeKey<*>, RemoteCustomTimeRelevance>,
+            remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>
+    ) {
         check(relevant)
 
-        val pair = instance.customTimeKey
         val remoteProject = instance.project
+
+        val pair = instance.instanceDateTime
+                .time
+                .timePair
+                .customTimeKey
         if (pair != null)
             remoteCustomTimeRelevances.getValue(pair).setRelevant()
 
-        remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
+        remoteProjectRelevances.getValue(remoteProject.projectKey).setRelevant()
 
         (instance.scheduleCustomTimeKey)?.let {
-            remoteCustomTimeRelevances.getValue(Pair(it.remoteProjectId, it.remoteCustomTimeId)).setRelevant()
+            remoteCustomTimeRelevances.getValue(it).setRelevant()
         }
     }
 }

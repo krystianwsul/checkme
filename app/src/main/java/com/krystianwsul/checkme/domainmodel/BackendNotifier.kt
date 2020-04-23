@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
@@ -19,7 +19,7 @@ object BackendNotifier {
 
     private const val PREFIX = "https://us-central1-check-me-add47.cloudfunctions.net/notify?"
 
-    fun getUrl(projects: Set<ProjectKey>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
+    fun getUrl(projects: Set<ProjectKey<*>>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=${it.key}" }.toMutableSet()
@@ -34,14 +34,14 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(remoteProjects: Set<RemoteProject<*, *>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
+    fun notify(projects: Set<Project<*>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
         val production = when (AndroidDatabaseWrapper.root) {
             "development" -> false
             "production" -> true
             else -> throw IllegalArgumentException()
         }
 
-        val projectIds = remoteProjects.map { it.id }.toSet()
+        val projectIds = projects.map { it.projectKey }.toSet()
 
         val url = getUrl(projectIds, production, userKeys, deviceInfo.token!!)
         check(url.isNotEmpty())

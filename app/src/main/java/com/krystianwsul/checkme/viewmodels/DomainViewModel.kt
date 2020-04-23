@@ -13,4 +13,6 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     override fun onCleared() = stop()
 
     protected fun internalStart() = domainListener.start()
+
+    fun refresh() = domainListener.start(true)
 }

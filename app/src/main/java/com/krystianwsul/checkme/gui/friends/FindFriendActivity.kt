@@ -24,6 +24,8 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.firebase.UserData
+import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
@@ -31,14 +33,15 @@ class FindFriendActivity : NavBarActivity() {
 
     companion object {
 
-        private const val USER_KEY = "user"
+        private const val KEY_USER_KEY = "userKey"
+        private const val KEY_USER_WRAPPER = "userWrapper"
         private const val LOADING_KEY = "loading"
 
         fun newIntent(context: Context) = Intent(context, FindFriendActivity::class.java)
     }
 
     private var loading = false
-    private var userData: UserData? = null
+    private var userPair: Pair<UserKey, UserWrapper>? = null
 
     private var databaseReference: DatabaseReference? = null
     private var valueEventListener: ValueEventListener? = null
@@ -86,7 +89,7 @@ class FindFriendActivity : NavBarActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DomainFactory.instance.addFriend(SaveService.Source.GUI, userData!!.getKey())
+            DomainFactory.instance.addFriend(SaveService.Source.GUI, userPair!!.first, userPair!!.second)
 
             finish()
         }
@@ -95,11 +98,19 @@ class FindFriendActivity : NavBarActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        check(savedInstanceState.containsKey(LOADING_KEY))
-        loading = savedInstanceState.getBoolean(LOADING_KEY)
+        savedInstanceState.apply {
+            check(containsKey(LOADING_KEY))
+            loading = getBoolean(LOADING_KEY)
 
-        if (savedInstanceState.containsKey(USER_KEY))
-            userData = savedInstanceState.getParcelable(USER_KEY)!!
+            if (containsKey(KEY_USER_KEY)) {
+                check(containsKey(KEY_USER_WRAPPER))
+
+                val userKey = getParcelable<UserKey>(KEY_USER_KEY)!!
+                val userWrapper = getParcelable<UserWrapper>(KEY_USER_WRAPPER)!!
+
+                userPair = userKey to userWrapper
+            }
+        }
 
         updateLayout()
     }
@@ -127,7 +138,7 @@ class FindFriendActivity : NavBarActivity() {
                 databaseReference = null
 
                 if (dataSnapshot.exists()) {
-                    userData = dataSnapshot.getValue(UserData::class.java)!!
+                    userPair = UserKey(dataSnapshot.key!!) to dataSnapshot.getValue(UserWrapper::class.java)!!
                 } else {
                     Snackbar.make(findFriendCoordinator, R.string.userNotFound, Snackbar.LENGTH_SHORT).show()
                 }
@@ -160,16 +171,18 @@ class FindFriendActivity : NavBarActivity() {
         val show = mutableListOf<View>()
 
         when {
-            userData != null -> {
+            userPair != null -> {
                 check(!loading)
 
                 findFriendEmail.isEnabled = true
                 show.add(findFriendUserLayout)
                 hide.add(findFriendProgress)
 
-                findFriendUserPhoto.loadPhoto(userData!!.photoUrl)
-                findFriendUserName.text = userData!!.name
-                findFriendUserEmail.text = userData!!.email
+                userPair!!.second.userData.apply {
+                    findFriendUserPhoto.loadPhoto(photoUrl)
+                    findFriendUserName.text = name
+                    findFriendUserEmail.text = email
+                }
             }
             loading -> {
                 findFriendEmail.isEnabled = false
@@ -206,7 +219,10 @@ class FindFriendActivity : NavBarActivity() {
         outState.run {
             putBoolean(LOADING_KEY, loading)
 
-            userData?.let { putParcelable(USER_KEY, it) }
+            userPair?.let {
+                putParcelable(KEY_USER_KEY, it.first)
+                putParcelable(KEY_USER_WRAPPER, it.second)
+            }
         }
     }
 
@@ -215,7 +231,7 @@ class FindFriendActivity : NavBarActivity() {
             return
 
         loading = true
-        userData = null
+        userPair = null
 
         updateLayout()
 

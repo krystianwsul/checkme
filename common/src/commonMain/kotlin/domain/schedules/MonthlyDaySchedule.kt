@@ -1,17 +1,18 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
-import com.krystianwsul.common.domain.Task
-import com.krystianwsul.common.firebase.models.RemoteTask
+
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
-class MonthlyDaySchedule(
-        rootTask: RemoteTask<*, *>,
-        override val repeatingScheduleBridge: MonthlyDayScheduleBridge
-) : RepeatingSchedule(rootTask) {
+class MonthlyDaySchedule<T : ProjectType>(
+        rootTask: Task<T>,
+        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<T>
+) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
@@ -21,7 +22,12 @@ class MonthlyDaySchedule(
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
+    override fun <T : ProjectType> getInstanceInDate(
+            task: Task<T>,
+            date: Date,
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
+    ): Instance<T>? {
         val dateThisMonth = getDate(date.year, date.month)
 
         if (dateThisMonth != date)
@@ -36,7 +42,7 @@ class MonthlyDaySchedule(
             return null
 
         val scheduleDateTime = DateTime(date, time)
-        check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
+        task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
     }
@@ -45,7 +51,7 @@ class MonthlyDaySchedule(
         val dateThisMonth = now.date.run { getDate(year, month) }
         val thisMonth = DateTime(dateThisMonth, time)
 
-        val endExactTimeStamp = getEndExactTimeStamp()
+        val endExactTimeStamp = endExactTimeStamp
 
         val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
             thisMonth

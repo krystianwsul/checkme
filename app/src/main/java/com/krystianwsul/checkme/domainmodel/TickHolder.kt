@@ -11,17 +11,11 @@ object TickHolder {
         val silent = oldTickData.silent && newTickData.silent
         val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
-        val locks = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
-        val waitingForPrivate = locks.all { it.waitingForPrivate }
-        val waitingForShared = locks.all { it.waitingForShared }
+        val expires = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
+                .map { it.expires }
+                .max()
 
-        return if (waitingForPrivate || waitingForShared) {
-            TickData.Lock(silent, source, waitingForPrivate, waitingForShared)
-        } else {
-            check(locks.isEmpty())
-
-            TickData.Normal(silent, source)
-        }
+        return expires?.let { TickData.Lock(silent, source, it) } ?: TickData.Normal(silent, source)
     }
 
     private fun tryClearTickData() {

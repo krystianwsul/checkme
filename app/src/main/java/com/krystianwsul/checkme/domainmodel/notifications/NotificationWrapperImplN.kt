@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 
 
 @SuppressLint("NewApi")
-open class NotificationWrapperImplN : NotificationWrapperImplM() {
+open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
     override fun cleanGroup(lastNotificationId: Int?) {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)

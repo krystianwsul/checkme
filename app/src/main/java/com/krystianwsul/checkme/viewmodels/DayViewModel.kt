@@ -20,6 +20,8 @@ class DayViewModel : ViewModel() {
 
     override fun onCleared() = entries.values.forEach { it.stop() }
 
+    fun refresh() = entries.values.forEach { it.start(true) }
+
     class Entry(private val timeRange: MainActivity.TimeRange, private val position: Int) : DomainListener<DayData>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)

@@ -1,39 +1,37 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.FirebaseWriteException
-import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.utils.UserKey
 
-class AndroidRemoteRootUserManager(children: Iterable<DataSnapshot>) : RemoteRootUserManager() {
+class AndroidRemoteRootUserManager(children: Iterable<Snapshot>) : RemoteRootUserManager() {
 
     companion object {
 
-        private fun Iterable<DataSnapshot>.toRootUserRecords() = map {
-            RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!)
-        }.associateBy { it.id }
+        private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!)
     }
 
-    override var remoteRootUserRecords = children.toRootUserRecords()
+    override var remoteRootUserRecords = children.map { it.toRecord() to false }
+            .associateBy { it.first.id }
+            .toMutableMap()
 
-    override val databaseWrapper = AndroidDatabaseWrapper
+    fun setFriend(dataSnapshot: Snapshot): RootUserRecord {
+        val userKey = UserKey(dataSnapshot.key)
 
-    override fun getDatabaseCallback(): DatabaseCallback {
-        return { databaseMessage, successful, exception ->
-            val message = "firebase write: RemotePrivateProjectManager.save $databaseMessage"
-            if (successful) {
-                MyCrashlytics.log(message)
-            } else {
-                MyCrashlytics.logException(FirebaseWriteException(message, exception))
-            }
+        return dataSnapshot.toRecord().also {
+            remoteRootUserRecords[userKey] = it to false
         }
     }
 
-    fun onNewSnapshot(children: Iterable<DataSnapshot>) = children.toRootUserRecords().also {
-        remoteRootUserRecords = it
+    fun removeFriend(userKey: UserKey) = checkNotNull(remoteRootUserRecords.remove(userKey))
+
+    fun addFriend(userKey: UserKey, userWrapper: UserWrapper): RootUserRecord {
+        check(!remoteRootUserRecords.containsKey(userKey))
+
+        return RootUserRecord(false, userWrapper).also {
+            remoteRootUserRecords[userKey] = it to false
+        }
     }
 }

@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.Instance
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -69,12 +69,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    final override fun notifyInstance(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp) { // consider queueing all notifications and group in a batch
+    final override fun notifyInstance(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*>,
+            silent: Boolean,
+            now: ExactTimeStamp
+    ) { // consider queueing all notifications and group in a batch
         val instanceData = getInstanceData(deviceDbInfo, instance, silent, now)
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
-    protected open fun getInstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp): InstanceData {
+    protected open fun getInstanceData(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*>,
+            silent: Boolean,
+            now: ExactTimeStamp
+    ): InstanceData {
         val reallySilent = if (silent) {
             true
         } else {
@@ -177,10 +187,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = false,
                 sortKey = sortKey,
                 largeIcon = largeIcon,
-                notificationHash = notificationHash)
+                notificationHash = notificationHash
+        )
     }
 
-    private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
+    private fun getInstanceText(instance: Instance<*>, now: ExactTimeStamp): String {
         val childNames = getChildNames(instance, now)
 
         return if (childNames.isNotEmpty()) {
@@ -192,7 +203,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance, now: ExactTimeStamp) = instance.getChildInstances(now)
+    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(now)
             .asSequence()
             .filter { it.first.done == null }
             .sortedBy { it.second.ordinal }
@@ -201,7 +212,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES
 
-    private fun getInboxStyle(lines: List<String>, group: Boolean): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
+    private fun getInboxStyle(
+            lines: List<String>,
+            group: Boolean
+    ): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val inboxStyle = NotificationCompat.InboxStyle()
@@ -234,7 +248,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash): NotificationCompat.Builder {
+            notificationHash: NotificationHash
+    ): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
         val builder = newBuilder(silent)
@@ -274,8 +289,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return builder
     }
 
-    protected open fun unchanged(notificationHash: NotificationHash) = false
-
     protected open fun notify(
             title: String,
             text: String?,
@@ -290,8 +303,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash) {
-        if (unchanged(notificationHash)) {
+            notificationHash: NotificationHash
+    ) {
+        val unchanged = notificationManager.activeNotifications
+                ?.singleOrNull { it.id == notificationHash.id }
+                ?.let { it.notification.extras.getInt(KEY_HASH_CODE) == notificationHash.hashCode() }
+                ?: false
+
+        if (unchanged) {
             Preferences.tickLog.logLineHour("skipping notification update for $title")
             return
         }
@@ -309,7 +328,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary,
                 sortKey,
                 largeIcon,
-                notificationHash).build()
+                notificationHash
+        ).build()
 
         @Suppress("Deprecation")
         if (!silent)
@@ -319,19 +339,21 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    override fun notifyGroup(instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
-        val groupData = GroupData(instances, now, silent)
-        notificationRelay.accept { notifyGroupHelper(groupData) }
-    }
+    override fun notifyGroup(
+            instances: Collection<Instance<*>>,
+            silent: Boolean, // not needed >= 24
+            now: ExactTimeStamp
+    ) = notificationRelay.accept { notifyGroupHelper(GroupData(instances, now, silent)) }
 
     private inner class GroupData(
-            instances: Collection<com.krystianwsul.common.domain.Instance>,
+            instances: Collection<com.krystianwsul.common.firebase.models.Instance<*>>,
             private val now: ExactTimeStamp,
-            val silent: Boolean) {
+            val silent: Boolean
+    ) {
 
         val instances = instances.map(::Instance)
 
-        inner class Instance(instance: com.krystianwsul.common.domain.Instance) {
+        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance<*>) {
 
             val name = instance.name
             val instanceKey = instance.instanceKey
@@ -369,7 +391,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 null,
                 styleHash,
                 "0",
-                null)
+                null
+        )
 
         notify(
                 title,
@@ -385,7 +408,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = true,
                 sortKey = "0",
                 largeIcon = null,
-                notificationHash = notificationHash)
+                notificationHash = notificationHash
+        )
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
@@ -398,11 +422,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun updateAlarm(nextAlarm: TimeStamp?) {
         val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent(), PendingIntent.FLAG_UPDATE_CURRENT)!!
         alarmManager.cancel(pendingIntent)
-        nextAlarm?.let { setExact(it.long, pendingIntent) }
-    }
-
-    protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+        nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
     }
 
     override fun logNotificationIds(source: String) = Unit
@@ -462,7 +482,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val timeStamp: Long?,
             val style: Style?,
             val sortKey: String,
-            val uuid: String?) {
+            val uuid: String?
+    ) {
 
         interface Style {
 
@@ -472,7 +493,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    protected inner class InstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
+    protected inner class InstanceData(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*>,
+            now: ExactTimeStamp,
+            val silent: Boolean
+    ) {
 
         val notificationId = instance.notificationId
 

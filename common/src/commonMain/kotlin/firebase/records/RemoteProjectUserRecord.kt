@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.json.UserJson
 
 class RemoteProjectUserRecord(
         create: Boolean,
-        private val remoteProjectRecord: RemoteSharedProjectRecord,
+        private val remoteProjectRecord: SharedProjectRecord,
         override val createObject: UserJson
 ) : RemoteRecord(create) {
 

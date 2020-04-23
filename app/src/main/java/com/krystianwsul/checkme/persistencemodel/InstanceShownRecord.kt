@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import com.krystianwsul.common.domain.Instance
+import com.krystianwsul.common.firebase.models.Instance
 import kotlin.properties.Delegates.observable
 
 class InstanceShownRecord(

@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
+import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
@@ -134,7 +135,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        appBarLayout.setText(data.name, data.collapseText)
+        appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
 
         updateBottomMenu()
 

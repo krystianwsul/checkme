@@ -16,7 +16,7 @@ class CollapseAppBarLayout : AppBarLayout {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    fun setText(title: String, text: String?) {
+    fun setText(title: String, text: String?, paddingLayout: View) {
         toolbarCollapseLayout.title = title
 
         val showText = text.isNullOrEmpty()
@@ -30,7 +30,9 @@ class CollapseAppBarLayout : AppBarLayout {
                 val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
 
                 layoutParams = layoutParams.apply {
-                    height = textLayout.height + 140 + it.height
+                    val newHeight = textLayout.height + 140 + it.height
+                    height = newHeight
+                    paddingLayout.setPadding(0, 0, 0, newHeight)
                 }
             }
         }

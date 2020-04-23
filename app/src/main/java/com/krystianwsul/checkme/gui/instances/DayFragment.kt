@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.gui.instances
 
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
+import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
@@ -24,7 +27,11 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 
-class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+class DayFragment @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+) : LinearLayoutCompat(context, attrs, defStyleAttr) {
     // todo consider subclass
 
     companion object {
@@ -93,6 +100,15 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
 
     private val compositeDisposable = CompositeDisposable()
 
+    private val receiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            entry?.start(true)
+        }
+    }
+
+    private var date: Date? = null
+
     init {
         check(context is Host)
 
@@ -159,10 +175,19 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
                 .subscribe { groupListFragment.checkCreatedTaskKey() }
                 .addTo(compositeDisposable)
 
+        context.startDate(receiver)
+
+        val today = Date.today()
+        if (date == null || date != today) {
+            date = today
+            entry?.start(true)
+        }
     }
 
     override fun onDetachedFromWindow() {
         compositeDisposable.clear()
+
+        context.unregisterReceiver(receiver)
 
         super.onDetachedFromWindow()
     }

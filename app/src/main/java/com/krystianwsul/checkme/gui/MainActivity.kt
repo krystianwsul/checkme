@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -500,7 +499,7 @@ class MainActivity :
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
-        registerReceiver(dateReceiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
+        startDate(dateReceiver)
     }
 
     private sealed class PagerScrollState {

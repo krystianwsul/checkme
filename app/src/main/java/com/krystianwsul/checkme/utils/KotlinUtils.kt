@@ -156,6 +156,10 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 }
 
+fun Context.startDate(receiver: BroadcastReceiver) {
+    registerReceiver(receiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
+}
+
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }!!
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>

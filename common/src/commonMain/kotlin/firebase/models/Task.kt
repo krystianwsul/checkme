@@ -630,7 +630,7 @@ class Task<T : ProjectType>(
             projectUpdater.convert(now, this, projectId)
     }
 
-    fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
+    fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String {
         requireCurrent(exactTimeStamp)
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)

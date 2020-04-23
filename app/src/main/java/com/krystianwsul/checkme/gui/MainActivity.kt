@@ -161,6 +161,9 @@ class MainActivity :
                 if (it > 0)
                     mainDaysPager.smoothScrollToPosition(it - 1)
             }
+
+            dayViewModel.refresh()
+            mainViewModel.refresh()
         }
     }
 

@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.DatabaseEvent
-import com.krystianwsul.checkme.firebase.ProjectsFactory
-import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.RemoteFriendFactory
+import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo

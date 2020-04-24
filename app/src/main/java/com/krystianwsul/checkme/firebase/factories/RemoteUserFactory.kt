@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.factories
 
 import com.badoo.reaktive.rxjavainterop.asRxJava2Observable
 import com.jakewharton.rxrelay2.BehaviorRelay

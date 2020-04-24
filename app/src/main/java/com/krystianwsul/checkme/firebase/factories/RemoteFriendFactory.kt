@@ -1,5 +1,6 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.factories
 
+import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager

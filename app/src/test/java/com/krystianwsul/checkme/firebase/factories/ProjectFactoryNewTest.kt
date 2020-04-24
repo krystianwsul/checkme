@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.loaders.*
@@ -34,14 +34,14 @@ import org.junit.Test
 import kotlin.random.Random
 
 @ExperimentalStdlibApi
-class ProjectFactoryOldTest {
+class ProjectFactoryNewTest {
 
     companion object {
 
         @BeforeClass
         @JvmStatic
         fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
+            Task.USE_ROOT_INSTANCES = true
         }
     }
 
@@ -49,7 +49,7 @@ class ProjectFactoryOldTest {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
 
-        override val projectProvider = ProjectLoaderOldTest.TestProjectProvider()
+        override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
@@ -117,7 +117,7 @@ class ProjectFactoryOldTest {
 
         override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()
 
-        override val changeInstancesEvents = Observable.never<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()!!
+        override val changeInstancesEvents = PublishRelay.create<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()
 
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()
     }

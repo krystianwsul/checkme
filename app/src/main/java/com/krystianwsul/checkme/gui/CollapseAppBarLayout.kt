@@ -7,6 +7,7 @@ import android.view.View
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.CollapsingTextHelper
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
 import kotlinx.android.synthetic.main.toolbar_collapse.view.*
 
@@ -30,7 +31,7 @@ class CollapseAppBarLayout : AppBarLayout {
                 val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
 
                 layoutParams = layoutParams.apply {
-                    val newHeight = textLayout.height + 140 + it.height
+                    val newHeight = textLayout.height + context.dpToPx(70).toInt() + it.height
                     height = newHeight
                     paddingLayout.setPadding(0, 0, 0, newHeight)
                 }

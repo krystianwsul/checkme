@@ -68,6 +68,9 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion"
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
+
+                implementation "com.badoo.reaktive:reaktive-js:$reaktiveVersion"
+                implementation "com.badoo.reaktive:utils-js:$reaktiveVersion"
             }
         }
     }

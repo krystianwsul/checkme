@@ -10,7 +10,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
+class JsDatabaseWrapper(admin: dynamic, private val root: String) : DatabaseWrapper() {
 
     private val rootReference = admin.database().ref(root)
 
@@ -77,16 +77,16 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
                 @Suppress("unused")
                 val snapshotInfos = snapshot
-            }).snapshotInfos)
+            }).snapshotInfos ?: mapOf())
         }
     }
 
     @Serializable
-    private class Instances(val snapshotInfos: Map<String, Map<String, RootInstanceManager.SnapshotInfo>>)
+    private class Instances(val snapshotInfos: Map<String, Map<String, RootInstanceManager.SnapshotInfo>>? = null)
 
-    @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION")
+    @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION", "UnsafeCastFromDynamic")
     private fun <T> parse(
             serializer: DeserializationStrategy<T>,
             data: dynamic
     ) = Json.nonstrict.parse(serializer, JSON.stringify(data))
-}
+} // todo dog tag + crashlytics, force task records after initializing project record subclass

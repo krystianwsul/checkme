@@ -10,7 +10,7 @@ import com.soywiz.klock.days
 class Instance<T : ProjectType> private constructor(
         val project: Project<T>,
         val task: Task<T>,
-        private var data: Data<T> // todo can a var be a delegate?
+        private var data: Data<T>
 ) {
 
     companion object {

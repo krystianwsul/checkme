@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
+import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
@@ -112,8 +113,7 @@ interface ProjectLoader<T : ProjectType> {
                             .zipSingle()
                             .map { ChangeWrapper(changeType, InitialProjectEvent(projectManager, projectRecord, it.toMap())) }
                 }
-                .cache()
-                .apply { domainDisposable += subscribe() }!!
+                .cacheImmediate(domainDisposable)
 
         // Here we observe the initial instances for new tasks
         override val addTaskEvents = rootInstanceDatabaseRx.skip(1)

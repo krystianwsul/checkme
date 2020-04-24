@@ -1,16 +1,20 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.merge
+import io.reactivex.rxkotlin.plusAssign
 
 class FriendsLoader(
         friendKeysObservable: Observable<Set<UserKey>>,
         private val domainDisposable: CompositeDisposable,
         private val friendsProvider: FriendsProvider
 ) {
+
+    private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
     private val databaseRx = friendKeysObservable.processChangesSet(
             {
@@ -20,7 +24,7 @@ class FriendsLoader(
                 )
             },
             { it.disposable.dispose() }
-    )
+    ).replayImmediate()
 
     val initialFriendsEvent = databaseRx.firstOrError()
             .flatMap {
@@ -29,6 +33,7 @@ class FriendsLoader(
                         .zipSingle()
             }
             .map(::InitialFriendsEvent)
+            .cacheImmediate(domainDisposable)
 
     private val addFriendEvents = databaseRx.skip(1)
             .switchMap {
@@ -46,11 +51,11 @@ class FriendsLoader(
                 .merge()
     }.map(::AddChangeFriendEvent)
 
-    val addChangeFriendEvents = listOf(addFriendEvents, changeFriendEvents).merge()
+    val addChangeFriendEvents = listOf(addFriendEvents, changeFriendEvents).merge().replayImmediate()
 
     val removeFriendEvents = databaseRx.map {
         RemoveFriendsEvent(it.removedEntries.keys) // todo friends this might need the changeType propagated
-    }
+    }.replayImmediate()
 
     class InitialFriendsEvent(val snapshots: Iterable<Snapshot>)
 

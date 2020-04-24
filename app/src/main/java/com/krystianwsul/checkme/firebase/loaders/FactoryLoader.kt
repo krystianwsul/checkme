@@ -8,7 +8,9 @@ import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.getCurrentValue
+import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -34,7 +36,8 @@ class FactoryLoader(
     init {
         val domainDisposable = CompositeDisposable()
 
-        fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
+        fun <T> Single<T>.cacheImmediate() = cacheImmediate(domainDisposable)
+        fun <T> Observable<T>.publishImmediate() = publishImmediate(domainDisposable)
 
         domainFactoryObservable = userInfoObservable.switchMapSingle {
             domainDisposable.clear()
@@ -61,10 +64,7 @@ class FactoryLoader(
                         factoryProvider.database.getPrivateProjectObservable(privateProjectKey)
                 )
 
-                val privateProjectManager = AndroidPrivateProjectManager(
-                        userInfo,
-                        factoryProvider.database
-                )
+                val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
                 val privateProjectLoader = ProjectLoader.Impl(
                         privateProjectDatabaseRx.observable,
@@ -109,8 +109,7 @@ class FactoryLoader(
 
                 val friendKeysObservable = userFactorySingle.flatMapObservable { it.friendKeysObservable }
                         .scan(Pair(setOf<UserKey>(), setOf<UserKey>())) { old, new -> Pair(old.second, new) }
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                        .publishImmediate()
 
                 val friendEvents = friendKeysObservable.scan<Pair<Set<UserKey>, Map<UserKey, Observable<Snapshot>>>>(Pair(setOf(), mapOf())) { (_, oldMap), (oldFriendKeys, newFriendKeys) ->
                     val newMap = oldMap.toMutableMap()
@@ -124,8 +123,7 @@ class FactoryLoader(
 
                         newMap[it] = factoryProvider.database
                                 .getUserObservable(it)
-                                .publish()
-                                .apply { connect() }
+                                .publishImmediate()
                     }
 
                     Pair(removedKeys, newMap)
@@ -139,8 +137,7 @@ class FactoryLoader(
 
                             listOf(removedEvents, addChangeEvents).merge()
                         }
-                        .publish()
-                        .apply { domainDisposable += connect() }
+                        .publishImmediate()
 
                 val friendSingle = friendKeysObservable.firstOrError()
                         .flatMap { (old, new) ->
@@ -148,7 +145,7 @@ class FactoryLoader(
 
                             new.map { factoryProvider.database.getUserSingle(it) }.zipSingle()
                         }
-                        .cache()
+                        .cacheImmediate()
 
                 val friendFactorySingle = friendSingle.map { RemoteFriendFactory(it) }
 

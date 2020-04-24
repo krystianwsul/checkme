@@ -21,18 +21,22 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
 
-    val taskRecords by lazy {
-        projectJson.tasks
+    lateinit var taskRecords: MutableMap<String, TaskRecord<T>>
+        private set
+
+    lateinit var taskHierarchyRecords: MutableMap<String, RemoteTaskHierarchyRecord>
+        private set
+
+    protected open fun initChildRecords(create: Boolean) {
+        taskRecords = projectJson.tasks
                 .mapValues { (id, taskJson) ->
                     check(id.isNotEmpty())
 
                     TaskRecord(id, this, taskJson)
                 }
                 .toMutableMap()
-    }
 
-    val taskHierarchyRecords by lazy {
-        projectJson.taskHierarchies
+        taskHierarchyRecords = projectJson.taskHierarchies
                 .mapValues { (id, taskHierarchyJson) ->
                     check(id.isNotEmpty())
 

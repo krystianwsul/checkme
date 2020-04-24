@@ -18,20 +18,32 @@ class SharedProjectRecord(
         projectKey
 ) {
 
-    override val customTimeRecords = jsonWrapper.projectJson
-            .customTimes
-            .map { (id, customTimeJson) ->
-                check(id.isNotEmpty())
+    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
+        private set
 
-                val customTimeId = CustomTimeId.Shared(id)
+    lateinit var remoteUserRecords: MutableMap<UserKey, RemoteProjectUserRecord>
+        private set
 
-                customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
-            }
-            .toMap()
-            .toMutableMap()
+    init {
+        initChildRecords(create)
+    }
 
-    val remoteUserRecords by lazy {
-        jsonWrapper.projectJson
+    override fun initChildRecords(create: Boolean) {
+        super.initChildRecords(create)
+
+        customTimeRecords = jsonWrapper.projectJson
+                .customTimes
+                .map { (id, customTimeJson) ->
+                    check(id.isNotEmpty())
+
+                    val customTimeId = CustomTimeId.Shared(id)
+
+                    customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
+                }
+                .toMap()
+                .toMutableMap()
+
+        remoteUserRecords = jsonWrapper.projectJson
                 .users
                 .entries
                 .associate { (id, userJson) ->

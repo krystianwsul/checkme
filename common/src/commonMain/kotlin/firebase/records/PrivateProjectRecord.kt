@@ -20,16 +20,27 @@ class PrivateProjectRecord(
         projectKey
 ) {
 
-    override val customTimeRecords = projectJson.customTimes
-            .map { (id, customTimeJson) ->
-                check(id.isNotEmpty())
+    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
+        private set
 
-                val customTimeId = CustomTimeId.Private(id)
+    init {
+        initChildRecords(create)
+    }
 
-                customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
-            }
-            .toMap()
-            .toMutableMap()
+    override fun initChildRecords(create: Boolean) {
+        super.initChildRecords(create)
+
+        customTimeRecords = projectJson.customTimes
+                .map { (id, customTimeJson) ->
+                    check(id.isNotEmpty())
+
+                    val customTimeId = CustomTimeId.Private(id)
+
+                    customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
+                }
+                .toMap()
+                .toMutableMap()
+    }
 
     constructor(
             databaseWrapper: DatabaseWrapper,

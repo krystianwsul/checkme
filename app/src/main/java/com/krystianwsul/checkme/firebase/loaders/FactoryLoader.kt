@@ -2,9 +2,9 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseEvent
+import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -76,7 +76,7 @@ class FactoryLoader(
                 val startTime = ExactTimeStamp.now
 
                 val userFactorySingle = userDatabaseRx.first
-                        .map { RemoteUserFactory(it, getDeviceDbInfo(), factoryProvider) }
+                        .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider) }
                         .cacheImmediate()
 
                 val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
@@ -147,7 +147,7 @@ class FactoryLoader(
                         }
                         .cacheImmediate()
 
-                val friendFactorySingle = friendSingle.map { RemoteFriendFactory(it) }
+                val friendFactorySingle = friendSingle.map { FriendFactory(it) }
 
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,

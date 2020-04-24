@@ -88,7 +88,7 @@ class ProjectFactoryNewTest {
 
         override val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
 
-        override fun newDomain(localFactory: FactoryProvider.Local, remoteUserFactory: RemoteUserFactory, projectsFactory: ProjectsFactory, remoteFriendFactory: RemoteFriendFactory, deviceDbInfo: DeviceDbInfo, startTime: ExactTimeStamp, readTime: ExactTimeStamp): FactoryProvider.Domain {
+        override fun newDomain(localFactory: FactoryProvider.Local, myUserFactory: MyUserFactory, projectsFactory: ProjectsFactory, friendFactory: FriendFactory, deviceDbInfo: DeviceDbInfo, startTime: ExactTimeStamp, readTime: ExactTimeStamp): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }
 

@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.DatabaseEvent
+import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -176,9 +176,9 @@ class FactoryLoaderOldTest {
 
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
-                remoteUserFactory: RemoteUserFactory,
+                myUserFactory: MyUserFactory,
                 projectsFactory: ProjectsFactory,
-                remoteFriendFactory: RemoteFriendFactory,
+                friendFactory: FriendFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp

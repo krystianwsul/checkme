@@ -2,18 +2,18 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
+import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class AndroidRemoteRootUserManager(children: Iterable<Snapshot>) : RemoteRootUserManager() {
+class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
 
     companion object {
 
         private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!)
     }
 
-    override var remoteRootUserRecords = children.map { it.toRecord() to false }
+    override var rootUserRecords = children.map { it.toRecord() to false }
             .associateBy { it.first.id }
             .toMutableMap()
 
@@ -21,17 +21,17 @@ class AndroidRemoteRootUserManager(children: Iterable<Snapshot>) : RemoteRootUse
         val userKey = UserKey(dataSnapshot.key)
 
         return dataSnapshot.toRecord().also {
-            remoteRootUserRecords[userKey] = it to false
+            rootUserRecords[userKey] = it to false
         }
     }
 
-    fun removeFriend(userKey: UserKey) = checkNotNull(remoteRootUserRecords.remove(userKey))
+    fun removeFriend(userKey: UserKey) = checkNotNull(rootUserRecords.remove(userKey))
 
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper): RootUserRecord {
-        check(!remoteRootUserRecords.containsKey(userKey))
+        check(!rootUserRecords.containsKey(userKey))
 
         return RootUserRecord(false, userWrapper).also {
-            remoteRootUserRecords[userKey] = it to false
+            rootUserRecords[userKey] = it to false
         }
     }
 }

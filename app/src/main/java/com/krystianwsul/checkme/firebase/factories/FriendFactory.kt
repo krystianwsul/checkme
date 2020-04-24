@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
+import com.krystianwsul.checkme.firebase.managers.AndroidRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -11,7 +11,7 @@ import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-class RemoteFriendFactory(children: Iterable<Snapshot>) {
+class FriendFactory(children: Iterable<Snapshot>) {
 
     companion object {
 
@@ -20,18 +20,18 @@ class RemoteFriendFactory(children: Iterable<Snapshot>) {
                 .toMutableMap()
     }
 
-    private val remoteFriendManager = AndroidRemoteRootUserManager(children)
+    private val rootUserManager = AndroidRootUserManager(children)
     private val strangerProjectManager = StrangerProjectManager()
 
-    private var _friends = remoteFriendManager.remoteRootUserRecords.toRootUsers()
+    private var _friends = rootUserManager.rootUserRecords.toRootUsers()
 
-    val isSaved get() = remoteFriendManager.isSaved
+    val isSaved get() = rootUserManager.isSaved
 
     val friends: Collection<RootUser> get() = _friends.values
 
     fun save(values: MutableMap<String, Any?>) {
         strangerProjectManager.save(values)
-        remoteFriendManager.save(values)
+        rootUserManager.save(values)
     }
 
     fun getUserJsons(friendIds: Set<UserKey>): MutableMap<UserKey, UserJson> {
@@ -68,21 +68,21 @@ class RemoteFriendFactory(children: Iterable<Snapshot>) {
 
     fun onDatabaseEvent(databaseEvent: DatabaseEvent): Boolean {
         val userKey = UserKey(databaseEvent.key)
-        val friendPair = remoteFriendManager.remoteRootUserRecords[userKey]
+        val friendPair = rootUserManager.rootUserRecords[userKey]
 
         if (friendPair?.second == true) {
-            remoteFriendManager.remoteRootUserRecords[userKey] = Pair(friendPair.first, false)
+            rootUserManager.rootUserRecords[userKey] = Pair(friendPair.first, false)
 
             return true
         } else {
             when (databaseEvent) {
                 is DatabaseEvent.AddChange -> {
-                    val remoteFriendRecord = remoteFriendManager.setFriend(databaseEvent.dataSnapshot)
+                    val remoteFriendRecord = rootUserManager.setFriend(databaseEvent.dataSnapshot)
 
                     _friends[userKey] = RootUser(remoteFriendRecord)
                 }
                 is DatabaseEvent.Remove -> {
-                    remoteFriendManager.removeFriend(userKey)
+                    rootUserManager.removeFriend(userKey)
                     _friends.remove(userKey)
                 }
             }
@@ -94,6 +94,6 @@ class RemoteFriendFactory(children: Iterable<Snapshot>) {
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper) {
         check(!_friends.containsKey(userKey))
 
-        _friends[userKey] = RootUser(remoteFriendManager.addFriend(userKey, userWrapper))
+        _friends[userKey] = RootUser(rootUserManager.addFriend(userKey, userWrapper))
     }
 }

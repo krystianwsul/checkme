@@ -5,25 +5,25 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-abstract class RemoteRootUserManager {
+abstract class RootUserManager {
 
-    val isSaved get() = remoteRootUserRecords.values.any { it.second }
+    val isSaved get() = rootUserRecords.values.any { it.second }
 
-    abstract var remoteRootUserRecords: MutableMap<UserKey, Pair<RootUserRecord, Boolean>>
+    abstract var rootUserRecords: MutableMap<UserKey, Pair<RootUserRecord, Boolean>>
 
     fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
-        val newRemoteRootUserRecords = remoteRootUserRecords.mapValues {
+        val newRootUserRecords = rootUserRecords.mapValues {
             Pair(it.value.first, it.value.first.getValues(myValues))
         }.toMutableMap()
 
-        ErrorLogger.instance.log("RemoteFriendManager.save values: $myValues")
+        ErrorLogger.instance.log("RootUserManager.save values: $myValues")
 
         if (myValues.isNotEmpty()) {
             check(!isSaved)
 
-            remoteRootUserRecords = newRemoteRootUserRecords
+            rootUserRecords = newRootUserRecords
         }
 
         values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }

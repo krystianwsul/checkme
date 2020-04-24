@@ -10,14 +10,14 @@ import com.krystianwsul.common.firebase.records.MyUserRecord
 import java.util.*
 import kotlin.properties.Delegates.observable
 
-class RemoteMyUserManager(
+class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         dataSnapshot: Snapshot
 ) {
 
-    var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
+    var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("MyUserManager.isSaved = $value") }
 
-    var remoteUserRecord = if (!dataSnapshot.exists()) {
+    var userRecord = if (!dataSnapshot.exists()) {
         val userWrapper = UserWrapper(deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) })
 
         MyUserRecord(true, userWrapper)
@@ -29,14 +29,14 @@ class RemoteMyUserManager(
     private fun Snapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
 
     fun newSnapshot(dataSnapshot: Snapshot): MyUserRecord {
-        remoteUserRecord = dataSnapshot.toRecord()
-        return remoteUserRecord
+        userRecord = dataSnapshot.toRecord()
+        return userRecord
     }
 
     fun save(values: MutableMap<String, Any?>) {
         val myValues = HashMap<String, Any?>()
 
-        remoteUserRecord.getValues(myValues)
+        userRecord.getValues(myValues)
 
         MyCrashlytics.log("RemoteUserManager.save values: $myValues")
 

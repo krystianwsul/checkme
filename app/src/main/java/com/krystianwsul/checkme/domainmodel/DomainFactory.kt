@@ -11,9 +11,9 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.DatabaseEvent
+import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
@@ -51,9 +51,9 @@ import java.util.*
 @Suppress("LeakingThis")
 class DomainFactory(
         private val localFactory: LocalFactory,
-        private val remoteUserFactory: RemoteUserFactory,
+        private val myUserFactory: MyUserFactory,
         val projectsFactory: ProjectsFactory,
-        val remoteFriendFactory: RemoteFriendFactory,
+        val friendFactory: FriendFactory,
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp
@@ -103,7 +103,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) { // todo route all external calls through here
             val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendFactory.isSaved) {
                 domainFactory.checkSave()
                 firebaseListener(domainFactory)
             } else {
@@ -114,7 +114,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
             val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendFactory.isSaved) {
                 Preferences.tickLog.logLineHour("running firebaseListener $source")
                 firebaseListener(domainFactory)
             } else {
@@ -165,7 +165,7 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    private fun updateIsSaved() = isSaved.accept(projectsFactory.isSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
+    private fun updateIsSaved() = isSaved.accept(projectsFactory.isSaved || myUserFactory.isSaved || friendFactory.isSaved)
 
     fun save(
             dataId: Int,
@@ -191,8 +191,8 @@ class DomainFactory(
 
         val localChanges = localFactory.save(source)
         projectsFactory.save(values)
-        remoteUserFactory.save(values)
-        remoteFriendFactory.save(values)
+        myUserFactory.save(values)
+        friendFactory.save(values)
 
         val changes = localChanges || values.isNotEmpty()
 
@@ -248,12 +248,12 @@ class DomainFactory(
     override fun updateUserRecord(dataSnapshot: Snapshot) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
 
-        val runType = if (remoteUserFactory.isSaved) {
-            remoteUserFactory.isSaved = false
+        val runType = if (myUserFactory.isSaved) {
+            myUserFactory.isSaved = false
 
             RunType.LOCAL
         } else {
-            remoteUserFactory.onNewSnapshot(dataSnapshot)
+            myUserFactory.onNewSnapshot(dataSnapshot)
 
             RunType.REMOTE
         }
@@ -265,7 +265,7 @@ class DomainFactory(
     override fun updateFriendRecords(databaseEvent: DatabaseEvent) {
         MyCrashlytics.log("updateFriendRecords")
 
-        val localChange = remoteFriendFactory.onDatabaseEvent(databaseEvent)
+        val localChange = friendFactory.onDatabaseEvent(databaseEvent)
 
         val runType = if (localChange) RunType.LOCAL else RunType.REMOTE
 
@@ -275,7 +275,7 @@ class DomainFactory(
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
-        if (projectsFactory.isSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
+        if (projectsFactory.isSaved || friendFactory.isSaved || myUserFactory.isSaved)
             return
 
         updateIsSaved()
@@ -805,7 +805,7 @@ class DomainFactory(
                 taskData,
                 parentTreeDatas,
                 customTimeDatas,
-                remoteUserFactory.remoteUser.defaultReminder
+                myUserFactory.user.defaultReminder
         )
     }
 
@@ -883,7 +883,7 @@ class DomainFactory(
 
         return MainViewModel.Data(
                 TaskListFragment.TaskData(childTaskDatas, null, true),
-                remoteUserFactory.remoteUser.defaultTab
+                myUserFactory.user.defaultTab
         )
     }
 
@@ -891,7 +891,7 @@ class DomainFactory(
     fun getDrawerData(): DrawerViewModel.Data {
         MyCrashlytics.log("DomainFactory.getDrawerData")
 
-        return remoteUserFactory.remoteUser.run { DrawerViewModel.Data(name, email, photoUrl) }
+        return myUserFactory.user.run { DrawerViewModel.Data(name, email, photoUrl) }
     }
 
     @Synchronized
@@ -918,7 +918,7 @@ class DomainFactory(
     fun getFriendListData(): FriendListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getFriendListData")
 
-        val friends = remoteFriendFactory.friends
+        val friends = friendFactory.friends
 
         val userListDatas = friends.map {
             FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl, it.userWrapper)
@@ -931,7 +931,7 @@ class DomainFactory(
     fun getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
-        val friendDatas = remoteFriendFactory.friends
+        val friendDatas = friendFactory.friends
                 .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                 .associateBy { it.id }
 
@@ -958,7 +958,7 @@ class DomainFactory(
     fun getSettingsData(): SettingsViewModel.Data {
         MyCrashlytics.log("DomainFactory.getSettingsData")
 
-        return SettingsViewModel.Data(remoteUserFactory.remoteUser.defaultReminder)
+        return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
     }
 
     // sets
@@ -1888,9 +1888,9 @@ class DomainFactory(
     @Synchronized
     fun removeFriends(source: SaveService.Source, keys: Set<UserKey>) {
         MyCrashlytics.log("DomainFactory.removeFriends")
-        check(!remoteFriendFactory.isSaved)
+        check(!friendFactory.isSaved)
 
-        keys.forEach { remoteUserFactory.remoteUser.removeFriend(it) }
+        keys.forEach { myUserFactory.user.removeFriend(it) }
 
         save(0, source)
     }
@@ -1898,10 +1898,10 @@ class DomainFactory(
     @Synchronized
     fun addFriend(source: SaveService.Source, userKey: UserKey, userWrapper: UserWrapper) {
         MyCrashlytics.log("DomainFactory.addFriend")
-        check(!remoteUserFactory.isSaved)
+        check(!myUserFactory.isSaved)
 
-        remoteUserFactory.remoteUser.addFriend(userKey)
-        remoteFriendFactory.addFriend(userKey, userWrapper)
+        myUserFactory.user.addFriend(userKey)
+        friendFactory.addFriend(userKey, userWrapper)
 
         save(0, source)
     }
@@ -1909,11 +1909,11 @@ class DomainFactory(
     @Synchronized
     fun addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) {
         MyCrashlytics.log("DomainFactory.addFriends")
-        check(!remoteUserFactory.isSaved)
+        check(!myUserFactory.isSaved)
 
         userMap.forEach {
-            remoteUserFactory.remoteUser.addFriend(it.key)
-            remoteFriendFactory.addFriend(it.key, it.value)
+            myUserFactory.user.addFriend(it.key)
+            friendFactory.addFriend(it.key, it.value)
         }
 
         save(0, source)
@@ -1922,11 +1922,11 @@ class DomainFactory(
     @Synchronized
     override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
-        if (remoteUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
+        if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
         this.deviceDbInfo = deviceDbInfo
 
-        remoteUserFactory.remoteUser.setToken(deviceDbInfo)
+        myUserFactory.user.setToken(deviceDbInfo)
         projectsFactory.updateDeviceInfo(deviceDbInfo)
 
         save(0, source)
@@ -1935,9 +1935,9 @@ class DomainFactory(
     @Synchronized
     fun updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
         MyCrashlytics.log("DomainFactory.updatePhotoUrl")
-        if (remoteUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
+        if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
-        remoteUserFactory.remoteUser.photoUrl = photoUrl
+        myUserFactory.user.photoUrl = photoUrl
         projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
         save(0, source)
@@ -1946,9 +1946,9 @@ class DomainFactory(
     @Synchronized
     fun updateDefaultReminder(dataId: Int, source: SaveService.Source, defaultReminder: Boolean) {
         MyCrashlytics.log("DomainFactory.updateDefaultReminder")
-        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+        if (myUserFactory.isSaved) throw SavedFactoryException()
 
-        remoteUserFactory.remoteUser.defaultReminder = defaultReminder
+        myUserFactory.user.defaultReminder = defaultReminder
 
         save(dataId, source)
     }
@@ -1956,9 +1956,9 @@ class DomainFactory(
     @Synchronized
     fun updateDefaultTab(source: SaveService.Source, defaultTab: Int) {
         MyCrashlytics.log("DomainFactory.updateDefaultTab")
-        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+        if (myUserFactory.isSaved) throw SavedFactoryException()
 
-        remoteUserFactory.remoteUser.defaultTab = defaultTab
+        myUserFactory.user.defaultTab = defaultTab
 
         save(0, source)
     }
@@ -1981,9 +1981,9 @@ class DomainFactory(
         val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
 
         remoteProject.name = name
-        remoteProject.updateUsers(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+        remoteProject.updateUsers(addedFriends.map { friendFactory.getFriend(it) }.toSet(), removedFriends)
 
-        remoteFriendFactory.updateProjects(projectId, addedFriends, removedFriends)
+        friendFactory.updateProjects(projectId, addedFriends, removedFriends)
 
         updateNotifications(now)
 
@@ -2010,13 +2010,13 @@ class DomainFactory(
                 name,
                 now,
                 recordOf,
-                remoteUserFactory.remoteUser,
+                myUserFactory.user,
                 deviceDbInfo.userInfo,
-                remoteFriendFactory
+                friendFactory
         )
 
-        remoteUserFactory.remoteUser.addProject(remoteProject.projectKey)
-        remoteFriendFactory.updateProjects(remoteProject.projectKey, friends, setOf())
+        myUserFactory.user.addProject(remoteProject.projectKey)
+        friendFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
         save(dataId, source)
 
@@ -2314,7 +2314,7 @@ class DomainFactory(
                 .toMap()
     }
 
-    private val ownerKey get() = remoteUserFactory.remoteUser.id
+    private val ownerKey get() = myUserFactory.user.id
 
     override fun <T : ProjectType> convert(
             now: ExactTimeStamp,
@@ -2811,7 +2811,7 @@ class DomainFactory(
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException : Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + remoteUserFactory.isSaved)
+    private inner class SavedFactoryException : Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
 
     private class AggregateData {
 

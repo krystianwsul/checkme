@@ -201,7 +201,7 @@ class ProjectsFactory(
             recordOf: Set<UserKey>,
             rootUser: RootUser,
             userInfo: UserInfo,
-            friendFactory: RemoteFriendFactory
+            friendFactory: FriendFactory
     ): SharedProject {
         check(name.isNotEmpty())
 

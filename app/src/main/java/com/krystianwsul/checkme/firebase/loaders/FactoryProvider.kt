@@ -4,9 +4,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.DatabaseEvent
+import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.factories.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -39,9 +39,9 @@ interface FactoryProvider {
 
     fun newDomain(
             localFactory: Local,
-            remoteUserFactory: RemoteUserFactory,
+            myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
-            remoteFriendFactory: RemoteFriendFactory,
+            friendFactory: FriendFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
             readTime: ExactTimeStamp
@@ -96,17 +96,17 @@ interface FactoryProvider {
 
         override fun newDomain(
                 localFactory: Local,
-                remoteUserFactory: RemoteUserFactory,
+                myUserFactory: MyUserFactory,
                 projectsFactory: ProjectsFactory,
-                remoteFriendFactory: RemoteFriendFactory,
+                friendFactory: FriendFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp
         ) = DomainFactory(
                 localFactory as LocalFactory,
-                remoteUserFactory,
+                myUserFactory,
                 projectsFactory,
-                remoteFriendFactory,
+                friendFactory,
                 deviceDbInfo,
                 startTime,
                 readTime

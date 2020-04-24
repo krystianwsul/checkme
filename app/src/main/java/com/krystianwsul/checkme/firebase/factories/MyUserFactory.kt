@@ -5,48 +5,48 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
-import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
+import com.krystianwsul.checkme.firebase.managers.MyUserManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.MyUser
 import io.reactivex.Observable
 
-class RemoteUserFactory(
+class MyUserFactory(
         userSnapshot: Snapshot,
         deviceDbInfo: DeviceDbInfo,
         private val factoryProvider: FactoryProvider
 ) {
 
-    private val remoteUserManager = RemoteMyUserManager(deviceDbInfo, userSnapshot)
+    private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot)
 
-    private val remoteUserRelay = BehaviorRelay.createDefault(MyUser(remoteUserManager.remoteUserRecord))
+    private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.userRecord))
 
-    var remoteUser
-        get() = remoteUserRelay.value!!
+    var user
+        get() = userRelay.value!!
         set(value) {
-            remoteUserRelay.accept(value)
+            userRelay.accept(value)
         }
 
     var isSaved
-        get() = remoteUserManager.isSaved
+        get() = myUserManager.isSaved
         set(value) {
-            remoteUserManager.isSaved = value
+            myUserManager.isSaved = value
         }
 
     init {
         setTab()
 
-        remoteUser.setToken(deviceDbInfo)
+        user.setToken(deviceDbInfo)
     }
 
     val sharedProjectKeysObservable = Observable.merge(
-            remoteUserRelay.map { ChangeType.REMOTE },
-            remoteUserRelay.switchMap { it.projectChanges.asRxJava2Observable() }.map { ChangeType.LOCAL }
+            userRelay.map { ChangeType.REMOTE },
+            userRelay.switchMap { it.projectChanges.asRxJava2Observable() }.map { ChangeType.LOCAL }
     )
-            .map { ChangeWrapper(it, remoteUser.projectIds) }
+            .map { ChangeWrapper(it, user.projectIds) }
             .distinctUntilChanged()!!
 
-    val friendKeysObservable = remoteUserRelay.switchMap { myUser ->
+    val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
                 .asRxJava2Observable()
                 .startWith(Unit)
@@ -54,13 +54,13 @@ class RemoteUserFactory(
     }.distinctUntilChanged()!!
 
     private fun setTab() {
-        factoryProvider.preferences.tab = remoteUser.defaultTab
+        factoryProvider.preferences.tab = user.defaultTab
     }
 
     fun onNewSnapshot(dataSnapshot: Snapshot) {
-        remoteUser = MyUser(remoteUserManager.newSnapshot(dataSnapshot))
+        user = MyUser(myUserManager.newSnapshot(dataSnapshot))
         setTab()
     }
 
-    fun save(values: MutableMap<String, Any?>) = remoteUserManager.save(values)
+    fun save(values: MutableMap<String, Any?>) = myUserManager.save(values)
 }

@@ -89,7 +89,7 @@ object RelevanceChecker {
                         databaseWrapper.getUsers {
                             val rootUserManager = JsRootUserManager(it)
 
-                            val rootUsers = rootUserManager.remoteRootUserRecords
+                            val rootUsers = rootUserManager.rootUserRecords
                                 .values
                                 .map { RootUser(it.first) }
 

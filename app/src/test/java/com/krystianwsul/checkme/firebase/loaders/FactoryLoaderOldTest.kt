@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.factories.FriendFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -78,15 +77,11 @@ class FactoryLoaderOldTest {
 
         override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = Unit
 
-        override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
             TODO("Not yet implemented")
         }
 
         override fun updateUserRecord(dataSnapshot: Snapshot) {
-            TODO("Not yet implemented")
-        }
-
-        override fun updateFriendRecords(databaseEvent: DatabaseEvent) {
             TODO("Not yet implemented")
         }
     }
@@ -113,7 +108,7 @@ class FactoryLoaderOldTest {
             changeListenerWrapper = null
         }
 
-        override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
             assertNotNull(changeListenerWrapper)
             assertNull(changeListenerWrapper!!.result)
 

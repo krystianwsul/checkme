@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.firebase.factories
 
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
@@ -15,9 +17,8 @@ class FriendFactory(children: Iterable<Snapshot>) {
 
     companion object {
 
-        private fun Map<UserKey, Pair<RootUserRecord, Boolean>>.toRootUsers() = values.map { RootUser(it.first) }
-                .associateBy { it.id }
-                .toMutableMap()
+        private fun Map<UserKey, Pair<RootUserRecord, Boolean>>.toRootUsers() =
+                mapValues { RootUser(it.value.first) }.toMutableMap()
     }
 
     private val rootUserManager = AndroidRootUserManager(children)
@@ -28,6 +29,8 @@ class FriendFactory(children: Iterable<Snapshot>) {
     val isSaved get() = rootUserManager.isSaved
 
     val friends: Collection<RootUser> get() = _friends.values
+
+    val changeTypes = PublishRelay.create<ChangeType>()
 
     fun save(values: MutableMap<String, Any?>) {
         strangerProjectManager.save(values)
@@ -66,14 +69,14 @@ class FriendFactory(children: Iterable<Snapshot>) {
         strangerProjectManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
     }
 
-    fun onDatabaseEvent(databaseEvent: DatabaseEvent): Boolean {
+    fun onDatabaseEvent(databaseEvent: DatabaseEvent) {
         val userKey = UserKey(databaseEvent.key)
         val friendPair = rootUserManager.rootUserRecords[userKey]
 
         if (friendPair?.second == true) {
             rootUserManager.rootUserRecords[userKey] = Pair(friendPair.first, false)
 
-            return true
+            changeTypes.accept(ChangeType.LOCAL)
         } else {
             when (databaseEvent) {
                 is DatabaseEvent.AddChange -> {
@@ -87,7 +90,7 @@ class FriendFactory(children: Iterable<Snapshot>) {
                 }
             }
 
-            return false
+            changeTypes.accept(ChangeType.REMOTE)
         }
     }
 

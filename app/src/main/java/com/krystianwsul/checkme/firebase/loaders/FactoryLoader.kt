@@ -165,16 +165,21 @@ class FactoryLoader(
                     )
                 }.cacheImmediate()
 
-                domainDisposable += Observables.combineLatest(
+                val changeTypes = listOf(
                         projectsFactorySingle.flatMapObservable { it.changeTypes },
-                        domainFactorySingle.toObservable()
-                ).subscribe { (changeType, domainFactory) -> domainFactory.onProjectsInstancesChange(changeType, ExactTimeStamp.now) }
+                        friendFactorySingle.flatMapObservable { it.changeTypes }
+                ).merge()
 
-                friendSingle.flatMapObservable { friendEvents }
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateFriendRecords(it) }.addTo(domainDisposable)
+                friendFactorySingle.flatMapObservable { friendEvents.map { friendEvent -> Pair(it, friendEvent) } }
+                        .subscribe { (friendFactory, friendEvent) ->
+                            friendFactory.onDatabaseEvent(friendEvent)
                         }
                         .addTo(domainDisposable)
+
+                domainDisposable += Observables.combineLatest(
+                        changeTypes,
+                        domainFactorySingle.toObservable()
+                ).subscribe { (changeType, domainFactory) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.now) }
 
                 userDatabaseRx.changes
                         .subscribe {

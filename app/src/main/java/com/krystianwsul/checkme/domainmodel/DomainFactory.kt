@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.factories.FriendFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -124,6 +123,12 @@ class DomainFactory(
                 Preferences.tickLog.logLineHour("listeners after: " + firebaseListeners.joinToString("; ") { it.second })
             }
         }
+
+        private val ChangeType.runType
+            get() = when (this) {
+                ChangeType.LOCAL -> RunType.LOCAL
+                ChangeType.REMOTE -> RunType.REMOTE
+            }
     }
 
     var remoteReadTimes: ReadTimes
@@ -231,17 +236,12 @@ class DomainFactory(
     override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    override fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp) {
-        MyCrashlytics.log("DomainFactory.onChange")
-
-        val runType = when (changeType) {
-            ChangeType.LOCAL -> RunType.LOCAL
-            ChangeType.REMOTE -> RunType.REMOTE
-        }
+    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
+        MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
         updateShortcuts(now)
 
-        tryNotifyListeners(now, "DomainFactory.onChange", runType)
+        tryNotifyListeners(now, "DomainFactory.onChangeTypeEvent", changeType.runType)
     }
 
     @Synchronized
@@ -259,17 +259,6 @@ class DomainFactory(
         }
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
-    }
-
-    @Synchronized
-    override fun updateFriendRecords(databaseEvent: DatabaseEvent) {
-        MyCrashlytics.log("updateFriendRecords")
-
-        val localChange = friendFactory.onDatabaseEvent(databaseEvent)
-
-        val runType = if (localChange) RunType.LOCAL else RunType.REMOTE
-
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
     }
 
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {

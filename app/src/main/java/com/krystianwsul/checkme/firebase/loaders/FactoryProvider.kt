@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.DatabaseEvent
 import com.krystianwsul.checkme.firebase.factories.FriendFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -49,9 +48,7 @@ interface FactoryProvider {
 
     interface Domain {
 
-        fun onProjectsInstancesChange(changeType: ChangeType, now: ExactTimeStamp)
-
-        fun updateFriendRecords(databaseEvent: DatabaseEvent)
+        fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp)
 
         fun updateUserRecord(dataSnapshot: Snapshot)
 

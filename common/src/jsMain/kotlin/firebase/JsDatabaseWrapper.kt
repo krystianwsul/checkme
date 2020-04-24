@@ -89,4 +89,4 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             serializer: DeserializationStrategy<T>,
             data: dynamic
     ) = Json.nonstrict.parse(serializer, JSON.stringify(data))
-} // todo dog tag + crashlytics, force task records after initializing project record subclass
+}

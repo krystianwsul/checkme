@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
 import firebase.JsDatabaseWrapper
 import firebase.managers.JsPrivateProjectManager
 import firebase.managers.JsRootUserManager
@@ -38,95 +37,85 @@ object RelevanceChecker {
         roots.forEach { root ->
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            fun <T : ProjectType> getInstances(
-                    projectRecord: ProjectRecord<T>,
-                    callback: (Map<TaskKey, RootInstanceManager<T>>) -> Unit
-            ) {
-                val results = projectRecord.taskRecords
+            databaseWrapper.getInstances { instanceJsonMap ->
+                fun <T : ProjectType> getInstances(projectRecord: ProjectRecord<T>) = projectRecord.taskRecords
                         .values
-                        .associate { it.taskKey to null as RootInstanceManager<T>? }
-                        .toMutableMap()
+                        .associate {
+                            val taskInstanceJsons = instanceJsonMap[it.rootInstanceKey] ?: mapOf()
 
-                projectRecord.taskRecords
-                        .values
-                        .forEach { taskRecord ->
-                            databaseWrapper.getInstances(taskRecord.rootInstanceKey) {
-                                check(results[taskRecord.taskKey] == null)
-
-                                results[taskRecord.taskKey] = RootInstanceManager(
-                                        taskRecord,
-                                        it.values.flatMap { it.values },
-                                        databaseWrapper
-                                )
-
-                                if (results.values.none { it == null }) {
-                                    callback(results.mapValues { it.value!! })
+                            val snapshotInfos = taskInstanceJsons.map { (date, timeMap) ->
+                                timeMap.map { (time, instanceJson) ->
+                                    RootInstanceManager.SnapshotInfo(date, time, instanceJson)
                                 }
+                            }.flatten()
+
+                            it.taskKey to RootInstanceManager(it, snapshotInfos, databaseWrapper)
+                        }
+
+                var privateData: Pair<JsPrivateProjectManager, Collection<RootInstanceManager<ProjectType.Private>>>? =
+                        null
+                var sharedData: Triple<JsSharedProjectManager, List<SharedProject>, Collection<RootInstanceManager<ProjectType.Shared>>>? =
+                        null
+
+                fun projectCallback() {
+                    if (privateData == null)
+                        return
+
+                    if (sharedData == null)
+                        return
+
+                    fun saveProjects(rootUserManager: JsRootUserManager?) {
+                        val values = mutableMapOf<String, Any?>()
+
+                        privateData!!.first.save(values)
+                        privateData!!.second.forEach { it.save(values) }
+                        sharedData!!.first.save(values)
+                        sharedData!!.third.forEach { it.save(values) }
+                        rootUserManager?.save(values)
+
+                        databaseWrapper.update(values) { message, _, exception ->
+                            ErrorLogger.instance.apply {
+                                log(message)
+                                exception?.let { logException(it) }
                             }
+
+                            callback(root)
                         }
-            }
-
-            var privateData: Pair<JsPrivateProjectManager, Collection<RootInstanceManager<ProjectType.Private>>>? = null
-            var sharedData: Triple<JsSharedProjectManager, List<SharedProject>, Collection<RootInstanceManager<ProjectType.Shared>>>? = null
-
-            fun projectCallback() {
-                if (privateData == null)
-                    return
-
-                if (sharedData == null)
-                    return
-
-                fun saveProjects(rootUserManager: JsRootUserManager?) {
-                    val values = mutableMapOf<String, Any?>()
-
-                    privateData!!.first.save(values)
-                    privateData!!.second.forEach { it.save(values) }
-                    sharedData!!.first.save(values)
-                    sharedData!!.third.forEach { it.save(values) }
-                    rootUserManager?.save(values)
-
-                    databaseWrapper.update(values) { message, _, exception ->
-                        ErrorLogger.instance.apply {
-                            log(message)
-                            exception?.let { logException(it) }
-                        }
-
-                        callback(root)
                     }
-                }
 
-                if (sharedData!!.second.isEmpty()) {
-                    saveProjects(null)
-                } else {
-                    databaseWrapper.getUsers {
-                        val rootUserManager = JsRootUserManager(it)
+                    if (sharedData!!.second.isEmpty()) {
+                        saveProjects(null)
+                    } else {
+                        databaseWrapper.getUsers {
+                            val rootUserManager = JsRootUserManager(it)
 
-                        val rootUsers = rootUserManager.remoteRootUserRecords
+                            val rootUsers = rootUserManager.remoteRootUserRecords
                                 .values
                                 .map { RootUser(it.first) }
 
-                        val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
+                            val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 
-                        rootUsers.forEach { remoteUser ->
-                            removedSharedProjectKeys.forEach {
-                                remoteUser.removeProject(it)
+                            rootUsers.forEach { remoteUser ->
+                                removedSharedProjectKeys.forEach {
+                                    remoteUser.removeProject(it)
+                                }
                             }
-                        }
 
-                        saveProjects(rootUserManager)
+                            saveProjects(rootUserManager)
+                        }
                     }
                 }
-            }
 
-            databaseWrapper.getPrivateProjects {
-                val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
+                databaseWrapper.getPrivateProjects {
+                    val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-                val privateRootInstanceManagers = privateProjectManager.privateProjectRecords
+                    val privateRootInstanceManagers = privateProjectManager.privateProjectRecords
                         .associate { it.projectKey to null as Collection<RootInstanceManager<ProjectType.Private>>? }
                         .toMutableMap()
 
-                privateProjectManager.privateProjectRecords.forEach { privateProjectRecord ->
-                    getInstances(privateProjectRecord) { rootInstanceManagers ->
+                    privateProjectManager.privateProjectRecords.forEach { privateProjectRecord ->
+                        val rootInstanceManagers = getInstances(privateProjectRecord)
+
                         val privateProject = PrivateProject(privateProjectRecord, rootInstanceManagers) {
                             throw UnsupportedOperationException()
                         }
@@ -161,20 +150,15 @@ object RelevanceChecker {
                         }
                     }
                 }
-            }
 
-            databaseWrapper.getSharedProjects {
-                val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
+                databaseWrapper.getSharedProjects {
+                    val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
 
-                val sharedDataInner = sharedProjectManager.sharedProjectRecords
+                    val sharedDataInner = sharedProjectManager.sharedProjectRecords
                         .values
-                        .associate { it.first.projectKey to null as Pair<SharedProject?, Collection<RootInstanceManager<ProjectType.Shared>>>? }
-                        .toMutableMap()
+                            .map { (sharedProjectRecord, _) ->
+                                val rootInstanceManagers = getInstances(sharedProjectRecord)
 
-                sharedProjectManager.sharedProjectRecords
-                        .values
-                        .forEach { (sharedProjectRecord, _) ->
-                            getInstances(sharedProjectRecord) { rootInstanceManagers ->
                                 val sharedProject = SharedProject(sharedProjectRecord, rootInstanceManagers) {
                                     throw UnsupportedOperationException()
                                 }
@@ -191,27 +175,17 @@ object RelevanceChecker {
                                 ).removedSharedProjects
                                 check(removedSharedProjects.size < 2)
 
-                                check(sharedDataInner.containsKey(sharedProjectRecord.projectKey))
-                                check(sharedDataInner[sharedProjectRecord.projectKey] == null)
-
-                                sharedDataInner[sharedProjectRecord.projectKey] = Pair(
-                                        removedSharedProjects.singleOrNull(),
-                                        rootInstanceManagers.values
-                                )
-
-                                if (sharedDataInner.values.none { it == null }) {
-                                    sharedData = Triple(
-                                            sharedProjectManager,
-                                            sharedDataInner.values.mapNotNull { it!!.first },
-                                            sharedDataInner.values
-                                                    .map { it!!.second }
-                                                    .flatten()
-                                    )
-
-                                    projectCallback()
-                                }
+                                Pair(removedSharedProjects.singleOrNull(), rootInstanceManagers.values)
                             }
-                        }
+
+                    sharedData = Triple(
+                            sharedProjectManager,
+                            sharedDataInner.mapNotNull { it.first },
+                            sharedDataInner.map { it.second }.flatten()
+                    )
+
+                    projectCallback()
+                }
             }
         }
     }

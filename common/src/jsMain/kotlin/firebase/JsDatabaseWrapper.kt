@@ -2,10 +2,10 @@ package firebase
 
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -71,8 +71,8 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     @Serializable
     private class Users(val userWrappers: Map<String, UserWrapper>)
 
-    fun getInstances(taskFirebaseKey: String, callback: (Map<String, Map<String, RootInstanceManager.SnapshotInfo>>) -> Unit) {
-        rootReference.child("$KEY_INSTANCES/$taskFirebaseKey").once("value") { snapshot ->
+    fun getInstances(callback: (Map<String, Map<String, Map<String, InstanceJson>>>) -> Unit) {
+        rootReference.child(KEY_INSTANCES).once("value") { snapshot ->
             callback(parse(Instances.serializer(), object {
 
                 @Suppress("unused")
@@ -82,7 +82,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     }
 
     @Serializable
-    private class Instances(val snapshotInfos: Map<String, Map<String, RootInstanceManager.SnapshotInfo>>? = null)
+    private class Instances(val snapshotInfos: Map<String, Map<String, Map<String, InstanceJson>>>? = null)
 
     @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION", "UnsafeCastFromDynamic")
     private fun <T> parse(

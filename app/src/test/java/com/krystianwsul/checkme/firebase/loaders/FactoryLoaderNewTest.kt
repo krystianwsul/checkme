@@ -429,4 +429,38 @@ class FactoryLoaderNewTest {
                         .toSet()
         )
     }
+
+    @Test
+    fun testFriendsChangeAfterDomainInit() {
+        testFactoryProvider.database
+                .myUserObservable
+                .accept(ValueTestSnapshot(
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                        userInfo.key.key
+                ))
+
+        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
+        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
+
+        assertNull(domainFactoryRelay.value)
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(PrivateProjectJson())
+
+        assertNotNull(domainFactoryRelay.value)
+
+        val changedEmail = "changed email"
+        testFactoryProvider.domain.checkChange {
+            testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
+        }
+
+        assertEquals(
+                changedEmail,
+                testFactoryProvider.friendFactory
+                        .friends
+                        .single { it.userKey == friendKey2 }
+                        .email
+        )
+    }
 }

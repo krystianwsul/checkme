@@ -147,7 +147,7 @@ class FactoryLoader(
                         }
                         .cacheImmediate()
 
-                val friendFactorySingle = friendSingle.map { FriendFactory(it) }
+                val friendFactorySingle = friendSingle.map { FriendFactory(it) }.cacheImmediate()
 
                 val domainFactorySingle = Singles.zip(
                         userFactorySingle,

@@ -22,7 +22,10 @@ import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.*
+import io.reactivex.rxkotlin.Singles
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
+import io.reactivex.rxkotlin.plusAssign
 
 class FactoryLoader(
         localFactory: FactoryProvider.Local,
@@ -176,10 +179,9 @@ class FactoryLoader(
                         }
                         .addTo(domainDisposable)
 
-                domainDisposable += Observables.combineLatest(
-                        changeTypes,
-                        domainFactorySingle.toObservable()
-                ).subscribe { (changeType, domainFactory) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.now) }
+                domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { Pair(domainFactory, it) } }
+                        .subscribe { (domainFactory, changeType) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.now) }
+                        .addTo(domainDisposable)
 
                 userDatabaseRx.changes
                         .subscribe {

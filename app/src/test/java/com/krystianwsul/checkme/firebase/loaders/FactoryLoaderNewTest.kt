@@ -463,4 +463,69 @@ class FactoryLoaderNewTest {
                         .email
         )
     }
+
+    @Test
+    fun testFriendsChangeAfterFriendsFactoryInit() {
+        testFactoryProvider.database
+                .myUserObservable
+                .accept(ValueTestSnapshot(
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                        userInfo.key.key
+                ))
+
+        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
+        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
+
+        val changedEmail = "changed email"
+        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
+
+        assertNull(domainFactoryRelay.value)
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(PrivateProjectJson())
+
+        assertNotNull(domainFactoryRelay.value)
+
+        assertEquals(
+                changedEmail,
+                testFactoryProvider.friendFactory
+                        .friends
+                        .single { it.userKey == friendKey2 }
+                        .email
+        )
+    }
+
+    @Test
+    fun testFriendsChangeBeforeFriendsFactoryInit() {
+        testFactoryProvider.database
+                .myUserObservable
+                .accept(ValueTestSnapshot(
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                        userInfo.key.key
+                ))
+
+        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
+
+        val changedEmail = "changed email"
+        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
+
+        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
+
+        assertNull(domainFactoryRelay.value)
+
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(PrivateProjectJson())
+
+        assertNotNull(domainFactoryRelay.value)
+
+        assertEquals(
+                changedEmail,
+                testFactoryProvider.friendFactory
+                        .friends
+                        .single { it.userKey == friendKey2 }
+                        .email
+        )
+    }
 }

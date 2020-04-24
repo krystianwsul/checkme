@@ -58,10 +58,10 @@ class FriendFactory(children: Iterable<Snapshot>) {
             removedUsers: Set<UserKey>
     ) {
         val addedFriends = addedUsers.mapNotNull(_friends::get)
-        val addedStrangers = addedUsers - addedFriends.map { it.id }
+        val addedStrangers = addedUsers - addedFriends.map { it.userKey }
 
         val removedFriends = removedUsers.mapNotNull(_friends::get)
-        val removedStrangers = removedUsers - removedFriends.map { it.id }
+        val removedStrangers = removedUsers - removedFriends.map { it.userKey }
 
         addedFriends.forEach { it.addProject(projectId) }
         removedFriends.forEach { it.removeProject(projectId) }

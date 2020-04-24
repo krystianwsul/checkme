@@ -11,8 +11,6 @@ sealed class ProjectKey<T : ProjectType> : Parcelable, Serializable {
         override val type get() = Type.PRIVATE
 
         override fun compareTo(other: Private) = key.compareTo(other.key)
-
-        fun toUserKey() = UserKey(key)
     }
 
     @Parcelize

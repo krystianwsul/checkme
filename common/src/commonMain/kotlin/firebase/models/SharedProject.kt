@@ -54,7 +54,7 @@ class SharedProject(
     }
 
     private fun addUser(rootUser: RootUser) {
-        val id = rootUser.id
+        val id = rootUser.userKey
 
         check(!remoteUsers.containsKey(id))
 

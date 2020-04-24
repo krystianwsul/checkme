@@ -3,12 +3,14 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.utils.UserKey
 
 
 class MyUserRecord(
         create: Boolean,
-        createObject: UserWrapper
-) : RootUserRecord(create, createObject), MyUserProperties {
+        createObject: UserWrapper,
+        userKey: UserKey
+) : RootUserRecord(create, createObject, userKey), MyUserProperties {
 
     override fun setToken(deviceDbInfo: DeviceDbInfo) {
         if (deviceDbInfo.token == userJson.tokens[deviceDbInfo.uuid])

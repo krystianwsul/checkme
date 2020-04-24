@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.UserKey
 
 interface RootUserProperties {
 
-    val id: UserKey
+    val userKey: UserKey
     val name: String
     val email: String
     val userJson: UserJson

@@ -10,7 +10,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
 
     companion object {
 
-        private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!)
+        private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!, UserKey(key))
     }
 
     override var rootUserRecords = children.associate { UserKey(it.key) to Pair(it.toRecord(), false) }.toMutableMap()
@@ -28,7 +28,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper): RootUserRecord {
         check(!rootUserRecords.containsKey(userKey))
 
-        return RootUserRecord(false, userWrapper).also {
+        return RootUserRecord(false, userWrapper, userKey).also {
             rootUserRecords[userKey] = it to false
         }
     }

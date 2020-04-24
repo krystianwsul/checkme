@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.RootUserProperties
-import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
@@ -9,7 +8,8 @@ import com.krystianwsul.common.utils.UserKey
 
 open class RootUserRecord(
         create: Boolean,
-        override val createObject: UserWrapper
+        override val createObject: UserWrapper,
+        override val userKey: UserKey
 ) : RemoteRecord(create), RootUserProperties {
 
     companion object {
@@ -23,9 +23,7 @@ open class RootUserRecord(
 
     override val userWrapper by lazy { createObject }
 
-    override val id by lazy { UserData.getKey(userJson.email) }
-
-    final override val key by lazy { id.key }
+    final override val key by lazy { this.userKey.key }
 
     override var name by Committer(userJson::name, "$key/$USER_DATA")
 

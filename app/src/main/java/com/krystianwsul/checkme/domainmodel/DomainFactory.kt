@@ -910,7 +910,7 @@ class DomainFactory(
         val friends = friendFactory.friends
 
         val userListDatas = friends.map {
-            FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl, it.userWrapper)
+            FriendListViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl, it.userWrapper)
         }.toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
@@ -921,7 +921,7 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         val friendDatas = friendFactory.friends
-                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
+                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
                 .associateBy { it.id }
 
         val name: String?
@@ -2303,7 +2303,7 @@ class DomainFactory(
                 .toMap()
     }
 
-    private val ownerKey get() = myUserFactory.user.id
+    private val ownerKey get() = myUserFactory.user.userKey
 
     override fun <T : ProjectType> convert(
             now: ExactTimeStamp,

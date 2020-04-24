@@ -62,6 +62,8 @@ class MyApplication : Application() {
         context = this
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
+        MyCrashlytics.init()
+
         RxDogTag.install()
 
         JodaTimeAndroid.init(this)

@@ -12,7 +12,7 @@ object MyCrashlytics : ErrorLogger() {
             .resources
             .getBoolean(R.bool.crashlytics_enabled)
 
-    init {
+    fun init() {
         if (enabled)
             Fabric.with(MyApplication.instance, Answers(), Crashlytics())
 

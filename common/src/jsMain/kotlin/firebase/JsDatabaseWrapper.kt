@@ -10,7 +10,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-class JsDatabaseWrapper(admin: dynamic, private val root: String) : DatabaseWrapper() {
+class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
     private val rootReference = admin.database().ref(root)
 

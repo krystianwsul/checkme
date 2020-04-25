@@ -60,6 +60,7 @@ class FriendsLoaderTest {
     private lateinit var removeFriendsEmissionChecker: EmissionChecker<FriendsLoader.RemoveFriendsEvent>
 
     private val friendKey1 = UserKey("friendKey1")
+    private val friendKey2 = UserKey("friendKey2")
 
     @Before
     fun before() {
@@ -96,6 +97,50 @@ class FriendsLoaderTest {
 
         initialFriendsEmissionChecker.checkOne {
             friendsProvider.database.acceptUser(friendKey1, UserWrapper())
+        }
+    }
+
+    @Test
+    fun testAddFriend() {
+        testInitial()
+
+        friendsKeysRelay.accept(setOf(friendKey1, friendKey2))
+
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey2, UserWrapper())
+        }
+    }
+
+    @Test
+    fun testChangeInitialFriend() {
+        testInitial()
+
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey1, UserWrapper())
+        }
+    }
+
+    @Test
+    fun testChangeAddedFriend() {
+        testInitial()
+
+        friendsKeysRelay.accept(setOf(friendKey1, friendKey2))
+
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey2, UserWrapper())
+        }
+
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey2, UserWrapper())
+        }
+    }
+
+    @Test
+    fun testRemoveFriend() {
+        testInitial()
+
+        removeFriendsEmissionChecker.checkOne {
+            friendsKeysRelay.accept(setOf())
         }
     }
 }

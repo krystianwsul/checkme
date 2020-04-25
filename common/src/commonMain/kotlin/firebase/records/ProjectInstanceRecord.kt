@@ -20,6 +20,10 @@ class ProjectInstanceRecord<T : ProjectType>(
         taskRecord.key + "/instances/" + firebaseKey,
         scheduleCustomTimeId
 ) {
+    /*
+    todo instances after switching to new instances, 1. wait a while, 2. have the server check
+    if all of these records are removed, 3. remove this class
+     */
 
     override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)
 }

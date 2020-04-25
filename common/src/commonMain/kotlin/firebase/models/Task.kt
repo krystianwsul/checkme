@@ -396,15 +396,16 @@ class Task<T : ProjectType>(
         val oldestOldestVisible = allOldestVisible.min()!!
 
         (getInstances(null, now, now) + _existingInstances.values)
+                .filter { it.isVisible(now, true) }
                 .map { it.scheduleDate }
                 .min()
                 ?.let { oldestScheduleDate ->
                     if (oldestScheduleDate < oldestOldestVisible)
-                        ErrorLogger.instance.logException(OldestVisibleCalculationException("oldest schedule date: $oldestScheduleDate, oldest oldestVisible: $oldestOldestVisible"))
+                        ErrorLogger.instance.logException(OldestVisibleCalculationException1("task: $name ($taskKey), oldest schedule date: $oldestScheduleDate, oldest oldestVisible: $oldestOldestVisible"))
                 }
     }
 
-    private class OldestVisibleCalculationException(message: String) : Exception(message)
+    private class OldestVisibleCalculationException1(message: String) : Exception(message)
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 

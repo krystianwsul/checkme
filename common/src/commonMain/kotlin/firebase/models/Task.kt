@@ -382,6 +382,30 @@ class Task<T : ProjectType>(
         )
     }
 
+    // todo instances if this doesn't log anything, use algorithm for filtering instances in database query
+    fun checkOldestVisible(now: ExactTimeStamp) {
+        fun getAllParentTasks(task: Task<T>): List<Task<T>> {
+            val parentTasks = task.getParentTaskHierarchies()
+                    .map { getAllParentTasks(it.parentTask) }
+                    .flatten()
+
+            return (parentTasks + task).distinct()
+        }
+
+        val allOldestVisible = getAllParentTasks(this).mapNotNull { it.getOldestVisible() } + now.date
+        val oldestOldestVisible = allOldestVisible.min()!!
+
+        (getInstances(null, now, now) + _existingInstances.values)
+                .map { it.scheduleDate }
+                .min()
+                ?.let { oldestScheduleDate ->
+                    if (oldestScheduleDate < oldestOldestVisible)
+                        ErrorLogger.instance.logException(OldestVisibleCalculationException("oldest schedule date: $oldestScheduleDate, oldest oldestVisible: $oldestOldestVisible"))
+                }
+    }
+
+    private class OldestVisibleCalculationException(message: String) : Exception(message)
+
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
     private fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {

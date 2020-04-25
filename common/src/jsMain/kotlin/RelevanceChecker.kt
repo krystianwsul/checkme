@@ -122,6 +122,8 @@ object RelevanceChecker {
 
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
+                        privateProject.tasks.forEach { it.checkOldestVisible(ExactTimeStamp.now) }
+
                         Irrelevant.setIrrelevant(
                                 object : Project.Parent {
 
@@ -164,6 +166,8 @@ object RelevanceChecker {
                                 }
 
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
+
+                                sharedProject.tasks.forEach { it.checkOldestVisible(ExactTimeStamp.now) }
 
                                 val removedSharedProjects = Irrelevant.setIrrelevant(
                                         object : Project.Parent {

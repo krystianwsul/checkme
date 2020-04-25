@@ -49,8 +49,9 @@ class MyUserFactory(
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
                 .asRxJava2Observable()
-                .startWith(Unit)
-                .map { myUser.friends }
+                .map { ChangeType.LOCAL }
+                .startWith(ChangeType.REMOTE)
+                .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!
 
     private fun setTab() {

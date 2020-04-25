@@ -62,7 +62,7 @@ class FriendsFactory(
                 _friends.remove(it)
             }
 
-            ChangeType.REMOTE // todo friends
+            it.userChangeType
         }
 
         changeTypes = listOf(

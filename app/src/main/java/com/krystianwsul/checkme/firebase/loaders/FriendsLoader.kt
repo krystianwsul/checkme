@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -9,18 +11,19 @@ import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 
 class FriendsLoader(
-        friendKeysObservable: Observable<Set<UserKey>>,
+        friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
         private val domainDisposable: CompositeDisposable,
         private val friendsProvider: FriendsProvider
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-    private val databaseRx = friendKeysObservable.processChangesSet(
-            {
+    private val databaseRx = friendKeysObservable.processChanges(
+            { it.data },
+            { _, userKey ->
                 DatabaseRx(
                         domainDisposable,
-                        friendsProvider.database.getUserObservable(it)
+                        friendsProvider.database.getUserObservable(userKey)
                 )
             },
             { it.disposable.dispose() }
@@ -29,7 +32,8 @@ class FriendsLoader(
     val initialFriendsEvent = databaseRx.firstOrError()
             .flatMap {
                 it.newMap
-                        .map { it.value.first }
+                        .values
+                        .map { it.first }
                         .zipSingle()
             }
             .map(::InitialFriendsEvent)
@@ -53,7 +57,7 @@ class FriendsLoader(
 
     val addChangeFriendEvents = listOf(addFriendEvents, changeFriendEvents).merge().replayImmediate()
 
-    val removeFriendEvents = databaseRx.map { RemoveFriendsEvent(it.removedEntries.keys) } // todo friends this might need the changeType propagated
+    val removeFriendEvents = databaseRx.map { RemoveFriendsEvent(it.original.changeType, it.removedEntries.keys) }
             .filter { it.userKeys.isNotEmpty() }
             .replayImmediate()
 
@@ -61,5 +65,5 @@ class FriendsLoader(
 
     class AddChangeFriendEvent(val snapshot: Snapshot)
 
-    class RemoveFriendsEvent(val userKeys: Set<UserKey>)
+    class RemoveFriendsEvent(val userChangeType: ChangeType, val userKeys: Set<UserKey>)
 }

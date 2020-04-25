@@ -53,9 +53,9 @@ class FriendsLoader(
 
     val addChangeFriendEvents = listOf(addFriendEvents, changeFriendEvents).merge().replayImmediate()
 
-    val removeFriendEvents = databaseRx.map {
-        RemoveFriendsEvent(it.removedEntries.keys) // todo friends this might need the changeType propagated
-    }.replayImmediate()
+    val removeFriendEvents = databaseRx.map { RemoveFriendsEvent(it.removedEntries.keys) } // todo friends this might need the changeType propagated
+            .filter { it.userKeys.isNotEmpty() }
+            .replayImmediate()
 
     class InitialFriendsEvent(val snapshots: Iterable<Snapshot>)
 

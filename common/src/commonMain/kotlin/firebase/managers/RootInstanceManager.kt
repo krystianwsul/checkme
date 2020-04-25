@@ -46,7 +46,7 @@ open class RootInstanceManager<T : ProjectType>(
             isSaved = newIsSaved
         }
 
-        values += myValues.mapKeys { "${DatabaseWrapper.KEY_INSTANCES}/${it.key}" }
+        values += myValues.mapKeys { "${DatabaseWrapper.KEY_INSTANCES}/${taskRecord.rootInstanceKey}/${it.key}" }
     }
 
     fun newRootInstanceRecord(

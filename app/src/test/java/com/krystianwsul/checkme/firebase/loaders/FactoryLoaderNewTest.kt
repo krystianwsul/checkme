@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -21,7 +21,6 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxkotlin.addTo
@@ -153,10 +152,6 @@ class FactoryLoaderNewTest {
             return userObservables.getValue(userKey)
         }
 
-        override fun getUserSingle(userKey: UserKey): Single<Snapshot> {
-            return getOrInitUserObservable(userKey).firstOrError()
-        }
-
         override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it, key.key) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
@@ -201,18 +196,18 @@ class FactoryLoaderNewTest {
 
         override val shownFactory = mockk<Instance.ShownFactory>()
 
-        lateinit var friendFactory: FriendFactory
+        lateinit var friendsFactory: FriendsFactory
 
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
                 myUserFactory: MyUserFactory,
                 projectsFactory: ProjectsFactory,
-                friendFactory: FriendFactory,
+                friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp
         ): FactoryProvider.Domain {
-            this.friendFactory = friendFactory
+            this.friendsFactory = friendsFactory
 
             return domain
         }
@@ -423,7 +418,7 @@ class FactoryLoaderNewTest {
         assertNotNull(domainFactoryRelay.value)
         assertEquals(
                 setOf(friendKey1, friendKey2),
-                testFactoryProvider.friendFactory
+                testFactoryProvider.friendsFactory
                         .friends
                         .map { it.userKey }
                         .toSet()
@@ -457,7 +452,7 @@ class FactoryLoaderNewTest {
 
         assertEquals(
                 changedEmail,
-                testFactoryProvider.friendFactory
+                testFactoryProvider.friendsFactory
                         .friends
                         .single { it.userKey == friendKey2 }
                         .email
@@ -489,7 +484,7 @@ class FactoryLoaderNewTest {
 
         assertEquals(
                 changedEmail,
-                testFactoryProvider.friendFactory
+                testFactoryProvider.friendsFactory
                         .friends
                         .single { it.userKey == friendKey2 }
                         .email
@@ -522,7 +517,7 @@ class FactoryLoaderNewTest {
 
         assertEquals(
                 changedEmail,
-                testFactoryProvider.friendFactory
+                testFactoryProvider.friendsFactory
                         .friends
                         .single { it.userKey == friendKey2 }
                         .email

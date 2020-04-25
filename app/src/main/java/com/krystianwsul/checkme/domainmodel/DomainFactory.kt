@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -52,7 +52,7 @@ class DomainFactory(
         private val localFactory: LocalFactory,
         private val myUserFactory: MyUserFactory,
         val projectsFactory: ProjectsFactory,
-        val friendFactory: FriendFactory,
+        val friendsFactory: FriendsFactory,
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp
@@ -102,7 +102,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) { // todo route all external calls through here
             val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendFactory.isSaved) {
+            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
                 domainFactory.checkSave()
                 firebaseListener(domainFactory)
             } else {
@@ -113,7 +113,7 @@ class DomainFactory(
         @Synchronized
         fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
             val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendFactory.isSaved) {
+            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
                 Preferences.tickLog.logLineHour("running firebaseListener $source")
                 firebaseListener(domainFactory)
             } else {
@@ -170,7 +170,7 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    private fun updateIsSaved() = isSaved.accept(projectsFactory.isSaved || myUserFactory.isSaved || friendFactory.isSaved)
+    private fun updateIsSaved() = isSaved.accept(projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved)
 
     fun save(
             dataId: Int,
@@ -197,7 +197,7 @@ class DomainFactory(
         val localChanges = localFactory.save(source)
         projectsFactory.save(values)
         myUserFactory.save(values)
-        friendFactory.save(values)
+        friendsFactory.save(values)
 
         val changes = localChanges || values.isNotEmpty()
 
@@ -264,7 +264,7 @@ class DomainFactory(
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
-        if (projectsFactory.isSaved || friendFactory.isSaved || myUserFactory.isSaved)
+        if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved)
             return
 
         updateIsSaved()
@@ -907,7 +907,7 @@ class DomainFactory(
     fun getFriendListData(): FriendListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getFriendListData")
 
-        val friends = friendFactory.friends
+        val friends = friendsFactory.friends
 
         val userListDatas = friends.map {
             FriendListViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl, it.userWrapper)
@@ -920,7 +920,7 @@ class DomainFactory(
     fun getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
-        val friendDatas = friendFactory.friends
+        val friendDatas = friendsFactory.friends
                 .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
                 .associateBy { it.id }
 
@@ -1877,7 +1877,7 @@ class DomainFactory(
     @Synchronized
     fun removeFriends(source: SaveService.Source, keys: Set<UserKey>) {
         MyCrashlytics.log("DomainFactory.removeFriends")
-        check(!friendFactory.isSaved)
+        check(!friendsFactory.isSaved)
 
         keys.forEach { myUserFactory.user.removeFriend(it) }
 
@@ -1890,7 +1890,7 @@ class DomainFactory(
         check(!myUserFactory.isSaved)
 
         myUserFactory.user.addFriend(userKey)
-        friendFactory.addFriend(userKey, userWrapper)
+        friendsFactory.addFriend(userKey, userWrapper)
 
         save(0, source)
     }
@@ -1902,7 +1902,7 @@ class DomainFactory(
 
         userMap.forEach {
             myUserFactory.user.addFriend(it.key)
-            friendFactory.addFriend(it.key, it.value)
+            friendsFactory.addFriend(it.key, it.value)
         }
 
         save(0, source)
@@ -1970,9 +1970,9 @@ class DomainFactory(
         val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
 
         remoteProject.name = name
-        remoteProject.updateUsers(addedFriends.map { friendFactory.getFriend(it) }.toSet(), removedFriends)
+        remoteProject.updateUsers(addedFriends.map { friendsFactory.getFriend(it) }.toSet(), removedFriends)
 
-        friendFactory.updateProjects(projectId, addedFriends, removedFriends)
+        friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
 
         updateNotifications(now)
 
@@ -2001,11 +2001,11 @@ class DomainFactory(
                 recordOf,
                 myUserFactory.user,
                 deviceDbInfo.userInfo,
-                friendFactory
+                friendsFactory
         )
 
         myUserFactory.user.addProject(remoteProject.projectKey)
-        friendFactory.updateProjects(remoteProject.projectKey, friends, setOf())
+        friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
         save(dataId, source)
 

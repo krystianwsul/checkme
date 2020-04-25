@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.factories.FriendFactory
+import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -12,9 +12,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
-import io.reactivex.Single
 
 interface FactoryProvider {
 
@@ -36,11 +34,17 @@ interface FactoryProvider {
             override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = database.getSharedProjectObservable(projectKey)
         }
 
+    val friendsProvider
+        get() = object : FriendsProvider {
+
+            override val database = this@FactoryProvider.database
+        }
+
     fun newDomain(
             localFactory: Local,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
-            friendFactory: FriendFactory,
+            friendsFactory: FriendsFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
             readTime: ExactTimeStamp
@@ -62,10 +66,7 @@ interface FactoryProvider {
         val uuid: String
     }
 
-    abstract class Database : ProjectProvider.Database() {
-
-        abstract fun getUserSingle(userKey: UserKey): Single<Snapshot>
-        abstract fun getUserObservable(userKey: UserKey): Observable<Snapshot>
+    abstract class Database : FriendsProvider.Database() {
 
         abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot>
 
@@ -95,7 +96,7 @@ interface FactoryProvider {
                 localFactory: Local,
                 myUserFactory: MyUserFactory,
                 projectsFactory: ProjectsFactory,
-                friendFactory: FriendFactory,
+                friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
                 readTime: ExactTimeStamp
@@ -103,7 +104,7 @@ interface FactoryProvider {
                 localFactory as LocalFactory,
                 myUserFactory,
                 projectsFactory,
-                friendFactory,
+                friendsFactory,
                 deviceDbInfo,
                 startTime,
                 readTime

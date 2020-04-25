@@ -1,10 +1,9 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.firebase.DatabaseEvent
-import com.krystianwsul.checkme.firebase.loaders.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
+import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -12,8 +11,15 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.merge
 
-class FriendFactory(children: Iterable<Snapshot>) {
+class FriendsFactory(
+        friendsLoader: FriendsLoader,
+        initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
+        domainDisposable: CompositeDisposable
+) {
 
     companion object {
 
@@ -21,7 +27,7 @@ class FriendFactory(children: Iterable<Snapshot>) {
                 mapValues { RootUser(it.value.first) }.toMutableMap()
     }
 
-    private val rootUserManager = AndroidRootUserManager(children)
+    private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots)
     private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = rootUserManager.rootUserRecords.toRootUsers()
@@ -30,7 +36,40 @@ class FriendFactory(children: Iterable<Snapshot>) {
 
     val friends: Collection<RootUser> get() = _friends.values
 
-    val changeTypes = PublishRelay.create<ChangeType>()
+    val changeTypes: Observable<ChangeType>
+
+    init {
+        val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
+            val userKey = UserKey(it.snapshot.key)
+            val friendPair = rootUserManager.rootUserRecords[userKey]
+
+            if (friendPair?.second == true) {
+                rootUserManager.rootUserRecords[userKey] = Pair(friendPair.first, false)
+
+                ChangeType.LOCAL
+            } else {
+                val remoteFriendRecord = rootUserManager.setFriend(it.snapshot)
+
+                _friends[userKey] = RootUser(remoteFriendRecord)
+
+                ChangeType.REMOTE
+            }
+        }
+
+        val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
+            it.userKeys.forEach {
+                rootUserManager.removeFriend(it)
+                _friends.remove(it)
+            }
+
+            ChangeType.REMOTE // todo friends
+        }
+
+        changeTypes = listOf(
+                addChangeFriendChangeTypes,
+                removeFriendsChangeTypes
+        ).merge().publishImmediate(domainDisposable)
+    }
 
     fun save(values: MutableMap<String, Any?>) {
         strangerProjectManager.save(values)
@@ -67,31 +106,6 @@ class FriendFactory(children: Iterable<Snapshot>) {
         removedFriends.forEach { it.removeProject(projectId) }
 
         strangerProjectManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
-    }
-
-    fun onDatabaseEvent(databaseEvent: DatabaseEvent) {
-        val userKey = UserKey(databaseEvent.key)
-        val friendPair = rootUserManager.rootUserRecords[userKey]
-
-        if (friendPair?.second == true) {
-            rootUserManager.rootUserRecords[userKey] = Pair(friendPair.first, false)
-
-            changeTypes.accept(ChangeType.LOCAL)
-        } else {
-            when (databaseEvent) {
-                is DatabaseEvent.AddChange -> {
-                    val remoteFriendRecord = rootUserManager.setFriend(databaseEvent.dataSnapshot)
-
-                    _friends[userKey] = RootUser(remoteFriendRecord)
-                }
-                is DatabaseEvent.Remove -> {
-                    rootUserManager.removeFriend(userKey)
-                    _friends.remove(userKey)
-                }
-            }
-
-            changeTypes.accept(ChangeType.REMOTE)
-        }
     }
 
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper) {

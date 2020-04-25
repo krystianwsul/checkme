@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
@@ -29,12 +28,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
-
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey).child("userData")
-    override fun getUserSingle(userKey: UserKey) = getUserQuery(userKey).snapshot()
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
 
-    private fun Query.snapshot() = data().map<Snapshot>(Snapshot::Impl)
     private fun Query.snapshotChanges() = dataChanges().map<Snapshot>(Snapshot::Impl)!!
 
     override fun getNewId(path: String) = rootReference.child(path)

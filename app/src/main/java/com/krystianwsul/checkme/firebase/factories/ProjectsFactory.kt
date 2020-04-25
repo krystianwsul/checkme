@@ -201,14 +201,14 @@ class ProjectsFactory(
             recordOf: Set<UserKey>,
             rootUser: RootUser,
             userInfo: UserInfo,
-            friendFactory: FriendFactory
+            friendsFactory: FriendsFactory
     ): SharedProject {
         check(name.isNotEmpty())
 
         val friendIds = recordOf.toMutableSet()
         friendIds.remove(userInfo.key)
 
-        val userJsons = friendFactory.getUserJsons(friendIds).toMutableMap()
+        val userJsons = friendsFactory.getUserJsons(friendIds).toMutableMap()
         userJsons[userInfo.key] = rootUser.userJson
 
         val sharedProjectJson = SharedProjectJson(

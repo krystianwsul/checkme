@@ -16,9 +16,14 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
 
     fun start(taskKey: TaskKey, page: Int) {
         this.taskKey = taskKey
-        this.page = page
 
-        internalStart()
+        if (this.page != page) {
+            this.page = page
+
+            refresh()
+        } else {
+            internalStart()
+        }
     }
 
     data class Data(

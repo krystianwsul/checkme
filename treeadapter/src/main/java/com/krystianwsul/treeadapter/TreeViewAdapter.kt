@@ -31,6 +31,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     val updates = PublishRelay.create<Unit>()
 
+    val progressShown = PublishRelay.create<Unit>()
+
     var showProgress = false // todo infinite apply this to padding view
         set(value) {
             if (value)
@@ -175,6 +177,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             check(position == itemCount - 1)
 
             (holder as PaddingHolder).showProgress(showProgress)
+
+            progressShown.accept(Unit)
         }
     }
 

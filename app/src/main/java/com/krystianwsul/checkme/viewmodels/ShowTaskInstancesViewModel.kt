@@ -7,14 +7,16 @@ import com.krystianwsul.common.utils.TaskKey
 class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Data>() {
 
     private lateinit var taskKey: TaskKey
+    private var page: Int = 0
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey, page)
     }
 
-    fun start(taskKey: TaskKey) {
+    fun start(taskKey: TaskKey, page: Int) {
         this.taskKey = taskKey
+        this.page = page
 
         internalStart()
     }

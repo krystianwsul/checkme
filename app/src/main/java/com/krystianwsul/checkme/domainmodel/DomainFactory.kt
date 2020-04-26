@@ -555,7 +555,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getShowTaskInstancesData(taskKey: TaskKey): ShowTaskInstancesViewModel.Data {
+    fun getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTaskInstancesViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
         val task = getTaskForce(taskKey)

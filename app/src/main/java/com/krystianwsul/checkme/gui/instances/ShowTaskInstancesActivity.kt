@@ -19,6 +19,8 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -80,10 +82,22 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
             page = savedInstanceState.getInt(KEY_PAGE)
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
-            start(taskKey)
+            start(taskKey, page)
+
+            val dataDisposable = CompositeDisposable().also { createDisposable += it }
 
             createDisposable += data.subscribe {
+                dataDisposable.clear()
+
                 groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper, it.showLoader)
+
+                groupListFragment.treeViewAdapter
+                        .progressShown
+                        .subscribe {
+                            page += 1
+                            start(taskKey, page)
+                        }
+                        .addTo(dataDisposable)
             }
         }
 

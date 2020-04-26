@@ -33,7 +33,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     val progressShown = PublishRelay.create<Unit>()
 
-    var showProgress = false // todo infinite apply this to padding view
+    var showProgress = false
         set(value) {
             if (value)
                 checkNotNull(padding)

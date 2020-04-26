@@ -64,7 +64,7 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         override fun onReceive(context: Context?, intent: Intent?) = showTaskInstancesViewModel.refresh()
     }
 
-    private var page = 0 // todo infinite about 20 instances
+    private var page = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

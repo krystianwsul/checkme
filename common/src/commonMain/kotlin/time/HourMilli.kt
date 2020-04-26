@@ -9,7 +9,8 @@ data class HourMilli(
         val hour: Int,
         val minute: Int,
         val second: Int,
-        val milli: Int) : Comparable<HourMilli>, Parcelable {
+        val milli: Int
+) : Comparable<HourMilli>, Parcelable {
 
     constructor(dateTimeTz: DateTimeTz) : this(
             dateTimeTz.hours,

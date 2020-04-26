@@ -33,7 +33,6 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
             rootTask.project.getCustomTime(it.customTimeId)
         } ?: Time.Normal(timePair.hourMinute!!)
 
-
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)
 

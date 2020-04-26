@@ -567,7 +567,28 @@ class DomainFactory(
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-        val instances = (task.existingInstances.values + task.getInstances(null, now, now)).toSet()
+        val instances = task.existingInstances
+                .values
+                .toMutableSet()
+
+        var startExactTimeStamp: ExactTimeStamp? = null
+        var endExactTimeStamp = now
+
+        var hasMore = true
+        while (hasMore) {
+            val (newInstances, newHasMore) = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
+
+            if (!newHasMore)
+                hasMore = false
+
+            instances += newInstances
+
+            if (instances.size > page * 20)
+                break
+
+            startExactTimeStamp = endExactTimeStamp
+            endExactTimeStamp = ExactTimeStamp(org.joda.time.DateTime(endExactTimeStamp.long).plusDays(1).millis)
+        }
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
@@ -610,7 +631,7 @@ class DomainFactory(
 
         instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-        return ShowTaskInstancesViewModel.Data(dataWrapper, true) // todo infinite
+        return ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
     }
 
     @Synchronized

@@ -223,7 +223,7 @@ class Task<T : ProjectType>(
                         .associateBy { it.instanceKey }
         )
 
-        allInstances.putAll(getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
+        allInstances += getInstances(null, now.plusOne(), now).first.associateBy { it.instanceKey }
 
         return allInstances.values
                 .toList()
@@ -251,7 +251,7 @@ class Task<T : ProjectType>(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
-    ): List<Instance<T>> {
+    ): Pair<List<Instance<T>>, Boolean> { // boolean = has more
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp,
@@ -263,23 +263,47 @@ class Task<T : ProjectType>(
                 givenEndExactTimeStamp
         ).min()!!
 
-        val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
-            listOf()
-        else
-            schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
+        val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
+            listOf<Instance<T>>() to false
+        } else {
+            val scheduleResults = schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
+
+            scheduleResults to schedules.any {
+                val scheduleHasMore = if (it is SingleSchedule<*>) {
+                    it.date > endExactTimeStamp.date || (it.date == endExactTimeStamp.date && it.time.getHourMinute(endExactTimeStamp.date.dayOfWeek).toHourMilli() > endExactTimeStamp.hourMilli)
+                } else {
+                    val repeatingSchedule = it as RepeatingSchedule<*>
+
+                    val scheduleEndDate: Date? = listOfNotNull(repeatingSchedule.until, repeatingSchedule.endExactTimeStamp?.date).min()
+
+                    scheduleEndDate?.let { it > endExactTimeStamp.date } ?: true
+                }
+
+                scheduleHasMore
+            }
+        }
+
+        var parentsHaveMore = false
 
         val parentInstances = getParentTaskHierarchies().map { it.parentTask }
-                .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
+                .flatMap {
+                    val parentInstances = it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+
+                    if (parentInstances.second)
+                        parentsHaveMore = true
+
+                    parentInstances.first
+                }
                 .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
                 .toList()
 
-        return scheduleInstances + parentInstances
+        return Pair(scheduleInstances + parentInstances, schedulesHaveMore || parentsHaveMore)
     }
 
-    fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).isNotEmpty()
+    fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).first.isNotEmpty()
 
     fun updateSchedules(
             ownerKey: UserKey,
@@ -395,7 +419,7 @@ class Task<T : ProjectType>(
         val allOldestVisible = getAllParentTasks(this).mapNotNull { it.getOldestVisible() } + now.date
         val oldestOldestVisible = allOldestVisible.min()!!
 
-        (getInstances(null, now, now) + _existingInstances.values)
+        (getInstances(null, now, now).first + _existingInstances.values)
                 .filter { it.isVisible(now, true) }
                 .map { it.scheduleDate }
                 .min()

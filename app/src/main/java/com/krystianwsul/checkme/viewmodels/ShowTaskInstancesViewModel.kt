@@ -19,5 +19,8 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
         internalStart()
     }
 
-    data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
+    data class Data(
+            val dataWrapper: GroupListFragment.DataWrapper,
+            val showLoader: Boolean
+    ) : DomainData()
 }

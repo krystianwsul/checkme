@@ -182,7 +182,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     override fun setFab(floatingActionButton: FloatingActionButton) {
         friendListFab = floatingActionButton
 
-        friendListFab!!.setOnClickListener { startActivity(FindFriendActivity.newIntent(activity!!)) }
+        friendListFab!!.setOnClickListener { startActivity(FindFriendActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
     }
@@ -205,7 +205,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set

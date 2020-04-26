@@ -193,7 +193,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     override fun setFab(floatingActionButton: FloatingActionButton) {
         showTimesFab = floatingActionButton
 
-        showTimesFab!!.setOnClickListener { startActivity(ShowCustomTimeActivity.getCreateIntent(activity!!)) }
+        showTimesFab!!.setOnClickListener { startActivity(ShowCustomTimeActivity.getCreateIntent(requireActivity())) }
 
         updateFabVisibility()
     }
@@ -217,7 +217,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set

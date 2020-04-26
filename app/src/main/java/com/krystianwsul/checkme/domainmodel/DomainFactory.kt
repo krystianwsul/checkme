@@ -610,7 +610,7 @@ class DomainFactory(
 
         instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-        return ShowTaskInstancesViewModel.Data(dataWrapper)
+        return ShowTaskInstancesViewModel.Data(dataWrapper, true) // todo infinite
     }
 
     @Synchronized

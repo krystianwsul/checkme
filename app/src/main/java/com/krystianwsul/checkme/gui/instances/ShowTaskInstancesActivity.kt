@@ -33,6 +33,8 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
+        private const val KEY_PAGE = "page"
+
         fun getIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
             putExtra(TASK_KEY, taskKey as Parcelable)
         }
@@ -60,6 +62,8 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         override fun onReceive(context: Context?, intent: Intent?) = showTaskInstancesViewModel.refresh()
     }
 
+    private var page = 0 // todo infinite about 20 instances
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
@@ -72,11 +76,14 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
 
         taskKey = intent.getParcelableExtra(TASK_KEY)!!
 
+        if (savedInstanceState != null)
+            page = savedInstanceState.getInt(KEY_PAGE)
+
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             start(taskKey)
 
             createDisposable += data.subscribe {
-                groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper)
+                groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper, it.showLoader)
             }
         }
 
@@ -91,6 +98,12 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         super.onStart()
 
         groupListFragment.checkCreatedTaskKey()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt(KEY_PAGE, page)
     }
 
     override fun onDestroy() {

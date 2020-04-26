@@ -280,7 +280,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         lateinit var userNodes: MutableList<UserNode>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set

@@ -445,7 +445,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
@@ -499,7 +499,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             treeNodeCollection.nodes = treeNodes
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
 
         override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
 

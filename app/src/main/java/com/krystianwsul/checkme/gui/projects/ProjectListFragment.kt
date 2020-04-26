@@ -205,7 +205,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     override fun setFab(floatingActionButton: FloatingActionButton) {
         projectListFab = floatingActionButton
 
-        projectListFab!!.setOnClickListener { startActivity(ShowProjectActivity.newIntent(activity!!)) }
+        projectListFab!!.setOnClickListener { startActivity(ShowProjectActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
     }
@@ -228,7 +228,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private inner class ProjectListAdapter : GroupHolderAdapter() {
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         private lateinit var projectNodes: MutableList<ProjectNode>
 

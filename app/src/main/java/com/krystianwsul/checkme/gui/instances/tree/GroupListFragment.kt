@@ -548,8 +548,9 @@ class GroupListFragment @JvmOverloads constructor(
             taskKey: TaskKey,
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper
-    ) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey))
+            dataWrapper: DataWrapper,
+            showLoader: Boolean
+    ) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey, showLoader))
 
     private fun useGroups() = parameters is Parameters.All
 
@@ -579,8 +580,10 @@ class GroupListFragment @JvmOverloads constructor(
                         state,
                         parameters.dataWrapper.taskDatas,
                         parameters.dataWrapper.note,
-                        parameters.dataWrapper.imageData
+                        parameters.dataWrapper.imageData,
+                        parameters.showProgress
                 )
+
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
@@ -593,7 +596,8 @@ class GroupListFragment @JvmOverloads constructor(
                     state,
                     parameters.dataWrapper.taskDatas,
                     parameters.dataWrapper.note,
-                    parameters.dataWrapper.imageData
+                    parameters.dataWrapper.imageData,
+                    parameters.showProgress
             )
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
@@ -800,7 +804,7 @@ class GroupListFragment @JvmOverloads constructor(
             const val TYPE_IMAGE = 1
         }
 
-        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
@@ -822,11 +826,21 @@ class GroupListFragment @JvmOverloads constructor(
                 val selectedDatas = nodesToSelectedDatas(selectedNodes, false)
                 val selectedInstances = selectedDatas.filterIsInstance<InstanceData>().map { it.instanceKey }
                 val selectedTasks = selectedDatas.filterIsInstance<TaskData>().map { it.taskKey }
+
                 val selectedGroups = selectedNodes.map { it.modelNode }
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                         .map { it.exactTimeStamp.long }
 
-                return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups, selectedTasks)
+                return State(
+                        doneExpanded,
+                        expandedGroups,
+                        expandedInstances,
+                        unscheduledExpanded,
+                        expandedTaskKeys,
+                        selectedInstances,
+                        selectedGroups,
+                        selectedTasks
+                )
             }
 
         var dataId = -1
@@ -843,7 +857,9 @@ class GroupListFragment @JvmOverloads constructor(
                 state: State,
                 taskDatas: List<TaskData>,
                 note: String?,
-                imageState: ImageState?) {
+                imageState: ImageState?,
+                showProgress: Boolean
+        ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
@@ -878,17 +894,23 @@ class GroupListFragment @JvmOverloads constructor(
                                 groupListFragment.showImage)
                     })
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
+            treeViewAdapter.showProgress = showProgress
 
             groupListFragment.showImage = false
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+        ) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
 
         override val hasActionMode get() = groupListFragment.selectionCallback.hasActionMode
 
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.incrementSelected(x)
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) =
+                groupListFragment.selectionCallback.incrementSelected(x)
 
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.decrementSelected(x)
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) =
+                groupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
 
@@ -904,7 +926,8 @@ class GroupListFragment @JvmOverloads constructor(
             val expandedTaskKeys: List<TaskKey> = listOf(),
             val selectedInstances: List<InstanceKey> = listOf(),
             val selectedGroups: List<Long> = listOf(),
-            val selectedTaskKeys: List<TaskKey> = listOf()) : Parcelable
+            val selectedTaskKeys: List<TaskKey> = listOf()
+    ) : Parcelable
 
     interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
@@ -1019,6 +1042,8 @@ class GroupListFragment @JvmOverloads constructor(
         abstract val immediate: Boolean
         abstract val dataWrapper: DataWrapper
 
+        open val showProgress: Boolean = false
+
         class All(
                 override val dataId: Int,
                 override val immediate: Boolean,
@@ -1052,7 +1077,8 @@ class GroupListFragment @JvmOverloads constructor(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val taskKey: com.krystianwsul.common.utils.TaskKey
+                val taskKey: com.krystianwsul.common.utils.TaskKey,
+                override val showProgress: Boolean
         ) : Parameters(false)
     }
 

@@ -233,9 +233,10 @@ class Task<T : ProjectType>(
     // there might be an issue here when moving task across projects
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
-        val optional = getPastRootInstances(now).filter { it.isVisible(now, true) }.minBy { it.scheduleDateTime }
-
-        val oldestVisible = listOfNotNull(optional?.scheduleDate, now.date).min()!!
+        val oldestVisible = listOfNotNull(
+                getPastRootInstances(now).filter { it.isVisible(now, true) }.map { it.scheduleDate },
+                listOf(now.date)
+        ).flatten().min()!!
 
         setOldestVisible(uuid, oldestVisible)
     }

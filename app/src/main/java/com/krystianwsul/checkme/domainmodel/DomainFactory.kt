@@ -583,7 +583,7 @@ class DomainFactory(
 
             instances += newInstances // todo infinite check if existing instances replaced by addition
 
-            if (instances.size > page * 20)
+            if (instances.size > (page + 1) * 20)
                 break
 
             startExactTimeStamp = endExactTimeStamp

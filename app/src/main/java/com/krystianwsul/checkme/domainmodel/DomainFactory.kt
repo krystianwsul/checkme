@@ -44,6 +44,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import com.soywiz.klock.days
 import io.reactivex.Observable
 import java.util.*
 
@@ -581,13 +582,16 @@ class DomainFactory(
             if (!newHasMore)
                 hasMore = false
 
-            instances += newInstances // todo infinite check if existing instances replaced by addition
+            instances += newInstances
 
             if (instances.size > (page + 1) * 20)
                 break
 
             startExactTimeStamp = endExactTimeStamp
-            endExactTimeStamp = ExactTimeStamp(org.joda.time.DateTime(endExactTimeStamp.long).plusDays(1).millis) // todo infinite rewrite
+
+            endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
+                    .plus(1.days)
+                    .toExactTimeStamp()
         }
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)

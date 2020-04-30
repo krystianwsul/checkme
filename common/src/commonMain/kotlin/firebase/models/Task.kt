@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
@@ -415,36 +414,6 @@ class Task<T : ProjectType>(
                         .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
         )
     }
-
-    /*
-    todo I'm not sure if this makes sense, but I think that the server can update a single
-    oldestVisible per task.  I don't see any obvious reason why this would collide across devices
-     */
-
-    // todo instances if this doesn't log anything, use algorithm for filtering instances in database query
-    fun checkOldestVisible(now: ExactTimeStamp) {
-        fun getAllParentTasks(task: Task<T>): List<Task<T>> {
-            val parentTasks = task.getParentTaskHierarchies()
-                    .map { getAllParentTasks(it.parentTask) }
-                    .flatten()
-
-            return (parentTasks + task).distinct()
-        }
-
-        val allOldestVisible = getAllParentTasks(this).mapNotNull { it.getOldestVisible() } + now.date
-        val oldestOldestVisible = allOldestVisible.min()!!
-
-        getInstances(null, now, now).first
-                .filter { it.isVisible(now, true) && !it.exists() }
-                .map { it.scheduleDate }
-                .min()
-                ?.let { oldestScheduleDate ->
-                    if (oldestScheduleDate < oldestOldestVisible)
-                        ErrorLogger.instance.logException(OldestVisibleCalculationException1("task: $name ($taskKey), oldest schedule date: $oldestScheduleDate, oldest oldestVisible: $oldestOldestVisible"))
-                }
-    }
-
-    private class OldestVisibleCalculationException1(message: String) : Exception(message)
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 

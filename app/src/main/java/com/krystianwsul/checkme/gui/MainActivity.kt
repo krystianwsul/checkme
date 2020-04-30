@@ -86,6 +86,8 @@ class MainActivity :
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
+
+        private fun Preferences.getTab() = Tab.values()[tab]
     }
 
     private lateinit var taskListFragment: TaskListFragment
@@ -274,7 +276,7 @@ class MainActivity :
                 ACTION_SEARCH -> {
                     check(restoreInstances.value!!.value == null)
 
-                    restoreInstances.accept(NullableWrapper(false))
+                    restoreInstances.accept(NullableWrapper(Preferences.getTab() == Tab.INSTANCES))
                     overrideTab = Tab.TASKS
 
                     mainSearchToolbar.visibility = View.VISIBLE
@@ -427,7 +429,7 @@ class MainActivity :
 
         mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
-        showTab(overrideTab ?: Tab.values()[Preferences.tab], true)
+        showTab(overrideTab ?: Preferences.getTab(), true)
 
         initBottomBar()
 

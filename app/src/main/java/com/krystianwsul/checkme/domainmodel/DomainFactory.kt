@@ -844,7 +844,6 @@ class DomainFactory(
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
-                            childTask.hasInstances(now),
                             true)
                 }
                 .sorted()
@@ -858,7 +857,6 @@ class DomainFactory(
                 task.name,
                 collapseText,
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.current(now)),
-                task.hasInstances(now),
                 task.getImage(deviceDbInfo),
                 task.current(now)
         )
@@ -886,7 +884,6 @@ class DomainFactory(
                             null,
                             task.getImage(deviceDbInfo),
                             task.current(now),
-                            task.hasInstances(now),
                             false
                     )
                 }
@@ -2433,7 +2430,6 @@ class DomainFactory(
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
-                            childTask.hasInstances(now),
                             alwaysShow
                     )
                 }

@@ -311,9 +311,6 @@ class Task<T : ProjectType>(
         )
     }
 
-    // todo I think that whatever this function is being used for, is flawed thinking
-    fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).first.isNotEmpty()
-
     fun updateSchedules(
             ownerKey: UserKey,
             shownFactory: Instance.ShownFactory,

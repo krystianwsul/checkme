@@ -172,7 +172,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             findItem(R.id.task_menu_share).isVisible = data != null
             findItem(R.id.task_menu_delete).isVisible = data?.current == true
             findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
-            findItem(R.id.task_menu_show_instances).isVisible = data?.hasInstances == true
+            findItem(R.id.task_menu_show_instances).isVisible = data != null
             findItem(R.id.taskMenuCopyTask).isVisible = data?.current == true
         }
     }

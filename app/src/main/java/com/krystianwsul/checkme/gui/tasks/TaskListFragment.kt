@@ -138,7 +138,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_join to !single,
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
-                    R.id.action_task_show_instances to (singleData?.hasInstances == true),
+                    R.id.action_task_show_instances to single,
                     R.id.actionTaskCopy to (singleData?.current == true)
             )
         }
@@ -669,7 +669,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val hierarchyData: HierarchyData?,
             val imageState: ImageState?,
             val current: Boolean,
-            val hasInstances: Boolean,
             val alwaysShow: Boolean
     ) : Comparable<ChildTaskData> {
 

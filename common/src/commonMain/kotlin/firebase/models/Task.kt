@@ -269,7 +269,7 @@ class Task<T : ProjectType>(
             val scheduleResults = schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
 
             scheduleResults to schedules.any {
-                val scheduleHasMore = if (it is SingleSchedule<*>) {
+                val scheduleHasMore = if (it is SingleSchedule<*>) { // todo infinite push down into schedules, check these inequalities
                     it.date > endExactTimeStamp.date || (it.date == endExactTimeStamp.date && it.time.getHourMinute(endExactTimeStamp.date.dayOfWeek).toHourMilli() > endExactTimeStamp.hourMilli)
                 } else {
                     val repeatingSchedule = it as RepeatingSchedule<*>

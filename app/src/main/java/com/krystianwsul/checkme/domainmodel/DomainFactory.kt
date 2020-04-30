@@ -581,13 +581,13 @@ class DomainFactory(
             if (!newHasMore)
                 hasMore = false
 
-            instances += newInstances
+            instances += newInstances // todo infinite check if existing instances replaced by addition
 
             if (instances.size > page * 20)
                 break
 
             startExactTimeStamp = endExactTimeStamp
-            endExactTimeStamp = ExactTimeStamp(org.joda.time.DateTime(endExactTimeStamp.long).plusDays(1).millis)
+            endExactTimeStamp = ExactTimeStamp(org.joda.time.DateTime(endExactTimeStamp.long).plusDays(1).millis) // todo infinite rewrite
         }
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)

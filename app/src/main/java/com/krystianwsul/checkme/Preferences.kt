@@ -3,6 +3,7 @@ package com.krystianwsul.checkme
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.deserialize
+import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -64,6 +65,7 @@ object Preferences : FactoryProvider.Preferences {
                             .putString(TOKEN_KEY, it.value)
                             .apply()
                 }
+                .ignore()
     }
 
     var token: String?

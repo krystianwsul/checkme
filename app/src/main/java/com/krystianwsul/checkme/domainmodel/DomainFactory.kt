@@ -568,9 +568,7 @@ class DomainFactory(
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-        val instances = task.existingInstances
-                .values
-                .toMutableSet()
+        val instances = task.existingInstances.toMutableMap()
 
         var startExactTimeStamp: ExactTimeStamp? = null
         var endExactTimeStamp = now
@@ -582,7 +580,7 @@ class DomainFactory(
             if (!newHasMore)
                 hasMore = false
 
-            instances += newInstances
+            instances += newInstances.associateBy { it.scheduleKey }
 
             if (instances.size > (page + 1) * 20)
                 break
@@ -596,7 +594,7 @@ class DomainFactory(
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-        val instanceDatas = instances.map {
+        val instanceDatas = instances.values.map {
             val children = getChildInstanceDatas(it, now)
 
             val hierarchyData = if (task.isRootTask(hierarchyExactTimeStamp))
@@ -2755,7 +2753,9 @@ class DomainFactory(
             task: Task<*>,
             now: ExactTimeStamp
     ): GroupListFragment.DataWrapper {
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+        }
 
         val instanceDatas = instance.getChildInstances(now).map { (childInstance, taskHierarchy) ->
             val childTask = childInstance.task

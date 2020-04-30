@@ -213,21 +213,11 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getPastRootInstances(now: ExactTimeStamp): List<Instance<T>> {
-        val allInstances = mutableMapOf<InstanceKey, Instance<T>>()
-
-        allInstances.putAll(
-                existingInstances.values
-                        .filter { it.scheduleDateTime.timeStamp.toExactTimeStamp() <= now }
-                        .associateBy { it.instanceKey }
-        )
-
-        allInstances += getInstances(null, now.plusOne(), now).first.associateBy { it.instanceKey }
-
-        return allInstances.values
-                .toList()
-                .filter { it.isRootInstance(now) }
-    }
+    fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
+            null,
+            now.plusOne(),
+            now
+    ).first.filter { it.isRootInstance(now) }
 
     // there might be an issue here when moving task across projects
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
@@ -309,11 +299,19 @@ class Task<T : ProjectType>(
         val parentsHaveMore = parentDatas.any { it.second }
 
         return Pair(
-                (existingInstances + scheduleInstances + parentInstances).distinct(),
+                listOf(
+                        existingInstances,
+                        scheduleInstances,
+                        parentInstances
+                ).flatten()
+                        .associateBy { it.scheduleKey }
+                        .values
+                        .toList(),
                 schedulesHaveMore || parentsHaveMore
         )
     }
 
+    // todo I think that whatever this function is being used for, is flawed thinking
     fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).first.isNotEmpty()
 
     fun updateSchedules(

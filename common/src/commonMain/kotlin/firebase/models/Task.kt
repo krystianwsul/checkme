@@ -394,6 +394,11 @@ class Task<T : ProjectType>(
         )
     }
 
+    /*
+    todo I'm not sure if this makes sense, but I think that the server can update a single
+    oldestVisible per task.  I don't see any obvious reason why this would collide across devices
+     */
+
     // todo instances if this doesn't log anything, use algorithm for filtering instances in database query
     fun checkOldestVisible(now: ExactTimeStamp) {
         fun getAllParentTasks(task: Task<T>): List<Task<T>> {

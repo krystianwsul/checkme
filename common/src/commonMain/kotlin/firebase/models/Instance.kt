@@ -149,28 +149,20 @@ class Instance<T : ProjectType> private constructor(
     }
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        val isVisible = isVisibleHelper(now, hack24)
-
-        if (isVisible && isRootInstance(now)) { // root because oldest visible now checked only for task's own schedules
-            val date = scheduleDate
-
-            if (task.getOldestVisible()?.let { date < it } == true) {
-                if (exists()) {
-                    task.correctOldestVisible(date) // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
-                } else {
-                    return false
-                }
-            }
+        return if (isRootInstance(now) &&
+                task.getOldestVisible()?.let { scheduleDate < it } == true &&
+                !exists()) {
+            false
+        } else {
+            isVisibleHelper(now, hack24)
         }
-
-        return isVisible
     }
 
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (data.hidden)
             return false
 
-        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null }) // todo it doesn't make sense to update this after setting done, because of the 24 hour delay
+        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null })
             return false
 
         val parentInstance = getParentInstance(now)

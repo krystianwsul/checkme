@@ -332,7 +332,9 @@ abstract class Project<T : ProjectType> : Current {
 
         tasks.forEach { task ->
             for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now).first) {
-                val instanceExactTimeStamp = instance.instanceDateTime.timeStamp.toExactTimeStamp()
+                val instanceExactTimeStamp = instance.instanceDateTime
+                        .timeStamp
+                        .toExactTimeStamp()
 
                 if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                     continue

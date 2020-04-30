@@ -234,18 +234,11 @@ class Task<T : ProjectType>(
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
         val oldestVisible = listOfNotNull(
-                getPastRootInstances(now).filter { it.isVisible(now, true) }.map { it.scheduleDate },
+                getPastRootInstances(now).filter { it.isVisible(now, true) && !it.exists() }.map { it.scheduleDate },
                 listOf(now.date)
         ).flatten().min()!!
 
         setOldestVisible(uuid, oldestVisible)
-    }
-
-    fun correctOldestVisible(date: Date) {
-        val oldestVisible = getOldestVisible()
-        check(oldestVisible != null && date < oldestVisible)
-
-        ErrorLogger.instance.logException(OldestVisibleException6("$name real oldest: $oldestVisible, correct oldest: $date"))
     }
 
     /*
@@ -260,6 +253,10 @@ class Task<T : ProjectType>(
     ): Pair<List<Instance<T>>, Boolean> { // boolean = has more
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
+                startExactTimeStamp
+        ).max()!!
+
+        val scheduleStartExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
         ).max()!!
@@ -269,15 +266,29 @@ class Task<T : ProjectType>(
                 givenEndExactTimeStamp
         ).min()!!
 
-        val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
+        val existingInstances = _existingInstances.values.filter {
+            val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
+
+            if (scheduleExactTimeStamp < startExactTimeStamp)
+                return@filter false
+
+            if (scheduleExactTimeStamp >= endExactTimeStamp)
+                return@filter false
+
+            true
+        }
+
+        val (scheduleInstances, schedulesHaveMore) = if (scheduleStartExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
         } else {
-            val scheduleResults = schedules.map { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
+            val scheduleResults = schedules.map { it.getInstances(this, scheduleStartExactTimeStamp, endExactTimeStamp) }
 
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second }
         }
 
-        val parentDatas = getParentTaskHierarchies().map { it.parentTask.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
+        val parentDatas = getParentTaskHierarchies().map {
+            it.parentTask.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+        }
 
         val parentInstances = parentDatas.flatMap { it.first }
                 .flatMap { it.getChildInstances(now) }
@@ -288,7 +299,10 @@ class Task<T : ProjectType>(
 
         val parentsHaveMore = parentDatas.any { it.second }
 
-        return Pair(scheduleInstances + parentInstances, schedulesHaveMore || parentsHaveMore)
+        return Pair(
+                (existingInstances + scheduleInstances + parentInstances).distinct(),
+                schedulesHaveMore || parentsHaveMore
+        )
     }
 
     fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).first.isNotEmpty()
@@ -331,8 +345,6 @@ class Task<T : ProjectType>(
             addSchedules(ownerKey, addScheduleDatas, now)
         }
     }
-
-    private class OldestVisibleException6(message: String) : Exception(message)
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
@@ -412,8 +424,8 @@ class Task<T : ProjectType>(
         val allOldestVisible = getAllParentTasks(this).mapNotNull { it.getOldestVisible() } + now.date
         val oldestOldestVisible = allOldestVisible.min()!!
 
-        (getInstances(null, now, now).first + _existingInstances.values)
-                .filter { it.isVisible(now, true) }
+        getInstances(null, now, now).first
+                .filter { it.isVisible(now, true) && !it.exists() }
                 .map { it.scheduleDate }
                 .min()
                 ?.let { oldestScheduleDate ->

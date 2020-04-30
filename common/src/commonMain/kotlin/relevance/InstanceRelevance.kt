@@ -11,13 +11,24 @@ class InstanceRelevance(val instance: Instance<*>) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
-        if (relevant) return
+    fun setRelevant(
+            taskRelevances: Map<TaskKey, TaskRelevance>,
+            taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
+            instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+            now: ExactTimeStamp
+    ) {
+        if (relevant)
+            return
 
         relevant = true
 
         // set task relevant
-        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+        taskRelevances.getValue(instance.taskKey).setRelevant(
+                taskRelevances,
+                taskHierarchyRelevances,
+                instanceRelevances,
+                now
+        )
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
@@ -28,7 +39,12 @@ class InstanceRelevance(val instance: Instance<*>) {
             if (!instanceRelevances.containsKey(parentInstanceKey))
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
-            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+            instanceRelevances.getValue(parentInstanceKey).setRelevant(
+                    taskRelevances,
+                    taskHierarchyRelevances,
+                    instanceRelevances,
+                    now
+            )
         }
 
         // set child instances relevant
@@ -50,16 +66,13 @@ class InstanceRelevance(val instance: Instance<*>) {
     ) {
         check(relevant)
 
-        val remoteProject = instance.project
-
-        val pair = instance.instanceDateTime
+        instance.instanceDateTime
                 .time
                 .timePair
                 .customTimeKey
-        if (pair != null)
-            remoteCustomTimeRelevances.getValue(pair).setRelevant()
+                ?.let { remoteCustomTimeRelevances.getValue(it).setRelevant() }
 
-        remoteProjectRelevances.getValue(remoteProject.projectKey).setRelevant()
+        remoteProjectRelevances.getValue(instance.project.projectKey).setRelevant()
 
         (instance.scheduleCustomTimeKey)?.let {
             remoteCustomTimeRelevances.getValue(it).setRelevant()

@@ -4,7 +4,6 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
 
@@ -18,7 +17,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override fun <T : ProjectType> getInstances(
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
+            givenExactEndTimeStamp: ExactTimeStamp?
     ): Sequence<Instance<T>> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
@@ -36,37 +35,44 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                         ?.plus(1.days)
                         ?.let { ExactTimeStamp(it) },
                 givenExactEndTimeStamp
-        ).min()!! // todo from delete task after until
+        ).min()
 
-        if (startExactTimeStamp >= endExactTimeStamp)
+        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true)
             return emptySequence()
-
-        check(startExactTimeStamp < endExactTimeStamp)
 
         val nullableSequence: Sequence<Instance<*>?>
 
-        if (startExactTimeStamp.date == endExactTimeStamp.date) {
-            nullableSequence = sequenceOf(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, endExactTimeStamp.hourMilli))
+        if (startExactTimeStamp.date == endExactTimeStamp?.date) {
+            nullableSequence = sequenceOf(getInstanceInDate(
+                    task,
+                    startExactTimeStamp.date,
+                    startExactTimeStamp.hourMilli,
+                    endExactTimeStamp.hourMilli
+            ))
         } else {
-            val startSequence = sequenceOf(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, null))
+            val startSequence = sequenceOf(getInstanceInDate(
+                    task,
+                    startExactTimeStamp.date,
+                    startExactTimeStamp.hourMilli,
+                    null
+            ))
 
             var loopStartCalendar = startExactTimeStamp.date.toDateTimeTz() + 1.days
-            val loopEndCalendar = endExactTimeStamp.date.toDateTimeTz()
+            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeTz()
 
             val calendarSequence = generateSequence {
-                if (loopStartCalendar < loopEndCalendar) {
-                    val date = Date(loopStartCalendar)
-                    loopStartCalendar += 1.days
+                if (loopEndCalendar?.let { it <= loopStartCalendar } == true)
+                    return@generateSequence null
 
-                    NullableWrapper(getInstanceInDate(task, date, null, null))
-                } else {
-                    null
-                }
+                val date = Date(loopStartCalendar)
+                loopStartCalendar += 1.days
+
+                getInstanceInDate(task, date, null, null)
             }
 
-            val endSequence = sequenceOf(getInstanceInDate(task, endExactTimeStamp.date, null, endExactTimeStamp.hourMilli))
+            val endSequence = listOfNotNull(endExactTimeStamp?.let { getInstanceInDate(task, it.date, null, it.hourMilli) }).asSequence()
 
-            nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
+            nullableSequence = startSequence + calendarSequence + endSequence
         }
 
         return nullableSequence.filterNotNull()

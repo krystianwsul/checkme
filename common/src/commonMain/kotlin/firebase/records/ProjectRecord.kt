@@ -86,9 +86,9 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract fun getCustomTimeId(id: String): CustomTimeId<T>
 
-    abstract fun getRemoteCustomTimeKey(customTimeId: CustomTimeId<T>): CustomTimeKey<T>
+    abstract fun getCustomTimeKey(customTimeId: CustomTimeId<T>): CustomTimeKey<T>
 
-    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getCustomTimeId(customTimeId))
+    fun getCustomTimeKey(customTimeId: String) = getCustomTimeKey(getCustomTimeId(customTimeId))
 
     fun getTaskKey(taskId: String) = TaskKey(projectKey, taskId)
 }

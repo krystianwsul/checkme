@@ -53,7 +53,7 @@ class RootInstanceRecord<T : ProjectType>(
 
                 Pair(TimePair(HourMinute(hour, minute)), null)
             } else {
-                val customTimeKey = projectRecord.getRemoteCustomTimeKey(timeString)
+                val customTimeKey = projectRecord.getCustomTimeKey(timeString)
 
                 Pair(TimePair(customTimeKey), customTimeKey.customTimeId)
             }

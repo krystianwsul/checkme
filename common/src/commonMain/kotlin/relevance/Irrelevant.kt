@@ -13,6 +13,8 @@ object Irrelevant {
     fun setIrrelevant(parent: Project.Parent, project: Project<*>, now: ExactTimeStamp): Result {
         val tasks = project.tasks
 
+        tasks.forEach { it.updateOldestVisibleServer(now) }
+
         // relevant hack
         val taskRelevances = tasks.map { it.taskKey to TaskRelevance(it) }.toMap()
 

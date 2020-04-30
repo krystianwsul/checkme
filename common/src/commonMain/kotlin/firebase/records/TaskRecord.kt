@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
@@ -87,12 +88,16 @@ class TaskRecord<T : ProjectType> private constructor(
     var note by Committer(taskJson::note)
 
     val oldestVisible
-        get() = taskJson.oldestVisible
-                .values
-                .map { it.toDate() }
-                .min()
+        get() = taskJson.oldestVisibleServer
+                ?.let { Date.fromJson(it) }
+                ?: taskJson.oldestVisible
+                        .values
+                        .map { it.toDate() }
+                        .min()
 
     var image by Committer(taskJson::image)
+
+    var oldestVisibleServer by Committer(taskJson::oldestVisibleServer)
 
     constructor(
             id: String,
@@ -275,8 +280,8 @@ class TaskRecord<T : ProjectType> private constructor(
 
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
 
-    fun getcustomTimeId(id: String) = projectRecord.getCustomTimeId(id)
-    fun getRemoteCustomTimeKey(id: String) = projectRecord.getRemoteCustomTimeKey(id)
+    fun getCustomTimeId(id: String) = projectRecord.getCustomTimeId(id)
+    fun getCustomTimeKey(id: String) = projectRecord.getCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
 

@@ -21,7 +21,7 @@ abstract class Project<T : ProjectType> : Current {
 
     abstract val projectRecord: ProjectRecord<T>
 
-    protected abstract val remoteTasks: MutableMap<String, Task<T>>
+    protected abstract val _tasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
 
@@ -39,8 +39,8 @@ abstract class Project<T : ProjectType> : Current {
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
 
     // don't want these to be mutable
-    val taskIds: Set<String> get() = remoteTasks.keys
-    val tasks: Collection<Task<T>> get() = remoteTasks.values
+    val taskIds: Set<String> get() = _tasks.keys
+    val tasks: Collection<Task<T>> get() = _tasks.values
 
     abstract val customTimes: Collection<Time.Custom<T>>
 
@@ -58,8 +58,8 @@ abstract class Project<T : ProjectType> : Current {
                 taskRecord,
                 newRootInstanceManager(taskRecord)
         )
-        check(!remoteTasks.containsKey(task.id))
-        remoteTasks[task.id] = task
+        check(!_tasks.containsKey(task.id))
+        _tasks[task.id] = task
 
         return task
     }
@@ -114,7 +114,7 @@ abstract class Project<T : ProjectType> : Current {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
-        check(!remoteTasks.containsKey(newTask.id))
+        check(!_tasks.containsKey(newTask.id))
 
         if (Task.USE_ROOT_INSTANCES) {
             instanceDatas.forEach {
@@ -126,7 +126,7 @@ abstract class Project<T : ProjectType> : Current {
             }
         }
 
-        remoteTasks[newTask.id] = newTask
+        _tasks[newTask.id] = newTask
 
         newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now))
 
@@ -210,16 +210,16 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun deleteTask(task: Task<T>) {
-        check(remoteTasks.containsKey(task.id))
+        check(_tasks.containsKey(task.id))
 
-        remoteTasks.remove(task.id)
+        _tasks.remove(task.id)
     }
 
     fun deleteTaskHierarchy(taskHierarchy: TaskHierarchy<T>) = taskHierarchyContainer.removeForce(taskHierarchy.id)
 
-    fun getTaskIfPresent(taskId: String) = remoteTasks[taskId]
+    fun getTaskIfPresent(taskId: String) = _tasks[taskId]
 
-    fun getTaskForce(taskId: String) = remoteTasks[taskId]
+    fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> {
@@ -243,7 +243,7 @@ abstract class Project<T : ProjectType> : Current {
     fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         requireCurrent(now)
 
-        remoteTasks.values
+        _tasks.values
                 .filter { it.current(now) }
                 .forEach {
                     it.setEndData(

@@ -34,7 +34,7 @@ abstract class RemoteScheduleRecord<T : ProjectType>(
     val minute get() = scheduleJson.minute
 
     val customTimeKey by lazy {
-        scheduleJson.customTimeId?.let { taskRecord.getRemoteCustomTimeKey(it) }
+        scheduleJson.customTimeId?.let { taskRecord.getCustomTimeKey(it) }
     }
 
     constructor(

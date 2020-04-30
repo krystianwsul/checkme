@@ -241,6 +241,16 @@ class Task<T : ProjectType>(
         setOldestVisible(uuid, oldestVisible)
     }
 
+    fun updateOldestVisibleServer(now: ExactTimeStamp) {
+        // 24 hack
+        val oldestVisible = listOfNotNull(
+                getPastRootInstances(now).filter { it.isVisible(now, true) && !it.exists() }.map { it.scheduleDate },
+                listOf(now.date)
+        ).flatten().min()!!
+
+        taskRecord.oldestVisibleServer = oldestVisible.toJson()
+    }
+
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents
      and schedules would need to go through a mechanism that would somehow grab the next element

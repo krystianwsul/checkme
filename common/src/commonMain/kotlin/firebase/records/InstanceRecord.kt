@@ -77,7 +77,7 @@ abstract class InstanceRecord<T : ProjectType>(
                 val customTimeId = customTimeMatchResult.groupValues[4]
                 check(customTimeId.isNotEmpty())
 
-                val customTimeKey = projectRecord.getRemoteCustomTimeKey(customTimeId)
+                val customTimeKey = projectRecord.getCustomTimeKey(customTimeId)
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
             }
@@ -116,7 +116,7 @@ abstract class InstanceRecord<T : ProjectType>(
                 if (hourMinuteRegex.find(it) != null)
                     JsonTime.Normal<T>(HourMinute.fromJson(it))
                 else
-                    JsonTime.Custom(taskRecord.getcustomTimeId(it))
+                    JsonTime.Custom(taskRecord.getCustomTimeId(it))
             }
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->

@@ -28,7 +28,7 @@ class SharedProject(
     val users get() = remoteUsers.values
 
     override val remoteCustomTimes = mutableMapOf<CustomTimeId.Shared, SharedCustomTime>()
-    override val remoteTasks: MutableMap<String, Task<ProjectType.Shared>>
+    override val _tasks: MutableMap<String, Task<ProjectType.Shared>>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Shared>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -41,7 +41,7 @@ class SharedProject(
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
 
-        remoteTasks = projectRecord.taskRecords
+        _tasks = projectRecord.taskRecords
                 .values
                 .map { Task(this, it, rootInstanceManagers.getValue(it.taskKey)) }
                 .associateBy { it.id }

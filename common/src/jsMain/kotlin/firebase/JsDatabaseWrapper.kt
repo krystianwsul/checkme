@@ -19,8 +19,6 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             .key as String
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
-        check(values.values.all { it == null })
-
         val dynamicValues: dynamic = object {}
 
         values.forEach {

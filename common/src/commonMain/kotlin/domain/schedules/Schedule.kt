@@ -49,7 +49,7 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance<T>>
+    ): Pair<Sequence<Instance<T>>, Boolean> // has more for this specific range?
 
     abstract fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean
 

@@ -266,39 +266,21 @@ class Task<T : ProjectType>(
         val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
         } else {
-            val scheduleResults = schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
+            val scheduleResults = schedules.map { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
 
-            scheduleResults to schedules.any {
-                val scheduleHasMore = if (it is SingleSchedule<*>) { // todo infinite push down into schedules, check these inequalities
-                    it.date > endExactTimeStamp.date || (it.date == endExactTimeStamp.date && it.time.getHourMinute(endExactTimeStamp.date.dayOfWeek).toHourMilli() > endExactTimeStamp.hourMilli)
-                } else {
-                    val repeatingSchedule = it as RepeatingSchedule<*>
-
-                    val scheduleEndDate: Date? = listOfNotNull(repeatingSchedule.until, repeatingSchedule.endExactTimeStamp?.date).min()
-
-                    scheduleEndDate?.let { it > endExactTimeStamp.date } ?: true
-                }
-
-                scheduleHasMore
-            }
+            scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second }
         }
 
-        var parentsHaveMore = false
+        val parentDatas = getParentTaskHierarchies().map { it.parentTask.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
 
-        val parentInstances = getParentTaskHierarchies().map { it.parentTask }
-                .flatMap {
-                    val parentInstances = it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
-
-                    if (parentInstances.second)
-                        parentsHaveMore = true
-
-                    parentInstances.first
-                }
+        val parentInstances = parentDatas.flatMap { it.first }
                 .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
                 .toList()
+
+        val parentsHaveMore = parentDatas.any { it.second }
 
         return Pair(scheduleInstances + parentInstances, schedulesHaveMore || parentsHaveMore)
     }

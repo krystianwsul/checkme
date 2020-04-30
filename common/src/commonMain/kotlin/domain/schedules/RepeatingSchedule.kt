@@ -19,7 +19,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance<T>> {
+    ): Pair<Sequence<Instance<T>>, Boolean> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
@@ -39,7 +39,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).min()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true)
-            return emptySequence()
+            return Pair(emptySequence(), false)
 
         val nullableSequence: Sequence<Instance<*>?>
 
@@ -76,7 +76,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
         }
 
-        return nullableSequence.filterNotNull()
+        return Pair(nullableSequence.filterNotNull(), endExactTimeStamp != null)
     }
 
     protected abstract fun <T : ProjectType> getInstanceInDate(
@@ -90,7 +90,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         requireCurrent(now)
 
         return until?.let {
-            getInstances(task, null, null).any { it.isVisible(now, hack24) }
+            getInstances(task, null, null).first.any { it.isVisible(now, hack24) }
         } ?: true
     }
 }

@@ -30,19 +30,19 @@ class SingleSchedule<T : ProjectType>(
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance<T>> {
+    ): Pair<Sequence<Instance<T>>, Boolean> {
         val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > singleScheduleExactTimeStamp } == true)
-            return emptySequence()
+            return Pair(emptySequence(), false)
 
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
-            return emptySequence()
+            return Pair(emptySequence(), false)
 
         if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
-            return emptySequence()
+            return Pair(emptySequence(), false)
 
-        return sequenceOf(getInstance(task))
+        return Pair(sequenceOf(getInstance(task)), false)
     }
 
     override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {

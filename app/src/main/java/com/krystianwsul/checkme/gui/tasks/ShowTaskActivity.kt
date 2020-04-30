@@ -211,6 +211,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 true
             }
         }
+
+        updateBottomMenu()
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)

@@ -34,15 +34,19 @@ class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
 
             ChangeWrapper(ChangeType.LOCAL, pair.first)
         } else {
-            try {
-                val sharedProjectRecord = snapshot.toRecord()
+            if (snapshot.exists()) {
+                try {
+                    val sharedProjectRecord = snapshot.toRecord()
 
-                sharedProjectRecords[key] = Pair(sharedProjectRecord, false)
+                    sharedProjectRecords[key] = Pair(sharedProjectRecord, false)
 
-                ChangeWrapper(ChangeType.REMOTE, sharedProjectRecord)
-            } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
-                MyCrashlytics.logException(onlyVisibilityPresentException)
+                    ChangeWrapper(ChangeType.REMOTE, sharedProjectRecord)
+                } catch (onlyVisibilityPresentException: TaskRecord.OnlyVisibilityPresentException) {
+                    MyCrashlytics.logException(onlyVisibilityPresentException)
 
+                    null
+                }
+            } else {
                 null
             }
         }

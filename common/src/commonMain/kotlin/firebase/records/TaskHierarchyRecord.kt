@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 
 
-class RemoteTaskHierarchyRecord(
+class TaskHierarchyRecord(
         create: Boolean,
         val id: String,
         private val projectRecord: ProjectRecord<*>,

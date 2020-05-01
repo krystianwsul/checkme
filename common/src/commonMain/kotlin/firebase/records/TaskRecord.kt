@@ -24,15 +24,15 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()
 
-    val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T>> = HashMap()
+    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = HashMap()
 
-    val remoteDailyScheduleRecords: MutableMap<String, RemoteDailyScheduleRecord<T>> = HashMap()
+    val dailyScheduleRecords: MutableMap<String, DailyScheduleRecord<T>> = HashMap()
 
-    val remoteWeeklyScheduleRecords: MutableMap<String, RemoteWeeklyScheduleRecord<T>> = HashMap()
+    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord<T>> = HashMap()
 
-    val remoteMonthlyDayScheduleRecords: MutableMap<String, RemoteMonthlyDayScheduleRecord<T>> = HashMap()
+    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord<T>> = HashMap()
 
-    val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T>> = HashMap()
+    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord<T>> = HashMap()
 
     override val createObject: TaskJson // because of duplicate functionality when converting local task
         get() {
@@ -43,20 +43,20 @@ class TaskRecord<T : ProjectType> private constructor(
 
             val scheduleWrappers = HashMap<String, ScheduleWrapper>()
 
-            for (remoteSingleScheduleRecord in remoteSingleScheduleRecords.values)
-                scheduleWrappers[remoteSingleScheduleRecord.id] = remoteSingleScheduleRecord.createObject
+            for (singleScheduleRecord in singleScheduleRecords.values)
+                scheduleWrappers[singleScheduleRecord.id] = singleScheduleRecord.createObject
 
-            for (remoteDailyScheduleRecord in remoteDailyScheduleRecords.values)
-                scheduleWrappers[remoteDailyScheduleRecord.id] = remoteDailyScheduleRecord.createObject
+            for (dailyScheduleRecord in dailyScheduleRecords.values)
+                scheduleWrappers[dailyScheduleRecord.id] = dailyScheduleRecord.createObject
 
-            for (remoteWeeklyScheduleRecord in remoteWeeklyScheduleRecords.values)
-                scheduleWrappers[remoteWeeklyScheduleRecord.id] = remoteWeeklyScheduleRecord.createObject
+            for (weeklyScheduleRecord in weeklyScheduleRecords.values)
+                scheduleWrappers[weeklyScheduleRecord.id] = weeklyScheduleRecord.createObject
 
-            for (remoteMonthlyDayScheduleRecord in remoteMonthlyDayScheduleRecords.values)
-                scheduleWrappers[remoteMonthlyDayScheduleRecord.id] = remoteMonthlyDayScheduleRecord.createObject
+            for (monthlyDayScheduleRecord in monthlyDayScheduleRecords.values)
+                scheduleWrappers[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord.createObject
 
-            for (remoteMonthlyWeekScheduleRecord in remoteMonthlyWeekScheduleRecords.values)
-                scheduleWrappers[remoteMonthlyWeekScheduleRecord.id] = remoteMonthlyWeekScheduleRecord.createObject
+            for (monthlyWeekScheduleRecord in monthlyWeekScheduleRecords.values)
+                scheduleWrappers[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord.createObject
 
             taskJson.schedules = scheduleWrappers
 
@@ -67,7 +67,7 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val rootInstanceKey by lazy { "${projectRecord.projectKey.key}-$id" }
 
-    val projectId get() = projectRecord.projectKey
+    val projectKey get() = projectRecord.projectKey
 
     var name by Committer(taskJson::name)
 
@@ -165,30 +165,30 @@ class TaskRecord<T : ProjectType> private constructor(
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
-                    remoteSingleScheduleRecords[id] = RemoteSingleScheduleRecord(id, this, scheduleWrapper)
+                    singleScheduleRecords[id] = SingleScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.dailyScheduleJson != null -> {
                     check(scheduleWrapper.weeklyScheduleJson == null)
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
-                    remoteDailyScheduleRecords[id] = RemoteDailyScheduleRecord(id, this, scheduleWrapper)
+                    dailyScheduleRecords[id] = DailyScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.weeklyScheduleJson != null -> {
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
-                    remoteWeeklyScheduleRecords[id] = RemoteWeeklyScheduleRecord(id, this, scheduleWrapper)
+                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.monthlyDayScheduleJson != null -> {
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
-                    remoteMonthlyDayScheduleRecords[id] = RemoteMonthlyDayScheduleRecord(id, this, scheduleWrapper)
+                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(id, this, scheduleWrapper)
                 }
                 else -> {
                     check(scheduleWrapper.monthlyWeekScheduleJson != null)
 
-                    remoteMonthlyWeekScheduleRecords[id] = RemoteMonthlyWeekScheduleRecord(id, this, scheduleWrapper)
+                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(id, this, scheduleWrapper)
                 }
             }
         }
@@ -198,11 +198,11 @@ class TaskRecord<T : ProjectType> private constructor(
 
     override val children
         get() = instanceRecords.values +
-                remoteSingleScheduleRecords.values +
-                remoteDailyScheduleRecords.values +
-                remoteWeeklyScheduleRecords.values +
-                remoteMonthlyDayScheduleRecords.values +
-                remoteMonthlyWeekScheduleRecords.values
+                singleScheduleRecords.values +
+                dailyScheduleRecords.values +
+                weeklyScheduleRecords.values +
+                monthlyDayScheduleRecords.values +
+                monthlyWeekScheduleRecords.values
 
     fun setOldestVisible(uuid: String, newOldestVisibleJson: OldestVisibleJson) {
         val oldOldestVisibleJson = getOldestVisibleJson(uuid)
@@ -244,36 +244,36 @@ class TaskRecord<T : ProjectType> private constructor(
         return projectInstanceRecord
     }
 
-    fun newSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T> {
-        val remoteSingleScheduleRecord = RemoteSingleScheduleRecord(this, scheduleWrapper)
-        check(!remoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.id))
+    fun newSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): SingleScheduleRecord<T> {
+        val singleScheduleRecord = SingleScheduleRecord(this, scheduleWrapper)
+        check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
 
-        remoteSingleScheduleRecords[remoteSingleScheduleRecord.id] = remoteSingleScheduleRecord
-        return remoteSingleScheduleRecord
+        singleScheduleRecords[singleScheduleRecord.id] = singleScheduleRecord
+        return singleScheduleRecord
     }
 
-    fun newWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord<T> {
-        val remoteWeeklyScheduleRecord = RemoteWeeklyScheduleRecord(this, scheduleWrapper)
-        check(!remoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.id))
+    fun newWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): WeeklyScheduleRecord<T> {
+        val weeklyScheduleRecord = WeeklyScheduleRecord(this, scheduleWrapper)
+        check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
 
-        remoteWeeklyScheduleRecords[remoteWeeklyScheduleRecord.id] = remoteWeeklyScheduleRecord
-        return remoteWeeklyScheduleRecord
+        weeklyScheduleRecords[weeklyScheduleRecord.id] = weeklyScheduleRecord
+        return weeklyScheduleRecord
     }
 
-    fun newMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord<T> {
-        val remoteMonthlyDayScheduleRecord = RemoteMonthlyDayScheduleRecord(this, scheduleWrapper)
-        check(!remoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.id))
+    fun newMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyDayScheduleRecord<T> {
+        val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(this, scheduleWrapper)
+        check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
 
-        remoteMonthlyDayScheduleRecords[remoteMonthlyDayScheduleRecord.id] = remoteMonthlyDayScheduleRecord
-        return remoteMonthlyDayScheduleRecord
+        monthlyDayScheduleRecords[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord
+        return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord<T> {
-        val remoteMonthlyWeekScheduleRecord = RemoteMonthlyWeekScheduleRecord(this, scheduleWrapper)
-        check(!remoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.id))
+    fun newMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyWeekScheduleRecord<T> {
+        val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(this, scheduleWrapper)
+        check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
 
-        remoteMonthlyWeekScheduleRecords[remoteMonthlyWeekScheduleRecord.id] = remoteMonthlyWeekScheduleRecord
-        return remoteMonthlyWeekScheduleRecord
+        monthlyWeekScheduleRecords[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord
+        return monthlyWeekScheduleRecord
     }
 
     override fun deleteFromParent() = check(projectRecord.taskRecords.remove(id) == this)

@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
 
-abstract class RemoteScheduleRecord<T : ProjectType>(
+abstract class ScheduleRecord<T : ProjectType>(
         create: Boolean,
         val id: String,
         protected val taskRecord: TaskRecord<T>,
@@ -25,7 +25,7 @@ abstract class RemoteScheduleRecord<T : ProjectType>(
 
     var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
-    val projectId get() = taskRecord.projectId
+    val projectId get() = taskRecord.projectKey
 
     val taskId get() = taskRecord.id
 

@@ -19,7 +19,7 @@ class SharedProject(
 
     override val projectKey = projectRecord.projectKey
 
-    private val remoteUsers = projectRecord.remoteUserRecords
+    private val remoteUsers = projectRecord.userRecords
             .values
             .map { ProjectUser(this, it) }
             .associateBy { it.id }

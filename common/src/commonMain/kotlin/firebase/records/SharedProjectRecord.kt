@@ -21,7 +21,7 @@ class SharedProjectRecord(
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
         private set
 
-    lateinit var remoteUserRecords: MutableMap<UserKey, RemoteProjectUserRecord>
+    lateinit var userRecords: MutableMap<UserKey, ProjectUserRecord>
         private set
 
     init {
@@ -43,18 +43,18 @@ class SharedProjectRecord(
                 .toMap()
                 .toMutableMap()
 
-        remoteUserRecords = jsonWrapper.projectJson
+        userRecords = jsonWrapper.projectJson
                 .users
                 .entries
                 .associate { (id, userJson) ->
                     check(id.isNotEmpty())
 
-                    UserKey(id) to RemoteProjectUserRecord(create, this, userJson)
+                    UserKey(id) to ProjectUserRecord(create, this, userJson)
                 }
                 .toMutableMap()
     }
 
-    override val children get() = super.children + remoteUserRecords.values
+    override val children get() = super.children + userRecords.values
 
     constructor(
             databaseWrapper: DatabaseWrapper,
@@ -89,11 +89,11 @@ class SharedProjectRecord(
         return remoteCustomTimeRecord
     }
 
-    fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {
-        val remoteProjectUserRecord = RemoteProjectUserRecord(true, this, userJson)
-        check(!remoteUserRecords.containsKey(remoteProjectUserRecord.id))
+    fun newRemoteUserRecord(userJson: UserJson): ProjectUserRecord {
+        val remoteProjectUserRecord = ProjectUserRecord(true, this, userJson)
+        check(!userRecords.containsKey(remoteProjectUserRecord.id))
 
-        remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
+        userRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
         return remoteProjectUserRecord
     }
 
@@ -111,7 +111,7 @@ class SharedProjectRecord(
                     .associateBy({ it.id.value }, { it.createObject })
                     .toMutableMap()
 
-            users = remoteUserRecords.values
+            users = userRecords.values
                     .associateBy({ it.id.key }, { it.createObject })
                     .toMutableMap()
         }

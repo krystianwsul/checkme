@@ -70,11 +70,11 @@ abstract class Project<T : ProjectType> : Current {
             now: ExactTimeStamp
     ) {
         val taskHierarchyJson = TaskHierarchyJson(parentTask.id, childTask.id, now.long, null, null)
-        val remoteTaskHierarchyRecord = projectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
+        val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)
+        val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
 
-        taskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
+        taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
     }
 
     @Suppress("ConstantConditionIf")
@@ -181,32 +181,32 @@ abstract class Project<T : ProjectType> : Current {
         )
     }
 
-    fun <V : TaskHierarchy<*>> copyRemoteTaskHierarchy(
+    fun <V : TaskHierarchy<*>> copyTaskHierarchy(
             now: ExactTimeStamp,
             startTaskHierarchy: V,
-            remoteParentTaskId: String,
-            remoteChildTaskId: String
+            parentTaskId: String,
+            childTaskId: String
     ): TaskHierarchy<T> {
-        check(remoteParentTaskId.isNotEmpty())
-        check(remoteChildTaskId.isNotEmpty())
+        check(parentTaskId.isNotEmpty())
+        check(childTaskId.isNotEmpty())
 
         val endTime = startTaskHierarchy.endExactTimeStamp?.long
 
         val taskHierarchyJson = TaskHierarchyJson(
-                remoteParentTaskId,
-                remoteChildTaskId,
+                parentTaskId,
+                childTaskId,
                 now.long,
                 endTime,
                 startTaskHierarchy.ordinal
         )
 
-        val remoteTaskHierarchyRecord = projectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
+        val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = TaskHierarchy(this, remoteTaskHierarchyRecord)
+        val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
 
-        taskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
+        taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
 
-        return remoteTaskHierarchy
+        return taskHierarchy
     }
 
     fun deleteTask(task: Task<T>) {

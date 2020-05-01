@@ -5,11 +5,11 @@ import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
 
 
-class RemoteDailyScheduleRecord<T : ProjectType>(
+class DailyScheduleRecord<T : ProjectType>(
         id: String,
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper
-) : RemoteScheduleRecord<T>(
+) : ScheduleRecord<T>(
         id,
         taskRecord,
         scheduleWrapper,
@@ -17,5 +17,5 @@ class RemoteDailyScheduleRecord<T : ProjectType>(
         "dailyScheduleJson"
 ) {
 
-    override fun deleteFromParent() = check(taskRecord.remoteDailyScheduleRecords.remove(id) == this)
+    override fun deleteFromParent() = check(taskRecord.dailyScheduleRecords.remove(id) == this)
 }

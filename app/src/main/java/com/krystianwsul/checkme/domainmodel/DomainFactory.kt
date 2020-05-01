@@ -2342,25 +2342,25 @@ class DomainFactory(
         val startProject = startingTask.project
         startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask)
 
-        val remoteProject = projectsFactory.getProjectForce(projectId)
+        val newProject = projectsFactory.getProjectForce(projectId)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            val remoteTask = remoteProject.copyTask(deviceDbInfo, pair.first, pair.second, now)
-            remoteToRemoteConversion.endTasks[pair.first.id] = remoteTask
+            val task = newProject.copyTask(deviceDbInfo, pair.first, pair.second, now)
+            remoteToRemoteConversion.endTasks[pair.first.id] = task
         }
 
         for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
-            val parentRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
-            val childRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
+            val parentTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
+            val childTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
 
-            val remoteTaskHierarchy = remoteProject.copyRemoteTaskHierarchy(
+            val taskHierarchy = newProject.copyTaskHierarchy(
                     now,
                     startTaskHierarchy,
-                    parentRemoteTask.id,
-                    childRemoteTask.id
+                    parentTask.id,
+                    childTask.id
             )
 
-            remoteToRemoteConversion.endTaskHierarchies.add(remoteTaskHierarchy)
+            remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)
         }
 
         val endData = Task.EndData(now, true)

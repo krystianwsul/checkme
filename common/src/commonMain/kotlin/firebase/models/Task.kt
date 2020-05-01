@@ -380,31 +380,31 @@ class Task<T : ProjectType>(
 
     init {
         _schedules.addAll(
-                taskRecord.remoteSingleScheduleRecords
+                taskRecord.singleScheduleRecords
                         .values
                         .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) }
         )
 
         _schedules.addAll(
-                taskRecord.remoteDailyScheduleRecords
+                taskRecord.dailyScheduleRecords
                         .values
                         .map { WeeklySchedule(this, RemoteDailyScheduleBridge(it)) }
         )
 
         _schedules.addAll(
-                taskRecord.remoteWeeklyScheduleRecords
+                taskRecord.weeklyScheduleRecords
                         .values
                         .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) }
         )
 
         _schedules.addAll(
-                taskRecord.remoteMonthlyDayScheduleRecords
+                taskRecord.monthlyDayScheduleRecords
                         .values
                         .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) }
         )
 
         _schedules.addAll(
-                taskRecord.remoteMonthlyWeekScheduleRecords
+                taskRecord.monthlyWeekScheduleRecords
                         .values
                         .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
         )

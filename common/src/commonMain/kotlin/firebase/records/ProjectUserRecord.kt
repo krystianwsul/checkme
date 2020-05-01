@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserJson
 
 
-class RemoteProjectUserRecord(
+class ProjectUserRecord(
         create: Boolean,
         private val remoteProjectRecord: SharedProjectRecord,
         override val createObject: UserJson
@@ -36,5 +36,5 @@ class RemoteProjectUserRecord(
         addValue("$key/tokens/${deviceDbInfo.uuid}", deviceDbInfo.deviceInfo.token)
     }
 
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteUserRecords.remove(id) == this)
+    override fun deleteFromParent() = check(remoteProjectRecord.userRecords.remove(id) == this)
 }

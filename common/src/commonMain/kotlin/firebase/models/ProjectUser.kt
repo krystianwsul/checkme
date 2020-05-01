@@ -1,39 +1,39 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
+import com.krystianwsul.common.firebase.records.ProjectUserRecord
 
 
 class ProjectUser(
         private val sharedProject: SharedProject,
-        private val remoteProjectUserRecord: RemoteProjectUserRecord
+        private val projectUserRecord: ProjectUserRecord
 ) {
 
-    val id = remoteProjectUserRecord.id
+    val id = projectUserRecord.id
 
     var name
-        get() = remoteProjectUserRecord.name
+        get() = projectUserRecord.name
         set(name) {
             check(name.isNotEmpty())
 
-            remoteProjectUserRecord.name = name
+            projectUserRecord.name = name
         }
 
-    val email = remoteProjectUserRecord.email
+    val email = projectUserRecord.email
 
     var photoUrl
-        get() = remoteProjectUserRecord.photoUrl
+        get() = projectUserRecord.photoUrl
         set(value) {
             check(!value.isNullOrEmpty())
 
-            remoteProjectUserRecord.photoUrl = value
+            projectUserRecord.photoUrl = value
         }
 
     fun delete() {
         sharedProject.deleteUser(this)
 
-        remoteProjectUserRecord.delete()
+        projectUserRecord.delete()
     }
 
-    fun setToken(deviceDbInfo: DeviceDbInfo) = remoteProjectUserRecord.setToken(deviceDbInfo)
+    fun setToken(deviceDbInfo: DeviceDbInfo) = projectUserRecord.setToken(deviceDbInfo)
 }

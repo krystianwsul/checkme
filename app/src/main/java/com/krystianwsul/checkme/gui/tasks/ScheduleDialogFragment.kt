@@ -23,10 +23,7 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.SerializableUnit
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.setFixedOnClickListener
-import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.Date
@@ -268,24 +265,26 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView.scheduleType.run {
             setItems(resources.getStringArray(R.array.schedule_types).toList())
 
-            addListener {
-                scheduleDialogData.scheduleType = when (it) {
-                    0 -> ScheduleType.SINGLE
-                    1 -> ScheduleType.WEEKLY
-                    2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
-                    else -> throw UnsupportedOperationException()
-                }
-
-                if (activity != null && customTimeDatas != null)
-                    initialize()
-            }
-
             setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> 1
                 ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
             })
+
+            addOneShotGlobalLayoutListener {
+                addListener {
+                    scheduleDialogData.scheduleType = when (it) {
+                        0 -> ScheduleType.SINGLE
+                        1 -> ScheduleType.WEEKLY
+                        2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                        else -> throw UnsupportedOperationException()
+                    }
+
+                    if (activity != null && customTimeDatas != null)
+                        updateScheduleTypeFields(true)
+                }
+            }
         }
 
         customView.scheduleDialogTime.setFixedOnClickListener {
@@ -337,14 +336,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogAllDays.apply {
+            isChecked = scheduleDialogData.allDays
+
             setOnCheckedChangeListener { _, isChecked ->
                 scheduleDialogData.allDays = isChecked
 
-                updateFields()
+                updateDays(true)
             }
         }
-
-        customView.scheduleDialogAllDays.isChecked = scheduleDialogData.allDays
 
         scheduleDialogData.daysOfWeek.forEach { scheduleDialogDays.getValue(it).isChecked = true }
         scheduleDialogDays.forEach { (day, view) ->
@@ -363,7 +362,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
+                if (scheduleDialogData.scheduleType.isMonthly)
+                    scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
 
                 customView.scheduleDialogMonthWeekRadio.isChecked = false
 
@@ -399,7 +399,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
+                if (scheduleDialogData.scheduleType.isMonthly)
+                    scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
 
                 customView.scheduleDialogMonthDayRadio.isChecked = false
 
@@ -486,8 +487,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private fun initialize() {
+        customView.addOneShotGlobalLayoutListener { // needed so animations run correctly
+            updateScheduleTypeFields()
+            updateDays()
+        }
+    }
+
+    private fun updateScheduleTypeFields(animate: Boolean = false) {
         check(customTimeDatas != null)
         check(activity != null)
+
+        if (animate)
+            TransitionManager.beginDelayedTransition(customView)
 
         when (scheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
@@ -536,11 +547,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             scheduleDialogData.timePairPersist.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
     }
 
+    private fun updateDays(animate: Boolean = false) {
+        if (animate)
+            TransitionManager.beginDelayedTransition(customView)
+
+        scheduleDialogDays.values.forEach { it.isVisible = !scheduleDialogData.allDays }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun updateFields() {
         checkNotNull(customTimeDatas)
-
-        TransitionManager.beginDelayedTransition(customView)
 
         val customTimeData = scheduleDialogData.timePairPersist
                 .customTimeKey
@@ -592,8 +608,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
             }
         }
-
-        scheduleDialogDays.values.forEach { it.isVisible = !scheduleDialogData.allDays }
 
         checkValid()
     }

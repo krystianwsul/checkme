@@ -27,7 +27,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="17dp"
-            android:visibility="gone"
             app:errorEnabled="true"
             app:hintEnabled="false">
 
@@ -44,8 +43,7 @@
             android:id="@+id/scheduleDialogDayLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <CheckBox
                 android:id="@+id/scheduleDialogAllDays"
@@ -94,8 +92,7 @@
             android:id="@+id/scheduleDialogMonthLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"

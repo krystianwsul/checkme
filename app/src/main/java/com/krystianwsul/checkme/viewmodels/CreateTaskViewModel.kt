@@ -236,7 +236,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                         date.dayOfWeek,
                         true,
                         TimePairPersist(timePair),
-                        ScheduleType.MONTHLY_DAY,
+                        ScheduleType.YEARLY,
                         scheduleData.from,
                         scheduleData.until
                 )

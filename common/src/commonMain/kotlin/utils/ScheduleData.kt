@@ -36,4 +36,12 @@ sealed class ScheduleData : Serializable {
             val from: Date?,
             val until: Date?
     ) : ScheduleData()
+
+    data class Yearly(
+            val month: Int,
+            val day: Int,
+            override val timePair: TimePair,
+            val from: Date?,
+            val until: Date?
+    ) : ScheduleData()
 }

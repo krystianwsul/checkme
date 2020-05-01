@@ -47,6 +47,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 is ScheduleData.Weekly -> Weekly(scheduleData)
                 is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
                 is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
+                is ScheduleData.Yearly -> Yearly(scheduleData)
             }
 
             private fun timePairCallback(
@@ -205,6 +206,37 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                         scheduleData.beginningOfMonth,
                         TimePairPersist(timePair),
                         ScheduleType.MONTHLY_WEEK,
+                        scheduleData.from,
+                        scheduleData.until
+                )
+            }
+        }
+
+        data class Yearly(override val scheduleData: ScheduleData.Yearly) : ScheduleDataWrapper() {
+
+            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+                return ScheduleText.Yearly.getScheduleText(scheduleData) {
+                    timePairCallback(it, customTimeDatas)
+                }
+            }
+
+            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+                var date = scheduleHint?.date ?: today
+
+                date = getDateInMonth(date.year, scheduleData.month, scheduleData.day, true)
+
+                @Suppress("BooleanLiteralArgument")
+                return ScheduleDialogFragment.ScheduleDialogData(
+                        date,
+                        mutableSetOf(date.dayOfWeek),
+                        true,
+                        true,
+                        scheduleData.day,
+                        (scheduleData.day - 1) / 7 + 1,
+                        date.dayOfWeek,
+                        true,
+                        TimePairPersist(timePair),
+                        ScheduleType.MONTHLY_DAY,
                         scheduleData.from,
                         scheduleData.until
                 )

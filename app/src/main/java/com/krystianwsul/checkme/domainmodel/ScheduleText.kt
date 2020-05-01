@@ -13,6 +13,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
+import com.soywiz.klock.Month
 import java.util.*
 
 sealed class ScheduleText {
@@ -27,6 +28,7 @@ sealed class ScheduleText {
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
+            is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
         }.getScheduleText(project)
 
         fun fromUntil(from: Date?, until: Date?): String {
@@ -123,6 +125,24 @@ sealed class ScheduleText {
                     Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
                 } + ": " + timePairCallback(scheduleData.timePair) + fromUntil(scheduleData.from, scheduleData.until)
             }
+        }
+
+        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, project)
+        }
+    }
+
+    class Yearly(private val scheduleGroup: ScheduleGroup.Yearly<*>) : ScheduleText() {
+
+        companion object {
+
+            fun getScheduleText(
+                    scheduleData: ScheduleData.Yearly,
+                    timePairCallback: (TimePair) -> String
+            ) = Month[scheduleData.month].localName +
+                    " " + Utils.ordinal(scheduleData.day) +
+                    ": " + timePairCallback(scheduleData.timePair) +
+                    fromUntil(scheduleData.from, scheduleData.until)
         }
 
         override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {

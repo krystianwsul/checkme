@@ -121,4 +121,22 @@ sealed class ScheduleGroup<T : ProjectType> {
 
         override val schedules get() = listOf(monthlyWeekSchedule)
     }
+
+    class Yearly<T : ProjectType>(
+            private val yearlySchedule: YearlySchedule<T>
+    ) : ScheduleGroup<T>() {
+
+        override val customTimeKey get() = yearlySchedule.customTimeKey
+
+        override val scheduleData
+            get() = ScheduleData.Yearly(
+                    yearlySchedule.month,
+                    yearlySchedule.day,
+                    yearlySchedule.timePair,
+                    yearlySchedule.from,
+                    yearlySchedule.until
+            )
+
+        override val schedules get() = listOf(yearlySchedule)
+    }
 }

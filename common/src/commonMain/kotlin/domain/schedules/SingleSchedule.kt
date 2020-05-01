@@ -22,7 +22,7 @@ class SingleSchedule<T : ProjectType>(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(dateTime)
+    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(DateTime(date, singleScheduleBridge.originalTimePair.toTime()))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 

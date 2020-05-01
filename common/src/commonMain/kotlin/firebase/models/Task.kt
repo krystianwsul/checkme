@@ -122,6 +122,8 @@ class Task<T : ProjectType>(
 
         override val timePair
             get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+
+        override val originalTimePair get() = singleScheduleBridge.timePair
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {

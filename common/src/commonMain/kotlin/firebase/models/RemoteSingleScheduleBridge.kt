@@ -13,4 +13,6 @@ class RemoteSingleScheduleBridge<T : ProjectType>(
     override val month get() = remoteSingleScheduleRecord.month
 
     override val day get() = remoteSingleScheduleRecord.day
+
+    override val originalTimePair get() = timePair
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectType
 
 interface SingleScheduleBridge<T : ProjectType> : ScheduleBridge<T> {
@@ -9,4 +10,6 @@ interface SingleScheduleBridge<T : ProjectType> : ScheduleBridge<T> {
     val month: Int
 
     val day: Int
+
+    val originalTimePair: TimePair
 }

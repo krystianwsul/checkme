@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
@@ -28,10 +29,11 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
 
     val timePair get() = scheduleBridge.timePair
 
-    val time
-        get() = customTimeKey?.let {
-            rootTask.project.getCustomTime(it.customTimeId)
-        } ?: Time.Normal(timePair.hourMinute!!)
+    val time get() = timePair.toTime()
+
+    protected fun TimePair.toTime() = customTimeKey
+            ?.let { rootTask.project.getCustomTime(it.customTimeId) }
+            ?: Time.Normal(hourMinute!!)
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)

@@ -2237,14 +2237,14 @@ class DomainFactory(
         if (!isRootTask(now))
             return false
 
-        if (includedTaskKeys.contains(taskKey)) {
+        if (excludedTaskKeys.contains(taskKey))
+            return false
+
+        if (includedTaskKeys.contains(taskKey)) { // todo this doesn't account for a parent that isn't a root instance
             check(isVisible(now, true))
 
             return true
         }
-
-        if (excludedTaskKeys.contains(taskKey))
-            return false
 
         if (!isVisible(now, false))
             return false
@@ -2252,10 +2252,14 @@ class DomainFactory(
         return true
     }
 
-    private fun getParentTreeDatas(now: ExactTimeStamp, excludedTaskKeys: Set<TaskKey>, includedTaskKeys: Set<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+    private fun getParentTreeDatas(
+            now: ExactTimeStamp,
+            excludedTaskKeys: Set<TaskKey>,
+            includedTaskKeys: Set<TaskKey>
+    ): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
 
-        parentTreeDatas.putAll(projectsFactory.privateProject
+        parentTreeDatas += projectsFactory.privateProject
                 .tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
@@ -2272,9 +2276,9 @@ class DomainFactory(
 
                     taskParentKey to parentTreeData
                 }
-                .toMap())
+                .toMap()
 
-        parentTreeDatas.putAll(projectsFactory.sharedProjects
+        parentTreeDatas += projectsFactory.sharedProjects
                 .values
                 .filter { it.current(now) }
                 .map {
@@ -2293,7 +2297,7 @@ class DomainFactory(
 
                     projectParentKey to parentTreeData
                 }
-                .toMap())
+                .toMap()
 
         return parentTreeDatas
     }

@@ -2,13 +2,18 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/listPaddingHeight">
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/listPaddingHeight" />
 
     <ProgressBar
         android:id="@+id/paddingProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/listPaddingHeight"
         android:visibility="gone" />
 
 </RelativeLayout>

@@ -77,7 +77,7 @@ class Task<T : ProjectType>(
 
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
 
-        getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
+        currentSchedules.getSingleSchedule()?.let { singleSchedule ->
             val instance = singleSchedule.getInstance(this)
 
             @Suppress("UNCHECKED_CAST")
@@ -91,9 +91,7 @@ class Task<T : ProjectType>(
         return currentSchedules
     }
 
-    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule<T>? {
-        return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
-    }
+    private fun List<Schedule<T>>.getSingleSchedule() = singleOrNull() as? SingleSchedule
 
     private class MockSingleScheduleBridge<T : ProjectType>(
             private val singleScheduleBridge: SingleScheduleBridge<T>,
@@ -334,7 +332,7 @@ class Task<T : ProjectType>(
 
         val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
         val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
-        val oldSingleSchedule = getSingleSchedule(now)
+        val oldSingleSchedule = oldSchedules.getSingleSchedule()
 
         if (singleRemoveSchedule != null &&
                 singleAddSchedulePair != null &&

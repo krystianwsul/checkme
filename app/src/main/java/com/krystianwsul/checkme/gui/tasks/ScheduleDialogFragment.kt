@@ -147,7 +147,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return dateError.isNullOrEmpty() && timeError.isNullOrEmpty()
         } else {
-            customView.scheduleDialogDateLayout.error = null
+            customView.scheduleDialogDateLayout.error = null // todo yearly check for leap year
             customView.scheduleDialogTimeLayout.error = null
 
             var valid = true
@@ -269,6 +269,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 ScheduleType.SINGLE -> 0
                 ScheduleType.WEEKLY -> 1
                 ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
+                ScheduleType.YEARLY -> 3
             })
 
             addOneShotGlobalLayoutListener {
@@ -277,6 +278,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                         0 -> ScheduleType.SINGLE
                         1 -> ScheduleType.WEEKLY
                         2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                        3 -> ScheduleType.YEARLY
                         else -> throw UnsupportedOperationException()
                     }
 
@@ -521,6 +523,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 customView.scheduleDialogFromLayout.visibility = View.VISIBLE
                 customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
             }
+            ScheduleType.YEARLY -> {
+                customView.scheduleDialogDateLayout.visibility = View.VISIBLE // todo yearly disable year
+                customView.scheduleDialogDayLayout.visibility = View.GONE
+                customView.scheduleDialogMonthLayout.visibility = View.GONE
+                customView.scheduleDialogFromLayout.visibility = View.VISIBLE
+                customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
+            }
         }
 
         updateFields()
@@ -670,7 +679,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     from,
                     until
             ))
-            else -> throw UnsupportedOperationException()
+            ScheduleType.YEARLY -> CreateTaskViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
+                    date.month,
+                    date.day,
+                    timePairPersist.timePair,
+                    from,
+                    until
+            ))
         })
     }
 

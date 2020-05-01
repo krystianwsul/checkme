@@ -139,7 +139,7 @@ sealed class ScheduleText {
             fun getScheduleText(
                     scheduleData: ScheduleData.Yearly,
                     timePairCallback: (TimePair) -> String
-            ) = Month[scheduleData.month].localName +
+            ) = Month[scheduleData.month].localName + // todo yearly format date, strip off year
                     " " + Utils.ordinal(scheduleData.day) +
                     ": " + timePairCallback(scheduleData.timePair) +
                     fromUntil(scheduleData.from, scheduleData.until)

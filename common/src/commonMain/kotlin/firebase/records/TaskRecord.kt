@@ -26,8 +26,6 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = HashMap()
 
-    val dailyScheduleRecords: MutableMap<String, DailyScheduleRecord<T>> = HashMap()
-
     val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord<T>> = HashMap()
 
     val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord<T>> = HashMap()
@@ -45,9 +43,6 @@ class TaskRecord<T : ProjectType> private constructor(
 
             for (singleScheduleRecord in singleScheduleRecords.values)
                 scheduleWrappers[singleScheduleRecord.id] = singleScheduleRecord.createObject
-
-            for (dailyScheduleRecord in dailyScheduleRecords.values)
-                scheduleWrappers[dailyScheduleRecord.id] = dailyScheduleRecord.createObject
 
             for (weeklyScheduleRecord in weeklyScheduleRecords.values)
                 scheduleWrappers[weeklyScheduleRecord.id] = weeklyScheduleRecord.createObject
@@ -160,19 +155,11 @@ class TaskRecord<T : ProjectType> private constructor(
 
             when {
                 scheduleWrapper.singleScheduleJson != null -> {
-                    check(scheduleWrapper.dailyScheduleJson == null)
                     check(scheduleWrapper.weeklyScheduleJson == null)
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
                     singleScheduleRecords[id] = SingleScheduleRecord(id, this, scheduleWrapper)
-                }
-                scheduleWrapper.dailyScheduleJson != null -> {
-                    check(scheduleWrapper.weeklyScheduleJson == null)
-                    check(scheduleWrapper.monthlyDayScheduleJson == null)
-                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
-
-                    dailyScheduleRecords[id] = DailyScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.weeklyScheduleJson != null -> {
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
@@ -199,7 +186,6 @@ class TaskRecord<T : ProjectType> private constructor(
     override val children
         get() = instanceRecords.values +
                 singleScheduleRecords.values +
-                dailyScheduleRecords.values +
                 weeklyScheduleRecords.values +
                 monthlyDayScheduleRecords.values +
                 monthlyWeekScheduleRecords.values

@@ -267,7 +267,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
-                ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> 1
                 ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
             })
@@ -508,7 +507,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 customView.scheduleDialogFromLayout.visibility = View.GONE
                 customView.scheduleDialogUntilLayout.visibility = View.GONE
             }
-            ScheduleType.DAILY -> throw UnsupportedOperationException()
             ScheduleType.WEEKLY -> {
                 customView.scheduleDialogDateLayout.visibility = View.GONE
                 customView.scheduleDialogDayLayout.visibility = View.VISIBLE

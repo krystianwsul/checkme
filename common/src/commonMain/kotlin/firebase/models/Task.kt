@@ -379,35 +379,21 @@ class Task<T : ProjectType>(
     }
 
     init {
-        _schedules.addAll(
-                taskRecord.singleScheduleRecords
-                        .values
-                        .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) }
-        )
+        _schedules += taskRecord.singleScheduleRecords
+                .values
+                .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) }
 
-        _schedules.addAll(
-                taskRecord.dailyScheduleRecords
-                        .values
-                        .map { WeeklySchedule(this, RemoteDailyScheduleBridge(it)) }
-        )
+        _schedules += taskRecord.weeklyScheduleRecords
+                .values
+                .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) }
 
-        _schedules.addAll(
-                taskRecord.weeklyScheduleRecords
-                        .values
-                        .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) }
-        )
+        _schedules += taskRecord.monthlyDayScheduleRecords
+                .values
+                .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) }
 
-        _schedules.addAll(
-                taskRecord.monthlyDayScheduleRecords
-                        .values
-                        .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) }
-        )
-
-        _schedules.addAll(
-                taskRecord.monthlyWeekScheduleRecords
-                        .values
-                        .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
-        )
+        _schedules += taskRecord.monthlyWeekScheduleRecords
+                .values
+                .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
     }
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }

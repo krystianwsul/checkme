@@ -892,7 +892,9 @@ class GroupListFragment @JvmOverloads constructor(
                                     groupListFragment.imageViewerData = null
                                 },
                                 groupListFragment.showImage)
-                    })
+                    }
+            )
+
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
             treeViewAdapter.showProgress = showProgress
 

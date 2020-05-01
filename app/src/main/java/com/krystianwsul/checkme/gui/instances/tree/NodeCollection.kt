@@ -40,9 +40,10 @@ class NodeCollection(
             unscheduledExpanded: Boolean,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
-            imageData: ImageNode.ImageData?): List<TreeNode<NodeHolder>> {
+            imageData: ImageNode.ImageData?
+    ): List<TreeNode<NodeHolder>> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
-        val doneInstanceDatas = instanceDatas.filter { it.done != null }
+        val doneInstanceDatas = instanceDatas.filter { it.done != null } // todo done should be easy enough
 
         return mutableListOf<TreeNode<NodeHolder>>().apply {
             if (!note.isNullOrEmpty()) {

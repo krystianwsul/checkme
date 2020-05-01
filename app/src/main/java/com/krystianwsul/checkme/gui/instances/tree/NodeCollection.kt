@@ -11,7 +11,8 @@ class NodeCollection(
         val groupAdapter: GroupListFragment.GroupAdapter,
         val useGroups: Boolean,
         val nodeContainer: NodeContainer<NodeHolder>,
-        private val note: String?
+        private val note: String?,
+        val useDoneNode: Boolean = true
 ) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -43,7 +44,7 @@ class NodeCollection(
             selectedTaskKeys: List<TaskKey>,
             imageData: ImageNode.ImageData?
     ): List<TreeNode<NodeHolder>> {
-        fun GroupListFragment.InstanceData.filterNotDone() = done == null || !groupAdapter.useDoneNode
+        fun GroupListFragment.InstanceData.filterNotDone() = done == null || !useDoneNode
         val notDoneInstanceDatas = instanceDatas.filter { it.filterNotDone() }
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 

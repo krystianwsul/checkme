@@ -178,7 +178,7 @@ class NotDoneGroupNode(
             } else {
                 val groupAdapter = nodeCollection.groupAdapter
 
-                val checked = if (nodeCollection.groupAdapter.useDoneNode) {
+                val checked = if (nodeCollection.useDoneNode) {
                     check(singleInstanceData.done == null)
 
                     false
@@ -198,7 +198,7 @@ class NotDoneGroupNode(
                             newDone
                     )
 
-                    if (groupAdapter.useDoneNode) {
+                    if (nodeCollection.useDoneNode) {
                         check(newDone)
 
                         groupAdapter.treeNodeCollection
@@ -212,17 +212,17 @@ class NotDoneGroupNode(
 
                                     notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
                                 }
-
-                        groupListFragment.listener.showSnackbarDone(1) {
-                            DomainFactory.instance.setInstanceDone(
-                                    0,
-                                    SaveService.Source.GUI,
-                                    instanceKey,
-                                    !newDone
-                            )
-                        }
                     } else {
                         updateDone()
+                    }
+
+                    groupListFragment.listener.showSnackbarDone(1) {
+                        DomainFactory.instance.setInstanceDone(
+                                0,
+                                SaveService.Source.GUI,
+                                instanceKey,
+                                !newDone
+                        )
                     }
                 }
             }

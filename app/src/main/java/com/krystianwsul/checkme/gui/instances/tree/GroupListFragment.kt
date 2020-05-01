@@ -581,13 +581,14 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.dataWrapper.taskDatas,
                         parameters.dataWrapper.note,
                         parameters.dataWrapper.imageData,
-                        parameters.showProgress
+                        parameters.showProgress,
+                        parameters.useDoneNode
                 )
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
-            val groupAdapter = GroupAdapter(this, parameters.useDoneNode)
+            val groupAdapter = GroupAdapter(this)
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -598,7 +599,8 @@ class GroupListFragment @JvmOverloads constructor(
                     parameters.dataWrapper.taskDatas,
                     parameters.dataWrapper.note,
                     parameters.dataWrapper.imageData,
-                    parameters.showProgress
+                    parameters.showProgress,
+                    parameters.useDoneNode
             )
 
             treeViewAdapter = groupAdapter.treeViewAdapter
@@ -799,10 +801,7 @@ class GroupListFragment @JvmOverloads constructor(
         selectionCallback.actionMode!!.finish()
     }
 
-    class GroupAdapter(
-            val groupListFragment: GroupListFragment,
-            val useDoneNode: Boolean
-    ) : GroupHolderAdapter(), NodeCollectionParent {
+    class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {
 
         companion object {
 
@@ -864,14 +863,22 @@ class GroupListFragment @JvmOverloads constructor(
                 taskDatas: List<TaskData>,
                 note: String?,
                 imageState: ImageState?,
-                showProgress: Boolean
+                showProgress: Boolean,
+                useDoneNode: Boolean
         ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
-            nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
+            nodeCollection = NodeCollection(
+                    0,
+                    this,
+                    useGroups,
+                    treeNodeCollection,
+                    note,
+                    useDoneNode
+            )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                     instanceDatas,
@@ -996,6 +1003,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override fun compareTo(other: InstanceData): Int {
+            check(this::instanceDataParent.isInitialized) // sanity check
+
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
             if (timeStampComparison != 0)
                 return timeStampComparison

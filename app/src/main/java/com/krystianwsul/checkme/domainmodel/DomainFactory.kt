@@ -602,7 +602,7 @@ class DomainFactory(
             else
                 task.getParentTaskHierarchy(hierarchyExactTimeStamp)!!.run { HierarchyData(taskHierarchyKey, ordinal) }
 
-            GroupListFragment.InstanceData(
+            val instanceData = GroupListFragment.InstanceData(
                     it.done,
                     it.instanceKey,
                     it.instanceDateTime.getDisplayText(),
@@ -620,6 +620,10 @@ class DomainFactory(
                     it.getNotificationShown(localFactory),
                     task.getImage(deviceDbInfo)
             )
+
+            children.values.forEach { it.instanceDataParent = instanceData }
+
+            instanceData
         }
 
         val dataWrapper = GroupListFragment.DataWrapper(
@@ -2734,7 +2738,8 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo))
+                    task.getImage(deviceDbInfo)
+            )
 
             children.values.forEach { it.instanceDataParent = instanceData }
 

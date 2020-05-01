@@ -605,7 +605,7 @@ class DomainFactory(
             GroupListFragment.InstanceData(
                     it.done,
                     it.instanceKey,
-                    it.getDisplayData(now)?.getDisplayText(),
+                    it.instanceDateTime.getDisplayText(),
                     it.name,
                     it.instanceDateTime.timeStamp,
                     task.current(now),

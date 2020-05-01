@@ -1,7 +1,9 @@
 package com.krystianwsul.common.utils
 
 enum class ScheduleType {
+
     SINGLE,
+
     WEEKLY,
 
     MONTHLY_DAY {
@@ -12,7 +14,9 @@ enum class ScheduleType {
     MONTHLY_WEEK {
 
         override val isMonthly = true
-    };
+    },
+
+    YEARLY;
 
     open val isMonthly = false
 }

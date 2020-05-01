@@ -11,7 +11,8 @@ class NodeCollection(
         val groupAdapter: GroupListFragment.GroupAdapter,
         val useGroups: Boolean,
         val nodeContainer: NodeContainer<NodeHolder>,
-        private val note: String?) {
+        private val note: String?
+) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
         private set
@@ -42,8 +43,9 @@ class NodeCollection(
             selectedTaskKeys: List<TaskKey>,
             imageData: ImageNode.ImageData?
     ): List<TreeNode<NodeHolder>> {
-        val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
-        val doneInstanceDatas = instanceDatas.filter { it.done != null } // todo done should be easy enough
+        fun GroupListFragment.InstanceData.filterNotDone() = done == null || !groupAdapter.useDoneNode
+        val notDoneInstanceDatas = instanceDatas.filter { it.filterNotDone() }
+        val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 
         return mutableListOf<TreeNode<NodeHolder>>().apply {
             if (!note.isNullOrEmpty()) {
@@ -58,20 +60,42 @@ class NodeCollection(
                 add(ImageNode(it).initialize(nodeContainer))
             }
 
-            notDoneGroupCollection = NotDoneGroupCollection(indentation, this@NodeCollection, nodeContainer)
+            notDoneGroupCollection = NotDoneGroupCollection(
+                    indentation,
+                    this@NodeCollection,
+                    nodeContainer
+            )
 
-            addAll(notDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedInstances, selectedGroups))
+            addAll(notDoneGroupCollection.initialize(
+                    notDoneInstanceDatas,
+                    expandedGroups,
+                    expandedInstances,
+                    selectedInstances,
+                    selectedGroups
+            ))
 
             check(indentation == 0 || taskDatas.isEmpty())
             if (taskDatas.isNotEmpty()) {
                 unscheduledNode = UnscheduledNode(this@NodeCollection)
 
-                add(unscheduledNode!!.initialize(unscheduledExpanded, nodeContainer, taskDatas, expandedTaskKeys, selectedTaskKeys))
+                add(unscheduledNode!!.initialize(
+                        unscheduledExpanded,
+                        nodeContainer,
+                        taskDatas,
+                        expandedTaskKeys,
+                        selectedTaskKeys
+                ))
             }
 
             dividerNode = DividerNode(indentation, this@NodeCollection)
 
-            add(dividerNode.initialize(doneExpanded && doneInstanceDatas.isNotEmpty(), nodeContainer, doneInstanceDatas, expandedInstances, selectedInstances))
+            add(dividerNode.initialize(
+                    doneExpanded && doneInstanceDatas.isNotEmpty(),
+                    nodeContainer,
+                    doneInstanceDatas,
+                    expandedInstances,
+                    selectedInstances
+            ))
         }
     }
 

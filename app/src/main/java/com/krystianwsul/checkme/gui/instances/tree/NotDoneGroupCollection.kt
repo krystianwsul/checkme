@@ -16,12 +16,36 @@ class NotDoneGroupCollection(
 
     val expandedGroups get() = notDoneGroupNodes.filter { !it.singleInstance() && it.expanded() }.map { it.exactTimeStamp.toTimeStamp() }
 
-    fun initialize(notDoneInstanceDatas: List<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>) = if (nodeCollection.useGroups) {
+    fun initialize(
+            notDoneInstanceDatas: List<GroupListFragment.InstanceData>,
+            expandedGroups: List<TimeStamp>,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selectedInstances: List<InstanceKey>,
+            selectedGroups: List<Long>
+    ) = if (nodeCollection.useGroups) {
         notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
                 .values
-                .map { newNotDoneGroupNode(this, it.toMutableList(), expandedGroups, expandedInstances, selectedInstances, selectedGroups) }
+                .map {
+                    newNotDoneGroupNode(
+                            this,
+                            it.toMutableList(),
+                            expandedGroups,
+                            expandedInstances,
+                            selectedInstances,
+                            selectedGroups
+                    )
+                }
     } else {
-        notDoneInstanceDatas.map { newNotDoneGroupNode(this, mutableListOf(it), expandedGroups, expandedInstances, selectedInstances, selectedGroups) }
+        notDoneInstanceDatas.map {
+            newNotDoneGroupNode(
+                    this,
+                    mutableListOf(it),
+                    expandedGroups,
+                    expandedInstances,
+                    selectedInstances,
+                    selectedGroups
+            )
+        }
     }
 
     fun remove(notDoneGroupNode: NotDoneGroupNode, x: TreeViewAdapter.Placeholder) {
@@ -49,12 +73,19 @@ class NotDoneGroupCollection(
             expandedGroups: List<TimeStamp>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>): TreeNode<NodeHolder> {
+            selectedGroups: List<Long>
+    ): TreeNode<NodeHolder> {
         check(instanceDatas.isNotEmpty())
 
         val notDoneGroupNode = NotDoneGroupNode(indentation, notDoneGroupCollection, instanceDatas)
 
-        val notDoneGroupTreeNode = notDoneGroupNode.initialize(expandedGroups, expandedInstances, selectedInstances, selectedGroups, nodeContainer)
+        val notDoneGroupTreeNode = notDoneGroupNode.initialize(
+                expandedGroups,
+                expandedInstances,
+                selectedInstances,
+                selectedGroups,
+                nodeContainer
+        )
 
         notDoneGroupNodes.add(notDoneGroupNode)
 

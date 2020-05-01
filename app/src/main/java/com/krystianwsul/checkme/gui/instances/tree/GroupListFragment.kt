@@ -587,7 +587,8 @@ class GroupListFragment @JvmOverloads constructor(
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
-            val groupAdapter = GroupAdapter(this)
+            val groupAdapter = GroupAdapter(this, parameters.useDoneNode)
+
             groupAdapter.initialize(
                     parameters.dataId,
                     parameters.dataWrapper.customTimeDatas,
@@ -599,7 +600,9 @@ class GroupListFragment @JvmOverloads constructor(
                     parameters.dataWrapper.imageData,
                     parameters.showProgress
             )
+
             treeViewAdapter = groupAdapter.treeViewAdapter
+
             groupListRecycler.adapter = treeViewAdapter
             groupListRecycler.itemAnimator = CustomItemAnimator()
 
@@ -796,7 +799,10 @@ class GroupListFragment @JvmOverloads constructor(
         selectionCallback.actionMode!!.finish()
     }
 
-    class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {
+    class GroupAdapter(
+            val groupListFragment: GroupListFragment,
+            val useDoneNode: Boolean
+    ) : GroupHolderAdapter(), NodeCollectionParent {
 
         companion object {
 
@@ -1045,6 +1051,7 @@ class GroupListFragment @JvmOverloads constructor(
         abstract val dataWrapper: DataWrapper
 
         open val showProgress: Boolean = false
+        open val useDoneNode = true
 
         class All(
                 override val dataId: Int,
@@ -1081,7 +1088,10 @@ class GroupListFragment @JvmOverloads constructor(
                 override val dataWrapper: DataWrapper,
                 val taskKey: com.krystianwsul.common.utils.TaskKey,
                 override val showProgress: Boolean
-        ) : Parameters(false)
+        ) : Parameters(false) {
+
+            override val useDoneNode = false
+        }
     }
 
     private class NoSelectionException(message: String) : Exception(message)

@@ -176,25 +176,53 @@ class NotDoneGroupNode(
             if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
                 CheckBoxState.Invisible
             } else {
-                CheckBoxState.Visible(false) {
-                    val groupAdapter = nodeCollection.groupAdapter
+                val groupAdapter = nodeCollection.groupAdapter
 
+                val checked = if (nodeCollection.groupAdapter.useDoneNode) {
+                    check(singleInstanceData.done == null)
+
+                    false
+                } else {
+                    singleInstanceData.done != null
+                }
+
+                CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    groupAdapter.treeNodeCollection
-                            .treeViewAdapter
-                            .updateDisplayedNodes {
-                                singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
+                    val newDone = singleInstanceData.done == null
 
-                                GroupListFragment.recursiveExists(singleInstanceData)
+                    fun updateDone() = DomainFactory.instance.setInstanceDone(
+                            groupAdapter.dataId,
+                            SaveService.Source.GUI,
+                            instanceKey,
+                            newDone
+                    )
 
-                                nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
+                    if (groupAdapter.useDoneNode) {
+                        check(newDone)
 
-                                notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
-                            }
+                        groupAdapter.treeNodeCollection
+                                .treeViewAdapter
+                                .updateDisplayedNodes {
+                                    singleInstanceData.done = updateDone()!!
 
-                    groupListFragment.listener.showSnackbarDone(1) {
-                        DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
+                                    GroupListFragment.recursiveExists(singleInstanceData)
+
+                                    nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
+
+                                    notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
+                                }
+
+                        groupListFragment.listener.showSnackbarDone(1) {
+                            DomainFactory.instance.setInstanceDone(
+                                    0,
+                                    SaveService.Source.GUI,
+                                    instanceKey,
+                                    !newDone
+                            )
+                        }
+                    } else {
+                        updateDone()
                     }
                 }
             }

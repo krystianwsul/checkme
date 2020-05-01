@@ -8,5 +8,6 @@ data class ScheduleWrapper @JvmOverloads constructor(
         val singleScheduleJson: SingleScheduleJson? = null,
         val weeklyScheduleJson: WeeklyScheduleJson? = null,
         val monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
-        val monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null
+        val monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
+        val yearlyScheduleJson: YearlyScheduleJson? = null
 )

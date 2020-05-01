@@ -11,5 +11,7 @@ data class YearlyScheduleJson @JvmOverloads constructor(
         val day: Int = 0,
         override val customTimeId: String? = null,
         override val hour: Int? = null,
-        override val minute: Int? = null
+        override val minute: Int? = null,
+        val from: String? = null,
+        val until: String? = null
 ) : ScheduleJson

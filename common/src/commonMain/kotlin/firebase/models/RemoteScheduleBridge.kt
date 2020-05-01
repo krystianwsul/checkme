@@ -25,9 +25,9 @@ abstract class RemoteScheduleBridge<T : ProjectType>(
 
     final override val customTimeKey get() = scheduleRecord.customTimeKey
 
-    final override val rootTaskKey get() = TaskKey(scheduleRecord.projectId, scheduleRecord.taskId)
+    final override val rootTaskKey get() = TaskKey(scheduleRecord.projectKey, scheduleRecord.taskId)
 
-    final override val scheduleId get() = ScheduleId(scheduleRecord.projectId, scheduleRecord.taskId, scheduleRecord.id)
+    final override val scheduleId get() = ScheduleId(scheduleRecord.projectKey, scheduleRecord.taskId, scheduleRecord.id)
 
     final override fun delete() = scheduleRecord.delete()
 }

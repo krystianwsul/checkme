@@ -25,7 +25,7 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
-    val projectId get() = taskRecord.projectKey
+    val projectKey get() = taskRecord.projectKey
 
     val taskId get() = taskRecord.id
 

@@ -1,10 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.OldestVisibleJson
-import com.krystianwsul.common.firebase.json.ScheduleWrapper
-import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
@@ -244,40 +241,60 @@ class TaskRecord<T : ProjectType> private constructor(
         return projectInstanceRecord
     }
 
-    fun newSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): SingleScheduleRecord<T> {
-        val singleScheduleRecord = SingleScheduleRecord(this, scheduleWrapper)
+    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord<T> {
+        val singleScheduleRecord = SingleScheduleRecord(
+                this,
+                ScheduleWrapper(singleScheduleJson = singleScheduleJson)
+        )
+
         check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
 
         singleScheduleRecords[singleScheduleRecord.id] = singleScheduleRecord
         return singleScheduleRecord
     }
 
-    fun newWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): WeeklyScheduleRecord<T> {
-        val weeklyScheduleRecord = WeeklyScheduleRecord(this, scheduleWrapper)
+    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord<T> {
+        val weeklyScheduleRecord = WeeklyScheduleRecord(
+                this,
+                ScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)
+        )
+
         check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
 
         weeklyScheduleRecords[weeklyScheduleRecord.id] = weeklyScheduleRecord
         return weeklyScheduleRecord
     }
 
-    fun newMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyDayScheduleRecord<T> {
-        val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(this, scheduleWrapper)
+    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord<T> {
+        val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
+                this,
+                ScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson)
+        )
+
         check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
 
         monthlyDayScheduleRecords[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord
         return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyWeekScheduleRecord<T> { // todo yearly accept json
-        val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(this, scheduleWrapper)
+    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord<T> {
+        val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
+                this,
+                ScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson)
+        )
+
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
 
         monthlyWeekScheduleRecords[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord
         return monthlyWeekScheduleRecord
     }
 
-    fun newYearlyScheduleRecord(scheduleWrapper: ScheduleWrapper): YearlyScheduleRecord<T> {
-        val yearlyScheduleRecord = YearlyScheduleRecord(this, scheduleWrapper)
+    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord<T> {
+        val yearlyScheduleRecord = YearlyScheduleRecord(
+                this,
+                ScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson)
+        )
+
         check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))
 
         yearlyScheduleRecords[yearlyScheduleRecord.id] = yearlyScheduleRecord

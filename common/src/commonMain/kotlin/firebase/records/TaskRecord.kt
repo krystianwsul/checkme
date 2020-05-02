@@ -162,30 +162,30 @@ class TaskRecord<T : ProjectType> private constructor(
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
                     check(scheduleWrapper.yearlyScheduleJson == null)
 
-                    singleScheduleRecords[id] = SingleScheduleRecord(id, this, scheduleWrapper)
+                    singleScheduleRecords[id] = SingleScheduleRecord(this, scheduleWrapper, id)
                 }
                 scheduleWrapper.weeklyScheduleJson != null -> {
                     check(scheduleWrapper.monthlyDayScheduleJson == null)
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
                     check(scheduleWrapper.yearlyScheduleJson == null)
 
-                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(id, this, scheduleWrapper)
+                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(this, scheduleWrapper, id)
                 }
                 scheduleWrapper.monthlyDayScheduleJson != null -> {
                     check(scheduleWrapper.monthlyWeekScheduleJson == null)
                     check(scheduleWrapper.yearlyScheduleJson == null)
 
-                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(id, this, scheduleWrapper)
+                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(this, scheduleWrapper, id)
                 }
                 scheduleWrapper.monthlyWeekScheduleJson != null -> {
                     check(scheduleWrapper.yearlyScheduleJson == null)
 
-                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(id, this, scheduleWrapper)
+                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(this, scheduleWrapper, id)
                 }
                 else -> {
                     check(scheduleWrapper.yearlyScheduleJson != null)
 
-                    yearlyScheduleRecords[id] = YearlyScheduleRecord(id, this, scheduleWrapper)
+                    yearlyScheduleRecords[id] = YearlyScheduleRecord(this, scheduleWrapper, id)
                 }
             }
         }

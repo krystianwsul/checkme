@@ -6,18 +6,19 @@ import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
 
 abstract class ScheduleRecord<T : ProjectType>(
-        create: Boolean,
-        val id: String,
         protected val taskRecord: TaskRecord<T>,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
-        endTimeKey: String
-) : RemoteRecord(create) {
+        endTimeKey: String,
+        _id: String? = null
+) : RemoteRecord(_id == null) {
 
     companion object {
 
         const val SCHEDULES = "schedules"
     }
+
+    val id = _id ?: taskRecord.getScheduleRecordId()
 
     final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 
@@ -36,33 +37,4 @@ abstract class ScheduleRecord<T : ProjectType>(
     val customTimeKey by lazy {
         scheduleJson.customTimeId?.let { taskRecord.getCustomTimeKey(it) }
     }
-
-    constructor(
-            id: String,
-            taskRecord: TaskRecord<T>,
-            scheduleWrapper: ScheduleWrapper,
-            scheduleJson: ScheduleJson,
-            endTimeKey: String
-    ) : this(
-            false,
-            id,
-            taskRecord,
-            scheduleWrapper,
-            scheduleJson,
-            endTimeKey
-    )
-
-    constructor(
-            taskRecord: TaskRecord<T>,
-            scheduleWrapper: ScheduleWrapper,
-            scheduleJson: ScheduleJson,
-            endTimeKey: String
-    ) : this(
-            true,
-            taskRecord.getScheduleRecordId(),
-            taskRecord,
-            scheduleWrapper,
-            scheduleJson,
-            endTimeKey
-    )
 }

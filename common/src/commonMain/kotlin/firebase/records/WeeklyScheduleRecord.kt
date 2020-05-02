@@ -5,7 +5,17 @@ import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
 
 
-class WeeklyScheduleRecord<T : ProjectType> : ScheduleRecord<T> {
+class WeeklyScheduleRecord<T : ProjectType>(
+        taskRecord: TaskRecord<T>,
+        scheduleWrapper: ScheduleWrapper,
+        id: String? = null
+) : ScheduleRecord<T>(
+        taskRecord,
+        scheduleWrapper,
+        scheduleWrapper.weeklyScheduleJson!!,
+        "weeklyScheduleJson",
+        id
+) {
 
     private val weeklyScheduleJson by lazy { createObject.weeklyScheduleJson!! }
 
@@ -13,28 +23,6 @@ class WeeklyScheduleRecord<T : ProjectType> : ScheduleRecord<T> {
 
     val from by lazy { weeklyScheduleJson.from }
     val until by lazy { weeklyScheduleJson.until }
-
-    constructor(
-            id: String,
-            taskRecord: TaskRecord<T>,
-            scheduleWrapper: ScheduleWrapper
-    ) : super(
-            id,
-            taskRecord,
-            scheduleWrapper,
-            scheduleWrapper.weeklyScheduleJson!!,
-            "weeklyScheduleJson"
-    )
-
-    constructor(
-            taskRecord: TaskRecord<T>,
-            scheduleWrapper: ScheduleWrapper
-    ) : super(
-            taskRecord,
-            scheduleWrapper,
-            scheduleWrapper.weeklyScheduleJson!!,
-            "weeklyScheduleJson"
-    )
 
     override fun deleteFromParent() = check(taskRecord.weeklyScheduleRecords.remove(id) == this)
 }

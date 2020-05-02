@@ -529,7 +529,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
             }
             ScheduleType.YEARLY -> {
-                customView.scheduleDialogDateLayout.visibility = View.VISIBLE // todo yearly disable year, enable past dates
+                customView.scheduleDialogDateLayout.visibility = View.VISIBLE
                 customView.scheduleDialogDayLayout.visibility = View.GONE
                 customView.scheduleDialogMonthLayout.visibility = View.GONE
                 customView.scheduleDialogFromLayout.visibility = View.VISIBLE

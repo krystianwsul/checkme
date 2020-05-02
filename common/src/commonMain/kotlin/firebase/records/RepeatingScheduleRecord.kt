@@ -26,4 +26,6 @@ abstract class RepeatingScheduleRecord<T : ProjectType>(
     val until by lazy {
         repeatingScheduleJson.until?.let { Date.fromJson(it) }
     }
+
+    var oldestVisible by Committer(repeatingScheduleJson::oldestVisible)
 }

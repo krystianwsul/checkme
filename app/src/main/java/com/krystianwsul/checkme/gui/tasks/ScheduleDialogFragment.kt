@@ -18,6 +18,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
@@ -575,14 +576,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     .toString()
         }
 
-        if (scheduleDialogData.scheduleType.hasDate)
+        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
             customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
-        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
             customView.scheduleDialogTime.setText(customTimeData?.let {
                 it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
             } ?: hourMinuteString)
         } else {
+            customView.scheduleDialogDate.setText(scheduleDialogData.date.run { ScheduleText.Yearly.getDateText(month, day) })
+
             customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
 
             dateFieldDatas.forEach { data ->

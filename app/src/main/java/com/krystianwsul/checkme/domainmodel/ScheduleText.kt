@@ -136,11 +136,13 @@ sealed class ScheduleText {
 
         companion object {
 
+            // todo yearly format date, strip off year
+            fun getDateText(month: Int, day: Int) = Month[month].localName + " " + Utils.ordinal(day)
+
             fun getScheduleText(
                     scheduleData: ScheduleData.Yearly,
                     timePairCallback: (TimePair) -> String
-            ) = Month[scheduleData.month].localName + // todo yearly format date, strip off year
-                    " " + Utils.ordinal(scheduleData.day) +
+            ) = getDateText(scheduleData.month, scheduleData.day) +
                     ": " + timePairCallback(scheduleData.timePair) +
                     fromUntil(scheduleData.from, scheduleData.until)
         }

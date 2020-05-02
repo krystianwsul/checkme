@@ -240,14 +240,13 @@ abstract class Project<T : ProjectType> : Current {
         projectRecord.delete()
     }
 
-    fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         requireCurrent(now)
 
         _tasks.values
                 .filter { it.current(now) }
                 .forEach {
                     it.setEndData(
-                            uuid,
                             Task.EndData(now, removeInstances),
                             projectUndoData.taskUndoData
                     )

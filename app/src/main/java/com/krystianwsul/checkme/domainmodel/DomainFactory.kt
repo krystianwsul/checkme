@@ -1093,7 +1093,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        instance.setDone(uuid, localFactory, true, now)
+        instance.setDone(localFactory, true, now)
         instance.setNotificationShown(localFactory, false)
 
         updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
@@ -1112,7 +1112,7 @@ class DomainFactory(
 
         val instance = getInstance(instanceKey)
 
-        instance.setDone(uuid, localFactory, done, now)
+        instance.setDone(localFactory, done, now)
 
         updateNotifications(now)
 
@@ -1155,7 +1155,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setDone(uuid, localFactory, done, now) }
+        instances.forEach { it.setDone(localFactory, done, now) }
 
         val remoteProjects = instances.map { it.project }.toSet()
 
@@ -1235,8 +1235,6 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
-
-        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1341,8 +1339,6 @@ class DomainFactory(
 
         updateNotifications(now)
 
-        newParentTask.updateOldestVisible(uuid, now)
-
         save(dataId, source)
 
         notifyCloud(newParentTask.project)
@@ -1387,8 +1383,6 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
-
-        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1440,8 +1434,6 @@ class DomainFactory(
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
-
-        newParentTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1523,8 +1515,6 @@ class DomainFactory(
 
         updateNotifications(now)
 
-        childTask.updateOldestVisible(uuid, now)
-
         save(dataId, source)
 
         notifyCloud(childTask.project)
@@ -1587,8 +1577,6 @@ class DomainFactory(
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
-
-        childTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1710,7 +1698,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(uuid, Task.EndData(now, deleteInstances), taskUndoData) }
+        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -1780,7 +1768,7 @@ class DomainFactory(
                 .forEach {
                     it.requireNotCurrent(now)
 
-                    it.clearEndExactTimeStamp(uuid, now)
+                    it.clearEndExactTimeStamp(now)
                 }
 
         taskUndoData.taskHierarchyKeys
@@ -2063,7 +2051,7 @@ class DomainFactory(
 
         remoteProjects.forEach {
             it.requireCurrent(now)
-            it.setEndExactTimeStamp(uuid, now, projectUndoData, removeInstances)
+            it.setEndExactTimeStamp(now, projectUndoData, removeInstances)
         }
 
         updateNotifications(now)
@@ -2376,13 +2364,13 @@ class DomainFactory(
         for (pair in remoteToRemoteConversion.startTasks.values) {
             pair.second.forEach {
                 if (!it.hidden)
-                    it.hide(uuid, now)
+                    it.hide(now)
             }
 
             if (pair.first.getEndData() != null)
                 check(pair.first.getEndData() == endData)
             else
-                pair.first.setEndData(uuid, endData)
+                pair.first.setEndData(endData)
         }
 
         return remoteToRemoteConversion.endTasks[startingTask.id]!!
@@ -2413,7 +2401,7 @@ class DomainFactory(
 
         removeInstanceKeys.map(::getInstance)
                 .filter { it.getParentInstance(now)?.task != newParentTask && it.isVisible(now, true) }
-                .forEach { it.hide(uuid, now) }
+                .forEach { it.hide(now) }
     }
 
     private fun getTasks() = projectsFactory.tasks.asSequence()
@@ -2470,14 +2458,6 @@ class DomainFactory(
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        getTasks().forEach { it.updateOldestVisible(uuid, now) }
-
-        /*
-        val instances = remoteProjectFactory.remoteProjects
-                .values
-                .flatMap { Irrelevant.setIrrelevant(remoteProjectFactory, it, now) }
-         */
-
         val instances = projectsFactory.projects
                 .values
                 .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }

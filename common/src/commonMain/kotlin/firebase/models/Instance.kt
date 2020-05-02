@@ -210,12 +210,10 @@ class Instance<T : ProjectType> private constructor(
         (data as Data.Real).instanceRecord.ordinal = ordinal
     }
 
-    fun hide(uuid: String, now: ExactTimeStamp) {
+    fun hide(now: ExactTimeStamp) {
         check(!data.hidden)
 
         createInstanceHierarchy(now).instanceRecord.hidden = true
-
-        task.updateOldestVisible(uuid, now)
     }
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
@@ -276,7 +274,7 @@ class Instance<T : ProjectType> private constructor(
             task.createRemoteInstanceRecord(this)
     ).also { data = it }
 
-    fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
+    fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
         if (done) {
             createInstanceHierarchy(now).instanceRecord.done = now.long
 
@@ -284,8 +282,6 @@ class Instance<T : ProjectType> private constructor(
         } else {
             (data as Data.Real<*>).instanceRecord.done = null
         }
-
-        task.updateOldestVisible(uuid, now)
     }
 
     fun delete() {

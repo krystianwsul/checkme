@@ -136,7 +136,6 @@ class Task<T : ProjectType>(
     }
 
     fun setEndData(
-            uuid: String,
             endData: EndData,
             taskUndoData: TaskUndoData? = null,
             recursive: Boolean = false
@@ -161,7 +160,7 @@ class Task<T : ProjectType>(
         }
 
         getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndData(uuid, endData, taskUndoData, true)
+            it.childTask.setEndData(endData, taskUndoData, true)
 
             taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
@@ -178,7 +177,7 @@ class Task<T : ProjectType>(
             }
         }
 
-        setMyEndExactTimeStamp(uuid, now, endData)
+        setMyEndExactTimeStamp(endData)
     }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T>? {
@@ -202,10 +201,10 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun clearEndExactTimeStamp(uuid: String, now: ExactTimeStamp) {
+    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
 
-        setMyEndExactTimeStamp(uuid, now, null)
+        setMyEndExactTimeStamp(null)
     }
 
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T>? {
@@ -224,17 +223,6 @@ class Task<T : ProjectType>(
             now
     ).first.filter { it.isRootInstance(now) }
 
-    // there might be an issue here when moving task across projects
-    fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
-        // 24 hack
-        val oldestVisible = listOf(
-                getPastRootInstances(now).filter { it.isVisible(now, true) && !it.exists() }.map { it.scheduleDate },
-                listOf(now.date)
-        ).flatten().min()!!
-
-        setOldestVisible(uuid, oldestVisible)
-    }
-
     fun updateOldestVisibleServer(now: ExactTimeStamp) {
         // 24 hack
         val oldestVisible = listOfNotNull(
@@ -244,7 +232,10 @@ class Task<T : ProjectType>(
 
         taskRecord.oldestVisibleServer = oldestVisible.toJson()
 
-        // todo oldestVisible to maintain compatibility, update for all user keys here
+        taskRecord.taskJson
+                .oldestVisible
+                .keys
+                .forEach { taskRecord.setOldestVisible(it, OldestVisibleJson.fromDate(oldestVisible)) }
     }
 
     /*
@@ -409,10 +400,8 @@ class Task<T : ProjectType>(
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
-    private fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {
+    private fun setMyEndExactTimeStamp(endData: EndData?) {
         taskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
-
-        updateOldestVisible(uuid, now)
     }
 
     fun createChildTask(
@@ -430,12 +419,7 @@ class Task<T : ProjectType>(
         return childTask
     }
 
-    fun getOldestVisible() = taskRecord.oldestVisible
-
-    private fun setOldestVisible(
-            uuid: String,
-            date: Date
-    ) = taskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
+    fun getOldestVisible() = taskRecord.oldestVisibleServer?.let { Date.fromJson(it) }
 
     fun delete() {
         schedules.toMutableList().forEach { it.delete() }

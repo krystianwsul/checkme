@@ -6,16 +6,16 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 
-abstract class SharedProjectManager : SharedProjectRecord.Parent {
+abstract class SharedProjectManager : SharedProjectRecord.Parent, RecordManager {
 
-    val isSaved get() = sharedProjectRecords.any { it.value.second }
+    override val isSaved get() = sharedProjectRecords.any { it.value.second }
 
     var sharedProjectRecords = mutableMapOf<ProjectKey.Shared, Pair<SharedProjectRecord, Boolean>>()
         private set
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    fun save(values: MutableMap<String, Any?>) {
+    override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
         val newRemoteProjectRecords = sharedProjectRecords.mapValues {

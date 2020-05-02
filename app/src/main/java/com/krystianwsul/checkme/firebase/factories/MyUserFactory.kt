@@ -33,12 +33,6 @@ class MyUserFactory(
             myUserManager.isSaved = value
         }
 
-    init {
-        setTab()
-
-        user.setToken(deviceDbInfo)
-    }
-
     val sharedProjectKeysObservable = Observable.merge(
             userRelay.map { ChangeType.REMOTE },
             userRelay.switchMap { it.projectChanges.asRxJava2Observable() }.map { ChangeType.LOCAL }
@@ -53,6 +47,14 @@ class MyUserFactory(
                 .startWith(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!
+
+    val savedList get() = myUserManager.savedList
+
+    init {
+        setTab()
+
+        user.setToken(deviceDbInfo)
+    }
 
     private fun setTab() {
         factoryProvider.preferences.tab = user.defaultTab

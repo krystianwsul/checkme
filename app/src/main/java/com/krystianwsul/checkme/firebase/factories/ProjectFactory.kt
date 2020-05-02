@@ -35,6 +35,8 @@ abstract class ProjectFactory<T : ProjectType>(
 
     val isSaved get() = projectManager.isSaved || rootInstanceManagers.values.any { it.isSaved }
 
+    val savedList get() = projectManager.savedList + rootInstanceManagers.values.flatMap { it.savedList }
+
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
             snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>

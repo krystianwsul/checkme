@@ -169,6 +169,8 @@ class ProjectsFactory(
                 .map { it.tasks.size }
                 .sum()
 
+    val savedList get() = privateProjectFactory.savedList + sharedProjectFactories.values.flatMap { it.savedList }
+
     fun createScheduleRootTask(
             now: ExactTimeStamp,
             name: String,

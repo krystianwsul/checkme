@@ -27,12 +27,6 @@ class DebugFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        debugException.setOnClickListener {
-            val i = 0
-            @Suppress("DIVISION_BY_ZERO", "UNUSED_VARIABLE")
-            val j = 1 / i
-        }
-
         debugTick.setOnClickListener { TickJobIntentService.startServiceNormal(requireContext(), "DebugFragment") }
 
         debugLoad.setOnClickListener {
@@ -63,6 +57,9 @@ class DebugFragment : AbstractFragment() {
 
                 append("\n\n")
                 append(Preferences.mainTabsLog.log)
+
+                append("\n\n")
+                append(Preferences.saveLog.log)
 
                 val t1 = ExactTimeStamp.now
                 DomainFactory.instance.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)

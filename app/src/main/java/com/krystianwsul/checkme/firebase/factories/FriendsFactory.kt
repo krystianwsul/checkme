@@ -38,6 +38,8 @@ class FriendsFactory(
 
     val changeTypes: Observable<ChangeType>
 
+    val savedList get() = rootUserManager.savedList
+
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
             val userKey = UserKey(it.snapshot.key)

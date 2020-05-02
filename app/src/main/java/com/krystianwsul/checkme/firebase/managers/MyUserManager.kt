@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.managers.RecordManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.UserKey
 import java.util.*
@@ -15,9 +16,9 @@ import kotlin.properties.Delegates.observable
 class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         dataSnapshot: Snapshot
-) {
+) : RecordManager {
 
-    var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("MyUserManager.isSaved = $value") }
+    override var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("MyUserManager.isSaved = $value") }
 
     var userRecord = if (!dataSnapshot.exists()) {
         val userWrapper = UserWrapper(deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) })
@@ -35,7 +36,7 @@ class MyUserManager(
         return userRecord
     }
 
-    fun save(values: MutableMap<String, Any?>) {
+    override fun save(values: MutableMap<String, Any?>) {
         val myValues = HashMap<String, Any?>()
 
         userRecord.getValues(myValues)

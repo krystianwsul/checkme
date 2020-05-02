@@ -171,7 +171,19 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    private fun updateIsSaved() = isSaved.accept(projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved)
+    private fun updateIsSaved() {
+        val oldSaved = isSaved.value!!
+        val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
+        isSaved.accept(newSaved)
+
+        if (newSaved || oldSaved) {
+            val savedList = projectsFactory.savedList + myUserFactory.savedList + friendsFactory.savedList
+            val entry = savedList.toMutableList()
+                    .apply { add(0, "saved managers:") }
+                    .joinToString("\n")
+            Preferences.saveLog.logLineHour(entry, true)
+        }
+    }
 
     fun save(
             dataId: Int,

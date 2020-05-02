@@ -23,6 +23,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_TEMPORARY_NOTIFICATION_LOG = "temporaryNotificationLog"
     private const val KEY_MAIN_TABS_LOG = "mainTabsLog"
     private const val TOKEN_KEY = "token"
+    private const val KEY_SAVE_LOG = "saveLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -56,6 +57,8 @@ object Preferences : FactoryProvider.Preferences {
     val tokenRelay = BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
+
+    val saveLog = Logger(KEY_SAVE_LOG)
 
     init {
         tokenRelay.distinctUntilChanged()
@@ -95,10 +98,15 @@ object Preferences : FactoryProvider.Preferences {
         fun logLineDate(line: String) {
             logLine("")
             logLine(ExactTimeStamp.now.date.toString())
-            logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+            logLineHour(line)
         }
 
-        fun logLineHour(line: String) = logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+        fun logLineHour(line: String, separator: Boolean = false) {
+            if (separator)
+                logLine("")
+
+            logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+        }
 
         private fun logLine(line: String) {
             MyCrashlytics.log("Preferences.logLine: $line")

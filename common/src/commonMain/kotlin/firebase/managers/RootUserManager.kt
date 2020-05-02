@@ -5,13 +5,13 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-abstract class RootUserManager {
+abstract class RootUserManager : RecordManager {
 
-    val isSaved get() = rootUserRecords.values.any { it.second }
+    override val isSaved get() = rootUserRecords.values.any { it.second }
 
     abstract var rootUserRecords: MutableMap<UserKey, Pair<RootUserRecord, Boolean>>
 
-    fun save(values: MutableMap<String, Any?>) {
+    override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
         val newRootUserRecords = rootUserRecords.mapValues {

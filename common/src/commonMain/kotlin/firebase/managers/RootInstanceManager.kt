@@ -15,7 +15,7 @@ open class RootInstanceManager<T : ProjectType>(
         protected val taskRecord: TaskRecord<T>,
         snapshotInfos: List<SnapshotInfo>,
         val databaseWrapper: DatabaseWrapper
-) : RootInstanceRecord.Parent {
+) : RootInstanceRecord.Parent, RecordManager {
 
     protected fun SnapshotInfo.toRecord() = RootInstanceRecord(
             taskRecord,
@@ -29,10 +29,10 @@ open class RootInstanceManager<T : ProjectType>(
             .associateBy { it.instanceKey }
             .toMutableMap()
 
-    var isSaved = false
+    override var isSaved = false
         protected set
 
-    fun save(values: MutableMap<String, Any?>) {
+    override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
         val newIsSaved = rootInstanceRecords.map { it.value.getValues(myValues) }.any { it }

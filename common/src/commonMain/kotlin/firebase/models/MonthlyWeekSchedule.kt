@@ -1,27 +1,27 @@
-package com.krystianwsul.common.domain.schedules
+package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.records.MonthlyDayScheduleRecord
+import com.krystianwsul.common.firebase.records.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
-class MonthlyDaySchedule<T : ProjectType>(
+class MonthlyWeekSchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleRecord: MonthlyDayScheduleRecord<T>
+        override val repeatingScheduleRecord: MonthlyWeekScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord
 
     val dayOfMonth get() = repeatingScheduleRecord.dayOfMonth
 
+    val dayOfWeek get() = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]
+
     val beginningOfMonth get() = repeatingScheduleRecord.beginningOfMonth
 
-    override val scheduleType = ScheduleType.MONTHLY_DAY
+    override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
     override fun <T : ProjectType> getInstanceInDate(
             task: Task<T>,
@@ -66,5 +66,5 @@ class MonthlyDaySchedule<T : ProjectType>(
             checkMonth
     }
 
-    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, repeatingScheduleRecord.beginningOfMonth)
+    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)
 }

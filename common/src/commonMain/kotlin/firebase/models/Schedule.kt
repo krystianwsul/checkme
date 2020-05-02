@@ -1,8 +1,6 @@
-package com.krystianwsul.common.domain.schedules
+package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time

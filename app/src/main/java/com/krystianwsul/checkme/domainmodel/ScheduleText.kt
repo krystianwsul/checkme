@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.common.domain.schedules.ScheduleGroup
+import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date

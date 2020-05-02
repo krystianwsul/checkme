@@ -9,7 +9,7 @@ class WeeklyScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null
-) : ScheduleRecord<T>(
+) : RepeatingScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
         scheduleWrapper.weeklyScheduleJson!!,
@@ -20,9 +20,6 @@ class WeeklyScheduleRecord<T : ProjectType>(
     private val weeklyScheduleJson by lazy { createObject.weeklyScheduleJson!! }
 
     val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
-
-    val from by lazy { weeklyScheduleJson.from }
-    val until by lazy { weeklyScheduleJson.until }
 
     override fun deleteFromParent() = check(taskRecord.weeklyScheduleRecords.remove(id) == this)
 }

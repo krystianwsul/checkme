@@ -9,7 +9,7 @@ class YearlyScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null
-) : ScheduleRecord<T>(
+) : RepeatingScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
         scheduleWrapper.yearlyScheduleJson!!,
@@ -21,9 +21,6 @@ class YearlyScheduleRecord<T : ProjectType>(
 
     val month by lazy { yearlyScheduleJson.month }
     val day by lazy { yearlyScheduleJson.day }
-
-    val from by lazy { yearlyScheduleJson.from }
-    val until by lazy { yearlyScheduleJson.until }
 
     override fun deleteFromParent() = check(taskRecord.yearlyScheduleRecords.remove(id) == this)
 }

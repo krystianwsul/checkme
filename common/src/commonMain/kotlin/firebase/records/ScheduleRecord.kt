@@ -10,7 +10,7 @@ abstract class ScheduleRecord<T : ProjectType>(
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         endTimeKey: String,
-        _id: String? = null
+        _id: String?
 ) : RemoteRecord(_id == null) {
 
     companion object {

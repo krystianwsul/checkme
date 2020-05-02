@@ -1,9 +1,12 @@
 package com.krystianwsul.common.firebase.records
 
 
+import com.krystianwsul.common.domain.schedules.ScheduleBridge
 import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord<T : ProjectType>(
         protected val taskRecord: TaskRecord<T>,
@@ -11,7 +14,7 @@ abstract class ScheduleRecord<T : ProjectType>(
         private val scheduleJson: ScheduleJson,
         endTimeKey: String,
         _id: String?
-) : RemoteRecord(_id == null) {
+) : RemoteRecord(_id == null), ScheduleBridge<T> {
 
     companion object {
 
@@ -22,19 +25,23 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 
-    val startTime get() = scheduleJson.startTime
+    override val startTime get() = scheduleJson.startTime
 
-    var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
+    override var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
-    val projectKey get() = taskRecord.projectKey
+    val projectKey = taskRecord.projectKey
 
-    val taskId get() = taskRecord.id
+    val taskId = taskRecord.id
 
-    val hour get() = scheduleJson.hour
+    override val hour = scheduleJson.hour
 
-    val minute get() = scheduleJson.minute
+    override val minute = scheduleJson.minute
 
-    val customTimeKey by lazy {
+    override val customTimeKey by lazy {
         scheduleJson.customTimeId?.let { taskRecord.getCustomTimeKey(it) }
     }
+
+    final override val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
+
+    final override val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
 }

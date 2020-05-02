@@ -381,23 +381,23 @@ class Task<T : ProjectType>(
     init {
         _schedules += taskRecord.singleScheduleRecords
                 .values
-                .map { SingleSchedule(this, RemoteSingleScheduleBridge(it)) }
+                .map { SingleSchedule(this, it) }
 
         _schedules += taskRecord.weeklyScheduleRecords
                 .values
-                .map { WeeklySchedule(this, RemoteWeeklyScheduleBridge(it)) }
+                .map { WeeklySchedule(this, it) }
 
         _schedules += taskRecord.monthlyDayScheduleRecords
                 .values
-                .map { MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(it)) }
+                .map { MonthlyDaySchedule(this, it) }
 
         _schedules += taskRecord.monthlyWeekScheduleRecords
                 .values
-                .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
+                .map { MonthlyWeekSchedule(this, it) }
 
         _schedules += taskRecord.yearlyScheduleRecords
                 .values
-                .map { YearlySchedule(this, RemoteYearlyScheduleBridge(it)) }
+                .map { YearlySchedule(this, it) }
     }
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
@@ -521,7 +521,7 @@ class Task<T : ProjectType>(
                             minute
                     ))
 
-                    _schedules += SingleSchedule(this, RemoteSingleScheduleBridge(singleScheduleRecord))
+                    _schedules += SingleSchedule(this, singleScheduleRecord)
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
@@ -536,7 +536,7 @@ class Task<T : ProjectType>(
                                 scheduleData.until?.toJson()
                         ))
 
-                        _schedules += WeeklySchedule(this, RemoteWeeklyScheduleBridge(weeklyScheduleRecord))
+                        _schedules += WeeklySchedule(this, weeklyScheduleRecord)
                     }
                 }
                 is ScheduleData.MonthlyDay -> {
@@ -554,7 +554,7 @@ class Task<T : ProjectType>(
                             scheduleData.until?.toJson()
                     ))
 
-                    _schedules += MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(monthlyDayScheduleRecord))
+                    _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
                 is ScheduleData.MonthlyWeek -> {
                     val (dayOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
@@ -572,7 +572,7 @@ class Task<T : ProjectType>(
                             scheduleData.until?.toJson()
                     ))
 
-                    _schedules += MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(monthlyWeekScheduleRecord))
+                    _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is ScheduleData.Yearly -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(YearlyScheduleJson(
@@ -587,7 +587,7 @@ class Task<T : ProjectType>(
                             scheduleData.until?.toJson()
                     ))
 
-                    _schedules += YearlySchedule(this, RemoteYearlyScheduleBridge(yearlyScheduleRecord))
+                    _schedules += YearlySchedule(this, yearlyScheduleRecord)
                 }
             }
         }
@@ -612,7 +612,7 @@ class Task<T : ProjectType>(
                             minute
                     ))
 
-                    _schedules += SingleSchedule(this, RemoteSingleScheduleBridge(singleScheduleRecord))
+                    _schedules += SingleSchedule(this, singleScheduleRecord)
                 }
                 is WeeklySchedule<*> -> {
                     for (dayOfWeek in schedule.daysOfWeek) {
@@ -627,7 +627,7 @@ class Task<T : ProjectType>(
                                 schedule.until?.toJson()
                         ))
 
-                        _schedules += WeeklySchedule(this, RemoteWeeklyScheduleBridge(weeklyScheduleRecord))
+                        _schedules += WeeklySchedule(this, weeklyScheduleRecord)
                     }
                 }
                 is MonthlyDaySchedule<*> -> {
@@ -643,7 +643,7 @@ class Task<T : ProjectType>(
                             schedule.until?.toJson()
                     ))
 
-                    _schedules += MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(monthlyDayScheduleRecord))
+                    _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
                 is MonthlyWeekSchedule<*> -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(MonthlyWeekScheduleJson(
@@ -659,7 +659,7 @@ class Task<T : ProjectType>(
                             schedule.until?.toJson()
                     ))
 
-                    _schedules += MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(monthlyWeekScheduleRecord))
+                    _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is YearlySchedule<*> -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(YearlyScheduleJson(
@@ -674,7 +674,7 @@ class Task<T : ProjectType>(
                             schedule.until?.toJson()
                     ))
 
-                    _schedules += YearlySchedule(this, RemoteYearlyScheduleBridge(yearlyScheduleRecord))
+                    _schedules += YearlySchedule(this, yearlyScheduleRecord)
                 }
             }
         }

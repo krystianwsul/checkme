@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
@@ -10,10 +11,10 @@ import com.soywiz.klock.days
 
 abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
-    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T>
+    protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord<T>
 
-    val from get() = repeatingScheduleBridge.from
-    val until get() = repeatingScheduleBridge.until
+    val from get() = repeatingScheduleRecord.from
+    val until get() = repeatingScheduleRecord.until
 
     override fun <T : ProjectType> getInstances(
             task: Task<T>,
@@ -22,7 +23,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     ): Pair<Sequence<Instance<T>>, Boolean> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
-                repeatingScheduleBridge.from
+                repeatingScheduleRecord.from
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toExactTimeStamp(),
                 givenStartExactTimeStamp
@@ -30,7 +31,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
         val endExactTimeStamp = listOfNotNull(
                 endExactTimeStamp,
-                repeatingScheduleBridge.until
+                repeatingScheduleRecord.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)

@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.MonthlyDayScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -11,14 +12,14 @@ import com.soywiz.klock.months
 
 class MonthlyDaySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<T>
+        override val repeatingScheduleRecord: MonthlyDayScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
-    override val scheduleBridge get() = repeatingScheduleBridge
+    override val scheduleBridge get() = repeatingScheduleRecord
 
-    val dayOfMonth get() = repeatingScheduleBridge.dayOfMonth
+    val dayOfMonth get() = repeatingScheduleRecord.dayOfMonth
 
-    val beginningOfMonth get() = repeatingScheduleBridge.beginningOfMonth
+    val beginningOfMonth get() = repeatingScheduleRecord.beginningOfMonth
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
@@ -65,5 +66,5 @@ class MonthlyDaySchedule<T : ProjectType>(
             checkMonth
     }
 
-    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleBridge.dayOfMonth, repeatingScheduleBridge.beginningOfMonth)
+    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, repeatingScheduleRecord.beginningOfMonth)
 }

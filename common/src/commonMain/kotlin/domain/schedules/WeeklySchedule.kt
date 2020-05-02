@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -10,16 +11,16 @@ import com.soywiz.klock.days
 
 class WeeklySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleBridge: WeeklyScheduleBridge<T>
+        override val repeatingScheduleRecord: WeeklyScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
     val daysOfWeek
-        get() = repeatingScheduleBridge.daysOfWeek
+        get() = repeatingScheduleRecord.daysOfWeek
                 .asSequence()
                 .map { DayOfWeek.values()[it] }
                 .toSet()
 
-    override val scheduleBridge get() = repeatingScheduleBridge
+    override val scheduleBridge get() = repeatingScheduleRecord
 
     override fun <T : ProjectType> getInstanceInDate(
             task: Task<T>,

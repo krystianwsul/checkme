@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.RepeatingScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
 
 abstract class RepeatingScheduleRecord<T : ProjectType>(
@@ -18,6 +19,11 @@ abstract class RepeatingScheduleRecord<T : ProjectType>(
         id
 ) {
 
-    val from = repeatingScheduleJson.from
-    val until = repeatingScheduleJson.until
+    val from by lazy {
+        repeatingScheduleJson.from?.let { Date.fromJson(it) }
+    }
+
+    val until by lazy {
+        repeatingScheduleJson.until?.let { Date.fromJson(it) }
+    }
 }

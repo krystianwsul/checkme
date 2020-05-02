@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.YearlyScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -10,13 +11,13 @@ import com.soywiz.klock.years
 
 class YearlySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleBridge: YearlyScheduleBridge<T>
+        override val repeatingScheduleRecord: YearlyScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
-    override val scheduleBridge get() = repeatingScheduleBridge
+    override val scheduleBridge get() = repeatingScheduleRecord
 
-    val month get() = repeatingScheduleBridge.month
-    val day get() = repeatingScheduleBridge.day
+    val month get() = repeatingScheduleRecord.month
+    val day get() = repeatingScheduleRecord.day
 
     override val scheduleType = ScheduleType.YEARLY
 

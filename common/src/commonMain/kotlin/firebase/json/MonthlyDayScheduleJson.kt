@@ -13,5 +13,6 @@ data class MonthlyDayScheduleJson @JvmOverloads constructor(
         override val hour: Int? = null,
         override val minute: Int? = null,
         override val from: String? = null,
-        override val until: String? = null
+        override val until: String? = null,
+        override var oldestVisible: String? = null
 ) : RepeatingScheduleJson

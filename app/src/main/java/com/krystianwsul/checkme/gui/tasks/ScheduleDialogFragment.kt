@@ -108,7 +108,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private val datePickerDialogFragmentListener = { date: Date ->
-        check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
+        check(scheduleDialogData.scheduleType.hasDate)
 
         scheduleDialogData.date = date
         updateFields()
@@ -314,7 +314,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogDate.setFixedOnClickListener {
-            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType.hasDate)
 
             DatePickerDialogFragment.newInstance(scheduleDialogData.date).let {
                 it.listener = datePickerDialogFragmentListener
@@ -323,7 +323,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
-            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType.hasDate)
 
             listener = datePickerDialogFragmentListener
         }
@@ -524,7 +524,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
             }
             ScheduleType.YEARLY -> {
-                customView.scheduleDialogDateLayout.visibility = View.VISIBLE // todo yearly disable year
+                customView.scheduleDialogDateLayout.visibility = View.VISIBLE // todo yearly disable year, enable past dates
                 customView.scheduleDialogDayLayout.visibility = View.GONE
                 customView.scheduleDialogMonthLayout.visibility = View.GONE
                 customView.scheduleDialogFromLayout.visibility = View.VISIBLE
@@ -575,11 +575,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     .toString()
         }
 
-        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
+        if (scheduleDialogData.scheduleType.hasDate)
             customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
+        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
             customView.scheduleDialogTime.setText(customTimeData?.let {
-                it.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")"
+                it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
             } ?: hourMinuteString)
         } else {
             customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)

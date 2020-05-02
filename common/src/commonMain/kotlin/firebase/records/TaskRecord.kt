@@ -268,7 +268,7 @@ class TaskRecord<T : ProjectType> private constructor(
         return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyWeekScheduleRecord<T> {
+    fun newMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): MonthlyWeekScheduleRecord<T> { // todo yearly accept json
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(this, scheduleWrapper)
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
 

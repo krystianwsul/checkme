@@ -394,6 +394,10 @@ class Task<T : ProjectType>(
         _schedules += taskRecord.monthlyWeekScheduleRecords
                 .values
                 .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(it)) }
+
+        _schedules += taskRecord.yearlyScheduleRecords
+                .values
+                .map { YearlySchedule(this, RemoteYearlyScheduleBridge(it)) }
     }
 
     fun getEndData() = taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
@@ -506,60 +510,104 @@ class Task<T : ProjectType>(
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
 
-                    val singleScheduleRecord = taskRecord.newSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, customTimeId?.value, hour, minute)))
+                    val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
+                            ScheduleWrapper(
+                                    SingleScheduleJson(
+                                            now.long,
+                                            null,
+                                            date.year,
+                                            date.month,
+                                            date.day,
+                                            customTimeId?.value,
+                                            hour,
+                                            minute
+                                    )
+                            )
+                    )
 
-                    _schedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(singleScheduleRecord)))
+                    _schedules += SingleSchedule(this, RemoteSingleScheduleBridge(singleScheduleRecord))
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
-                        val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
-                                now.long,
-                                null,
-                                dayOfWeek.ordinal,
-                                customTimeId?.value,
-                                hour,
-                                minute,
-                                scheduleData.from?.toJson(),
-                                scheduleData.until?.toJson()
-                        )))
+                        val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
+                                ScheduleWrapper(
+                                        weeklyScheduleJson = WeeklyScheduleJson(
+                                                now.long,
+                                                null,
+                                                dayOfWeek.ordinal,
+                                                customTimeId?.value,
+                                                hour,
+                                                minute,
+                                                scheduleData.from?.toJson(),
+                                                scheduleData.until?.toJson()
+                                        )
+                                )
+                        )
 
-                        _schedules.add(WeeklySchedule(this, RemoteWeeklyScheduleBridge(weeklyScheduleRecord)))
+                        _schedules += WeeklySchedule(this, RemoteWeeklyScheduleBridge(weeklyScheduleRecord))
                     }
                 }
                 is ScheduleData.MonthlyDay -> {
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
-                    val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
-                            now.long,
-                            null,
-                            dayOfMonth,
-                            beginningOfMonth,
-                            customTimeId?.value,
-                            hour,
-                            minute,
-                            scheduleData.from?.toJson(),
-                            scheduleData.until?.toJson()
-                    )))
+                    val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
+                            ScheduleWrapper(
+                                    monthlyDayScheduleJson = MonthlyDayScheduleJson(
+                                            now.long,
+                                            null,
+                                            dayOfMonth,
+                                            beginningOfMonth,
+                                            customTimeId?.value,
+                                            hour,
+                                            minute,
+                                            scheduleData.from?.toJson(),
+                                            scheduleData.until?.toJson()
+                                    )
+                            )
+                    )
 
-                    _schedules.add(MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(monthlyDayScheduleRecord)))
+                    _schedules += MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(monthlyDayScheduleRecord))
                 }
                 is ScheduleData.MonthlyWeek -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth, _) = scheduleData
+                    val (dayOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
 
-                    val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
-                            now.long,
-                            null,
-                            dayOfMonth,
-                            dayOfWeek.ordinal,
-                            beginningOfMonth,
-                            customTimeId?.value,
-                            hour,
-                            minute,
-                            scheduleData.from?.toJson(),
-                            scheduleData.until?.toJson()
-                    )))
+                    val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
+                            ScheduleWrapper(
+                                    monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
+                                            now.long,
+                                            null,
+                                            dayOfMonth,
+                                            dayOfWeek.ordinal,
+                                            beginningOfMonth,
+                                            customTimeId?.value,
+                                            hour,
+                                            minute,
+                                            scheduleData.from?.toJson(),
+                                            scheduleData.until?.toJson()
+                                    )
+                            )
+                    )
 
-                    _schedules.add(MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(monthlyWeekScheduleRecord)))
+                    _schedules += MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(monthlyWeekScheduleRecord))
+                }
+                is ScheduleData.Yearly -> {
+                    val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
+                            ScheduleWrapper(
+                                    yearlyScheduleJson = YearlyScheduleJson(
+                                            now.long,
+                                            null,
+                                            scheduleData.month,
+                                            scheduleData.day,
+                                            customTimeId?.value,
+                                            hour,
+                                            minute,
+                                            scheduleData.from?.toJson(),
+                                            scheduleData.until?.toJson()
+                                    )
+                            )
+                    )
+
+                    _schedules += YearlySchedule(this, RemoteYearlyScheduleBridge(yearlyScheduleRecord))
                 }
             }
         }

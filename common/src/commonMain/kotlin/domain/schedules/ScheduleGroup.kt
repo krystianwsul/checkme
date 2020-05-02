@@ -13,7 +13,7 @@ sealed class ScheduleGroup<T : ProjectType> {
     companion object {
 
         fun <T : ProjectType> getGroups(schedules: List<Schedule<out T>>): List<ScheduleGroup<T>> {
-            fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
+            fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek> = DayOfWeek.set) = daysOfWeek.map { day ->
                 getHourMinute(day).let { it.hour * 60 + it.minute }
             }
                     .sum()
@@ -38,7 +38,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                     .sortedWith(compareBy(
                             { !it.beginningOfMonth },
                             { it.dayOfMonth },
-                            { it.time.getTimeFloat(DayOfWeek.set) }))
+                            { it.time.getTimeFloat() }))
                     .map { MonthlyDay(it) }
 
             val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule<T>>()
@@ -46,10 +46,18 @@ sealed class ScheduleGroup<T : ProjectType> {
                             { !it.beginningOfMonth },
                             { it.dayOfMonth },
                             { it.dayOfWeek },
-                            { it.time.getTimeFloat(DayOfWeek.set) }))
+                            { it.time.getTimeFloat() }))
                     .map { MonthlyWeek(it) }
 
-            return singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
+            val yearlySchedules = schedules.filterIsInstance<YearlySchedule<T>>()
+                    .sortedWith(compareBy(
+                            { it.month },
+                            { it.day },
+                            { it.time.getTimeFloat() }
+                    ))
+                    .map { Yearly(it) }
+
+            return singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules + yearlySchedules
         }
     }
 

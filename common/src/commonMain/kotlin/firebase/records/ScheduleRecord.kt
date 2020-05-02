@@ -4,6 +4,8 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.domain.schedules.ScheduleBridge
 import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
@@ -44,4 +46,7 @@ abstract class ScheduleRecord<T : ProjectType>(
     final override val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
 
     final override val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
+
+    override val timePair
+        get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
 }

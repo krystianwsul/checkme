@@ -1,6 +1,5 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -25,6 +24,5 @@ interface ScheduleBridge<T : ProjectType> {
 
     val scheduleId: ScheduleId
 
-    val timePair
-        get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+    val timePair: TimePair
 }

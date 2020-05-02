@@ -49,4 +49,6 @@ class SingleSchedule<T : ProjectType>(
 
         return getInstance(task).isVisible(now, hack24)
     }
+
+    override fun updateOldestVisible(now: ExactTimeStamp) = Unit
 }

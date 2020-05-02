@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Current {
+abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Current {
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
 
@@ -62,4 +62,6 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
     }
 
     val scheduleId get() = scheduleRecord.scheduleId
+
+    abstract fun updateOldestVisible(now: ExactTimeStamp)
 }

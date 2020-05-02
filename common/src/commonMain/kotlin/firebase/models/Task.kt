@@ -227,7 +227,7 @@ class Task<T : ProjectType>(
     // there might be an issue here when moving task across projects
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
-        val oldestVisible = listOfNotNull(
+        val oldestVisible = listOf(
                 getPastRootInstances(now).filter { it.isVisible(now, true) && !it.exists() }.map { it.scheduleDate },
                 listOf(now.date)
         ).flatten().min()!!
@@ -243,6 +243,8 @@ class Task<T : ProjectType>(
         ).flatten().min()!!
 
         taskRecord.oldestVisibleServer = oldestVisible.toJson()
+
+        // todo oldestVisible to maintain compatibility, update for all user keys here
     }
 
     /*

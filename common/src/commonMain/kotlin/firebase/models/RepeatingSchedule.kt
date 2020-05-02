@@ -14,6 +14,8 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until
 
+    private val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+
     override fun <T : ProjectType> getInstances(
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
@@ -24,7 +26,8 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 repeatingScheduleRecord.from
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toExactTimeStamp(),
-                givenStartExactTimeStamp
+                givenStartExactTimeStamp,
+                oldestVisible?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) }
         ).max()!!
 
         val endExactTimeStamp = listOfNotNull(
@@ -91,5 +94,22 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         return until?.let {
             getInstances(task, null, null).first.any { it.isVisible(now, hack24) }
         } ?: true
+    }
+
+    override fun updateOldestVisible(now: ExactTimeStamp) {
+        val pastRootInstances = getInstances(
+                rootTask,
+                now.plusOne(),
+                now
+        ).first.filter { it.isRootInstance(now) }
+
+        val oldestVisible = listOf(
+                pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }
+                        .map { it.scheduleDate }
+                        .toList(),
+                listOf(now.date)
+        ).flatten().min()!!
+
+        repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
     }
 }

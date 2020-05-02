@@ -11,7 +11,7 @@ class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
         val projectRecord: ProjectRecord<T>,
-        private val taskJson: TaskJson
+        val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
     companion object {

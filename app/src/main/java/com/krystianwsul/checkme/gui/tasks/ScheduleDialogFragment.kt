@@ -111,7 +111,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val datePickerDialogFragmentListener = { date: Date ->
         check(scheduleDialogData.scheduleType.hasDate)
 
-        scheduleDialogData.date = date
+        val fixedDate = when (scheduleDialogData.scheduleType) {
+            ScheduleType.SINGLE -> date
+            ScheduleType.YEARLY -> {
+                if (date.month == 2 && date.day == 29)
+                    Date(date.year, 2, 28)
+                else
+                    date
+            }
+            else -> throw IllegalArgumentException()
+        }
+
+        scheduleDialogData.date = fixedDate
         updateFields()
     }
 
@@ -148,7 +159,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return dateError.isNullOrEmpty() && timeError.isNullOrEmpty()
         } else {
-            customView.scheduleDialogDateLayout.error = null // todo yearly check for leap year
+            customView.scheduleDialogDateLayout.error = null
             customView.scheduleDialogTimeLayout.error = null
 
             var valid = true

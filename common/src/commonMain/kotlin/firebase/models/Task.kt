@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -84,7 +85,7 @@ class Task<T : ProjectType>(
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
                 return listOf(SingleSchedule(
                         this,
-                        MockSingleScheduleBridge(singleSchedule.singleScheduleBridge, instance)
+                        MockSingleScheduleRecord(singleSchedule.singleScheduleRecord, instance)
                 ))
         }
 
@@ -93,10 +94,14 @@ class Task<T : ProjectType>(
 
     private fun List<Schedule<T>>.getSingleSchedule() = singleOrNull() as? SingleSchedule
 
-    private class MockSingleScheduleBridge<T : ProjectType>(
-            private val singleScheduleBridge: SingleScheduleBridge<T>,
+    private class MockSingleScheduleRecord<T : ProjectType>(
+            private val singleScheduleRecord: SingleScheduleRecord<T>,
             private val instance: Instance<T>
-    ) : SingleScheduleBridge<T> by singleScheduleBridge {
+    ) : SingleScheduleRecord<T>(
+            singleScheduleRecord.taskRecord,
+            singleScheduleRecord.createObject,
+            singleScheduleRecord.id
+    ) {
 
         override val customTimeKey get() = instance.instanceCustomTimeKey
 
@@ -121,7 +126,7 @@ class Task<T : ProjectType>(
         override val timePair
             get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
 
-        override val originalTimePair get() = singleScheduleBridge.timePair
+        override val originalTimePair get() = singleScheduleRecord.timePair
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {

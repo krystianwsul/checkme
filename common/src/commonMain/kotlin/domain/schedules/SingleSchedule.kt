@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -11,18 +12,18 @@ import com.krystianwsul.common.utils.ScheduleType
 
 class SingleSchedule<T : ProjectType>(
         rootTask: Task<T>,
-        val singleScheduleBridge: SingleScheduleBridge<T>
+        val singleScheduleRecord: SingleScheduleRecord<T>
 ) : Schedule<T>(rootTask) {
 
-    override val scheduleBridge get() = singleScheduleBridge
+    override val scheduleRecord get() = singleScheduleRecord
 
-    val date get() = Date(singleScheduleBridge.year, singleScheduleBridge.month, singleScheduleBridge.day)
+    val date get() = Date(singleScheduleRecord.year, singleScheduleRecord.month, singleScheduleRecord.day)
 
     private val dateTime get() = DateTime(date, time)
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(DateTime(date, singleScheduleBridge.originalTimePair.toTime()))
+    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(DateTime(date, singleScheduleRecord.originalTimePair.toTime()))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 

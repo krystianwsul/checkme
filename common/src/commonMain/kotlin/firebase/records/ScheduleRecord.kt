@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 
-import com.krystianwsul.common.domain.schedules.ScheduleBridge
 import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.time.HourMinute
@@ -11,12 +10,12 @@ import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord<T : ProjectType>(
-        protected val taskRecord: TaskRecord<T>,
+        val taskRecord: TaskRecord<T>,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         endTimeKey: String,
         _id: String?
-) : RemoteRecord(_id == null), ScheduleBridge<T> {
+) : RemoteRecord(_id == null) {
 
     companion object {
 
@@ -27,26 +26,25 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 
-    override val startTime get() = scheduleJson.startTime
+    val startTime get() = scheduleJson.startTime
 
-    override var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
+    var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
     val projectKey = taskRecord.projectKey
 
     val taskId = taskRecord.id
 
-    override val hour = scheduleJson.hour
+    open val hour = scheduleJson.hour
+    open val minute = scheduleJson.minute
 
-    override val minute = scheduleJson.minute
-
-    override val customTimeKey by lazy {
+    open val customTimeKey by lazy {
         scheduleJson.customTimeId?.let { taskRecord.getCustomTimeKey(it) }
     }
 
-    final override val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
+    val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
 
-    final override val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
+    val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
 
-    override val timePair
+    open val timePair
         get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
 }

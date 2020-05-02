@@ -20,7 +20,7 @@ class WeeklySchedule<T : ProjectType>(
                 .map { DayOfWeek.values()[it] }
                 .toSet()
 
-    override val scheduleBridge get() = repeatingScheduleRecord
+    override val scheduleRecord get() = repeatingScheduleRecord
 
     override fun <T : ProjectType> getInstanceInDate(
             task: Task<T>,

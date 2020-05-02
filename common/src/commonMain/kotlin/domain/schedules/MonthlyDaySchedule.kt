@@ -15,7 +15,7 @@ class MonthlyDaySchedule<T : ProjectType>(
         override val repeatingScheduleRecord: MonthlyDayScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
-    override val scheduleBridge get() = repeatingScheduleRecord
+    override val scheduleRecord get() = repeatingScheduleRecord
 
     val dayOfMonth get() = repeatingScheduleRecord.dayOfMonth
 

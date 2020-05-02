@@ -3,6 +3,7 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
@@ -14,20 +15,20 @@ import com.krystianwsul.common.utils.ScheduleType
 
 abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Current {
 
-    protected abstract val scheduleBridge: ScheduleBridge<T>
+    protected abstract val scheduleRecord: ScheduleRecord<T>
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
-    override val endExactTimeStamp get() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
+    override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
 
-    val startTime by lazy { scheduleBridge.startTime }
+    val startTime by lazy { scheduleRecord.startTime }
 
-    val endTime get() = scheduleBridge.endTime
+    val endTime get() = scheduleRecord.endTime
 
-    val customTimeKey get() = scheduleBridge.customTimeKey
+    val customTimeKey get() = scheduleRecord.customTimeKey
 
     abstract val scheduleType: ScheduleType
 
-    val timePair get() = scheduleBridge.timePair
+    val timePair get() = scheduleRecord.timePair
 
     val time get() = timePair.toTime()
 
@@ -38,13 +39,13 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)
 
-        scheduleBridge.endTime = endExactTimeStamp.long
+        scheduleRecord.endTime = endExactTimeStamp.long
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
 
-        scheduleBridge.endTime = null
+        scheduleRecord.endTime = null
     }
 
     abstract fun <T : ProjectType> getInstances(
@@ -59,8 +60,8 @@ abstract class Schedule<T : ProjectType>(private val rootTask: Task<T>) : Curren
 
     fun delete() {
         rootTask.deleteSchedule(this)
-        scheduleBridge.delete()
+        scheduleRecord.delete()
     }
 
-    val scheduleId get() = scheduleBridge.scheduleId
+    val scheduleId get() = scheduleRecord.scheduleId
 }

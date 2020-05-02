@@ -1,12 +1,11 @@
 package com.krystianwsul.common.firebase.records
 
 
-import com.krystianwsul.common.domain.schedules.SingleScheduleBridge
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectType
 
 
-class SingleScheduleRecord<T : ProjectType>(
+open class SingleScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null
@@ -16,15 +15,15 @@ class SingleScheduleRecord<T : ProjectType>(
         scheduleWrapper.singleScheduleJson!!,
         "singleScheduleJson",
         id
-), SingleScheduleBridge<T> {
+) {
 
     private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }
 
-    override val year by lazy { singleScheduleJson.year }
-    override val month by lazy { singleScheduleJson.month }
-    override val day by lazy { singleScheduleJson.day }
+    open val year by lazy { singleScheduleJson.year }
+    open val month by lazy { singleScheduleJson.month }
+    open val day by lazy { singleScheduleJson.day }
 
-    override val originalTimePair get() = timePair
+    open val originalTimePair get() = timePair
 
     override fun deleteFromParent() = check(taskRecord.singleScheduleRecords.remove(id) == this)
 }

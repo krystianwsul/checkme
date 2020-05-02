@@ -317,7 +317,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView.scheduleDialogDate.setFixedOnClickListener {
             check(scheduleDialogData.scheduleType.hasDate)
 
-            DatePickerDialogFragment.newInstance(scheduleDialogData.date).let {
+            when (scheduleDialogData.scheduleType) {
+                ScheduleType.SINGLE -> DatePickerDialogFragment.newInstance(scheduleDialogData.date)
+                ScheduleType.YEARLY -> DatePickerDialogFragment.newYearInstance(scheduleDialogData.date)
+                else -> throw IllegalArgumentException()
+            }.let {
                 it.listener = datePickerDialogFragmentListener
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
             }

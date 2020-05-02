@@ -13,7 +13,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
-import com.soywiz.klock.Month
+import org.joda.time.LocalDate
 import java.util.*
 
 sealed class ScheduleText {
@@ -136,14 +136,14 @@ sealed class ScheduleText {
 
         companion object {
 
-            // todo yearly format date, strip off year
-            fun getDateText(month: Int, day: Int) = Month[month].localName + " " + Utils.ordinal(day)
+            fun getDateText(month: Int, day: Int) = LocalDate(0, month, day).toString("MMMM d")!!
 
             fun getScheduleText(
                     scheduleData: ScheduleData.Yearly,
                     timePairCallback: (TimePair) -> String
             ) = getDateText(scheduleData.month, scheduleData.day) +
-                    ": " + timePairCallback(scheduleData.timePair) +
+                    ": " +
+                    timePairCallback(scheduleData.timePair) +
                     fromUntil(scheduleData.from, scheduleData.until)
         }
 

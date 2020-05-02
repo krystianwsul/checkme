@@ -27,5 +27,5 @@ abstract class RepeatingScheduleRecord<T : ProjectType>(
         repeatingScheduleJson.until?.let { Date.fromJson(it) }
     }
 
-    var oldestVisible by Committer(repeatingScheduleJson::oldestVisible)
+    var oldestVisible by Committer(repeatingScheduleJson::oldestVisible, "$key/$endTimeKey")
 }

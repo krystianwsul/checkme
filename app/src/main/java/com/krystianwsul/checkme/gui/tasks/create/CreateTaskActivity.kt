@@ -66,14 +66,12 @@ class CreateTaskActivity : NavBarActivity() {
 
         private const val DISCARD_TAG = "discard"
 
-        private const val KEY_PARAMETERS = "parameters"
+        const val KEY_PARAMETERS = "parameters"
         private const val KEY_INITIAL_STATE = "initialState"
 
-        private const val KEY_PARENT_PROJECT_TYPE = "parentProjectType"
-        private const val KEY_PARENT_PROJECT_KEY = "parentProjectKey"
-        private const val KEY_PARENT_TASK = "parentTask"
-
-        private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
+        const val KEY_PARENT_PROJECT_TYPE = "parentProjectType"
+        const val KEY_PARENT_PROJECT_KEY = "parentProjectKey"
+        const val KEY_PARENT_TASK = "parentTask"
 
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
 
@@ -1416,104 +1414,4 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    sealed class Parameters : Parcelable { // todo create separate package, move to upper level
-
-        companion object {
-
-            fun fromIntent(intent: Intent): Parameters {
-                return when {
-                    intent.hasExtra(KEY_PARAMETERS) -> {
-                        check(intent.action != Intent.ACTION_SEND)
-                        check(!intent.hasExtra(KEY_SHORTCUT_ID))
-                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
-
-                        intent.getParcelableExtra(KEY_PARAMETERS)!!
-                    }
-                    intent.action == Intent.ACTION_SEND -> {
-                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
-
-                        check(intent.type == "text/plain")
-
-                        val nameHint = intent.getStringExtra(Intent.EXTRA_TEXT)
-                        check(!nameHint.isNullOrEmpty())
-
-                        val taskKey = if (intent.hasExtra(KEY_SHORTCUT_ID)) {
-                            TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!)
-                        } else {
-                            null
-                        }
-
-                        Share(nameHint, taskKey)
-                    }
-                    intent.hasExtra(KEY_SHORTCUT_ID) -> {
-                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
-
-                        Shortcut(TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!))
-                    }
-                    intent.hasExtra(KEY_PARENT_PROJECT_KEY) -> {
-                        check(intent.hasExtra(KEY_PARENT_TASK))
-                        check(intent.hasExtra(KEY_PARENT_PROJECT_TYPE))
-
-                        val projectKey = ProjectKey.Type
-                                .values()[intent.getIntExtra(KEY_PARENT_PROJECT_TYPE, -1)]
-                                .newKey(intent.getStringExtra(KEY_PARENT_PROJECT_KEY)!!)
-
-                        Shortcut(TaskKey(projectKey, intent.getStringExtra(KEY_PARENT_TASK)!!))
-                    }
-                    else -> None
-                }
-            }
-        }
-
-        open val taskKeys: List<TaskKey>? = null
-        open val removeInstanceKeys: List<InstanceKey> = listOf()
-        open val copy = false
-        open val nameHint: String? = null
-        open val taskKey: TaskKey? = null
-        open val hint: Hint? = null
-        open val parentScheduleState: ParentScheduleState? = null
-
-        @Parcelize
-        class Create(
-                override val hint: Hint? = null,
-                override val parentScheduleState: ParentScheduleState? = null,
-                override val nameHint: String? = null
-        ) : Parameters()
-
-        @Parcelize
-        class Join(
-                override val taskKeys: List<TaskKey>,
-                override val hint: Hint? = null,
-                override val removeInstanceKeys: List<InstanceKey> = listOf()
-        ) : Parameters() {
-
-            init {
-                check(taskKeys.size > 1)
-            }
-        }
-
-        @Parcelize
-        class Copy(override val taskKey: TaskKey) : Parameters() {
-
-            override val copy get() = true
-        }
-
-        @Parcelize
-        class Edit(override val taskKey: TaskKey) : Parameters()
-
-        @Parcelize
-        class Shortcut(private val parentTaskKeyHint: TaskKey) : Parameters() {
-
-            override val hint get() = Hint.Task(parentTaskKeyHint)
-        }
-
-        @Parcelize
-        class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : Parameters() {
-
-            override val hint get() = parentTaskKeyHint?.let { Hint.Task(parentTaskKeyHint) }
-        }
-
-        @Parcelize
-        object None : Parameters()
-    }
 }

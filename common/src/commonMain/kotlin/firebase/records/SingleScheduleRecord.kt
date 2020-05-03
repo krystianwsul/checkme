@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
 
 
@@ -19,11 +20,11 @@ open class SingleScheduleRecord<T : ProjectType>(
 
     private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }
 
-    open val year by lazy { singleScheduleJson.year }
-    open val month by lazy { singleScheduleJson.month }
-    open val day by lazy { singleScheduleJson.day }
-
     open val originalTimePair get() = timePair
+
+    open val date by lazy {
+        singleScheduleJson.run { Date(year, month, day) }
+    }
 
     override fun deleteFromParent() = check(taskRecord.singleScheduleRecords.remove(id) == this)
 }

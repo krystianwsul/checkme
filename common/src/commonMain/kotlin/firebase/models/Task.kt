@@ -105,11 +105,7 @@ class Task<T : ProjectType>(
 
         override val customTimeKey get() = instance.instanceCustomTimeKey
 
-        override val year get() = instance.instanceDate.year
-
-        override val month get() = instance.instanceDate.month
-
-        override val day get() = instance.instanceDate.day
+        override val date get() = instance.instanceDate
 
         override val hour
             get() = instance.instanceTime

@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
@@ -15,7 +14,7 @@ class SingleSchedule<T : ProjectType>(
 
     override val scheduleRecord get() = singleScheduleRecord
 
-    val date get() = Date(singleScheduleRecord.year, singleScheduleRecord.month, singleScheduleRecord.day)
+    val date get() = singleScheduleRecord.date
 
     private val dateTime get() = DateTime(date, time)
 

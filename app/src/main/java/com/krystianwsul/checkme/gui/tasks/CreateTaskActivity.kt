@@ -1138,7 +1138,10 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        private var items by observable(listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) }) { _, oldItems, newItems ->
+        private fun getItems(scheduleEntries: List<ScheduleEntry>) =
+                listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) } + Item.NewSchedule
+
+        private var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -1146,7 +1149,7 @@ class CreateTaskActivity : NavBarActivity() {
                 override fun getNewListSize() = newItems.size
 
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                        oldItems[oldItemPosition].same(oldItemPosition, newItemPosition, newItems[newItemPosition])
+                        oldItems[oldItemPosition].same(newItems[newItemPosition])
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                         oldItems[oldItemPosition] == newItems[newItemPosition]
@@ -1158,7 +1161,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         private fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
-            items = listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) }
+            items = getItems(scheduleEntries)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
@@ -1174,29 +1177,6 @@ class CreateTaskActivity : NavBarActivity() {
             val elementsBeforeSchedules = elementsBeforeSchedules()
 
             when (position) {
-                elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {
-                    scheduleMargin.visibility = View.GONE
-
-                    scheduleLayout.run {
-                        hint = getString(R.string.addReminder)
-                        error = null
-                        isHintAnimationEnabled = false
-                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
-                    }
-
-                    scheduleText.run {
-                        text = null
-
-                        setFixedOnClickListener {
-                            val parameters = ScheduleDialogFragment.Parameters(
-                                    null,
-                                    firstScheduleEntry().scheduleDataWrapper.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
-                                    false)
-
-                            parametersRelay.accept(parameters)
-                        }
-                    }
-                }
                 elementsBeforeSchedules + stateData.state.schedules.size + 1 -> {
                     (holder as NoteHolder).run {
                         noteLayout.isHintAnimationEnabled = data != null
@@ -1387,7 +1367,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         abstract fun bind(activity: CreateTaskActivity, holder: Holder)
 
-        abstract fun same(myPosition: Int, otherPosition: Int, other: Item): Boolean
+        open fun same(other: Item) = other == this
 
         object Parent : Item() {
 
@@ -1410,8 +1390,6 @@ class CreateTaskActivity : NavBarActivity() {
                     activity.updateParentView(this)
                 }
             }
-
-            override fun same(myPosition: Int, otherPosition: Int, other: Item) = other == this
         }
 
         data class Schedule(private val scheduleEntry: ScheduleEntry) : Item() {
@@ -1449,7 +1427,7 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override fun same(myPosition: Int, otherPosition: Int, other: Item): Boolean {
+            override fun same(other: Item): Boolean {
                 if (other !is Schedule)
                     return false
 
@@ -1457,6 +1435,43 @@ class CreateTaskActivity : NavBarActivity() {
                     return true
 
                 return scheduleEntry.scheduleDataWrapper === other.scheduleEntry.scheduleDataWrapper
+            }
+        }
+
+        object NewSchedule : Item() {
+
+            override val holderType = HolderType.SCHEDULE
+
+            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+                (holder as ScheduleHolder).apply {
+                    scheduleMargin.visibility = View.GONE
+
+                    scheduleLayout.run {
+                        hint = activity.getString(R.string.addReminder)
+                        error = null
+                        isHintAnimationEnabled = false
+                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
+                    }
+
+                    scheduleText.run {
+                        text = null
+
+                        setFixedOnClickListener {
+                            val parameters = ScheduleDialogFragment.Parameters(
+                                    null,
+                                    activity.firstScheduleEntry()
+                                            .scheduleDataWrapper
+                                            .getScheduleDialogData(
+                                                    Date.today(),
+                                                    activity.hint as? Hint.Schedule
+                                            ),
+                                    false
+                            )
+
+                            activity.parametersRelay.accept(parameters)
+                        }
+                    }
+                }
             }
         }
     }

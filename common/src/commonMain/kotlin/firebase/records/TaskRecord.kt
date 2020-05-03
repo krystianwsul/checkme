@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeId
@@ -118,23 +117,8 @@ class TaskRecord<T : ProjectType> private constructor(
     )
 
     init {
-        val malformedOldestVisible = taskJson.oldestVisible.filter {
-            try {
-                it.value.toDate()
-                false
-            } catch (exception: Exception) {
-                true
-            }
-        }
-
-        if (malformedOldestVisible.isNotEmpty() || name.isEmpty()) {
-            if (taskJson == TaskJson(oldestVisible = taskJson.oldestVisible)) {
-                throw OnlyVisibilityPresentException("taskKey: $key")
-            } else {
-                val malformedTaskException = MalformedTaskException("taskKey: $key, taskJson: $taskJson")
-                ErrorLogger.instance.logException(malformedTaskException)
-            }
-        }
+        if (name.isEmpty())
+            throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
 
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
@@ -309,6 +293,4 @@ class TaskRecord<T : ProjectType> private constructor(
     fun getCustomTimeKey(id: String) = projectRecord.getCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
-
-    class OnlyVisibilityPresentException(message: String) : Exception(message)
 }

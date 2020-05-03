@@ -54,11 +54,11 @@
         <intent
             android:action="com.krystianwsul.checkme.VIEW"
             android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.tasks.CreateTaskActivity" />
+            android:targetClass="com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity" />
 
     </shortcut>
 
-    <share-target android:targetClass="com.krystianwsul.checkme.gui.tasks.CreateTaskActivity">
+    <share-target android:targetClass="com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity">
         <data android:mimeType="text/plain" />
         <category android:name="ADD_TO_LIST" />
     </share-target>

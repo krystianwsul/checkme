@@ -23,8 +23,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
-import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz

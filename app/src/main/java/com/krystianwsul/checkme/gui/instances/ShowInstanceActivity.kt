@@ -16,8 +16,8 @@ import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.startDate

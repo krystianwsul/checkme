@@ -8,7 +8,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
-import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Task
 import io.reactivex.BackpressureStrategy

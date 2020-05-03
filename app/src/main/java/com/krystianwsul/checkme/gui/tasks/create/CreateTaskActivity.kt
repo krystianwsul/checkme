@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks
+package com.krystianwsul.checkme.gui.tasks.create
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
+import com.krystianwsul.checkme.gui.tasks.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener

@@ -5,6 +5,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 
@@ -28,7 +29,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        showRemove = arguments!!.getBoolean(KEY_SHOW_REMOVE)
+        showRemove = requireArguments().getBoolean(KEY_SHOW_REMOVE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {

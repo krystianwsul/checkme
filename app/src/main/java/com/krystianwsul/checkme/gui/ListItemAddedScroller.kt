@@ -6,7 +6,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.common.utils.TaskKey
 
 interface ListItemAddedScroller {

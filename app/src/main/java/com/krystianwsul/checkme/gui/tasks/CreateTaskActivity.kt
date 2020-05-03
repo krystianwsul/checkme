@@ -13,6 +13,7 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -943,7 +944,7 @@ class CreateTaskActivity : NavBarActivity() {
         check(index >= 0)
 
         createTaskRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
-            (createTaskRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).scheduleLayout.error = scheduleEntry.error
+            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error
         }
     }
 
@@ -983,7 +984,10 @@ class CreateTaskActivity : NavBarActivity() {
         return findTaskDataHelper(data!!.parentTreeDatas, parentKey).single()
     }
 
-    private fun findTaskDataHelper(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, parentKey: CreateTaskViewModel.ParentKey): Iterable<CreateTaskViewModel.ParentTreeData> {
+    private fun findTaskDataHelper(
+            taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>,
+            parentKey: CreateTaskViewModel.ParentKey
+    ): Iterable<CreateTaskViewModel.ParentTreeData> {
         if (taskDatas.containsKey(parentKey))
             return listOf(taskDatas.getValue(parentKey))
 
@@ -1005,11 +1009,11 @@ class CreateTaskActivity : NavBarActivity() {
         val view = createTaskRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)
                 ?: return
 
-        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
+        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder
         updateParentView(scheduleHolder)
     }
 
-    private fun updateParentView(scheduleHolder: CreateTaskAdapter.ScheduleHolder) {
+    private fun updateParentView(scheduleHolder: ScheduleHolder) {
         scheduleHolder.apply {
             scheduleLayout.endIconMode = if (stateData.parent != null)
                 TextInputLayout.END_ICON_CLEAR_TEXT
@@ -1081,14 +1085,38 @@ class CreateTaskActivity : NavBarActivity() {
         class Task(val taskKey: TaskKey) : Hint()
     }
 
+    private enum class HolderType {
+
+        SCHEDULE {
+
+            override val layout = R.layout.row_schedule
+
+            override fun newHolder(view: View) = ScheduleHolder(view)
+        },
+
+        NOTE {
+
+            override val layout = R.layout.row_note
+
+            override fun newHolder(view: View) = NoteHolder(view)
+        },
+
+        IMAGE {
+
+            override val layout = R.layout.row_image
+
+            override fun newHolder(view: View) = ImageHolder(view)
+        };
+
+        abstract val layout: Int
+
+        abstract fun newHolder(view: View): Holder
+    }
+
     @Suppress("PrivatePropertyName")
-    private inner class CreateTaskAdapter : RecyclerView.Adapter<CreateTaskAdapter.Holder>() {
+    private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
-        private val TYPE_SCHEDULE = 0
-        private val TYPE_NOTE = 1
-        private val TYPE_IMAGE = 2
-
-        private val mNameListener = object : TextWatcher {
+        private val nameListener = object : TextWatcher {
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
@@ -1099,18 +1127,20 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
+        private val items = listOf<Item.Parent>()
+
         init {
             checkNotNull(data)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
-            TYPE_SCHEDULE -> ScheduleHolder(layoutInflater.inflate(R.layout.row_schedule, parent, false)!!)
-            TYPE_NOTE -> NoteHolder(layoutInflater.inflate(R.layout.row_note, parent, false)!!)
-            TYPE_IMAGE -> ImageHolder(layoutInflater.inflate(R.layout.row_image, parent, false)!!)
-            else -> throw UnsupportedOperationException()
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
+            newHolder(layoutInflater.inflate(layout, parent, false))
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
+            if (position < items.size)
+                items[position].bind(this@CreateTaskActivity, holder)
+
             val elementsBeforeSchedules = elementsBeforeSchedules()
 
             when (position) {
@@ -1145,7 +1175,18 @@ class CreateTaskActivity : NavBarActivity() {
                         setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
                         setFixedOnClickListener(
-                                { onTextClick() },
+                                {
+                                    checkNotNull(data)
+
+                                    val scheduleEntry = stateData.state.schedules[adapterPosition - createTaskAdapter.elementsBeforeSchedules()]
+
+                                    val parameters = ScheduleDialogFragment.Parameters(
+                                            adapterPosition,
+                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), this@CreateTaskActivity.hint as? Hint.Schedule),
+                                            true)
+
+                                    parametersRelay.accept(parameters)
+                                },
                                 { removeSchedule(holder.adapterPosition) }
                         )
                     }
@@ -1175,12 +1216,12 @@ class CreateTaskActivity : NavBarActivity() {
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size + 1 -> {
                     (holder as NoteHolder).run {
-                        mNoteLayout.isHintAnimationEnabled = data != null
+                        noteLayout.isHintAnimationEnabled = data != null
 
-                        mNoteText.run {
+                        noteText.run {
                             setText(note)
-                            removeTextChangedListener(mNameListener)
-                            addTextChangedListener(mNameListener)
+                            removeTextChangedListener(nameListener)
+                            addTextChangedListener(nameListener)
                             setOnFocusChangeListener { _, hasFocus ->
                                 noteHasFocus = hasFocus
 
@@ -1236,17 +1277,20 @@ class CreateTaskActivity : NavBarActivity() {
         override fun getItemCount() = elementsBeforeSchedules() + stateData.state.schedules.size + 3
 
         override fun getItemViewType(position: Int): Int {
+            if (position < items.size)
+                return items[position].holderType.ordinal
+
             val elementsBeforeSchedules = elementsBeforeSchedules()
 
             return when (position) {
-                0 -> TYPE_SCHEDULE
-                in (1 until elementsBeforeSchedules) -> TYPE_SCHEDULE
-                in (elementsBeforeSchedules until elementsBeforeSchedules + stateData.state.schedules.size) -> TYPE_SCHEDULE
-                elementsBeforeSchedules + stateData.state.schedules.size -> TYPE_SCHEDULE
-                elementsBeforeSchedules + stateData.state.schedules.size + 1 -> TYPE_NOTE
-                elementsBeforeSchedules + stateData.state.schedules.size + 2 -> TYPE_IMAGE
+                0 -> HolderType.SCHEDULE
+                in (1 until elementsBeforeSchedules) -> HolderType.SCHEDULE
+                in (elementsBeforeSchedules until elementsBeforeSchedules + stateData.state.schedules.size) -> HolderType.SCHEDULE
+                elementsBeforeSchedules + stateData.state.schedules.size -> HolderType.SCHEDULE
+                elementsBeforeSchedules + stateData.state.schedules.size + 1 -> HolderType.NOTE
+                elementsBeforeSchedules + stateData.state.schedules.size + 2 -> HolderType.IMAGE
                 else -> throw IllegalArgumentException()
-            }
+            }.ordinal
         }
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
@@ -1255,46 +1299,33 @@ class CreateTaskActivity : NavBarActivity() {
             stateData.state.schedules.add(scheduleEntry)
             notifyItemInserted(position)
         }
+    }
 
-        abstract inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
+    abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
 
-            val compositeDisposable = CompositeDisposable()
-        }
+        val compositeDisposable = CompositeDisposable()
+    }
 
-        inner class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
+    class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
 
-            val scheduleMargin = itemView.scheduleMargin!!
-            val scheduleLayout = itemView.scheduleLayout!!
-            val scheduleText = itemView.scheduleText!!
+        val scheduleMargin = itemView.scheduleMargin!!
+        val scheduleLayout = itemView.scheduleLayout!!
+        val scheduleText = itemView.scheduleText!!
+    }
 
-            fun onTextClick() {
-                checkNotNull(data)
+    class NoteHolder(scheduleRow: View) : Holder(scheduleRow) {
 
-                val scheduleEntry = stateData.state.schedules[adapterPosition - createTaskAdapter.elementsBeforeSchedules()]
+        val noteLayout = itemView.noteLayout!!
+        val noteText = itemView.noteText!!
+    }
 
-                val parameters = ScheduleDialogFragment.Parameters(
-                        adapterPosition,
-                        scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), hint as? Hint.Schedule),
-                        true)
+    class ImageHolder(itemView: View) : Holder(itemView) {
 
-                parametersRelay.accept(parameters)
-            }
-        }
-
-        inner class NoteHolder(scheduleRow: View) : Holder(scheduleRow) {
-
-            val mNoteLayout = itemView.noteLayout!!
-            val mNoteText = itemView.noteText!!
-        }
-
-        inner class ImageHolder(itemView: View) : Holder(itemView) {
-
-            val imageImage = itemView.imageImage!!
-            val imageProgress = itemView.imageProgress!!
-            val imageLayout = itemView.imageLayout!!
-            val imageLayoutText = itemView.imageLayoutText!!
-            val imageEdit = itemView.imageEdit!!
-        }
+        val imageImage = itemView.imageImage!!
+        val imageProgress = itemView.imageProgress!!
+        val imageLayout = itemView.imageLayout!!
+        val imageLayoutText = itemView.imageLayoutText!!
+        val imageEdit = itemView.imageEdit!!
     }
 
     @Parcelize
@@ -1365,6 +1396,36 @@ class CreateTaskActivity : NavBarActivity() {
                 }
 
             override val writeImagePath get() = NullableWrapper(Pair(path, Uri.parse(uri)))
+        }
+    }
+
+    private sealed class Item {
+
+        abstract fun bind(activity: CreateTaskActivity, holder: Holder)
+
+        abstract val holderType: HolderType
+
+        object Parent : Item() {
+
+            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+                (holder as ScheduleHolder).apply {
+                    scheduleMargin.isVisible = true
+
+                    scheduleLayout.run {
+                        hint = activity.getString(R.string.parentTask)
+                        error = null
+                        isHintAnimationEnabled = false
+
+                        addOneShotGlobalLayoutListener {
+                            isHintAnimationEnabled = true
+                        }
+                    }
+
+                    activity.updateParentView(this)
+                }
+            }
+
+            override val holderType get() = HolderType.SCHEDULE
         }
     }
 }

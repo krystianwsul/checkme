@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
@@ -73,6 +74,7 @@ class MainActivity :
         private const val DAY_STATES_KEY = "dayStates"
         private const val RESTORE_INSTANCES_KEY = "restoreInstances"
         private const val KEY_SHOW_DELETED = "showDeleted"
+        private const val KEY_DATE = "date"
 
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
@@ -158,16 +160,10 @@ class MainActivity :
 
     private val dateReceiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context?, intent: Intent?) {
-            mainDaysPager.currentPosition.let {
-                if (it > 0)
-                    mainDaysPager.smoothScrollToPosition(it - 1)
-            }
-
-            dayViewModel.refresh()
-            mainViewModel.refresh()
-        }
+        override fun onReceive(context: Context?, intent: Intent?) = onDateSwitch()
     }
+
+    private lateinit var date: Date
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -266,6 +262,8 @@ class MainActivity :
 
                 check(containsKey(KEY_SHOW_DELETED))
                 showDeleted.accept(getBoolean(KEY_SHOW_DELETED))
+
+                date = getParcelable(KEY_DATE)!!
             }
         } else {
             states = mutableMapOf()
@@ -290,6 +288,8 @@ class MainActivity :
             }
 
             showDeleted.accept(false)
+
+            date = Date.today()
         }
 
         mainActivityToolbar.apply {
@@ -506,6 +506,9 @@ class MainActivity :
 
                 override fun onTabUnselected(tab: TabLayout.Tab?) = Unit
             })
+
+            if (Date.today() != date)
+                onDateSwitch()
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
@@ -880,6 +883,21 @@ class MainActivity :
             closeSearch(false)
         else
             super.onBackPressed()
+    }
+
+    private fun onDateSwitch() {
+        val today = Date.today()
+        check(date != today)
+
+        date = today
+
+        mainDaysPager.currentPosition.let {
+            if (it > 0)
+                mainDaysPager.smoothScrollToPosition(it - 1)
+        }
+
+        dayViewModel.refresh()
+        mainViewModel.refresh()
     }
 
     private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {

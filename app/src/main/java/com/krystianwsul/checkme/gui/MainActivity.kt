@@ -625,6 +625,8 @@ class MainActivity :
             putParcelableArrayList(DAY_STATES_KEY, ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) }))
 
             putBoolean(KEY_SHOW_DELETED, showDeleted.value!!)
+
+            putParcelable(KEY_DATE, date)
         }
     }
 

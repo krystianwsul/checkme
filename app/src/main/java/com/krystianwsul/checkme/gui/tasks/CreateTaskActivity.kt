@@ -1429,7 +1429,6 @@ class CreateTaskActivity : NavBarActivity() {
                         intent.getParcelableExtra(KEY_PARAMETERS)!!
                     }
                     intent.action == Intent.ACTION_SEND -> {
-                        check(!intent.hasExtra(KEY_SHORTCUT_ID))
                         check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
 
                         check(intent.type == "text/plain")
@@ -1437,7 +1436,13 @@ class CreateTaskActivity : NavBarActivity() {
                         val nameHint = intent.getStringExtra(Intent.EXTRA_TEXT)
                         check(!nameHint.isNullOrEmpty())
 
-                        Share(nameHint)
+                        val taskKey = if (intent.hasExtra(KEY_SHORTCUT_ID)) {
+                            TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!)
+                        } else {
+                            null
+                        }
+
+                        Share(nameHint, taskKey)
                     }
                     intent.hasExtra(KEY_SHORTCUT_ID) -> {
                         check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
@@ -1502,7 +1507,10 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         @Parcelize
-        class Share(override val nameHint: String) : Parameters()
+        class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : Parameters() {
+
+            override val hint get() = parentTaskKeyHint?.let { Hint.Task(parentTaskKeyHint) }
+        }
 
         @Parcelize
         object None : Parameters()

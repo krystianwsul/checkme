@@ -1130,7 +1130,8 @@ class CreateTaskActivity : NavBarActivity() {
         private fun getItems(scheduleEntries: List<ScheduleEntry>) = listOf(Item.Parent) +
                 scheduleEntries.map { Item.Schedule(it) } +
                 Item.NewSchedule +
-                Item.Note
+                Item.Note +
+                Item.Image
 
         private var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -1159,27 +1160,8 @@ class CreateTaskActivity : NavBarActivity() {
             newHolder(layoutInflater.inflate(layout, parent, false))
         }
 
-        override fun onBindViewHolder(holder: Holder, position: Int) {
-            if (position < items.size) {
+        override fun onBindViewHolder(holder: Holder, position: Int) = 
                 items[position].bind(this@CreateTaskActivity, holder)
-                return
-            }
-
-            val elementsBeforeSchedules = elementsBeforeSchedules()
-
-            when (position) {
-                elementsBeforeSchedules + stateData.state.schedules.size + 2 -> {
-                    (holder as ImageHolder).run {
-                        fun listener() = CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
-
-                        imageImage.setOnClickListener { listener() }
-                        imageEdit.setOnClickListener { listener() }
-                        imageLayoutText.setFixedOnClickListener(::listener)
-                    }
-                }
-                else -> throw IllegalArgumentException()
-            }
-        }
 
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)
@@ -1211,24 +1193,9 @@ class CreateTaskActivity : NavBarActivity() {
 
         fun elementsBeforeSchedules() = 1
 
-        override fun getItemCount() = elementsBeforeSchedules() + stateData.state.schedules.size + 3
+        override fun getItemCount() = items.size
 
-        override fun getItemViewType(position: Int): Int {
-            if (position < items.size)
-                return items[position].holderType.ordinal
-
-            val elementsBeforeSchedules = elementsBeforeSchedules()
-
-            return when (position) {
-                0 -> HolderType.SCHEDULE
-                in (1 until elementsBeforeSchedules) -> HolderType.SCHEDULE
-                in (elementsBeforeSchedules until elementsBeforeSchedules + stateData.state.schedules.size) -> HolderType.SCHEDULE
-                elementsBeforeSchedules + stateData.state.schedules.size -> HolderType.SCHEDULE
-                elementsBeforeSchedules + stateData.state.schedules.size + 1 -> HolderType.NOTE
-                elementsBeforeSchedules + stateData.state.schedules.size + 2 -> HolderType.IMAGE
-                else -> throw IllegalArgumentException()
-            }.ordinal
-        }
+        override fun getItemViewType(position: Int) = items[position].holderType.ordinal
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
             stateData.state.schedules += scheduleEntry
@@ -1479,6 +1446,21 @@ class CreateTaskActivity : NavBarActivity() {
                                 activity.editToolbarAppBar.setExpanded(false)
                         }
                     }
+                }
+            }
+        }
+
+        object Image : Item() {
+
+            override val holderType = HolderType.IMAGE
+
+            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+                (holder as ImageHolder).apply {
+                    fun listener() = CameraGalleryFragment.newInstance(activity.imageUrl.value!!.loader != null).show(activity.supportFragmentManager, TAG_CAMERA_GALLERY)
+
+                    imageImage.setOnClickListener { listener() }
+                    imageEdit.setOnClickListener { listener() }
+                    imageLayoutText.setFixedOnClickListener(::listener)
                 }
             }
         }

@@ -616,16 +616,19 @@ class CreateTaskActivity : NavBarActivity() {
 
         setupParent(createTaskRoot)
 
-        listOf(
-                parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle({
-                    ScheduleDialogFragment.newInstance(it).run {
-                        initialize(data!!.customTimeDatas)
-                        show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
-                        result.firstOrError()
-                    }
-                }, false, 1).toObservable(),
-                ((supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let { Observable.just(it) }
-                        ?: Observable.never()).flatMapSingle { it.result.firstOrError() }
+        listOfNotNull(
+                parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
+                        {
+                            ScheduleDialogFragment.newInstance(it).run {
+                                initialize(data!!.customTimeDatas)
+                                show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+                                result.firstOrError()
+                            }
+                        },
+                        false,
+                        1
+                ).toObservable(),
+                (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let { Observable.just(it) }?.flatMapSingle { it.result.firstOrError() }
         ).merge()
                 .subscribe { result ->
                     when (result) {
@@ -643,9 +646,9 @@ class CreateTaskActivity : NavBarActivity() {
 
                                 createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
                             } else {
-                                check(result.position >= createTaskAdapter.elementsBeforeSchedules())
+                                check(result.position >= 1)
 
-                                val position = result.position - createTaskAdapter.elementsBeforeSchedules()
+                                val position = result.position - 1
 
                                 val oldId = if (position < stateData.state.schedules.size) {
                                     stateData.state
@@ -668,12 +671,12 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun removeSchedule(position: Int) {
-        check(position >= createTaskAdapter.elementsBeforeSchedules())
+        check(position >= 1)
         checkNotNull(data)
 
         stateData.state
                 .schedules
-                .removeAt(position - createTaskAdapter.elementsBeforeSchedules())
+                .removeAt(position - 1)
 
         createTaskAdapter.updateSchedules()
     }
@@ -837,9 +840,7 @@ class CreateTaskActivity : NavBarActivity() {
         createTaskRecycler.itemAnimator = CustomItemAnimator()
 
         if (noteHasFocus) { // keyboard hack
-            val notePosition = stateData.state
-                    .schedules
-                    .size + 1 + createTaskAdapter.elementsBeforeSchedules()
+            val notePosition = createTaskAdapter.items.indexOf(Item.Note)
 
             createTaskRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
@@ -954,7 +955,7 @@ class CreateTaskActivity : NavBarActivity() {
                 .indexOf(scheduleEntry)
         check(index >= 0)
 
-        createTaskRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
+        createTaskRecycler.getChildAt(index + 1)?.let {
             (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error
         }
     }
@@ -1008,7 +1009,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun clearParentTask() {
-        if (stateData.parent == null || stateData.parent!!.parentKey is CreateTaskViewModel.ParentKey.Project)
+        if (stateData.parent?.parentKey !is CreateTaskViewModel.ParentKey.Task)
             return
 
         stateData.parent = null
@@ -1017,8 +1018,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun updateParentView() {
-        val view = createTaskRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)
-                ?: return
+        val view = createTaskRecycler.getChildAt(0) ?: return
 
         val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder
         updateParentView(scheduleHolder)
@@ -1133,7 +1133,7 @@ class CreateTaskActivity : NavBarActivity() {
                 Item.Note +
                 Item.Image
 
-        private var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
+        var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -1147,6 +1147,7 @@ class CreateTaskActivity : NavBarActivity() {
                         oldItems[oldItemPosition] == newItems[newItemPosition]
             }).dispatchUpdatesTo(this)
         }
+            private set
 
         init {
             checkNotNull(data)
@@ -1160,7 +1161,7 @@ class CreateTaskActivity : NavBarActivity() {
             newHolder(layoutInflater.inflate(layout, parent, false))
         }
 
-        override fun onBindViewHolder(holder: Holder, position: Int) = 
+        override fun onBindViewHolder(holder: Holder, position: Int) =
                 items[position].bind(this@CreateTaskActivity, holder)
 
         override fun onViewAttachedToWindow(holder: Holder) {
@@ -1190,8 +1191,6 @@ class CreateTaskActivity : NavBarActivity() {
 
             super.onViewDetachedFromWindow(holder)
         }
-
-        fun elementsBeforeSchedules() = 1
 
         override fun getItemCount() = items.size
 

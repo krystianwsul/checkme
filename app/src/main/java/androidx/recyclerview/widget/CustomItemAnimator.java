@@ -376,7 +376,10 @@ public class CustomItemAnimator extends SimpleItemAnimator {
         if (newView != null) {
             final ViewPropertyAnimator newViewAnimation = newView.animate();
             mChangeAnimations.add(changeInfo.newHolder);
-            newViewAnimation.translationX(0).translationY(0).setDuration(getChangeDuration() / 2)
+
+            long duration = (changeInfo.fromY == changeInfo.toY) ? getChangeDuration() / 2 : getChangeDuration();
+
+            newViewAnimation.translationX(0).translationY(0).setDuration(duration)
                     .alpha(1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animator) {

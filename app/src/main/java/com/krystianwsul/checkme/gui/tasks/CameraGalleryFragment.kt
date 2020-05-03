@@ -6,6 +6,7 @@ import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 
@@ -63,7 +64,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                         )
 
                     }
-                    R.id.camera_gallery_remove -> createTaskActivity.imageUrl.accept(CreateTaskActivity.ImageState.Removed)
+                    R.id.camera_gallery_remove -> createTaskActivity.imageUrl.accept(CreateTaskImageState.Removed)
                     else -> throw IllegalArgumentException()
                 }
 

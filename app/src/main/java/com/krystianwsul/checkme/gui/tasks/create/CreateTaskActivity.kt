@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks.create
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -12,13 +11,11 @@ import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
@@ -26,7 +23,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.tasks.*
@@ -34,7 +30,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -56,7 +51,6 @@ import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
-import java.io.Serializable
 import kotlin.properties.Delegates.observable
 
 
@@ -89,20 +83,20 @@ class CreateTaskActivity : NavBarActivity() {
                 hint: Hint? = null,
                 parentScheduleState: ParentScheduleState? = null,
                 nameHint: String? = null
-        ) = getParametersIntent(Parameters.Create(hint, parentScheduleState, nameHint))
+        ) = getParametersIntent(CreateTaskParameters.Create(hint, parentScheduleState, nameHint))
 
         fun getJoinIntent(
                 joinTaskKeys: List<TaskKey>,
                 hint: Hint? = null,
                 removeInstanceKeys: List<InstanceKey> = listOf()
-        ) = getParametersIntent(Parameters.Join(joinTaskKeys, hint, removeInstanceKeys))
+        ) = getParametersIntent(CreateTaskParameters.Join(joinTaskKeys, hint, removeInstanceKeys))
 
-        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(Parameters.Edit(taskKey))
+        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(CreateTaskParameters.Edit(taskKey))
 
-        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(Parameters.Copy(taskKey))
+        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(CreateTaskParameters.Copy(taskKey))
 
-        private fun getParametersIntent(parameters: Parameters) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            putExtra(KEY_PARAMETERS, parameters)
+        private fun getParametersIntent(createTaskParameters: CreateTaskParameters) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+            putExtra(KEY_PARAMETERS, createTaskParameters)
         }
 
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
@@ -120,19 +114,19 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val discardDialogListener = this::finish
 
-    private var taskKey: TaskKey? = null
     private var taskKeys: List<TaskKey>? = null
+    private lateinit var removeInstanceKeys: List<InstanceKey>
     private var copy = false
-
-    private var hint: Hint? = null
     private var nameHint: String? = null
+    private var taskKey: TaskKey? = null
+    private var hint: Hint? = null
+    private var tmpState: ParentScheduleState? = null
 
     private var data: CreateTaskViewModel.Data? = null
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
     private lateinit var initialState: ParentScheduleState
-    private var tmpState: ParentScheduleState? = null
     private lateinit var stateData: ParentScheduleData
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
@@ -217,9 +211,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    val imageUrl = BehaviorRelay.createDefault<ImageState>(ImageState.None)
-
-    private lateinit var removeInstanceKeys: List<InstanceKey>
+    val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None)
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 
@@ -520,12 +512,12 @@ class CreateTaskActivity : NavBarActivity() {
         this.savedInstanceState = savedInstanceState
 
         savedInstanceState?.run {
-            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as ImageState)
+            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as CreateTaskImageState)
         }
 
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
-        val parameters = Parameters.fromIntent(intent)
+        val parameters = CreateTaskParameters.fromIntent(intent)
 
         taskKeys = parameters.taskKeys // join
         removeInstanceKeys = parameters.removeInstanceKeys
@@ -637,7 +629,7 @@ class CreateTaskActivity : NavBarActivity() {
                 val file = it.data().file
                 it.targetUI()
                         .imageUrl
-                        .accept(ImageState.Selected(file.absolutePath, file.toURI().toString()))
+                        .accept(CreateTaskImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
     }
@@ -666,7 +658,7 @@ class CreateTaskActivity : NavBarActivity() {
         data.taskData
                 ?.imageState
                 ?.takeUnless { imageUrl.value!!.dontOverwrite }
-                ?.let { imageUrl.accept(ImageState.Existing(it)) }
+                ?.let { imageUrl.accept(CreateTaskImageState.Existing(it)) }
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -1213,43 +1205,6 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    sealed class ImageState : Serializable {
-
-        open val dontOverwrite = false
-
-        open val loader: ((ImageView) -> Any)? = null
-
-        open val writeImagePath: NullableWrapper<Pair<String, Uri>>? = null
-
-        object None : ImageState()
-
-        data class Existing(val imageState: com.krystianwsul.common.firebase.models.ImageState) : ImageState() {
-
-            override val loader: (ImageView) -> Unit get() = { imageState.toImageLoader().load(it, false) }
-        }
-
-        object Removed : ImageState() {
-
-            override val dontOverwrite = true
-
-            override val writeImagePath = NullableWrapper<Pair<String, Uri>>(null)
-        }
-
-        data class Selected(val path: String, val uri: String) : ImageState() {
-
-            override val dontOverwrite = true
-
-            override val loader
-                get() = { imageView: ImageView ->
-                    Glide.with(imageView)
-                            .load(path)
-                            .into(imageView)
-                }
-
-            override val writeImagePath get() = NullableWrapper(Pair(path, Uri.parse(uri)))
-        }
-    }
-
     private sealed class Item {
 
         abstract val holderType: HolderType
@@ -1413,5 +1368,4 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
     }
-
 }

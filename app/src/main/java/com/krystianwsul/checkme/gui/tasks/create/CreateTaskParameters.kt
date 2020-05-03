@@ -7,13 +7,13 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import kotlinx.android.parcel.Parcelize
 
-sealed class Parameters : Parcelable {
+sealed class CreateTaskParameters : Parcelable {
 
     companion object {
 
         private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
 
-        fun fromIntent(intent: Intent): Parameters {
+        fun fromIntent(intent: Intent): CreateTaskParameters {
             return when {
                 intent.hasExtra(CreateTaskActivity.KEY_PARAMETERS) -> {
                     check(intent.action != Intent.ACTION_SEND)
@@ -71,14 +71,14 @@ sealed class Parameters : Parcelable {
             override val hint: CreateTaskActivity.Hint? = null,
             override val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
             override val nameHint: String? = null
-    ) : Parameters()
+    ) : CreateTaskParameters()
 
     @Parcelize
     class Join(
             override val taskKeys: List<TaskKey>,
             override val hint: CreateTaskActivity.Hint? = null,
             override val removeInstanceKeys: List<InstanceKey> = listOf()
-    ) : Parameters() {
+    ) : CreateTaskParameters() {
 
         init {
             check(taskKeys.size > 1)
@@ -86,26 +86,26 @@ sealed class Parameters : Parcelable {
     }
 
     @Parcelize
-    class Copy(override val taskKey: TaskKey) : Parameters() {
+    class Copy(override val taskKey: TaskKey) : CreateTaskParameters() {
 
         override val copy get() = true
     }
 
     @Parcelize
-    class Edit(override val taskKey: TaskKey) : Parameters()
+    class Edit(override val taskKey: TaskKey) : CreateTaskParameters()
 
     @Parcelize
-    class Shortcut(private val parentTaskKeyHint: TaskKey) : Parameters() {
+    class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateTaskParameters() {
 
         override val hint get() = CreateTaskActivity.Hint.Task(parentTaskKeyHint)
     }
 
     @Parcelize
-    class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : Parameters() {
+    class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
 
         override val hint get() = parentTaskKeyHint?.let { CreateTaskActivity.Hint.Task(parentTaskKeyHint) }
     }
 
     @Parcelize
-    object None : Parameters()
+    object None : CreateTaskParameters()
 }

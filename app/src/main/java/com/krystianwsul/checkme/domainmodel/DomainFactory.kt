@@ -800,8 +800,10 @@ class DomainFactory(
                 }
 
                 parentKey = task.project
-                        .takeIf { it is SharedProject }
-                        ?.let { CreateTaskViewModel.ParentKey.Project(it.projectKey) }
+                        .projectKey
+                        .let {
+                            (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                        }
 
                 if (schedules.isNotEmpty()) {
                     scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {

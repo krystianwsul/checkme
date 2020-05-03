@@ -774,7 +774,9 @@ class CreateTaskActivity : NavBarActivity() {
                     parentKey = taskKeys?.map { it.projectKey }
                             ?.distinct()
                             ?.singleOrNull()
-                            ?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                            ?.let {
+                                (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                            }
                 }
 
                 taskData?.let { note = it.note }

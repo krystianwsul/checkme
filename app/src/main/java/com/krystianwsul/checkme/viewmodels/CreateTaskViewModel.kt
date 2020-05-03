@@ -293,7 +293,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     sealed class ParentKey : Parcelable {
 
         @Parcelize
-        data class Project(val projectId: ProjectKey<*>) : ParentKey()
+        data class Project(val projectId: ProjectKey.Shared) : ParentKey()
 
         @Parcelize
         data class Task(val taskKey: TaskKey) : ParentKey()

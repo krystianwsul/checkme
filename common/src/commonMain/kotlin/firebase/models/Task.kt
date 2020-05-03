@@ -6,7 +6,6 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -76,38 +75,7 @@ class Task<T : ProjectType>(
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
         requireCurrent(exactTimeStamp)
 
-        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
-
-        currentSchedules.getSingleSchedule()?.let { singleSchedule ->
-            val instance = singleSchedule.getInstance(this)
-
-            @Suppress("UNCHECKED_CAST")
-            if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
-                return listOf(SingleSchedule(
-                        this,
-                        MockSingleScheduleRecord(singleSchedule.singleScheduleRecord, instance)
-                ))
-        }
-
-        return currentSchedules
-    }
-
-    private fun List<Schedule<T>>.getSingleSchedule() = singleOrNull() as? SingleSchedule
-
-    private class MockSingleScheduleRecord<T : ProjectType>(
-            private val singleScheduleRecord: SingleScheduleRecord<T>,
-            private val instance: Instance<T>
-    ) : SingleScheduleRecord<T>(
-            singleScheduleRecord.taskRecord,
-            singleScheduleRecord.createObject,
-            singleScheduleRecord.id
-    ) {
-
-        override val date get() = instance.instanceDate
-
-        override val timePair get() = instance.instanceTimePair
-
-        override val originalTimePair get() = singleScheduleRecord.timePair
+        return schedules.filter { it.current(exactTimeStamp) }
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -311,13 +279,19 @@ class Task<T : ProjectType>(
 
         val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
         val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
-        val oldSingleSchedule = oldSchedules.getSingleSchedule()
+
+        val oldMockPair = oldSchedules.filterIsInstance<SingleSchedule<T>>()
+                .singleOrNull()
+                ?.let { singleSchedule ->
+                    singleSchedule.mockInstance?.let { Pair(singleSchedule, it) }
+                }
 
         if (singleRemoveSchedule != null &&
                 singleAddSchedulePair != null &&
-                singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
+                singleRemoveSchedule.scheduleId == oldMockPair?.first?.scheduleId
         ) {
-            oldSingleSchedule.getInstance(this).setInstanceDateTime(
+            oldMockPair.second
+                    .setInstanceDateTime(
                     shownFactory,
                     ownerKey,
                     singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },

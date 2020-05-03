@@ -12,15 +12,19 @@ class SingleSchedule<T : ProjectType>(
         val singleScheduleRecord: SingleScheduleRecord<T>
 ) : Schedule<T>(rootTask) {
 
-    override val scheduleRecord get() = singleScheduleRecord
+    val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
 
-    val date get() = singleScheduleRecord.date
+    override val scheduleRecord get() = mockInstance?.let { MockRecord(it) } ?: singleScheduleRecord
+
+    val date get() = scheduleRecord.date
 
     private val dateTime get() = DateTime(date, time)
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(DateTime(date, singleScheduleRecord.originalTimePair.toTime()))
+    fun <T : ProjectType> getInstance(task: Task<T>) = singleScheduleRecord.run { // specifically not scheduleRecord
+        task.getInstance(DateTime(date, originalTimePair.toTime()))
+    }
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
@@ -50,4 +54,17 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun updateOldestVisible(now: ExactTimeStamp) = Unit
+
+    private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord<T>(
+            singleScheduleRecord.taskRecord,
+            singleScheduleRecord.createObject,
+            singleScheduleRecord.id
+    ) {
+
+        override val date get() = instance.instanceDate
+
+        override val timePair get() = instance.instanceTimePair
+
+        override val originalTimePair get() = singleScheduleRecord.timePair
+    }
 }

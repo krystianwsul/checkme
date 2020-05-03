@@ -55,6 +55,7 @@ class TickJobIntentService : JobIntentService() {
         // still running?
         private fun tick(silent: Boolean, sourceName: String) {
             Preferences.tickLog.logLineHour("TickJobIntentService.tick from $sourceName")
+            Preferences.temporaryNotificationLog.logLineHour("TickJobIntentService.tick from $sourceName")
 
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.tickLog.logLineHour("TickJobIntentService.tick skipping, no userInfo")

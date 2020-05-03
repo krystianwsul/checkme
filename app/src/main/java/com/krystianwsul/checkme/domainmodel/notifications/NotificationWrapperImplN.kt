@@ -90,14 +90,19 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
 
     override fun hideTemporary(source: String) {
+        Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: start")
         if (showTemporary) {
             val statusBarNotifications = notificationManager.activeNotifications!!
 
             if (statusBarNotifications.any { it.id == NOTIFICATION_ID_TEMPORARY }) {
-                Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
+                Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source success")
 
                 cancelNotification(NOTIFICATION_ID_TEMPORARY)
+            } else {
+                Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: not found")
             }
+        } else {
+            Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: !showTemporary")
         }
     }
 

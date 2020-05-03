@@ -37,6 +37,7 @@ import com.krystianwsul.common.utils.ScheduleType
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
+import kotlin.random.Random
 import kotlin.reflect.KMutableProperty0
 
 class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
@@ -671,40 +672,43 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             check(monthWeekNumber < 5)
         }
 
-        fun toScheduleEntry() = ScheduleEntry(when (scheduleType) {
-            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
-                    date,
-                    timePairPersist.timePair
-            ))
-            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
-                    if (allDays) DayOfWeek.set else daysOfWeek,
-                    timePairPersist.timePair,
-                    from,
-                    until
-            ))
-            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
-                    monthDayNumber,
-                    beginningOfMonth,
-                    timePairPersist.timePair,
-                    from,
-                    until
-            ))
-            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
-                    monthWeekNumber,
-                    monthWeekDay,
-                    beginningOfMonth,
-                    timePairPersist.timePair,
-                    from,
-                    until
-            ))
-            ScheduleType.YEARLY -> CreateTaskViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
-                    date.month,
-                    date.day,
-                    timePairPersist.timePair,
-                    from,
-                    until
-            ))
-        })
+        fun toScheduleEntry(id: Int? = null) = ScheduleEntry(
+                when (scheduleType) {
+                    ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
+                            date,
+                            timePairPersist.timePair
+                    ))
+                    ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
+                            if (allDays) DayOfWeek.set else daysOfWeek,
+                            timePairPersist.timePair,
+                            from,
+                            until
+                    ))
+                    ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
+                            monthDayNumber,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until
+                    ))
+                    ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
+                            monthWeekNumber,
+                            monthWeekDay,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until
+                    ))
+                    ScheduleType.YEARLY -> CreateTaskViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
+                            date.month,
+                            date.day,
+                            timePairPersist.timePair,
+                            from,
+                            until
+                    ))
+                },
+                id ?: Random.nextInt()
+        )
     }
 
     class Parameters(val position: Int?, val scheduleDialogData: ScheduleDialogData, val showDelete: Boolean)

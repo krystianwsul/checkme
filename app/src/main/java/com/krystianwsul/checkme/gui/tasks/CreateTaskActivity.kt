@@ -15,6 +15,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.CustomItemAnimator
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -644,9 +645,19 @@ class CreateTaskActivity : NavBarActivity() {
                             } else {
                                 check(result.position >= createTaskAdapter.elementsBeforeSchedules())
 
-                                stateData.state.schedules[result.position - createTaskAdapter.elementsBeforeSchedules()] = result.scheduleDialogData.toScheduleEntry()
+                                val position = result.position - createTaskAdapter.elementsBeforeSchedules()
 
-                                createTaskAdapter.notifyItemChanged(result.position)
+                                val oldId = if (position < stateData.state.schedules.size) {
+                                    stateData.state
+                                            .schedules[position]
+                                            .id
+                                } else {
+                                    null
+                                }
+
+                                stateData.state.schedules[position] = result.scheduleDialogData.toScheduleEntry(oldId)
+
+                                createTaskAdapter.updateSchedules()
                             }
                         }
                         is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
@@ -664,7 +675,7 @@ class CreateTaskActivity : NavBarActivity() {
                 .schedules
                 .removeAt(position - createTaskAdapter.elementsBeforeSchedules())
 
-        createTaskAdapter.notifyItemRemoved(position)
+        createTaskAdapter.updateSchedules()
     }
 
     @SuppressLint("CheckResult")
@@ -821,7 +832,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 
-        createTaskAdapter = CreateTaskAdapter()
+        createTaskAdapter = CreateTaskAdapter(stateData.state.schedules)
         createTaskRecycler.adapter = createTaskAdapter
         createTaskRecycler.itemAnimator = CustomItemAnimator()
 
@@ -1114,7 +1125,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     @Suppress("PrivatePropertyName")
-    private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
+    private inner class CreateTaskAdapter(scheduleEntries: List<ScheduleEntry>) : RecyclerView.Adapter<Holder>() {
 
         private val nameListener = object : TextWatcher {
 
@@ -1127,10 +1138,27 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        private val items = listOf<Item.Parent>()
+        private var items by observable(listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) }) { _, oldItems, newItems ->
+            DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+
+                override fun getOldListSize() = oldItems.size
+
+                override fun getNewListSize() = newItems.size
+
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                        oldItems[oldItemPosition].same(oldItemPosition, newItemPosition, newItems[newItemPosition])
+
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                        oldItems[oldItemPosition] == newItems[newItemPosition]
+            }).dispatchUpdatesTo(this)
+        }
 
         init {
             checkNotNull(data)
+        }
+
+        private fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
+            items = listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
@@ -1138,59 +1166,14 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
-            if (position < items.size)
+            if (position < items.size) {
                 items[position].bind(this@CreateTaskActivity, holder)
+                return
+            }
 
             val elementsBeforeSchedules = elementsBeforeSchedules()
 
             when (position) {
-                in (0 until elementsBeforeSchedules) -> (holder as ScheduleHolder).run {
-                    scheduleMargin.visibility = if (position == 0) View.VISIBLE else View.GONE
-
-                    scheduleLayout.run {
-                        hint = getString(R.string.parentTask)
-                        error = null
-                        isHintAnimationEnabled = false
-
-                        addOneShotGlobalLayoutListener {
-                            isHintAnimationEnabled = true
-                        }
-                    }
-
-                    updateParentView(this)
-                }
-                in (elementsBeforeSchedules until (elementsBeforeSchedules + stateData.state.schedules.size)) -> (holder as ScheduleHolder).run {
-                    val scheduleEntry = stateData.state.schedules[position - elementsBeforeSchedules()]
-
-                    scheduleMargin.visibility = View.GONE
-
-                    scheduleLayout.run {
-                        hint = null
-                        error = scheduleEntry.error
-                        isHintAnimationEnabled = false
-                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
-                    }
-
-                    scheduleText.run {
-                        setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
-
-                        setFixedOnClickListener(
-                                {
-                                    checkNotNull(data)
-
-                                    val scheduleEntry = stateData.state.schedules[adapterPosition - createTaskAdapter.elementsBeforeSchedules()]
-
-                                    val parameters = ScheduleDialogFragment.Parameters(
-                                            adapterPosition,
-                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), this@CreateTaskActivity.hint as? Hint.Schedule),
-                                            true)
-
-                                    parametersRelay.accept(parameters)
-                                },
-                                { removeSchedule(holder.adapterPosition) }
-                        )
-                    }
-                }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {
                     scheduleMargin.visibility = View.GONE
 
@@ -1294,11 +1277,11 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            val position = elementsBeforeSchedules() + stateData.state.schedules.size
-
-            stateData.state.schedules.add(scheduleEntry)
-            notifyItemInserted(position)
+            stateData.state.schedules += scheduleEntry
+            updateSchedules()
         }
+
+        fun updateSchedules() = setSchedules(stateData.state.schedules)
     }
 
     abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -1331,7 +1314,8 @@ class CreateTaskActivity : NavBarActivity() {
     @Parcelize
     class ParentScheduleState(
             var parentKey: CreateTaskViewModel.ParentKey?,
-            val schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable {
+            val schedules: MutableList<ScheduleEntry> = mutableListOf()
+    ) : Parcelable {
 
         override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + schedules.hashCode()
 
@@ -1354,10 +1338,8 @@ class CreateTaskActivity : NavBarActivity() {
             state.parentKey = newValue?.parentKey
 
             if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
-                val scheduleCount = state.schedules.size
-
                 state.schedules.clear()
-                createTaskAdapter.notifyItemRangeRemoved(createTaskAdapter.elementsBeforeSchedules(), scheduleCount)
+                createTaskAdapter.updateSchedules()
             }
         }
     }
@@ -1401,11 +1383,15 @@ class CreateTaskActivity : NavBarActivity() {
 
     private sealed class Item {
 
-        abstract fun bind(activity: CreateTaskActivity, holder: Holder)
-
         abstract val holderType: HolderType
 
+        abstract fun bind(activity: CreateTaskActivity, holder: Holder)
+
+        abstract fun same(myPosition: Int, otherPosition: Int, other: Item): Boolean
+
         object Parent : Item() {
+
+            override val holderType get() = HolderType.SCHEDULE
 
             override fun bind(activity: CreateTaskActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
@@ -1425,7 +1411,53 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override val holderType get() = HolderType.SCHEDULE
+            override fun same(myPosition: Int, otherPosition: Int, other: Item) = other == this
+        }
+
+        data class Schedule(private val scheduleEntry: ScheduleEntry) : Item() {
+
+            override val holderType = HolderType.SCHEDULE
+
+            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+                (holder as ScheduleHolder).apply {
+                    scheduleMargin.visibility = View.GONE
+
+                    scheduleLayout.run {
+                        hint = null
+                        error = scheduleEntry.error
+                        isHintAnimationEnabled = false
+                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
+                    }
+
+                    scheduleText.run {
+                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.data!!.customTimeDatas, activity))
+
+                        setFixedOnClickListener(
+                                {
+                                    checkNotNull(activity.data)
+
+                                    val parameters = ScheduleDialogFragment.Parameters(
+                                            adapterPosition,
+                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), activity.hint as? Hint.Schedule),
+                                            true)
+
+                                    activity.parametersRelay.accept(parameters)
+                                },
+                                { activity.removeSchedule(adapterPosition) }
+                        )
+                    }
+                }
+            }
+
+            override fun same(myPosition: Int, otherPosition: Int, other: Item): Boolean {
+                if (other !is Schedule)
+                    return false
+
+                if (scheduleEntry.id == other.scheduleEntry.id)
+                    return true
+
+                return scheduleEntry.scheduleDataWrapper === other.scheduleEntry.scheduleDataWrapper
+            }
         }
     }
 }

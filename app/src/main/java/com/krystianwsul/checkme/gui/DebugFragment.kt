@@ -48,8 +48,12 @@ class DebugFragment : AbstractFragment() {
 
                 append("\n\ntasks: ")
                 append(domainFactory.taskCount)
-                append("\ninstances: ")
+                append("\nall existing instances: ")
                 append(domainFactory.instanceCount)
+                append("\nfirst page root instances: existing ")
+                append(domainFactory.instanceInfo.first)
+                append(", virtual ")
+                append(domainFactory.instanceInfo.second)
                 append("\ncustom times: ")
                 append(domainFactory.customTimeCount)
                 append("\ninstance shown: ")

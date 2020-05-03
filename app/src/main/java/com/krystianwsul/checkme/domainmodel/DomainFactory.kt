@@ -161,6 +161,9 @@ class DomainFactory(
     val taskCount get() = projectsFactory.taskCount
     val instanceCount get() = projectsFactory.instanceCount
 
+    lateinit var instanceInfo: Pair<Int, Int>
+        private set
+
     val customTimeCount get() = customTimes.size
 
     val instanceShownCount get() = localFactory.instanceShownRecords.size
@@ -480,6 +483,12 @@ class DomainFactory(
         endExactTimeStamp = ExactTimeStamp(Date(endCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
 
         val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
+
+        if (position == 0 && timeRange == MainActivity.TimeRange.DAY) {
+            instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->
+                Pair(existingInstanceCount, currentInstances.size - existingInstanceCount)
+            }
+        }
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 

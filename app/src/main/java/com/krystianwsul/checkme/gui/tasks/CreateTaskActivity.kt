@@ -65,21 +65,17 @@ class CreateTaskActivity : NavBarActivity() {
 
         private const val DISCARD_TAG = "discard"
 
-        private const val TASK_KEY_KEY = "taskKey"
-        private const val TASK_KEYS_KEY = "taskKeys"
-        private const val KEY_COPY = "copy"
+        private const val KEY_PARAMETERS = "parameters"
+        private const val KEY_INITIAL_STATE = "initialState"
 
-        private const val KEY_HINT = "hint"
-        private const val KEY_NAME_HINT = "nameHint"
-        private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
         private const val KEY_PARENT_PROJECT_TYPE = "parentProjectType"
         private const val KEY_PARENT_PROJECT_KEY = "parentProjectKey"
         private const val KEY_PARENT_TASK = "parentTask"
+
         private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
 
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
 
-        private const val KEY_INITIAL_STATE = "initialState"
         private const val KEY_STATE = "state"
         private const val NOTE_KEY = "note"
         private const val NOTE_HAS_FOCUS_KEY = "noteHasFocus"
@@ -94,36 +90,25 @@ class CreateTaskActivity : NavBarActivity() {
                 hint: Hint? = null,
                 parentScheduleState: ParentScheduleState? = null,
                 nameHint: String? = null
-        ) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            hint?.let { putExtra(KEY_HINT, hint) }
-            parentScheduleState?.let { putExtra(KEY_INITIAL_STATE, parentScheduleState) }
-            putExtra(KEY_NAME_HINT, nameHint)
-        }
+        ) = getParametersIntent(Parameters.Create(hint, parentScheduleState, nameHint))
 
         fun getJoinIntent(
                 joinTaskKeys: List<TaskKey>,
                 hint: Hint? = null,
                 removeInstanceKeys: List<InstanceKey> = listOf()
-        ) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            check(joinTaskKeys.size > 1)
+        ) = getParametersIntent(Parameters.Join(joinTaskKeys, hint, removeInstanceKeys))
 
-            putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
-            hint?.let { putExtra(KEY_HINT, hint) }
-            putParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS, ArrayList(removeInstanceKeys))
-        }
+        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(Parameters.Edit(taskKey))
 
-        fun getEditIntent(taskKey: TaskKey) = Intent(
-                MyApplication.instance,
-                CreateTaskActivity::class.java
-        ).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
+        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(Parameters.Copy(taskKey))
 
-        fun getCopyIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            putExtra(TASK_KEY_KEY, taskKey as Parcelable)
-            putExtra(KEY_COPY, true)
+        private fun getParametersIntent(parameters: Parameters) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+            putExtra(KEY_PARAMETERS, parameters)
         }
 
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
+
             putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
             putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectKey.type.ordinal)
             putExtra(KEY_PARENT_TASK, parentTaskKeyHint.taskId)
@@ -541,52 +526,18 @@ class CreateTaskActivity : NavBarActivity() {
 
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
-        intent.run {
-            if (hasExtra(TASK_KEY_KEY)) {
-                check(!hasExtra(TASK_KEYS_KEY))
-                check(!hasExtra(KEY_HINT))
+        val parameters = Parameters.fromIntent(intent)
 
-                taskKey = getParcelableExtra(TASK_KEY_KEY)!!
-                copy = getBooleanExtra(KEY_COPY, false)
-            } else {
-                check(!hasExtra(KEY_COPY))
+        taskKeys = parameters.taskKeys // join
+        removeInstanceKeys = parameters.removeInstanceKeys
 
-                if (action == Intent.ACTION_SEND) {
-                    check(type == "text/plain")
+        copy = parameters.copy // copy
 
-                    nameHint = getStringExtra(Intent.EXTRA_TEXT)!!
-                    check(!nameHint.isNullOrEmpty())
-                } else {
-                    nameHint = getStringExtra(KEY_NAME_HINT)
-                }
+        nameHint = parameters.nameHint // create, share
 
-                if (hasExtra(TASK_KEYS_KEY))
-                    taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
+        taskKey = parameters.taskKey // edit, copy
 
-                hint = when {
-                    hasExtra(KEY_HINT) -> {
-                        check(!hasExtra(KEY_SHORTCUT_ID))
-
-                        getParcelableExtra<Hint>(KEY_HINT)
-                    }
-                    hasExtra(KEY_SHORTCUT_ID) -> Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
-                    hasExtra(KEY_PARENT_PROJECT_KEY) -> {
-                        check(hasExtra(KEY_PARENT_TASK))
-                        check(hasExtra(KEY_PARENT_PROJECT_TYPE))
-                        check(!hasExtra(KEY_SHORTCUT_ID))
-
-                        val projectKey = ProjectKey.Type
-                                .values()[getIntExtra(KEY_PARENT_PROJECT_TYPE, -1)]
-                                .newKey(getStringExtra(KEY_PARENT_PROJECT_KEY)!!)
-
-                        Hint.Task(TaskKey(projectKey, getStringExtra(KEY_PARENT_TASK)!!))
-                    }
-                    else -> null
-                }
-            }
-
-            removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()
-        }
+        hint = parameters.hint // create, join, shortcut
 
         if (savedInstanceState != null) {
             savedInstanceState.run {
@@ -597,10 +548,9 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
         } else {
-            if (intent.hasExtra(KEY_INITIAL_STATE)) {
-                tmpState = intent.getParcelableExtra(KEY_INITIAL_STATE)!!
+            tmpState = parameters.parentScheduleState // create
+            if (tmpState != null)
                 initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
-            }
         }
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
@@ -1463,5 +1413,98 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
         }
+    }
+
+    sealed class Parameters : Parcelable { // todo create separate package, move to upper level
+
+        companion object {
+
+            fun fromIntent(intent: Intent): Parameters {
+                return when {
+                    intent.hasExtra(KEY_PARAMETERS) -> {
+                        check(intent.action != Intent.ACTION_SEND)
+                        check(!intent.hasExtra(KEY_SHORTCUT_ID))
+                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
+
+                        intent.getParcelableExtra(KEY_PARAMETERS)!!
+                    }
+                    intent.action == Intent.ACTION_SEND -> {
+                        check(!intent.hasExtra(KEY_SHORTCUT_ID))
+                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
+
+                        check(intent.type == "text/plain")
+
+                        val nameHint = intent.getStringExtra(Intent.EXTRA_TEXT)
+                        check(!nameHint.isNullOrEmpty())
+
+                        Share(nameHint)
+                    }
+                    intent.hasExtra(KEY_SHORTCUT_ID) -> {
+                        check(!intent.hasExtra(KEY_PARENT_PROJECT_KEY))
+
+                        Shortcut(TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!))
+                    }
+                    intent.hasExtra(KEY_PARENT_PROJECT_KEY) -> {
+                        check(intent.hasExtra(KEY_PARENT_TASK))
+                        check(intent.hasExtra(KEY_PARENT_PROJECT_TYPE))
+
+                        val projectKey = ProjectKey.Type
+                                .values()[intent.getIntExtra(KEY_PARENT_PROJECT_TYPE, -1)]
+                                .newKey(intent.getStringExtra(KEY_PARENT_PROJECT_KEY)!!)
+
+                        Shortcut(TaskKey(projectKey, intent.getStringExtra(KEY_PARENT_TASK)!!))
+                    }
+                    else -> None
+                }
+            }
+        }
+
+        open val taskKeys: List<TaskKey>? = null
+        open val removeInstanceKeys: List<InstanceKey> = listOf()
+        open val copy = false
+        open val nameHint: String? = null
+        open val taskKey: TaskKey? = null
+        open val hint: Hint? = null
+        open val parentScheduleState: ParentScheduleState? = null
+
+        @Parcelize
+        class Create(
+                override val hint: Hint? = null,
+                override val parentScheduleState: ParentScheduleState? = null,
+                override val nameHint: String? = null
+        ) : Parameters()
+
+        @Parcelize
+        class Join(
+                override val taskKeys: List<TaskKey>,
+                override val hint: Hint? = null,
+                override val removeInstanceKeys: List<InstanceKey> = listOf()
+        ) : Parameters() {
+
+            init {
+                check(taskKeys.size > 1)
+            }
+        }
+
+        @Parcelize
+        class Copy(override val taskKey: TaskKey) : Parameters() {
+
+            override val copy get() = true
+        }
+
+        @Parcelize
+        class Edit(override val taskKey: TaskKey) : Parameters()
+
+        @Parcelize
+        class Shortcut(private val parentTaskKeyHint: TaskKey) : Parameters() {
+
+            override val hint get() = Hint.Task(parentTaskKeyHint)
+        }
+
+        @Parcelize
+        class Share(override val nameHint: String) : Parameters()
+
+        @Parcelize
+        object None : Parameters()
     }
 }

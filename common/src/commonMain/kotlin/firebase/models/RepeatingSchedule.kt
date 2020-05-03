@@ -14,7 +14,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until
 
-    private val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+    override val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
 
     override fun <T : ProjectType> getInstances(
             task: Task<T>,

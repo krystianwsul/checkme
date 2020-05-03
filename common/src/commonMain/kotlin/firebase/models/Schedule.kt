@@ -2,10 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.ScheduleRecord
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -62,6 +59,8 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     }
 
     val scheduleId get() = scheduleRecord.scheduleId
+
+    abstract val oldestVisible: Date?
 
     abstract fun updateOldestVisible(now: ExactTimeStamp)
 }

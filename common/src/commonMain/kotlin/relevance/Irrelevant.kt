@@ -125,6 +125,14 @@ object Irrelevant {
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
+        relevantTasks.forEach {
+            it.schedules.filter { schedule ->
+                !schedule.current(now) && schedule.oldestVisible?.let {
+                    it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!!
+                } == true
+            }.forEach { it.delete() }
+        }
+
         return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })
     }
 

@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
@@ -52,6 +53,8 @@ class SingleSchedule<T : ProjectType>(
 
         return getInstance(task).isVisible(now, hack24)
     }
+
+    override val oldestVisible: Date? = null
 
     override fun updateOldestVisible(now: ExactTimeStamp) = Unit
 

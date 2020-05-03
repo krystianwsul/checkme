@@ -21,7 +21,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
@@ -744,7 +743,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         val parentHint = (hint as? Hint.Task)?.taskKey
-        var parentKey: CreateTaskViewModel.ParentKey? = null
+        val parentKey: CreateTaskViewModel.ParentKey?
 
         if (savedInstanceState?.containsKey(KEY_STATE) == true) {
             savedInstanceState!!.run {
@@ -757,26 +756,31 @@ class CreateTaskActivity : NavBarActivity() {
 
                 noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
             }
+
+            parentKey = null
         } else {
             data.run {
-                if (taskData?.parentKey != null) {
-                    check(parentHint == null)
-                    check(taskKeys == null)
-                    checkNotNull(taskKey)
+                parentKey = when {
+                    taskData?.parentKey != null -> {
+                        check(parentHint == null)
+                        check(taskKeys == null)
+                        checkNotNull(taskKey)
 
-                    parentKey = taskData.parentKey
-                } else if (parentHint != null) {
-                    check(taskKey == null)
+                        taskData.parentKey
+                    }
+                    parentHint != null -> {
+                        check(taskKey == null)
 
-                    MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentHint")
-                    parentKey = CreateTaskViewModel.ParentKey.Task(parentHint)
-                } else {
-                    parentKey = taskKeys?.map { it.projectKey }
-                            ?.distinct()
-                            ?.singleOrNull()
-                            ?.let {
-                                (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
-                            }
+                        CreateTaskViewModel.ParentKey.Task(parentHint)
+                    }
+                    else -> {
+                        taskKeys?.map { it.projectKey }
+                                ?.distinct()
+                                ?.singleOrNull()
+                                ?.let {
+                                    (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                                }
+                    }
                 }
 
                 taskData?.let { note = it.note }

@@ -1127,19 +1127,10 @@ class CreateTaskActivity : NavBarActivity() {
     @Suppress("PrivatePropertyName")
     private inner class CreateTaskAdapter(scheduleEntries: List<ScheduleEntry>) : RecyclerView.Adapter<Holder>() {
 
-        private val nameListener = object : TextWatcher {
-
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
-
-            override fun afterTextChanged(s: Editable) {
-                note = s.toString()
-            }
-        }
-
-        private fun getItems(scheduleEntries: List<ScheduleEntry>) =
-                listOf(Item.Parent) + scheduleEntries.map { Item.Schedule(it) } + Item.NewSchedule
+        private fun getItems(scheduleEntries: List<ScheduleEntry>) = listOf(Item.Parent) +
+                scheduleEntries.map { Item.Schedule(it) } +
+                Item.NewSchedule +
+                Item.Note
 
         private var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -1177,23 +1168,6 @@ class CreateTaskActivity : NavBarActivity() {
             val elementsBeforeSchedules = elementsBeforeSchedules()
 
             when (position) {
-                elementsBeforeSchedules + stateData.state.schedules.size + 1 -> {
-                    (holder as NoteHolder).run {
-                        noteLayout.isHintAnimationEnabled = data != null
-
-                        noteText.run {
-                            setText(note)
-                            removeTextChangedListener(nameListener)
-                            addTextChangedListener(nameListener)
-                            setOnFocusChangeListener { _, hasFocus ->
-                                noteHasFocus = hasFocus
-
-                                if (hasFocus)
-                                    editToolbarAppBar.setExpanded(false)
-                            }
-                        }
-                    }
-                }
                 elementsBeforeSchedules + stateData.state.schedules.size + 2 -> {
                     (holder as ImageHolder).run {
                         fun listener() = CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
@@ -1469,6 +1443,40 @@ class CreateTaskActivity : NavBarActivity() {
                             )
 
                             activity.parametersRelay.accept(parameters)
+                        }
+                    }
+                }
+            }
+        }
+
+        object Note : Item() {
+
+            override val holderType = HolderType.NOTE
+
+            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+                (holder as NoteHolder).apply {
+                    noteLayout.isHintAnimationEnabled = activity.data != null
+
+                    val nameListener = object : TextWatcher {
+
+                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+
+                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+
+                        override fun afterTextChanged(s: Editable) {
+                            activity.note = s.toString()
+                        }
+                    }
+
+                    noteText.run {
+                        setText(activity.note)
+                        removeTextChangedListener(nameListener)
+                        addTextChangedListener(nameListener)
+                        setOnFocusChangeListener { _, hasFocus ->
+                            activity.noteHasFocus = hasFocus
+
+                            if (hasFocus)
+                                activity.editToolbarAppBar.setExpanded(false)
                         }
                     }
                 }

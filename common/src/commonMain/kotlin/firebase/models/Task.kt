@@ -277,12 +277,13 @@ class Task<T : ProjectType>(
                 removeSchedules.addAll(value)
         }
 
+        // using the mock only really makes sense if one single schedule is being replaced by another
         val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
         val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
 
         val oldMockPair = oldSchedules.filterIsInstance<SingleSchedule<T>>()
                 .singleOrNull()
-                ?.let { singleSchedule ->
+                ?.let { singleSchedule -> // mocking isn't necessary if the old instance is virtual
                     singleSchedule.mockInstance?.let { Pair(singleSchedule, it) }
                 }
 

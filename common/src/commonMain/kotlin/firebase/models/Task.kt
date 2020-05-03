@@ -103,24 +103,9 @@ class Task<T : ProjectType>(
             singleScheduleRecord.id
     ) {
 
-        override val customTimeKey get() = instance.instanceCustomTimeKey
-
         override val date get() = instance.instanceDate
 
-        override val hour
-            get() = instance.instanceTime
-                    .timePair
-                    .hourMinute
-                    ?.hour
-
-        override val minute
-            get() = instance.instanceTime
-                    .timePair
-                    .hourMinute
-                    ?.minute
-
-        override val timePair
-            get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+        override val timePair get() = instance.instanceTimePair
 
         override val originalTimePair get() = singleScheduleRecord.timePair
     }

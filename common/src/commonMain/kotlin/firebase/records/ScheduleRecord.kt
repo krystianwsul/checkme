@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
@@ -34,17 +35,19 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     val taskId = taskRecord.id
 
-    open val hour = scheduleJson.hour
-    open val minute = scheduleJson.minute
-
-    open val customTimeKey by lazy {
-        scheduleJson.customTimeId?.let { taskRecord.getCustomTimeKey(it) }
-    }
-
     val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
 
     val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
 
-    open val timePair
-        get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+    open val timePair by lazy {
+        scheduleJson.run {
+            customTimeId?.let {
+                TimePair(taskRecord.getCustomTimeKey(it))
+            } ?: TimePair(HourMinute(hour!!, minute!!))
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST") // I prefer to cast, than to have two entry points for this
+    val customTimeKey
+        get() = timePair.customTimeKey as CustomTimeKey<T>
 }

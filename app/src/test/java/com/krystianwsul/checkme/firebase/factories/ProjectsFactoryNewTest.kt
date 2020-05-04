@@ -385,7 +385,7 @@ class ProjectsFactoryNewTest {
 
         val done = ExactTimeStamp.now
 
-        instance.setDone("uuid", mockk(relaxed = true), true, done)
+        instance.setDone(mockk(relaxed = true), true, done)
         projectsFactory.save()
 
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
@@ -553,6 +553,92 @@ class ProjectsFactoryNewTest {
                         .single()
                         .name,
                 name
+        )
+    }
+
+    @Test
+    fun testChangeSharedProjectRemoteAddRemoteTaskWithInstances() {
+        val privateProjectKey = ProjectKey.Private("privateProjectKey")
+        privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(), privateProjectKey.key))
+
+        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
+        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
+        )))
+
+        initProjectsFactory()
+
+        val name = "name"
+
+        emissionChecker.checkRemote {
+            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
+                    name = name,
+                    users = mutableMapOf(
+                            userInfo.key.key to mockk(relaxed = true) {
+                                every { tokens } returns mutableMapOf()
+                            }
+                    )
+            ))
+        }
+        assertEquals(
+                projectsFactory.sharedProjects
+                        .values
+                        .single()
+                        .name,
+                name
+        )
+
+        val taskKey = TaskKey(privateProjectKey, "taskKey")
+
+        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
+                users = mutableMapOf(
+                        userInfo.key.key to mockk(relaxed = true) {
+                            every { tokens } returns mutableMapOf()
+                        }
+                ),
+                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))
+        ))
+
+        val date = Date.today()
+        val hourMinute = HourMinute.now
+        val done = ExactTimeStamp.now
+        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
+
+        emissionChecker.checkRemote {
+            factoryProvider.projectProvider.acceptInstance(
+                    sharedProjectKey.key,
+                    taskKey.taskId,
+                    mapOf(
+                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
+                                    Pair(
+                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
+                                            InstanceJson(done = done.long)
+                                    )
+                            )
+                    )
+            )
+        }
+        assertEquals(
+                1,
+                projectsFactory.sharedProjects
+                        .values
+                        .single()
+                        .tasks
+                        .size
+        )
+        assertEquals(
+                1,
+                projectsFactory.sharedProjects
+                        .values
+                        .single()
+                        .tasks
+                        .single()
+                        .existingInstances
+                        .size
         )
     }
 

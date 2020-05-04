@@ -255,7 +255,7 @@ class CreateTaskActivity : NavBarActivity() {
                         else
                             null
 
-                        val createScheduleParameters = Delegate.CreateScheduleParameters(
+                        val createWithScheduleParameters = Delegate.CreateWithScheduleParameters(
                                 data!!.dataId,
                                 name,
                                 scheduleDatas,
@@ -264,83 +264,22 @@ class CreateTaskActivity : NavBarActivity() {
                                 writeImagePath
                         )
 
-                        delegate.createScheduleTask(createScheduleParameters)
+                        delegate.createTaskWithSchedule(createWithScheduleParameters)
                     }
                     hasValueParentTask() -> {
                         checkNotNull(stateData.parent)
 
                         val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
-                        if (intent.action == Intent.ACTION_SEND)
-                            ShortcutManager.addShortcut(parentTaskKey)
+                        val createWithParentParameters = Delegate.CreateWithParentParameters(
+                                data!!.dataId,
+                                parentTaskKey,
+                                name,
+                                note,
+                                writeImagePath
+                        )
 
-                        when {
-                            copy -> {
-                                checkNotNull(data!!.taskData)
-                                check(taskKeys == null)
-                                check(removeInstanceKeys.isEmpty())
-
-                                DomainFactory.instance
-                                        .createChildTask(
-                                                data!!.dataId,
-                                                SaveService.Source.GUI,
-                                                parentTaskKey,
-                                                name,
-                                                note,
-                                                writeImagePath?.value,
-                                                taskKey!!
-                                        )
-                                        .also { createdTaskKey = it }
-                            }
-                            taskKey != null -> {
-                                checkNotNull(data!!.taskData)
-                                check(taskKeys == null)
-                                check(removeInstanceKeys.isEmpty())
-
-                                DomainFactory.instance.updateChildTask(
-                                        ExactTimeStamp.now,
-                                        data!!.dataId,
-                                        SaveService.Source.GUI,
-                                        taskKey!!,
-                                        name,
-                                        parentTaskKey,
-                                        note,
-                                        writeImagePath
-                                )
-                            }
-                            taskKeys != null -> {
-                                check(data!!.taskData == null)
-                                check(taskKeys!!.size > 1)
-
-                                DomainFactory.instance
-                                        .createJoinChildTask(
-                                                data!!.dataId,
-                                                SaveService.Source.GUI,
-                                                parentTaskKey,
-                                                name,
-                                                taskKeys!!,
-                                                note,
-                                                writeImagePath?.value,
-                                                removeInstanceKeys
-                                        )
-                                        .also { createdTaskKey = it }
-                            }
-                            else -> {
-                                check(data!!.taskData == null)
-                                check(removeInstanceKeys.isEmpty())
-
-                                DomainFactory.instance
-                                        .createChildTask(
-                                                data!!.dataId,
-                                                SaveService.Source.GUI,
-                                                parentTaskKey,
-                                                name,
-                                                note,
-                                                writeImagePath?.value
-                                        )
-                                        .also { createdTaskKey = it }
-                            }
-                        }
+                        delegate.createTaskWithParent(createWithParentParameters)
                     }
                     else -> {  // no reminder
                         val projectId = if (hasValueParentInGeneral())
@@ -1331,7 +1270,11 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        class CreateScheduleParameters(
+        fun createTaskWithSchedule(createWithScheduleParameters: CreateWithScheduleParameters): TaskKey
+
+        fun createTaskWithParent(createWithParentParameters: CreateWithParentParameters): TaskKey
+
+        class CreateWithScheduleParameters(
                 val dataId: Int,
                 val name: String,
                 val scheduleDatas: List<ScheduleData>,
@@ -1340,21 +1283,41 @@ class CreateTaskActivity : NavBarActivity() {
                 val writeImagePath: NullableWrapper<Pair<String, Uri>>?
         )
 
-        fun createScheduleTask(createScheduleParameters: CreateScheduleParameters): TaskKey
+        class CreateWithParentParameters(
+                val dataId: Int,
+                val parentTaskKey: TaskKey,
+                val name: String,
+                val note: String?,
+                val writeImagePath: NullableWrapper<Pair<String, Uri>>?
+        )
     }
 
     private class CopyDelegate(private val parameters: CreateTaskParameters.Copy) : Delegate {
 
-        override fun createScheduleTask(createScheduleParameters: Delegate.CreateScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createScheduleParameters.dataId,
+                            createWithScheduleParameters.dataId,
                             SaveService.Source.GUI,
-                            createScheduleParameters.name,
-                            createScheduleParameters.scheduleDatas,
-                            createScheduleParameters.note,
-                            createScheduleParameters.projectKey,
-                            createScheduleParameters.writeImagePath?.value,
+                            createWithScheduleParameters.name,
+                            createWithScheduleParameters.scheduleDatas,
+                            createWithScheduleParameters.note,
+                            createWithScheduleParameters.projectKey,
+                            createWithScheduleParameters.writeImagePath?.value,
+                            parameters.taskKey
+                    )
+                    .also { createdTaskKey = it }
+        }
+
+        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+            return DomainFactory.instance
+                    .createChildTask(
+                            createWithParentParameters.dataId,
+                            SaveService.Source.GUI,
+                            createWithParentParameters.parentTaskKey,
+                            createWithParentParameters.name,
+                            createWithParentParameters.note,
+                            createWithParentParameters.writeImagePath?.value,
                             parameters.taskKey
                     )
                     .also { createdTaskKey = it }
@@ -1363,34 +1326,62 @@ class CreateTaskActivity : NavBarActivity() {
 
     private class EditDelegate(private val parameters: CreateTaskParameters.Edit) : Delegate {
 
-        override fun createScheduleTask(createScheduleParameters: Delegate.CreateScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
             return DomainFactory.instance.updateScheduleTask(
-                    createScheduleParameters.dataId,
+                    createWithScheduleParameters.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
-                    createScheduleParameters.name,
-                    createScheduleParameters.scheduleDatas,
-                    createScheduleParameters.note,
-                    createScheduleParameters.projectKey,
-                    createScheduleParameters.writeImagePath
+                    createWithScheduleParameters.name,
+                    createWithScheduleParameters.scheduleDatas,
+                    createWithScheduleParameters.note,
+                    createWithScheduleParameters.projectKey,
+                    createWithScheduleParameters.writeImagePath
+            )
+        }
+
+        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+            return DomainFactory.instance.updateChildTask(
+                    ExactTimeStamp.now,
+                    createWithParentParameters.dataId,
+                    SaveService.Source.GUI,
+                    parameters.taskKey,
+                    createWithParentParameters.name,
+                    createWithParentParameters.parentTaskKey,
+                    createWithParentParameters.note,
+                    createWithParentParameters.writeImagePath
             )
         }
     }
 
     private class JoinDelegate(private val parameters: CreateTaskParameters.Join) : Delegate {
 
-        override fun createScheduleTask(createScheduleParameters: Delegate.CreateScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
             return DomainFactory.instance
                     .createScheduleJoinRootTask(
                             ExactTimeStamp.now,
-                            createScheduleParameters.dataId,
+                            createWithScheduleParameters.dataId,
                             SaveService.Source.GUI,
-                            createScheduleParameters.name,
-                            createScheduleParameters.scheduleDatas,
+                            createWithScheduleParameters.name,
+                            createWithScheduleParameters.scheduleDatas,
                             parameters.taskKeys,
-                            createScheduleParameters.note,
-                            createScheduleParameters.projectKey,
-                            createScheduleParameters.writeImagePath?.value,
+                            createWithScheduleParameters.note,
+                            createWithScheduleParameters.projectKey,
+                            createWithScheduleParameters.writeImagePath?.value,
+                            parameters.removeInstanceKeys
+                    )
+                    .also { createdTaskKey = it }
+        }
+
+        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+            return DomainFactory.instance
+                    .createJoinChildTask(
+                            createWithParentParameters.dataId,
+                            SaveService.Source.GUI,
+                            createWithParentParameters.parentTaskKey,
+                            createWithParentParameters.name,
+                            parameters.taskKeys,
+                            createWithParentParameters.note,
+                            createWithParentParameters.writeImagePath?.value,
                             parameters.removeInstanceKeys
                     )
                     .also { createdTaskKey = it }
@@ -1399,16 +1390,32 @@ class CreateTaskActivity : NavBarActivity() {
 
     private class CreateDelegate(private val parameters: CreateTaskParameters) : Delegate {
 
-        override fun createScheduleTask(createScheduleParameters: Delegate.CreateScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createScheduleParameters.dataId,
+                            createWithScheduleParameters.dataId,
                             SaveService.Source.GUI,
-                            createScheduleParameters.name,
-                            createScheduleParameters.scheduleDatas,
-                            createScheduleParameters.note,
-                            createScheduleParameters.projectKey,
-                            createScheduleParameters.writeImagePath?.value
+                            createWithScheduleParameters.name,
+                            createWithScheduleParameters.scheduleDatas,
+                            createWithScheduleParameters.note,
+                            createWithScheduleParameters.projectKey,
+                            createWithScheduleParameters.writeImagePath?.value
+                    )
+                    .also { createdTaskKey = it }
+        }
+
+        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+            if (parameters.fromSendIntent)
+                ShortcutManager.addShortcut(createWithParentParameters.parentTaskKey)
+
+            return DomainFactory.instance
+                    .createChildTask(
+                            createWithParentParameters.dataId,
+                            SaveService.Source.GUI,
+                            createWithParentParameters.parentTaskKey,
+                            createWithParentParameters.name,
+                            createWithParentParameters.note,
+                            createWithParentParameters.writeImagePath?.value
                     )
                     .also { createdTaskKey = it }
         }

@@ -65,6 +65,7 @@ sealed class CreateTaskParameters : Parcelable {
     open val taskKey: TaskKey? = null
     open val hint: CreateTaskActivity.Hint? = null
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
+    open val fromSendIntent: Boolean = false
 
     @Parcelize
     class Create(
@@ -104,6 +105,8 @@ sealed class CreateTaskParameters : Parcelable {
     class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
 
         override val hint get() = parentTaskKeyHint?.let { CreateTaskActivity.Hint.Task(parentTaskKeyHint) }
+
+        override val fromSendIntent get() = true
     }
 
     @Parcelize

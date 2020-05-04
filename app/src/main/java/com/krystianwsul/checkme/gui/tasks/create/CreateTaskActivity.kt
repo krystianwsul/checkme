@@ -544,6 +544,8 @@ class CreateTaskActivity : NavBarActivity() {
                 initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
         }
 
+        val delegate = Delegate.fromParameters(parameters)
+
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
         if (!noteHasFocus)// keyboard hack
@@ -1368,4 +1370,30 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
     }
+
+    private interface Delegate {
+
+        companion object {
+
+            fun fromParameters(parameters: CreateTaskParameters): Delegate {
+                return when (parameters) {
+                    is CreateTaskParameters.Copy -> CopyDelegate(parameters)
+                    is CreateTaskParameters.Edit -> EditDelegate(parameters)
+                    is CreateTaskParameters.Join -> JoinDelegate(parameters)
+                    is CreateTaskParameters.Create,
+                    is CreateTaskParameters.Share,
+                    is CreateTaskParameters.Shortcut,
+                    CreateTaskParameters.None -> CreateDelegate(parameters)
+                }
+            }
+        }
+    }
+
+    private class CopyDelegate(private val parameters: CreateTaskParameters.Copy) : Delegate
+
+    private class EditDelegate(private val parameters: CreateTaskParameters.Edit) : Delegate
+
+    private class JoinDelegate(private val parameters: CreateTaskParameters.Join) : Delegate
+
+    private class CreateDelegate(private val parameters: CreateTaskParameters) : Delegate
 }

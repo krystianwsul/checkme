@@ -118,7 +118,6 @@ class CreateTaskActivity : NavBarActivity() {
 
     private var taskKeys: List<TaskKey>? = null
     private lateinit var removeInstanceKeys: List<InstanceKey>
-    private var copy = false
     private var nameHint: String? = null
     private var taskKey: TaskKey? = null
     private var hint: Hint? = null
@@ -325,8 +324,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         taskKeys = parameters.taskKeys // join
         removeInstanceKeys = parameters.removeInstanceKeys
-
-        copy = parameters.copy // copy
 
         nameHint = parameters.nameHint // create, share
 
@@ -625,6 +622,8 @@ class CreateTaskActivity : NavBarActivity() {
     private fun updateError(): Boolean {
         checkNotNull(data)
 
+        val data = data!!
+
         var hasError = false
 
         if (TextUtils.isEmpty(toolbarEditText.text)) {
@@ -639,16 +638,13 @@ class CreateTaskActivity : NavBarActivity() {
             if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
-            if (!copy && data?.taskData?.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
-                if (data!!.taskData == null) {
-                    continue
-                } else {
-                    if (data!!.taskData!!.parentKey == stateData.state.parentKey) {
+            val taskData = data.taskData!!
+
+            if (delegate.isEditing && taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
+                if (taskData.parentKey == stateData.state.parentKey) {
                         continue
                     } else {
-                        val initialProject = data!!.taskData!!
-                                .parentKey
-                                ?.getProjectId()
+                    val initialProject = taskData.parentKey?.getProjectId()
 
                         val finalProject = stateData.parent
                                 ?.parentKey
@@ -657,31 +653,30 @@ class CreateTaskActivity : NavBarActivity() {
                         if (initialProject == finalProject)
                             continue
                     }
-                }
             }
 
-            if (scheduleEntry.scheduleDataWrapper.scheduleData.date > Date.today())
+            val date = scheduleEntry.scheduleDataWrapper
+                    .scheduleData
+                    .date
+
+            if (date > Date.today())
                 continue
 
-            if (scheduleEntry.scheduleDataWrapper.scheduleData.date < Date.today()) {
+            if (date < Date.today()) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date)
 
                 hasError = true
                 continue
             }
 
-            val timePair = scheduleEntry.scheduleDataWrapper.timePair
-            val hourMinute = if (timePair.customTimeKey != null) {
-                check(timePair.hourMinute == null)
-
-                data!!.customTimeDatas
-                        .getValue(timePair.customTimeKey!!)
-                        .hourMinutes[scheduleEntry.scheduleDataWrapper.scheduleData.date.dayOfWeek]
-            } else {
-                checkNotNull(timePair.hourMinute)
-
-                timePair.hourMinute
-            }!!
+            val hourMinute = scheduleEntry.scheduleDataWrapper
+                    .timePair
+                    .run {
+                        customTimeKey?.let { data.customTimeDatas.getValue(it) }
+                                ?.hourMinutes
+                                ?.getValue(date.dayOfWeek)
+                                ?: hourMinute!!
+                    }
 
             if (hourMinute <= HourMinute.now) {
                 setScheduleEntryError(scheduleEntry, R.string.error_time)
@@ -1190,6 +1185,8 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
+        val isEditing get() = false
+
         fun createTaskWithSchedule(
                 createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
@@ -1271,6 +1268,8 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private class EditDelegate(private val parameters: CreateTaskParameters.Edit) : Delegate {
+
+        override val isEditing = true
 
         override fun createTaskWithSchedule(
                 createParameters: Delegate.CreateParameters,

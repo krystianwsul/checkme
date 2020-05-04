@@ -60,7 +60,6 @@ sealed class CreateTaskParameters : Parcelable {
 
     open val taskKeys: List<TaskKey>? = null
     open val removeInstanceKeys: List<InstanceKey> = listOf()
-    open val copy = false
     open val nameHint: String? = null
     open val taskKey: TaskKey? = null
     open val hint: CreateTaskActivity.Hint? = null
@@ -87,10 +86,7 @@ sealed class CreateTaskParameters : Parcelable {
     }
 
     @Parcelize
-    class Copy(override val taskKey: TaskKey) : CreateTaskParameters() {
-
-        override val copy get() = true
-    }
+    class Copy(override val taskKey: TaskKey) : CreateTaskParameters()
 
     @Parcelize
     class Edit(override val taskKey: TaskKey) : CreateTaskParameters()

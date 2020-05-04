@@ -246,56 +246,34 @@ class CreateTaskActivity : NavBarActivity() {
 
                 val writeImagePath = imageUrl.value!!.writeImagePath
 
+                val createParameters = Delegate.CreateParameters(
+                        data!!.dataId,
+                        name,
+                        note,
+                        writeImagePath
+                )
+
+                val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
+
                 val taskKey: TaskKey = when {
                     hasValueSchedule() -> {
                         check(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral())
-                            (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId
-                        else
-                            null
-
-                        val createWithScheduleParameters = Delegate.CreateWithScheduleParameters(
-                                data!!.dataId,
-                                name,
-                                scheduleDatas,
-                                note,
-                                projectId,
-                                writeImagePath
-                        )
-
-                        delegate.createTaskWithSchedule(createWithScheduleParameters)
+                        delegate.createTaskWithSchedule(createParameters, scheduleDatas, projectId)
                     }
                     hasValueParentTask() -> {
                         checkNotNull(stateData.parent)
+                        check(projectId == null)
+                        check(scheduleDatas.isEmpty())
 
                         val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
-                        val createWithParentParameters = Delegate.CreateWithParentParameters(
-                                data!!.dataId,
-                                parentTaskKey,
-                                name,
-                                note,
-                                writeImagePath
-                        )
-
-                        delegate.createTaskWithParent(createWithParentParameters)
+                        delegate.createTaskWithParent(createParameters, parentTaskKey)
                     }
                     else -> {  // no reminder
-                        val projectId = if (hasValueParentInGeneral())
-                            (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId
-                        else
-                            null
+                        check(scheduleDatas.isEmpty())
 
-                        val createWithoutReminderParameters = Delegate.CreateWithoutReminderParameters(
-                                data!!.dataId,
-                                name,
-                                note,
-                                projectId,
-                                writeImagePath
-                        )
-
-                        delegate.createTaskWithoutReminder(createWithoutReminderParameters)
+                        delegate.createTaskWithoutReminder(createParameters, projectId)
                     }
                 }
 
@@ -816,8 +794,6 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private fun hasValueParentInGeneral() = stateData.parent != null
-
     private fun hasValueParentTask() = stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task
 
     private fun hasValueSchedule() = stateData.state
@@ -1214,78 +1190,80 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        fun createTaskWithSchedule(createWithScheduleParameters: CreateWithScheduleParameters): TaskKey
+        fun createTaskWithSchedule(
+                createParameters: CreateParameters,
+                scheduleDatas: List<ScheduleData>,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey
 
-        fun createTaskWithParent(createWithParentParameters: CreateWithParentParameters): TaskKey
+        fun createTaskWithParent(
+                createParameters: CreateParameters,
+                parentTaskKey: TaskKey
+        ): TaskKey
 
-        fun createTaskWithoutReminder(createWithoutReminderParameters: CreateWithoutReminderParameters): TaskKey
+        fun createTaskWithoutReminder(
+                createParameters: CreateParameters,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey
 
-        class CreateWithScheduleParameters( // todo create merge all of these
-                val dataId: Int,
-                val name: String,
-                val scheduleDatas: List<ScheduleData>,
-                val note: String?,
-                val projectKey: ProjectKey.Shared?,
-                val writeImagePath: NullableWrapper<Pair<String, Uri>>?
-        )
-
-        class CreateWithParentParameters(
-                val dataId: Int,
-                val parentTaskKey: TaskKey,
-                val name: String,
-                val note: String?,
-                val writeImagePath: NullableWrapper<Pair<String, Uri>>?
-        )
-
-        class CreateWithoutReminderParameters(
+        class CreateParameters(
                 val dataId: Int,
                 val name: String,
                 val note: String?,
-                val projectKey: ProjectKey.Shared?,
                 val writeImagePath: NullableWrapper<Pair<String, Uri>>?
         )
     }
 
     private class CopyDelegate(private val parameters: CreateTaskParameters.Copy) : Delegate {
 
-        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(
+                createParameters: Delegate.CreateParameters,
+                scheduleDatas: List<ScheduleData>,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createWithScheduleParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithScheduleParameters.name,
-                            createWithScheduleParameters.scheduleDatas,
-                            createWithScheduleParameters.note,
-                            createWithScheduleParameters.projectKey,
-                            createWithScheduleParameters.writeImagePath?.value,
+                            createParameters.name,
+                            scheduleDatas,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value,
                             parameters.taskKey
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+        override fun createTaskWithParent(
+                createParameters: Delegate.CreateParameters,
+                parentTaskKey: TaskKey
+        ): TaskKey {
             return DomainFactory.instance
                     .createChildTask(
-                            createWithParentParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithParentParameters.parentTaskKey,
-                            createWithParentParameters.name,
-                            createWithParentParameters.note,
-                            createWithParentParameters.writeImagePath?.value,
+                            parentTaskKey,
+                            createParameters.name,
+                            createParameters.note,
+                            createParameters.writeImagePath?.value,
                             parameters.taskKey
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithoutReminder(createWithoutReminderParameters: Delegate.CreateWithoutReminderParameters): TaskKey {
+        override fun createTaskWithoutReminder(
+                createParameters: Delegate.CreateParameters,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createRootTask(
-                            createWithoutReminderParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithoutReminderParameters.name,
-                            createWithoutReminderParameters.note,
-                            createWithoutReminderParameters.projectKey,
-                            createWithoutReminderParameters.writeImagePath?.value,
+                            createParameters.name,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value,
                             parameters.taskKey
                     )
                     .also { createdTaskKey = it }
@@ -1294,89 +1272,109 @@ class CreateTaskActivity : NavBarActivity() {
 
     private class EditDelegate(private val parameters: CreateTaskParameters.Edit) : Delegate {
 
-        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(
+                createParameters: Delegate.CreateParameters,
+                scheduleDatas: List<ScheduleData>,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance.updateScheduleTask(
-                    createWithScheduleParameters.dataId,
+                    createParameters.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
-                    createWithScheduleParameters.name,
-                    createWithScheduleParameters.scheduleDatas,
-                    createWithScheduleParameters.note,
-                    createWithScheduleParameters.projectKey,
-                    createWithScheduleParameters.writeImagePath
+                    createParameters.name,
+                    scheduleDatas,
+                    createParameters.note,
+                    projectKey,
+                    createParameters.writeImagePath
             )
         }
 
-        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+        override fun createTaskWithParent(
+                createParameters: Delegate.CreateParameters,
+                parentTaskKey: TaskKey
+        ): TaskKey {
             return DomainFactory.instance.updateChildTask(
                     ExactTimeStamp.now,
-                    createWithParentParameters.dataId,
+                    createParameters.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
-                    createWithParentParameters.name,
-                    createWithParentParameters.parentTaskKey,
-                    createWithParentParameters.note,
-                    createWithParentParameters.writeImagePath
+                    createParameters.name,
+                    parentTaskKey,
+                    createParameters.note,
+                    createParameters.writeImagePath
             )
         }
 
-        override fun createTaskWithoutReminder(createWithoutReminderParameters: Delegate.CreateWithoutReminderParameters): TaskKey {
+        override fun createTaskWithoutReminder(
+                createParameters: Delegate.CreateParameters,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance.updateRootTask(
-                    createWithoutReminderParameters.dataId,
+                    createParameters.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
-                    createWithoutReminderParameters.name,
-                    createWithoutReminderParameters.note,
-                    createWithoutReminderParameters.projectKey,
-                    createWithoutReminderParameters.writeImagePath
+                    createParameters.name,
+                    createParameters.note,
+                    projectKey,
+                    createParameters.writeImagePath
             )
         }
     }
 
     private class JoinDelegate(private val parameters: CreateTaskParameters.Join) : Delegate {
 
-        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(
+                createParameters: Delegate.CreateParameters,
+                scheduleDatas: List<ScheduleData>,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createScheduleJoinRootTask(
                             ExactTimeStamp.now,
-                            createWithScheduleParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithScheduleParameters.name,
-                            createWithScheduleParameters.scheduleDatas,
+                            createParameters.name,
+                            scheduleDatas,
                             parameters.taskKeys,
-                            createWithScheduleParameters.note,
-                            createWithScheduleParameters.projectKey,
-                            createWithScheduleParameters.writeImagePath?.value,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value,
                             parameters.removeInstanceKeys
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+        override fun createTaskWithParent(
+                createParameters: Delegate.CreateParameters,
+                parentTaskKey: TaskKey
+        ): TaskKey {
             return DomainFactory.instance
                     .createJoinChildTask(
-                            createWithParentParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithParentParameters.parentTaskKey,
-                            createWithParentParameters.name,
+                            parentTaskKey,
+                            createParameters.name,
                             parameters.taskKeys,
-                            createWithParentParameters.note,
-                            createWithParentParameters.writeImagePath?.value,
+                            createParameters.note,
+                            createParameters.writeImagePath?.value,
                             parameters.removeInstanceKeys
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithoutReminder(createWithoutReminderParameters: Delegate.CreateWithoutReminderParameters): TaskKey {
+        override fun createTaskWithoutReminder(
+                createParameters: Delegate.CreateParameters,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createJoinRootTask(
-                            createWithoutReminderParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithoutReminderParameters.name,
+                            createParameters.name,
                             parameters.taskKeys,
-                            createWithoutReminderParameters.note,
-                            createWithoutReminderParameters.projectKey,
-                            createWithoutReminderParameters.writeImagePath?.value,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value,
                             parameters.removeInstanceKeys
                     )
                     .also { createdTaskKey = it }
@@ -1385,45 +1383,55 @@ class CreateTaskActivity : NavBarActivity() {
 
     private class CreateDelegate(private val parameters: CreateTaskParameters) : Delegate {
 
-        override fun createTaskWithSchedule(createWithScheduleParameters: Delegate.CreateWithScheduleParameters): TaskKey {
+        override fun createTaskWithSchedule(
+                createParameters: Delegate.CreateParameters,
+                scheduleDatas: List<ScheduleData>,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createWithScheduleParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithScheduleParameters.name,
-                            createWithScheduleParameters.scheduleDatas,
-                            createWithScheduleParameters.note,
-                            createWithScheduleParameters.projectKey,
-                            createWithScheduleParameters.writeImagePath?.value
+                            createParameters.name,
+                            scheduleDatas,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithParent(createWithParentParameters: Delegate.CreateWithParentParameters): TaskKey {
+        override fun createTaskWithParent(
+                createParameters: Delegate.CreateParameters,
+                parentTaskKey: TaskKey
+        ): TaskKey {
             if (parameters.fromSendIntent)
-                ShortcutManager.addShortcut(createWithParentParameters.parentTaskKey)
+                ShortcutManager.addShortcut(parentTaskKey)
 
             return DomainFactory.instance
                     .createChildTask(
-                            createWithParentParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithParentParameters.parentTaskKey,
-                            createWithParentParameters.name,
-                            createWithParentParameters.note,
-                            createWithParentParameters.writeImagePath?.value
+                            parentTaskKey,
+                            createParameters.name,
+                            createParameters.note,
+                            createParameters.writeImagePath?.value
                     )
                     .also { createdTaskKey = it }
         }
 
-        override fun createTaskWithoutReminder(createWithoutReminderParameters: Delegate.CreateWithoutReminderParameters): TaskKey {
+        override fun createTaskWithoutReminder(
+                createParameters: Delegate.CreateParameters,
+                projectKey: ProjectKey.Shared?
+        ): TaskKey {
             return DomainFactory.instance
                     .createRootTask(
-                            createWithoutReminderParameters.dataId,
+                            createParameters.dataId,
                             SaveService.Source.GUI,
-                            createWithoutReminderParameters.name,
-                            createWithoutReminderParameters.note,
-                            createWithoutReminderParameters.projectKey,
-                            createWithoutReminderParameters.writeImagePath?.value
+                            createParameters.name,
+                            createParameters.note,
+                            projectKey,
+                            createParameters.writeImagePath?.value
                     )
                     .also { createdTaskKey = it }
         }

@@ -60,7 +60,6 @@ sealed class CreateTaskParameters : Parcelable {
 
     open val taskKeys: List<TaskKey>? = null
     open val removeInstanceKeys: List<InstanceKey> = listOf()
-    open val nameHint: String? = null
     open val taskKey: TaskKey? = null
     open val hint: CreateTaskActivity.Hint? = null
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
@@ -70,7 +69,7 @@ sealed class CreateTaskParameters : Parcelable {
     class Create(
             override val hint: CreateTaskActivity.Hint? = null,
             override val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
-            override val nameHint: String? = null
+            val nameHint: String? = null
     ) : CreateTaskParameters()
 
     @Parcelize
@@ -98,7 +97,7 @@ sealed class CreateTaskParameters : Parcelable {
     }
 
     @Parcelize
-    class Share(override val nameHint: String, private val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
+    class Share(val nameHint: String, private val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
 
         override val hint get() = parentTaskKeyHint?.let { CreateTaskActivity.Hint.Task(parentTaskKeyHint) }
 

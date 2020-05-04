@@ -119,7 +119,6 @@ class CreateTaskActivity : NavBarActivity() {
     private lateinit var parameters: CreateTaskParameters
     private var taskKeys: List<TaskKey>? = null
     private lateinit var removeInstanceKeys: List<InstanceKey>
-    private var nameHint: String? = null // todo create remove next
     private var taskKey: TaskKey? = null
     private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
@@ -326,8 +325,6 @@ class CreateTaskActivity : NavBarActivity() {
         taskKeys = parameters.taskKeys // join
         removeInstanceKeys = parameters.removeInstanceKeys
 
-        nameHint = parameters.nameHint // create, share
-
         taskKey = parameters.taskKey // edit, copy
 
         hint = parameters.hint // create, join, shortcut
@@ -473,18 +470,8 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         toolbarEditText.run {
-            if (savedInstanceState == null) {
-                if (data.taskData != null) {
-                    checkNotNull(taskKey)
-
-                    setText(data.taskData.name)
-                } else if (!TextUtils.isEmpty(nameHint)) {
-                    check(taskKey == null)
-                    check(taskKeys == null)
-
-                    setText(nameHint)
-                }
-            }
+            if (savedInstanceState == null)
+                setText(delegate.initialName)
 
             addTextChangedListener(object : TextWatcher {
 
@@ -1152,6 +1139,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         abstract var data: CreateTaskViewModel.Data
 
+        open val initialName: String? = null
+
         open fun skipScheduleCheck(
                 scheduleEntry: ScheduleEntry,
                 parentKey: CreateTaskViewModel.ParentKey?
@@ -1200,6 +1189,10 @@ class CreateTaskActivity : NavBarActivity() {
             private val parameters: CreateTaskParameters.Copy,
             override var data: CreateTaskViewModel.Data
     ) : Delegate() {
+
+        private val taskData get() = data.taskData!!
+
+        override val initialName get() = taskData.name
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
@@ -1261,6 +1254,8 @@ class CreateTaskActivity : NavBarActivity() {
     ) : Delegate() {
 
         private val taskData get() = data.taskData!!
+
+        override val initialName get() = taskData.name
 
         override fun skipScheduleCheck(scheduleEntry: ScheduleEntry, parentKey: CreateTaskViewModel.ParentKey?): Boolean {
             if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
@@ -1400,6 +1395,26 @@ class CreateTaskActivity : NavBarActivity() {
             private val parameters: CreateTaskParameters,
             override var data: CreateTaskViewModel.Data
     ) : Delegate() {
+
+        override val initialName: String?
+
+        init {
+            when (parameters) {
+                is CreateTaskParameters.Create -> {
+                    initialName = parameters.nameHint
+                }
+                is CreateTaskParameters.Share -> {
+                    initialName = parameters.nameHint
+                }
+                is CreateTaskParameters.Shortcut -> {
+                    initialName = null
+                }
+                CreateTaskParameters.None -> {
+                    initialName = null
+                }
+                else -> throw IllegalArgumentException()
+            }
+        }
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,

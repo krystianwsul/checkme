@@ -59,7 +59,6 @@ sealed class CreateTaskParameters : Parcelable {
     }
 
     open val taskKeys: List<TaskKey>? = null
-    open val removeInstanceKeys: List<InstanceKey> = listOf()
     open val taskKey: TaskKey? = null
     open val hint: CreateTaskActivity.Hint? = null
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
@@ -76,7 +75,7 @@ sealed class CreateTaskParameters : Parcelable {
     class Join(
             override val taskKeys: List<TaskKey>,
             override val hint: CreateTaskActivity.Hint? = null,
-            override val removeInstanceKeys: List<InstanceKey> = listOf()
+            val removeInstanceKeys: List<InstanceKey> = listOf()
     ) : CreateTaskParameters() {
 
         init {

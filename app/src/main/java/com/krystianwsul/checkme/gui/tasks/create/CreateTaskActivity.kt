@@ -118,7 +118,6 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var parameters: CreateTaskParameters
     private var taskKeys: List<TaskKey>? = null
-    private lateinit var removeInstanceKeys: List<InstanceKey>
     private var taskKey: TaskKey? = null
     private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
@@ -323,7 +322,6 @@ class CreateTaskActivity : NavBarActivity() {
         parameters = CreateTaskParameters.fromIntent(intent)
 
         taskKeys = parameters.taskKeys // join
-        removeInstanceKeys = parameters.removeInstanceKeys
 
         taskKey = parameters.taskKey // edit, copy
 

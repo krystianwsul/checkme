@@ -116,9 +116,10 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val discardDialogListener = this::finish
 
+    private lateinit var parameters: CreateTaskParameters
     private var taskKeys: List<TaskKey>? = null
     private lateinit var removeInstanceKeys: List<InstanceKey>
-    private var nameHint: String? = null
+    private var nameHint: String? = null // todo create remove next
     private var taskKey: TaskKey? = null
     private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
@@ -320,7 +321,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
-        val parameters = CreateTaskParameters.fromIntent(intent)
+        parameters = CreateTaskParameters.fromIntent(intent)
 
         taskKeys = parameters.taskKeys // join
         removeInstanceKeys = parameters.removeInstanceKeys
@@ -344,8 +345,6 @@ class CreateTaskActivity : NavBarActivity() {
             if (tmpState != null)
                 initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
         }
-
-        delegate = Delegate.fromParameters(parameters)
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
@@ -457,6 +456,11 @@ class CreateTaskActivity : NavBarActivity() {
 
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         this.data = data
+
+        if (!this::delegate.isInitialized)
+            delegate = Delegate.fromParameters(parameters, data)
+        else
+            delegate.data = data
 
         data.taskData
                 ?.imageState
@@ -614,15 +618,8 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private fun CreateTaskViewModel.ParentKey.getProjectId() = when (this) {
-        is CreateTaskViewModel.ParentKey.Project -> projectId
-        is CreateTaskViewModel.ParentKey.Task -> findTaskData(this).projectId
-    }
-
     private fun updateError(): Boolean {
-        checkNotNull(data)
-
-        val data = data!!
+        val data = delegate.data
 
         var hasError = false
 
@@ -638,22 +635,8 @@ class CreateTaskActivity : NavBarActivity() {
             if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
-            val taskData = data.taskData!!
-
-            if (delegate.isEditing && taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
-                if (taskData.parentKey == stateData.state.parentKey) {
-                        continue
-                    } else {
-                    val initialProject = taskData.parentKey?.getProjectId()
-
-                        val finalProject = stateData.parent
-                                ?.parentKey
-                                ?.getProjectId()
-
-                        if (initialProject == finalProject)
-                            continue
-                    }
-            }
+            if (delegate.skipScheduleCheck(scheduleEntry, stateData.state.parentKey))
+                continue
 
             val date = scheduleEntry.scheduleDataWrapper
                     .scheduleData
@@ -732,24 +715,6 @@ class CreateTaskActivity : NavBarActivity() {
         return false
     }
 
-    private fun findTaskData(parentKey: CreateTaskViewModel.ParentKey): CreateTaskViewModel.ParentTreeData {
-        checkNotNull(data)
-
-        return findTaskDataHelper(data!!.parentTreeDatas, parentKey).single()
-    }
-
-    private fun findTaskDataHelper(
-            taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>,
-            parentKey: CreateTaskViewModel.ParentKey
-    ): Iterable<CreateTaskViewModel.ParentTreeData> {
-        if (taskDatas.containsKey(parentKey))
-            return listOf(taskDatas.getValue(parentKey))
-
-        return taskDatas.values
-                .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
-                .flatten()
-    }
-
     private fun clearParentTask() {
         if (stateData.parent?.parentKey !is CreateTaskViewModel.ParentKey.Task)
             return
@@ -809,7 +774,7 @@ class CreateTaskActivity : NavBarActivity() {
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                stateData.parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
+                stateData.parent = delegate.findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
     }
@@ -994,7 +959,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     private inner class ParentScheduleData(val state: ParentScheduleState) {
 
-        var parent by observable(state.parentKey?.let { findTaskData(it) }) { _, _, newValue ->
+        var parent by observable(state.parentKey?.let { delegate.findTaskData(it) }) { _, _, newValue ->
             state.parentKey = newValue?.parentKey
 
             if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
@@ -1168,37 +1133,57 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private interface Delegate {
+    private abstract class Delegate {
 
         companion object {
 
-            fun fromParameters(parameters: CreateTaskParameters): Delegate {
+            fun fromParameters(parameters: CreateTaskParameters, data: CreateTaskViewModel.Data): Delegate {
                 return when (parameters) {
-                    is CreateTaskParameters.Copy -> CopyDelegate(parameters)
-                    is CreateTaskParameters.Edit -> EditDelegate(parameters)
-                    is CreateTaskParameters.Join -> JoinDelegate(parameters)
+                    is CreateTaskParameters.Copy -> CopyDelegate(parameters, data)
+                    is CreateTaskParameters.Edit -> EditDelegate(parameters, data)
+                    is CreateTaskParameters.Join -> JoinDelegate(parameters, data)
                     is CreateTaskParameters.Create,
                     is CreateTaskParameters.Share,
                     is CreateTaskParameters.Shortcut,
-                    CreateTaskParameters.None -> CreateDelegate(parameters)
+                    CreateTaskParameters.None -> CreateDelegate(parameters, data)
                 }
             }
         }
 
-        val isEditing get() = false
+        abstract var data: CreateTaskViewModel.Data
 
-        fun createTaskWithSchedule(
+        open fun skipScheduleCheck(
+                scheduleEntry: ScheduleEntry,
+                parentKey: CreateTaskViewModel.ParentKey?
+        ): Boolean = false
+
+        fun findTaskData(parentKey: CreateTaskViewModel.ParentKey) =
+                findTaskDataHelper(data.parentTreeDatas, parentKey).single()
+
+        private fun findTaskDataHelper(
+                taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>,
+                parentKey: CreateTaskViewModel.ParentKey
+        ): Iterable<CreateTaskViewModel.ParentTreeData> {
+            if (taskDatas.containsKey(parentKey))
+                return listOf(taskDatas.getValue(parentKey))
+
+            return taskDatas.values
+                    .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
+                    .flatten()
+        }
+
+        abstract fun createTaskWithSchedule(
                 createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
                 projectKey: ProjectKey.Shared?
         ): TaskKey
 
-        fun createTaskWithParent(
+        abstract fun createTaskWithParent(
                 createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey
 
-        fun createTaskWithoutReminder(
+        abstract fun createTaskWithoutReminder(
                 createParameters: CreateParameters,
                 projectKey: ProjectKey.Shared?
         ): TaskKey
@@ -1211,10 +1196,13 @@ class CreateTaskActivity : NavBarActivity() {
         )
     }
 
-    private class CopyDelegate(private val parameters: CreateTaskParameters.Copy) : Delegate {
+    private class CopyDelegate(
+            private val parameters: CreateTaskParameters.Copy,
+            override var data: CreateTaskViewModel.Data
+    ) : Delegate() {
 
         override fun createTaskWithSchedule(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
@@ -1233,7 +1221,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithParent(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey {
             return DomainFactory.instance
@@ -1250,7 +1238,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithoutReminder(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance
@@ -1267,12 +1255,37 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private class EditDelegate(private val parameters: CreateTaskParameters.Edit) : Delegate {
+    private class EditDelegate(
+            private val parameters: CreateTaskParameters.Edit,
+            override var data: CreateTaskViewModel.Data
+    ) : Delegate() {
 
-        override val isEditing = true
+        private val taskData get() = data.taskData!!
+
+        override fun skipScheduleCheck(scheduleEntry: ScheduleEntry, parentKey: CreateTaskViewModel.ParentKey?): Boolean {
+            if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
+                if (taskData.parentKey == parentKey) {
+                    return true
+                } else {
+                    fun CreateTaskViewModel.ParentKey.getProjectId() = when (this) {
+                        is CreateTaskViewModel.ParentKey.Project -> projectId
+                        is CreateTaskViewModel.ParentKey.Task -> findTaskData(this).projectId
+                    }
+
+                    val initialProject = taskData.parentKey?.getProjectId()
+
+                    val finalProject = parentKey?.getProjectId()
+
+                    if (initialProject == finalProject)
+                        return true
+                }
+            }
+
+            return false
+        }
 
         override fun createTaskWithSchedule(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
@@ -1289,7 +1302,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithParent(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey {
             return DomainFactory.instance.updateChildTask(
@@ -1305,7 +1318,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithoutReminder(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance.updateRootTask(
@@ -1320,10 +1333,13 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private class JoinDelegate(private val parameters: CreateTaskParameters.Join) : Delegate {
+    private class JoinDelegate(
+            private val parameters: CreateTaskParameters.Join,
+            override var data: CreateTaskViewModel.Data
+    ) : Delegate() {
 
         override fun createTaskWithSchedule(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
@@ -1344,7 +1360,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithParent(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey {
             return DomainFactory.instance
@@ -1362,7 +1378,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithoutReminder(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance
@@ -1380,10 +1396,13 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private class CreateDelegate(private val parameters: CreateTaskParameters) : Delegate {
+    private class CreateDelegate(
+            private val parameters: CreateTaskParameters,
+            override var data: CreateTaskViewModel.Data
+    ) : Delegate() {
 
         override fun createTaskWithSchedule(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
@@ -1401,7 +1420,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithParent(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey {
             if (parameters.fromSendIntent)
@@ -1420,7 +1439,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun createTaskWithoutReminder(
-                createParameters: Delegate.CreateParameters,
+                createParameters: CreateParameters,
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance

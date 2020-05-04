@@ -356,7 +356,7 @@ class ProjectsFactoryOldTest {
 
         val done = ExactTimeStamp.now
 
-        instance.setDone("uuid", mockk(relaxed = true), true, done)
+        instance.setDone(mockk(relaxed = true), true, done)
         projectsFactory.save()
     }
 

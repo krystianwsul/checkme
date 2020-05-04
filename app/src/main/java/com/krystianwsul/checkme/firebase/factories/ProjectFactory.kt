@@ -100,6 +100,8 @@ abstract class ProjectFactory<T : ProjectType>(
         val addTaskChangeTypes = projectLoader.addTaskEvents.map { (projectChangeType, addTaskEvent) ->
             addTaskEvent.apply { updateRootInstanceManager(taskRecord, snapshotInfos) }
 
+            check(rootInstanceManagers.containsKey(addTaskEvent.taskRecord.taskKey))
+
             project = newProject(addTaskEvent.projectRecord)
 
             projectChangeType

@@ -59,7 +59,6 @@ sealed class CreateTaskParameters : Parcelable {
         }
     }
 
-    open val taskKey: TaskKey? = null
     open val hint: CreateTaskActivity.Hint? = null
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
 
@@ -92,13 +91,13 @@ sealed class CreateTaskParameters : Parcelable {
     }
 
     @Parcelize
-    class Copy(override val taskKey: TaskKey) : CreateTaskParameters() {
+    class Copy(val taskKey: TaskKey) : CreateTaskParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
     }
 
     @Parcelize
-    class Edit(override val taskKey: TaskKey) : CreateTaskParameters() {
+    class Edit(val taskKey: TaskKey) : CreateTaskParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
     }

@@ -117,7 +117,6 @@ class CreateTaskActivity : NavBarActivity() {
     private val discardDialogListener = this::finish
 
     private lateinit var parameters: CreateTaskParameters
-    private var taskKeys: List<TaskKey>? = null
     private var taskKey: TaskKey? = null
     private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
@@ -320,8 +319,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         parameters = CreateTaskParameters.fromIntent(intent)
 
-        taskKeys = parameters.taskKeys // join
-
         taskKey = parameters.taskKey // edit, copy
 
         hint = parameters.hint // create, join, shortcut
@@ -489,9 +486,6 @@ class CreateTaskActivity : NavBarActivity() {
             })
         }
 
-        val parentHint = (hint as? Hint.Task)?.taskKey
-        val parentKey: CreateTaskViewModel.ParentKey?
-
         if (savedInstanceState?.containsKey(KEY_STATE) == true) {
             savedInstanceState!!.run {
                 if (containsKey(NOTE_KEY)) {
@@ -502,35 +496,6 @@ class CreateTaskActivity : NavBarActivity() {
                 check(containsKey(NOTE_HAS_FOCUS_KEY))
 
                 noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
-            }
-
-            parentKey = null
-        } else {
-            data.run {
-                parentKey = when {
-                    taskData?.parentKey != null -> {
-                        check(parentHint == null)
-                        check(taskKeys == null)
-                        checkNotNull(taskKey)
-
-                        taskData.parentKey
-                    }
-                    parentHint != null -> {
-                        check(taskKey == null)
-
-                        CreateTaskViewModel.ParentKey.Task(parentHint)
-                    }
-                    else -> {
-                        taskKeys?.map { it.projectKey }
-                                ?.distinct()
-                                ?.singleOrNull()
-                                ?.let {
-                                    (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
-                                }
-                    }
-                }
-
-                taskData?.let { note = it.note }
             }
         }
 
@@ -543,6 +508,8 @@ class CreateTaskActivity : NavBarActivity() {
 
             val schedules = mutableListOf<ScheduleEntry>()
 
+            val parentKey = delegate.initialParentKey
+
             data.run {
                 if (taskData != null) {
                     if (taskData.scheduleDataWrappers != null) {
@@ -554,7 +521,7 @@ class CreateTaskActivity : NavBarActivity() {
                                 .toMutableList())
                     }
                 } else {
-                    if (parentHint == null && defaultReminder)
+                    if (parentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder)
                         schedules.add(firstScheduleEntry())
                 }
             }
@@ -680,7 +647,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         if (taskKey != null) {
             checkNotNull(data!!.taskData)
-            check(taskKeys == null)
             check(hint == null)
 
             if (toolbarEditText.text.toString() != data!!.taskData!!.name)
@@ -1137,6 +1103,10 @@ class CreateTaskActivity : NavBarActivity() {
         abstract var data: CreateTaskViewModel.Data
 
         open val initialName: String? = null
+        abstract val initialParentKey: CreateTaskViewModel.ParentKey?
+
+        protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
+        protected fun Hint.toParentKey() = (this as? Hint.Task)?.taskKey?.toParentKey()
 
         open fun skipScheduleCheck(
                 scheduleEntry: ScheduleEntry,
@@ -1190,6 +1160,7 @@ class CreateTaskActivity : NavBarActivity() {
         private val taskData get() = data.taskData!!
 
         override val initialName get() = taskData.name
+        override val initialParentKey get() = taskData.parentKey
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
@@ -1253,6 +1224,7 @@ class CreateTaskActivity : NavBarActivity() {
         private val taskData get() = data.taskData!!
 
         override val initialName get() = taskData.name
+        override val initialParentKey get() = taskData.parentKey
 
         override fun skipScheduleCheck(scheduleEntry: ScheduleEntry, parentKey: CreateTaskViewModel.ParentKey?): Boolean {
             if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
@@ -1330,6 +1302,19 @@ class CreateTaskActivity : NavBarActivity() {
             override var data: CreateTaskViewModel.Data
     ) : Delegate() {
 
+        override val initialParentKey = parameters.run {
+            if (hint is Hint.Task) {
+                hint.toParentKey()
+            } else {
+                taskKeys.map { it.projectKey }
+                        .distinct()
+                        .singleOrNull()
+                        ?.let {
+                            (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                        }
+            }
+        }
+
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
@@ -1394,20 +1379,25 @@ class CreateTaskActivity : NavBarActivity() {
     ) : Delegate() {
 
         override val initialName: String?
+        override val initialParentKey: CreateTaskViewModel.ParentKey?
 
         init {
             when (parameters) {
                 is CreateTaskParameters.Create -> {
                     initialName = parameters.nameHint
+                    initialParentKey = parameters.hint?.toParentKey()
                 }
                 is CreateTaskParameters.Share -> {
                     initialName = parameters.nameHint
+                    initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
                 }
                 is CreateTaskParameters.Shortcut -> {
                     initialName = null
+                    initialParentKey = parameters.parentTaskKeyHint.toParentKey()
                 }
                 CreateTaskParameters.None -> {
                     initialName = null
+                    initialParentKey = null
                 }
                 else -> throw IllegalArgumentException()
             }
@@ -1435,7 +1425,7 @@ class CreateTaskActivity : NavBarActivity() {
                 createParameters: CreateParameters,
                 parentTaskKey: TaskKey
         ): TaskKey {
-            if (parameters.fromSendIntent)
+            if (parameters is CreateTaskParameters.Share)
                 ShortcutManager.addShortcut(parentTaskKey)
 
             return DomainFactory.instance

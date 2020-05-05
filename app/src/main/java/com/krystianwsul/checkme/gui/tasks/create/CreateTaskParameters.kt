@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tasks.create
 
 import android.content.Intent
 import android.os.Parcelable
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -64,12 +65,18 @@ sealed class CreateTaskParameters : Parcelable {
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
     open val fromSendIntent: Boolean = false
 
+    abstract fun startViewModel(viewModel: CreateTaskViewModel)
+
     @Parcelize
     class Create(
             override val hint: CreateTaskActivity.Hint? = null,
             override val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
             val nameHint: String? = null
-    ) : CreateTaskParameters()
+    ) : CreateTaskParameters() {
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) =
+                viewModel.start(parentTaskKeyHint = (hint as? CreateTaskActivity.Hint.Task)?.taskKey)
+    }
 
     @Parcelize
     class Join(
@@ -81,18 +88,30 @@ sealed class CreateTaskParameters : Parcelable {
         init {
             check(taskKeys.size > 1)
         }
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) =
+                viewModel.start(null, taskKeys, (hint as? CreateTaskActivity.Hint.Task)?.taskKey)
     }
 
     @Parcelize
-    class Copy(override val taskKey: TaskKey) : CreateTaskParameters()
+    class Copy(override val taskKey: TaskKey) : CreateTaskParameters() {
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
+    }
 
     @Parcelize
-    class Edit(override val taskKey: TaskKey) : CreateTaskParameters()
+    class Edit(override val taskKey: TaskKey) : CreateTaskParameters() {
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
+    }
 
     @Parcelize
     class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateTaskParameters() {
 
         override val hint get() = CreateTaskActivity.Hint.Task(parentTaskKeyHint)
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) =
+                viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
@@ -101,8 +120,14 @@ sealed class CreateTaskParameters : Parcelable {
         override val hint get() = parentTaskKeyHint?.let { CreateTaskActivity.Hint.Task(parentTaskKeyHint) }
 
         override val fromSendIntent get() = true
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) =
+                viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
-    object None : CreateTaskParameters()
+    object None : CreateTaskParameters() {
+
+        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start()
+    }
 }

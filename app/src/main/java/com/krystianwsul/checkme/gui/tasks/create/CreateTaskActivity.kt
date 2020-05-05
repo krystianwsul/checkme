@@ -346,7 +346,7 @@ class CreateTaskActivity : NavBarActivity() {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
-            start(taskKey, taskKeys, (hint as? Hint.Task)?.taskKey)
+            parameters.startViewModel(this)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }

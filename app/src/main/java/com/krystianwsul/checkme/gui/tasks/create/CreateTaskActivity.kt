@@ -317,6 +317,27 @@ class CreateTaskActivity : NavBarActivity() {
 
         parameters = CreateTaskParameters.fromIntent(intent)
 
+        /*
+onCreate:
+	if savedinstancestate
+		if key present (only after data loaded), set both states
+	else
+		if params have state, set both states
+
+onLoadFinished:
+	if (tmp and initial) aren't initialized, initialize from data
+	initialize stateData
+
+onsaveinstance:
+	if (data != null)
+		save stateData (then parsed to tmpState)
+		save initialState
+
+tmpState is first initialized from params. it's also the serialized form of stateData
+
+initialState is a copy, for comparing if data has changed
+         */
+
         if (savedInstanceState != null) {
             savedInstanceState.run {
                 @Suppress("UNCHECKED_CAST")

@@ -117,7 +117,6 @@ class CreateTaskActivity : NavBarActivity() {
     private val discardDialogListener = this::finish
 
     private lateinit var parameters: CreateTaskParameters
-    private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
 
     private lateinit var delegate: Delegate
@@ -317,8 +316,6 @@ class CreateTaskActivity : NavBarActivity() {
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
         parameters = CreateTaskParameters.fromIntent(intent)
-
-        hint = parameters.hint // create, join, shortcut
 
         if (savedInstanceState != null) {
             savedInstanceState.run {
@@ -690,7 +687,7 @@ class CreateTaskActivity : NavBarActivity() {
             .schedules
             .isNotEmpty()
 
-    private fun firstScheduleEntry() = hintToSchedule(hint as? Hint.Schedule)
+    private fun firstScheduleEntry() = hintToSchedule(delegate.scheduleHint)
 
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(createTaskRecycler)
@@ -954,7 +951,10 @@ class CreateTaskActivity : NavBarActivity() {
 
                                     val parameters = ScheduleDialogFragment.Parameters(
                                             adapterPosition,
-                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), activity.hint as? Hint.Schedule),
+                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
+                                                    Date.today(),
+                                                    activity.delegate.scheduleHint
+                                            ),
                                             true
                                     )
 
@@ -1002,7 +1002,7 @@ class CreateTaskActivity : NavBarActivity() {
                                             .scheduleDataWrapper
                                             .getScheduleDialogData(
                                                     Date.today(),
-                                                    activity.hint as? Hint.Schedule
+                                                    activity.delegate.scheduleHint
                                             ),
                                     false
                             )
@@ -1085,9 +1085,11 @@ class CreateTaskActivity : NavBarActivity() {
 
         open val initialName: String? = null
         abstract val initialParentKey: CreateTaskViewModel.ParentKey?
+        open val scheduleHint: Hint.Schedule? = null
 
         protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
         protected fun Hint.toParentKey() = (this as? Hint.Task)?.taskKey?.toParentKey()
+        protected fun Hint.toScheduleHint() = this as? Hint.Schedule
 
         open fun checkDataChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 
@@ -1308,6 +1310,8 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
+        override val scheduleHint = parameters.hint?.toScheduleHint()
+
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
                 scheduleDatas: List<ScheduleData>,
@@ -1373,24 +1377,29 @@ class CreateTaskActivity : NavBarActivity() {
 
         override val initialName: String?
         override val initialParentKey: CreateTaskViewModel.ParentKey?
+        override val scheduleHint: Hint.Schedule?
 
         init {
             when (parameters) {
                 is CreateTaskParameters.Create -> {
                     initialName = parameters.nameHint
                     initialParentKey = parameters.hint?.toParentKey()
+                    scheduleHint = parameters.hint?.toScheduleHint()
                 }
                 is CreateTaskParameters.Share -> {
                     initialName = parameters.nameHint
                     initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
+                    scheduleHint = null
                 }
                 is CreateTaskParameters.Shortcut -> {
                     initialName = null
                     initialParentKey = parameters.parentTaskKeyHint.toParentKey()
+                    scheduleHint = null
                 }
                 CreateTaskParameters.None -> {
                     initialName = null
                     initialParentKey = null
+                    scheduleHint = null
                 }
                 else -> throw IllegalArgumentException()
             }

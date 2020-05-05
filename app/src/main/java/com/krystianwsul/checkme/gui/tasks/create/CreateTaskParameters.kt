@@ -59,14 +59,13 @@ sealed class CreateTaskParameters : Parcelable {
         }
     }
 
-    open val hint: CreateTaskActivity.Hint? = null
     open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
 
     abstract fun startViewModel(viewModel: CreateTaskViewModel)
 
     @Parcelize
     class Create(
-            override val hint: CreateTaskActivity.Hint? = null,
+            val hint: CreateTaskActivity.Hint? = null,
             override val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
             val nameHint: String? = null
     ) : CreateTaskParameters() {
@@ -78,7 +77,7 @@ sealed class CreateTaskParameters : Parcelable {
     @Parcelize
     class Join(
             val taskKeys: List<TaskKey>,
-            override val hint: CreateTaskActivity.Hint? = null,
+            val hint: CreateTaskActivity.Hint? = null,
             val removeInstanceKeys: List<InstanceKey> = listOf()
     ) : CreateTaskParameters() {
 
@@ -105,16 +104,12 @@ sealed class CreateTaskParameters : Parcelable {
     @Parcelize
     class Shortcut(val parentTaskKeyHint: TaskKey) : CreateTaskParameters() {
 
-        override val hint get() = CreateTaskActivity.Hint.Task(parentTaskKeyHint)
-
         override fun startViewModel(viewModel: CreateTaskViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
     class Share(val nameHint: String, val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
-
-        override val hint get() = parentTaskKeyHint?.let { CreateTaskActivity.Hint.Task(parentTaskKeyHint) }
 
         override fun startViewModel(viewModel: CreateTaskViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)

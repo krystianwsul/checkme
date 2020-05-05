@@ -117,7 +117,6 @@ class CreateTaskActivity : NavBarActivity() {
     private val discardDialogListener = this::finish
 
     private lateinit var parameters: CreateTaskParameters
-    private var taskKey: TaskKey? = null
     private var hint: Hint? = null
     private var tmpState: ParentScheduleState? = null
 
@@ -318,8 +317,6 @@ class CreateTaskActivity : NavBarActivity() {
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
         parameters = CreateTaskParameters.fromIntent(intent)
-
-        taskKey = parameters.taskKey // edit, copy
 
         hint = parameters.hint // create, join, shortcut
 
@@ -645,24 +642,7 @@ class CreateTaskActivity : NavBarActivity() {
         if (initialState != stateData.state)
             return true
 
-        if (taskKey != null) {
-            checkNotNull(data!!.taskData)
-            check(hint == null)
-
-            if (toolbarEditText.text.toString() != data!!.taskData!!.name)
-                return true
-
-            if (note != data!!.taskData!!.note)
-                return true
-        } else {
-            if (!TextUtils.isEmpty(toolbarEditText.text))
-                return true
-
-            if (!TextUtils.isEmpty(note))
-                return true
-        }
-
-        return false
+        return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
     }
 
     private fun clearParentTask() {
@@ -975,7 +955,8 @@ class CreateTaskActivity : NavBarActivity() {
                                     val parameters = ScheduleDialogFragment.Parameters(
                                             adapterPosition,
                                             scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), activity.hint as? Hint.Schedule),
-                                            true)
+                                            true
+                                    )
 
                                     activity.parametersRelay.accept(parameters)
                                 },
@@ -1108,6 +1089,14 @@ class CreateTaskActivity : NavBarActivity() {
         protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
         protected fun Hint.toParentKey() = (this as? Hint.Task)?.taskKey?.toParentKey()
 
+        open fun checkDataChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
+
+        protected fun checkDataChanged(
+                taskData: CreateTaskViewModel.TaskData,
+                name: String,
+                note: String?
+        ) = name != taskData.name || note != taskData.note
+
         open fun skipScheduleCheck(
                 scheduleEntry: ScheduleEntry,
                 parentKey: CreateTaskViewModel.ParentKey?
@@ -1161,6 +1150,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         override val initialName get() = taskData.name
         override val initialParentKey get() = taskData.parentKey
+
+        override fun checkDataChanged(name: String, note: String?) = checkDataChanged(taskData, name, note)
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
@@ -1225,6 +1216,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         override val initialName get() = taskData.name
         override val initialParentKey get() = taskData.parentKey
+
+        override fun checkDataChanged(name: String, note: String?) = checkDataChanged(taskData, name, note)
 
         override fun skipScheduleCheck(scheduleEntry: ScheduleEntry, parentKey: CreateTaskViewModel.ParentKey?): Boolean {
             if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {

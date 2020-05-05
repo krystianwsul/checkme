@@ -141,7 +141,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
-                        hint,
+                        null,
                         stateData.state.run {
                             ParentScheduleState(
                                     parentKey,

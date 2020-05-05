@@ -8,9 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.krystianwsul.checkme.BuildConfig
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.RemoteConfig
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.addTo
@@ -24,8 +24,6 @@ class AboutFragment : AbstractFragment() {
     companion object {
 
         fun newInstance() = AboutFragment()
-
-        private const val BENIA_URL_KEY = "beniaAboutUrl"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_about, container, false)!!
@@ -35,17 +33,8 @@ class AboutFragment : AbstractFragment() {
 
         val element = Element().setTitle(getString(R.string.designBy)).setIconDrawable(R.drawable.ic_brush_black_24dp)
 
-        val config = FirebaseRemoteConfig.getInstance().apply {
-            setDefaultsAsync(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardawsul/"))
-        }
-
-        fun update() = element.setIntent(Intent(Intent.ACTION_VIEW, Uri.parse(config.getString(BENIA_URL_KEY))))
-        update()
-
-        Observable.interval(0, 12, TimeUnit.HOURS)
-                .subscribe {
-                    config.fetchAndActivate().addOnSuccessListener { update() }
-                }
+        RemoteConfig.observable
+                .subscribe { element.intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.beniaUrl)) }
                 .addTo(viewCreatedDisposable)
 
         aboutRoot.addView(AboutPage(requireContext()).setImage(R.drawable.ic_launcher_round_try_sign2_unscaled)

@@ -207,7 +207,6 @@ class CreateTaskActivity : NavBarActivity() {
         get() = stateData.state
                 .schedules
                 .map { it.scheduleDataWrapper }
-                .apply { check(!isEmpty()) }
 
     private val scheduleDatas get() = scheduleDataWrappers.map { it.scheduleData }
 

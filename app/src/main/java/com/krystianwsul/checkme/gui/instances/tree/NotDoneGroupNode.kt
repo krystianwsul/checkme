@@ -395,9 +395,15 @@ class NotDoneGroupNode(
         }
     }
 
-    override val id = GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)
+    override val id: Any = if (nodeCollection.useGroups) {
+        GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)
+    } else {
+        SingleId(singleInstanceData.instanceKey)
+    }
 
     override val toggleDescendants get() = !singleInstance()
+
+    data class SingleId(val instanceKey: InstanceKey)
 
     class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp) {
 

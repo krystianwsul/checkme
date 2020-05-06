@@ -30,7 +30,11 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         )
     }
 
-    fun start(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?) {
+    fun start(
+            taskKey: TaskKey? = null,
+            joinTaskKeys: List<TaskKey>? = null,
+            parentTaskKeyHint: TaskKey? = null
+    ) {
         this.taskKey = taskKey
         this.joinTaskKeys = joinTaskKeys
         this.parentTaskKeyHint = parentTaskKeyHint

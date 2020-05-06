@@ -317,41 +317,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         parameters = CreateTaskParameters.fromIntent(intent)
 
-        /*
-onCreate:
-	if savedinstancestate
-		if key present (only after data loaded), set both states
-	else
-		if params have state, set both states
-
-onLoadFinished:
-	if (tmp and initial) aren't initialized, initialize from data
-	initialize stateData
-
-onsaveinstance:
-	if (data != null)
-		save stateData (then parsed to tmpState)
-		save initialState
-
-tmpState is first initialized from params. it's also the serialized form of stateData
-
-initialState is a copy, for comparing if data has changed
-         */
-
-        if (savedInstanceState != null) {
-            savedInstanceState.run {
-                @Suppress("UNCHECKED_CAST")
-                if (containsKey(KEY_INITIAL_STATE)) {
-                    initialState = getParcelable(KEY_INITIAL_STATE)!!
-                    tmpState = getParcelable(KEY_STATE)!!
-                }
-            }
-        } else {
-            tmpState = parameters.parentScheduleState // create
-            if (tmpState != null)
-                initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
-        }
-
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
         if (!noteHasFocus)// keyboard hack
@@ -518,34 +483,66 @@ initialState is a copy, for comparing if data has changed
 
         invalidateOptionsMenu()
 
-        if (!this::initialState.isInitialized) {
-            check(!this::stateData.isInitialized)
+        /*
+onCreate:
+	if savedinstancestate
+		if key present (only after data loaded), set both states
+	else
+		if params have state, set both states
 
-            val schedules = mutableListOf<ScheduleEntry>()
+onLoadFinished:
+	if (tmp and initial) aren't initialized, initialize from data
+	initialize stateData
 
-            val parentKey = delegate.initialParentKey
+onsaveinstance:
+	if (data != null)
+		save stateData (then parsed to tmpState)
+		save initialState
 
-            data.run {
-                if (taskData != null) {
-                    if (taskData.scheduleDataWrappers != null) {
-                        check(taskData.scheduleDataWrappers.isNotEmpty())
+tmpState is first initialized from params. it's also the serialized form of stateData
 
-                        schedules.addAll(taskData.scheduleDataWrappers
-                                .asSequence()
-                                .map { ScheduleEntry(it) }
-                                .toMutableList())
-                    }
-                } else {
-                    if (parentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder)
-                        schedules.add(firstScheduleEntry())
+initialState is a copy, for comparing if data has changed
+         */
+
+        if (!this::stateData.isInitialized) {
+            check(tmpState == null)
+            check(!this::initialState.isInitialized)
+
+            if (savedInstanceState?.containsKey(KEY_INITIAL_STATE) == true) {
+                savedInstanceState!!.run {
+                    initialState = getParcelable(KEY_INITIAL_STATE)!!
+                    tmpState = getParcelable(KEY_STATE)!!
                 }
+            } else if (parameters.parentScheduleState != null) {
+                tmpState = parameters.parentScheduleState // create
+                initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
+            } else {
+                val schedules = mutableListOf<ScheduleEntry>()
+
+                val parentKey = delegate.initialParentKey
+
+                data.run {
+                    if (taskData != null) {
+                        if (taskData.scheduleDataWrappers != null) {
+                            check(taskData.scheduleDataWrappers.isNotEmpty())
+
+                            schedules.addAll(taskData.scheduleDataWrappers
+                                    .asSequence()
+                                    .map { ScheduleEntry(it) }
+                                    .toMutableList())
+                        }
+                    } else {
+                        if (parentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder)
+                            schedules.add(firstScheduleEntry())
+                    }
+                }
+
+                tmpState = ParentScheduleState(parentKey, schedules)
+                initialState = ParentScheduleState(parentKey, ArrayList(schedules))
             }
 
-            tmpState = ParentScheduleState(parentKey, schedules)
-            initialState = ParentScheduleState(parentKey, ArrayList(schedules))
+            stateData = ParentScheduleData(tmpState!!)
         }
-
-        stateData = ParentScheduleData(tmpState!!)
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 

@@ -129,8 +129,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
             stateData.parent = parentTreeData
-
-            updateParentView()
         }
 
         override fun onTaskDeleted() = removeParent()
@@ -154,8 +152,6 @@ class CreateTaskActivity : NavBarActivity() {
         checkNotNull(stateData.parent)
 
         stateData.parent = null
-
-        updateParentView()
     }
 
     private fun setupParent(view: View) {
@@ -351,8 +347,6 @@ class CreateTaskActivity : NavBarActivity() {
                             }
 
                             if (result.position == null) {
-                                clearParentTask()
-
                                 createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
                             } else {
                                 check(result.position >= 1)
@@ -626,22 +620,6 @@ class CreateTaskActivity : NavBarActivity() {
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
     }
 
-    private fun clearParentTask() {
-        if (stateData.parent?.parentKey !is CreateTaskViewModel.ParentKey.Task)
-            return
-
-        stateData.parent = null
-
-        updateParentView()
-    }
-
-    private fun updateParentView() {
-        val view = createTaskRecycler.getChildAt(0) ?: return
-
-        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
-        updateParentView(scheduleHolder)
-    }
-
     private fun updateParentView(scheduleHolder: ScheduleHolder) {
         scheduleHolder.apply {
             scheduleLayout.endIconMode = if (stateData.parent != null)
@@ -875,6 +853,11 @@ class CreateTaskActivity : NavBarActivity() {
                 state.schedules.clear()
                 createTaskAdapter.updateSchedules()
             }
+
+            createTaskRecycler.getChildAt(0)?.let { view ->
+                val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
+                updateParentView(scheduleHolder)
+            }
         }
 
         val schedules: List<ScheduleEntry> get() = state.schedules
@@ -886,6 +869,9 @@ class CreateTaskActivity : NavBarActivity() {
         fun removeSchedule(position: Int) = state.schedules.removeAt(position)
 
         fun addSchedule(scheduleEntry: ScheduleEntry) {
+            if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
+                parent = null
+
             state.schedules += scheduleEntry
         }
 

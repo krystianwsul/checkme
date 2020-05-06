@@ -193,9 +193,6 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private val scheduleDataWrappers
-        get() = stateData.schedules.map { it.scheduleDataWrapper }
-
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
     val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None)
@@ -384,7 +381,11 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
+    private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
+
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
+        loadFinishedDisposable.clear()
+
         this.data = data
 
         if (!this::delegate.isInitialized) {
@@ -429,6 +430,15 @@ class CreateTaskActivity : NavBarActivity() {
 
             delegate.data = data
         }
+
+        stateData.parentObservable
+                .subscribe {
+                    createTaskRecycler.getChildAt(0)?.let { view ->
+                        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
+                        updateParentView(scheduleHolder)
+                    }
+                }
+                .addTo(loadFinishedDisposable)
 
         data.taskData
                 ?.imageState
@@ -810,19 +820,22 @@ class CreateTaskActivity : NavBarActivity() {
 
     private inner class ParentScheduleData(private val state: ParentScheduleState) {
 
-        var parent by observable(state.parentKey?.let { delegate.findTaskData(it) }) { _, _, newValue ->
-            state.parentKey = newValue?.parentKey
+        private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(state.parentKey?.let { delegate.findTaskData(it) }))
 
-            if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) { // todo create same clearing as vice versa
-                state.schedules.clear()
-                createTaskAdapter.updateSchedules()
-            }
+        val parentObservable: Observable<NullableWrapper<CreateTaskViewModel.ParentTreeData>> = parentRelay
 
-            createTaskRecycler.getChildAt(0)?.let { view ->
-                val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
-                updateParentView(scheduleHolder)
+        var parent
+            get() = parentRelay.value!!.value
+            set(newValue) {
+                state.parentKey = newValue?.parentKey
+
+                if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
+                    state.schedules.clear()
+                    createTaskAdapter.updateSchedules()
+                }
+
+                parentRelay.accept(NullableWrapper(newValue))
             }
-        }
 
         val schedules: List<ScheduleEntry> get() = state.schedules
 

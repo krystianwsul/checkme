@@ -114,26 +114,21 @@ class CreateTaskActivity : NavBarActivity() {
 
     private var savedInstanceState: Bundle? = null
 
-    private val discardDialogListener = this::finish
-
     private lateinit var parameters: CreateTaskParameters
-    private var tmpState: ParentScheduleState? = null
-
-    private lateinit var delegate: Delegate
-
-    private var data: CreateTaskViewModel.Data? = null
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
+    private var data: CreateTaskViewModel.Data? = null
+    private lateinit var delegate: Delegate
     private lateinit var initialState: ParentScheduleState
     private lateinit var stateData: ParentScheduleData
+
+    private val discardDialogListener = this::finish
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
             stateData.parent = parentTreeData
-
-            updateParentView()
         }
 
         override fun onTaskDeleted() = removeParent()
@@ -141,9 +136,9 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
                         null,
-                        stateData.state.run {
+                        stateData.run {
                             ParentScheduleState(
-                                    parentKey,
+                                    parent?.parentKey,
                                     schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList()
                             )
                         },
@@ -157,8 +152,6 @@ class CreateTaskActivity : NavBarActivity() {
         checkNotNull(stateData.parent)
 
         stateData.parent = null
-
-        updateParentView()
     }
 
     private fun setupParent(view: View) {
@@ -200,13 +193,6 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private val scheduleDataWrappers
-        get() = stateData.state
-                .schedules
-                .map { it.scheduleDataWrapper }
-
-    private val scheduleDatas get() = scheduleDataWrappers.map { it.scheduleData }
-
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
     val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None)
@@ -226,8 +212,6 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(!hasValueParentTask() || !hasValueSchedule())
-
         fun save(andOpen: Boolean) {
             checkNotNull(data)
             checkNotNull(toolbarEditText)
@@ -247,29 +231,7 @@ class CreateTaskActivity : NavBarActivity() {
                         writeImagePath
                 )
 
-                val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
-
-                val taskKey: TaskKey = when {
-                    hasValueSchedule() -> {
-                        check(!hasValueParentTask())
-
-                        delegate.createTaskWithSchedule(createParameters, scheduleDatas, projectId)
-                    }
-                    hasValueParentTask() -> {
-                        checkNotNull(stateData.parent)
-                        check(projectId == null)
-                        check(scheduleDatas.isEmpty())
-
-                        val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
-
-                        delegate.createTaskWithParent(createParameters, parentTaskKey)
-                    }
-                    else -> {  // no reminder
-                        check(scheduleDatas.isEmpty())
-
-                        delegate.createTaskWithoutReminder(createParameters, projectId)
-                    }
-                }
+                val taskKey = delegate.createTask(createParameters, stateData)
 
                 if (andOpen)
                     startActivity(ShowTaskActivity.newIntent(taskKey))
@@ -317,41 +279,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         parameters = CreateTaskParameters.fromIntent(intent)
 
-        /*
-onCreate:
-	if savedinstancestate
-		if key present (only after data loaded), set both states
-	else
-		if params have state, set both states
-
-onLoadFinished:
-	if (tmp and initial) aren't initialized, initialize from data
-	initialize stateData
-
-onsaveinstance:
-	if (data != null)
-		save stateData (then parsed to tmpState)
-		save initialState
-
-tmpState is first initialized from params. it's also the serialized form of stateData
-
-initialState is a copy, for comparing if data has changed
-         */
-
-        if (savedInstanceState != null) {
-            savedInstanceState.run {
-                @Suppress("UNCHECKED_CAST")
-                if (containsKey(KEY_INITIAL_STATE)) {
-                    initialState = getParcelable(KEY_INITIAL_STATE)!!
-                    tmpState = getParcelable(KEY_STATE)!!
-                }
-            }
-        } else {
-            tmpState = parameters.parentScheduleState // create
-            if (tmpState != null)
-                initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
-        }
-
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
         if (!noteHasFocus)// keyboard hack
@@ -391,25 +318,19 @@ initialState is a copy, for comparing if data has changed
                             }
 
                             if (result.position == null) {
-                                clearParentTask()
-
-                                createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
+                                stateData.addSchedule(result.scheduleDialogData.toScheduleEntry())
                             } else {
                                 check(result.position >= 1)
 
                                 val position = result.position - 1
 
-                                val oldId = if (position < stateData.state.schedules.size) {
-                                    stateData.state
-                                            .schedules[position]
-                                            .id
+                                val oldId = if (position < stateData.schedules.size) {
+                                    stateData.schedules[position].id
                                 } else {
                                     null
                                 }
 
-                                stateData.state.schedules[position] = result.scheduleDialogData.toScheduleEntry(oldId)
-
-                                createTaskAdapter.updateSchedules()
+                                stateData.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
                             }
                         }
                         is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
@@ -423,11 +344,7 @@ initialState is a copy, for comparing if data has changed
         check(position >= 1)
         checkNotNull(data)
 
-        stateData.state
-                .schedules
-                .removeAt(position - 1)
-
-        createTaskAdapter.updateSchedules()
+        stateData.removeSchedule(position - 1)
     }
 
     @SuppressLint("CheckResult")
@@ -447,7 +364,7 @@ initialState is a copy, for comparing if data has changed
 
         outState.run {
             if (data != null) {
-                putParcelable(KEY_STATE, stateData.state)
+                stateData.saveState(this)
                 putParcelable(KEY_INITIAL_STATE, initialState)
 
                 if (!note.isNullOrEmpty())
@@ -460,13 +377,64 @@ initialState is a copy, for comparing if data has changed
         }
     }
 
+    private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
+
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
+        loadFinishedDisposable.clear()
+
         this.data = data
 
-        if (!this::delegate.isInitialized)
+        if (!this::delegate.isInitialized) {
+            check(!this::stateData.isInitialized) // todo create move all this into delegate
+            check(!this::initialState.isInitialized)
+
             delegate = Delegate.fromParameters(parameters, data)
-        else
+
+            when {
+                savedInstanceState?.containsKey(KEY_INITIAL_STATE) == true -> {
+                    savedInstanceState!!.run {
+                        initialState = getParcelable(KEY_INITIAL_STATE)!!
+                        stateData = ParentScheduleData(getParcelable(KEY_STATE)!!)
+                    }
+                }
+                parameters.parentScheduleState != null -> {
+                    parameters.parentScheduleState!!.let { // create delegate
+                        initialState = it
+                        stateData = ParentScheduleData(it)
+                    }
+                }
+                else -> {
+                    val schedules = data.run {
+                        if (taskData != null) {
+                            taskData.scheduleDataWrappers
+                                    ?.map { ScheduleEntry(it) }
+                                    ?: listOf()
+                        } else if (delegate.initialParentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder) {
+                            listOf(firstScheduleEntry())
+                        } else {
+                            listOf()
+                        }
+                    }
+
+                    initialState = ParentScheduleState(delegate.initialParentKey, schedules.toMutableList())
+                    stateData = ParentScheduleData(initialState)
+                }
+            }
+        } else {
+            check(this::stateData.isInitialized)
+            check(this::initialState.isInitialized)
+
             delegate.data = data
+        }
+
+        stateData.parentObservable
+                .subscribe {
+                    createTaskRecycler.getChildAt(0)?.let { view ->
+                        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
+                        updateParentView(scheduleHolder)
+                    }
+                }
+                .addTo(loadFinishedDisposable)
 
         data.taskData
                 ?.imageState
@@ -518,40 +486,15 @@ initialState is a copy, for comparing if data has changed
 
         invalidateOptionsMenu()
 
-        if (!this::initialState.isInitialized) {
-            check(!this::stateData.isInitialized)
-
-            val schedules = mutableListOf<ScheduleEntry>()
-
-            val parentKey = delegate.initialParentKey
-
-            data.run {
-                if (taskData != null) {
-                    if (taskData.scheduleDataWrappers != null) {
-                        check(taskData.scheduleDataWrappers.isNotEmpty())
-
-                        schedules.addAll(taskData.scheduleDataWrappers
-                                .asSequence()
-                                .map { ScheduleEntry(it) }
-                                .toMutableList())
-                    }
-                } else {
-                    if (parentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder)
-                        schedules.add(firstScheduleEntry())
-                }
-            }
-
-            tmpState = ParentScheduleState(parentKey, schedules)
-            initialState = ParentScheduleState(parentKey, ArrayList(schedules))
-        }
-
-        stateData = ParentScheduleData(tmpState!!)
-
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 
-        createTaskAdapter = CreateTaskAdapter(stateData.state.schedules)
+        createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter
         createTaskRecycler.itemAnimator = CustomItemAnimator()
+
+        stateData.scheduleObservable
+                .subscribe { createTaskAdapter.setSchedules(it) }
+                .addTo(loadFinishedDisposable)
 
         if (noteHasFocus) { // keyboard hack
             val notePosition = createTaskAdapter.items.indexOf(Item.Note)
@@ -560,8 +503,6 @@ initialState is a copy, for comparing if data has changed
 
             (createTaskRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
         }
-
-        check(!hasValueParentTask() || !hasValueSchedule())
     }
 
     override fun onBackPressed() {
@@ -570,8 +511,6 @@ initialState is a copy, for comparing if data has changed
     }
 
     private fun tryClose(): Boolean {
-        check(!hasValueParentTask() || !hasValueSchedule())
-
         return if (dataChanged()) {
             DiscardDialogFragment.newInstance().let {
                 it.discardDialogListener = discardDialogListener
@@ -597,11 +536,11 @@ initialState is a copy, for comparing if data has changed
             toolbarLayout.error = null
         }
 
-        for (scheduleEntry in stateData.state.schedules) {
+        for (scheduleEntry in stateData.schedules) {
             if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
-            if (delegate.skipScheduleCheck(scheduleEntry, stateData.state.parentKey))
+            if (delegate.skipScheduleCheck(scheduleEntry, stateData.parent?.parentKey))
                 continue
 
             val date = scheduleEntry.scheduleDataWrapper
@@ -641,13 +580,11 @@ initialState is a copy, for comparing if data has changed
         scheduleEntry.error = getString(stringId)
         check(!TextUtils.isEmpty(scheduleEntry.error))
 
-        val index = stateData.state
-                .schedules
-                .indexOf(scheduleEntry)
+        val index = stateData.schedules.indexOf(scheduleEntry)
         check(index >= 0)
 
         createTaskRecycler.getChildAt(index + 1)?.let {
-            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error
+            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error // todo create use payloads
         }
     }
 
@@ -655,28 +592,10 @@ initialState is a copy, for comparing if data has changed
         if (data == null)
             return false
 
-        check(!hasValueParentTask() || !hasValueSchedule())
-
-        if (initialState != stateData.state)
+        if (!stateData.equalTo(initialState))
             return true
 
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
-    }
-
-    private fun clearParentTask() {
-        if (stateData.parent?.parentKey !is CreateTaskViewModel.ParentKey.Task)
-            return
-
-        stateData.parent = null
-
-        updateParentView()
-    }
-
-    private fun updateParentView() {
-        val view = createTaskRecycler.getChildAt(0) ?: return
-
-        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder
-        updateParentView(scheduleHolder)
     }
 
     private fun updateParentView(scheduleHolder: ScheduleHolder) {
@@ -701,12 +620,6 @@ initialState is a copy, for comparing if data has changed
                 scheduleLayout.setEndIconOnClickListener { removeParent() }
         }
     }
-
-    private fun hasValueParentTask() = stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task
-
-    private fun hasValueSchedule() = stateData.state
-            .schedules
-            .isNotEmpty()
 
     private fun firstScheduleEntry() = hintToSchedule(delegate.scheduleHint)
 
@@ -778,7 +691,7 @@ initialState is a copy, for comparing if data has changed
     }
 
     @Suppress("PrivatePropertyName")
-    private inner class CreateTaskAdapter(scheduleEntries: List<ScheduleEntry>) : RecyclerView.Adapter<Holder>() {
+    private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
         private fun getItems(scheduleEntries: List<ScheduleEntry>) = listOf(Item.Parent) +
                 scheduleEntries.map { Item.Schedule(it) } +
@@ -786,7 +699,7 @@ initialState is a copy, for comparing if data has changed
                 Item.Note +
                 Item.Image
 
-        var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
+        var items by observable(getItems(listOf())) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -806,7 +719,7 @@ initialState is a copy, for comparing if data has changed
             checkNotNull(data)
         }
 
-        private fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
+        fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
             items = getItems(scheduleEntries)
         }
 
@@ -848,13 +761,6 @@ initialState is a copy, for comparing if data has changed
         override fun getItemCount() = items.size
 
         override fun getItemViewType(position: Int) = items[position].holderType.ordinal
-
-        fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            stateData.state.schedules += scheduleEntry
-            updateSchedules()
-        }
-
-        fun updateSchedules() = setSchedules(stateData.state.schedules)
     }
 
     abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -905,16 +811,56 @@ initialState is a copy, for comparing if data has changed
         }
     }
 
-    private inner class ParentScheduleData(val state: ParentScheduleState) {
+    private inner class ParentScheduleData(private val state: ParentScheduleState) { // todo create move into delegate
 
-        var parent by observable(state.parentKey?.let { delegate.findTaskData(it) }) { _, _, newValue ->
-            state.parentKey = newValue?.parentKey
+        private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(state.parentKey?.let { delegate.findTaskData(it) }))
 
-            if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
-                state.schedules.clear()
-                createTaskAdapter.updateSchedules()
+        val parentObservable: Observable<NullableWrapper<CreateTaskViewModel.ParentTreeData>> = parentRelay
+
+        var parent
+            get() = parentRelay.value!!.value
+            set(newValue) {
+                state.parentKey = newValue?.parentKey
+
+                if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
+                    state.schedules.clear()
+
+                    scheduleUpdates.accept(Unit)
+                }
+
+                parentRelay.accept(NullableWrapper(newValue))
             }
+
+        private val scheduleUpdates = BehaviorRelay.createDefault(Unit)
+
+        val schedules: List<ScheduleEntry> get() = state.schedules
+
+        val scheduleObservable = scheduleUpdates.map { schedules }!!
+
+        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
+            state.schedules[position] = scheduleEntry
+
+            scheduleUpdates.accept(Unit)
         }
+
+        fun removeSchedule(position: Int) {
+            state.schedules.removeAt(position)
+
+            scheduleUpdates.accept(Unit)
+        }
+
+        fun addSchedule(scheduleEntry: ScheduleEntry) {
+            if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
+                parent = null
+
+            state.schedules += scheduleEntry
+
+            scheduleUpdates.accept(Unit)
+        }
+
+        fun equalTo(parentScheduleState: ParentScheduleState) = state == parentScheduleState
+
+        fun saveState(outState: Bundle) = outState.putParcelable(KEY_STATE, state)
     }
 
     private sealed class Item {
@@ -1138,6 +1084,26 @@ initialState is a copy, for comparing if data has changed
             return taskDatas.values
                     .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
                     .flatten()
+        }
+
+        fun createTask(createParameters: CreateParameters, stateData: ParentScheduleData): TaskKey {
+            val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
+
+            return when {
+                stateData.schedules.isNotEmpty() -> createTaskWithSchedule(
+                        createParameters,
+                        stateData.schedules.map { it.scheduleDataWrapper.scheduleData },
+                        projectId
+                )
+                stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
+                    check(projectId == null)
+
+                    val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
+
+                    createTaskWithParent(createParameters, parentTaskKey)
+                }
+                else -> createTaskWithoutReminder(createParameters, projectId)
+            }
         }
 
         abstract fun createTaskWithSchedule(

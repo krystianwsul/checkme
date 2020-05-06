@@ -18,7 +18,7 @@ class Task<T : ProjectType>(
 
     companion object {
 
-        var USE_ROOT_INSTANCES = false // todo instances May 23rd 2020
+        var USE_ROOT_INSTANCES = false
     }
 
     private val _existingInstances = taskRecord.instanceRecords

@@ -114,19 +114,16 @@ class CreateTaskActivity : NavBarActivity() {
 
     private var savedInstanceState: Bundle? = null
 
-    private val discardDialogListener = this::finish
-
     private lateinit var parameters: CreateTaskParameters
-    private var tmpState: ParentScheduleState? = null
-
-    private lateinit var delegate: Delegate
-
-    private var data: CreateTaskViewModel.Data? = null
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
+    private var data: CreateTaskViewModel.Data? = null
+    private lateinit var delegate: Delegate
     private lateinit var initialState: ParentScheduleState
     private lateinit var stateData: ParentScheduleData
+
+    private val discardDialogListener = this::finish
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
@@ -505,43 +502,38 @@ initialState is a copy, for comparing if data has changed
          */
 
         if (!this::stateData.isInitialized) {
-            check(tmpState == null)
             check(!this::initialState.isInitialized)
 
-            if (savedInstanceState?.containsKey(KEY_INITIAL_STATE) == true) {
-                savedInstanceState!!.run {
-                    initialState = getParcelable(KEY_INITIAL_STATE)!!
-                    tmpState = getParcelable(KEY_STATE)!!
-                }
-            } else if (parameters.parentScheduleState != null) {
-                tmpState = parameters.parentScheduleState // create
-                initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
-            } else {
-                val schedules = mutableListOf<ScheduleEntry>()
-
-                val parentKey = delegate.initialParentKey
-
-                data.run {
-                    if (taskData != null) {
-                        if (taskData.scheduleDataWrappers != null) {
-                            check(taskData.scheduleDataWrappers.isNotEmpty())
-
-                            schedules.addAll(taskData.scheduleDataWrappers
-                                    .asSequence()
-                                    .map { ScheduleEntry(it) }
-                                    .toMutableList())
-                        }
-                    } else {
-                        if (parentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder)
-                            schedules.add(firstScheduleEntry())
+            when {
+                savedInstanceState?.containsKey(KEY_INITIAL_STATE) == true -> {
+                    savedInstanceState!!.run {
+                        initialState = getParcelable(KEY_INITIAL_STATE)!!
+                        stateData = ParentScheduleData(getParcelable(KEY_STATE)!!)
                     }
                 }
+                parameters.parentScheduleState != null -> {
+                    parameters.parentScheduleState!!.let { // create delegate
+                        initialState = it
+                        stateData = ParentScheduleData(it)
+                    }
+                }
+                else -> {
+                    val schedules = data.run {
+                        if (taskData != null) {
+                            taskData.scheduleDataWrappers
+                                    ?.map { ScheduleEntry(it) }
+                                    ?: listOf()
+                        } else if (delegate.initialParentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder) {
+                            listOf(firstScheduleEntry())
+                        } else {
+                            listOf()
+                        }
+                    }
 
-                tmpState = ParentScheduleState(parentKey, schedules)
-                initialState = ParentScheduleState(parentKey, ArrayList(schedules))
+                    initialState = ParentScheduleState(delegate.initialParentKey, schedules.toMutableList())
+                    stateData = ParentScheduleData(initialState)
+                }
             }
-
-            stateData = ParentScheduleData(tmpState!!)
         }
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)

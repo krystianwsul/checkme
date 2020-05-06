@@ -138,9 +138,9 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
                         null,
-                        stateData.state.run {
+                        stateData.run {
                             ParentScheduleState(
-                                    parentKey,
+                                    parent?.parentKey,
                                     schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList()
                             )
                         },
@@ -198,9 +198,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private val scheduleDataWrappers
-        get() = stateData.state
-                .schedules
-                .map { it.scheduleDataWrapper }
+        get() = stateData.schedules.map { it.scheduleDataWrapper }
 
     private val scheduleDatas get() = scheduleDataWrappers.map { it.scheduleData }
 
@@ -361,15 +359,13 @@ class CreateTaskActivity : NavBarActivity() {
 
                                 val position = result.position - 1
 
-                                val oldId = if (position < stateData.state.schedules.size) {
-                                    stateData.state
-                                            .schedules[position]
-                                            .id
+                                val oldId = if (position < stateData.schedules.size) {
+                                    stateData.schedules[position].id
                                 } else {
                                     null
                                 }
 
-                                stateData.state.schedules[position] = result.scheduleDialogData.toScheduleEntry(oldId)
+                                stateData.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
 
                                 createTaskAdapter.updateSchedules()
                             }
@@ -385,9 +381,7 @@ class CreateTaskActivity : NavBarActivity() {
         check(position >= 1)
         checkNotNull(data)
 
-        stateData.state
-                .schedules
-                .removeAt(position - 1)
+        stateData.removeSchedule(position - 1)
 
         createTaskAdapter.updateSchedules()
     }
@@ -409,7 +403,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         outState.run {
             if (data != null) {
-                putParcelable(KEY_STATE, stateData.state)
+                stateData.saveState(this)
                 putParcelable(KEY_INITIAL_STATE, initialState)
 
                 if (!note.isNullOrEmpty())
@@ -520,7 +514,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 
-        createTaskAdapter = CreateTaskAdapter(stateData.state.schedules)
+        createTaskAdapter = CreateTaskAdapter(stateData.schedules)
         createTaskRecycler.adapter = createTaskAdapter
         createTaskRecycler.itemAnimator = CustomItemAnimator()
 
@@ -568,11 +562,11 @@ class CreateTaskActivity : NavBarActivity() {
             toolbarLayout.error = null
         }
 
-        for (scheduleEntry in stateData.state.schedules) {
+        for (scheduleEntry in stateData.schedules) {
             if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
-            if (delegate.skipScheduleCheck(scheduleEntry, stateData.state.parentKey))
+            if (delegate.skipScheduleCheck(scheduleEntry, stateData.parent?.parentKey))
                 continue
 
             val date = scheduleEntry.scheduleDataWrapper
@@ -612,9 +606,7 @@ class CreateTaskActivity : NavBarActivity() {
         scheduleEntry.error = getString(stringId)
         check(!TextUtils.isEmpty(scheduleEntry.error))
 
-        val index = stateData.state
-                .schedules
-                .indexOf(scheduleEntry)
+        val index = stateData.schedules.indexOf(scheduleEntry)
         check(index >= 0)
 
         createTaskRecycler.getChildAt(index + 1)?.let {
@@ -628,7 +620,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         check(!hasValueParentTask() || !hasValueSchedule())
 
-        if (initialState != stateData.state)
+        if (!stateData.equalTo(initialState))
             return true
 
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
@@ -675,9 +667,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     private fun hasValueParentTask() = stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task
 
-    private fun hasValueSchedule() = stateData.state
-            .schedules
-            .isNotEmpty()
+    private fun hasValueSchedule() = stateData.schedules.isNotEmpty()
 
     private fun firstScheduleEntry() = hintToSchedule(delegate.scheduleHint)
 
@@ -821,11 +811,11 @@ class CreateTaskActivity : NavBarActivity() {
         override fun getItemViewType(position: Int) = items[position].holderType.ordinal
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            stateData.state.schedules += scheduleEntry
+            stateData.addSchedule(scheduleEntry)
             updateSchedules()
         }
 
-        fun updateSchedules() = setSchedules(stateData.state.schedules)
+        fun updateSchedules() = setSchedules(stateData.schedules)
     }
 
     abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -876,16 +866,32 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private inner class ParentScheduleData(val state: ParentScheduleState) {
+    private inner class ParentScheduleData(private val state: ParentScheduleState) {
 
         var parent by observable(state.parentKey?.let { delegate.findTaskData(it) }) { _, _, newValue ->
             state.parentKey = newValue?.parentKey
 
-            if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
+            if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) { // todo create same clearing as vice versa
                 state.schedules.clear()
                 createTaskAdapter.updateSchedules()
             }
         }
+
+        val schedules: List<ScheduleEntry> get() = state.schedules
+
+        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
+            state.schedules[position] = scheduleEntry
+        }
+
+        fun removeSchedule(position: Int) = state.schedules.removeAt(position)
+
+        fun addSchedule(scheduleEntry: ScheduleEntry) {
+            state.schedules += scheduleEntry
+        }
+
+        fun equalTo(parentScheduleState: ParentScheduleState) = state == parentScheduleState
+
+        fun saveState(outState: Bundle) = outState.putParcelable(KEY_STATE, state)
     }
 
     private sealed class Item {

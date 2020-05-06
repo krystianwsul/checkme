@@ -426,7 +426,7 @@ class CreateTaskActivity : NavBarActivity() {
         this.data = data
 
         if (!this::delegate.isInitialized) {
-            check(!this::stateData.isInitialized) // todo move all this into delegate
+            check(!this::stateData.isInitialized) // todo create move all this into delegate
             check(!this::initialState.isInitialized)
 
             delegate = Delegate.fromParameters(parameters, data)
@@ -618,7 +618,7 @@ class CreateTaskActivity : NavBarActivity() {
         check(index >= 0)
 
         createTaskRecycler.getChildAt(index + 1)?.let {
-            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error
+            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error // todo create use payloads
         }
     }
 
@@ -646,7 +646,7 @@ class CreateTaskActivity : NavBarActivity() {
     private fun updateParentView() {
         val view = createTaskRecycler.getChildAt(0) ?: return
 
-        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder
+        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
         updateParentView(scheduleHolder)
     }
 

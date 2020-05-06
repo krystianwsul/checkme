@@ -2,15 +2,18 @@ package com.krystianwsul.checkme.firebase
 
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.Observable
 
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
@@ -50,5 +53,29 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).snapshotChanges()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) = rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
-    override fun getRootInstanceObservable(taskFirebaseKey: String) = rootInstanceQuery(taskFirebaseKey).snapshotChanges()
+
+    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
+        return RemoteConfig.observable
+                .map { it.queryRemoteInstances }
+                .distinctUntilChanged()
+                .switchMap {
+                    if (it)
+                        rootInstanceQuery(taskFirebaseKey).snapshotChanges()
+                    else
+                        Observable.just(EmptySnapshot())
+                }
+    }
+
+    private class EmptySnapshot : Snapshot {
+
+        override val key get() = throw UnsupportedOperationException()
+
+        override val children get() = throw UnsupportedOperationException()
+
+        override fun exists() = false
+
+        override fun <T> getValue(valueType: Class<T>) = throw UnsupportedOperationException()
+
+        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T? = null
+    }
 }

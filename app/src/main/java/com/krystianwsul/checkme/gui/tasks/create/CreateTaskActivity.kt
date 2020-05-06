@@ -217,8 +217,6 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(!hasValueParentTask() || !hasValueSchedule())
-
         fun save(andOpen: Boolean) {
             checkNotNull(data)
             checkNotNull(toolbarEditText)
@@ -242,8 +240,6 @@ class CreateTaskActivity : NavBarActivity() {
 
                 val taskKey: TaskKey = when {
                     hasValueSchedule() -> {
-                        check(!hasValueParentTask())
-
                         delegate.createTaskWithSchedule(createParameters, scheduleDatas, projectId)
                     }
                     hasValueParentTask() -> {
@@ -519,8 +515,6 @@ class CreateTaskActivity : NavBarActivity() {
 
             (createTaskRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
         }
-
-        check(!hasValueParentTask() || !hasValueSchedule())
     }
 
     override fun onBackPressed() {
@@ -529,8 +523,6 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun tryClose(): Boolean {
-        check(!hasValueParentTask() || !hasValueSchedule())
-
         return if (dataChanged()) {
             DiscardDialogFragment.newInstance().let {
                 it.discardDialogListener = discardDialogListener
@@ -611,8 +603,6 @@ class CreateTaskActivity : NavBarActivity() {
     private fun dataChanged(): Boolean {
         if (data == null)
             return false
-
-        check(!hasValueParentTask() || !hasValueSchedule())
 
         if (!stateData.equalTo(initialState))
             return true

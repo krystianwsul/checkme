@@ -318,7 +318,7 @@ class CreateTaskActivity : NavBarActivity() {
                             }
 
                             if (result.position == null) {
-                                createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
+                                stateData.addSchedule(result.scheduleDialogData.toScheduleEntry())
                             } else {
                                 check(result.position >= 1)
 
@@ -331,8 +331,6 @@ class CreateTaskActivity : NavBarActivity() {
                                 }
 
                                 stateData.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
-
-                                createTaskAdapter.updateSchedules()
                             }
                         }
                         is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
@@ -347,8 +345,6 @@ class CreateTaskActivity : NavBarActivity() {
         checkNotNull(data)
 
         stateData.removeSchedule(position - 1)
-
-        createTaskAdapter.updateSchedules()
     }
 
     @SuppressLint("CheckResult")
@@ -762,11 +758,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         override fun getItemViewType(position: Int) = items[position].holderType.ordinal
 
-        fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            stateData.addSchedule(scheduleEntry)
-            updateSchedules()
-        }
-
         fun updateSchedules() = setSchedules(stateData.schedules)
     }
 
@@ -841,15 +832,23 @@ class CreateTaskActivity : NavBarActivity() {
 
         fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
             state.schedules[position] = scheduleEntry
+
+            createTaskAdapter.updateSchedules()
         }
 
-        fun removeSchedule(position: Int) = state.schedules.removeAt(position)
+        fun removeSchedule(position: Int) {
+            state.schedules.removeAt(position)
+
+            createTaskAdapter.updateSchedules()
+        }
 
         fun addSchedule(scheduleEntry: ScheduleEntry) {
             if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
                 parent = null
 
             state.schedules += scheduleEntry
+
+            createTaskAdapter.updateSchedules()
         }
 
         fun equalTo(parentScheduleState: ParentScheduleState) = state == parentScheduleState

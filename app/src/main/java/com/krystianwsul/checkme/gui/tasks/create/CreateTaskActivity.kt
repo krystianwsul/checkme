@@ -196,8 +196,6 @@ class CreateTaskActivity : NavBarActivity() {
     private val scheduleDataWrappers
         get() = stateData.schedules.map { it.scheduleDataWrapper }
 
-    private val scheduleDatas get() = scheduleDataWrappers.map { it.scheduleData }
-
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
     val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None)
@@ -236,27 +234,7 @@ class CreateTaskActivity : NavBarActivity() {
                         writeImagePath
                 )
 
-                val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
-
-                val taskKey: TaskKey = when {
-                    hasValueSchedule() -> {
-                        delegate.createTaskWithSchedule(createParameters, scheduleDatas, projectId)
-                    }
-                    hasValueParentTask() -> {
-                        checkNotNull(stateData.parent)
-                        check(projectId == null)
-                        check(scheduleDatas.isEmpty())
-
-                        val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
-
-                        delegate.createTaskWithParent(createParameters, parentTaskKey)
-                    }
-                    else -> {  // no reminder
-                        check(scheduleDatas.isEmpty())
-
-                        delegate.createTaskWithoutReminder(createParameters, projectId)
-                    }
-                }
+                val taskKey = delegate.createTask(createParameters, stateData)
 
                 if (andOpen)
                     startActivity(ShowTaskActivity.newIntent(taskKey))
@@ -632,10 +610,6 @@ class CreateTaskActivity : NavBarActivity() {
                 scheduleLayout.setEndIconOnClickListener { removeParent() }
         }
     }
-
-    private fun hasValueParentTask() = stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task
-
-    private fun hasValueSchedule() = stateData.schedules.isNotEmpty()
 
     private fun firstScheduleEntry() = hintToSchedule(delegate.scheduleHint)
 
@@ -1091,6 +1065,26 @@ class CreateTaskActivity : NavBarActivity() {
             return taskDatas.values
                     .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
                     .flatten()
+        }
+
+        fun createTask(createParameters: CreateParameters, stateData: ParentScheduleData): TaskKey {
+            val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
+
+            return when {
+                stateData.schedules.isNotEmpty() -> createTaskWithSchedule(
+                        createParameters,
+                        stateData.schedules.map { it.scheduleDataWrapper.scheduleData },
+                        projectId
+                )
+                stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
+                    check(projectId == null)
+
+                    val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
+
+                    createTaskWithParent(createParameters, parentTaskKey)
+                }
+                else -> createTaskWithoutReminder(createParameters, projectId)
+            }
         }
 
         abstract fun createTaskWithSchedule(

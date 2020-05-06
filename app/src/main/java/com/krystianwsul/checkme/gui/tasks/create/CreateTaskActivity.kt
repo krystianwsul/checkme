@@ -488,9 +488,13 @@ class CreateTaskActivity : NavBarActivity() {
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 
-        createTaskAdapter = CreateTaskAdapter(stateData.schedules)
+        createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter
         createTaskRecycler.itemAnimator = CustomItemAnimator()
+
+        stateData.scheduleObservable
+                .subscribe { createTaskAdapter.setSchedules(it) }
+                .addTo(loadFinishedDisposable)
 
         if (noteHasFocus) { // keyboard hack
             val notePosition = createTaskAdapter.items.indexOf(Item.Note)
@@ -687,7 +691,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     @Suppress("PrivatePropertyName")
-    private inner class CreateTaskAdapter(scheduleEntries: List<ScheduleEntry>) : RecyclerView.Adapter<Holder>() {
+    private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
         private fun getItems(scheduleEntries: List<ScheduleEntry>) = listOf(Item.Parent) +
                 scheduleEntries.map { Item.Schedule(it) } +
@@ -695,7 +699,7 @@ class CreateTaskActivity : NavBarActivity() {
                 Item.Note +
                 Item.Image
 
-        var items by observable(getItems(scheduleEntries)) { _, oldItems, newItems ->
+        var items by observable(getItems(listOf())) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -715,7 +719,7 @@ class CreateTaskActivity : NavBarActivity() {
             checkNotNull(data)
         }
 
-        private fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
+        fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
             items = getItems(scheduleEntries)
         }
 
@@ -757,8 +761,6 @@ class CreateTaskActivity : NavBarActivity() {
         override fun getItemCount() = items.size
 
         override fun getItemViewType(position: Int) = items[position].holderType.ordinal
-
-        fun updateSchedules() = setSchedules(stateData.schedules)
     }
 
     abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -809,7 +811,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private inner class ParentScheduleData(private val state: ParentScheduleState) {
+    private inner class ParentScheduleData(private val state: ParentScheduleState) { // todo create move into delegate
 
         private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(state.parentKey?.let { delegate.findTaskData(it) }))
 
@@ -822,24 +824,29 @@ class CreateTaskActivity : NavBarActivity() {
 
                 if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
                     state.schedules.clear()
-                    createTaskAdapter.updateSchedules()
+
+                    scheduleUpdates.accept(Unit)
                 }
 
                 parentRelay.accept(NullableWrapper(newValue))
             }
 
+        private val scheduleUpdates = BehaviorRelay.createDefault(Unit)
+
         val schedules: List<ScheduleEntry> get() = state.schedules
+
+        val scheduleObservable = scheduleUpdates.map { schedules }!!
 
         fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
             state.schedules[position] = scheduleEntry
 
-            createTaskAdapter.updateSchedules()
+            scheduleUpdates.accept(Unit)
         }
 
         fun removeSchedule(position: Int) {
             state.schedules.removeAt(position)
 
-            createTaskAdapter.updateSchedules()
+            scheduleUpdates.accept(Unit)
         }
 
         fun addSchedule(scheduleEntry: ScheduleEntry) {
@@ -848,7 +855,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             state.schedules += scheduleEntry
 
-            createTaskAdapter.updateSchedules()
+            scheduleUpdates.accept(Unit)
         }
 
         fun equalTo(parentScheduleState: ParentScheduleState) = state == parentScheduleState

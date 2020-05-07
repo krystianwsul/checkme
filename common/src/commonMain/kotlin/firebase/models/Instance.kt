@@ -151,13 +151,21 @@ class Instance<T : ProjectType> private constructor(
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         return if (isRootInstance(now) &&
                 task.getOldestVisible()?.let { scheduleDate < it } == true &&
-                !exists()) {
+                !exists()
+        ) {
             false
         } else {
             isVisibleHelper(now, hack24)
         }
     }
 
+    /*
+        todo this doesn't take oldestVisible into account, and it's cropping up in the following
+          situation: child instance exists, and queries parent for visibility.  Parent is already
+          removed, so the parent virtual instance returns that it's visible.  Obviously, this
+          function should *just* check if - when the instance is virtual - does it match up with
+          the visibility of any of the schedules... or something.  I'm not sure how to do it, though.
+     */
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (data.hidden)
             return false

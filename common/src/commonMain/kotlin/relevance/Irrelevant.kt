@@ -55,7 +55,7 @@ object Irrelevant {
 
         existingInstances.asSequence()
                 .filter { it.isRootInstance(now) && it.isVisible(now, true) }
-                .map { instanceRelevances[it.instanceKey]!! }
+                .map { instanceRelevances.getValue(it.instanceKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
@@ -80,16 +80,17 @@ object Irrelevant {
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
         val visibleIrrelevantExistingInstances = irrelevantExistingInstances.filter { it.isVisible(now, true) }
-        if (visibleIrrelevantExistingInstances.isNotEmpty())
+        if (visibleIrrelevantExistingInstances.isNotEmpty()) {
             throw VisibleIrrelevantExistingInstancesException(visibleIrrelevantExistingInstances.joinToString(", ") {
                 it.instanceKey.toString() +
-                        ", raw date data: " +
-                        it.instanceKey
-                                .scheduleKey
-                                .scheduleDate
-                                .run { "$year - $month - $day" } +
-                        ", name: " + it.name
+                        ", name: " +
+                        it.name +
+                        ", parent: " +
+                        it.getParentName(ExactTimeStamp.now) +
+                        ", parent exists: " +
+                        it.getParentInstance(ExactTimeStamp.now)?.exists()
             })
+        }
 
         irrelevantExistingInstances.forEach { it.delete() }
         irrelevantTasks.forEach { it.delete() }

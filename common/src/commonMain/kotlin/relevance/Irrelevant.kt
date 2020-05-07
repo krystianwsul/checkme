@@ -81,7 +81,15 @@ object Irrelevant {
 
         val visibleIrrelevantExistingInstances = irrelevantExistingInstances.filter { it.isVisible(now, true) }
         if (visibleIrrelevantExistingInstances.isNotEmpty())
-            throw VisibleIrrelevantExistingInstancesException(visibleIrrelevantExistingInstances.joinToString(", ") { it.instanceKey.toString() })
+            throw VisibleIrrelevantExistingInstancesException(visibleIrrelevantExistingInstances.joinToString(", ") {
+                it.instanceKey.toString() +
+                        ", raw date data: " +
+                        it.instanceKey
+                                .scheduleKey
+                                .scheduleDate
+                                .run { "$year - $month - $day" } +
+                        ", name: " + it.name
+            })
 
         irrelevantExistingInstances.forEach { it.delete() }
         irrelevantTasks.forEach { it.delete() }

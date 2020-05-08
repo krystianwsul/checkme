@@ -756,12 +756,13 @@ class CreateTaskActivity : NavBarActivity() {
     class ParentScheduleState(
             var parentKey: CreateTaskViewModel.ParentKey?,
             val schedules: MutableList<ScheduleEntry>,
+            @Suppress("unused")
             val bogus: Unit
     ) : Parcelable {
 
         constructor(
                 parentKey: CreateTaskViewModel.ParentKey?,
-                schedules: List<ScheduleEntry>?
+                schedules: List<ScheduleEntry>? = null
         ) : this(parentKey, schedules.orEmpty().toMutableList(), Unit)
 
         override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + schedules.hashCode()
@@ -1027,7 +1028,6 @@ class CreateTaskActivity : NavBarActivity() {
         abstract var data: CreateTaskViewModel.Data
 
         open val initialName: String? = null
-        abstract val initialParentKey: CreateTaskViewModel.ParentKey?
         open val scheduleHint: Hint.Schedule? = null
 
         protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
@@ -1124,10 +1124,9 @@ class CreateTaskActivity : NavBarActivity() {
         private val taskData get() = data.taskData!!
 
         override val initialName get() = taskData.name
-        override val initialParentKey get() = taskData.parentKey
 
         override val initialState = savedInitialState ?: ParentScheduleState(
-                initialParentKey,
+                taskData.parentKey,
                 taskData.scheduleDataWrappers
                         ?.map { ScheduleEntry(it) }
                         ?.toList()
@@ -1198,13 +1197,12 @@ class CreateTaskActivity : NavBarActivity() {
         private val taskData get() = data.taskData!!
 
         override val initialName get() = taskData.name
-        override val initialParentKey get() = taskData.parentKey // todo create may be unnecessary
 
         override val initialState: ParentScheduleState
 
         init {
             initialState = savedInitialState ?: ParentScheduleState(
-                    initialParentKey,
+                    taskData.parentKey,
                     taskData.scheduleDataWrappers
                             ?.map { ScheduleEntry(it) }
                             ?.toMutableList()
@@ -1291,39 +1289,31 @@ class CreateTaskActivity : NavBarActivity() {
             savedInitialState: ParentScheduleState?
     ) : Delegate() {
 
-        override val initialParentKey = parameters.run {
-            if (hint is Hint.Task) {
-                hint.toParentKey()
-            } else {
-                taskKeys.map { it.projectKey }
-                        .distinct()
-                        .singleOrNull()
-                        ?.let {
-                            (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
-                        }
-            }
-        }
-
         override val scheduleHint = parameters.hint?.toScheduleHint()
 
         override val initialState: ParentScheduleState
 
         init {
-            initialState = when {
-                savedInitialState != null -> savedInitialState
-                else -> {
-                    val schedules = if (initialParentKey !is CreateTaskViewModel.ParentKey.Task && data.defaultReminder) {
-                        listOf(firstScheduleEntry)
-                    } else {
-                        listOf()
-                    }
-
-                    ParentScheduleState(
-                            initialParentKey,
-                            schedules.toMutableList()
+            val (initialParentKey, schedule) = parameters.run {
+                if (hint is Hint.Task) {
+                    Pair(hint.toParentKey(), null)
+                } else {
+                    Pair(
+                            taskKeys.map { it.projectKey }
+                                    .distinct()
+                                    .singleOrNull()
+                                    ?.let {
+                                        (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
+                                    },
+                            firstScheduleEntry.takeIf { data.defaultReminder }
                     )
                 }
             }
+
+            initialState = savedInitialState ?: ParentScheduleState(
+                    initialParentKey,
+                    listOfNotNull(schedule)
+            )
         }
 
         override fun createTaskWithSchedule(
@@ -1391,42 +1381,50 @@ class CreateTaskActivity : NavBarActivity() {
     ) : Delegate() {
 
         override val initialName: String?
-        override val initialParentKey: CreateTaskViewModel.ParentKey?
         override val scheduleHint: Hint.Schedule?
-
         override val initialState: ParentScheduleState
 
         init {
             when (parameters) {
                 is CreateTaskParameters.Create -> {
                     initialName = parameters.nameHint
-                    initialParentKey = parameters.hint?.toParentKey()
                     scheduleHint = parameters.hint?.toScheduleHint()
-                }
-                is CreateTaskParameters.Share -> {
-                    initialName = parameters.nameHint
-                    initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
-                    scheduleHint = null
-                }
-                is CreateTaskParameters.Shortcut -> {
-                    initialName = null
-                    initialParentKey = parameters.parentTaskKeyHint.toParentKey()
-                    scheduleHint = null
-                }
-                CreateTaskParameters.None -> {
-                    initialName = null
-                    initialParentKey = null
-                    scheduleHint = null
-                }
-                else -> throw IllegalArgumentException()
-            }
 
-            initialState = savedInitialState
-                    ?: (parameters as? CreateTaskParameters.Create)?.parentScheduleState
+                    val initialParentKey = parameters.hint?.toParentKey()
+                    initialState = savedInitialState ?: parameters.parentScheduleState
                             ?: ParentScheduleState(
                             initialParentKey,
                             listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is CreateTaskViewModel.ParentKey.Task && data.defaultReminder })
                     )
+                }
+                is CreateTaskParameters.Share -> {
+                    initialName = parameters.nameHint
+                    scheduleHint = null
+
+                    val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
+                    initialState = savedInitialState ?: ParentScheduleState(
+                            initialParentKey,
+                            listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
+                    )
+                }
+                is CreateTaskParameters.Shortcut -> {
+                    initialName = null
+                    scheduleHint = null
+
+                    val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
+                    initialState = savedInitialState ?: ParentScheduleState(initialParentKey)
+                }
+                CreateTaskParameters.None -> {
+                    initialName = null
+                    scheduleHint = null
+
+                    initialState = savedInitialState ?: ParentScheduleState(
+                            null,
+                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder })
+                    )
+                }
+                else -> throw IllegalArgumentException()
+            }
         }
 
         override fun createTaskWithSchedule(

@@ -59,14 +59,12 @@ sealed class CreateTaskParameters : Parcelable {
         }
     }
 
-    open val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null
-
     abstract fun startViewModel(viewModel: CreateTaskViewModel)
 
     @Parcelize
     class Create(
             val hint: CreateTaskActivity.Hint? = null,
-            override val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
+            val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
             val nameHint: String? = null
     ) : CreateTaskParameters() {
 

@@ -390,17 +390,22 @@ class CreateTaskActivity : NavBarActivity() {
 
             delegate = Delegate.fromParameters(parameters, data)
 
+            fun initStateData(parentScheduleState: ParentScheduleState) {
+                val initialParent = parentScheduleState.parentKey?.let { delegate.findTaskData(it) }
+                stateData = ParentScheduleData(parentScheduleState, initialParent)
+            }
+
             when {
                 savedInstanceState?.containsKey(KEY_INITIAL_STATE) == true -> {
                     savedInstanceState!!.run {
                         initialState = getParcelable(KEY_INITIAL_STATE)!!
-                        stateData = ParentScheduleData(getParcelable(KEY_STATE)!!)
+                        initStateData(getParcelable(KEY_STATE)!!)
                     }
                 }
                 parameters.parentScheduleState != null -> {
                     parameters.parentScheduleState!!.let { // create delegate
                         initialState = it
-                        stateData = ParentScheduleData(it)
+                        initStateData(it)
                     }
                 }
                 else -> {
@@ -417,7 +422,7 @@ class CreateTaskActivity : NavBarActivity() {
                     }
 
                     initialState = ParentScheduleState(delegate.initialParentKey, schedules.toMutableList())
-                    stateData = ParentScheduleData(initialState)
+                    initStateData(initialState)
                 }
             }
         } else {
@@ -811,9 +816,12 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private inner class ParentScheduleData(private val state: ParentScheduleState) { // todo create move into delegate
+    private class ParentScheduleData(
+            private val state: ParentScheduleState,
+            initialParent: CreateTaskViewModel.ParentTreeData?
+    ) { // todo create move into delegate
 
-        private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(state.parentKey?.let { delegate.findTaskData(it) }))
+        private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(initialParent))
 
         val parentObservable: Observable<NullableWrapper<CreateTaskViewModel.ParentTreeData>> = parentRelay
 

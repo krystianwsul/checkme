@@ -19,7 +19,7 @@ class WeeklyScheduleRecord<T : ProjectType>(
 
     private val weeklyScheduleJson by lazy { createObject.weeklyScheduleJson!! }
 
-    val daysOfWeek by lazy { setOf(weeklyScheduleJson.dayOfWeek) } // todo no set
+    val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
 
     override fun deleteFromParent() = check(taskRecord.weeklyScheduleRecords.remove(id) == this)
 }

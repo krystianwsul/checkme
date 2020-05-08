@@ -12,11 +12,7 @@ class WeeklySchedule<T : ProjectType>(
         override val repeatingScheduleRecord: WeeklyScheduleRecord<T>
 ) : RepeatingSchedule<T>(rootTask) {
 
-    val daysOfWeek
-        get() = repeatingScheduleRecord.daysOfWeek
-                .asSequence()
-                .map { DayOfWeek.values()[it] }
-                .toSet()
+    val dayOfWeek = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]
 
     override val scheduleRecord get() = repeatingScheduleRecord
 
@@ -30,7 +26,7 @@ class WeeklySchedule<T : ProjectType>(
     ): Instance<T>? {
         val day = date.dayOfWeek
 
-        if (!daysOfWeek.contains(day))
+        if (dayOfWeek != day)
             return null
 
         val hourMinute = time.getHourMinute(day)
@@ -53,15 +49,7 @@ class WeeklySchedule<T : ProjectType>(
         val nowDayOfWeek = today.dayOfWeek
         val nowHourMinute = HourMinute(now.toDateTimeTz())
 
-        val nextDayOfWeek = daysOfWeek.sorted().run {
-            if (time.getHourMinute(nowDayOfWeek) > nowHourMinute) {
-                firstOrNull { it >= nowDayOfWeek }
-            } else {
-                firstOrNull { it > nowDayOfWeek }
-            } ?: first()
-        }
-
-        val ordinalDifference = nextDayOfWeek.ordinal - nowDayOfWeek.ordinal
+        val ordinalDifference = dayOfWeek.ordinal - nowDayOfWeek.ordinal
         val addDays = if (ordinalDifference == 0 && time.getHourMinute(nowDayOfWeek) > nowHourMinute)
             0
         else if (ordinalDifference > 0)
@@ -75,5 +63,5 @@ class WeeklySchedule<T : ProjectType>(
     }
 
     override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime) =
-            scheduleDateTime.date.dayOfWeek in daysOfWeek
+            scheduleDateTime.date.dayOfWeek == dayOfWeek
 }

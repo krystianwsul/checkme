@@ -569,20 +569,18 @@ class Task<T : ProjectType>(
                     _schedules += SingleSchedule(this, singleScheduleRecord)
                 }
                 is WeeklySchedule<*> -> {
-                    for (dayOfWeek in schedule.daysOfWeek) {
-                        val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(WeeklyScheduleJson(
-                                now.long,
-                                schedule.endTime,
-                                dayOfWeek.ordinal,
-                                customTimeId?.value,
-                                hour,
-                                minute,
-                                schedule.from?.toJson(),
-                                schedule.until?.toJson()
-                        ))
+                    val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(WeeklyScheduleJson(
+                            now.long,
+                            schedule.endTime,
+                            schedule.dayOfWeek.ordinal,
+                            customTimeId?.value,
+                            hour,
+                            minute,
+                            schedule.from?.toJson(),
+                            schedule.until?.toJson()
+                    ))
 
-                        _schedules += WeeklySchedule(this, weeklyScheduleRecord)
-                    }
+                    _schedules += WeeklySchedule(this, weeklyScheduleRecord)
                 }
                 is MonthlyDaySchedule<*> -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(MonthlyDayScheduleJson(

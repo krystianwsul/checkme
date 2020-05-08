@@ -87,7 +87,7 @@ sealed class ScheduleGroup<T : ProjectType> {
             val until: Date?
     ) : ScheduleGroup<T>() {
 
-        val daysOfWeek get() = weeklySchedules.flatMap { it.daysOfWeek }.toSet()
+        val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
         override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair, from, until)
 

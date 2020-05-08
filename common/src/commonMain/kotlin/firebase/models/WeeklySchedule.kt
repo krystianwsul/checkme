@@ -20,6 +20,8 @@ class WeeklySchedule<T : ProjectType>(
 
     override val scheduleRecord get() = repeatingScheduleRecord
 
+    override val scheduleType = ScheduleType.WEEKLY
+
     override fun <T : ProjectType> getInstanceInDate(
             task: Task<T>,
             date: Date,
@@ -72,5 +74,6 @@ class WeeklySchedule<T : ProjectType>(
         return DateTime(thisDate, time).timeStamp
     }
 
-    override val scheduleType = ScheduleType.WEEKLY
+    override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime) =
+            scheduleDateTime.date.dayOfWeek in daysOfWeek
 }

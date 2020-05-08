@@ -55,7 +55,7 @@ class InstanceRelevance(val instance: Instance<*>) {
                     if (!instanceRelevances.containsKey(instanceKey))
                         instanceRelevances[instanceKey] = InstanceRelevance(instance)
 
-                    instanceRelevances[instanceKey]!!
+                    instanceRelevances.getValue(instanceKey)
                 }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }

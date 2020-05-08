@@ -2469,6 +2469,20 @@ class DomainFactory(
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
+        /*
+        if (true) {
+            Irrelevant.setIrrelevant(
+                    object : Project.Parent {
+
+                        override fun deleteProject(project: Project<*>) {
+                            TODO("Not yet implemented")
+                        }
+                    },
+                    projectsFactory.privateProject,
+                    now
+            )
+        }*/
+
         val instances = projectsFactory.projects
                 .values
                 .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }

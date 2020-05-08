@@ -159,13 +159,6 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
-    /*
-        todo this doesn't take oldestVisible into account, and it's cropping up in the following
-          situation: child instance exists, and queries parent for visibility.  Parent is already
-          removed, so the parent virtual instance returns that it's visible.  Obviously, this
-          function should *just* check if - when the instance is virtual - does it match up with
-          the visibility of any of the schedules... or something.  I'm not sure how to do it, though.
-     */
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (data.hidden)
             return false
@@ -176,6 +169,9 @@ class Instance<T : ProjectType> private constructor(
         val parentInstance = getParentInstance(now)
         if (parentInstance != null)
             return parentInstance.isVisible(now, hack24)
+
+        if (!exists() && task.schedules.none { it.matchesScheduleDateTime(scheduleDateTime) })
+            return false
 
         val done = done ?: return true
 

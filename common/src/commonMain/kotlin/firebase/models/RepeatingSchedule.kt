@@ -99,8 +99,8 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override fun updateOldestVisible(now: ExactTimeStamp) {
         val pastRootInstances = getInstances(
                 rootTask,
-                now.plusOne(),
-                now
+                null,
+                now.plusOne()
         ).first.filter { it.isRootInstance(now) }
 
         val oldestVisible = listOf(
@@ -112,4 +112,16 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
     }
+
+    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean {
+        if (from?.let { scheduleDateTime.date < it } == true)
+            return false
+
+        if (until?.let { scheduleDateTime.date > it } == true)
+            return false
+
+        return matchesScheduleDateTimeRepeatingHelper(scheduleDateTime)
+    }
+
+    protected abstract fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime): Boolean
 }

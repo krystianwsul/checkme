@@ -70,4 +70,6 @@ class SingleSchedule<T : ProjectType>(
 
         override val originalTimePair get() = singleScheduleRecord.timePair
     }
+
+    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime) = scheduleDateTime.date == date
 }

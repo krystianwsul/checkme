@@ -63,4 +63,10 @@ class YearlySchedule<T : ProjectType>(
     }
 
     private fun getDate(year: Int) = Date(year, month, day)
+
+    override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime): Boolean {
+        val date = getDate(scheduleDateTime.date.year)
+
+        return date == scheduleDateTime.date
+    }
 }

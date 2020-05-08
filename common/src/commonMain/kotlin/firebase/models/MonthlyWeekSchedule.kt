@@ -67,4 +67,10 @@ class MonthlyWeekSchedule<T : ProjectType>(
     }
 
     private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)
+
+    override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime): Boolean {
+        val date = scheduleDateTime.date.run { getDate(year, month) }
+
+        return date == scheduleDateTime.date
+    }
 }

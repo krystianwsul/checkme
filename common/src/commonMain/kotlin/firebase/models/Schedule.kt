@@ -63,4 +63,24 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     abstract val oldestVisible: Date?
 
     abstract fun updateOldestVisible(now: ExactTimeStamp)
+
+    fun matchesScheduleDateTime(scheduleDateTime: DateTime): Boolean {
+        val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
+
+        if (exactTimeStamp < startExactTimeStamp)
+            return false
+
+        if (oldestVisible?.let { scheduleDateTime.date < it } == true)
+            return false
+
+        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true)
+            return false
+
+        if (timePair != scheduleDateTime.time.timePair)
+            return false
+
+        return matchesScheduleDateTimeHelper(scheduleDateTime)
+    }
+
+    protected abstract fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean
 }

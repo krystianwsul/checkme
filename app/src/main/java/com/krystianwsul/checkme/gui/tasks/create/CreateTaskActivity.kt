@@ -415,7 +415,7 @@ class CreateTaskActivity : NavBarActivity() {
                                     ?.map { ScheduleEntry(it) }
                                     ?: listOf()
                         } else if (delegate.initialParentKey !is CreateTaskViewModel.ParentKey.Task && defaultReminder) {
-                            listOf(firstScheduleEntry())
+                            listOf(delegate.firstScheduleEntry)
                         } else {
                             listOf()
                         }
@@ -626,8 +626,6 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
-    private fun firstScheduleEntry() = hintToSchedule(delegate.scheduleHint)
-
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(createTaskRecycler)
 
@@ -643,13 +641,6 @@ class CreateTaskActivity : NavBarActivity() {
                 stateData.parent = delegate.findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
-    }
-
-    private fun hintToSchedule(scheduleHint: Hint.Schedule?): ScheduleEntry {
-        val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
-                ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
-
-        return ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
     sealed class Hint : Parcelable {
@@ -973,7 +964,8 @@ class CreateTaskActivity : NavBarActivity() {
                         setFixedOnClickListener {
                             val parameters = ScheduleDialogFragment.Parameters(
                                     null,
-                                    activity.firstScheduleEntry()
+                                    activity.delegate
+                                            .firstScheduleEntry
                                             .scheduleDataWrapper
                                             .getScheduleDialogData(
                                                     Date.today(),
@@ -1065,6 +1057,13 @@ class CreateTaskActivity : NavBarActivity() {
         protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
         protected fun Hint.toParentKey() = (this as? Hint.Task)?.taskKey?.toParentKey()
         protected fun Hint.toScheduleHint() = this as? Hint.Schedule
+
+        val firstScheduleEntry by lazy {
+            val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
+                    ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
+
+            ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
+        }
 
         open fun checkDataChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 

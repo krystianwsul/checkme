@@ -220,7 +220,6 @@ class CreateTaskActivity : NavBarActivity() {
                 val writeImagePath = imageUrl.value!!.writeImagePath
 
                 val createParameters = Delegate.CreateParameters(
-                        delegate.data.dataId, // todo move into delegate
                         name,
                         note,
                         writeImagePath
@@ -1033,7 +1032,6 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         class CreateParameters(
-                val dataId: Int,
                 val name: String,
                 val note: String?,
                 val writeImagePath: NullableWrapper<Pair<String, Uri>>?
@@ -1068,7 +1066,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             scheduleDatas,
@@ -1086,7 +1084,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createChildTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             parentTaskKey,
                             createParameters.name,
@@ -1103,7 +1101,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createRootTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             createParameters.note,
@@ -1164,7 +1162,7 @@ class CreateTaskActivity : NavBarActivity() {
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance.updateScheduleTask(
-                    createParameters.dataId,
+                    data.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
                     createParameters.name,
@@ -1181,7 +1179,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance.updateChildTask(
                     ExactTimeStamp.now,
-                    createParameters.dataId,
+                    data.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
                     createParameters.name,
@@ -1196,7 +1194,7 @@ class CreateTaskActivity : NavBarActivity() {
                 projectKey: ProjectKey.Shared?
         ): TaskKey {
             return DomainFactory.instance.updateRootTask(
-                    createParameters.dataId,
+                    data.dataId,
                     SaveService.Source.GUI,
                     parameters.taskKey,
                     createParameters.name,
@@ -1250,7 +1248,7 @@ class CreateTaskActivity : NavBarActivity() {
             return DomainFactory.instance
                     .createScheduleJoinRootTask(
                             ExactTimeStamp.now,
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             scheduleDatas,
@@ -1269,7 +1267,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createJoinChildTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             parentTaskKey,
                             createParameters.name,
@@ -1287,7 +1285,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createJoinRootTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             parameters.taskKeys,
@@ -1363,7 +1361,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createScheduleRootTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             scheduleDatas,
@@ -1383,7 +1381,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             return DomainFactory.instance
                     .createChildTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             parentTaskKey,
                             createParameters.name,
@@ -1399,7 +1397,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey {
             return DomainFactory.instance
                     .createRootTask(
-                            createParameters.dataId,
+                            data.dataId,
                             SaveService.Source.GUI,
                             createParameters.name,
                             createParameters.note,

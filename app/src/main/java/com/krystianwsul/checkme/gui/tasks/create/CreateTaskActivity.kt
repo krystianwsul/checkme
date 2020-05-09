@@ -141,7 +141,7 @@ class CreateTaskActivity : NavBarActivity() {
         )
     }
 
-    private fun removeParent() {
+    private fun removeParent() { // todo create remove
         checkNotNull(delegate.parentScheduleManager.parent)
 
         delegate.parentScheduleManager.parent = null
@@ -383,16 +383,6 @@ class CreateTaskActivity : NavBarActivity() {
             delegate.data = data
         }
 
-        delegate.parentScheduleManager
-                .parentObservable
-                .subscribe {
-                    createTaskRecycler.getChildAt(0)?.let { view ->
-                        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as ScheduleHolder // todo create use payloads
-                        updateParentView(scheduleHolder)
-                    }
-                }
-                .addTo(loadFinishedDisposable)
-
         data.taskData
                 ?.imageState
                 ?.takeUnless { imageUrl.value!!.dontOverwrite }
@@ -553,29 +543,6 @@ class CreateTaskActivity : NavBarActivity() {
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
     }
 
-    private fun updateParentView(scheduleHolder: ScheduleHolder) {
-        scheduleHolder.apply {
-            scheduleLayout.endIconMode = if (delegate.parentScheduleManager.parent != null)
-                TextInputLayout.END_ICON_CLEAR_TEXT
-            else
-                TextInputLayout.END_ICON_DROPDOWN_MENU
-
-            scheduleText.run {
-                setText(delegate.parentScheduleManager.parent?.name)
-
-                setFixedOnClickListener {
-                    ParentPickerFragment.newInstance(delegate.parentScheduleManager.parent != null).let {
-                        it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                        it.initialize(delegate.data.parentTreeDatas, parentFragmentListener)
-                    }
-                }
-            }
-
-            if (delegate.parentScheduleManager.parent != null)
-                scheduleLayout.setEndIconOnClickListener { removeParent() }
-        }
-    }
-
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(createTaskRecycler)
 
@@ -675,23 +642,16 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)
 
-            (holder as? ImageHolder)?.run {
-                compositeDisposable += imageUrl.subscribe {
-                    if (it.loader != null) {
-                        imageProgress.visibility = View.VISIBLE
-                        imageImage.visibility = View.VISIBLE
-                        imageLayout.visibility = View.GONE
-                        imageEdit.visibility = View.VISIBLE
+            fun getItem() = holder.adapterPosition
+                    .takeIf { it >= 0 }
+                    ?.let { items[it] }
 
-                        it.loader!!(imageImage)
-                    } else {
-                        imageProgress.visibility = View.GONE
-                        imageImage.visibility = View.GONE
-                        imageLayout.visibility = View.VISIBLE
-                        imageEdit.visibility = View.GONE
-                    }
-                }
-            }
+            holder.compositeDisposable += imageUrl.subscribe { getItem()?.onNewImageState(it, holder) }
+
+            delegate.parentScheduleManager
+                    .parentObservable
+                    .subscribe { getItem()?.onNewParent(this@CreateTaskActivity, holder) }
+                    .addTo(holder.compositeDisposable)
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
@@ -738,6 +698,10 @@ class CreateTaskActivity : NavBarActivity() {
 
         abstract fun bind(activity: CreateTaskActivity, holder: Holder)
 
+        open fun onNewImageState(imageState: CreateTaskImageState, holder: Holder) = Unit
+
+        open fun onNewParent(activity: CreateTaskActivity, holder: Holder) = Unit
+
         open fun same(other: Item) = other == this
 
         object Parent : Item() {
@@ -758,7 +722,34 @@ class CreateTaskActivity : NavBarActivity() {
                         }
                     }
 
-                    activity.updateParentView(this)
+                    onNewParent(activity, this)
+                }
+            }
+
+            override fun onNewParent(activity: CreateTaskActivity, holder: Holder) {
+                val parent = activity.delegate
+                        .parentScheduleManager
+                        .parent
+
+                (holder as ScheduleHolder).apply {
+                    scheduleLayout.endIconMode = if (parent != null)
+                        TextInputLayout.END_ICON_CLEAR_TEXT
+                    else
+                        TextInputLayout.END_ICON_DROPDOWN_MENU
+
+                    scheduleText.run {
+                        setText(parent?.name)
+
+                        setFixedOnClickListener {
+                            ParentPickerFragment.newInstance(parent != null).let {
+                                it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
+                                it.initialize(activity.delegate.data.parentTreeDatas, activity.parentFragmentListener)
+                            }
+                        }
+                    }
+
+                    if (parent != null)
+                        scheduleLayout.setEndIconOnClickListener { activity.removeParent() }
                 }
             }
         }
@@ -894,6 +885,24 @@ class CreateTaskActivity : NavBarActivity() {
                     imageImage.setOnClickListener { listener() }
                     imageEdit.setOnClickListener { listener() }
                     imageLayoutText.setFixedOnClickListener(::listener)
+                }
+            }
+
+            override fun onNewImageState(imageState: CreateTaskImageState, holder: Holder) {
+                (holder as ImageHolder).apply {
+                    if (imageState.loader != null) {
+                        imageProgress.visibility = View.VISIBLE
+                        imageImage.visibility = View.VISIBLE
+                        imageLayout.visibility = View.GONE
+                        imageEdit.visibility = View.VISIBLE
+
+                        imageState.loader!!(imageImage)
+                    } else {
+                        imageProgress.visibility = View.GONE
+                        imageImage.visibility = View.GONE
+                        imageLayout.visibility = View.VISIBLE
+                        imageEdit.visibility = View.GONE
+                    }
                 }
             }
         }

@@ -64,7 +64,7 @@ sealed class CreateTaskParameters : Parcelable {
     @Parcelize
     class Create(
             val hint: CreateTaskActivity.Hint? = null,
-            val parentScheduleState: CreateTaskActivity.ParentScheduleState? = null,
+            val parentScheduleState: ParentScheduleState? = null,
             val nameHint: String? = null
     ) : CreateTaskParameters() {
 

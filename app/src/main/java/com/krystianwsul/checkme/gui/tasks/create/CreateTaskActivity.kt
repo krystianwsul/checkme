@@ -28,8 +28,6 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.tasks.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.NonNullRelayProperty
-import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -126,7 +124,7 @@ class CreateTaskActivity : NavBarActivity() {
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
-            delegate.stateData.parent = parentTreeData
+            delegate.parentScheduleManager.parent = parentTreeData
         }
 
         override fun onTaskDeleted() = removeParent()
@@ -134,7 +132,7 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
                         null,
-                        delegate.stateData.run {
+                        delegate.parentScheduleManager.run {
                             ParentScheduleState(
                                     parent?.parentKey,
                                     schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList()
@@ -147,9 +145,9 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun removeParent() {
-        checkNotNull(delegate.stateData.parent)
+        checkNotNull(delegate.parentScheduleManager.parent)
 
-        delegate.stateData.parent = null
+        delegate.parentScheduleManager.parent = null
     }
 
     private fun setupParent(view: View) {
@@ -316,21 +314,21 @@ class CreateTaskActivity : NavBarActivity() {
                             }
 
                             if (result.position == null) {
-                                delegate.stateData.addSchedule(result.scheduleDialogData.toScheduleEntry())
+                                delegate.parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())
                             } else {
                                 check(result.position >= 1)
 
                                 val position = result.position - 1
 
-                                val oldId = if (position < delegate.stateData.schedules.size) {
-                                    delegate.stateData
+                                val oldId = if (position < delegate.parentScheduleManager.schedules.size) {
+                                    delegate.parentScheduleManager
                                             .schedules[position]
                                             .id
                                 } else {
                                     null
                                 }
 
-                                delegate.stateData.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
+                                delegate.parentScheduleManager.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
                             }
                         }
                         is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
@@ -344,7 +342,7 @@ class CreateTaskActivity : NavBarActivity() {
         check(position >= 1)
         checkNotNull(data)
 
-        delegate.stateData.removeSchedule(position - 1)
+        delegate.parentScheduleManager.removeSchedule(position - 1)
     }
 
     @SuppressLint("CheckResult")
@@ -393,7 +391,7 @@ class CreateTaskActivity : NavBarActivity() {
             delegate.data = data
         }
 
-        delegate.stateData
+        delegate.parentScheduleManager
                 .parentObservable
                 .subscribe {
                     createTaskRecycler.getChildAt(0)?.let { view ->
@@ -457,7 +455,7 @@ class CreateTaskActivity : NavBarActivity() {
         createTaskRecycler.adapter = createTaskAdapter
         createTaskRecycler.itemAnimator = CustomItemAnimator()
 
-        delegate.stateData
+        delegate.parentScheduleManager
                 .scheduleObservable
                 .subscribe { createTaskAdapter.setSchedules(it) }
                 .addTo(loadFinishedDisposable)
@@ -502,7 +500,7 @@ class CreateTaskActivity : NavBarActivity() {
             toolbarLayout.error = null
         }
 
-        for (scheduleEntry in delegate.stateData.schedules) {
+        for (scheduleEntry in delegate.parentScheduleManager.schedules) {
             if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
@@ -546,7 +544,7 @@ class CreateTaskActivity : NavBarActivity() {
         scheduleEntry.error = getString(stringId)
         check(!TextUtils.isEmpty(scheduleEntry.error))
 
-        val index = delegate.stateData
+        val index = delegate.parentScheduleManager
                 .schedules
                 .indexOf(scheduleEntry)
         check(index >= 0)
@@ -565,23 +563,23 @@ class CreateTaskActivity : NavBarActivity() {
 
     private fun updateParentView(scheduleHolder: ScheduleHolder) {
         scheduleHolder.apply {
-            scheduleLayout.endIconMode = if (delegate.stateData.parent != null)
+            scheduleLayout.endIconMode = if (delegate.parentScheduleManager.parent != null)
                 TextInputLayout.END_ICON_CLEAR_TEXT
             else
                 TextInputLayout.END_ICON_DROPDOWN_MENU
 
             scheduleText.run {
-                setText(delegate.stateData.parent?.name)
+                setText(delegate.parentScheduleManager.parent?.name)
 
                 setFixedOnClickListener {
-                    ParentPickerFragment.newInstance(delegate.stateData.parent != null).let {
+                    ParentPickerFragment.newInstance(delegate.parentScheduleManager.parent != null).let {
                         it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
                         it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                     }
                 }
             }
 
-            if (delegate.stateData.parent != null)
+            if (delegate.parentScheduleManager.parent != null)
                 scheduleLayout.setEndIconOnClickListener { removeParent() }
         }
     }
@@ -598,7 +596,7 @@ class CreateTaskActivity : NavBarActivity() {
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                delegate.stateData.parent = delegate.findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
+                delegate.parentScheduleManager.parent = delegate.findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
     }
@@ -744,74 +742,6 @@ class CreateTaskActivity : NavBarActivity() {
         val imageLayout = itemView.imageLayout!!
         val imageLayoutText = itemView.imageLayoutText!!
         val imageEdit = itemView.imageEdit!!
-    }
-
-    @Parcelize
-    data class ParentScheduleState(
-            val parentKey: CreateTaskViewModel.ParentKey?,
-            val schedules: List<ScheduleEntry>
-    ) : Parcelable {
-
-        companion object {
-
-            fun create(
-                    parentKey: CreateTaskViewModel.ParentKey?,
-                    schedules: List<ScheduleEntry>? = null
-            ) = ParentScheduleState(parentKey, schedules.orEmpty().toMutableList())
-        }
-
-        override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + schedules.hashCode()
-
-        override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
-
-            if (other !is ParentScheduleState)
-                return false
-
-            fun ParentScheduleState.scheduleDatas() = schedules.map { it.scheduleDataWrapper }
-
-            return (parentKey == other.parentKey && scheduleDatas() == other.scheduleDatas())
-        }
-    }
-
-    private class ParentScheduleData(
-            state: ParentScheduleState,
-            initialParent: CreateTaskViewModel.ParentTreeData?
-    ) { // todo create move into delegate
-
-        private val parentProperty = NullableRelayProperty(initialParent) {
-            if (it?.parentKey is CreateTaskViewModel.ParentKey.Task)
-                mutateSchedules { it.clear() }
-        }
-
-        var parent by parentProperty
-        val parentObservable = parentProperty.observable
-
-        private val scheduleProperty = NonNullRelayProperty(state.schedules) {
-            if (it.isNotEmpty() && parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
-                parent = null
-        }
-
-        var schedules by scheduleProperty
-        val scheduleObservable = scheduleProperty.observable
-
-        private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
-                scheduleProperty.mutate { it.toMutableList().also(action) }
-
-        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) =
-                mutateSchedules { it[position] = scheduleEntry }
-
-        fun removeSchedule(position: Int) = mutateSchedules { it.removeAt(position) }
-
-        fun addSchedule(scheduleEntry: ScheduleEntry) {
-            mutateSchedules { it += scheduleEntry }
-        }
-
-        fun toState() = ParentScheduleState(
-                parent?.parentKey,
-                schedules
-        )
     }
 
     private sealed class Item {
@@ -1031,16 +961,16 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         protected abstract val initialState: ParentScheduleState
-        abstract val stateData: ParentScheduleData
+        abstract val parentScheduleManager: ParentScheduleManager
 
-        protected fun getStateData(savedState: ParentScheduleState?): ParentScheduleData {
+        protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentScheduleManager {
             val parentScheduleState = savedState ?: initialState.copy()
             val initialParent = parentScheduleState.parentKey?.let { findTaskData(it) }
-            return ParentScheduleData(parentScheduleState, initialParent)
+            return ParentScheduleManager(parentScheduleState, initialParent)
         }
 
         fun checkDataChanged(name: String, note: String?): Boolean {
-            if (stateData.toState() != initialState)
+            if (parentScheduleManager.toState() != initialState)
                 return true
 
             return checkNameNoteChanged(name, note)
@@ -1072,18 +1002,18 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         fun createTask(createParameters: CreateParameters): TaskKey {
-            val projectId = (stateData.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
+            val projectId = (parentScheduleManager.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
 
             return when {
-                stateData.schedules.isNotEmpty() -> createTaskWithSchedule(
+                parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
                         createParameters,
-                        stateData.schedules.map { it.scheduleDataWrapper.scheduleData },
+                        parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                         projectId
                 )
-                stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
+                parentScheduleManager.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
                     check(projectId == null)
 
-                    val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
+                    val parentTaskKey = (parentScheduleManager.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
                     createTaskWithParent(createParameters, parentTaskKey)
                 }
@@ -1108,7 +1038,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey
 
         fun saveState(outState: Bundle) {
-            outState.putParcelable(KEY_STATE, stateData.toState())
+            outState.putParcelable(KEY_STATE, parentScheduleManager.toState())
             outState.putParcelable(KEY_INITIAL_STATE, initialState)
         }
 
@@ -1137,7 +1067,7 @@ class CreateTaskActivity : NavBarActivity() {
                         ?.toList()
         )
 
-        override val stateData = getStateData(savedStates?.second)
+        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
 
         override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
 
@@ -1213,7 +1143,7 @@ class CreateTaskActivity : NavBarActivity() {
                         ?: mutableListOf()
         )
 
-        override val stateData = getStateData(savedStates?.second)
+        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
 
         override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
 
@@ -1221,7 +1151,7 @@ class CreateTaskActivity : NavBarActivity() {
             if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)
                 return false
 
-            val parentKey = stateData.parent?.parentKey
+            val parentKey = parentScheduleManager.parent?.parentKey
 
             if (taskData.parentKey == parentKey)
                 return true
@@ -1320,7 +1250,7 @@ class CreateTaskActivity : NavBarActivity() {
             )
         }
 
-        override val stateData = getStateData(savedStates?.second)
+        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,
@@ -1434,7 +1364,7 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        override val stateData = getStateData(savedStates?.second)
+        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
 
         override fun createTaskWithSchedule(
                 createParameters: CreateParameters,

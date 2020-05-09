@@ -13,24 +13,9 @@ import com.krystianwsul.common.utils.TaskKey
 
 class EditCreateTaskDelegate(
         private val parameters: CreateTaskParameters.Edit,
-        override var data: CreateTaskViewModel.Data,
+        data: CreateTaskViewModel.Data,
         savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-) : CreateTaskDelegate() {
-
-    private val taskData get() = data.taskData!!
-
-    override val initialName get() = taskData.name
-
-    override val initialState = savedStates?.first ?: ParentScheduleState.create(
-            taskData.parentKey,
-            taskData.scheduleDataWrappers
-                    ?.map { ScheduleEntry(it) }
-                    ?.toList()
-    )
-
-    override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
-
-    override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
+) : ExistingCreateTaskDelegate(data, savedStates) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)

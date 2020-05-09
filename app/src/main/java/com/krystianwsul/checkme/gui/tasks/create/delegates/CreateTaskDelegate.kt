@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.gui.tasks.create.delegates
 
 import android.net.Uri
 import android.os.Bundle
+import androidx.annotation.StringRes
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
@@ -9,6 +11,7 @@ import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleManager
 import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
@@ -86,7 +89,39 @@ abstract class CreateTaskDelegate {
             note: String?
     ) = name != taskData.name || note != taskData.note
 
-    open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
+    fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
+        if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
+            return null
+
+        if (skipScheduleCheck(scheduleEntry))
+            return null
+
+        val date = scheduleEntry.scheduleDataWrapper
+                .scheduleData
+                .date
+
+        if (date > Date.today())
+            return null
+
+        if (date < Date.today())
+            return ScheduleError.DATE
+
+        val hourMinute = scheduleEntry.scheduleDataWrapper
+                .timePair
+                .run {
+                    customTimeKey?.let { data.customTimeDatas.getValue(it) }
+                            ?.hourMinutes
+                            ?.getValue(date.dayOfWeek)
+                            ?: hourMinute!!
+                }
+
+        if (hourMinute <= HourMinute.now)
+            return ScheduleError.TIME
+
+        return null
+    }
+
+    protected open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
 
     fun findTaskData(parentKey: CreateTaskViewModel.ParentKey) =
             findTaskDataHelper(data.parentTreeDatas, parentKey).single()
@@ -149,4 +184,9 @@ abstract class CreateTaskDelegate {
             val note: String?,
             val writeImagePath: NullableWrapper<Pair<String, Uri>>?
     )
+
+    enum class ScheduleError(@StringRes val resource: Int) {
+
+        DATE(R.string.error_date), TIME(R.string.error_time)
+    }
 }

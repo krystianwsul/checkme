@@ -368,19 +368,21 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
 
+    private val dataLoaded get() = this::delegate.isInitialized
+
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         loadFinishedDisposable.clear()
 
         this.data = data
 
-        if (!this::delegate.isInitialized) {
+        if (dataLoaded) {
+            delegate.data = data
+        } else {
             delegate = CreateTaskDelegate.fromParameters(
                     parameters,
                     data,
                     savedInstanceState
             )
-        } else {
-            delegate.data = data
         }
 
         data.taskData
@@ -470,8 +472,6 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun updateError(): Boolean {
-        val data = delegate.data
-
         var hasError = false
 
         if (TextUtils.isEmpty(toolbarEditText.text)) {
@@ -483,40 +483,11 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         for (scheduleEntry in delegate.parentScheduleManager.schedules) {
-            if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
-                continue
+            val scheduleError = delegate.getError(scheduleEntry) ?: continue
 
-            if (delegate.skipScheduleCheck(scheduleEntry))
-                continue
+            hasError = true
 
-            val date = scheduleEntry.scheduleDataWrapper
-                    .scheduleData
-                    .date
-
-            if (date > Date.today())
-                continue
-
-            if (date < Date.today()) {
-                setScheduleEntryError(scheduleEntry, R.string.error_date)
-
-                hasError = true
-                continue
-            }
-
-            val hourMinute = scheduleEntry.scheduleDataWrapper
-                    .timePair
-                    .run {
-                        customTimeKey?.let { data.customTimeDatas.getValue(it) }
-                                ?.hourMinutes
-                                ?.getValue(date.dayOfWeek)
-                                ?: hourMinute!!
-                    }
-
-            if (hourMinute <= HourMinute.now) {
-                setScheduleEntryError(scheduleEntry, R.string.error_time)
-
-                hasError = true
-            }
+            setScheduleEntryError(scheduleEntry, scheduleError.resource)
         }
 
         return hasError

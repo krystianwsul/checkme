@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks.create
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -22,22 +21,20 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.tasks.*
-import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.gui.tasks.create.delegates.CreateTaskDelegate
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ScheduleType
+import com.krystianwsul.common.utils.TaskKey
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import io.reactivex.BackpressureStrategy
@@ -117,7 +114,7 @@ class CreateTaskActivity : NavBarActivity() {
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
     private var data: CreateTaskViewModel.Data? = null
-    private lateinit var delegate: Delegate
+    private lateinit var delegate: CreateTaskDelegate
 
     private val discardDialogListener = this::finish
 
@@ -219,7 +216,7 @@ class CreateTaskActivity : NavBarActivity() {
 
                 val writeImagePath = imageUrl.value!!.writeImagePath
 
-                val createParameters = Delegate.CreateParameters(
+                val createParameters = CreateTaskDelegate.CreateParameters(
                         name,
                         note,
                         writeImagePath
@@ -377,7 +374,7 @@ class CreateTaskActivity : NavBarActivity() {
         this.data = data
 
         if (!this::delegate.isInitialized) {
-            delegate = Delegate.fromParameters(
+            delegate = CreateTaskDelegate.fromParameters(
                     parameters,
                     data,
                     savedInstanceState
@@ -899,512 +896,6 @@ class CreateTaskActivity : NavBarActivity() {
                     imageLayoutText.setFixedOnClickListener(::listener)
                 }
             }
-        }
-    }
-
-    private abstract class Delegate {
-
-        companion object {
-
-            private const val KEY_INITIAL_STATE = "initialState"
-            const val KEY_STATE = "state"
-
-            fun fromParameters(
-                    parameters: CreateTaskParameters,
-                    data: CreateTaskViewModel.Data,
-                    savedInstanceState: Bundle?
-            ): Delegate {
-                val savedStates = savedInstanceState?.takeIf { it.containsKey(KEY_INITIAL_STATE) }?.run {
-                    Pair<ParentScheduleState, ParentScheduleState>(
-                            getParcelable(KEY_INITIAL_STATE)!!,
-                            getParcelable(KEY_STATE)!!
-                    )
-                }
-
-                return when (parameters) {
-                    is CreateTaskParameters.Copy -> CopyDelegate(parameters, data, savedStates)
-                    is CreateTaskParameters.Edit -> EditDelegate(parameters, data, savedStates)
-                    is CreateTaskParameters.Join -> JoinDelegate(parameters, data, savedStates)
-                    is CreateTaskParameters.Create,
-                    is CreateTaskParameters.Share,
-                    is CreateTaskParameters.Shortcut,
-                    CreateTaskParameters.None -> CreateDelegate(parameters, data, savedStates)
-                }
-            }
-        }
-
-        abstract var data: CreateTaskViewModel.Data
-
-        open val initialName: String? = null
-        open val scheduleHint: Hint.Schedule? = null
-
-        protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
-        protected fun Hint.toParentKey() = (this as? Hint.Task)?.taskKey?.toParentKey()
-        protected fun Hint.toScheduleHint() = this as? Hint.Schedule
-
-        val firstScheduleEntry by lazy {
-            val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
-                    ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
-
-            ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
-        }
-
-        protected abstract val initialState: ParentScheduleState
-        abstract val parentScheduleManager: ParentScheduleManager
-
-        protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentScheduleManager {
-            val parentScheduleState = savedState ?: initialState.copy()
-            val initialParent = parentScheduleState.parentKey?.let { findTaskData(it) }
-            return ParentScheduleManager(parentScheduleState, initialParent)
-        }
-
-        fun checkDataChanged(name: String, note: String?): Boolean {
-            if (parentScheduleManager.toState() != initialState)
-                return true
-
-            return checkNameNoteChanged(name, note)
-        }
-
-        protected open fun checkNameNoteChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
-
-        protected fun checkNameNoteChanged(
-                taskData: CreateTaskViewModel.TaskData,
-                name: String,
-                note: String?
-        ) = name != taskData.name || note != taskData.note
-
-        open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
-
-        fun findTaskData(parentKey: CreateTaskViewModel.ParentKey) =
-                findTaskDataHelper(data.parentTreeDatas, parentKey).single()
-
-        private fun findTaskDataHelper(
-                taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>,
-                parentKey: CreateTaskViewModel.ParentKey
-        ): Iterable<CreateTaskViewModel.ParentTreeData> {
-            if (taskDatas.containsKey(parentKey))
-                return listOf(taskDatas.getValue(parentKey))
-
-            return taskDatas.values
-                    .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
-                    .flatten()
-        }
-
-        fun createTask(createParameters: CreateParameters): TaskKey {
-            val projectId = (parentScheduleManager.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
-
-            return when {
-                parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
-                        createParameters,
-                        parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                        projectId
-                )
-                parentScheduleManager.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
-                    check(projectId == null)
-
-                    val parentTaskKey = (parentScheduleManager.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
-
-                    createTaskWithParent(createParameters, parentTaskKey)
-                }
-                else -> createTaskWithoutReminder(createParameters, projectId)
-            }
-        }
-
-        abstract fun createTaskWithSchedule(
-                createParameters: CreateParameters,
-                scheduleDatas: List<ScheduleData>,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey
-
-        abstract fun createTaskWithParent(
-                createParameters: CreateParameters,
-                parentTaskKey: TaskKey
-        ): TaskKey
-
-        abstract fun createTaskWithoutReminder(
-                createParameters: CreateParameters,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey
-
-        fun saveState(outState: Bundle) {
-            outState.putParcelable(KEY_STATE, parentScheduleManager.toState())
-            outState.putParcelable(KEY_INITIAL_STATE, initialState)
-        }
-
-        class CreateParameters(
-                val name: String,
-                val note: String?,
-                val writeImagePath: NullableWrapper<Pair<String, Uri>>?
-        )
-    }
-
-    private class CopyDelegate(
-            private val parameters: CreateTaskParameters.Copy,
-            override var data: CreateTaskViewModel.Data,
-            savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-    ) : Delegate() {
-
-        private val taskData get() = data.taskData!!
-
-        override val initialName get() = taskData.name
-
-        override val initialState = savedStates?.first ?: ParentScheduleState.create(
-                taskData.parentKey,
-                taskData.scheduleDataWrappers
-                        ?.map { ScheduleEntry(it) }
-                        ?.toList()
-        )
-
-        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
-
-        override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
-
-        override fun createTaskWithSchedule(
-                createParameters: CreateParameters,
-                scheduleDatas: List<ScheduleData>,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createScheduleRootTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            scheduleDatas,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value,
-                            parameters.taskKey
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithParent(
-                createParameters: CreateParameters,
-                parentTaskKey: TaskKey
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createChildTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            parentTaskKey,
-                            createParameters.name,
-                            createParameters.note,
-                            createParameters.writeImagePath?.value,
-                            parameters.taskKey
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithoutReminder(
-                createParameters: CreateParameters,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createRootTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value,
-                            parameters.taskKey
-                    )
-                    .also { createdTaskKey = it }
-        }
-    }
-
-    private class EditDelegate(
-            private val parameters: CreateTaskParameters.Edit,
-            override var data: CreateTaskViewModel.Data,
-            savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-    ) : Delegate() {
-
-        private val taskData get() = data.taskData!!
-
-        override val initialName get() = taskData.name
-
-        override val initialState = savedStates?.first ?: ParentScheduleState(
-                taskData.parentKey,
-                taskData.scheduleDataWrappers
-                        ?.map { ScheduleEntry(it) }
-                        ?.toMutableList()
-                        ?: mutableListOf()
-        )
-
-        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
-
-        override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
-
-        override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
-            if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)
-                return false
-
-            val parentKey = parentScheduleManager.parent?.parentKey
-
-            if (taskData.parentKey == parentKey)
-                return true
-
-            fun CreateTaskViewModel.ParentKey.getProjectId() = when (this) {
-                is CreateTaskViewModel.ParentKey.Project -> projectId
-                is CreateTaskViewModel.ParentKey.Task -> findTaskData(this).projectId
-            }
-
-            val initialProject = taskData.parentKey?.getProjectId()
-
-            val finalProject = parentKey?.getProjectId()
-
-            return initialProject == finalProject
-        }
-
-        override fun createTaskWithSchedule(
-                createParameters: CreateParameters,
-                scheduleDatas: List<ScheduleData>,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance.updateScheduleTask(
-                    data.dataId,
-                    SaveService.Source.GUI,
-                    parameters.taskKey,
-                    createParameters.name,
-                    scheduleDatas,
-                    createParameters.note,
-                    projectKey,
-                    createParameters.writeImagePath
-            )
-        }
-
-        override fun createTaskWithParent(
-                createParameters: CreateParameters,
-                parentTaskKey: TaskKey
-        ): TaskKey {
-            return DomainFactory.instance.updateChildTask(
-                    ExactTimeStamp.now,
-                    data.dataId,
-                    SaveService.Source.GUI,
-                    parameters.taskKey,
-                    createParameters.name,
-                    parentTaskKey,
-                    createParameters.note,
-                    createParameters.writeImagePath
-            )
-        }
-
-        override fun createTaskWithoutReminder(
-                createParameters: CreateParameters,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance.updateRootTask(
-                    data.dataId,
-                    SaveService.Source.GUI,
-                    parameters.taskKey,
-                    createParameters.name,
-                    createParameters.note,
-                    projectKey,
-                    createParameters.writeImagePath
-            )
-        }
-    }
-
-    private class JoinDelegate(
-            private val parameters: CreateTaskParameters.Join,
-            override var data: CreateTaskViewModel.Data,
-            savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-    ) : Delegate() {
-
-        override val scheduleHint = parameters.hint?.toScheduleHint()
-
-        override val initialState: ParentScheduleState
-
-        init {
-            val (initialParentKey, schedule) = parameters.run {
-                if (hint is Hint.Task) {
-                    Pair(hint.toParentKey(), null)
-                } else {
-                    Pair(
-                            taskKeys.map { it.projectKey }
-                                    .distinct()
-                                    .singleOrNull()
-                                    ?.let {
-                                        (it as? ProjectKey.Shared)?.let { CreateTaskViewModel.ParentKey.Project(it) }
-                                    },
-                            firstScheduleEntry.takeIf { data.defaultReminder }
-                    )
-                }
-            }
-
-            initialState = savedStates?.first ?: ParentScheduleState(
-                    initialParentKey,
-                    listOfNotNull(schedule)
-            )
-        }
-
-        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
-
-        override fun createTaskWithSchedule(
-                createParameters: CreateParameters,
-                scheduleDatas: List<ScheduleData>,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createScheduleJoinRootTask(
-                            ExactTimeStamp.now,
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            scheduleDatas,
-                            parameters.taskKeys,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value,
-                            parameters.removeInstanceKeys
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithParent(
-                createParameters: CreateParameters,
-                parentTaskKey: TaskKey
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createJoinChildTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            parentTaskKey,
-                            createParameters.name,
-                            parameters.taskKeys,
-                            createParameters.note,
-                            createParameters.writeImagePath?.value,
-                            parameters.removeInstanceKeys
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithoutReminder(
-                createParameters: CreateParameters,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createJoinRootTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            parameters.taskKeys,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value,
-                            parameters.removeInstanceKeys
-                    )
-                    .also { createdTaskKey = it }
-        }
-    }
-
-    private class CreateDelegate(
-            private val parameters: CreateTaskParameters,
-            override var data: CreateTaskViewModel.Data,
-            savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-    ) : Delegate() {
-
-        override val initialName: String?
-        override val scheduleHint: Hint.Schedule?
-        override val initialState: ParentScheduleState
-
-        init {
-            when (parameters) {
-                is CreateTaskParameters.Create -> {
-                    initialName = parameters.nameHint
-                    scheduleHint = parameters.hint?.toScheduleHint()
-
-                    val initialParentKey = parameters.hint?.toParentKey()
-                    initialState = savedStates?.first ?: parameters.parentScheduleState
-                            ?: ParentScheduleState(
-                            initialParentKey,
-                            listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is CreateTaskViewModel.ParentKey.Task && data.defaultReminder })
-                    )
-                }
-                is CreateTaskParameters.Share -> {
-                    initialName = parameters.nameHint
-                    scheduleHint = null
-
-                    val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
-                    initialState = savedStates?.first ?: ParentScheduleState(
-                            initialParentKey,
-                            listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
-                    )
-                }
-                is CreateTaskParameters.Shortcut -> {
-                    initialName = null
-                    scheduleHint = null
-
-                    val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
-                    initialState = savedStates?.first
-                            ?: ParentScheduleState.create(initialParentKey)
-                }
-                CreateTaskParameters.None -> {
-                    initialName = null
-                    scheduleHint = null
-
-                    initialState = savedStates?.first ?: ParentScheduleState(
-                            null,
-                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder })
-                    )
-                }
-                else -> throw IllegalArgumentException()
-            }
-        }
-
-        override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
-
-        override fun createTaskWithSchedule(
-                createParameters: CreateParameters,
-                scheduleDatas: List<ScheduleData>,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createScheduleRootTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            scheduleDatas,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithParent(
-                createParameters: CreateParameters,
-                parentTaskKey: TaskKey
-        ): TaskKey {
-            if (parameters is CreateTaskParameters.Share)
-                ShortcutManager.addShortcut(parentTaskKey)
-
-            return DomainFactory.instance
-                    .createChildTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            parentTaskKey,
-                            createParameters.name,
-                            createParameters.note,
-                            createParameters.writeImagePath?.value
-                    )
-                    .also { createdTaskKey = it }
-        }
-
-        override fun createTaskWithoutReminder(
-                createParameters: CreateParameters,
-                projectKey: ProjectKey.Shared?
-        ): TaskKey {
-            return DomainFactory.instance
-                    .createRootTask(
-                            data.dataId,
-                            SaveService.Source.GUI,
-                            createParameters.name,
-                            createParameters.note,
-                            projectKey,
-                            createParameters.writeImagePath?.value
-                    )
-                    .also { createdTaskKey = it }
         }
     }
 }

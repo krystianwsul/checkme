@@ -8,6 +8,5 @@ import kotlin.random.Random
 @Parcelize
 data class ScheduleEntry(
         val scheduleDataWrapper: CreateTaskViewModel.ScheduleDataWrapper,
-        var id: Int = Random.nextInt(),
-        val error: String? = null
+        var id: Int = Random.nextInt()
 ) : Parcelable

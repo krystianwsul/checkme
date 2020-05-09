@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.gui.tasks.create
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -27,6 +29,7 @@ import com.krystianwsul.checkme.gui.tasks.*
 import com.krystianwsul.checkme.gui.tasks.create.delegates.CreateTaskDelegate
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
+import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
@@ -192,6 +195,13 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 
+    private val timeRelay = BehaviorRelay.createDefault(Unit)
+
+    private val timeReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -329,6 +339,8 @@ class CreateTaskActivity : NavBarActivity() {
                     }
                 }
                 .addTo(createDisposable)
+
+        startTicks(timeReceiver)
     }
 
     private fun removeSchedule(position: Int) {
@@ -483,23 +495,17 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         for (scheduleEntry in delegate.parentScheduleManager.schedules) {
-            val scheduleError = delegate.getError(scheduleEntry) ?: continue
-
-            hasError = true
-
-            setScheduleEntryError(scheduleEntry, scheduleError.resource)
+            if (delegate.getError(scheduleEntry) != null)
+                hasError = true
         }
 
         return hasError
     }
 
-    private fun setScheduleEntryError(scheduleEntry: ScheduleEntry, stringId: Int) {
-        val index = delegate.parentScheduleManager
-                .schedules
-                .indexOf(scheduleEntry)
-        check(index >= 0)
+    override fun onDestroy() {
+        unregisterReceiver(timeReceiver)
 
-        delegate.parentScheduleManager.setSchedule(index, scheduleEntry.copy(error = getString(stringId)))
+        super.onDestroy()
     }
 
     private fun dataChanged(): Boolean {
@@ -619,10 +625,7 @@ class CreateTaskActivity : NavBarActivity() {
                     .subscribe { getItem()?.onNewParent(this@CreateTaskActivity, holder) }
                     .addTo(holder.compositeDisposable)
 
-            delegate.parentScheduleManager
-                    .scheduleObservable
-                    .subscribe { getItem()?.onNewSchedules(holder, it) }
-                    .addTo(holder.compositeDisposable)
+            holder.compositeDisposable += timeRelay.subscribe { getItem()?.onTimeChanged(this@CreateTaskActivity, holder) }
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
@@ -673,7 +676,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         open fun onNewParent(activity: CreateTaskActivity, holder: Holder) = Unit
 
-        open fun onNewSchedules(holder: Holder, scheduleEntries: List<ScheduleEntry>) = Unit
+        open fun onTimeChanged(activity: CreateTaskActivity, holder: Holder) = Unit
 
         open fun same(other: Item) = other == this
 
@@ -689,6 +692,8 @@ class CreateTaskActivity : NavBarActivity() {
                         hint = activity.getString(R.string.parentTask)
                         error = null
                         isHintAnimationEnabled = false
+
+                        onTimeChanged(activity, holder)
 
                         addOneShotGlobalLayoutListener {
                             isHintAnimationEnabled = true
@@ -737,7 +742,6 @@ class CreateTaskActivity : NavBarActivity() {
 
                     scheduleLayout.run {
                         hint = null
-                        error = scheduleEntry.error
                         isHintAnimationEnabled = false
                         endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
                     }
@@ -764,8 +768,10 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override fun onNewSchedules(holder: Holder, scheduleEntries: List<ScheduleEntry>) {
-                (holder as ScheduleHolder).scheduleLayout.error = scheduleEntries.single { same(it) }.error
+            override fun onTimeChanged(activity: CreateTaskActivity, holder: Holder) {
+                activity.delegate
+                        .getError(scheduleEntry)
+                        ?.let { (holder as ScheduleHolder).scheduleLayout.error = activity.getString(it.resource) }
             }
 
             fun same(other: ScheduleEntry): Boolean {

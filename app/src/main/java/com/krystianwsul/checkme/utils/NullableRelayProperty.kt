@@ -1,0 +1,31 @@
+package com.krystianwsul.checkme.utils
+
+import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Observable
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+
+open class NullableRelayProperty<T : Any>(initialValue: T?, private val beforeSet: ((T?) -> Unit)? = null) : ReadWriteProperty<Any, T?> {
+
+    private val relay = BehaviorRelay.createDefault(NullableWrapper(initialValue))
+
+    val observable = relay as Observable<NullableWrapper<T>>
+
+    var value
+        get() = relay.value!!.value
+        set(value) {
+            beforeSet?.invoke(value)
+            relay.accept(NullableWrapper(value))
+        }
+
+    protected fun mutate(mutator: (T?) -> T?) {
+        value = mutator(value)
+    }
+
+    override fun getValue(thisRef: Any, property: KProperty<*>) = value
+
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T?) {
+        this.value = value
+    }
+}

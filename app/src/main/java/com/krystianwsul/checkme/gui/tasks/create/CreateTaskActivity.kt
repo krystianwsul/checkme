@@ -28,6 +28,8 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.tasks.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.NonNullRelayProperty
+import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -778,41 +780,31 @@ class CreateTaskActivity : NavBarActivity() {
             initialParent: CreateTaskViewModel.ParentTreeData?
     ) { // todo create move into delegate
 
-        private val parentRelay = BehaviorRelay.createDefault(NullableWrapper(initialParent))
-
-        val parentObservable: Observable<NullableWrapper<CreateTaskViewModel.ParentTreeData>> = parentRelay
-
-        var parent
-            get() = parentRelay.value!!.value
-            set(newValue) {
-                if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task)
-                    mutateSchedules { it.clear() }
-
-                parentRelay.accept(NullableWrapper(newValue))
-            }
-
-        private val scheduleRelay = BehaviorRelay.createDefault(state.schedules)
-
-        var schedules
-            get() = scheduleRelay.value!!
-            set(value) = scheduleRelay.accept(value)
-
-        private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit) {
-            val newSchedules = schedules.toMutableList()
-            action(newSchedules)
-            schedules = newSchedules
+        private val parentProperty = NullableRelayProperty(initialParent) {
+            if (it?.parentKey is CreateTaskViewModel.ParentKey.Task)
+                mutateSchedules { it.clear() }
         }
 
-        val scheduleObservable: Observable<List<ScheduleEntry>> = scheduleRelay
+        var parent by parentProperty
+        val parentObservable = parentProperty.observable
 
-        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) = mutateSchedules { it[position] = scheduleEntry }
+        private val scheduleProperty = NonNullRelayProperty(state.schedules) {
+            if (it.isNotEmpty() && parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
+                parent = null
+        }
+
+        var schedules by scheduleProperty
+        val scheduleObservable = scheduleProperty.observable
+
+        private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
+                scheduleProperty.mutate { it.toMutableList().also(action) }
+
+        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) =
+                mutateSchedules { it[position] = scheduleEntry }
 
         fun removeSchedule(position: Int) = mutateSchedules { it.removeAt(position) }
 
         fun addSchedule(scheduleEntry: ScheduleEntry) {
-            if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
-                parent = null
-
             mutateSchedules { it += scheduleEntry }
         }
 

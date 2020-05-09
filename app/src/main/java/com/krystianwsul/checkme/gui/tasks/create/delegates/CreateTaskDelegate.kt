@@ -49,7 +49,7 @@ abstract class CreateTaskDelegate {
         }
     }
 
-    abstract var data: CreateTaskViewModel.Data
+    abstract var data: CreateTaskViewModel.Data // todo create on making private
 
     open val initialName: String? = null
     open val scheduleHint: CreateTaskActivity.Hint.Schedule? = null

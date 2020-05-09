@@ -116,8 +116,8 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
-    private var data: CreateTaskViewModel.Data? = null
     private lateinit var delegate: CreateTaskDelegate
+    private var hasDelegate = false
 
     private val discardDialogListener = this::finish
 
@@ -208,8 +208,8 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_save).isVisible = data != null
-        menu.findItem(R.id.action_save_and_open).isVisible = data != null && data!!.taskData == null
+        menu.findItem(R.id.action_save).isVisible = hasDelegate
+        menu.findItem(R.id.action_save_and_open).isVisible = hasDelegate && delegate.data.taskData == null
 
         return true
     }
@@ -365,7 +365,7 @@ class CreateTaskActivity : NavBarActivity() {
         super.onSaveInstanceState(outState)
 
         outState.run {
-            if (data != null) {
+            if (hasDelegate) {
                 delegate.saveState(this)
 
                 if (!note.isNullOrEmpty())
@@ -385,8 +385,6 @@ class CreateTaskActivity : NavBarActivity() {
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         loadFinishedDisposable.clear()
 
-        this.data = data
-
         if (dataLoaded) {
             delegate.data = data
         } else {
@@ -396,6 +394,7 @@ class CreateTaskActivity : NavBarActivity() {
                     savedInstanceState
             )
         }
+        hasDelegate = true
 
         data.taskData
                 ?.imageState
@@ -509,7 +508,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun dataChanged(): Boolean {
-        if (data == null)
+        if (!hasDelegate)
             return false
 
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
@@ -833,7 +832,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override fun bind(activity: CreateTaskActivity, holder: Holder) {
                 (holder as NoteHolder).apply {
-                    noteLayout.isHintAnimationEnabled = activity.data != null
+                    noteLayout.isHintAnimationEnabled = activity.hasDelegate
 
                     val nameListener = object : TextWatcher {
 

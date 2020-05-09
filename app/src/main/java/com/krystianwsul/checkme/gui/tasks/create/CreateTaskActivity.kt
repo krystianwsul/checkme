@@ -209,7 +209,6 @@ class CreateTaskActivity : NavBarActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         fun save(andOpen: Boolean) {
-            checkNotNull(data)
             checkNotNull(toolbarEditText)
 
             if (!updateError()) {
@@ -221,7 +220,7 @@ class CreateTaskActivity : NavBarActivity() {
                 val writeImagePath = imageUrl.value!!.writeImagePath
 
                 val createParameters = Delegate.CreateParameters(
-                        data!!.dataId,
+                        delegate.data.dataId, // todo move into delegate
                         name,
                         note,
                         writeImagePath
@@ -292,7 +291,7 @@ class CreateTaskActivity : NavBarActivity() {
                 parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
                         {
                             ScheduleDialogFragment.newInstance(it).run {
-                                initialize(data!!.customTimeDatas)
+                                initialize(delegate.data.customTimeDatas)
                                 show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                                 result.firstOrError()
                             }
@@ -305,8 +304,6 @@ class CreateTaskActivity : NavBarActivity() {
                 .subscribe { result ->
                     when (result) {
                         is ScheduleDialogFragment.Result.Change -> {
-                            checkNotNull(data)
-
                             if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
                                 check(result.scheduleDialogData.monthlyDay)
                             } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
@@ -340,7 +337,6 @@ class CreateTaskActivity : NavBarActivity() {
 
     private fun removeSchedule(position: Int) {
         check(position >= 1)
-        checkNotNull(data)
 
         delegate.parentScheduleManager.removeSchedule(position - 1)
     }
@@ -574,7 +570,7 @@ class CreateTaskActivity : NavBarActivity() {
                 setFixedOnClickListener {
                     ParentPickerFragment.newInstance(delegate.parentScheduleManager.parent != null).let {
                         it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                        it.initialize(data!!.parentTreeDatas, parentFragmentListener)
+                        it.initialize(delegate.data.parentTreeDatas, parentFragmentListener)
                     }
                 }
             }
@@ -668,10 +664,6 @@ class CreateTaskActivity : NavBarActivity() {
             }).dispatchUpdatesTo(this)
         }
             private set
-
-        init {
-            checkNotNull(data)
-        }
 
         fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
             items = getItems(scheduleEntries)
@@ -791,12 +783,10 @@ class CreateTaskActivity : NavBarActivity() {
                     }
 
                     scheduleText.run {
-                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.data!!.customTimeDatas, activity))
+                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.data.customTimeDatas, activity))
 
                         setFixedOnClickListener(
                                 {
-                                    checkNotNull(activity.data)
-
                                     val parameters = ScheduleDialogFragment.Parameters(
                                             adapterPosition,
                                             scheduleEntry.scheduleDataWrapper.getScheduleDialogData(

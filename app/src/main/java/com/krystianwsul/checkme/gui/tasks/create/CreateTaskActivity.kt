@@ -745,17 +745,18 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     @Parcelize
-    data class ParentScheduleState( // todo create make this immutable, move mutable stuff to Data
-            var parentKey: CreateTaskViewModel.ParentKey?,
-            val schedules: MutableList<ScheduleEntry>,
-            @Suppress("unused")
-            val bogus: Unit
+    data class ParentScheduleState(
+            val parentKey: CreateTaskViewModel.ParentKey?,
+            val schedules: List<ScheduleEntry>
     ) : Parcelable {
 
-        constructor(
-                parentKey: CreateTaskViewModel.ParentKey?,
-                schedules: List<ScheduleEntry>? = null
-        ) : this(parentKey, schedules.orEmpty().toMutableList(), Unit)
+        companion object {
+
+            fun create(
+                    parentKey: CreateTaskViewModel.ParentKey?,
+                    schedules: List<ScheduleEntry>? = null
+            ) = ParentScheduleState(parentKey, schedules.orEmpty().toMutableList())
+        }
 
         override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + schedules.hashCode()
 
@@ -773,7 +774,7 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private class ParentScheduleData(
-            private val state: ParentScheduleState,
+            state: ParentScheduleState,
             initialParent: CreateTaskViewModel.ParentTreeData?
     ) { // todo create move into delegate
 
@@ -784,10 +785,8 @@ class CreateTaskActivity : NavBarActivity() {
         var parent
             get() = parentRelay.value!!.value
             set(newValue) {
-                state.parentKey = newValue?.parentKey
-
                 if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
-                    state.schedules.clear()
+                    schedules.clear()
 
                     scheduleUpdates.accept(Unit)
                 }
@@ -797,18 +796,18 @@ class CreateTaskActivity : NavBarActivity() {
 
         private val scheduleUpdates = BehaviorRelay.createDefault(Unit)
 
-        val schedules: List<ScheduleEntry> get() = state.schedules
+        val schedules = state.schedules.toMutableList()
 
         val scheduleObservable = scheduleUpdates.map { schedules }!!
 
         fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
-            state.schedules[position] = scheduleEntry
+            schedules[position] = scheduleEntry
 
             scheduleUpdates.accept(Unit)
         }
 
         fun removeSchedule(position: Int) {
-            state.schedules.removeAt(position)
+            schedules.removeAt(position)
 
             scheduleUpdates.accept(Unit)
         }
@@ -817,14 +816,19 @@ class CreateTaskActivity : NavBarActivity() {
             if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
                 parent = null
 
-            state.schedules += scheduleEntry
+            schedules += scheduleEntry
 
             scheduleUpdates.accept(Unit)
         }
 
-        fun equalTo(parentScheduleState: ParentScheduleState) = state == parentScheduleState
+        fun toState() = ParentScheduleState(
+                parent?.parentKey,
+                schedules
+        )
 
-        fun saveState(outState: Bundle) = outState.putParcelable(Delegate.KEY_STATE, state)
+        fun equalTo(parentScheduleState: ParentScheduleState) = toState() == parentScheduleState // todo create move out of here
+
+        fun saveState(outState: Bundle) = outState.putParcelable(Delegate.KEY_STATE, toState()) // todo create move out of here
     }
 
     private sealed class Item {
@@ -1143,7 +1147,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         override val initialName get() = taskData.name
 
-        override val initialState = savedStates?.first ?: ParentScheduleState(
+        override val initialState = savedStates?.first ?: ParentScheduleState.create(
                 taskData.parentKey,
                 taskData.scheduleDataWrappers
                         ?.map { ScheduleEntry(it) }
@@ -1431,7 +1435,8 @@ class CreateTaskActivity : NavBarActivity() {
                     scheduleHint = null
 
                     val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
-                    initialState = savedStates?.first ?: ParentScheduleState(initialParentKey)
+                    initialState = savedStates?.first
+                            ?: ParentScheduleState.create(initialParentKey)
                 }
                 CreateTaskParameters.None -> {
                     initialName = null

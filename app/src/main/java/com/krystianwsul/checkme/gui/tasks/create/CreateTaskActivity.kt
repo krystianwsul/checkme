@@ -785,50 +785,41 @@ class CreateTaskActivity : NavBarActivity() {
         var parent
             get() = parentRelay.value!!.value
             set(newValue) {
-                if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
-                    schedules.clear()
-
-                    scheduleUpdates.accept(Unit)
-                }
+                if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task)
+                    mutateSchedules { it.clear() }
 
                 parentRelay.accept(NullableWrapper(newValue))
             }
 
-        private val scheduleUpdates = BehaviorRelay.createDefault(Unit)
+        private val scheduleRelay = BehaviorRelay.createDefault(state.schedules)
 
-        val schedules = state.schedules.toMutableList()
+        var schedules
+            get() = scheduleRelay.value!!
+            set(value) = scheduleRelay.accept(value)
 
-        val scheduleObservable = scheduleUpdates.map { schedules }!!
-
-        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) {
-            schedules[position] = scheduleEntry
-
-            scheduleUpdates.accept(Unit)
+        private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit) {
+            val newSchedules = schedules.toMutableList()
+            action(newSchedules)
+            schedules = newSchedules
         }
 
-        fun removeSchedule(position: Int) {
-            schedules.removeAt(position)
+        val scheduleObservable: Observable<List<ScheduleEntry>> = scheduleRelay
 
-            scheduleUpdates.accept(Unit)
-        }
+        fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) = mutateSchedules { it[position] = scheduleEntry }
+
+        fun removeSchedule(position: Int) = mutateSchedules { it.removeAt(position) }
 
         fun addSchedule(scheduleEntry: ScheduleEntry) {
             if (parent?.parentKey is CreateTaskViewModel.ParentKey.Task)
                 parent = null
 
-            schedules += scheduleEntry
-
-            scheduleUpdates.accept(Unit)
+            mutateSchedules { it += scheduleEntry }
         }
 
         fun toState() = ParentScheduleState(
                 parent?.parentKey,
                 schedules
         )
-
-        fun equalTo(parentScheduleState: ParentScheduleState) = toState() == parentScheduleState // todo create move out of here
-
-        fun saveState(outState: Bundle) = outState.putParcelable(Delegate.KEY_STATE, toState()) // todo create move out of here
     }
 
     private sealed class Item {
@@ -1057,7 +1048,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         fun checkDataChanged(name: String, note: String?): Boolean {
-            if (!stateData.equalTo(initialState))
+            if (stateData.toState() != initialState)
                 return true
 
             return checkNameNoteChanged(name, note)
@@ -1125,7 +1116,7 @@ class CreateTaskActivity : NavBarActivity() {
         ): TaskKey
 
         fun saveState(outState: Bundle) {
-            stateData.saveState(outState)
+            outState.putParcelable(KEY_STATE, stateData.toState())
             outState.putParcelable(KEY_INITIAL_STATE, initialState)
         }
 

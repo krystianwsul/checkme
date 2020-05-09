@@ -127,7 +127,9 @@ class CreateTaskActivity : NavBarActivity() {
             delegate.parentScheduleManager.parent = parentTreeData
         }
 
-        override fun onTaskDeleted() = removeParent()
+        override fun onTaskDeleted() {
+            delegate.parentScheduleManager.parent = null
+        }
 
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
@@ -142,12 +144,6 @@ class CreateTaskActivity : NavBarActivity() {
                 ),
                 REQUEST_CREATE_PARENT
         )
-    }
-
-    private fun removeParent() {
-        checkNotNull(delegate.parentScheduleManager.parent)
-
-        delegate.parentScheduleManager.parent = null
     }
 
     private fun setupParent(view: View) {
@@ -178,7 +174,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         override fun onChildViewAttachedToWindow(view: View) {
             view.noteText?.let {
-                removeListenerHelper()
+                createTaskRecycler.removeOnChildAttachStateChangeListener(this)
 
                 it.requestFocus()
 
@@ -510,12 +506,6 @@ class CreateTaskActivity : NavBarActivity() {
         return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
     }
 
-    private fun removeListenerHelper() { // keyboard hack
-        checkNotNull(createTaskRecycler)
-
-        createTaskRecycler.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -721,8 +711,13 @@ class CreateTaskActivity : NavBarActivity() {
                         }
                     }
 
-                    if (parent != null)
-                        scheduleLayout.setEndIconOnClickListener { activity.removeParent() }
+                    if (parent != null) {
+                        scheduleLayout.setEndIconOnClickListener {
+                            activity.delegate
+                                    .parentScheduleManager
+                                    .parent = null
+                        }
+                    }
                 }
             }
         }
@@ -828,7 +823,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override fun bind(activity: CreateTaskActivity, holder: Holder) {
                 (holder as NoteHolder).apply {
-                    noteLayout.isHintAnimationEnabled = activity.hasDelegate
+                    noteLayout.isHintAnimationEnabled = true
 
                     val nameListener = object : TextWatcher {
 

@@ -141,7 +141,7 @@ class CreateTaskActivity : NavBarActivity() {
         )
     }
 
-    private fun removeParent() { // todo create remove
+    private fun removeParent() {
         checkNotNull(delegate.parentScheduleManager.parent)
 
         delegate.parentScheduleManager.parent = null
@@ -523,17 +523,12 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun setScheduleEntryError(scheduleEntry: ScheduleEntry, stringId: Int) {
-        scheduleEntry.error = getString(stringId)
-        check(!TextUtils.isEmpty(scheduleEntry.error))
-
         val index = delegate.parentScheduleManager
                 .schedules
                 .indexOf(scheduleEntry)
         check(index >= 0)
 
-        createTaskRecycler.getChildAt(index + 1)?.let {
-            (createTaskRecycler.getChildViewHolder(it) as ScheduleHolder).scheduleLayout.error = scheduleEntry.error // todo create use payloads
-        }
+        delegate.parentScheduleManager.setSchedule(index, scheduleEntry.copy(error = getString(stringId)))
     }
 
     private fun dataChanged(): Boolean {
@@ -652,6 +647,11 @@ class CreateTaskActivity : NavBarActivity() {
                     .parentObservable
                     .subscribe { getItem()?.onNewParent(this@CreateTaskActivity, holder) }
                     .addTo(holder.compositeDisposable)
+
+            delegate.parentScheduleManager
+                    .scheduleObservable
+                    .subscribe { getItem()?.onNewSchedules(holder, it) }
+                    .addTo(holder.compositeDisposable)
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
@@ -701,6 +701,8 @@ class CreateTaskActivity : NavBarActivity() {
         open fun onNewImageState(imageState: CreateTaskImageState, holder: Holder) = Unit
 
         open fun onNewParent(activity: CreateTaskActivity, holder: Holder) = Unit
+
+        open fun onNewSchedules(holder: Holder, scheduleEntries: List<ScheduleEntry>) = Unit
 
         open fun same(other: Item) = other == this
 
@@ -791,14 +793,22 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
+            override fun onNewSchedules(holder: Holder, scheduleEntries: List<ScheduleEntry>) {
+                (holder as ScheduleHolder).scheduleLayout.error = scheduleEntries.single { same(it) }.error
+            }
+
+            fun same(other: ScheduleEntry): Boolean {
+                if (scheduleEntry.id == other.id)
+                    return true
+
+                return scheduleEntry.scheduleDataWrapper === other.scheduleDataWrapper
+            }
+
             override fun same(other: Item): Boolean {
                 if (other !is Schedule)
                     return false
 
-                if (scheduleEntry.id == other.scheduleEntry.id)
-                    return true
-
-                return scheduleEntry.scheduleDataWrapper === other.scheduleEntry.scheduleDataWrapper
+                return same(other.scheduleEntry)
             }
         }
 

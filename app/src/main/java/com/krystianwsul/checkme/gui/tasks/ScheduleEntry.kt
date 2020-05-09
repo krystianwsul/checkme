@@ -9,5 +9,5 @@ import kotlin.random.Random
 data class ScheduleEntry(
         val scheduleDataWrapper: CreateTaskViewModel.ScheduleDataWrapper,
         var id: Int = Random.nextInt(),
-        var error: String? = null
+        val error: String? = null
 ) : Parcelable

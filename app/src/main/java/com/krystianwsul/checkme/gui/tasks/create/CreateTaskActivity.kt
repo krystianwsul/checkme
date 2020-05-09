@@ -1030,8 +1030,8 @@ class CreateTaskActivity : NavBarActivity() {
             ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
         }
 
-        abstract val initialState: ParentScheduleState // todo create try making private
-        abstract val stateData: ParentScheduleData // todo create try making private
+        protected abstract val initialState: ParentScheduleState
+        abstract val stateData: ParentScheduleData
 
         protected fun getStateData(savedState: ParentScheduleState?): ParentScheduleData {
             val parentScheduleState = savedState ?: initialState.copy()

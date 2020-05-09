@@ -5,10 +5,7 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleManager
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
+import com.krystianwsul.checkme.gui.tasks.create.*
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.Date
@@ -49,10 +46,19 @@ abstract class CreateTaskDelegate {
         }
     }
 
-    abstract var data: CreateTaskViewModel.Data // todo create on making private
+    fun newData(data: CreateTaskViewModel.Data) {
+        this.data = data
+    }
+
+    protected abstract var data: CreateTaskViewModel.Data
 
     open val initialName: String? = null
     open val scheduleHint: CreateTaskActivity.Hint.Schedule? = null
+    open val showSaveAndOpen: Boolean = true
+    open val initialImageState: CreateTaskImageState.Existing? = null
+
+    val parentTreeDatas get() = data.parentTreeDatas
+    val customTimeDatas get() = data.customTimeDatas
 
     protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
     protected fun CreateTaskActivity.Hint.toParentKey() = (this as? CreateTaskActivity.Hint.Task)?.taskKey?.toParentKey()

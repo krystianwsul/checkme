@@ -209,7 +209,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.action_save).isVisible = hasDelegate
-        menu.findItem(R.id.action_save_and_open).isVisible = hasDelegate && delegate.data.taskData == null
+        menu.findItem(R.id.action_save_and_open).isVisible = hasDelegate && delegate.showSaveAndOpen
 
         return true
     }
@@ -297,7 +297,7 @@ class CreateTaskActivity : NavBarActivity() {
                 parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
                         {
                             ScheduleDialogFragment.newInstance(it).run {
-                                initialize(delegate.data.customTimeDatas)
+                                initialize(delegate.customTimeDatas)
                                 show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                                 result.firstOrError()
                             }
@@ -386,7 +386,7 @@ class CreateTaskActivity : NavBarActivity() {
         loadFinishedDisposable.clear()
 
         if (dataLoaded) {
-            delegate.data = data
+            delegate.newData(data)
         } else {
             delegate = CreateTaskDelegate.fromParameters(
                     parameters,
@@ -396,10 +396,9 @@ class CreateTaskActivity : NavBarActivity() {
         }
         hasDelegate = true
 
-        data.taskData
-                ?.imageState
+        delegate.initialImageState
                 ?.takeUnless { imageUrl.value!!.dontOverwrite }
-                ?.let { imageUrl.accept(CreateTaskImageState.Existing(it)) }
+                ?.let { imageUrl.accept(it) }
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -440,11 +439,11 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(data.parentTreeDatas, parentFragmentListener)
+        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(delegate.parentTreeDatas, parentFragmentListener)
 
         invalidateOptionsMenu()
 
-        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
+        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(delegate.customTimeDatas)
 
         createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter
@@ -720,7 +719,7 @@ class CreateTaskActivity : NavBarActivity() {
                         setFixedOnClickListener {
                             ParentPickerFragment.newInstance(parent != null).let {
                                 it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(activity.delegate.data.parentTreeDatas, activity.parentFragmentListener)
+                                it.initialize(activity.delegate.parentTreeDatas, activity.parentFragmentListener)
                             }
                         }
                     }
@@ -746,7 +745,7 @@ class CreateTaskActivity : NavBarActivity() {
                     }
 
                     scheduleText.run {
-                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.data.customTimeDatas, activity))
+                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.customTimeDatas, activity))
 
                         setFixedOnClickListener(
                                 {

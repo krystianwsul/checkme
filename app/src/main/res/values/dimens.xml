@@ -19,4 +19,5 @@
     <dimen name="listPaddingHeight">90dp</dimen>
 
     <dimen name="collapseAppBarHeight">150dp</dimen>
+    <dimen name="expandedTitleMarginTop">-2dp</dimen>
 </resources>

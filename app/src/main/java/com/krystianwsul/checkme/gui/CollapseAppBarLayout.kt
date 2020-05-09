@@ -31,7 +31,7 @@ class CollapseAppBarLayout : AppBarLayout {
                 val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
 
                 layoutParams = layoutParams.apply {
-                    val newHeight = textLayout.height + context.dpToPx(70).toInt() + it.height
+                    val newHeight = textLayout.height + context.dpToPx(35).toInt() + it.height
                     height = newHeight
                     paddingLayout.setPadding(0, 0, 0, newHeight)
                 }

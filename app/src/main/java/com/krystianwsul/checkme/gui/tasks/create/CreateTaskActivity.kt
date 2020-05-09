@@ -380,12 +380,10 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
 
-    private val dataLoaded get() = this::delegate.isInitialized
-
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         loadFinishedDisposable.clear()
 
-        if (dataLoaded) {
+        if (hasDelegate) {
             delegate.newData(data)
         } else {
             delegate = CreateTaskDelegate.fromParameters(
@@ -423,7 +421,7 @@ class CreateTaskActivity : NavBarActivity() {
                         return
                     }
 
-                    updateError()
+                    updateNameError()
                 }
             })
         }
@@ -481,16 +479,15 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
+    private fun updateNameError(): Boolean {
+        val error = if (toolbarEditText.text.isNullOrEmpty()) getString(R.string.nameError) else null
+        toolbarLayout.error = error
+
+        return error != null
+    }
+
     private fun updateError(): Boolean {
-        var hasError = false
-
-        if (TextUtils.isEmpty(toolbarEditText.text)) {
-            toolbarLayout.error = getString(R.string.nameError)
-
-            hasError = true
-        } else {
-            toolbarLayout.error = null
-        }
+        var hasError = updateNameError()
 
         for (scheduleEntry in delegate.parentScheduleManager.schedules) {
             if (delegate.getError(scheduleEntry) != null)

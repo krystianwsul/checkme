@@ -167,7 +167,7 @@ class EditActivity : NavBarActivity() {
 
     private fun hideSoftKeyboard() {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(createTaskRoot.windowToken, 0)
+        inputMethodManager.hideSoftInputFromWindow(editRoot.windowToken, 0)
     }
 
     private var note: String? = null
@@ -279,7 +279,7 @@ class EditActivity : NavBarActivity() {
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
 
-        setupParent(createTaskRoot)
+        setupParent(editRoot)
 
         listOfNotNull(
                 parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(

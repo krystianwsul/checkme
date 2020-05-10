@@ -25,7 +25,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var showRemove = false
 
-    private val createTaskActivity get() = activity as EditActivity
+    private val editActivity get() = activity as EditActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +47,8 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
             setNavigationItemSelectedListener {
                 when (it.itemId) {
                     R.id.camera_gallery_camera -> {
-                        createTaskActivity.getImage(
-                                RxPaparazzo.single(createTaskActivity)
+                        editActivity.getImage(
+                                RxPaparazzo.single(editActivity)
                                         .size(ScreenSize())
                                         .useInternalStorage()
                                         .usingCamera()
@@ -56,15 +56,15 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
                     }
                     R.id.camera_gallery_gallery -> {
-                        createTaskActivity.getImage(
-                                RxPaparazzo.single(createTaskActivity)
+                        editActivity.getImage(
+                                RxPaparazzo.single(editActivity)
                                         .size(ScreenSize())
                                         .useInternalStorage()
                                         .usingGallery()
                         )
 
                     }
-                    R.id.camera_gallery_remove -> createTaskActivity.delegate
+                    R.id.camera_gallery_remove -> editActivity.delegate
                             .imageUrl
                             .accept(EditImageState.Removed)
                     else -> throw IllegalArgumentException()

@@ -13,23 +13,23 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
         private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!, UserKey(key))
     }
 
-    override var rootUserRecords = children.associate { UserKey(it.key) to Pair(it.toRecord(), false) }.toMutableMap()
+    override var records = children.associate { UserKey(it.key) to Pair(it.toRecord(), false) }.toMutableMap()
 
     fun setFriend(dataSnapshot: Snapshot): RootUserRecord {
         val userKey = UserKey(dataSnapshot.key)
 
         return dataSnapshot.toRecord().also {
-            rootUserRecords[userKey] = it to false
+            records[userKey] = it to false
         }
     }
 
-    fun removeFriend(userKey: UserKey) = checkNotNull(rootUserRecords.remove(userKey))
+    fun removeFriend(userKey: UserKey) = checkNotNull(records.remove(userKey))
 
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper): RootUserRecord {
-        check(!rootUserRecords.containsKey(userKey))
+        check(!records.containsKey(userKey))
 
         return RootUserRecord(false, userWrapper, userKey).also {
-            rootUserRecords[userKey] = it to false
+            records[userKey] = it to false
         }
     }
 }

@@ -1,17 +1,14 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
 
     override val isSaved get() = records.any { it.value.second }
 
-    var records = mutableMapOf<T, Pair<U, Boolean>>()
-        private set
-
-    abstract val databaseWrapper: DatabaseWrapper
+    open var records = mutableMapOf<T, Pair<U, Boolean>>()
+        protected set
 
     abstract val databasePrefix: String
 

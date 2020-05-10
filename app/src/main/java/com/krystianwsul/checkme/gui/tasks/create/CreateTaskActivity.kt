@@ -187,7 +187,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None)
+    val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None) // todo create move into delegate
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 

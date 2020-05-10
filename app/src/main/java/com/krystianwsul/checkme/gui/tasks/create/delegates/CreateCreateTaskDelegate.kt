@@ -81,7 +81,9 @@ class CreateCreateTaskDelegate(
                         scheduleDatas,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
     }
@@ -100,7 +102,9 @@ class CreateCreateTaskDelegate(
                         parentTaskKey,
                         createParameters.name,
                         createParameters.note,
-                        createParameters.writeImagePath?.value
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
     }
@@ -116,7 +120,9 @@ class CreateCreateTaskDelegate(
                         createParameters.name,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
     }

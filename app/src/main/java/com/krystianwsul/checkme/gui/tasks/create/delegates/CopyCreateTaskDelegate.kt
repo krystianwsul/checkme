@@ -30,7 +30,9 @@ class CopyCreateTaskDelegate(
                         scheduleDatas,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.taskKey
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
@@ -47,7 +49,9 @@ class CopyCreateTaskDelegate(
                         parentTaskKey,
                         createParameters.name,
                         createParameters.note,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.taskKey
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
@@ -64,7 +68,9 @@ class CopyCreateTaskDelegate(
                         createParameters.name,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.taskKey
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }

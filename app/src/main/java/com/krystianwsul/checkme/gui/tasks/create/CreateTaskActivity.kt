@@ -219,15 +219,7 @@ class CreateTaskActivity : NavBarActivity() {
 
                 createTaskViewModel.stop()
 
-                val writeImagePath = delegate.imageUrl // todo move into delegate
-                        .value!!
-                        .writeImagePath
-
-                val createParameters = CreateTaskDelegate.CreateParameters(
-                        name,
-                        note,
-                        writeImagePath
-                )
+                val createParameters = CreateTaskDelegate.CreateParameters(name, note)
 
                 val taskKey = delegate.createTask(createParameters)
 

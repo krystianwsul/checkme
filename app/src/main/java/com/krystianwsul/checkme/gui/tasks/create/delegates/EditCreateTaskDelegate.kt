@@ -52,7 +52,7 @@ class EditCreateTaskDelegate(
                 scheduleDatas,
                 createParameters.note,
                 projectKey,
-                createParameters.writeImagePath
+                imageUrl.value!!.writeImagePath
         )
     }
 
@@ -68,7 +68,7 @@ class EditCreateTaskDelegate(
                 createParameters.name,
                 parentTaskKey,
                 createParameters.note,
-                createParameters.writeImagePath
+                imageUrl.value!!.writeImagePath
         )
     }
 
@@ -83,7 +83,7 @@ class EditCreateTaskDelegate(
                 createParameters.name,
                 createParameters.note,
                 projectKey,
-                createParameters.writeImagePath
+                imageUrl.value!!.writeImagePath
         )
     }
 }

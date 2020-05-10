@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.tasks.create.delegates
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.StringRes
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -8,7 +7,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
 import com.krystianwsul.checkme.gui.tasks.create.*
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
@@ -191,11 +189,7 @@ abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
         outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
     }
 
-    class CreateParameters(
-            val name: String,
-            val note: String?,
-            val writeImagePath: NullableWrapper<Pair<String, Uri>>?
-    )
+    class CreateParameters(val name: String, val note: String?)
 
     enum class ScheduleError(@StringRes val resource: Int) {
 

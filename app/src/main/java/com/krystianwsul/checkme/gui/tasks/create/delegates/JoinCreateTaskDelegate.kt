@@ -62,7 +62,9 @@ class JoinCreateTaskDelegate(
                         parameters.taskKeys,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.removeInstanceKeys
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
@@ -80,7 +82,9 @@ class JoinCreateTaskDelegate(
                         createParameters.name,
                         parameters.taskKeys,
                         createParameters.note,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.removeInstanceKeys
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }
@@ -98,7 +102,9 @@ class JoinCreateTaskDelegate(
                         parameters.taskKeys,
                         createParameters.note,
                         projectKey,
-                        createParameters.writeImagePath?.value,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
                         parameters.removeInstanceKeys
                 )
                 .also { CreateTaskActivity.createdTaskKey = it }

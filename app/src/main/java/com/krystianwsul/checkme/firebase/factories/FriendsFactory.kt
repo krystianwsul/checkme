@@ -30,7 +30,7 @@ class FriendsFactory(
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots)
     private val strangerProjectManager = StrangerProjectManager()
 
-    private var _friends = rootUserManager.rootUserRecords.toRootUsers()
+    private var _friends = rootUserManager.records.toRootUsers()
 
     val isSaved get() = rootUserManager.isSaved
 
@@ -43,10 +43,10 @@ class FriendsFactory(
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
             val userKey = UserKey(it.snapshot.key)
-            val friendPair = rootUserManager.rootUserRecords[userKey]
+            val friendPair = rootUserManager.records[userKey]
 
             if (friendPair?.second == true) {
-                rootUserManager.rootUserRecords[userKey] = Pair(friendPair.first, false)
+                rootUserManager.records[userKey] = Pair(friendPair.first, false)
 
                 ChangeType.LOCAL
             } else {

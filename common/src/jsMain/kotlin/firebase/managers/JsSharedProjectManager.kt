@@ -12,7 +12,7 @@ class JsSharedProjectManager(
 ) : SharedProjectManager() {
 
     init {
-        sharedProjectRecords.putAll(
+        records.putAll(
                 jsonWrappers.entries
                         .associate {
                             val projectKey = ProjectKey.Shared(it.key)

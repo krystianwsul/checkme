@@ -10,18 +10,16 @@ import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
-class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
+class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper) :
         SharedProjectManager(),
         ProjectProvider.ProjectManager<ProjectType.Shared> {
 
     private fun Snapshot.toRecord() = SharedProjectRecord(
-            database,
+            databaseWrapper,
             this@AndroidSharedProjectManager,
             ProjectKey.Shared(key),
             getValue(JsonWrapper::class.java)!!
     )
-
-    override val databaseWrapper = database
 
     override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<SharedProjectRecord>? {
         val key = ProjectKey.Shared(snapshot.key)

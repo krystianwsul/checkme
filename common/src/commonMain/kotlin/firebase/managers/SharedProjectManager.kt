@@ -11,6 +11,8 @@ abstract class SharedProjectManager :
 
     override val databasePrefix = DatabaseWrapper.RECORDS_KEY
 
+    abstract val databaseWrapper: DatabaseWrapper
+
     fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!records.containsKey(it.projectKey))
 

@@ -4,7 +4,6 @@ package com.krystianwsul.checkme.gui.edit.dialogs
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.EditText
@@ -205,7 +204,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
-        fun initialize(taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>, expandedParentKeys: List<EditViewModel.ParentKey>?) {
+        fun initialize(
+                taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
+                expandedParentKeys: List<EditViewModel.ParentKey>?
+        ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
@@ -225,7 +227,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
             treeNodeCollection.nodes = treeNodes
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(R.layout.row_list_dialog, parent, false))
+        override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+        ) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(
+                R.layout.row_list_dialog,
+                parent,
+                false
+        ))
 
         override val hasActionMode = false
 
@@ -233,7 +242,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private inner class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: EditViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
+        private inner class TaskWrapper(
+                indentation: Int,
+                private val taskParent: TaskParent,
+                val parentTreeData: EditViewModel.ParentTreeData
+        ) : GroupHolderNode(indentation), TaskParent {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
@@ -278,7 +291,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             fun initialize(
                     nodeContainer: NodeContainer<NodeHolder>,
-                    expandedParentKeys: List<EditViewModel.ParentKey>?): TreeNode<NodeHolder> {
+                    expandedParentKeys: List<EditViewModel.ParentKey>?
+            ): TreeNode<NodeHolder> {
                 var expanded = false
                 if (expandedParentKeys != null) {
                     check(expandedParentKeys.isNotEmpty())
@@ -314,7 +328,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 }
 
             override val children: Pair<String, Int>?
-                get() = if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && TextUtils.isEmpty(parentTreeData.note)) {
+                get() = if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && parentTreeData.note.isNullOrEmpty()) {
                     null
                 } else {
                     val text = if (parentTreeData.parentTreeDatas.isNotEmpty() && !treeNode.isExpanded) {

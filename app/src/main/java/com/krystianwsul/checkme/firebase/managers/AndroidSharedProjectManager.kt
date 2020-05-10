@@ -28,7 +28,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
         return if (pair?.second == true) {
             records[key] = Pair(pair.first, false)
 
-            ChangeWrapper(ChangeType.LOCAL, pair.first)
+            ChangeWrapper(ChangeType.LOCAL, pair.first) // todo move to common
         } else {
             if (snapshot.exists()) {
                 val sharedProjectRecord = snapshot.toRecord()

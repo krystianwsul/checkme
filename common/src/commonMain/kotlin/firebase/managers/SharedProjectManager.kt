@@ -18,8 +18,4 @@ abstract class SharedProjectManager :
 
         records[it.projectKey] = Pair(it, false)
     }
-
-    override fun deleteRemoteSharedProjectRecord(projectKey: ProjectKey.Shared) {
-        check(records.remove(projectKey) != null)
-    }
 }

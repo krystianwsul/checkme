@@ -60,7 +60,7 @@ class FriendsFactory(
 
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
             it.userKeys.forEach {
-                rootUserManager.removeFriend(it)
+                rootUserManager.remove(it)
                 _friends.remove(it)
             }
 

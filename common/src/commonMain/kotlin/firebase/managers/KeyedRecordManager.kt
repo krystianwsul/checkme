@@ -29,4 +29,8 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
             values += myValues.mapKeys { "$databasePrefix/${it.key}" }
         }
     }
+
+    fun remove(key: T) {
+        checkNotNull(records.remove(key))
+    }
 }

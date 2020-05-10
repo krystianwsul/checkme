@@ -120,7 +120,7 @@ class SharedProjectRecord(
 
     override val childKey get() = "$key/$PROJECT_JSON"
 
-    override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(projectKey)
+    override fun deleteFromParent() = parent.remove(projectKey)
 
     fun getCustomTimeRecordId() = CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
@@ -138,6 +138,6 @@ class SharedProjectRecord(
 
     interface Parent {
 
-        fun deleteRemoteSharedProjectRecord(projectKey: ProjectKey.Shared)
+        fun remove(key: ProjectKey.Shared)
     }
 }

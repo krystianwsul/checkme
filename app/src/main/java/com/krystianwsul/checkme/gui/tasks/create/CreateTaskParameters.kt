@@ -83,8 +83,10 @@ sealed class CreateTaskParameters : Parcelable {
             check(taskKeys.size > 1)
         }
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) =
-                viewModel.start(null, taskKeys, (hint as? CreateTaskActivity.Hint.Task)?.taskKey)
+        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(
+                CreateTaskViewModel.StartParameters.Join(taskKeys),
+                (hint as? CreateTaskActivity.Hint.Task)?.taskKey
+        )
     }
 
     @Parcelize

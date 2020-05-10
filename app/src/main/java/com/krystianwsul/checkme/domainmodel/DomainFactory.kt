@@ -751,25 +751,16 @@ class DomainFactory(
 
     @Synchronized
     fun getCreateTaskData(
-            taskKey: TaskKey?,
-            joinTaskKeys: List<TaskKey>?,
+            startParameters: CreateTaskViewModel.StartParameters,
             parentTaskKeyHint: TaskKey?
     ): CreateTaskViewModel.Data {
         MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
-
-        check(taskKey == null || joinTaskKeys == null)
 
         val now = ExactTimeStamp.now
 
         val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
             it.key
         }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-        val excludedTaskKeys = when {
-            taskKey != null -> setOf(taskKey)
-            joinTaskKeys != null -> joinTaskKeys.toSet()
-            else -> setOf()
-        }
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
@@ -786,8 +777,8 @@ class DomainFactory(
             checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas)
         } ?: true
 
-        val taskData = if (taskKey != null) {
-            val task = getTaskForce(taskKey)
+        val taskData = (startParameters as? CreateTaskViewModel.StartParameters.Task)?.let {
+            val task = getTaskForce(it.taskKey)
 
             val parentKey: CreateTaskViewModel.ParentKey?
             var scheduleDataWrappers: List<CreateTaskViewModel.ScheduleDataWrapper>? = null
@@ -824,11 +815,9 @@ class DomainFactory(
                     task.project.name,
                     task.getImage(deviceDbInfo)
             )
-        } else {
-            null
         }
 
-        val parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
+        val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, includeTaskKeys)
 
         check(checkHintPresent(parentTreeDatas))
 

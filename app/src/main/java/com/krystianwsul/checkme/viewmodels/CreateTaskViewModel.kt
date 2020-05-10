@@ -17,30 +17,28 @@ import java.util.*
 
 class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
-    private var taskKey: TaskKey? = null
-    private var joinTaskKeys: List<TaskKey>? = null
+    private lateinit var startParameters: StartParameters
     private var parentTaskKeyHint: TaskKey? = null
 
     override val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
-                taskKey,
-                joinTaskKeys,
+                startParameters,
                 parentTaskKeyHint
         )
     }
 
     fun start(
-            taskKey: TaskKey? = null,
-            joinTaskKeys: List<TaskKey>? = null,
+            startParameters: StartParameters = StartParameters.Create,
             parentTaskKeyHint: TaskKey? = null
     ) {
-        this.taskKey = taskKey
-        this.joinTaskKeys = joinTaskKeys
+        this.startParameters = startParameters
         this.parentTaskKeyHint = parentTaskKeyHint
 
         internalStart()
     }
+
+    fun start(taskKey: TaskKey) = start(StartParameters.Task(taskKey))
 
     sealed class ScheduleDataWrapper : Serializable {
 
@@ -327,6 +325,26 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
                 return startExactTimeStamp.compareTo(taskSortKey.startExactTimeStamp)
             }
+        }
+    }
+
+    sealed class StartParameters {
+
+        abstract val excludedTaskKeys: Set<TaskKey>
+
+        object Create : StartParameters() {
+
+            override val excludedTaskKeys = setOf<TaskKey>()
+        }
+
+        class Task(val taskKey: TaskKey) : StartParameters() {
+
+            override val excludedTaskKeys = setOf(taskKey)
+        }
+
+        class Join(joinTaskKeys: List<TaskKey>) : StartParameters() {
+
+            override val excludedTaskKeys = joinTaskKeys.toSet()
         }
     }
 }

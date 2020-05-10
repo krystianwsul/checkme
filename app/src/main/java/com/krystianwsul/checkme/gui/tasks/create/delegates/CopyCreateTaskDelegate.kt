@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tasks.create.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
 import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -13,7 +14,7 @@ import com.krystianwsul.common.utils.TaskKey
 class CopyCreateTaskDelegate(
         private val parameters: CreateTaskParameters.Copy,
         data: CreateTaskViewModel.Data,
-        savedStates: Pair<ParentScheduleState, ParentScheduleState>?
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
 ) : ExistingCreateTaskDelegate(data, savedStates) {
 
     override fun createTaskWithSchedule(

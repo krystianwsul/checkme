@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks.create.delegates
 import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.StringRes
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
 import com.krystianwsul.checkme.gui.tasks.create.*
@@ -15,12 +16,13 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class CreateTaskDelegate {
+abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
 
     companion object {
 
         private const val KEY_INITIAL_STATE = "initialState"
-        const val KEY_STATE = "state"
+        private const val KEY_STATE = "state"
+        private const val IMAGE_URL_KEY = "imageUrl"
 
         fun fromParameters(
                 parameters: CreateTaskParameters,
@@ -28,9 +30,10 @@ abstract class CreateTaskDelegate {
                 savedInstanceState: Bundle?
         ): CreateTaskDelegate {
             val savedStates = savedInstanceState?.takeIf { it.containsKey(KEY_INITIAL_STATE) }?.run {
-                Pair<ParentScheduleState, ParentScheduleState>(
+                Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>(
                         getParcelable(KEY_INITIAL_STATE)!!,
-                        getParcelable(KEY_STATE)!!
+                        getParcelable(KEY_STATE)!!,
+                        getSerializable(IMAGE_URL_KEY) as CreateTaskImageState
                 )
             }
 
@@ -55,7 +58,6 @@ abstract class CreateTaskDelegate {
     open val initialName: String? = null
     open val scheduleHint: CreateTaskActivity.Hint.Schedule? = null
     open val showSaveAndOpen: Boolean = true
-    open val initialImageState: CreateTaskImageState.Existing? = null
 
     val parentTreeDatas get() = data.parentTreeDatas
     val customTimeDatas get() = data.customTimeDatas
@@ -73,6 +75,9 @@ abstract class CreateTaskDelegate {
 
     protected abstract val initialState: ParentScheduleState
     abstract val parentScheduleManager: ParentScheduleManager
+
+    open val imageUrl = BehaviorRelay.createDefault(createTaskImageState
+            ?: CreateTaskImageState.None)
 
     protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentScheduleManager {
         val parentScheduleState = savedState ?: initialState.copy()
@@ -183,6 +188,7 @@ abstract class CreateTaskDelegate {
     fun saveState(outState: Bundle) {
         outState.putParcelable(KEY_STATE, parentScheduleManager.toState())
         outState.putParcelable(KEY_INITIAL_STATE, initialState)
+        outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
     }
 
     class CreateParameters(

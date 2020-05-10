@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tasks.create.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
 import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
 import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -14,8 +15,8 @@ import com.krystianwsul.common.utils.TaskKey
 class JoinCreateTaskDelegate(
         private val parameters: CreateTaskParameters.Join,
         override var data: CreateTaskViewModel.Data,
-        savedStates: Pair<ParentScheduleState, ParentScheduleState>?
-) : CreateTaskDelegate() {
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
+) : CreateTaskDelegate(savedStates?.third) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 

@@ -72,7 +72,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         private const val NOTE_KEY = "note"
         private const val NOTE_HAS_FOCUS_KEY = "noteHasFocus"
-        private const val IMAGE_URL_KEY = "imageUrl"
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
@@ -116,7 +115,9 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
-    private lateinit var delegate: CreateTaskDelegate
+    lateinit var delegate: CreateTaskDelegate
+        private set
+
     private var hasDelegate = false
 
     private val discardDialogListener = this::finish
@@ -187,8 +188,6 @@ class CreateTaskActivity : NavBarActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    val imageUrl = BehaviorRelay.createDefault<CreateTaskImageState>(CreateTaskImageState.None) // todo create move into delegate
-
     private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 
     private val timeRelay = BehaviorRelay.createDefault(Unit)
@@ -220,7 +219,9 @@ class CreateTaskActivity : NavBarActivity() {
 
                 createTaskViewModel.stop()
 
-                val writeImagePath = imageUrl.value!!.writeImagePath
+                val writeImagePath = delegate.imageUrl // todo move into delegate
+                        .value!!
+                        .writeImagePath
 
                 val createParameters = CreateTaskDelegate.CreateParameters(
                         name,
@@ -267,10 +268,6 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         this.savedInstanceState = savedInstanceState
-
-        savedInstanceState?.run {
-            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as CreateTaskImageState)
-        }
 
         createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
@@ -351,7 +348,7 @@ class CreateTaskActivity : NavBarActivity() {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
                 it.targetUI()
-                        .imageUrl
+                        .delegate.imageUrl
                         .accept(CreateTaskImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
@@ -369,8 +366,6 @@ class CreateTaskActivity : NavBarActivity() {
 
                 putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
             }
-
-            putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
         }
     }
 
@@ -389,10 +384,6 @@ class CreateTaskActivity : NavBarActivity() {
             )
         }
         hasDelegate = true
-
-        delegate.initialImageState
-                ?.takeUnless { imageUrl.value!!.dontOverwrite }
-                ?.let { imageUrl.accept(it) }
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -603,7 +594,9 @@ class CreateTaskActivity : NavBarActivity() {
                     .takeIf { it >= 0 }
                     ?.let { items[it] }
 
-            holder.compositeDisposable += imageUrl.subscribe { getItem()?.onNewImageState(it, holder) }
+            delegate.imageUrl
+                    .subscribe { getItem()?.onNewImageState(it, holder) }
+                    .addTo(holder.compositeDisposable)
 
             delegate.parentScheduleManager
                     .parentObservable
@@ -857,7 +850,12 @@ class CreateTaskActivity : NavBarActivity() {
 
             override fun bind(activity: CreateTaskActivity, holder: Holder) {
                 (holder as ImageHolder).apply {
-                    fun listener() = CameraGalleryFragment.newInstance(activity.imageUrl.value!!.loader != null).show(activity.supportFragmentManager, TAG_CAMERA_GALLERY)
+                    fun listener() = CameraGalleryFragment.newInstance(
+                            activity.delegate
+                                    .imageUrl
+                                    .value!!
+                                    .loader != null
+                    ).show(activity.supportFragmentManager, TAG_CAMERA_GALLERY)
 
                     imageImage.setOnClickListener { listener() }
                     imageEdit.setOnClickListener { listener() }

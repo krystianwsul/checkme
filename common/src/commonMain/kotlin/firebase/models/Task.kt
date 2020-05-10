@@ -189,8 +189,8 @@ class Task<T : ProjectType>(
 
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents
-     and schedules would need to go through a mechanism that would somehow grab the next element
-     from each one and yield them in order
+      and schedules would need to go through a mechanism that would somehow grab the next element
+      from each one and yield them in order
      */
     fun getInstances(
             givenStartExactTimeStamp: ExactTimeStamp?,

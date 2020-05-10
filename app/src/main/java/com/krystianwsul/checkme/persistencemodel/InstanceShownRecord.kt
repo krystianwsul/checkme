@@ -52,7 +52,8 @@ class InstanceShownRecord(
                     "$COLUMN_SCHEDULE_MINUTE INTEGER, " +
                     "$COLUMN_NOTIFIED INTEGER NOT NULL DEFAULT 0, " +
                     "$COLUMN_NOTIFICATION_SHOWN INTEGER NOT NULL DEFAULT 0, " +
-                    "$COLUMN_PROJECT_ID TEXT NOT NULL);")
+                    "$COLUMN_PROJECT_ID TEXT NOT NULL);"
+            )
 
             sqLiteDatabase.execSQL("CREATE UNIQUE INDEX $INDEX_HOUR_MINUTE ON $TABLE_INSTANCES_SHOWN " +
                     "(" +
@@ -62,7 +63,8 @@ class InstanceShownRecord(
                     "$COLUMN_SCHEDULE_MONTH, " +
                     "$COLUMN_SCHEDULE_DAY, " +
                     "$COLUMN_SCHEDULE_HOUR, " +
-                    COLUMN_SCHEDULE_MINUTE + ")")
+                    COLUMN_SCHEDULE_MINUTE + ")"
+            )
 
             sqLiteDatabase.execSQL("CREATE UNIQUE INDEX $INDEX_CUSTOM_TIME_ID ON $TABLE_INSTANCES_SHOWN " +
                     "(" +
@@ -71,10 +73,15 @@ class InstanceShownRecord(
                     "$COLUMN_SCHEDULE_YEAR, " +
                     "$COLUMN_SCHEDULE_MONTH, " +
                     "$COLUMN_SCHEDULE_DAY, " +
-                    "$COLUMN_SCHEDULE_CUSTOM_TIME_ID)")
+                    "$COLUMN_SCHEDULE_CUSTOM_TIME_ID)"
+            )
         }
 
-        fun getInstancesShownRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_INSTANCES_SHOWN, this::cursorToInstanceShownRecord)
+        fun getInstancesShownRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(
+                sqLiteDatabase,
+                TABLE_INSTANCES_SHOWN,
+                this::cursorToInstanceShownRecord
+        )
 
         private fun cursorToInstanceShownRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -92,7 +99,20 @@ class InstanceShownRecord(
             check(scheduleHour == null == (scheduleMinute == null))
             check(scheduleHour == null != (scheduleCustomTimeId == null))
 
-            InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown, projectId)
+            InstanceShownRecord(
+                    true,
+                    id,
+                    taskId,
+                    scheduleYear,
+                    scheduleMonth,
+                    scheduleDay,
+                    scheduleCustomTimeId,
+                    scheduleHour,
+                    scheduleMinute,
+                    notified,
+                    notificationShown,
+                    projectId
+            )
         }
 
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID)

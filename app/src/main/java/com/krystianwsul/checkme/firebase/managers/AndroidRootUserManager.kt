@@ -23,11 +23,8 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
         }
     }
 
-    fun addFriend(userKey: UserKey, userWrapper: UserWrapper): RootUserRecord {
-        check(!records.containsKey(userKey))
-
-        return RootUserRecord(false, userWrapper, userKey).also {
-            records[userKey] = it to false
-        }
-    }
+    fun addFriend(
+            userKey: UserKey,
+            userWrapper: UserWrapper
+    ) = RootUserRecord(false, userWrapper, userKey).also { add(userKey, it) }
 }

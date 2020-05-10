@@ -13,9 +13,9 @@ abstract class SharedProjectManager :
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
-        check(!records.containsKey(it.projectKey))
-
-        records[it.projectKey] = Pair(it, false)
-    }
+    fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(
+            databaseWrapper,
+            this,
+            jsonWrapper
+    ).also { add(it.projectKey, it) }
 }

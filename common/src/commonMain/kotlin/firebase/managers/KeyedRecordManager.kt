@@ -33,4 +33,10 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
     fun remove(key: T) {
         checkNotNull(records.remove(key))
     }
+
+    fun add(key: T, record: U) {
+        check(!records.containsKey(key))
+
+        records[key] = Pair(record, false)
+    }
 }

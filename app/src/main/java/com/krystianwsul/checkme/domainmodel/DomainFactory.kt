@@ -329,30 +329,6 @@ class DomainFactory(
     // gets
 
     @Synchronized
-    fun getEditInstanceData(instanceKey: InstanceKey): EditInstanceViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getEditInstanceData")
-
-        val now = ExactTimeStamp.now
-
-        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.key
-        }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-        val instance = getInstance(instanceKey)
-        check(instance.isRootInstance(now))
-
-        (instance.instanceTime as? Time.Custom<*>)?.let {
-            currentCustomTimes[it.key] = it
-        }
-
-        val customTimeDatas = currentCustomTimes.mapValues {
-            it.value.let { EditInstanceViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap()) }
-        }
-
-        return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
-    }
-
-    @Synchronized
     fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
         MyCrashlytics.log("DomainFactory.getEditInstancesData")
 

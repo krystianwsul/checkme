@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.loaders
 
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import org.junit.Assert
 import org.junit.Test
@@ -14,8 +14,8 @@ class TaskKeyTest {
     fun testEquals() {
         val projectId = ProjectKey.Shared("asdf")
 
-        val parentKey1 = CreateTaskViewModel.ParentKey.Project(projectId)
-        val parentKey2 = CreateTaskViewModel.ParentKey.Project(projectId)
+        val parentKey1 = EditViewModel.ParentKey.Project(projectId)
+        val parentKey2 = EditViewModel.ParentKey.Project(projectId)
 
         Assert.assertTrue(parentKey1 == parentKey2)
     }

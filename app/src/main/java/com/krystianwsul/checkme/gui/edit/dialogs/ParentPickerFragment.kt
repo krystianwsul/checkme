@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -51,11 +51,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private lateinit var searchField: EditText
     private lateinit var searchChanges: Observable<String>
 
-    private var taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>? = null
+    private var taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>? = null
     lateinit var listener: Listener
 
     private var treeViewAdapter: TreeViewAdapter<NodeHolder>? = null
-    private var expandedParentKeys: List<CreateTaskViewModel.ParentKey>? = null
+    private var expandedParentKeys: List<EditViewModel.ParentKey>? = null
 
     private val initializeDisposable = CompositeDisposable()
 
@@ -95,7 +95,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 .create()
     }
 
-    fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, listener: Listener) {
+    fun initialize(taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>, listener: Listener) {
         this.taskDatas = taskDatas
         this.listener = listener
 
@@ -205,7 +205,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
-        fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?) {
+        fun initialize(taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>, expandedParentKeys: List<EditViewModel.ParentKey>?) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
@@ -233,7 +233,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private inner class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
+        private inner class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: EditViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
@@ -261,9 +261,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override val colorBackground: Int
                 get() = taskBackground
 
-            val expandedParentKeys: List<CreateTaskViewModel.ParentKey>
+            val expandedParentKeys: List<EditViewModel.ParentKey>
                 get() {
-                    val expandedParentKeys = ArrayList<CreateTaskViewModel.ParentKey>()
+                    val expandedParentKeys = ArrayList<EditViewModel.ParentKey>()
 
                     val treeNode = this.treeNode
 
@@ -278,7 +278,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             fun initialize(
                     nodeContainer: NodeContainer<NodeHolder>,
-                    expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeNode<NodeHolder> {
+                    expandedParentKeys: List<EditViewModel.ParentKey>?): TreeNode<NodeHolder> {
                 var expanded = false
                 if (expandedParentKeys != null) {
                     check(expandedParentKeys.isNotEmpty())
@@ -357,7 +357,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     interface Listener {
 
-        fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData)
+        fun onTaskSelected(parentTreeData: EditViewModel.ParentTreeData)
 
         fun onTaskDeleted()
 

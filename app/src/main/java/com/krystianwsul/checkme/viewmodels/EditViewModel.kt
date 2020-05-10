@@ -15,7 +15,7 @@ import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 import java.util.*
 
-class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
+class EditViewModel : DomainViewModel<EditViewModel.Data>() {
 
     private lateinit var startParameters: StartParameters
     private var parentTaskKeyHint: TaskKey? = null

@@ -6,14 +6,14 @@ import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
 class CopyExistingTaskEditDelegate(
         private val parameters: EditParameters.Copy,
-        data: CreateTaskViewModel.Data,
+        data: EditViewModel.Data,
         savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
 ) : ExistingTaskEditDelegate(data, savedStates) {
 

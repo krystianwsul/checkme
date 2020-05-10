@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.content.Intent
 import android.os.Parcelable
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -59,7 +59,7 @@ sealed class EditParameters : Parcelable {
         }
     }
 
-    abstract fun startViewModel(viewModel: CreateTaskViewModel)
+    abstract fun startViewModel(viewModel: EditViewModel)
 
     @Parcelize
     class Create(
@@ -68,7 +68,7 @@ sealed class EditParameters : Parcelable {
             val nameHint: String? = null
     ) : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) =
+        override fun startViewModel(viewModel: EditViewModel) =
                 viewModel.start(parentTaskKeyHint = (hint as? EditActivity.Hint.Task)?.taskKey)
     }
 
@@ -83,8 +83,8 @@ sealed class EditParameters : Parcelable {
             check(taskKeys.size > 1)
         }
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(
-                CreateTaskViewModel.StartParameters.Join(taskKeys),
+        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(
+                EditViewModel.StartParameters.Join(taskKeys),
                 (hint as? EditActivity.Hint.Task)?.taskKey
         )
     }
@@ -92,32 +92,32 @@ sealed class EditParameters : Parcelable {
     @Parcelize
     class Copy(val taskKey: TaskKey) : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
+        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(taskKey)
     }
 
     @Parcelize
     class Edit(val taskKey: TaskKey) : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
+        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(taskKey)
     }
 
     @Parcelize
     class Shortcut(val parentTaskKeyHint: TaskKey) : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) =
+        override fun startViewModel(viewModel: EditViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
     class Share(val nameHint: String, val parentTaskKeyHint: TaskKey?) : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) =
+        override fun startViewModel(viewModel: EditViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
     object None : EditParameters() {
 
-        override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start()
+        override fun startViewModel(viewModel: EditViewModel) = viewModel.start()
     }
 }

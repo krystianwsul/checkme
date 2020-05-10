@@ -4,10 +4,10 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 
 abstract class ExistingTaskEditDelegate(
-        final override var data: CreateTaskViewModel.Data,
+        final override var data: EditViewModel.Data,
         savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
 ) : EditDelegate(savedStates?.third) {
 

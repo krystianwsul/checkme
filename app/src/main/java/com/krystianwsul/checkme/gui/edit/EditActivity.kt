@@ -33,7 +33,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -127,7 +127,7 @@ class EditActivity : NavBarActivity() {
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
-        override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
+        override fun onTaskSelected(parentTreeData: EditViewModel.ParentTreeData) {
             delegate.parentScheduleManager.parent = parentTreeData
         }
 
@@ -189,7 +189,7 @@ class EditActivity : NavBarActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private lateinit var createTaskViewModel: CreateTaskViewModel
+    private lateinit var editViewModel: EditViewModel
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 
@@ -220,7 +220,7 @@ class EditActivity : NavBarActivity() {
                 val name = toolbarEditText.text.toString().trim { it <= ' ' }
                 check(!TextUtils.isEmpty(name))
 
-                createTaskViewModel.stop()
+                editViewModel.stop()
 
                 val createParameters = EditDelegate.CreateParameters(name, note)
 
@@ -273,7 +273,7 @@ class EditActivity : NavBarActivity() {
         if (!noteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
+        editViewModel = getViewModel<EditViewModel>().apply {
             parameters.startViewModel(this)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
@@ -366,7 +366,7 @@ class EditActivity : NavBarActivity() {
 
     private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
 
-    private fun onLoadFinished(data: CreateTaskViewModel.Data) {
+    private fun onLoadFinished(data: EditViewModel.Data) {
         loadFinishedDisposable.clear()
 
         if (hasDelegate) {
@@ -498,7 +498,7 @@ class EditActivity : NavBarActivity() {
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                delegate.parentScheduleManager.parent = delegate.findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
+                delegate.parentScheduleManager.parent = delegate.findTaskData(EditViewModel.ParentKey.Task(taskKey))
             }
         }
     }

@@ -5,7 +5,7 @@ import androidx.annotation.StringRes
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
@@ -23,7 +23,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
         fun fromParameters(
                 parameters: EditParameters,
-                data: CreateTaskViewModel.Data,
+                data: EditViewModel.Data,
                 savedInstanceState: Bundle?
         ): EditDelegate {
             val savedStates = savedInstanceState?.takeIf { it.containsKey(KEY_INITIAL_STATE) }?.run {
@@ -46,11 +46,11 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         }
     }
 
-    fun newData(data: CreateTaskViewModel.Data) {
+    fun newData(data: EditViewModel.Data) {
         this.data = data
     }
 
-    protected abstract var data: CreateTaskViewModel.Data
+    protected abstract var data: EditViewModel.Data
 
     open val initialName: String? = null
     open val scheduleHint: EditActivity.Hint.Schedule? = null
@@ -59,7 +59,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     val parentTreeDatas get() = data.parentTreeDatas
     val customTimeDatas get() = data.customTimeDatas
 
-    protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
+    protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
     protected fun EditActivity.Hint.toParentKey() = (this as? EditActivity.Hint.Task)?.taskKey?.toParentKey()
     protected fun EditActivity.Hint.toScheduleHint() = this as? EditActivity.Hint.Schedule
 
@@ -67,7 +67,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
                 ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
 
-        ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
+        ScheduleEntry(EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
     protected abstract val initialState: ParentScheduleState
@@ -92,13 +92,13 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     protected open fun checkNameNoteChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 
     protected fun checkNameNoteChanged(
-            taskData: CreateTaskViewModel.TaskData,
+            taskData: EditViewModel.TaskData,
             name: String,
             note: String?
     ) = name != taskData.name || note != taskData.note
 
     fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
-        if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
+        if (scheduleEntry.scheduleDataWrapper !is EditViewModel.ScheduleDataWrapper.Single)
             return null
 
         if (skipScheduleCheck(scheduleEntry))
@@ -131,13 +131,13 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     protected open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
 
-    fun findTaskData(parentKey: CreateTaskViewModel.ParentKey) =
+    fun findTaskData(parentKey: EditViewModel.ParentKey) =
             findTaskDataHelper(data.parentTreeDatas, parentKey).single()
 
     private fun findTaskDataHelper(
-            taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>,
-            parentKey: CreateTaskViewModel.ParentKey
-    ): Iterable<CreateTaskViewModel.ParentTreeData> {
+            taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
+            parentKey: EditViewModel.ParentKey
+    ): Iterable<EditViewModel.ParentTreeData> {
         if (taskDatas.containsKey(parentKey))
             return listOf(taskDatas.getValue(parentKey))
 
@@ -147,7 +147,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     }
 
     fun createTask(createParameters: CreateParameters): TaskKey {
-        val projectId = (parentScheduleManager.parent?.parentKey as? CreateTaskViewModel.ParentKey.Project)?.projectId
+        val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
@@ -155,10 +155,10 @@ abstract class EditDelegate(editImageState: EditImageState?) {
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     projectId
             )
-            parentScheduleManager.parent?.parentKey is CreateTaskViewModel.ParentKey.Task -> {
+            parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(projectId == null)
 
-                val parentTaskKey = (parentScheduleManager.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
+                val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
 
                 createTaskWithParent(createParameters, parentTaskKey)
             }

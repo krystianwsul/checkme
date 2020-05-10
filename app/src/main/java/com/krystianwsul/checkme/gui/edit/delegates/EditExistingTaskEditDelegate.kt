@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -14,7 +14,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class EditExistingTaskEditDelegate(
         private val parameters: EditParameters.Edit,
-        data: CreateTaskViewModel.Data,
+        data: EditViewModel.Data,
         savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
 ) : ExistingTaskEditDelegate(data, savedStates) {
 
@@ -27,9 +27,9 @@ class EditExistingTaskEditDelegate(
         if (taskData.parentKey == parentKey)
             return true
 
-        fun CreateTaskViewModel.ParentKey.getProjectId() = when (this) {
-            is CreateTaskViewModel.ParentKey.Project -> projectId
-            is CreateTaskViewModel.ParentKey.Task -> findTaskData(this).projectId
+        fun EditViewModel.ParentKey.getProjectId() = when (this) {
+            is EditViewModel.ParentKey.Project -> projectId
+            is EditViewModel.ParentKey.Task -> findTaskData(this).projectId
         }
 
         val initialProject = taskData.parentKey?.getProjectId()

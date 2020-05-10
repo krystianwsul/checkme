@@ -27,7 +27,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
@@ -67,7 +67,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private lateinit var customView: ViewGroup
     private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
-    private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -498,7 +498,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
         if (this::scheduleDialogData.isInitialized)
@@ -675,24 +675,24 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         fun toScheduleEntry(id: Int? = null) = ScheduleEntry(
                 when (scheduleType) {
-                    ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
+                    ScheduleType.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
                             date,
                             timePairPersist.timePair
                     ))
-                    ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
+                    ScheduleType.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
                             if (allDays) DayOfWeek.set else daysOfWeek,
                             timePairPersist.timePair,
                             from,
                             until
                     ))
-                    ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
+                    ScheduleType.MONTHLY_DAY -> EditViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
                             monthDayNumber,
                             beginningOfMonth,
                             timePairPersist.timePair,
                             from,
                             until
                     ))
-                    ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
+                    ScheduleType.MONTHLY_WEEK -> EditViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
                             monthWeekNumber,
                             monthWeekDay,
                             beginningOfMonth,
@@ -700,7 +700,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                             from,
                             until
                     ))
-                    ScheduleType.YEARLY -> CreateTaskViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
+                    ScheduleType.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
                             date.month,
                             date.day,
                             timePairPersist.timePair,

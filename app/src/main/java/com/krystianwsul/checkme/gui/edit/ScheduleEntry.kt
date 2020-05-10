@@ -1,12 +1,12 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import kotlinx.android.parcel.Parcelize
 import kotlin.random.Random
 
 @Parcelize
 data class ScheduleEntry(
-        val scheduleDataWrapper: CreateTaskViewModel.ScheduleDataWrapper,
+        val scheduleDataWrapper: EditViewModel.ScheduleDataWrapper,
         var id: Int = Random.nextInt()
 ) : Parcelable

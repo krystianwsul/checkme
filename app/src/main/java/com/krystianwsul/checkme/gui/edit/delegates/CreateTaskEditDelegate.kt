@@ -7,14 +7,14 @@ import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
 class CreateTaskEditDelegate(
         private val parameters: EditParameters,
-        override var data: CreateTaskViewModel.Data,
+        override var data: EditViewModel.Data,
         savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
 ) : EditDelegate(savedStates?.third) {
 
@@ -32,7 +32,7 @@ class CreateTaskEditDelegate(
                 initialState = savedStates?.first ?: parameters.parentScheduleState
                         ?: ParentScheduleState(
                         initialParentKey,
-                        listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is CreateTaskViewModel.ParentKey.Task && data.defaultReminder })
+                        listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is EditViewModel.ParentKey.Task && data.defaultReminder })
                 )
             }
             is EditParameters.Share -> {

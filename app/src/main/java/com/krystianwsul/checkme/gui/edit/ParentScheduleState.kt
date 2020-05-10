@@ -1,19 +1,19 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class ParentScheduleState(
-        val parentKey: CreateTaskViewModel.ParentKey?,
+        val parentKey: EditViewModel.ParentKey?,
         val schedules: List<ScheduleEntry>
 ) : Parcelable {
 
     companion object {
 
         fun create(
-                parentKey: CreateTaskViewModel.ParentKey?,
+                parentKey: EditViewModel.ParentKey?,
                 schedules: List<ScheduleEntry>? = null
         ) = ParentScheduleState(parentKey, schedules.orEmpty().toMutableList())
     }

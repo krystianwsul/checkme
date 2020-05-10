@@ -21,4 +21,5 @@ class PrivateCustomTimeJson @JvmOverloads constructor(
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
         var current: Boolean = true,
-        var endTime: Long? = null) : CustomTimeJson
+        var endTime: Long? = null
+) : CustomTimeJson

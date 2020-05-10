@@ -25,17 +25,17 @@ class AndroidSharedProjectManager(private val database: DatabaseWrapper) :
 
     override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<SharedProjectRecord>? {
         val key = ProjectKey.Shared(snapshot.key)
-        val pair = sharedProjectRecords[key]
+        val pair = records[key]
 
         return if (pair?.second == true) {
-            sharedProjectRecords[key] = Pair(pair.first, false)
+            records[key] = Pair(pair.first, false)
 
             ChangeWrapper(ChangeType.LOCAL, pair.first)
         } else {
             if (snapshot.exists()) {
                 val sharedProjectRecord = snapshot.toRecord()
 
-                sharedProjectRecords[key] = Pair(sharedProjectRecord, false)
+                records[key] = Pair(sharedProjectRecord, false)
 
                 ChangeWrapper(ChangeType.REMOTE, sharedProjectRecord)
             } else {

@@ -296,8 +296,6 @@ class Instance<T : ProjectType> private constructor(
         (data as Data.Real<*>).instanceRecord.delete()
     }
 
-    fun belongsToRemoteProject() = true
-
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
     fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
         val instanceTimePair = instanceTime.timePair

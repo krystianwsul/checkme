@@ -973,16 +973,13 @@ class DomainFactory(
 
         instances.forEach { it.setInstanceDateTime(localFactory, ownerKey, DateTime(instanceDate, getTime(instanceTimePair)), now) }
 
-        val remoteProjects = instances
-                .filter { it.belongsToRemoteProject() }
-                .map { it.project }
-                .toSet()
+        val projects = instances.map { it.project }.toSet()
 
         updateNotifications(now)
 
         save(dataId, source)
 
-        notifyCloud(remoteProjects)
+        notifyCloud(projects)
     }
 
     @Synchronized

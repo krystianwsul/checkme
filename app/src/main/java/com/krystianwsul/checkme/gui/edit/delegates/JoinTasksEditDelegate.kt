@@ -1,10 +1,10 @@
-package com.krystianwsul.checkme.gui.tasks.create.delegates
+package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -12,11 +12,11 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-class JoinCreateTaskDelegate(
-        private val parameters: CreateTaskParameters.Join,
+class JoinTasksEditDelegate(
+        private val parameters: EditParameters.Join,
         override var data: CreateTaskViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
-) : CreateTaskDelegate(savedStates?.third) {
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
+) : EditDelegate(savedStates?.third) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 
@@ -24,7 +24,7 @@ class JoinCreateTaskDelegate(
 
     init {
         val (initialParentKey, schedule) = parameters.run {
-            if (hint is CreateTaskActivity.Hint.Task) {
+            if (hint is EditActivity.Hint.Task) {
                 Pair(hint.toParentKey(), null)
             } else {
                 Pair(
@@ -67,7 +67,7 @@ class JoinCreateTaskDelegate(
                                 ?.value,
                         parameters.removeInstanceKeys
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithParent(
@@ -87,7 +87,7 @@ class JoinCreateTaskDelegate(
                                 ?.value,
                         parameters.removeInstanceKeys
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithoutReminder(
@@ -107,6 +107,6 @@ class JoinCreateTaskDelegate(
                                 ?.value,
                         parameters.removeInstanceKeys
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 }

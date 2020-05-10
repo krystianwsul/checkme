@@ -1,15 +1,15 @@
-package com.krystianwsul.checkme.gui.tasks.create.delegates
+package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
-abstract class ExistingCreateTaskDelegate(
+abstract class ExistingTaskEditDelegate(
         final override var data: CreateTaskViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
-) : CreateTaskDelegate(savedStates?.third) {
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
+) : EditDelegate(savedStates?.third) {
 
     protected val taskData get() = data.taskData!!
 
@@ -25,14 +25,14 @@ abstract class ExistingCreateTaskDelegate(
 
     override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
 
-    final override val imageUrl: BehaviorRelay<CreateTaskImageState>
+    final override val imageUrl: BehaviorRelay<EditImageState>
 
     init {
         val final = when {
             savedStates?.third?.dontOverwrite == true -> savedStates.third
-            taskData.imageState != null -> CreateTaskImageState.Existing(taskData.imageState!!)
+            taskData.imageState != null -> EditImageState.Existing(taskData.imageState!!)
             savedStates?.third != null -> savedStates.third
-            else -> CreateTaskImageState.None
+            else -> EditImageState.None
         }
 
         imageUrl = BehaviorRelay.createDefault(final)

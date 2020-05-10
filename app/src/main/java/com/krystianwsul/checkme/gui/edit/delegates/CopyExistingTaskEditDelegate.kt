@@ -1,21 +1,21 @@
-package com.krystianwsul.checkme.gui.tasks.create.delegates
+package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-class CopyCreateTaskDelegate(
-        private val parameters: CreateTaskParameters.Copy,
+class CopyExistingTaskEditDelegate(
+        private val parameters: EditParameters.Copy,
         data: CreateTaskViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
-) : ExistingCreateTaskDelegate(data, savedStates) {
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
+) : ExistingTaskEditDelegate(data, savedStates) {
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
@@ -35,7 +35,7 @@ class CopyCreateTaskDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithParent(
@@ -54,7 +54,7 @@ class CopyCreateTaskDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithoutReminder(
@@ -73,6 +73,6 @@ class CopyCreateTaskDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 }

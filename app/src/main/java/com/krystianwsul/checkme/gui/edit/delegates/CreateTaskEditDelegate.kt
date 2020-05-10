@@ -1,30 +1,30 @@
-package com.krystianwsul.checkme.gui.tasks.create.delegates
+package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskParameters
-import com.krystianwsul.checkme.gui.tasks.create.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-class CreateCreateTaskDelegate(
-        private val parameters: CreateTaskParameters,
+class CreateTaskEditDelegate(
+        private val parameters: EditParameters,
         override var data: CreateTaskViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>?
-) : CreateTaskDelegate(savedStates?.third) {
+        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
+) : EditDelegate(savedStates?.third) {
 
     override val initialName: String?
-    override val scheduleHint: CreateTaskActivity.Hint.Schedule?
+    override val scheduleHint: EditActivity.Hint.Schedule?
     override val initialState: ParentScheduleState
 
     init {
         when (parameters) {
-            is CreateTaskParameters.Create -> {
+            is EditParameters.Create -> {
                 initialName = parameters.nameHint
                 scheduleHint = parameters.hint?.toScheduleHint()
 
@@ -35,7 +35,7 @@ class CreateCreateTaskDelegate(
                         listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is CreateTaskViewModel.ParentKey.Task && data.defaultReminder })
                 )
             }
-            is CreateTaskParameters.Share -> {
+            is EditParameters.Share -> {
                 initialName = parameters.nameHint
                 scheduleHint = null
 
@@ -45,7 +45,7 @@ class CreateCreateTaskDelegate(
                         listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
                 )
             }
-            is CreateTaskParameters.Shortcut -> {
+            is EditParameters.Shortcut -> {
                 initialName = null
                 scheduleHint = null
 
@@ -53,7 +53,7 @@ class CreateCreateTaskDelegate(
                 initialState = savedStates?.first
                         ?: ParentScheduleState.create(initialParentKey)
             }
-            CreateTaskParameters.None -> {
+            EditParameters.None -> {
                 initialName = null
                 scheduleHint = null
 
@@ -85,14 +85,14 @@ class CreateCreateTaskDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithParent(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
-        if (parameters is CreateTaskParameters.Share)
+        if (parameters is EditParameters.Share)
             ShortcutManager.addShortcut(parentTaskKey)
 
         return DomainFactory.instance
@@ -106,7 +106,7 @@ class CreateCreateTaskDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 
     override fun createTaskWithoutReminder(
@@ -124,6 +124,6 @@ class CreateCreateTaskDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { CreateTaskActivity.createdTaskKey = it }
+                .also { EditActivity.createdTaskKey = it }
     }
 }

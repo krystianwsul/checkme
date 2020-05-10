@@ -1,6 +1,5 @@
-package com.krystianwsul.checkme.gui.tasks.create
+package com.krystianwsul.checkme.gui.edit
 
-import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel

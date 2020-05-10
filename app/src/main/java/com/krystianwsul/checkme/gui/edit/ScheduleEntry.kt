@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks
+package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel

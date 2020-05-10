@@ -1,7 +1,6 @@
-package com.krystianwsul.checkme.gui.tasks.create
+package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import kotlinx.android.parcel.Parcelize
 

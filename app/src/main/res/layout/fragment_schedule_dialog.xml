@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".gui.tasks.ScheduleDialogFragment"
+    tools:context=".gui.edit.dialogs.ScheduleDialogFragment"
     android:fitsSystemWindows="true">
 
     <LinearLayout

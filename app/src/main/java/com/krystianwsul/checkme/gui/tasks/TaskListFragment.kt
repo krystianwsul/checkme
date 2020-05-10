@@ -16,9 +16,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -99,8 +99,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             when (itemId) {
                 R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
-                R.id.action_task_edit -> startActivity(CreateTaskActivity.getEditIntent(childTaskDatas.single().taskKey))
-                R.id.action_task_join -> startActivity(CreateTaskActivity.getJoinIntent(taskKeys, hint()))
+                R.id.action_task_edit -> startActivity(EditActivity.getEditIntent(childTaskDatas.single().taskKey))
+                R.id.action_task_join -> startActivity(EditActivity.getJoinIntent(taskKeys, hint()))
                 R.id.action_task_delete -> {
                     checkNotNull(data)
 
@@ -108,9 +108,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             .also { it.listener = deleteInstancesListener }
                             .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
-                R.id.action_task_add -> startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(taskKeys.single())))
+                R.id.action_task_add -> startActivity(EditActivity.getCreateIntent(EditActivity.Hint.Task(taskKeys.single())))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
-                R.id.actionTaskCopy -> startActivity(CreateTaskActivity.getCopyIntent(taskKeys.single()))
+                R.id.actionTaskCopy -> startActivity(EditActivity.getCopyIntent(taskKeys.single()))
                 else -> throw UnsupportedOperationException()
             }
 
@@ -408,13 +408,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            startActivity(CreateTaskActivity.getCreateIntent(hint()))
+            startActivity(EditActivity.getCreateIntent(hint()))
         }
 
         updateFabVisibility("setFab")
     }
 
-    private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Task(it.taskKey) }
+    private fun hint() = rootTaskData?.let { EditActivity.Hint.Task(it.taskKey) }
 
     private fun updateFabVisibility(source: String) {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")

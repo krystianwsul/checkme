@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks
+package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
+import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel

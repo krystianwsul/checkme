@@ -8,7 +8,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Task
 import io.reactivex.BackpressureStrategy
@@ -34,7 +34,7 @@ object ShortcutQueue {
                                 .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.name)
                                 .setIcon(icon)
                                 .setCategories(setOf("ADD_TO_LIST"))
-                                .setIntent(CreateTaskActivity.getShortcutIntent(it.taskKey))
+                                .setIntent(EditActivity.getShortcutIntent(it.taskKey))
                                 .build()
                     }
 

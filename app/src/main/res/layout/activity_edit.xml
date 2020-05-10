@@ -7,12 +7,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".gui.tasks.create.CreateTaskActivity">
+    tools:context=".gui.edit.EditActivity">
 
     <include layout="@layout/toolbar_edit_text" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/createTaskRecycler"
+        android:id="@+id/editRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

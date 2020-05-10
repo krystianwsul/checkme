@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks.create
+package com.krystianwsul.checkme.gui.edit
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -25,8 +25,11 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
-import com.krystianwsul.checkme.gui.tasks.*
-import com.krystianwsul.checkme.gui.tasks.create.delegates.CreateTaskDelegate
+import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.ScheduleDialogFragment
+import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
@@ -48,7 +51,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.activity_create_task.*
+import kotlinx.android.synthetic.main.activity_edit.*
 import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
@@ -56,7 +59,7 @@ import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import kotlin.properties.Delegates.observable
 
 
-class CreateTaskActivity : NavBarActivity() {
+class EditActivity : NavBarActivity() {
 
     companion object {
 
@@ -82,23 +85,23 @@ class CreateTaskActivity : NavBarActivity() {
                 hint: Hint? = null,
                 parentScheduleState: ParentScheduleState? = null,
                 nameHint: String? = null
-        ) = getParametersIntent(CreateTaskParameters.Create(hint, parentScheduleState, nameHint))
+        ) = getParametersIntent(EditParameters.Create(hint, parentScheduleState, nameHint))
 
         fun getJoinIntent(
                 joinTaskKeys: List<TaskKey>,
                 hint: Hint? = null,
                 removeInstanceKeys: List<InstanceKey> = listOf()
-        ) = getParametersIntent(CreateTaskParameters.Join(joinTaskKeys, hint, removeInstanceKeys))
+        ) = getParametersIntent(EditParameters.Join(joinTaskKeys, hint, removeInstanceKeys))
 
-        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(CreateTaskParameters.Edit(taskKey))
+        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(EditParameters.Edit(taskKey))
 
-        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(CreateTaskParameters.Copy(taskKey))
+        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(EditParameters.Copy(taskKey))
 
-        private fun getParametersIntent(createTaskParameters: CreateTaskParameters) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            putExtra(KEY_PARAMETERS, createTaskParameters)
+        private fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
+            putExtra(KEY_PARAMETERS, editParameters)
         }
 
-        fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
 
             putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
@@ -111,11 +114,11 @@ class CreateTaskActivity : NavBarActivity() {
 
     private var savedInstanceState: Bundle? = null
 
-    private lateinit var parameters: CreateTaskParameters
+    private lateinit var parameters: EditParameters
 
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
-    lateinit var delegate: CreateTaskDelegate
+    lateinit var delegate: EditDelegate
         private set
 
     private var hasDelegate = false
@@ -175,7 +178,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         override fun onChildViewAttachedToWindow(view: View) {
             view.noteText?.let {
-                createTaskRecycler.removeOnChildAttachStateChangeListener(this)
+                editRecycler.removeOnChildAttachStateChangeListener(this)
 
                 it.requestFocus()
 
@@ -219,7 +222,7 @@ class CreateTaskActivity : NavBarActivity() {
 
                 createTaskViewModel.stop()
 
-                val createParameters = CreateTaskDelegate.CreateParameters(name, note)
+                val createParameters = EditDelegate.CreateParameters(name, note)
 
                 val taskKey = delegate.createTask(createParameters)
 
@@ -250,7 +253,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_task)
+        setContentView(R.layout.activity_edit)
 
         setSupportActionBar(toolbar)
 
@@ -261,9 +264,9 @@ class CreateTaskActivity : NavBarActivity() {
 
         this.savedInstanceState = savedInstanceState
 
-        createTaskRecycler.layoutManager = LinearLayoutManager(this)
+        editRecycler.layoutManager = LinearLayoutManager(this)
 
-        parameters = CreateTaskParameters.fromIntent(intent)
+        parameters = EditParameters.fromIntent(intent)
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
@@ -335,13 +338,13 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     @SuppressLint("CheckResult")
-    fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
+    fun getImage(single: Observable<Response<EditActivity, FileData>>) {
         single.observeOn(AndroidSchedulers.mainThread()).subscribe {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
                 it.targetUI()
                         .delegate.imageUrl
-                        .accept(CreateTaskImageState.Selected(file.absolutePath, file.toURI().toString()))
+                        .accept(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
     }
@@ -369,7 +372,7 @@ class CreateTaskActivity : NavBarActivity() {
         if (hasDelegate) {
             delegate.newData(data)
         } else {
-            delegate = CreateTaskDelegate.fromParameters(
+            delegate = EditDelegate.fromParameters(
                     parameters,
                     data,
                     savedInstanceState
@@ -423,8 +426,8 @@ class CreateTaskActivity : NavBarActivity() {
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(delegate.customTimeDatas)
 
         createTaskAdapter = CreateTaskAdapter()
-        createTaskRecycler.adapter = createTaskAdapter
-        createTaskRecycler.itemAnimator = CustomItemAnimator()
+        editRecycler.adapter = createTaskAdapter
+        editRecycler.itemAnimator = CustomItemAnimator()
 
         delegate.parentScheduleManager
                 .scheduleObservable
@@ -434,9 +437,9 @@ class CreateTaskActivity : NavBarActivity() {
         if (noteHasFocus) { // keyboard hack
             val notePosition = createTaskAdapter.items.indexOf(Item.Note)
 
-            createTaskRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+            editRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
-            (createTaskRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
+            (editRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
         }
     }
 
@@ -577,7 +580,7 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) =
-                items[position].bind(this@CreateTaskActivity, holder)
+                items[position].bind(this@EditActivity, holder)
 
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)
@@ -592,10 +595,10 @@ class CreateTaskActivity : NavBarActivity() {
 
             delegate.parentScheduleManager
                     .parentObservable
-                    .subscribe { getItem()?.onNewParent(this@CreateTaskActivity, holder) }
+                    .subscribe { getItem()?.onNewParent(this@EditActivity, holder) }
                     .addTo(holder.compositeDisposable)
 
-            holder.compositeDisposable += timeRelay.subscribe { getItem()?.onTimeChanged(this@CreateTaskActivity, holder) }
+            holder.compositeDisposable += timeRelay.subscribe { getItem()?.onTimeChanged(this@EditActivity, holder) }
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
@@ -640,13 +643,13 @@ class CreateTaskActivity : NavBarActivity() {
 
         abstract val holderType: HolderType
 
-        abstract fun bind(activity: CreateTaskActivity, holder: Holder)
+        abstract fun bind(activity: EditActivity, holder: Holder)
 
-        open fun onNewImageState(imageState: CreateTaskImageState, holder: Holder) = Unit
+        open fun onNewImageState(imageState: EditImageState, holder: Holder) = Unit
 
-        open fun onNewParent(activity: CreateTaskActivity, holder: Holder) = Unit
+        open fun onNewParent(activity: EditActivity, holder: Holder) = Unit
 
-        open fun onTimeChanged(activity: CreateTaskActivity, holder: Holder) = Unit
+        open fun onTimeChanged(activity: EditActivity, holder: Holder) = Unit
 
         open fun same(other: Item) = other == this
 
@@ -654,7 +657,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override val holderType get() = HolderType.SCHEDULE
 
-            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+            override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
                     scheduleMargin.isVisible = true
 
@@ -674,7 +677,7 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override fun onNewParent(activity: CreateTaskActivity, holder: Holder) {
+            override fun onNewParent(activity: EditActivity, holder: Holder) {
                 val parent = activity.delegate
                         .parentScheduleManager
                         .parent
@@ -711,7 +714,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override val holderType = HolderType.SCHEDULE
 
-            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+            override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
                     scheduleMargin.visibility = View.GONE
 
@@ -743,7 +746,7 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override fun onTimeChanged(activity: CreateTaskActivity, holder: Holder) {
+            override fun onTimeChanged(activity: EditActivity, holder: Holder) {
                 activity.delegate
                         .getError(scheduleEntry)
                         ?.let { (holder as ScheduleHolder).scheduleLayout.error = activity.getString(it.resource) }
@@ -768,7 +771,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override val holderType = HolderType.SCHEDULE
 
-            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+            override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
                     scheduleMargin.visibility = View.GONE
 
@@ -806,7 +809,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override val holderType = HolderType.NOTE
 
-            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+            override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as NoteHolder).apply {
                     noteLayout.isHintAnimationEnabled = true
 
@@ -840,7 +843,7 @@ class CreateTaskActivity : NavBarActivity() {
 
             override val holderType = HolderType.IMAGE
 
-            override fun bind(activity: CreateTaskActivity, holder: Holder) {
+            override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ImageHolder).apply {
                     fun listener() = CameraGalleryFragment.newInstance(
                             activity.delegate
@@ -855,7 +858,7 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            override fun onNewImageState(imageState: CreateTaskImageState, holder: Holder) {
+            override fun onNewImageState(imageState: EditImageState, holder: Holder) {
                 (holder as ImageHolder).apply {
                     if (imageState.loader != null) {
                         imageProgress.visibility = View.VISIBLE

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks.create
+package com.krystianwsul.checkme.gui.edit
 
 import android.net.Uri
 import android.widget.ImageView
@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import java.io.Serializable
 
-sealed class CreateTaskImageState : Serializable {
+sealed class EditImageState : Serializable {
 
     open val dontOverwrite = false
 
@@ -15,21 +15,21 @@ sealed class CreateTaskImageState : Serializable {
 
     open val writeImagePath: NullableWrapper<Pair<String, Uri>>? = null
 
-    object None : CreateTaskImageState()
+    object None : EditImageState()
 
-    data class Existing(val imageState: com.krystianwsul.common.firebase.models.ImageState) : CreateTaskImageState() {
+    data class Existing(val imageState: com.krystianwsul.common.firebase.models.ImageState) : EditImageState() {
 
         override val loader: (ImageView) -> Unit get() = { imageState.toImageLoader().load(it, false) }
     }
 
-    object Removed : CreateTaskImageState() {
+    object Removed : EditImageState() {
 
         override val dontOverwrite = true
 
         override val writeImagePath = NullableWrapper<Pair<String, Uri>>(null)
     }
 
-    data class Selected(val path: String, val uri: String) : CreateTaskImageState() {
+    data class Selected(val path: String, val uri: String) : EditImageState() {
 
         override val dontOverwrite = true
 

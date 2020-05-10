@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks.create
+package com.krystianwsul.checkme.gui.edit
 
 import android.content.Intent
 import android.os.Parcelable
@@ -8,23 +8,23 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import kotlinx.android.parcel.Parcelize
 
-sealed class CreateTaskParameters : Parcelable {
+sealed class EditParameters : Parcelable {
 
     companion object {
 
         private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
 
-        fun fromIntent(intent: Intent): CreateTaskParameters {
+        fun fromIntent(intent: Intent): EditParameters {
             return when {
-                intent.hasExtra(CreateTaskActivity.KEY_PARAMETERS) -> {
+                intent.hasExtra(EditActivity.KEY_PARAMETERS) -> {
                     check(intent.action != Intent.ACTION_SEND)
                     check(!intent.hasExtra(KEY_SHORTCUT_ID))
-                    check(!intent.hasExtra(CreateTaskActivity.KEY_PARENT_PROJECT_KEY))
+                    check(!intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY))
 
-                    intent.getParcelableExtra(CreateTaskActivity.KEY_PARAMETERS)!!
+                    intent.getParcelableExtra(EditActivity.KEY_PARAMETERS)!!
                 }
                 intent.action == Intent.ACTION_SEND -> {
-                    check(!intent.hasExtra(CreateTaskActivity.KEY_PARENT_PROJECT_KEY))
+                    check(!intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY))
 
                     check(intent.type == "text/plain")
 
@@ -40,19 +40,19 @@ sealed class CreateTaskParameters : Parcelable {
                     Share(nameHint, taskKey)
                 }
                 intent.hasExtra(KEY_SHORTCUT_ID) -> {
-                    check(!intent.hasExtra(CreateTaskActivity.KEY_PARENT_PROJECT_KEY))
+                    check(!intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY))
 
                     Shortcut(TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!))
                 }
-                intent.hasExtra(CreateTaskActivity.KEY_PARENT_PROJECT_KEY) -> {
-                    check(intent.hasExtra(CreateTaskActivity.KEY_PARENT_TASK))
-                    check(intent.hasExtra(CreateTaskActivity.KEY_PARENT_PROJECT_TYPE))
+                intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY) -> {
+                    check(intent.hasExtra(EditActivity.KEY_PARENT_TASK))
+                    check(intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_TYPE))
 
                     val projectKey = ProjectKey.Type
-                            .values()[intent.getIntExtra(CreateTaskActivity.KEY_PARENT_PROJECT_TYPE, -1)]
-                            .newKey(intent.getStringExtra(CreateTaskActivity.KEY_PARENT_PROJECT_KEY)!!)
+                            .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
+                            .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
 
-                    Shortcut(TaskKey(projectKey, intent.getStringExtra(CreateTaskActivity.KEY_PARENT_TASK)!!))
+                    Shortcut(TaskKey(projectKey, intent.getStringExtra(EditActivity.KEY_PARENT_TASK)!!))
                 }
                 else -> None
             }
@@ -63,21 +63,21 @@ sealed class CreateTaskParameters : Parcelable {
 
     @Parcelize
     class Create(
-            val hint: CreateTaskActivity.Hint? = null,
+            val hint: EditActivity.Hint? = null,
             val parentScheduleState: ParentScheduleState? = null,
             val nameHint: String? = null
-    ) : CreateTaskParameters() {
+    ) : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) =
-                viewModel.start(parentTaskKeyHint = (hint as? CreateTaskActivity.Hint.Task)?.taskKey)
+                viewModel.start(parentTaskKeyHint = (hint as? EditActivity.Hint.Task)?.taskKey)
     }
 
     @Parcelize
     class Join(
             val taskKeys: List<TaskKey>,
-            val hint: CreateTaskActivity.Hint? = null,
+            val hint: EditActivity.Hint? = null,
             val removeInstanceKeys: List<InstanceKey> = listOf()
-    ) : CreateTaskParameters() {
+    ) : EditParameters() {
 
         init {
             check(taskKeys.size > 1)
@@ -85,38 +85,38 @@ sealed class CreateTaskParameters : Parcelable {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(
                 CreateTaskViewModel.StartParameters.Join(taskKeys),
-                (hint as? CreateTaskActivity.Hint.Task)?.taskKey
+                (hint as? EditActivity.Hint.Task)?.taskKey
         )
     }
 
     @Parcelize
-    class Copy(val taskKey: TaskKey) : CreateTaskParameters() {
+    class Copy(val taskKey: TaskKey) : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
     }
 
     @Parcelize
-    class Edit(val taskKey: TaskKey) : CreateTaskParameters() {
+    class Edit(val taskKey: TaskKey) : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start(taskKey)
     }
 
     @Parcelize
-    class Shortcut(val parentTaskKeyHint: TaskKey) : CreateTaskParameters() {
+    class Shortcut(val parentTaskKeyHint: TaskKey) : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
-    class Share(val nameHint: String, val parentTaskKeyHint: TaskKey?) : CreateTaskParameters() {
+    class Share(val nameHint: String, val parentTaskKeyHint: TaskKey?) : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
-    object None : CreateTaskParameters() {
+    object None : EditParameters() {
 
         override fun startViewModel(viewModel: CreateTaskViewModel) = viewModel.start()
     }

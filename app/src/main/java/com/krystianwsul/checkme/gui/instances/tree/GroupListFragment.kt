@@ -22,9 +22,9 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -185,7 +185,7 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.taskKey))
+                    activity.startActivity(EditActivity.getEditIntent(instanceData.taskKey))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = selectedDatas.map { it.taskKey }
@@ -198,14 +198,14 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(instanceData.taskKey)))
+                    activity.startActivity(EditActivity.getCreateIntent(EditActivity.Hint.Task(instanceData.taskKey)))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
+                        activity.startActivity(EditActivity.getJoinIntent(taskKeys, EditActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
                     } else {
                         val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
 
@@ -213,12 +213,12 @@ class GroupListFragment @JvmOverloads constructor(
                             val date = it.instanceTimeStamp.date
                             val timePair = it.createTaskTimePair
 
-                            CreateTaskActivity.Hint.Schedule(date, timePair)
+                            EditActivity.Hint.Schedule(date, timePair)
                         }
 
                         val removeInstanceKeys = instanceDatas.map { it.instanceKey }
 
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, scheduleHint, removeInstanceKeys))
+                        activity.startActivity(EditActivity.getJoinIntent(taskKeys, scheduleHint, removeInstanceKeys))
                     }
                 }
                 R.id.action_group_mark_done -> {
@@ -310,7 +310,7 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.actionGroupCopyTask -> {
                     val instanceData = selectedDatas.single()
 
-                    activity.startActivity(CreateTaskActivity.getCopyIntent(instanceData.taskKey))
+                    activity.startActivity(EditActivity.getCopyIntent(instanceData.taskKey))
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -688,7 +688,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             fun List<InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
                     ?: first()).let {
-                CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
+                EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
             }
 
             val hint = when (val parameters = parameters) {
@@ -702,17 +702,17 @@ class GroupListFragment @JvmOverloads constructor(
 
                         hint
                     } else {
-                        CreateTaskActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
+                        EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
                     }
                 }
                 is Parameters.TimeStamp -> parameters.dataWrapper
                         .instanceDatas
                         .getHint()
-                is Parameters.InstanceKey -> CreateTaskActivity.Hint.Task(parameters.instanceKey.taskKey)
+                is Parameters.InstanceKey -> EditActivity.Hint.Task(parameters.instanceKey.taskKey)
                 else -> throw IllegalStateException()
             }
 
-            activity.startActivity(CreateTaskActivity.getCreateIntent(hint))
+            activity.startActivity(EditActivity.getCreateIntent(hint))
         }
 
         updateFabVisibility()

@@ -14,10 +14,10 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.startDate
@@ -300,7 +300,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                             showInstanceViewModel.stop()
 
-                            startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                            startActivityForResult(EditActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                         }
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
@@ -314,11 +314,11 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         }
                         R.id.instance_menu_add_task -> {
                             data!!.instanceDateTime.let {
-                                startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.date, it.time.timePair)))
+                                startActivity(EditActivity.getCreateIntent(EditActivity.Hint.Schedule(it.date, it.time.timePair)))
                             }
                         }
                         R.id.instanceMenuCopyTask -> {
-                            startActivity(CreateTaskActivity.getCopyIntent(data!!.taskKey))
+                            startActivity(EditActivity.getCopyIntent(data!!.taskKey))
                         }
                         else -> throw UnsupportedOperationException()
                     }

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tasks
+package com.krystianwsul.checkme.gui.edit.dialogs
 
 
 import android.annotation.SuppressLint
@@ -63,7 +63,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(arguments!!.containsKey(SHOW_DELETE_KEY))
+        check(requireArguments().containsKey(SHOW_DELETE_KEY))
 
         savedInstanceState?.apply {
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {

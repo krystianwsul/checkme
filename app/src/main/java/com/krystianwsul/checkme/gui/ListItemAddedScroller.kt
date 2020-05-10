@@ -6,7 +6,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.utils.TaskKey
 
 interface ListItemAddedScroller {
@@ -78,8 +78,8 @@ interface ListItemAddedScroller {
     fun delay(action: () -> Unit) = Handler().postDelayed(action, 500)
 
     fun checkCreatedTaskKey() {
-        scrollToTaskKey = CreateTaskActivity.createdTaskKey
-        CreateTaskActivity.createdTaskKey = null
+        scrollToTaskKey = EditActivity.createdTaskKey
+        EditActivity.createdTaskKey = null
 
         tryScroll()
     }

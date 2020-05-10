@@ -1,11 +1,10 @@
-package com.krystianwsul.checkme.gui.tasks.create.delegates
+package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import androidx.annotation.StringRes
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.tasks.ScheduleEntry
-import com.krystianwsul.checkme.gui.tasks.create.*
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -14,7 +13,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
+abstract class EditDelegate(editImageState: EditImageState?) {
 
     companion object {
 
@@ -23,26 +22,26 @@ abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
         private const val IMAGE_URL_KEY = "imageUrl"
 
         fun fromParameters(
-                parameters: CreateTaskParameters,
+                parameters: EditParameters,
                 data: CreateTaskViewModel.Data,
                 savedInstanceState: Bundle?
-        ): CreateTaskDelegate {
+        ): EditDelegate {
             val savedStates = savedInstanceState?.takeIf { it.containsKey(KEY_INITIAL_STATE) }?.run {
-                Triple<ParentScheduleState, ParentScheduleState, CreateTaskImageState>(
+                Triple<ParentScheduleState, ParentScheduleState, EditImageState>(
                         getParcelable(KEY_INITIAL_STATE)!!,
                         getParcelable(KEY_STATE)!!,
-                        getSerializable(IMAGE_URL_KEY) as CreateTaskImageState
+                        getSerializable(IMAGE_URL_KEY) as EditImageState
                 )
             }
 
             return when (parameters) {
-                is CreateTaskParameters.Copy -> CopyCreateTaskDelegate(parameters, data, savedStates)
-                is CreateTaskParameters.Edit -> EditCreateTaskDelegate(parameters, data, savedStates)
-                is CreateTaskParameters.Join -> JoinCreateTaskDelegate(parameters, data, savedStates)
-                is CreateTaskParameters.Create,
-                is CreateTaskParameters.Share,
-                is CreateTaskParameters.Shortcut,
-                CreateTaskParameters.None -> CreateCreateTaskDelegate(parameters, data, savedStates)
+                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedStates)
+                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedStates)
+                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedStates)
+                is EditParameters.Create,
+                is EditParameters.Share,
+                is EditParameters.Shortcut,
+                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedStates)
             }
         }
     }
@@ -54,15 +53,15 @@ abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
     protected abstract var data: CreateTaskViewModel.Data
 
     open val initialName: String? = null
-    open val scheduleHint: CreateTaskActivity.Hint.Schedule? = null
+    open val scheduleHint: EditActivity.Hint.Schedule? = null
     open val showSaveAndOpen: Boolean = true
 
     val parentTreeDatas get() = data.parentTreeDatas
     val customTimeDatas get() = data.customTimeDatas
 
     protected fun TaskKey.toParentKey() = CreateTaskViewModel.ParentKey.Task(this)
-    protected fun CreateTaskActivity.Hint.toParentKey() = (this as? CreateTaskActivity.Hint.Task)?.taskKey?.toParentKey()
-    protected fun CreateTaskActivity.Hint.toScheduleHint() = this as? CreateTaskActivity.Hint.Schedule
+    protected fun EditActivity.Hint.toParentKey() = (this as? EditActivity.Hint.Task)?.taskKey?.toParentKey()
+    protected fun EditActivity.Hint.toScheduleHint() = this as? EditActivity.Hint.Schedule
 
     val firstScheduleEntry by lazy {
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
@@ -74,8 +73,8 @@ abstract class CreateTaskDelegate(createTaskImageState: CreateTaskImageState?) {
     protected abstract val initialState: ParentScheduleState
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open val imageUrl = BehaviorRelay.createDefault(createTaskImageState
-            ?: CreateTaskImageState.None)
+    open val imageUrl = BehaviorRelay.createDefault(editImageState
+            ?: EditImageState.None)
 
     protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentScheduleManager {
         val parentScheduleState = savedState ?: initialState.copy()

@@ -1,12 +1,12 @@
-package com.krystianwsul.checkme.gui.tasks
+package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.os.Bundle
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskImageState
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 
@@ -25,7 +25,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var showRemove = false
 
-    private val createTaskActivity get() = activity as CreateTaskActivity
+    private val createTaskActivity get() = activity as EditActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                     }
                     R.id.camera_gallery_remove -> createTaskActivity.delegate
                             .imageUrl
-                            .accept(CreateTaskImageState.Removed)
+                            .accept(EditImageState.Removed)
                     else -> throw IllegalArgumentException()
                 }
 

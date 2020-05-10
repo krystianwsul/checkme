@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.gui.tasks.ScheduleDialogFragment
-import com.krystianwsul.checkme.gui.tasks.create.CreateTaskActivity
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.dialogs.ScheduleDialogFragment
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -72,7 +72,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
         abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String
 
-        abstract fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData
+        abstract fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData
 
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
@@ -82,7 +82,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+            override fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var monthDayNumber = scheduleData.date.day
                 var beginningOfMonth = true
                 if (monthDayNumber > 28) {
@@ -117,7 +117,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+            override fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 val date = scheduleHint?.date ?: today
 
                 var monthDayNumber = date.day
@@ -155,7 +155,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+            override fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
@@ -186,7 +186,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+            override fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
@@ -222,7 +222,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
+            override fun getScheduleDialogData(today: Date, scheduleHint: EditActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
                 date = getDateInMonth(date.year, scheduleData.month, scheduleData.day, true)

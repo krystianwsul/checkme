@@ -40,7 +40,7 @@ class SingleSchedule<T : ProjectType>(
             return Pair(emptySequence(), false)
 
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
-            return Pair(emptySequence(), false)
+            return Pair(emptySequence(), true)
 
         if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
             return Pair(emptySequence(), false)

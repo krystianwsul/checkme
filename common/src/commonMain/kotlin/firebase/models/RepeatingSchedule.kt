@@ -20,7 +20,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Pair<Sequence<Instance<T>>, Boolean> {
+    ): Pair<Sequence<Instance<T>>, Boolean?> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleRecord.from
@@ -30,13 +30,17 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 oldestVisible?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) }
         ).max()!!
 
-        val endExactTimeStamp = listOfNotNull(
+        val intrinsicEndExactTimeStamp = listOfNotNull(
                 endExactTimeStamp,
                 repeatingScheduleRecord.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.let { ExactTimeStamp(it) },
+                        ?.let { ExactTimeStamp(it) }
+        ).min()
+
+        val endExactTimeStamp = listOfNotNull(
+                intrinsicEndExactTimeStamp,
                 givenExactEndTimeStamp
         ).min()
 
@@ -78,7 +82,17 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
         }
 
-        return Pair(nullableSequence.filterNotNull(), endExactTimeStamp != null)
+        val hasMore = if (givenExactEndTimeStamp != null) {
+            if (intrinsicEndExactTimeStamp != null) {
+                intrinsicEndExactTimeStamp > givenExactEndTimeStamp
+            } else {
+                true
+            }
+        } else {
+            null // meaningless for open sequence
+        }
+
+        return Pair(nullableSequence.filterNotNull(), hasMore)
     }
 
     protected abstract fun <T : ProjectType> getInstanceInDate(

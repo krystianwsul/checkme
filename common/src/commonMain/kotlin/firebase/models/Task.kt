@@ -224,12 +224,14 @@ class Task<T : ProjectType>(
             true
         }
 
+        val existingHaveMore = _existingInstances.size > existingInstances.size
+
         val (scheduleInstances, schedulesHaveMore) = if (scheduleStartExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
         } else {
             val scheduleResults = schedules.map { it.getInstances(this, scheduleStartExactTimeStamp, endExactTimeStamp) }
 
-            scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second }
+            scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }
 
         val parentDatas = getParentTaskHierarchies().map {
@@ -254,7 +256,7 @@ class Task<T : ProjectType>(
                         .associateBy { it.scheduleKey }
                         .values
                         .toList(),
-                schedulesHaveMore || parentsHaveMore
+                existingHaveMore || schedulesHaveMore || parentsHaveMore
         )
     }
 

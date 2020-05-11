@@ -89,9 +89,9 @@ object RelevanceChecker {
                         databaseWrapper.getUsers {
                             val rootUserManager = JsRootUserManager(it)
 
-                            val rootUsers = rootUserManager.rootUserRecords
-                                .values
-                                .map { RootUser(it.first) }
+                            val rootUsers = rootUserManager.records
+                                    .values
+                                    .map { RootUser(it) }
 
                             val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 
@@ -110,8 +110,8 @@ object RelevanceChecker {
                     val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
                     val privateRootInstanceManagers = privateProjectManager.privateProjectRecords
-                        .associate { it.projectKey to null as Collection<RootInstanceManager<ProjectType.Private>>? }
-                        .toMutableMap()
+                            .associate { it.projectKey to null as Collection<RootInstanceManager<ProjectType.Private>>? }
+                            .toMutableMap()
 
                     privateProjectManager.privateProjectRecords.forEach { privateProjectRecord ->
                         val rootInstanceManagers = getInstances(privateProjectRecord)
@@ -154,9 +154,9 @@ object RelevanceChecker {
                 databaseWrapper.getSharedProjects {
                     val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
 
-                    val sharedDataInner = sharedProjectManager.sharedProjectRecords
-                        .values
-                            .map { (sharedProjectRecord, _) ->
+                    val sharedDataInner = sharedProjectManager.records
+                            .values
+                            .map { sharedProjectRecord ->
                                 val rootInstanceManagers = getInstances(sharedProjectRecord)
 
                                 val sharedProject = SharedProject(sharedProjectRecord, rootInstanceManagers) {

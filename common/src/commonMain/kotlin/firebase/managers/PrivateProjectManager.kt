@@ -3,18 +3,16 @@ package com.krystianwsul.common.firebase.managers
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import kotlin.properties.Delegates
 
-abstract class PrivateProjectManager : RecordManager {
-
-    override var isSaved by Delegates.observable(false) { _, _, value ->
-        ErrorLogger.instance.log("PrivateProjectManager.isSaved = $value")
-    }
-        protected set
+abstract class PrivateProjectManager : ValueRecordManager<List<PrivateProjectRecord>>() {
 
     abstract val databaseWrapper: DatabaseWrapper
 
     abstract val privateProjectRecords: List<PrivateProjectRecord>
+
+    override val records get() = privateProjectRecords
+
+    override val value get() = privateProjectRecords
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()

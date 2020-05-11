@@ -15,7 +15,7 @@ open class RootInstanceManager<T : ProjectType>(
         protected val taskRecord: TaskRecord<T>,
         snapshotInfos: List<SnapshotInfo>,
         val databaseWrapper: DatabaseWrapper
-) : RootInstanceRecord.Parent, RecordManager {
+) : ValueRecordManager<MutableMap<InstanceKey, RootInstanceRecord<T>>>(), RootInstanceRecord.Parent {
 
     protected fun SnapshotInfo.toRecord() = RootInstanceRecord(
             taskRecord,
@@ -25,17 +25,16 @@ open class RootInstanceManager<T : ProjectType>(
             this@RootInstanceManager
     )
 
-    var rootInstanceRecords = snapshotInfos.map { it.toRecord() }
+    override var value = snapshotInfos.map { it.toRecord() }
             .associateBy { it.instanceKey }
             .toMutableMap()
 
-    override var isSaved = false
-        protected set
+    override val records get() = value.values
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
-        val newIsSaved = rootInstanceRecords.map { it.value.getValues(myValues) }.any { it }
+        val newIsSaved = value.map { it.value.getValues(myValues) }.any { it }
 
         ErrorLogger.instance.log("RootInstanceManager.save values: $myValues")
 
@@ -60,15 +59,15 @@ open class RootInstanceManager<T : ProjectType>(
             scheduleCustomTimeId,
             this
     ).also {
-        check(!rootInstanceRecords.containsKey(it.instanceKey))
+        check(!value.containsKey(it.instanceKey))
 
-        rootInstanceRecords[it.instanceKey] = it
+        value[it.instanceKey] = it
     }
 
     override fun removeRootInstanceRecord(instanceKey: InstanceKey) {
-        check(rootInstanceRecords.containsKey(instanceKey))
+        check(value.containsKey(instanceKey))
 
-        rootInstanceRecords.remove(instanceKey)
+        value.remove(instanceKey)
     }
 
     @Serializable

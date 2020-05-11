@@ -17,7 +17,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
 
         ChangeType.LOCAL
     } else {
-        rootInstanceRecords = snapshotInfos.map { it.toRecord() }
+        value = snapshotInfos.map { it.toRecord() }
                 .associateBy { it.instanceKey }
                 .toMutableMap()
 

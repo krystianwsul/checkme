@@ -4,10 +4,10 @@ import com.badoo.reaktive.rxjavainterop.asRxJava2Observable
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.models.MyUser
 import io.reactivex.Observable
 

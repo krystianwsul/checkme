@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -28,7 +29,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
         return if (pair?.second == true) {
             records[key] = Pair(pair.first, false)
 
-            ChangeWrapper(ChangeType.LOCAL, pair.first) // todo move to common
+            ChangeWrapper(ChangeType.LOCAL, pair.first)
         } else {
             if (snapshot.exists()) {
                 val sharedProjectRecord = snapshot.toRecord()

@@ -6,12 +6,12 @@ import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.InstanceRecord

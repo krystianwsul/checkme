@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
-import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import io.mockk.every
 import io.mockk.mockkStatic
 import org.junit.Assert.assertTrue

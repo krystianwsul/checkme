@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.Observable

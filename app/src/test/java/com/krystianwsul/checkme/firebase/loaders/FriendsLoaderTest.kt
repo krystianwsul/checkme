@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.firebase.managers.ChangeWrapper
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey

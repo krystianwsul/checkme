@@ -1,6 +1,8 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
@@ -38,5 +40,21 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
         check(!records.containsKey(key))
 
         records[key] = Pair(record, false)
+    }
+
+    fun set(key: T, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+        val pair = records[key]
+
+        return if (pair?.second == true) {
+            records[key] = Pair(pair.first, false)
+
+            ChangeWrapper(ChangeType.LOCAL, pair.first)
+        } else {
+            val record = recordCallback() ?: return null
+
+            records[key] = Pair(record, false)
+
+            ChangeWrapper(ChangeType.REMOTE, record)
+        }
     }
 }

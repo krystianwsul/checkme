@@ -7,11 +7,7 @@ abstract class PrivateProjectManager : ValueRecordManager<List<PrivateProjectRec
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    abstract val privateProjectRecords: List<PrivateProjectRecord>
-
-    override val records get() = privateProjectRecords
-
-    override val value get() = privateProjectRecords
+    override val records get() = value
 
     override val databasePrefix = DatabaseWrapper.PRIVATE_PROJECTS_KEY
 }

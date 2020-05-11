@@ -311,7 +311,7 @@ class ProjectLoaderNewTest {
 
         val name = "project"
 
-        projectManager.privateProjectRecords.first().name = name
+        projectManager.value.single().name = name
         projectManager.save(mockk(relaxed = true))
 
         changeProjectEmissionChecker.checkLocal {

@@ -109,11 +109,11 @@ object RelevanceChecker {
                 databaseWrapper.getPrivateProjects {
                     val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-                    val privateRootInstanceManagers = privateProjectManager.privateProjectRecords
+                    val privateRootInstanceManagers = privateProjectManager.value
                             .associate { it.projectKey to null as Collection<RootInstanceManager<ProjectType.Private>>? }
                             .toMutableMap()
 
-                    privateProjectManager.privateProjectRecords.forEach { privateProjectRecord ->
+                    privateProjectManager.value.forEach { privateProjectRecord ->
                         val rootInstanceManagers = getInstances(privateProjectRecord)
 
                         val privateProject = PrivateProject(privateProjectRecord, rootInstanceManagers) {

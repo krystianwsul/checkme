@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
@@ -16,9 +16,7 @@ class AndroidPrivateProjectManager(
         override val databaseWrapper: DatabaseWrapper
 ) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private> {
 
-    private lateinit var privateProjectRecord: PrivateProjectRecord
-
-    override val privateProjectRecords get() = listOf(privateProjectRecord)
+    override lateinit var value: List<PrivateProjectRecord>
 
     private fun Snapshot.toRecord() = PrivateProjectRecord(
             databaseWrapper,
@@ -29,12 +27,8 @@ class AndroidPrivateProjectManager(
     private var first = true
 
     override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<PrivateProjectRecord> {
-        return if (isSaved) {
-            isSaved = false
-
-            ChangeWrapper(ChangeType.LOCAL, privateProjectRecord)
-        } else {
-            privateProjectRecord = if (first) {
+        val changeWrapper = set {
+            val record = if (first) {
                 first = false // for new users, the project may not exist yet
 
                 snapshot.takeIf { it.exists() }
@@ -48,7 +42,9 @@ class AndroidPrivateProjectManager(
                 snapshot.toRecord()
             }
 
-            ChangeWrapper(ChangeType.REMOTE, privateProjectRecord)
+            listOf(record)
         }
+
+        return ChangeWrapper(changeWrapper.changeType, changeWrapper.data.single())
     }
 }

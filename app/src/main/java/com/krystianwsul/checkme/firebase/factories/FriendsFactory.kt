@@ -23,8 +23,7 @@ class FriendsFactory(
 
     companion object {
 
-        private fun Map<UserKey, Pair<RootUserRecord, Boolean>>.toRootUsers() =
-                mapValues { RootUser(it.value.first) }.toMutableMap()
+        private fun Map<UserKey, RootUserRecord>.toRootUsers() = mapValues { RootUser(it.value) }.toMutableMap()
     }
 
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots)
@@ -42,20 +41,11 @@ class FriendsFactory(
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
-            val userKey = UserKey(it.snapshot.key)
-            val friendPair = rootUserManager.records[userKey]
+            val (changeType, rootUserRecord) = rootUserManager.setFriend(it.snapshot)
 
-            if (friendPair?.second == true) {
-                rootUserManager.records[userKey] = Pair(friendPair.first, false)
+            _friends[rootUserRecord.userKey] = RootUser(rootUserRecord)
 
-                ChangeType.LOCAL
-            } else {
-                val remoteFriendRecord = rootUserManager.setFriend(it.snapshot)
-
-                _friends[userKey] = RootUser(remoteFriendRecord)
-
-                ChangeType.REMOTE
-            }
+            changeType
         }
 
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {

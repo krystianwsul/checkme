@@ -24,7 +24,7 @@ class Task<T : ProjectType>(
     private val _existingInstances = taskRecord.instanceRecords
             .values
             .toMutableList<InstanceRecord<T>>()
-            .apply { addAll(rootInstanceManager.rootInstanceRecords.values) }
+            .apply { addAll(rootInstanceManager.records) }
             .map { Instance(project, this, it) }
             .toMutableList()
             .associateBy { it.scheduleKey }

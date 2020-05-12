@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -14,31 +13,16 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
         SharedProjectManager(),
         ProjectProvider.ProjectManager<ProjectType.Shared> {
 
+    private fun Snapshot.toKey() = ProjectKey.Shared(key)
+
     private fun Snapshot.toRecord() = SharedProjectRecord(
             databaseWrapper,
             this@AndroidSharedProjectManager,
-            ProjectKey.Shared(key),
+            toKey(),
             getValue(JsonWrapper::class.java)!!
     )
 
-    override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<SharedProjectRecord>? {
-        val key = ProjectKey.Shared(snapshot.key)
-        val pair = records[key]
-
-        return if (pair?.second == true) {
-            records[key] = Pair(pair.first, false)
-
-            ChangeWrapper(ChangeType.LOCAL, pair.first) // todo move to common
-        } else {
-            if (snapshot.exists()) {
-                val sharedProjectRecord = snapshot.toRecord()
-
-                records[key] = Pair(sharedProjectRecord, false)
-
-                ChangeWrapper(ChangeType.REMOTE, sharedProjectRecord)
-            } else {
-                null
-            }
-        }
+    override fun setProjectRecord(snapshot: Snapshot) = setNullable(snapshot.toKey()) {
+        snapshot.takeIf { it.exists() }?.toRecord()
     }
 }

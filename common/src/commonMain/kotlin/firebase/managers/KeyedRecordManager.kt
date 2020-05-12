@@ -1,21 +1,24 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
 
-    override val isSaved get() = records.any { it.value.second }
+    override val isSaved get() = recordPairs.any { it.value.second }
 
-    open var records = mutableMapOf<T, Pair<U, Boolean>>()
-        protected set
+    protected open var recordPairs = mutableMapOf<T, Pair<U, Boolean>>()
+
+    val records get() = recordPairs.mapValues { it.value.first }
 
     abstract val databasePrefix: String
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
-        val newRecords = records.mapValues {
+        val newRecords = recordPairs.mapValues {
             Pair(it.value.first, it.value.first.getValues(myValues))
         }.toMutableMap()
 
@@ -24,19 +27,37 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
         if (myValues.isNotEmpty()) {
             check(!isSaved)
 
-            records = newRecords
+            recordPairs = newRecords
 
             values += myValues.mapKeys { "$databasePrefix/${it.key}" }
         }
     }
 
     fun remove(key: T) {
-        checkNotNull(records.remove(key))
+        checkNotNull(recordPairs.remove(key))
     }
 
     fun add(key: T, record: U) {
-        check(!records.containsKey(key))
+        check(!recordPairs.containsKey(key))
 
-        records[key] = Pair(record, false)
+        recordPairs[key] = Pair(record, false)
     }
+
+    fun setNullable(key: T, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+        val pair = recordPairs[key]
+
+        return if (pair?.second == true) {
+            recordPairs[key] = Pair(pair.first, false)
+
+            ChangeWrapper(ChangeType.LOCAL, pair.first)
+        } else {
+            val record = recordCallback() ?: return null
+
+            recordPairs[key] = Pair(record, false)
+
+            ChangeWrapper(ChangeType.REMOTE, record)
+        }
+    }
+
+    fun setNonNull(key: T, recordCallback: () -> U) = setNullable(key, recordCallback)!!
 }

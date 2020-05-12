@@ -10,18 +10,18 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
 
     companion object {
 
-        private fun Snapshot.toRecord() = RootUserRecord(false, getValue(UserWrapper::class.java)!!, UserKey(key))
+        private fun Snapshot.toKey() = UserKey(key)
+
+        private fun Snapshot.toRecord() = RootUserRecord(
+                false,
+                getValue(UserWrapper::class.java)!!,
+                toKey()
+        )
     }
 
-    override var records = children.associate { UserKey(it.key) to Pair(it.toRecord(), false) }.toMutableMap()
+    override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()
 
-    fun setFriend(dataSnapshot: Snapshot): RootUserRecord {
-        val userKey = UserKey(dataSnapshot.key)
-
-        return dataSnapshot.toRecord().also {
-            records[userKey] = it to false
-        }
-    }
+    fun setFriend(snapshot: Snapshot) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
 
     fun addFriend(
             userKey: UserKey,

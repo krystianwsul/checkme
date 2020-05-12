@@ -11,5 +11,5 @@ class JsPrivateProjectManager(
         privateProjectJsons: Map<String, PrivateProjectJson>
 ) : PrivateProjectManager() {
 
-    override val privateProjectRecords = privateProjectJsons.map { PrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
+    override var value = privateProjectJsons.map { PrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
 }

@@ -12,15 +12,11 @@ class AndroidRootInstanceManager<T : ProjectType>(
         factoryProvider: FactoryProvider
 ) : RootInstanceManager<T>(taskRecord, snapshotInfos, factoryProvider.database) {
 
-    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>) = if (isSaved) {
-        isSaved = false
-
-        ChangeType.LOCAL
-    } else {
-        value = snapshotInfos.map { it.toRecord() }
-                .associateBy { it.instanceKey }
-                .toMutableMap()
-
-        ChangeType.REMOTE
+    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>): ChangeType {
+        return set {
+            snapshotInfos.map { it.toRecord() }
+                    .associateBy { it.instanceKey }
+                    .toMutableMap()
+        }.changeType
     }
 }

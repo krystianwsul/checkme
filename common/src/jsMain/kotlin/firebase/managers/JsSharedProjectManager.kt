@@ -11,13 +11,10 @@ class JsSharedProjectManager(
         jsonWrappers: Map<String, JsonWrapper>
 ) : SharedProjectManager() {
 
-    init {
-        recordPairs.putAll(
-                jsonWrappers.entries
-                        .associate {
-                            val projectKey = ProjectKey.Shared(it.key)
-                            projectKey to Pair(SharedProjectRecord(databaseWrapper, this, projectKey, it.value), false)
-                        }
-        )
-    }
+    override var recordPairs = jsonWrappers.entries
+            .associate {
+                val projectKey = ProjectKey.Shared(it.key)
+                projectKey to Pair(SharedProjectRecord(databaseWrapper, this, projectKey, it.value), false)
+            }
+            .toMutableMap()
 }

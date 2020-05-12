@@ -21,11 +21,9 @@ class MyUserFactory(
 
     private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))
 
-    var user // todo private set?
+    var user
         get() = userRelay.value!!
-        set(value) {
-            userRelay.accept(value)
-        }
+        private set(value) = userRelay.accept(value)
 
     val isSaved get() = myUserManager.isSaved
 

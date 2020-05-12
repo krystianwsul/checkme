@@ -10,7 +10,7 @@ class StrangerProjectManager {
 
     private var strangerProjects: Pair<ProjectKey<*>, List<Pair<UserKey, Boolean>>>? = null
 
-    fun save(values: MutableMap<String, Any?>) {
+    fun save(values: MutableMap<String, Any?>) { // todo unify with *RecordManager
         val myValues = mutableMapOf<String, Any?>()
 
         strangerProjects?.let { (projectId, userValues) ->

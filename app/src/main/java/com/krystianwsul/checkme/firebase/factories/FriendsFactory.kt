@@ -41,7 +41,7 @@ class FriendsFactory(
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
-            val (changeType, rootUserRecord) = rootUserManager.setFriend(it.snapshot)
+            val (changeType, rootUserRecord) = rootUserManager.set(it.snapshot)
 
             _friends[rootUserRecord.userKey] = RootUser(rootUserRecord)
 

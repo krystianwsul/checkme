@@ -63,7 +63,7 @@ interface ProjectLoader<T : ProjectType> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.setProjectRecord(it) }
+        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }
 
         private data class ProjectData<T : ProjectType>(
                 val changeWrapper: ChangeWrapper<out ProjectRecord<T>>,

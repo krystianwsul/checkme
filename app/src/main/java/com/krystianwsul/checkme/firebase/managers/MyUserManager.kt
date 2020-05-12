@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.UserKey
 class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         snapshot: Snapshot
-) : ValueRecordManager<MyUserRecord>() {
+) : ValueRecordManager<MyUserRecord>(), SnapshotRecordManager<MyUserRecord> {
 
     companion object {
 
@@ -33,5 +33,5 @@ class MyUserManager(
 
     override val records = listOf(value)
 
-    fun newSnapshot(dataSnapshot: Snapshot) = set { dataSnapshot.toRecord() }
+    override fun set(snapshot: Snapshot) = set { snapshot.toRecord() }
 }

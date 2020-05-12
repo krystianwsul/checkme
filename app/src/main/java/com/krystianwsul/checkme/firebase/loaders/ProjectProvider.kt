@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.checkme.firebase.managers.SnapshotRecordManager
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.managers.RecordManager
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -16,8 +16,5 @@ interface ProjectProvider {
         abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot>
     }
 
-    interface ProjectManager<T : ProjectType> : RecordManager {
-
-        fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<out ProjectRecord<T>>?
-    }
+    interface ProjectManager<T : ProjectType> : RecordManager, SnapshotRecordManager<ProjectRecord<T>>
 }

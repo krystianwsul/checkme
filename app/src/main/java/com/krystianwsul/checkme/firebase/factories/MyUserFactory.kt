@@ -54,8 +54,8 @@ class MyUserFactory(
         factoryProvider.preferences.tab = user.defaultTab
     }
 
-    fun onNewSnapshot(dataSnapshot: Snapshot): ChangeType {
-        val changeWrapper = myUserManager.newSnapshot(dataSnapshot)
+    fun onNewSnapshot(snapshot: Snapshot): ChangeType {
+        val changeWrapper = myUserManager.set(snapshot)
         user = MyUser(changeWrapper.data)
         setTab()
 

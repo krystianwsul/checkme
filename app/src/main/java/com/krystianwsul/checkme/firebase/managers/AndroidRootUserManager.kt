@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
+class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager(), SnapshotRecordManager<RootUserRecord> {
 
     companion object {
 
@@ -21,7 +21,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager() {
 
     override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()
 
-    fun setFriend(snapshot: Snapshot) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
+    override fun set(snapshot: Snapshot) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
 
     fun addFriend(
             userKey: UserKey,

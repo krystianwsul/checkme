@@ -26,7 +26,7 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun setProjectRecord(snapshot: Snapshot): ChangeWrapper<PrivateProjectRecord> {
+    override fun set(snapshot: Snapshot): ChangeWrapper<PrivateProjectRecord> {
         val changeWrapper = set {
             val record = if (first) {
                 first = false // for new users, the project may not exist yet

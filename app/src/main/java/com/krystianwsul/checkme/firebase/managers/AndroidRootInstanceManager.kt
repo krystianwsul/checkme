@@ -12,7 +12,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
         factoryProvider: FactoryProvider
 ) : RootInstanceManager<T>(taskRecord, snapshotInfos, factoryProvider.database) {
 
-    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>): ChangeType {
+    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>): ChangeType { // todo collection consider unifying with SnapshotRecordManager
         return set {
             snapshotInfos.map { it.toRecord() }
                     .associateBy { it.instanceKey }

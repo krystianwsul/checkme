@@ -37,13 +37,13 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
         checkNotNull(recordPairs.remove(key))
     }
 
-    fun add(key: T, record: U) {
+    protected fun add(key: T, record: U) {
         check(!recordPairs.containsKey(key))
 
         recordPairs[key] = Pair(record, false)
     }
 
-    fun setNullable(key: T, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+    protected fun setNullable(key: T, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
         val pair = recordPairs[key]
 
         return if (pair?.second == true) {
@@ -59,5 +59,5 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
         }
     }
 
-    fun setNonNull(key: T, recordCallback: () -> U) = setNullable(key, recordCallback)!!
+    protected fun setNonNull(key: T, recordCallback: () -> U) = setNullable(key, recordCallback)!!
 }

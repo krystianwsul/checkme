@@ -13,7 +13,7 @@ abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
 
     val records get() = recordPairs.mapValues { it.value.first }
 
-    abstract val databasePrefix: String
+    protected abstract val databasePrefix: String
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()

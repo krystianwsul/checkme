@@ -11,10 +11,11 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         protected set
 
     abstract var value: T
+        protected set
 
     abstract val records: Collection<RemoteRecord>
 
-    abstract val databasePrefix: String
+    protected abstract val databasePrefix: String
 
     final override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
@@ -33,7 +34,7 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         }
     }
 
-    fun set(valueCallback: () -> T): ChangeWrapper<T> { // lazy to prevent parsing if LOCAL
+    protected fun set(valueCallback: () -> T): ChangeWrapper<T> { // lazy to prevent parsing if LOCAL
         return if (isSaved) {
             isSaved = false
 

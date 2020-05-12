@@ -27,7 +27,7 @@ class PrivateProjectFactory(
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) = PrivateProject(
             projectRecord as PrivateProjectRecord,
             rootInstanceManagers
-    ) { newRootInstanceManager(it, listOf()) }.apply {
+    ) { newRootInstanceManager(it, null) }.apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
     }
 }

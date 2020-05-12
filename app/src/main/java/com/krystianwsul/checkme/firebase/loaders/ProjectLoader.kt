@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeWrapper
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -34,24 +33,24 @@ interface ProjectLoader<T : ProjectType> {
     class InitialProjectEvent<T : ProjectType>(
             val projectManager: ProjectProvider.ProjectManager<T>,
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
+            val instanceSnapshots: Map<TaskKey, Snapshot>
     )
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfos: List<RootInstanceManager.SnapshotInfo>
+            val instanceSnapshot: Snapshot
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val snapshotInfos: List<RootInstanceManager.SnapshotInfo>
+            val instanceSnapshot: Snapshot
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
+            val instanceSnapshots: Map<TaskKey, Snapshot>
     )
 
     class Impl<T : ProjectType>(
@@ -108,7 +107,7 @@ interface ProjectLoader<T : ProjectType> {
                     it.newMap
                             .values
                             .map { (taskRecord, databaseRx) ->
-                                databaseRx.first.map { taskRecord.taskKey to it.toSnapshotInfos() }
+                                databaseRx.first.map { taskRecord.taskKey to it }
                             }
                             .zipSingle()
                             .map { ChangeWrapper(changeType, InitialProjectEvent(projectManager, projectRecord, it.toMap())) }
@@ -128,7 +127,7 @@ interface ProjectLoader<T : ProjectType> {
                                         .map {
                                             ChangeWrapper(
                                                     changeType,
-                                                    AddTaskEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                                                    AddTaskEvent(projectRecord, taskRecord, it)
                                             )
                                         }
                             }
@@ -146,7 +145,7 @@ interface ProjectLoader<T : ProjectType> {
                     .values
                     .map { (taskRecord, databaseRx) ->
                         databaseRx.changes.map {
-                            ChangeInstancesEvent(projectRecord, taskRecord, it.toSnapshotInfos())
+                            ChangeInstancesEvent(projectRecord, taskRecord, it)
                         }
                     }
                     .merge()
@@ -171,7 +170,7 @@ interface ProjectLoader<T : ProjectType> {
                                             .map {
                                                 ChangeProjectEvent(
                                                         projectRecord,
-                                                        it.toMap().mapValues { it.value.toSnapshotInfos() }
+                                                        it.toMap().mapValues { it.value }
                                                 )
                                             }
                                 }

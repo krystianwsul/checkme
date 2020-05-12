@@ -2,11 +2,11 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -39,13 +39,13 @@ abstract class ProjectFactory<T : ProjectType>(
 
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
-            snapshotInfos: Map<TaskKey, List<RootInstanceManager.SnapshotInfo>>
+            snapshots: Map<TaskKey, Snapshot>
     ) = projectRecord.taskRecords
             .values
             .map {
                 it.taskKey to AndroidRootInstanceManager(
                         it,
-                        snapshotInfos.getValue(it.taskKey),
+                        snapshots.getValue(it.taskKey),
                         factoryProvider
                 )
             }
@@ -54,11 +54,11 @@ abstract class ProjectFactory<T : ProjectType>(
 
     protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
-            snapshotInfos: List<RootInstanceManager.SnapshotInfo>
+            snapshot: Snapshot?
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
-        return AndroidRootInstanceManager(taskRecord, snapshotInfos, factoryProvider).apply {
+        return AndroidRootInstanceManager(taskRecord, snapshot, factoryProvider).apply {
             rootInstanceManagers[taskRecord.taskKey] = this
         }
     }
@@ -68,19 +68,19 @@ abstract class ProjectFactory<T : ProjectType>(
     val changeTypes: Observable<ChangeType>
 
     init {
-        rootInstanceManagers = newRootInstanceManagers(initialProjectEvent.projectRecord, initialProjectEvent.snapshotInfos)
+        rootInstanceManagers = initialProjectEvent.run { newRootInstanceManagers(projectRecord, instanceSnapshots) }
         project = newProject(initialProjectEvent.projectRecord)
 
         fun updateRootInstanceManager(
                 taskRecord: TaskRecord<T>,
-                snapshotInfos: List<RootInstanceManager.SnapshotInfo>
+                snapshot: Snapshot
         ): ChangeType {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 
             return if (rootInstanceManager != null) {
-                rootInstanceManager.setSnapshotInfos(snapshotInfos)
+                rootInstanceManager.set(snapshot).changeType
             } else {
-                newRootInstanceManager(taskRecord, snapshotInfos)
+                newRootInstanceManager(taskRecord, snapshot)
 
                 ChangeType.REMOTE
             }
@@ -90,7 +90,7 @@ abstract class ProjectFactory<T : ProjectType>(
             changeProjectEvent.projectRecord
                     .taskRecords
                     .values
-                    .forEach { updateRootInstanceManager(it, changeProjectEvent.snapshotInfos.getValue(it.taskKey)) }
+                    .forEach { updateRootInstanceManager(it, changeProjectEvent.instanceSnapshots.getValue(it.taskKey)) }
 
             project = newProject(changeProjectEvent.projectRecord)
 
@@ -98,7 +98,7 @@ abstract class ProjectFactory<T : ProjectType>(
         }
 
         val addTaskChangeTypes = projectLoader.addTaskEvents.map { (projectChangeType, addTaskEvent) ->
-            addTaskEvent.apply { updateRootInstanceManager(taskRecord, snapshotInfos) }
+            addTaskEvent.apply { updateRootInstanceManager(taskRecord, instanceSnapshot) }
 
             check(rootInstanceManagers.containsKey(addTaskEvent.taskRecord.taskKey))
 
@@ -108,7 +108,7 @@ abstract class ProjectFactory<T : ProjectType>(
         }
 
         val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.map { changeInstancesEvent ->
-            val instanceChangeType = changeInstancesEvent.run { updateRootInstanceManager(taskRecord, snapshotInfos) }
+            val instanceChangeType = changeInstancesEvent.run { updateRootInstanceManager(taskRecord, instanceSnapshot) }
 
             project = newProject(changeInstancesEvent.projectRecord)
 

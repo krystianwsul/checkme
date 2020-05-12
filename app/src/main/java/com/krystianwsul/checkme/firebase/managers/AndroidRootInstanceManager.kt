@@ -1,22 +1,39 @@
 package com.krystianwsul.checkme.firebase.managers
 
+import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.checkme.firebase.loaders.Snapshot
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
+import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidRootInstanceManager<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        snapshotInfos: List<SnapshotInfo>,
+        snapshot: Snapshot?,
         factoryProvider: FactoryProvider
-) : RootInstanceManager<T>(taskRecord, snapshotInfos, factoryProvider.database) {
+) :
+        RootInstanceManager<T>(taskRecord, snapshot.toSnapshotInfos(), factoryProvider.database),
+        SnapshotRecordManager<MutableMap<InstanceKey, RootInstanceRecord<T>>> {
 
-    fun setSnapshotInfos(snapshotInfos: List<SnapshotInfo>): ChangeType { // todo collection consider unifying with SnapshotRecordManager
-        return set {
-            snapshotInfos.map { it.toRecord() }
-                    .associateBy { it.instanceKey }
-                    .toMutableMap()
-        }.changeType
+    companion object {
+
+        private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
+
+        private fun Snapshot?.toSnapshotInfos() = this?.getValue(typeToken)
+                ?.map { (dateString, timeMap) ->
+                    timeMap.map { (timeString, instanceJson) -> SnapshotInfo(dateString, timeString, instanceJson) }
+                }
+                ?.flatten()
+                ?: listOf()
+    }
+
+    override fun set(snapshot: Snapshot) = set {
+        snapshot.toSnapshotInfos()
+                .map { it.toRecord() }
+                .associateBy { it.instanceKey }
+                .toMutableMap()
     }
 }

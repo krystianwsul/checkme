@@ -224,7 +224,7 @@ class ProjectsFactory(
         val sharedProject = SharedProject(
                 sharedProjectRecord,
                 mapOf()
-        ) { AndroidRootInstanceManager(it, listOf(), factoryProvider) }
+        ) { AndroidRootInstanceManager(it, null, factoryProvider) }
 
         check(!projects.containsKey(sharedProject.projectKey))
 

@@ -27,7 +27,7 @@ class SharedProjectFactory(
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) = SharedProject(
             projectRecord as SharedProjectRecord,
             rootInstanceManagers
-    ) { newRootInstanceManager(it, listOf()) }.apply {
+    ) { newRootInstanceManager(it, null) }.apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
         updateDeviceDbInfo(deviceDbInfo())
     }

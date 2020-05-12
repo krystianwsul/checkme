@@ -1,8 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.google.firebase.database.GenericTypeIndicator
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import io.reactivex.Observable
 
 fun <T, U, V> Observable<T>.processChanges(
@@ -53,13 +50,3 @@ fun <T, U, V> Observable<Map<T, U>>.processChangesMap(
         { newData, key -> adder(key, newData.getValue(key)) },
         remover
 )
-
-private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
-
-fun Snapshot.toSnapshotInfos() = getValue(typeToken)?.map { (dateString, timeMap) ->
-    timeMap.map { (timeString, instanceJson) ->
-        RootInstanceManager.SnapshotInfo(dateString, timeString, instanceJson)
-    }
-}
-        ?.flatten()
-        ?: listOf()

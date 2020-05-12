@@ -181,7 +181,7 @@ class ProjectFactoryNewTest {
                                     projectLoader.projectRecord,
                                     TaskJson("task")
                             ),
-                            listOf()
+                            EmptyTestSnapshot()
                     )
             ))
         }

@@ -80,7 +80,7 @@ class FactoryLoaderNewTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateUserRecord(dataSnapshot: Snapshot) {
+        override fun updateUserRecord(snapshot: Snapshot) {
             TODO("Not yet implemented")
         }
     }
@@ -114,10 +114,10 @@ class FactoryLoaderNewTest {
             changeListenerWrapper!!.result = changeType
         }
 
-        override fun updateUserRecord(dataSnapshot: Snapshot) {
+        override fun updateUserRecord(snapshot: Snapshot) {
             assertNotNull(userListener)
 
-            userListener!!(dataSnapshot)
+            userListener!!(snapshot)
 
             userListener = null
         }

@@ -19,19 +19,15 @@ class MyUserFactory(
 
     private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot)
 
-    private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.userRecord))
+    private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))
 
-    var user
+    var user // todo private set?
         get() = userRelay.value!!
         set(value) {
             userRelay.accept(value)
         }
 
-    var isSaved
-        get() = myUserManager.isSaved
-        set(value) {
-            myUserManager.isSaved = value
-        }
+    val isSaved get() = myUserManager.isSaved
 
     val sharedProjectKeysObservable = Observable.merge(
             userRelay.map { ChangeType.REMOTE },
@@ -60,9 +56,12 @@ class MyUserFactory(
         factoryProvider.preferences.tab = user.defaultTab
     }
 
-    fun onNewSnapshot(dataSnapshot: Snapshot) {
-        user = MyUser(myUserManager.newSnapshot(dataSnapshot))
+    fun onNewSnapshot(dataSnapshot: Snapshot): ChangeType {
+        val changeWrapper = myUserManager.newSnapshot(dataSnapshot)
+        user = MyUser(changeWrapper.data)
         setTab()
+
+        return changeWrapper.changeType
     }
 
     fun save(values: MutableMap<String, Any?>) = myUserManager.save(values)

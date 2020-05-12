@@ -54,7 +54,7 @@ interface FactoryProvider {
 
         fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp)
 
-        fun updateUserRecord(dataSnapshot: Snapshot)
+        fun updateUserRecord(snapshot: Snapshot)
 
         fun clearUserInfo()
 

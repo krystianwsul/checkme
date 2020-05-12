@@ -257,18 +257,10 @@ class DomainFactory(
     }
 
     @Synchronized
-    override fun updateUserRecord(dataSnapshot: Snapshot) {
+    override fun updateUserRecord(snapshot: Snapshot) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
 
-        val runType = if (myUserFactory.isSaved) {
-            myUserFactory.isSaved = false
-
-            RunType.LOCAL
-        } else {
-            myUserFactory.onNewSnapshot(dataSnapshot)
-
-            RunType.REMOTE
-        }
+        val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
     }

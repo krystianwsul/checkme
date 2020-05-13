@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -185,7 +186,7 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(EditActivity.getEditIntent(instanceData.taskKey))
+                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Edit(instanceData.taskKey)))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = selectedDatas.map { it.taskKey }
@@ -198,14 +199,14 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(EditActivity.getCreateIntent(EditActivity.Hint.Task(instanceData.taskKey)))
+                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Task(instanceData.taskKey))))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(EditActivity.getJoinIntent(taskKeys, EditActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
+                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(taskKeys, EditActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey))))
                     } else {
                         val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
 
@@ -218,7 +219,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                         val removeInstanceKeys = instanceDatas.map { it.instanceKey }
 
-                        activity.startActivity(EditActivity.getJoinIntent(taskKeys, scheduleHint, removeInstanceKeys))
+                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(taskKeys, scheduleHint, removeInstanceKeys)))
                     }
                 }
                 R.id.action_group_mark_done -> {
@@ -310,7 +311,7 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.actionGroupCopyTask -> {
                     val instanceData = selectedDatas.single()
 
-                    activity.startActivity(EditActivity.getCopyIntent(instanceData.taskKey))
+                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(instanceData.taskKey)))
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -712,7 +713,7 @@ class GroupListFragment @JvmOverloads constructor(
                 else -> throw IllegalStateException()
             }
 
-            activity.startActivity(EditActivity.getCreateIntent(hint))
+            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
         }
 
         updateFabVisibility()

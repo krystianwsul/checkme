@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
@@ -300,7 +301,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                             showInstanceViewModel.stop()
 
-                            startActivityForResult(EditActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                            startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(instanceKey.taskKey)), ShowTaskActivity.REQUEST_EDIT_TASK)
                         }
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
@@ -314,11 +315,11 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         }
                         R.id.instance_menu_add_task -> {
                             data!!.instanceDateTime.let {
-                                startActivity(EditActivity.getCreateIntent(EditActivity.Hint.Schedule(it.date, it.time.timePair)))
+                                startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Schedule(it.date, it.time.timePair))))
                             }
                         }
                         R.id.instanceMenuCopyTask -> {
-                            startActivity(EditActivity.getCopyIntent(data!!.taskKey))
+                            startActivity(EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey)))
                         }
                         else -> throw UnsupportedOperationException()
                     }

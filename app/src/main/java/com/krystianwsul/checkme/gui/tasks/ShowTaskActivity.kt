@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
@@ -189,7 +190,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                     R.id.task_menu_edit -> {
                         showTaskViewModel.stop()
 
-                        startActivityForResult(EditActivity.getEditIntent(taskKey), REQUEST_EDIT_TASK)
+                        startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(taskKey)), REQUEST_EDIT_TASK)
                     }
                     R.id.task_menu_share -> {
                         check(data != null)
@@ -207,7 +208,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                         }
                     }
                     R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
-                    R.id.taskMenuCopyTask -> startActivity(EditActivity.getCopyIntent(taskKey))
+                    R.id.taskMenuCopyTask -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
                     else -> throw UnsupportedOperationException()
                 }
 

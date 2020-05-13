@@ -38,7 +38,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
@@ -81,23 +80,7 @@ class EditActivity : NavBarActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getCreateIntent(
-                hint: Hint? = null,
-                parentScheduleState: ParentScheduleState? = null,
-                nameHint: String? = null
-        ) = getParametersIntent(EditParameters.Create(hint, parentScheduleState, nameHint))
-
-        fun getJoinIntent(
-                joinTaskKeys: List<TaskKey>,
-                hint: Hint? = null,
-                removeInstanceKeys: List<InstanceKey> = listOf()
-        ) = getParametersIntent(EditParameters.Join(joinTaskKeys, hint, removeInstanceKeys))
-
-        fun getEditIntent(taskKey: TaskKey) = getParametersIntent(EditParameters.Edit(taskKey))
-
-        fun getCopyIntent(taskKey: TaskKey) = getParametersIntent(EditParameters.Copy(taskKey))
-
-        private fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
+        fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, editParameters)
         }
 
@@ -136,7 +119,7 @@ class EditActivity : NavBarActivity() {
         }
 
         override fun onNewParent(nameHint: String?) = startActivityForResult(
-                getCreateIntent(
+                getParametersIntent(EditParameters.Create(
                         null,
                         delegate.parentScheduleManager.run {
                             ParentScheduleState(
@@ -145,7 +128,7 @@ class EditActivity : NavBarActivity() {
                             )
                         },
                         nameHint
-                ),
+                )),
                 REQUEST_CREATE_PARENT
         )
     }

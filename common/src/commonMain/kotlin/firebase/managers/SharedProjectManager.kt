@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 abstract class SharedProjectManager :
-        KeyedRecordManager<ProjectKey.Shared, SharedProjectRecord>(),
+        MapRecordManager<ProjectKey.Shared, SharedProjectRecord>(),
         SharedProjectRecord.Parent {
 
     override val databasePrefix = DatabaseWrapper.RECORDS_KEY

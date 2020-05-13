@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 
-abstract class KeyedRecordManager<T, U : RemoteRecord> : RecordManager {
+abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
 
     override val isSaved get() = recordPairs.any { it.value.second }
 

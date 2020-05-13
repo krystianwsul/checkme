@@ -71,7 +71,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     }
 
     protected abstract val initialState: ParentScheduleState
-    abstract val parentScheduleManager: ParentScheduleManager
+    abstract val parentScheduleManager: ParentScheduleManager // todo group make protected
 
     open val imageUrl = BehaviorRelay.createDefault(editImageState
             ?: EditImageState.None)

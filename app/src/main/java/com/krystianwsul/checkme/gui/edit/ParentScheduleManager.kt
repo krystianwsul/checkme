@@ -12,6 +12,8 @@ interface ParentScheduleManager {
     val schedules: List<ScheduleEntry>
     val scheduleObservable: Observable<List<ScheduleEntry>> // todo group expose list of adapter items in delegate
 
+    val changed: Boolean
+
     fun addSchedule(scheduleEntry: ScheduleEntry)
 
     fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)

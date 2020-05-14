@@ -79,12 +79,11 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     val parentLookup by lazy { ParentLookup() }
 
     protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentMultiScheduleManager {
-        val parentScheduleState = savedState ?: initialState.copy()
-        return ParentMultiScheduleManager(parentScheduleState, parentLookup)
+        return ParentMultiScheduleManager(savedState, initialState, parentLookup)
     }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
-        if (parentScheduleManager.toState() != initialState) // todo group task move into manager
+        if (parentScheduleManager.changed)
             return true
 
         return checkNameNoteChanged(name, note)

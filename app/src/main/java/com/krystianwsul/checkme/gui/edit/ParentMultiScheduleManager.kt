@@ -6,9 +6,12 @@ import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 
 class ParentMultiScheduleManager(
-        state: ParentScheduleState,
+        savedState: ParentScheduleState?,
+        private val initialState: ParentScheduleState,
         parentLookup: EditDelegate.ParentLookup
 ) : ParentScheduleManager {
+
+    private val state = savedState ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
         if (it?.parentKey is EditViewModel.ParentKey.Task)
@@ -27,6 +30,8 @@ class ParentMultiScheduleManager(
         private set
 
     override val scheduleObservable = scheduleProperty.observable
+
+    override val changed get() = toState() != initialState
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
             scheduleProperty.mutate { it.toMutableList().also(action) }

@@ -327,7 +327,8 @@ class EditActivity : NavBarActivity() {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
                 it.targetUI()
-                        .delegate.imageUrl
+                        .delegate
+                        .imageUrl
                         .accept(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
@@ -414,11 +415,9 @@ class EditActivity : NavBarActivity() {
         editRecycler.itemAnimator = CustomItemAnimator()
 
         if (noteHasFocus) { // keyboard hack
-            val notePosition = createTaskAdapter.items.indexOf(Item.Note)
-
             editRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
-            (editRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
+            (editRecycler.layoutManager as LinearLayoutManager).scrollToPosition(createTaskAdapter.notePosition)
         }
     }
 
@@ -447,16 +446,9 @@ class EditActivity : NavBarActivity() {
         return error != null
     }
 
-    private fun updateError(): Boolean {
-        var hasError = updateNameError()
-
-        for (scheduleEntry in delegate.parentScheduleManager.schedules) {
-            if (delegate.getError(scheduleEntry) != null)
-                hasError = true
-        }
-
-        return hasError
-    }
+    private fun updateError() = updateNameError() || delegate.parentScheduleManager
+            .schedules
+            .any { delegate.getError(it) != null }
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)
@@ -528,7 +520,7 @@ class EditActivity : NavBarActivity() {
     @Suppress("PrivatePropertyName")
     private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
-        var items by observable(delegate.adapterItemObservable.getCurrentValue()) { _, oldItems, newItems ->
+        private var items: List<Item> by observable(delegate.adapterItemObservable.getCurrentValue()) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -542,13 +534,14 @@ class EditActivity : NavBarActivity() {
                         oldItems[oldItemPosition] == newItems[newItemPosition]
             }).dispatchUpdatesTo(this)
         }
-            private set
 
         init {
             delegate.adapterItemObservable
                     .subscribe { items = it }
                     .addTo(createDisposable)
         }
+
+        val notePosition get() = items.indexOf(Item.Note)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
             newHolder(layoutInflater.inflate(layout, parent, false))

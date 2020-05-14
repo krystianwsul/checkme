@@ -71,19 +71,19 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     }
 
     protected abstract val initialState: ParentScheduleState
-    abstract val parentScheduleManager: ParentScheduleManager // todo group make protected
+    abstract val parentScheduleManager: ParentScheduleManager
 
     open val imageUrl = BehaviorRelay.createDefault(editImageState
             ?: EditImageState.None)
 
-    protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentScheduleManager {
+    protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentMultiScheduleManager {
         val parentScheduleState = savedState ?: initialState.copy()
         val initialParent = parentScheduleState.parentKey?.let { findTaskData(it) }
-        return ParentScheduleManager(parentScheduleState, initialParent)
+        return ParentMultiScheduleManager(parentScheduleState, initialParent)
     }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
-        if (parentScheduleManager.toState() != initialState)
+        if (parentScheduleManager.toState() != initialState) // todo group task move into manager
             return true
 
         return checkNameNoteChanged(name, note)

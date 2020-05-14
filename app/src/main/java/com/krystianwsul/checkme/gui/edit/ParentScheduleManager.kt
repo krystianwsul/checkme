@@ -1,41 +1,22 @@
 package com.krystianwsul.checkme.gui.edit
 
-import com.krystianwsul.checkme.utils.NonNullRelayProperty
-import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Observable
 
-class ParentScheduleManager(
-        state: ParentScheduleState,
-        initialParent: EditViewModel.ParentTreeData?
-) {
+interface ParentScheduleManager {
 
-    private val parentProperty = NullableRelayProperty(initialParent) {
-        if (it?.parentKey is EditViewModel.ParentKey.Task)
-            mutateSchedules { it.clear() }
-    }
+    var parent: EditViewModel.ParentTreeData?
+    val parentObservable: Observable<NullableWrapper<EditViewModel.ParentTreeData>>
 
-    var parent by parentProperty
-    val parentObservable = parentProperty.observable
+    val schedules: List<ScheduleEntry>
+    val scheduleObservable: Observable<List<ScheduleEntry>> // todo group expose list of adapter items in delegate
 
-    private val scheduleProperty = NonNullRelayProperty(state.schedules) {
-        if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task)
-            parent = null
-    }
+    fun addSchedule(scheduleEntry: ScheduleEntry)
 
-    var schedules by scheduleProperty
-    val scheduleObservable = scheduleProperty.observable
+    fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)
 
-    private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
-            scheduleProperty.mutate { it.toMutableList().also(action) }
+    fun removeSchedule(position: Int)
 
-    fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) =
-            mutateSchedules { it[position] = scheduleEntry }
-
-    fun removeSchedule(position: Int) = mutateSchedules { it.removeAt(position) }
-
-    fun addSchedule(scheduleEntry: ScheduleEntry) {
-        mutateSchedules { it += scheduleEntry }
-    }
-
-    fun toState() = ParentScheduleState(parent?.parentKey, schedules)
+    fun toState(): ParentScheduleState // todo group task encapsulate, move state class into multi
 }

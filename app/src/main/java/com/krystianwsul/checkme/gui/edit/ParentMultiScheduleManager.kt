@@ -1,15 +1,16 @@
 package com.krystianwsul.checkme.gui.edit
 
+import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 
 class ParentMultiScheduleManager(
         state: ParentScheduleState,
-        initialParent: EditViewModel.ParentTreeData?
+        parentLookup: EditDelegate.ParentLookup
 ) : ParentScheduleManager {
 
-    private val parentProperty = NullableRelayProperty(initialParent) {
+    private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
         if (it?.parentKey is EditViewModel.ParentKey.Task)
             mutateSchedules { it.clear() }
     }

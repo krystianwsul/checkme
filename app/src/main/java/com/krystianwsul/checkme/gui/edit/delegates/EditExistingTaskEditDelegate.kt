@@ -29,7 +29,7 @@ class EditExistingTaskEditDelegate(
 
         fun EditViewModel.ParentKey.getProjectId() = when (this) {
             is EditViewModel.ParentKey.Project -> projectId
-            is EditViewModel.ParentKey.Task -> findTaskData(this).projectId
+            is EditViewModel.ParentKey.Task -> parentLookup.findTaskData(this).projectId
         }
 
         val initialProject = taskData.parentKey?.getProjectId()

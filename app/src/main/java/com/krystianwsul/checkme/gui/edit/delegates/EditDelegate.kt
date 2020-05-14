@@ -76,10 +76,11 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     open val imageUrl = BehaviorRelay.createDefault(editImageState
             ?: EditImageState.None)
 
+    val parentLookup by lazy { ParentLookup() }
+
     protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentMultiScheduleManager {
         val parentScheduleState = savedState ?: initialState.copy()
-        val initialParent = parentScheduleState.parentKey?.let { findTaskData(it) }
-        return ParentMultiScheduleManager(parentScheduleState, initialParent)
+        return ParentMultiScheduleManager(parentScheduleState, parentLookup)
     }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
@@ -131,19 +132,23 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     protected open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
 
-    fun findTaskData(parentKey: EditViewModel.ParentKey) =
-            findTaskDataHelper(data.parentTreeDatas, parentKey).single()
+    inner class ParentLookup {
 
-    private fun findTaskDataHelper(
-            taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-            parentKey: EditViewModel.ParentKey
-    ): Iterable<EditViewModel.ParentTreeData> {
-        if (taskDatas.containsKey(parentKey))
-            return listOf(taskDatas.getValue(parentKey))
+        fun findTaskData(parentKey: EditViewModel.ParentKey): EditViewModel.ParentTreeData {
+            fun helper(
+                    taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
+                    parentKey: EditViewModel.ParentKey
+            ): EditViewModel.ParentTreeData? {
+                if (taskDatas.containsKey(parentKey))
+                    return taskDatas.getValue(parentKey)
 
-        return taskDatas.values
-                .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
-                .flatten()
+                return taskDatas.values
+                        .mapNotNull { helper(it.parentTreeDatas, parentKey) }
+                        .singleOrNull()
+            }
+
+            return helper(data.parentTreeDatas, parentKey)!!
+        }
     }
 
     fun createTask(createParameters: CreateParameters): TaskKey {

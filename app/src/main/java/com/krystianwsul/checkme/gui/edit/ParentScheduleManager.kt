@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.edit
 
+import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
@@ -20,5 +21,5 @@ interface ParentScheduleManager {
 
     fun removeSchedule(position: Int)
 
-    fun toState(): ParentScheduleState // todo group task encapsulate, move state class into multi
+    fun saveState(outState: Bundle)
 }

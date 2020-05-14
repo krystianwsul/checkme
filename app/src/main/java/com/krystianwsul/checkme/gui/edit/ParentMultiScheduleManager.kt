@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.edit
 
+import android.os.Bundle
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
@@ -45,5 +46,12 @@ class ParentMultiScheduleManager(
         mutateSchedules { it += scheduleEntry }
     }
 
-    override fun toState() = ParentScheduleState(parent?.parentKey, schedules)
+    private fun toState() = ParentScheduleState(parent?.parentKey, schedules)
+
+    override fun saveState(outState: Bundle) {
+        outState.apply {
+            putParcelable(EditDelegate.KEY_STATE, toState())
+            putParcelable(EditDelegate.KEY_INITIAL_STATE, initialState)
+        }
+    }
 }

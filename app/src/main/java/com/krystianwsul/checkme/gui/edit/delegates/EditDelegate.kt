@@ -17,8 +17,8 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     companion object {
 
-        private const val KEY_INITIAL_STATE = "initialState"
-        private const val KEY_STATE = "state"
+        const val KEY_INITIAL_STATE = "initialState" // todo group task move into manager
+        const val KEY_STATE = "state"
         private const val IMAGE_URL_KEY = "imageUrl"
 
         fun fromParameters(
@@ -183,8 +183,6 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     ): TaskKey
 
     fun saveState(outState: Bundle) {
-        outState.putParcelable(KEY_STATE, parentScheduleManager.toState())
-        outState.putParcelable(KEY_INITIAL_STATE, initialState)
         outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
     }
 

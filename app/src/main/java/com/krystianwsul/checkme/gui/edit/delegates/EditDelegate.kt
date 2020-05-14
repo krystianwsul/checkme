@@ -67,7 +67,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     open val imageUrl = BehaviorRelay.createDefault(editImageState
             ?: EditImageState.None)
 
-    val parentLookup by lazy { ParentLookup() }
+    protected val parentLookup by lazy { ParentLookup() }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
         if (parentScheduleManager.changed)

@@ -5,11 +5,12 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.common.utils.TaskKey
 
 class ParentMultiScheduleManager(
         savedInstanceState: Bundle?,
-        initialStateGetter: () -> ParentScheduleState, // todo group task don't expose ParentScheduleState
-        parentLookup: EditDelegate.ParentLookup
+        initialStateGetter: () -> ParentScheduleState,
+        private val parentLookup: EditDelegate.ParentLookup
 ) : ParentScheduleManager {
 
     companion object {
@@ -42,6 +43,10 @@ class ParentMultiScheduleManager(
     override val scheduleObservable = scheduleProperty.observable
 
     override val changed get() = toState() != initialState
+
+    override fun setParentTask(taskKey: TaskKey) {
+        parent = parentLookup.findTaskData(EditViewModel.ParentKey.Task(taskKey))
+    }
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
             scheduleProperty.mutate { it.toMutableList().also(action) }

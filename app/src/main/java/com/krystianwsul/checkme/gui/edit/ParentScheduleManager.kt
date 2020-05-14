@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.edit
 import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.Observable
 
 interface ParentScheduleManager {
@@ -14,6 +15,8 @@ interface ParentScheduleManager {
     val scheduleObservable: Observable<List<ScheduleEntry>> // todo group expose list of adapter items in delegate
 
     val changed: Boolean
+
+    fun setParentTask(taskKey: TaskKey)
 
     fun addSchedule(scheduleEntry: ScheduleEntry)
 

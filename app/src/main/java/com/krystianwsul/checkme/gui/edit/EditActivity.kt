@@ -481,7 +481,7 @@ class EditActivity : NavBarActivity() {
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                delegate.parentScheduleManager.parent = delegate.parentLookup.findTaskData(EditViewModel.ParentKey.Task(taskKey)) // todo group task move into delegate (or deeper)
+                delegate.parentScheduleManager.setParentTask(taskKey)
             }
         }
     }

@@ -685,6 +685,22 @@ class Task<T : ProjectType>(
         }
     }
 
+    fun getTreeData(now: ExactTimeStamp): TreeData {
+        val isRootTask = isRootTask(now)
+        val hasCurrentSchedules = getCurrentSchedules(now).isEmpty()
+
+        return if (isRootTask) {
+            if (hasCurrentSchedules)
+                TreeData.Schedule
+            else
+                TreeData.NoSchedule
+        } else {
+            check(!hasCurrentSchedules)
+
+            TreeData.Child
+        }
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String
@@ -703,4 +719,13 @@ class Task<T : ProjectType>(
             val exactTimeStamp: ExactTimeStamp,
             val deleteInstances: Boolean
     )
+
+    sealed class TreeData {
+
+        object Child : TreeData()
+
+        object Schedule : TreeData()
+
+        object NoSchedule : TreeData()
+    }
 }

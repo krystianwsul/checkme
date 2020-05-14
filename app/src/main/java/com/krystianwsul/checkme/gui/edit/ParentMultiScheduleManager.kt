@@ -7,12 +7,21 @@ import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 
 class ParentMultiScheduleManager(
-        savedState: ParentScheduleState?,
-        private val initialState: ParentScheduleState,
+        savedInstanceState: Bundle?,
+        initialStateGetter: () -> ParentScheduleState, // todo group task don't expose ParentScheduleState
         parentLookup: EditDelegate.ParentLookup
 ) : ParentScheduleManager {
 
-    private val state = savedState ?: initialState.copy()
+    companion object {
+
+        private const val KEY_INITIAL_STATE = "initialState"
+        private const val KEY_STATE = "state"
+    }
+
+    private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE)
+            ?: initialStateGetter()
+
+    private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
         if (it?.parentKey is EditViewModel.ParentKey.Task)
@@ -50,8 +59,8 @@ class ParentMultiScheduleManager(
 
     override fun saveState(outState: Bundle) {
         outState.apply {
-            putParcelable(EditDelegate.KEY_STATE, toState())
-            putParcelable(EditDelegate.KEY_INITIAL_STATE, initialState)
+            putParcelable(KEY_STATE, toState())
+            putParcelable(KEY_INITIAL_STATE, initialState)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
+import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.gui.edit.*
@@ -12,58 +13,72 @@ import com.krystianwsul.common.utils.TaskKey
 class CreateTaskEditDelegate(
         private val parameters: EditParameters,
         override var data: EditViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
-) : EditDelegate(savedStates?.third) {
+        savedInstanceState: Bundle?,
+        editImageState: EditImageState?
+) : EditDelegate(editImageState) {
 
     override val initialName: String?
     override val scheduleHint: EditActivity.Hint.Schedule?
-    override val initialState: ParentScheduleState
+    override val parentScheduleManager: ParentScheduleManager
 
     init {
+        val initialStateGetter: () -> ParentScheduleState
+
         when (parameters) {
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
                 scheduleHint = parameters.hint?.toScheduleHint()
 
                 val initialParentKey = parameters.hint?.toParentKey()
-                initialState = savedStates?.first ?: parameters.parentScheduleState
-                        ?: ParentScheduleState(
-                        initialParentKey,
-                        listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is EditViewModel.ParentKey.Task && data.defaultReminder })
-                )
+                initialStateGetter = {
+                    parameters.parentScheduleState
+                            ?: ParentScheduleState(
+                                    initialParentKey,
+                                    listOfNotNull(firstScheduleEntry.takeIf { initialParentKey !is EditViewModel.ParentKey.Task && data.defaultReminder })
+                            )
+                }
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
                 scheduleHint = null
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
-                initialState = savedStates?.first ?: ParentScheduleState(
-                        initialParentKey,
-                        listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
-                )
+                initialStateGetter = {
+                    ParentScheduleState(
+                            initialParentKey,
+                            listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
+                    )
+                }
             }
             is EditParameters.Shortcut -> {
                 initialName = null
                 scheduleHint = null
 
                 val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
-                initialState = savedStates?.first
-                        ?: ParentScheduleState.create(initialParentKey)
+                initialStateGetter = {
+                    ParentScheduleState.create(initialParentKey)
+                }
             }
             EditParameters.None -> {
                 initialName = null
                 scheduleHint = null
 
-                initialState = savedStates?.first ?: ParentScheduleState(
-                        null,
-                        listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder })
-                )
+                initialStateGetter = {
+                    ParentScheduleState(
+                            null,
+                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder })
+                    )
+                }
             }
             else -> throw IllegalArgumentException()
         }
-    }
 
-    override val parentScheduleManager = ParentMultiScheduleManager(savedStates?.second, initialState, parentLookup)
+        parentScheduleManager = ParentMultiScheduleManager(
+                savedInstanceState,
+                initialStateGetter,
+                parentLookup
+        )
+    }
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,

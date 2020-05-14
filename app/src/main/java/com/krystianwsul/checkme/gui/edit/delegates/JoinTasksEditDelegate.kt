@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
+import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -12,14 +13,13 @@ import com.krystianwsul.common.utils.TaskKey
 class JoinTasksEditDelegate(
         private val parameters: EditParameters.Join,
         override var data: EditViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
-) : EditDelegate(savedStates?.third) {
+        savedInstanceState: Bundle?,
+        editImageState: EditImageState?
+) : EditDelegate(editImageState) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 
-    override val initialState: ParentScheduleState
-
-    init {
+    private fun initialStateGetter(): ParentScheduleState {
         val (initialParentKey, schedule) = parameters.run {
             if (hint is EditActivity.Hint.Task) {
                 Pair(hint.toParentKey(), null)
@@ -36,13 +36,17 @@ class JoinTasksEditDelegate(
             }
         }
 
-        initialState = savedStates?.first ?: ParentScheduleState(
+        return ParentScheduleState(
                 initialParentKey,
                 listOfNotNull(schedule)
         )
     }
 
-    override val parentScheduleManager = ParentMultiScheduleManager(savedStates?.second, initialState, parentLookup)
+    override val parentScheduleManager = ParentMultiScheduleManager(
+            savedInstanceState,
+            this::initialStateGetter,
+            parentLookup
+    )
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,

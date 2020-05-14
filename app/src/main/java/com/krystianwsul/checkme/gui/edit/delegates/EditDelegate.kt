@@ -17,8 +17,6 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     companion object {
 
-        const val KEY_INITIAL_STATE = "initialState" // todo group task move into manager
-        const val KEY_STATE = "state"
         private const val IMAGE_URL_KEY = "imageUrl"
 
         fun fromParameters(
@@ -26,22 +24,16 @@ abstract class EditDelegate(editImageState: EditImageState?) {
                 data: EditViewModel.Data,
                 savedInstanceState: Bundle?
         ): EditDelegate {
-            val savedStates = savedInstanceState?.takeIf { it.containsKey(KEY_INITIAL_STATE) }?.run {
-                Triple<ParentScheduleState, ParentScheduleState, EditImageState>(
-                        getParcelable(KEY_INITIAL_STATE)!!,
-                        getParcelable(KEY_STATE)!!,
-                        getSerializable(IMAGE_URL_KEY) as EditImageState
-                )
-            }
+            val editImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
             return when (parameters) {
-                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedStates)
-                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedStates)
-                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedStates)
+                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
+                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
+                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedInstanceState, editImageState)
                 is EditParameters.Create,
                 is EditParameters.Share,
                 is EditParameters.Shortcut,
-                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedStates)
+                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
             }
         }
     }
@@ -70,7 +62,6 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         ScheduleEntry(EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
-    protected abstract val initialState: ParentScheduleState
     abstract val parentScheduleManager: ParentScheduleManager
 
     open val imageUrl = BehaviorRelay.createDefault(editImageState
@@ -183,6 +174,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     ): TaskKey
 
     fun saveState(outState: Bundle) {
+        parentScheduleManager.saveState(outState)
         outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
     }
 

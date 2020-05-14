@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
+import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -15,8 +15,9 @@ import com.krystianwsul.common.utils.TaskKey
 class EditExistingTaskEditDelegate(
         private val parameters: EditParameters.Edit,
         data: EditViewModel.Data,
-        savedStates: Triple<ParentScheduleState, ParentScheduleState, EditImageState>?
-) : ExistingTaskEditDelegate(data, savedStates) {
+        savedInstanceState: Bundle?,
+        editImageState: EditImageState?
+) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)

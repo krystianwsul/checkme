@@ -12,7 +12,7 @@ interface ParentScheduleManager {
     val parentObservable: Observable<NullableWrapper<EditViewModel.ParentTreeData>>
 
     val schedules: List<ScheduleEntry>
-    val scheduleObservable: Observable<List<ScheduleEntry>> // todo group expose list of adapter items in delegate
+    val scheduleObservable: Observable<List<ScheduleEntry>>
 
     val changed: Boolean
 

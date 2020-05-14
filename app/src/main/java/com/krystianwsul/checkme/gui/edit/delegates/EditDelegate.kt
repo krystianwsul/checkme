@@ -69,6 +69,15 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     protected val parentLookup by lazy { ParentLookup() }
 
+    val adapterItemObservable
+        get() = parentScheduleManager.scheduleObservable.map {
+            listOf(EditActivity.Item.Parent) +
+                    it.map { EditActivity.Item.Schedule(it) } +
+                    EditActivity.Item.NewSchedule +
+                    EditActivity.Item.Note +
+                    EditActivity.Item.Image
+        }!!
+
     fun checkDataChanged(name: String, note: String?): Boolean {
         if (parentScheduleManager.changed)
             return true

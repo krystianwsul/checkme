@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.getCurrentValue
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -412,11 +413,6 @@ class EditActivity : NavBarActivity() {
         editRecycler.adapter = createTaskAdapter
         editRecycler.itemAnimator = CustomItemAnimator()
 
-        delegate.parentScheduleManager
-                .scheduleObservable
-                .subscribe { createTaskAdapter.setSchedules(it) }
-                .addTo(loadFinishedDisposable)
-
         if (noteHasFocus) { // keyboard hack
             val notePosition = createTaskAdapter.items.indexOf(Item.Note)
 
@@ -501,7 +497,7 @@ class EditActivity : NavBarActivity() {
         class Task(val taskKey: TaskKey) : Hint()
     }
 
-    private enum class HolderType {
+    enum class HolderType {
 
         SCHEDULE {
 
@@ -532,13 +528,7 @@ class EditActivity : NavBarActivity() {
     @Suppress("PrivatePropertyName")
     private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
-        private fun getItems(scheduleEntries: List<ScheduleEntry>) = listOf(Item.Parent) +
-                scheduleEntries.map { Item.Schedule(it) } +
-                Item.NewSchedule +
-                Item.Note +
-                Item.Image
-
-        var items by observable(getItems(listOf())) { _, oldItems, newItems ->
+        var items by observable(delegate.adapterItemObservable.getCurrentValue()) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
                 override fun getOldListSize() = oldItems.size
@@ -554,8 +544,10 @@ class EditActivity : NavBarActivity() {
         }
             private set
 
-        fun setSchedules(scheduleEntries: List<ScheduleEntry>) {
-            items = getItems(scheduleEntries)
+        init {
+            delegate.adapterItemObservable
+                    .subscribe { items = it }
+                    .addTo(createDisposable)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
@@ -622,7 +614,7 @@ class EditActivity : NavBarActivity() {
         val imageEdit = itemView.imageEdit!!
     }
 
-    private sealed class Item {
+    sealed class Item {
 
         abstract val holderType: HolderType
 
@@ -735,7 +727,7 @@ class EditActivity : NavBarActivity() {
                         ?.let { (holder as ScheduleHolder).scheduleLayout.error = activity.getString(it.resource) }
             }
 
-            fun same(other: ScheduleEntry): Boolean {
+            private fun same(other: ScheduleEntry): Boolean {
                 if (scheduleEntry.id == other.id)
                     return true
 

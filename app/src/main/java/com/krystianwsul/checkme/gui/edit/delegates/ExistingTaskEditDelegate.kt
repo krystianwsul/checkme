@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -16,14 +17,14 @@ abstract class ExistingTaskEditDelegate(
     override val initialName get() = taskData.name
     override val showSaveAndOpen = false
 
-    override val initialState = savedStates?.first ?: ParentScheduleState.create(
+    final override val initialState = savedStates?.first ?: ParentScheduleState.create(
             taskData.parentKey,
             taskData.scheduleDataWrappers
                     ?.map { ScheduleEntry(it) }
                     ?.toList()
     )
 
-    override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
+    override val parentScheduleManager = ParentMultiScheduleManager(savedStates?.second, initialState, parentLookup)
 
     final override val imageUrl: BehaviorRelay<EditImageState>
 

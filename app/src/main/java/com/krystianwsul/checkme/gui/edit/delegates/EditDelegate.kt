@@ -78,10 +78,6 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     val parentLookup by lazy { ParentLookup() }
 
-    protected fun getParentScheduleManager(savedState: ParentScheduleState?): ParentMultiScheduleManager {
-        return ParentMultiScheduleManager(savedState, initialState, parentLookup)
-    }
-
     fun checkDataChanged(name: String, note: String?): Boolean {
         if (parentScheduleManager.changed)
             return true

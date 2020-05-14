@@ -2,10 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.gui.edit.EditActivity
-import com.krystianwsul.checkme.gui.edit.EditImageState
-import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -66,7 +63,7 @@ class CreateTaskEditDelegate(
         }
     }
 
-    override val parentScheduleManager = getParentScheduleManager(savedStates?.second)
+    override val parentScheduleManager = ParentMultiScheduleManager(savedStates?.second, initialState, parentLookup)
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,

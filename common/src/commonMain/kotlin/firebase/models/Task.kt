@@ -720,6 +720,13 @@ class Task<T : ProjectType>(
             val deleteInstances: Boolean
     )
 
+    /*
+     todo group task if there is a conflict, choose the type that has the newest (un-ended) record,
+      and log a warning.  (If there's more than one parent, do the same amongst those records).  On
+      the server, use the exact same algorithm to establish which records are "correct", remove the
+      remaining CURRENT records, and log a warning.
+     */
+
     sealed class TreeData {
 
         object Child : TreeData()

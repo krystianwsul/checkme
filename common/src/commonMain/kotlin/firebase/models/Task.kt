@@ -685,22 +685,6 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getTreeData(now: ExactTimeStamp): TreeData {
-        val isRootTask = isRootTask(now)
-        val hasCurrentSchedules = getCurrentSchedules(now).isEmpty()
-
-        return if (isRootTask) {
-            if (hasCurrentSchedules)
-                TreeData.Schedule
-            else
-                TreeData.NoSchedule
-        } else {
-            check(!hasCurrentSchedules)
-
-            TreeData.Child
-        }
-    }
-
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String
@@ -719,20 +703,4 @@ class Task<T : ProjectType>(
             val exactTimeStamp: ExactTimeStamp,
             val deleteInstances: Boolean
     )
-
-    /*
-     todo group task if there is a conflict, choose the type that has the newest (un-ended) record,
-      and log a warning.  (If there's more than one parent, do the same amongst those records).  On
-      the server, use the exact same algorithm to establish which records are "correct", remove the
-      remaining CURRENT records, and log a warning.
-     */
-
-    sealed class TreeData {
-
-        object Child : TreeData()
-
-        object Schedule : TreeData()
-
-        object NoSchedule : TreeData()
-    }
 }

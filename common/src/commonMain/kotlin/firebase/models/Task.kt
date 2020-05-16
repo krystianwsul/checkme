@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
@@ -75,7 +76,11 @@ class Task<T : ProjectType>(
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
         requireCurrent(exactTimeStamp)
 
-        return schedules.filter { it.current(exactTimeStamp) }
+        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
+
+        checkIntervalMatchesSchedules(exactTimeStamp, schedules)
+
+        return currentSchedules
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -143,11 +148,15 @@ class Task<T : ProjectType>(
             getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
         }
 
-        return if (taskHierarchies.isEmpty()) {
+        val parentTaskHierarchy = if (taskHierarchies.isEmpty()) {
             null
         } else {
             taskHierarchies.single()
         }
+
+        checkIntervalMatchesParentTaskHierarchy(exactTimeStamp, parentTaskHierarchy)
+
+        return parentTaskHierarchy
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
@@ -164,6 +173,29 @@ class Task<T : ProjectType>(
 
             parentTask.apply { requireNotDeleted(exactTimeStamp) }
         }
+    }
+
+    private fun checkIntervalMatchesParentTaskHierarchy(
+            exactTimeStamp: ExactTimeStamp,
+            parentTaskHierarchy: TaskHierarchy<T>?
+    ) {
+        val interval = getInterval(exactTimeStamp)
+
+        if ((interval.type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy != parentTaskHierarchy)
+            ErrorLogger.instance.logException(InconsistentIntervalException("exactTimeStamp: $exactTimeStamp, expected parent task hierarchy: $parentTaskHierarchy, actual interval: $interval"))
+    }
+
+    private fun checkIntervalMatchesSchedules(
+            exactTimeStamp: ExactTimeStamp,
+            schedules: List<Schedule<T>>
+    ) {
+        val interval = getInterval(exactTimeStamp)
+
+        val intervalSchedules = (interval.type as? IntervalBuilder.Type.Schedule)?.schedules
+                ?: listOf()
+
+        if (schedules.toSet() != intervalSchedules.toSet())
+            ErrorLogger.instance.logException(InconsistentIntervalException("exactTimeStamp: $exactTimeStamp, expected schedules: $schedules, actual interval: $interval"))
     }
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
@@ -317,7 +349,11 @@ class Task<T : ProjectType>(
 
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
         it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
-    }.sortedBy { it.ordinal }
+    }
+            .sortedBy { it.ordinal }
+            .also {
+                it.forEach { it.childTask.checkIntervalMatchesParentTaskHierarchy(exactTimeStamp, it) }
+            }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = taskRecord.image ?: return null
@@ -685,6 +721,12 @@ class Task<T : ProjectType>(
         }
     }
 
+    private fun getIntervals() = IntervalBuilder.build(this)
+
+    private fun getInterval(exactTimeStamp: ExactTimeStamp) = getIntervals().single {
+        it.containsExactTimeStamp(exactTimeStamp)
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String
@@ -703,4 +745,7 @@ class Task<T : ProjectType>(
             val exactTimeStamp: ExactTimeStamp,
             val deleteInstances: Boolean
     )
+
+    // todo group tasks: this can be safely removed once intervals are the new Source of Truth.
+    private class InconsistentIntervalException(message: String) : Exception(message)
 }

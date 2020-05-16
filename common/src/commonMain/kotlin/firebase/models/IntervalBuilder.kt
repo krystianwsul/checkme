@@ -4,15 +4,17 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
-object TreeDataBuilder {
+object IntervalBuilder {
 
     /*
-     todo group task if there is a conflict, choose the type that has the newest (un-ended) record,
-      and log a warning.  (If there's more than one parent, do the same amongst those records).  On
-      the server, use the exact same algorithm to establish which records are "correct", remove the
-      remaining CURRENT records, and log a warning.
+     todo group task once this is being used, also use the intervals for checking schedules in the
+     same way that oldestVisible, from/until, and start/end/ExactTimeStamp is used.
      */
 
+    /*
+     Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
+     and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
+     */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val schedules = task.schedules.toMutableList()
         val parentTaskHierarchies = task.getParentTaskHierarchies().toMutableList()
@@ -21,18 +23,29 @@ object TreeDataBuilder {
             val nextSchedule = schedules.minBy { it.startExactTimeStamp }
             val nextParentTaskHierarchy = parentTaskHierarchies.minBy { it.startExactTimeStamp }
 
-            return if (nextSchedule == null || nextParentTaskHierarchy == null) {
+            fun returnSchedule(nextSchedule: Schedule<T>): TypeBuilder.Schedule<T> {
+                schedules.remove(nextSchedule)
+
+                return TypeBuilder.Schedule(nextSchedule)
+            }
+
+            fun returnParent(nextParentTaskHierarchy: TaskHierarchy<T>): TypeBuilder.Parent<T> {
+                parentTaskHierarchies.remove(nextParentTaskHierarchy)
+
+                return TypeBuilder.Parent(nextParentTaskHierarchy)
+            }
+
+            return if (nextSchedule != null && nextParentTaskHierarchy != null) {
+                if (nextSchedule.startExactTimeStamp < nextParentTaskHierarchy.startExactTimeStamp) // parents take precedence (arbitrarily)
+                    returnSchedule(nextSchedule)
+                else
+                    returnParent(nextParentTaskHierarchy)
+            } else if (nextParentTaskHierarchy != null) {
+                returnParent(nextParentTaskHierarchy)
+            } else if (nextSchedule != null) {
+                returnSchedule(nextSchedule)
+            } else {
                 null
-            } else { // parents take precedence (arbitrarily)
-                if (nextSchedule.startExactTimeStamp < nextParentTaskHierarchy.startExactTimeStamp) {
-                    schedules.remove(nextSchedule)
-
-                    TypeBuilder.Schedule(nextSchedule)
-                } else {
-                    parentTaskHierarchies.remove(nextParentTaskHierarchy)
-
-                    TypeBuilder.Parent(nextParentTaskHierarchy)
-                }
             }
         }
 
@@ -67,8 +80,16 @@ object TreeDataBuilder {
 
             while (typeBuilder != null) {
                 fun addIntervalBuilder(endExactTimeStamp: ExactTimeStamp, newIntervalBuilder: IntervalBuilder<T>) {
-                    if (intervalBuilder.endExactTimeStamp?.let { it <= endExactTimeStamp } != true) // todo group task test this
+                    /*
+                     todo group tasks: endExactTimeStamp isn't meaningful for NoSchedule constructed
+                      from an absence of records.  It will be, however, for NoSchedule constructed
+                      from the records I'll be adding to represent a root task without a schedule.
+                     */
+                    if (intervalBuilder !is IntervalBuilder.NoSchedule &&
+                            intervalBuilder.endExactTimeStamp?.let { it <= endExactTimeStamp } != true
+                    ) {
                         ErrorLogger.instance.logException(OverlapException("task: ${task.name}, taskKey: ${task.taskKey}, endExactTimeStamp: $endExactTimeStamp, old interval builder: $intervalBuilder, new interval builder: $newIntervalBuilder"))
+                    }
 
                     intervals.add(intervalBuilder.toInterval(endExactTimeStamp))
                     intervalBuilder = newIntervalBuilder
@@ -104,6 +125,11 @@ object TreeDataBuilder {
         }
     }
 
+    /*
+     This isn't really an error.  But, to the best of my knowledge, no inconsistencies exist in the
+     database as of now, so I'd like to know if any are found, to check if there's anything
+     suspicious about them.
+     */
     private class OverlapException(message: String) : Exception(message)
 
     private sealed class TypeBuilder<T : ProjectType> {
@@ -184,16 +210,26 @@ object TreeDataBuilder {
 
         abstract val startExactTimeStamp: ExactTimeStamp
 
-        class Current<T : ProjectType>(
+        open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
+
+        data class Current<T : ProjectType>(
                 override val type: Type<T>,
                 override val startExactTimeStamp: ExactTimeStamp
         ) : Interval<T>()
 
-        class Ended<T : ProjectType>(
+        data class Ended<T : ProjectType>(
                 override val type: Type<T>,
                 override val startExactTimeStamp: ExactTimeStamp,
                 val endExactTimeStamp: ExactTimeStamp
-        ) : Interval<T>()
+        ) : Interval<T>() {
+
+            override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
+                if (!super.containsExactTimeStamp(exactTimeStamp))
+                    return false
+
+                return endExactTimeStamp >= exactTimeStamp
+            }
+        }
     }
 
     sealed class Type<T : ProjectType> {

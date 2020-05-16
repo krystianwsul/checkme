@@ -463,11 +463,7 @@ class DomainFactory(
         }
 
         val taskDatas = if (position == 0) {
-            getTasks().filter {
-                it.current(now) &&
-                        it.isVisible(now, true) &&
-                        it.getTreeData(now) == Task.TreeData.NoSchedule
-            }
+            getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map {
                         GroupListFragment.TaskData(
                                 it.taskKey,

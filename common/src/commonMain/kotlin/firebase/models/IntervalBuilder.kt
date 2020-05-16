@@ -97,28 +97,18 @@ object IntervalBuilder {
 
                 fun addIntervalBuilder() = typeBuilder!!.run { addIntervalBuilder(startExactTimeStamp, toIntervalBuilder()) }
 
-                val currentIntervalBuilder = intervalBuilder
-                val intervalEndExactTimeStamp = currentIntervalBuilder.endExactTimeStamp
-
-                if (intervalEndExactTimeStamp?.let { it < typeBuilder!!.startExactTimeStamp } == true) { // guaranteed not NoSchedule
-                    addIntervalBuilder(
-                            intervalEndExactTimeStamp,
-                            IntervalBuilder.NoSchedule(intervalEndExactTimeStamp)
-                    )
-                } else {
-                    when (currentIntervalBuilder) {
-                        is IntervalBuilder.Child -> addIntervalBuilder()
-                        is IntervalBuilder.Schedule -> {
-                            when (typeBuilder) {
-                                is TypeBuilder.Parent -> addIntervalBuilder()
-                                is TypeBuilder.Schedule -> currentIntervalBuilder.schedules += typeBuilder.schedule
-                            }
+                when (val currentIntervalBuilder = intervalBuilder) {
+                    is IntervalBuilder.Child -> addIntervalBuilder()
+                    is IntervalBuilder.Schedule -> {
+                        when (typeBuilder) {
+                            is TypeBuilder.Parent -> addIntervalBuilder()
+                            is TypeBuilder.Schedule -> currentIntervalBuilder.schedules += typeBuilder.schedule
                         }
-                        is IntervalBuilder.NoSchedule -> addIntervalBuilder()
                     }
-
-                    typeBuilder = getNextTypeBuilder()
+                    is IntervalBuilder.NoSchedule -> addIntervalBuilder()
                 }
+
+                typeBuilder = getNextTypeBuilder()
             }
 
             return intervals + intervalBuilder.toInterval(null)

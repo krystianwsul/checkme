@@ -17,6 +17,7 @@ abstract class ExistingTaskEditDelegate(
     protected val taskData get() = data.taskData!!
 
     override val initialName get() = taskData.name
+    override val initialNote get() = taskData.note
     override val showSaveAndOpen = false
 
     override val parentScheduleManager = ParentMultiScheduleManager(

@@ -341,9 +341,7 @@ class EditActivity : NavBarActivity() {
             if (hasDelegate) {
                 delegate.saveState(this)
 
-                if (!note.isNullOrEmpty())
-                    putString(NOTE_KEY, note)
-
+                putString(NOTE_KEY, note)
                 putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
             }
         }
@@ -395,13 +393,13 @@ class EditActivity : NavBarActivity() {
 
         if (savedInstanceState?.containsKey(NOTE_HAS_FOCUS_KEY) == true) {
             savedInstanceState!!.run {
-                if (containsKey(NOTE_KEY)) {
-                    note = getString(NOTE_KEY)!!
-                    check(!note.isNullOrEmpty())
-                }
+                check(containsKey(NOTE_KEY))
 
+                note = getString(NOTE_KEY)
                 noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
             }
+        } else {
+            note = delegate.initialNote
         }
 
         (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(delegate.parentTreeDatas, parentFragmentListener)

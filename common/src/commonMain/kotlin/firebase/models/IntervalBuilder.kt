@@ -217,7 +217,7 @@ object IntervalBuilder {
                 if (!super.containsExactTimeStamp(exactTimeStamp))
                     return false
 
-                return endExactTimeStamp >= exactTimeStamp
+                return endExactTimeStamp > exactTimeStamp
             }
         }
     }

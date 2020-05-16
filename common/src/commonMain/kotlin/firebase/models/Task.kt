@@ -182,7 +182,7 @@ class Task<T : ProjectType>(
         val interval = getInterval(exactTimeStamp)
 
         if ((interval.type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy != parentTaskHierarchy)
-            ErrorLogger.instance.logException(InconsistentIntervalException("exactTimeStamp: $exactTimeStamp, expected parent task hierarchy: $parentTaskHierarchy, actual interval: $interval"))
+            ErrorLogger.instance.logException(InconsistentIntervalException2("exactTimeStamp: $exactTimeStamp, expected parent task hierarchy: $parentTaskHierarchy, actual interval: $interval"))
     }
 
     private fun checkIntervalMatchesSchedules(
@@ -195,7 +195,7 @@ class Task<T : ProjectType>(
                 ?: listOf()
 
         if (schedules.toSet() != intervalSchedules.toSet())
-            ErrorLogger.instance.logException(InconsistentIntervalException("exactTimeStamp: $exactTimeStamp, expected schedules: $schedules, actual interval: $interval"))
+            ErrorLogger.instance.logException(InconsistentIntervalException2("exactTimeStamp: $exactTimeStamp, expected schedules: $schedules, actual interval: $interval"))
     }
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
@@ -747,5 +747,5 @@ class Task<T : ProjectType>(
     )
 
     // todo group tasks: this can be safely removed once intervals are the new Source of Truth.
-    private class InconsistentIntervalException(message: String) : Exception(message)
+    private class InconsistentIntervalException2(message: String) : Exception(message)
 }

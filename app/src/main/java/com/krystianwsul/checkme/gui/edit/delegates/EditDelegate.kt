@@ -45,6 +45,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
     protected abstract var data: EditViewModel.Data
 
     open val initialName: String? = null
+    open val initialNote: String? = null
     open val scheduleHint: EditActivity.Hint.Schedule? = null
     open val showSaveAndOpen: Boolean = true
 

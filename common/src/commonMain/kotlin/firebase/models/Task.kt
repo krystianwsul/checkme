@@ -179,7 +179,7 @@ class Task<T : ProjectType>(
             exactTimeStamp: ExactTimeStamp,
             parentTaskHierarchy: TaskHierarchy<T>?
     ) {
-        val interval = getInterval(exactTimeStamp)
+        val interval = getInterval(exactTimeStamp) ?: return
 
         if ((interval.type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy != parentTaskHierarchy)
             ErrorLogger.instance.logException(InconsistentIntervalException2("exactTimeStamp: $exactTimeStamp, expected parent task hierarchy: $parentTaskHierarchy, actual interval: $interval"))
@@ -189,7 +189,7 @@ class Task<T : ProjectType>(
             exactTimeStamp: ExactTimeStamp,
             schedules: List<Schedule<T>>
     ) {
-        val interval = getInterval(exactTimeStamp)
+        val interval = getInterval(exactTimeStamp) ?: return
 
         val intervalSchedules = (interval.type as? IntervalBuilder.Type.Schedule)?.schedules
                 ?: listOf()
@@ -723,8 +723,15 @@ class Task<T : ProjectType>(
 
     private fun getIntervals() = IntervalBuilder.build(this)
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp) = getIntervals().single {
-        it.containsExactTimeStamp(exactTimeStamp)
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): IntervalBuilder.Interval<T>? {
+        val intervals = getIntervals().filter { it.containsExactTimeStamp(exactTimeStamp) }
+
+        return if (intervals.size != 1) {
+            ErrorLogger.instance.logException(MultipleIntervalsException(intervals.joinToString("\n")))
+            null
+        } else {
+            intervals.single()
+        }
     }
 
     interface ScheduleTextFactory {
@@ -748,4 +755,6 @@ class Task<T : ProjectType>(
 
     // todo group tasks: this can be safely removed once intervals are the new Source of Truth.
     private class InconsistentIntervalException2(message: String) : Exception(message)
+
+    private class MultipleIntervalsException(message: String) : Exception(message)
 }

@@ -2313,8 +2313,8 @@ class DomainFactory(
         }
 
         for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
-            val parentTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
-            val childTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
+            val parentTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
+            val childTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
             val taskHierarchy = newProject.copyTaskHierarchy(
                     now,
@@ -2340,7 +2340,7 @@ class DomainFactory(
                 pair.first.setEndData(endData)
         }
 
-        return remoteToRemoteConversion.endTasks[startingTask.id]!!
+        return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }
 
     private fun joinTasks(

@@ -43,7 +43,7 @@ class TaskHierarchyContainer<T : ProjectType> {
 
     fun getById(id: String) = taskHierarchiesById[id]!!
 
-    val all: Collection<TaskHierarchy<*>> get() = taskHierarchiesById.values
+    val all: Collection<TaskHierarchy<T>> get() = taskHierarchiesById.values
 
     private class MultiMap<T : ProjectType> {
 

@@ -170,7 +170,7 @@ class Instance<T : ProjectType> private constructor(
         if (parentInstance != null)
             return parentInstance.isVisible(now, hack24)
 
-        if (!exists() && task.schedules.none { it.matchesScheduleDateTime(scheduleDateTime) })
+        if (!exists() && task.scheduleIntervals.none { it.matchesScheduleDateTime(scheduleDateTime) })
             return false
 
         val done = done ?: return true

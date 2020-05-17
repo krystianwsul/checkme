@@ -36,7 +36,7 @@ class Task<T : ProjectType>(
 
     val name get() = taskRecord.name
 
-    val schedules: List<Schedule<T>> get() = _schedules // todo group task return filtered intervals?
+    val schedules: List<Schedule<T>> get() = _schedules
 
     override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
 
@@ -57,6 +57,11 @@ class Task<T : ProjectType>(
 
     private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
+
+    val scheduleIntervals
+        get() = intervals.mapNotNull {
+            (it.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(it)
+        }.flatten()
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
@@ -80,11 +85,13 @@ class Task<T : ProjectType>(
             exactTimeStamp: ExactTimeStamp
     ): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
-    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<IntervalBuilder.ScheduleInterval<T>> {
         requireCurrent(exactTimeStamp)
 
-        return (getInterval(exactTimeStamp).type as? IntervalBuilder.Type.Schedule)?.schedules
-                ?: listOf()
+        return getInterval(exactTimeStamp).let { interval ->
+            (interval.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(interval)
+                    ?: listOf()
+        }
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -109,9 +116,9 @@ class Task<T : ProjectType>(
             schedules.forEach {
                 it.requireCurrent(now)
 
-                taskUndoData?.scheduleIds?.add(it.scheduleId)
+                taskUndoData?.scheduleIds?.add(it.schedule.scheduleId)
 
-                it.setEndExactTimeStamp(now)
+                it.schedule.setEndExactTimeStamp(now)
             }
         } else {
             check(schedules.isEmpty())
@@ -237,7 +244,7 @@ class Task<T : ProjectType>(
         val (scheduleInstances, schedulesHaveMore) = if (scheduleStartExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
         } else {
-            val scheduleResults = schedules.map { it.getInstances(this, scheduleStartExactTimeStamp, endExactTimeStamp) }
+            val scheduleResults = scheduleIntervals.map { it.getInstances(this, scheduleStartExactTimeStamp, endExactTimeStamp) }
 
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }
@@ -277,7 +284,7 @@ class Task<T : ProjectType>(
         val removeSchedules = mutableListOf<Schedule<T>>()
         val addScheduleDatas = scheduleDatas.toMutableList()
 
-        val oldSchedules = getCurrentSchedules(now)
+        val oldSchedules = getCurrentSchedules(now).map { it.schedule }
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in oldScheduleDatas) {
             val existing = addScheduleDatas.singleOrNull { it.first == key }
@@ -326,7 +333,10 @@ class Task<T : ProjectType>(
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
         it.current(exactTimeStamp) &&
                 it.childTask.current(exactTimeStamp) &&
-                it.childTask.getInterval(exactTimeStamp).type.matches(it)
+                it.childTask
+                        .getInterval(exactTimeStamp)
+                        .type
+                        .matches(it)
     }.sortedBy { it.ordinal }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
@@ -675,7 +685,7 @@ class Task<T : ProjectType>(
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
         currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
 
-        return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") {
+        return ScheduleGroup.getGroups(currentSchedules.map { it.schedule }).joinToString("\n") {
             scheduleTextFactory.getScheduleText(it, project)
         }
     }
@@ -695,7 +705,7 @@ class Task<T : ProjectType>(
         return if (parentTask == null) {
             currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
 
-            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") {
+            ScheduleGroup.getGroups(currentSchedules.map { it.schedule }).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, project)
             }
         } else {
@@ -705,11 +715,8 @@ class Task<T : ProjectType>(
         }
     }
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp): IntervalBuilder.Interval<T> {
-        val interval = intervals.singleOrNull { it.containsExactTimeStamp(exactTimeStamp) }
-        if (interval == null)
-            throw Exception("name: $name, required: $exactTimeStamp, intervals:\n" + intervals.joinToString("\n"))
-        return interval
+    private fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
+        it.containsExactTimeStamp(exactTimeStamp)
     }
 
     interface ScheduleTextFactory {

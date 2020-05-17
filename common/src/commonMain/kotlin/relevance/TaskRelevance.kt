@@ -62,8 +62,8 @@ class TaskRelevance(val task: Task<*>) {
     ) {
         check(relevant)
 
-        task.schedules
-                .mapNotNull { it.customTimeKey }
+        task.scheduleIntervals
+                .mapNotNull { it.schedule.customTimeKey }
                 .map { remoteCustomTimeRelevances.getValue(it) }
                 .forEach { it.setRelevant() }
 

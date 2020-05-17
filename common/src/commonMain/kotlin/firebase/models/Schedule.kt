@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.Current
@@ -47,15 +48,24 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
         rootTask.invalidateIntervals()
     }
 
-    abstract fun <T : ProjectType> getInstances(
+    abstract fun getInstances(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Pair<Sequence<Instance<T>>, Boolean?> // second parameter required if end not null
 
-    abstract fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean
+    abstract fun isVisible(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            task: Task<T>,
+            now: ExactTimeStamp,
+            hack24: Boolean
+    ): Boolean
 
-    abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
+    abstract fun getNextAlarm(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            now: ExactTimeStamp
+    ): TimeStamp?
 
     fun delete() {
         rootTask.deleteSchedule(this)
@@ -66,18 +76,21 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
 
     abstract val oldestVisible: Date?
 
-    abstract fun updateOldestVisible(now: ExactTimeStamp)
+    abstract fun updateOldestVisible(scheduleInterval: IntervalBuilder.ScheduleInterval<T>, now: ExactTimeStamp)
 
-    fun matchesScheduleDateTime(scheduleDateTime: DateTime): Boolean {
+    fun matchesScheduleDateTime(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleDateTime: DateTime
+    ): Boolean {
         val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
 
-        if (exactTimeStamp < startExactTimeStamp)
+        if (exactTimeStamp < scheduleInterval.startExactTimeStamp)
+            return false
+
+        if (scheduleInterval.endExactTimeStamp?.let { exactTimeStamp >= it } == true)
             return false
 
         if (oldestVisible?.let { scheduleDateTime.date < it } == true)
-            return false
-
-        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true)
             return false
 
         if (timePair != scheduleDateTime.time.timePair)

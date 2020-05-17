@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
@@ -48,11 +49,14 @@ class MonthlyWeekSchedule<T : ProjectType>(
         return task.getInstance(scheduleDateTime)
     }
 
-    override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
+    override fun getNextAlarm(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            now: ExactTimeStamp
+    ): TimeStamp? {
         val dateThisMonth = now.date.run { getDate(year, month) }
         val thisMonth = DateTime(dateThisMonth, time)
 
-        val endExactTimeStamp = endExactTimeStamp
+        val endExactTimeStamp = scheduleInterval.endExactTimeStamp
 
         val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
             thisMonth

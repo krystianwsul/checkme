@@ -756,7 +756,7 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                customTimes += schedules.mapNotNull { it.customTimeKey }.map {
+                customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
                     it to task.project.getCustomTime(it.customTimeId)
                 }
 
@@ -767,7 +767,7 @@ class DomainFactory(
                         }
 
                 if (schedules.isNotEmpty()) {
-                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {
+                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
                         EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
                     }
                 }
@@ -1436,7 +1436,7 @@ class DomainFactory(
         }.apply {
             setName(name, note)
             getParentTaskHierarchy(now)?.setEndExactTimeStamp(now)
-            getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+            getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
         }
 
         val imageUuid = imagePath?.value?.let { newUuid() }
@@ -1582,7 +1582,7 @@ class DomainFactory(
 
         val oldParentTask = task.getParentTask(now)
         if (oldParentTask == null) {
-            task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+            task.getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
 
             newParentTask.addChild(task, now)
         } else if (oldParentTask !== newParentTask) {
@@ -2356,7 +2356,7 @@ class DomainFactory(
             joinTask.requireCurrent(now)
 
             if (joinTask.isRootTask(now)) {
-                joinTask.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+                joinTask.getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
             } else {
                 val taskHierarchy = joinTask.getParentTaskHierarchy(now)!!
 

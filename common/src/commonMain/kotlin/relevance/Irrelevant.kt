@@ -13,7 +13,7 @@ object Irrelevant {
         tasks.forEach {
             it.updateOldestVisibleServer(now)
 
-            it.schedules.forEach { it.updateOldestVisible(now) }
+            it.scheduleIntervals.forEach { it.updateOldestVisible(now) } // todo group task remove all schedules that don't appear in this list
         }
 
         // relevant hack

@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
@@ -43,7 +44,10 @@ class WeeklySchedule<T : ProjectType>(
         return task.getInstance(scheduleDateTime)
     }
 
-    override fun getNextAlarm(now: ExactTimeStamp): TimeStamp {
+    override fun getNextAlarm(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            now: ExactTimeStamp
+    ): TimeStamp {
         val today = Date.today()
 
         val nowDayOfWeek = today.dayOfWeek

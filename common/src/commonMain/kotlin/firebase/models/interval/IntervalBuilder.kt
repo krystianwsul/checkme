@@ -4,14 +4,18 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 
 object IntervalBuilder {
 
     /*
      todo group task once this is being used, also use the intervals for checking schedules and task
-       hierarchies in the same way that oldestVisible, from/until, and start/end/ExactTimeStamp is used.
+       hierarchies in the same way that oldestVisible, from/until, and start/end/ExactTimeStamp is
+       used.  Revisit hierarchies; for schedules, require ScheduleInterval for everything involving
+       start/end
      */
 
     /*
@@ -252,18 +256,22 @@ object IntervalBuilder {
         abstract val type: Type<T>
 
         abstract val startExactTimeStamp: ExactTimeStamp
+        abstract val endExactTimeStamp: ExactTimeStamp?
 
         open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
 
         data class Current<T : ProjectType>(
                 override val type: Type<T>,
                 override val startExactTimeStamp: ExactTimeStamp
-        ) : Interval<T>()
+        ) : Interval<T>() {
+
+            override val endExactTimeStamp: ExactTimeStamp? = null
+        }
 
         data class Ended<T : ProjectType>(
                 override val type: Type<T>,
                 override val startExactTimeStamp: ExactTimeStamp,
-                val endExactTimeStamp: ExactTimeStamp
+                override val endExactTimeStamp: ExactTimeStamp
         ) : Interval<T>() {
 
             override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -279,13 +287,59 @@ object IntervalBuilder {
 
         open fun matches(taskHierarchy: TaskHierarchy<T>) = false
 
-        data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
+        class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
 
             override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
         }
 
-        data class Schedule<T : ProjectType>(val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>) : Type<T>()
+        class Schedule<T : ProjectType>(
+                private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>
+        ) : Type<T>() {
 
-        data class NoSchedule<T : ProjectType>(private val unit: Unit = Unit) : Type<T>()
+            fun getScheduleIntervals(interval: Interval<T>) = schedules.map {
+                ScheduleInterval(
+                        interval.startExactTimeStamp,
+                        interval.endExactTimeStamp,
+                        it
+                )
+            }
+        }
+
+        class NoSchedule<T : ProjectType> : Type<T>()
+    }
+
+    class ScheduleInterval<T : ProjectType>(
+            override val startExactTimeStamp: ExactTimeStamp,
+            override val endExactTimeStamp: ExactTimeStamp?,
+            val schedule: Schedule<T>
+    ) : Current {
+
+        init {
+            check(startExactTimeStamp >= schedule.startExactTimeStamp)
+
+            if (schedule.endExactTimeStamp != null) {
+                check(endExactTimeStamp != null)
+                check(endExactTimeStamp <= schedule.endExactTimeStamp!!)
+            }
+        }
+
+        fun isVisible(
+                task: Task<T>,
+                now: ExactTimeStamp,
+                hack24: Boolean
+        ) = schedule.isVisible(this, task, now, hack24)
+
+        fun getInstances(
+                task: Task<T>,
+                givenStartExactTimeStamp: ExactTimeStamp?,
+                givenExactEndTimeStamp: ExactTimeStamp?
+        ) = schedule.getInstances(this, task, givenStartExactTimeStamp, givenExactEndTimeStamp)
+
+        fun matchesScheduleDateTime(scheduleDateTime: DateTime) =
+                schedule.matchesScheduleDateTime(this, scheduleDateTime)
+
+        fun updateOldestVisible(now: ExactTimeStamp) = schedule.updateOldestVisible(this, now)
+
+        fun getNextAlarm(now: ExactTimeStamp) = schedule.getNextAlarm(this, now)
     }
 }

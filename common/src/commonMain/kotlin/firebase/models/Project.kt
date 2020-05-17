@@ -129,7 +129,7 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks[newTask.id] = newTask
 
-        newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now))
+        newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now).map { it.schedule })
 
         return newTask
     }

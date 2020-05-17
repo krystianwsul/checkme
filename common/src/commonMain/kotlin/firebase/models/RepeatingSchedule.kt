@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
@@ -16,27 +17,28 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     override val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
 
-    override fun <T : ProjectType> getInstances(
+    override fun getInstances(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Pair<Sequence<Instance<T>>, Boolean?> {
         val startExactTimeStamp = listOfNotNull(
-                startExactTimeStamp,
                 repeatingScheduleRecord.from
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toExactTimeStamp(),
                 givenStartExactTimeStamp,
-                oldestVisible?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) }
+                oldestVisible?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                scheduleInterval.startExactTimeStamp
         ).max()!!
 
         val intrinsicEndExactTimeStamp = listOfNotNull(
-                endExactTimeStamp,
                 repeatingScheduleRecord.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.let { ExactTimeStamp(it) }
+                        ?.let { ExactTimeStamp(it) },
+                scheduleInterval.endExactTimeStamp
         ).min()
 
         val endExactTimeStamp = listOfNotNull(
@@ -102,16 +104,23 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             endHourMilli: HourMilli?
     ): Instance<T>?
 
-    override fun isVisible(task: Task<*>, now: ExactTimeStamp, hack24: Boolean): Boolean {
+    override fun isVisible(
+            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            task: Task<T>,
+            now: ExactTimeStamp,
+            hack24: Boolean
+    ): Boolean {
+        scheduleInterval.requireCurrent(now)
         requireCurrent(now)
 
         return until?.let {
-            getInstances(task, null, null).first.any { it.isVisible(now, hack24) }
+            getInstances(scheduleInterval, task, null, null).first.any { it.isVisible(now, hack24) }
         } ?: true
     }
 
-    override fun updateOldestVisible(now: ExactTimeStamp) {
+    override fun updateOldestVisible(scheduleInterval: IntervalBuilder.ScheduleInterval<T>, now: ExactTimeStamp) {
         val pastRootInstances = getInstances(
+                scheduleInterval,
                 rootTask,
                 null,
                 now.plusOne()

@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
+import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*

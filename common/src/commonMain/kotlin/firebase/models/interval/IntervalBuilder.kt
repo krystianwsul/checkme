@@ -1,6 +1,9 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.models.Schedule
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 

@@ -135,29 +135,25 @@ class Task<T : ProjectType>(
     }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T>? {
-        val taskHierarchies = if (current(exactTimeStamp)) {
-            requireNotDeleted(exactTimeStamp)
+        requireNotDeleted(exactTimeStamp)
 
-            getParentTaskHierarchies().filter { it.current(exactTimeStamp) }
+        return if (current(exactTimeStamp)) {
+            (getInterval(exactTimeStamp).type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy
         } else {
             // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
             // żeby można było dodawać child instances do past parent instance
 
-            requireNotDeleted(exactTimeStamp)
+            ErrorLogger.instance.logException(PastParentException("name: $name, taskKey: $taskKey, exactTimeStamp: $startExactTimeStamp, start: $startExactTimeStamp"))
 
-            getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
+            val taskHierarchies = getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
+            check(taskHierarchies.size <= 1)
+
+            taskHierarchies.singleOrNull()
         }
-
-        val parentTaskHierarchy = if (taskHierarchies.isEmpty()) {
-            null
-        } else {
-            taskHierarchies.single()
-        }
-
-        checkIntervalMatchesParentTaskHierarchy(exactTimeStamp, parentTaskHierarchy)
-
-        return parentTaskHierarchy
     }
+
+    // todo group task this is a sanity check, since I don't think the code is used anywhere
+    private class PastParentException(message: String) : Exception(message)
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
@@ -348,12 +344,10 @@ class Task<T : ProjectType>(
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
-        it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
-    }
-            .sortedBy { it.ordinal }
-            .also {
-                it.forEach { it.childTask.checkIntervalMatchesParentTaskHierarchy(exactTimeStamp, it) }
-            }
+        it.current(exactTimeStamp) &&
+                it.childTask.current(exactTimeStamp) &&
+                it.childTask.getInterval(exactTimeStamp).type.matches(it)
+    }.sortedBy { it.ordinal }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = taskRecord.image ?: return null

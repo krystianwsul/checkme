@@ -224,7 +224,12 @@ object IntervalBuilder {
 
     sealed class Type<T : ProjectType> {
 
-        class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>()
+        open fun matches(taskHierarchy: TaskHierarchy<T>) = false
+
+        class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
+
+            override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
+        }
 
         class Schedule<T : ProjectType>(val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>) : Type<T>()
 

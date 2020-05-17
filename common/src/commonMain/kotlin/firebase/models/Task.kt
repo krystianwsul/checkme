@@ -76,11 +76,8 @@ class Task<T : ProjectType>(
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T>> {
         requireCurrent(exactTimeStamp)
 
-        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
-
-        checkIntervalMatchesSchedules(exactTimeStamp, schedules)
-
-        return currentSchedules
+        return (getInterval(exactTimeStamp).type as? IntervalBuilder.Type.Schedule)?.schedules
+                ?: listOf()
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -169,29 +166,6 @@ class Task<T : ProjectType>(
 
             parentTask.apply { requireNotDeleted(exactTimeStamp) }
         }
-    }
-
-    private fun checkIntervalMatchesParentTaskHierarchy(
-            exactTimeStamp: ExactTimeStamp,
-            parentTaskHierarchy: TaskHierarchy<T>?
-    ) {
-        val interval = getInterval(exactTimeStamp)
-
-        if ((interval.type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy != parentTaskHierarchy)
-            ErrorLogger.instance.logException(InconsistentIntervalException2("exactTimeStamp: $exactTimeStamp, expected parent task hierarchy: $parentTaskHierarchy, actual interval: $interval"))
-    }
-
-    private fun checkIntervalMatchesSchedules(
-            exactTimeStamp: ExactTimeStamp,
-            schedules: List<Schedule<T>>
-    ) {
-        val interval = getInterval(exactTimeStamp)
-
-        val intervalSchedules = (interval.type as? IntervalBuilder.Type.Schedule)?.schedules
-                ?: listOf()
-
-        if (schedules.toSet() != intervalSchedules.toSet())
-            ErrorLogger.instance.logException(InconsistentIntervalException2("exactTimeStamp: $exactTimeStamp, expected schedules: $schedules, actual interval: $interval"))
     }
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
@@ -737,7 +711,4 @@ class Task<T : ProjectType>(
             val exactTimeStamp: ExactTimeStamp,
             val deleteInstances: Boolean
     )
-
-    // todo group tasks: this can be safely removed once intervals are the new Source of Truth.
-    private class InconsistentIntervalException2(message: String) : Exception(message)
 }

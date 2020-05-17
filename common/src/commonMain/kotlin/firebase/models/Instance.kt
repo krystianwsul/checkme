@@ -193,6 +193,7 @@ class Instance<T : ProjectType> private constructor(
         } else {
             fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
 
+            // todo remove after June 17th 2020
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
 
             null

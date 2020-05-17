@@ -35,7 +35,7 @@ class Task<T : ProjectType>(
 
     val name get() = taskRecord.name
 
-    val schedules: List<Schedule<T>> get() = _schedules
+    val schedules: List<Schedule<T>> get() = _schedules    // todo group task return filtered intervals?
 
     override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
 
@@ -638,8 +638,10 @@ class Task<T : ProjectType>(
         }
     }
 
+    // todo group task return filtered intervals?
     fun getParentTaskHierarchies(): Set<TaskHierarchy<T>> = project.getTaskHierarchiesByChildTaskKey(taskKey)
 
+    // todo group task return filtered intervals?
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
 
     fun updateProject(

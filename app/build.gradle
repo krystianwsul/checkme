@@ -84,9 +84,9 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta5'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
     implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.sharetarget:sharetarget:1.0.0-rc01'
+    implementation 'androidx.sharetarget:sharetarget:1.0.0'
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"

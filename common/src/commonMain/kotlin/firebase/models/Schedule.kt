@@ -35,12 +35,16 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
         requireCurrent(endExactTimeStamp)
 
         scheduleRecord.endTime = endExactTimeStamp.long
+
+        rootTask.invalidateIntervals()
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
 
         scheduleRecord.endTime = null
+
+        rootTask.invalidateIntervals()
     }
 
     abstract fun <T : ProjectType> getInstances(

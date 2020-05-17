@@ -651,8 +651,10 @@ class Task<T : ProjectType>(
 
     fun invalidateParentTaskHierarchies() {
         parentTaskHierarchiesProperty.invalidate()
-        intervalsProperty.invalidate()
+        invalidateIntervals()
     }
+
+    fun invalidateIntervals() = intervalsProperty.invalidate()
 
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
 

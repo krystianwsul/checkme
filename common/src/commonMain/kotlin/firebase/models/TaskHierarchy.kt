@@ -37,12 +37,16 @@ class TaskHierarchy<T : ProjectType>(
         requireCurrent(now)
 
         taskHierarchyRecord.endTime = now.long
+
+        childTask.invalidateParentTaskHierarchies()
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
 
         taskHierarchyRecord.endTime = null
+
+        childTask.invalidateParentTaskHierarchies()
     }
 
     fun delete() {

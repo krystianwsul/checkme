@@ -52,9 +52,7 @@ class Task<T : ProjectType>(
     override val endExactTimeStamp get() = getEndData()?.exactTimeStamp
 
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
-
-    // todo group task return filtered intervals?
-    val parentTaskHierarchies by parentTaskHierarchiesProperty
+    val parentTaskHierarchies by parentTaskHierarchiesProperty // todo group task return filtered intervals?
 
     private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
@@ -157,8 +155,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    // todo group task this is a sanity check, since I don't think the code is used anywhere
-    private class PastParentException(message: String) : Exception(message)
+    private class PastParentException(message: String) : Exception(message) // todo group task this is a sanity check, since I don't think the code is used anywhere
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)
@@ -656,8 +653,7 @@ class Task<T : ProjectType>(
         intervalsProperty.invalidate()
     }
 
-    // todo group task return filtered intervals?
-    fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
+    fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey) // todo group task return filtered intervals?
 
     fun updateProject(
             projectUpdater: ProjectUpdater,

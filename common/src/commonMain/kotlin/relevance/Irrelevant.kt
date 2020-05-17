@@ -1,10 +1,7 @@
 package com.krystianwsul.common.relevance
 
 
-import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.PrivateProject
-import com.krystianwsul.common.firebase.models.Project
-import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.soywiz.klock.days
 
@@ -136,9 +133,18 @@ object Irrelevant {
 
         relevantTasks.forEach {
             it.schedules.filter { schedule ->
-                !schedule.current(now) && schedule.oldestVisible?.let {
-                    it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!!
-                } == true
+                if (schedule.current(now))
+                    return@filter false
+
+                val result = if (schedule is SingleSchedule<*>) {
+                    !schedule.getInstance(it).isVisible(now, true)
+                } else {
+                    schedule.oldestVisible?.let {
+                        it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!!
+                    } == true
+                }
+
+                result
             }.forEach { it.delete() }
         }
 

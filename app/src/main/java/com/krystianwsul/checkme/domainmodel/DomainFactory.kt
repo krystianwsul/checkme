@@ -458,7 +458,9 @@ class DomainFactory(
             }
         }
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+        }
 
         val taskDatas = if (position == 0) {
             getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }

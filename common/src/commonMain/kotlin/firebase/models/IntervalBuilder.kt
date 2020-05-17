@@ -7,8 +7,8 @@ import com.krystianwsul.common.utils.ProjectType
 object IntervalBuilder {
 
     /*
-     todo group task once this is being used, also use the intervals for checking schedules in the
-     same way that oldestVisible, from/until, and start/end/ExactTimeStamp is used.
+     todo group task once this is being used, also use the intervals for checking schedules and task
+       hierarchies in the same way that oldestVisible, from/until, and start/end/ExactTimeStamp is used.
      */
 
     /*

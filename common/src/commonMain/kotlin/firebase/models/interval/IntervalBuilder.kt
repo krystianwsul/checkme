@@ -114,7 +114,7 @@ object IntervalBuilder {
                 typeBuilder = getNextTypeBuilder()
             }
 
-            return intervals + intervalBuilder.toInterval(null)
+            return intervals + intervalBuilder.toInterval(intervalBuilder.endExactTimeStamp)
         }
     }
 

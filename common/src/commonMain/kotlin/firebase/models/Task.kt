@@ -56,6 +56,9 @@ class Task<T : ProjectType>(
     // todo group task return filtered intervals?
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
+    private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
+    private val intervals by intervalsProperty
+
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
@@ -424,6 +427,7 @@ class Task<T : ProjectType>(
         check(_schedules.contains(schedule))
 
         _schedules.remove(schedule)
+        intervalsProperty.invalidate()
     }
 
     fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
@@ -556,6 +560,8 @@ class Task<T : ProjectType>(
                 }
             }
         }
+
+        intervalsProperty.invalidate()
     }
 
     fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*>>) {
@@ -641,9 +647,14 @@ class Task<T : ProjectType>(
                 }
             }
         }
+
+        intervalsProperty.invalidate()
     }
 
-    fun invalidateParentTaskHierarchies() = parentTaskHierarchiesProperty.invalidate()
+    fun invalidateParentTaskHierarchies() {
+        parentTaskHierarchiesProperty.invalidate()
+        intervalsProperty.invalidate()
+    }
 
     // todo group task return filtered intervals?
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
@@ -695,9 +706,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    private fun getIntervals() = IntervalBuilder.build(this)
-
-    private fun getInterval(exactTimeStamp: ExactTimeStamp) = getIntervals().single { it.containsExactTimeStamp(exactTimeStamp) }
+    private fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single { it.containsExactTimeStamp(exactTimeStamp) }
 
     interface ScheduleTextFactory {
 

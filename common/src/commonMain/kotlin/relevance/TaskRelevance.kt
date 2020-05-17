@@ -23,7 +23,7 @@ class TaskRelevance(val task: Task<*>) {
 
         relevant = true
 
-        (task.getParentTaskHierarchies() + task.getChildTaskHierarchies())
+        (task.parentTaskHierarchies + task.getChildTaskHierarchies())
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
                     it.notDeleted(hierarchyExactTimeStamp)

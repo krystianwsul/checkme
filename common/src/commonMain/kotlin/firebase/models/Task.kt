@@ -51,6 +51,11 @@ class Task<T : ProjectType>(
 
     override val endExactTimeStamp get() = getEndData()?.exactTimeStamp
 
+    private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
+
+    // todo group task return filtered intervals?
+    val parentTaskHierarchies by parentTaskHierarchiesProperty
+
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
@@ -142,7 +147,7 @@ class Task<T : ProjectType>(
 
             ErrorLogger.instance.logException(PastParentException("name: $name, taskKey: $taskKey, exactTimeStamp: $startExactTimeStamp, start: $startExactTimeStamp"))
 
-            val taskHierarchies = getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
+            val taskHierarchies = parentTaskHierarchies.filter { it.startExactTimeStamp == startExactTimeStamp }
             check(taskHierarchies.size <= 1)
 
             taskHierarchies.singleOrNull()
@@ -236,7 +241,7 @@ class Task<T : ProjectType>(
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }
 
-        val parentDatas = getParentTaskHierarchies().map {
+        val parentDatas = parentTaskHierarchies.map {
             it.parentTask.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
         }
 
@@ -638,8 +643,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    // todo group task return filtered intervals?
-    fun getParentTaskHierarchies(): Set<TaskHierarchy<T>> = project.getTaskHierarchiesByChildTaskKey(taskKey)
+    fun invalidateParentTaskHierarchies() = parentTaskHierarchiesProperty.invalidate()
 
     // todo group task return filtered intervals?
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)

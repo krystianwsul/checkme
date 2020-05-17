@@ -75,6 +75,7 @@ abstract class Project<T : ProjectType> : Current {
         val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
+        taskHierarchy.childTask.invalidateParentTaskHierarchies()
     }
 
     @Suppress("ConstantConditionIf")
@@ -205,6 +206,7 @@ abstract class Project<T : ProjectType> : Current {
         val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
+        taskHierarchy.childTask.invalidateParentTaskHierarchies()
 
         return taskHierarchy
     }
@@ -215,7 +217,10 @@ abstract class Project<T : ProjectType> : Current {
         _tasks.remove(task.id)
     }
 
-    fun deleteTaskHierarchy(taskHierarchy: TaskHierarchy<T>) = taskHierarchyContainer.removeForce(taskHierarchy.id)
+    fun deleteTaskHierarchy(taskHierarchy: TaskHierarchy<T>) {
+        taskHierarchyContainer.removeForce(taskHierarchy.id)
+        taskHierarchy.childTask.invalidateParentTaskHierarchies()
+    }
 
     fun getTaskIfPresent(taskId: String) = _tasks[taskId]
 

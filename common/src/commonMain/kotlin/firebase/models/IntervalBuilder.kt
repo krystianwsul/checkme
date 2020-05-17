@@ -17,7 +17,7 @@ object IntervalBuilder {
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val schedules = task.schedules.toMutableList()
-        val parentTaskHierarchies = task.getParentTaskHierarchies().toMutableList()
+        val parentTaskHierarchies = task.parentTaskHierarchies.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {
             val nextSchedule = schedules.minBy { it.startExactTimeStamp }

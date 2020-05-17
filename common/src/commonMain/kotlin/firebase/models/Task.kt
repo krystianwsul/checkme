@@ -53,7 +53,7 @@ class Task<T : ProjectType>(
     override val endExactTimeStamp get() = getEndData()?.exactTimeStamp
 
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
-    val parentTaskHierarchies by parentTaskHierarchiesProperty // todo group task return filtered intervals?
+    val parentTaskHierarchies by parentTaskHierarchiesProperty
 
     private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
@@ -654,7 +654,7 @@ class Task<T : ProjectType>(
         intervalsProperty.invalidate()
     }
 
-    fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey) // todo group task return filtered intervals?
+    fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
 
     fun updateProject(
             projectUpdater: ProjectUpdater,
@@ -703,7 +703,12 @@ class Task<T : ProjectType>(
         }
     }
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single { it.containsExactTimeStamp(exactTimeStamp) }
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): IntervalBuilder.Interval<T> {
+        val interval = intervals.singleOrNull { it.containsExactTimeStamp(exactTimeStamp) }
+        if (interval == null)
+            throw Exception("name: $name, required: $exactTimeStamp, intervals:\n" + intervals.joinToString("\n"))
+        return interval
+    }
 
     interface ScheduleTextFactory {
 

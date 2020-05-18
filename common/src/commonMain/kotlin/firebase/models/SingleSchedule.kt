@@ -63,6 +63,7 @@ class SingleSchedule<T : ProjectType>(
             hack24: Boolean
     ): Boolean {
         scheduleInterval.requireCurrent(now)
+        requireCurrent(now)
 
         return getInstance(task).isVisible(now, hack24)
     }

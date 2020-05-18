@@ -12,10 +12,8 @@ import com.krystianwsul.common.utils.ProjectType
 object IntervalBuilder {
 
     /*
-     todo group task once this is being used, also use the intervals for checking schedules and task
-       hierarchies in the same way that oldestVisible, from/until, and start/end/ExactTimeStamp is
-       used.  Revisit hierarchies; for schedules, require ScheduleInterval for everything involving
-       start/end
+     todo group task use the intervals for checking taskHierarchies in by overloading all members of
+       Current, and looking for references.  Presumably add wrapper
      */
 
     /*
@@ -328,11 +326,6 @@ object IntervalBuilder {
             val schedule: Schedule<T>
     ) : Current {
 
-        /*
-         todo group task for all these functions, check BOTH start/end/ExactTimeStamp from Schedule
-          and ScheduleInterval.  Also, check for requireCurrent and current, both here and for
-          taskHierarchies.  (Probably add a wrapper for those as well.)
-         */
         fun isVisible(
                 task: Task<T>,
                 now: ExactTimeStamp,

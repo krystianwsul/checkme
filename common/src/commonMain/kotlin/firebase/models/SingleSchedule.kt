@@ -47,6 +47,9 @@ class SingleSchedule<T : ProjectType>(
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
             return Pair(emptySequence(), true)
 
+        if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
+            return Pair(emptySequence(), false)
+
         if (scheduleInterval.endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
             return Pair(emptySequence(), false)
 

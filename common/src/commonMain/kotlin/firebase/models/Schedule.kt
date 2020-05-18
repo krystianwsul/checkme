@@ -84,7 +84,13 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     ): Boolean {
         val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
 
+        if (exactTimeStamp < startExactTimeStamp)
+            return false
+
         if (exactTimeStamp < scheduleInterval.startExactTimeStamp)
+            return false
+
+        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true)
             return false
 
         if (scheduleInterval.endExactTimeStamp?.let { exactTimeStamp >= it } == true)

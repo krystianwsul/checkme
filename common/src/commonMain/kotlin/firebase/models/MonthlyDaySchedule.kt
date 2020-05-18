@@ -54,7 +54,7 @@ class MonthlyDaySchedule<T : ProjectType>(
         val dateThisMonth = now.date.run { getDate(year, month) }
         val thisMonth = DateTime(dateThisMonth, time)
 
-        val endExactTimeStamp = scheduleInterval.endExactTimeStamp
+        val endExactTimeStamp = listOfNotNull(endExactTimeStamp, scheduleInterval.endExactTimeStamp).min()
 
         val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
             thisMonth

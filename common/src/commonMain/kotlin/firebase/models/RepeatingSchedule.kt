@@ -24,6 +24,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Pair<Sequence<Instance<T>>, Boolean?> {
         val startExactTimeStamp = listOfNotNull(
+                startExactTimeStamp,
                 repeatingScheduleRecord.from
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toExactTimeStamp(),
@@ -33,6 +34,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).max()!!
 
         val intrinsicEndExactTimeStamp = listOfNotNull(
+                endExactTimeStamp,
                 repeatingScheduleRecord.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()

@@ -317,12 +317,22 @@ object IntervalBuilder {
         init {
             check(startExactTimeStamp >= schedule.startExactTimeStamp)
 
+            /*
+             todo group task this check is wrong, since individual schedules don't necessarily
+              meet these criteria.  The entire group of schedules, however, might, so write a check
+              in one of the other classes that have access to that group.
+             */
             if (schedule.endExactTimeStamp != null) {
                 check(endExactTimeStamp != null)
                 check(endExactTimeStamp <= schedule.endExactTimeStamp!!)
             }
         }
 
+        /*
+         todo group task for all these functions, check BOTH start/end/ExactTimeStamp from Schedule
+          and ScheduleInterval.  Also, check for requireCurrent and current, both here and for
+          taskHierarchies.  (Probably add a wrapper for those as well.)
+         */
         fun isVisible(
                 task: Task<T>,
                 now: ExactTimeStamp,

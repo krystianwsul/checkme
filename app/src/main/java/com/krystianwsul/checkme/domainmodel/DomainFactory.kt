@@ -1748,11 +1748,7 @@ class DomainFactory(
 
         taskUndoData.scheduleIds
                 .map { projectsFactory.getSchedule(it) }
-                .forEach {
-                    it.requireNotCurrent(now)
-
-                    it.clearEndExactTimeStamp(now)
-                }
+                .forEach { it.clearEndExactTimeStamp(now) }
     }
 
     @Synchronized

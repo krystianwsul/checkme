@@ -312,5 +312,62 @@ class IntervalBuilderTest {
         )
     }
 
-    // todo group task test group of multiple schedules with various starts and ends
+    @Test
+    fun testNothingScheduleTwoStarts() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+
+        val schedule1Start = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule1 = scheduleMock(schedule1Start)
+
+        val schedule2Start = ExactTimeStamp(date, HourMinute(12, 2).toHourMilli())
+        val schedule2 = scheduleMock(schedule2Start)
+
+        val task = taskMock(
+                taskStart,
+                scheduleList = listOf(schedule1, schedule2)
+        )
+
+        task.check(
+                Interval.Ended(Type.NoSchedule(), taskStart, schedule1Start),
+                Interval.Current(Type.Schedule(listOf(schedule1, schedule2)), schedule1Start)
+        )
+    }
+
+    @Test
+    fun testScheduleOneEnd() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+
+        val schedule1End = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule1 = scheduleMock(taskStart, schedule1End)
+
+        val schedule2 = scheduleMock(taskStart)
+
+        val task = taskMock(
+                taskStart,
+                scheduleList = listOf(schedule1, schedule2)
+        )
+
+        task.check(Interval.Current(Type.Schedule(listOf(schedule1, schedule2)), taskStart))
+    }
+
+    @Test
+    fun testScheduleTwoEnds() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+
+        val schedule1End = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule1 = scheduleMock(taskStart, schedule1End)
+
+        val schedule2End = ExactTimeStamp(date, HourMinute(12, 2).toHourMilli())
+        val schedule2 = scheduleMock(taskStart, schedule2End)
+
+        val task = taskMock(
+                taskStart,
+                scheduleList = listOf(schedule1, schedule2)
+        )
+
+        task.check(
+                Interval.Ended(Type.Schedule(listOf(schedule1, schedule2)), taskStart, schedule2End),
+                Interval.Current(Type.NoSchedule(), schedule2End)
+        )
+    }
 }

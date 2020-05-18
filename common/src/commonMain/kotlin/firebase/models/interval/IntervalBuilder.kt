@@ -287,25 +287,39 @@ object IntervalBuilder {
 
         open fun matches(taskHierarchy: TaskHierarchy<T>) = false
 
-        class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
+        data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
 
             override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
         }
 
-        class Schedule<T : ProjectType>(
+        data class Schedule<T : ProjectType>(
                 private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>
         ) : Type<T>() {
 
-            fun getScheduleIntervals(interval: Interval<T>) = schedules.map {
-                ScheduleInterval(
-                        interval.startExactTimeStamp,
-                        interval.endExactTimeStamp,
-                        it
-                )
+            fun getScheduleIntervals(interval: Interval<T>): List<ScheduleInterval<T>> {
+                val minStartExactTimeStamp = schedules.map { it.startExactTimeStamp }.min()!!
+                check(minStartExactTimeStamp == interval.startExactTimeStamp)
+
+                val endExactTimeStamps = schedules.map { it.endExactTimeStamp }
+                if (endExactTimeStamps.all { it != null }) {
+                    val intervalEndExactTimeStamp = interval.endExactTimeStamp
+                    checkNotNull(intervalEndExactTimeStamp)
+
+                    val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().max()!!
+                    check(maxEndExactTimeStamp >= intervalEndExactTimeStamp)
+                }
+
+                return schedules.map {
+                    ScheduleInterval(
+                            interval.startExactTimeStamp,
+                            interval.endExactTimeStamp,
+                            it
+                    )
+                }
             }
         }
 
-        class NoSchedule<T : ProjectType> : Type<T>()
+        data class NoSchedule<T : ProjectType>(val unit: Unit = Unit) : Type<T>()
     }
 
     class ScheduleInterval<T : ProjectType>(
@@ -313,20 +327,6 @@ object IntervalBuilder {
             override val endExactTimeStamp: ExactTimeStamp?,
             val schedule: Schedule<T>
     ) : Current {
-
-        init {
-            check(startExactTimeStamp >= schedule.startExactTimeStamp)
-
-            /*
-             todo group task this check is wrong, since individual schedules don't necessarily
-              meet these criteria.  The entire group of schedules, however, might, so write a check
-              in one of the other classes that have access to that group.
-             */
-            if (schedule.endExactTimeStamp != null) {
-                check(endExactTimeStamp != null)
-                check(endExactTimeStamp <= schedule.endExactTimeStamp!!)
-            }
-        }
 
         /*
          todo group task for all these functions, check BOTH start/end/ExactTimeStamp from Schedule

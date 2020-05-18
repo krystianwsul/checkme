@@ -1,5 +1,6 @@
 package firebase.models.interval
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
@@ -13,6 +14,7 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 class IntervalBuilderTest {
@@ -61,6 +63,11 @@ class IntervalBuilderTest {
     private fun Task<ProjectType.Private>.check(vararg expected: Interval<ProjectType.Private>) {
         val actual = IntervalBuilder.build(this)
         assertEquals(expected.toList(), actual)
+    }
+
+    @Before
+    fun before() {
+        ErrorLogger.instance = mockk(relaxed = true)
     }
 
     @Test
@@ -254,4 +261,56 @@ class IntervalBuilderTest {
                 Interval.Ended(Type.NoSchedule(), nothingStart2, taskEnd)
         )
     }
+
+    @Test
+    fun testChildCurrentOverlapScheduleCurrentOverlapChild() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+        val taskHierarchy1 = taskHierarchyMock(taskStart)
+
+        val scheduleStart = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule = scheduleMock(scheduleStart)
+
+        val hierarchy2Start = ExactTimeStamp(date, HourMinute(12, 2).toHourMilli())
+        val taskHierarchy2 = taskHierarchyMock(hierarchy2Start)
+
+        val task = taskMock(
+                taskStart,
+                taskHierarchies = listOf(taskHierarchy1, taskHierarchy2),
+                scheduleList = listOf(schedule)
+        )
+
+        task.check(
+                Interval.Ended(Type.Child(taskHierarchy1), taskStart, scheduleStart),
+                Interval.Ended(Type.Schedule(listOf(schedule)), scheduleStart, hierarchy2Start),
+                Interval.Current(Type.Child(taskHierarchy2), hierarchy2Start)
+        )
+    }
+
+    @Test
+    fun testChildEndedOverlapScheduleEndedOverlapChild() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+        val futureEnd = ExactTimeStamp(date, HourMinute(13, 0).toHourMilli())
+        val taskHierarchy1 = taskHierarchyMock(taskStart, futureEnd)
+
+        val scheduleStart = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule = scheduleMock(scheduleStart, futureEnd)
+
+        val hierarchy2Start = ExactTimeStamp(date, HourMinute(12, 2).toHourMilli())
+        val taskHierarchy2 = taskHierarchyMock(hierarchy2Start, futureEnd)
+
+        val task = taskMock(
+                taskStart,
+                taskHierarchies = listOf(taskHierarchy1, taskHierarchy2),
+                scheduleList = listOf(schedule)
+        )
+
+        task.check(
+                Interval.Ended(Type.Child(taskHierarchy1), taskStart, scheduleStart),
+                Interval.Ended(Type.Schedule(listOf(schedule)), scheduleStart, hierarchy2Start),
+                Interval.Ended(Type.Child(taskHierarchy2), hierarchy2Start, futureEnd),
+                Interval.Current(Type.NoSchedule(), futureEnd)
+        )
+    }
+
+    // todo group task test group of multiple schedules with various starts and ends
 }

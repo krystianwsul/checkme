@@ -13,7 +13,7 @@ object Irrelevant {
         tasks.forEach {
             it.updateOldestVisibleServer(now)
 
-            it.scheduleIntervals.forEach { it.updateOldestVisible(now) } // todo group task remove all schedules that don't appear in this list
+            it.scheduleIntervals.forEach { it.updateOldestVisible(now) }
         }
 
         // relevant hack
@@ -132,8 +132,15 @@ object Irrelevant {
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
         relevantTasks.forEach {
-            it.schedules.filter { schedule ->
-                if (schedule.current(now))
+            val scheduleIntervals = it.scheduleIntervals
+            val unusedSchedules = it.schedules - scheduleIntervals.map { it.schedule }
+
+            unusedSchedules.forEach { it.delete() }
+
+            scheduleIntervals.filter { scheduleInterval ->
+                val schedule = scheduleInterval.schedule
+
+                if (scheduleInterval.current(now) && schedule.current(now))
                     return@filter false
 
                 val result = if (schedule is SingleSchedule<*>) {
@@ -145,7 +152,7 @@ object Irrelevant {
                 }
 
                 result
-            }.forEach { it.delete() }
+            }.forEach { it.schedule.delete() }
         }
 
         return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })

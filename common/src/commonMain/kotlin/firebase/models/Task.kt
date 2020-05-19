@@ -160,6 +160,12 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(endData)
     }
 
+    fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
+            parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
+
+    fun endAllCurrentSchedules(now: ExactTimeStamp) =
+            schedules.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
+
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): IntervalBuilder.HierarchyInterval<T>? {
         requireNotDeleted(exactTimeStamp)
 

@@ -1248,8 +1248,7 @@ class DomainFactory(
         }.apply {
             setName(name, note)
 
-            if (!isRootTask(now))
-                getParentTaskHierarchy(now)!!.taskHierarchy.setEndExactTimeStamp(now)
+            endAllCurrentTaskHierarchies(now)
 
             updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
@@ -1439,8 +1438,9 @@ class DomainFactory(
             updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
         }.apply {
             setName(name, note)
-            getParentTaskHierarchy(now)?.taskHierarchy?.setEndExactTimeStamp(now)
-            getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
+
+            endAllCurrentTaskHierarchies(now)
+            endAllCurrentSchedules(now)
         }
 
         val imageUuid = imagePath?.value?.let { newUuid() }
@@ -1591,18 +1591,10 @@ class DomainFactory(
 
         task.setName(name, note)
 
-        val oldParentTask = task.getParentTask(now)
-        if (oldParentTask == null) {
-            task.getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
+        task.endAllCurrentTaskHierarchies(now)
+        task.endAllCurrentSchedules(now)
 
-            newParentTask.addChild(task, now)
-        } else if (oldParentTask !== newParentTask) {
-            task.getParentTaskHierarchy(now)!!
-                    .taskHierarchy
-                    .setEndExactTimeStamp(now)
-
-            newParentTask.addChild(task, now)
-        }
+        newParentTask.addChild(task, now)
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
@@ -2364,13 +2356,8 @@ class DomainFactory(
         for (joinTask in joinTasks) {
             joinTask.requireCurrent(now)
 
-            if (joinTask.isRootTask(now)) {
-                joinTask.getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
-            } else {
-                joinTask.getParentTaskHierarchy(now)!!
-                        .taskHierarchy
-                        .setEndExactTimeStamp(now)
-            }
+            joinTask.endAllCurrentTaskHierarchies(now)
+            joinTask.endAllCurrentSchedules(now)
 
             newParentTask.addChild(joinTask, now)
         }

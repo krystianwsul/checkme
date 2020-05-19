@@ -4,10 +4,10 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
+import firebase.models.interval.Interval
+import firebase.models.interval.Type
 
 object IntervalBuilder {
 
@@ -243,123 +243,4 @@ object IntervalBuilder {
             override fun toType() = Type.NoSchedule<T>()
         }
     }
-
-    sealed class Interval<T : ProjectType> {
-
-        abstract val type: Type<T>
-
-        abstract val startExactTimeStamp: ExactTimeStamp
-        abstract val endExactTimeStamp: ExactTimeStamp?
-
-        open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
-
-        data class Current<T : ProjectType>(
-                override val type: Type<T>,
-                override val startExactTimeStamp: ExactTimeStamp
-        ) : Interval<T>() {
-
-            override val endExactTimeStamp: ExactTimeStamp? = null
-        }
-
-        data class Ended<T : ProjectType>(
-                override val type: Type<T>,
-                override val startExactTimeStamp: ExactTimeStamp,
-                override val endExactTimeStamp: ExactTimeStamp
-        ) : Interval<T>() {
-
-            override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
-                if (!super.containsExactTimeStamp(exactTimeStamp))
-                    return false
-
-                return endExactTimeStamp > exactTimeStamp
-            }
-        }
-    }
-
-    sealed class Type<T : ProjectType> {
-
-        open fun matches(taskHierarchy: TaskHierarchy<T>) = false
-
-        data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
-
-            override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
-
-            fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
-                check(parentTaskHierarchy.startExactTimeStamp == interval.startExactTimeStamp)
-
-                parentTaskHierarchy.endExactTimeStamp?.let {
-                    val intervalEndExactTimeStamp = interval.endExactTimeStamp
-                    checkNotNull(intervalEndExactTimeStamp)
-                    check(it >= intervalEndExactTimeStamp)
-                }
-
-                return HierarchyInterval(
-                        interval.startExactTimeStamp,
-                        interval.endExactTimeStamp,
-                        parentTaskHierarchy
-                )
-            }
-        }
-
-        data class Schedule<T : ProjectType>(
-                private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>
-        ) : Type<T>() {
-
-            fun getScheduleIntervals(interval: Interval<T>): List<ScheduleInterval<T>> {
-                val minStartExactTimeStamp = schedules.map { it.startExactTimeStamp }.min()!!
-                check(minStartExactTimeStamp == interval.startExactTimeStamp)
-
-                val endExactTimeStamps = schedules.map { it.endExactTimeStamp }
-                if (endExactTimeStamps.all { it != null }) {
-                    val intervalEndExactTimeStamp = interval.endExactTimeStamp
-                    checkNotNull(intervalEndExactTimeStamp)
-
-                    val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().max()!!
-                    check(maxEndExactTimeStamp >= intervalEndExactTimeStamp)
-                }
-
-                return schedules.map {
-                    ScheduleInterval(
-                            interval.startExactTimeStamp,
-                            interval.endExactTimeStamp,
-                            it
-                    )
-                }
-            }
-        }
-
-        data class NoSchedule<T : ProjectType>(val unit: Unit = Unit) : Type<T>()
-    }
-
-    class ScheduleInterval<T : ProjectType>(
-            override val startExactTimeStamp: ExactTimeStamp,
-            override val endExactTimeStamp: ExactTimeStamp?,
-            val schedule: Schedule<T>
-    ) : Current {
-
-        fun isVisible(
-                task: Task<T>,
-                now: ExactTimeStamp,
-                hack24: Boolean
-        ) = schedule.isVisible(this, task, now, hack24)
-
-        fun getInstances(
-                task: Task<T>,
-                givenStartExactTimeStamp: ExactTimeStamp?,
-                givenExactEndTimeStamp: ExactTimeStamp?
-        ) = schedule.getInstances(this, task, givenStartExactTimeStamp, givenExactEndTimeStamp)
-
-        fun matchesScheduleDateTime(scheduleDateTime: DateTime) =
-                schedule.matchesScheduleDateTime(this, scheduleDateTime)
-
-        fun updateOldestVisible(now: ExactTimeStamp) = schedule.updateOldestVisible(this, now)
-
-        fun getNextAlarm(now: ExactTimeStamp) = schedule.getNextAlarm(this, now)
-    }
-
-    class HierarchyInterval<T : ProjectType>(
-            override val startExactTimeStamp: ExactTimeStamp,
-            override val endExactTimeStamp: ExactTimeStamp?,
-            val taskHierarchy: TaskHierarchy<T>
-    ) : Current
 }

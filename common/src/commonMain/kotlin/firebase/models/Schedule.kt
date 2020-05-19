@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
+import firebase.models.interval.ScheduleInterval
 
 
 abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Current {
@@ -49,21 +49,21 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     }
 
     abstract fun getInstances(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Pair<Sequence<Instance<T>>, Boolean?> // second parameter required if end not null
 
     abstract fun isVisible(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             now: ExactTimeStamp,
             hack24: Boolean
     ): Boolean
 
     abstract fun getNextAlarm(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             now: ExactTimeStamp
     ): TimeStamp?
 
@@ -76,10 +76,10 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
 
     abstract val oldestVisible: Date?
 
-    abstract fun updateOldestVisible(scheduleInterval: IntervalBuilder.ScheduleInterval<T>, now: ExactTimeStamp)
+    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp)
 
     fun matchesScheduleDateTime(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             scheduleDateTime: DateTime
     ): Boolean {
         val exactTimeStamp = scheduleDateTime.toExactTimeStamp()

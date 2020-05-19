@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
+import firebase.models.interval.ScheduleInterval
 
 abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
@@ -18,7 +18,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
 
     override fun getInstances(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
@@ -107,7 +107,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     ): Instance<T>?
 
     override fun isVisible(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             now: ExactTimeStamp,
             hack24: Boolean
@@ -120,7 +120,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         } ?: true
     }
 
-    override fun updateOldestVisible(scheduleInterval: IntervalBuilder.ScheduleInterval<T>, now: ExactTimeStamp) {
+    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp) {
         val pastRootInstances = getInstances(
                 scheduleInterval,
                 rootTask,

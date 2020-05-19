@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
+import firebase.models.interval.ScheduleInterval
 
 class WeeklySchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -45,7 +45,7 @@ class WeeklySchedule<T : ProjectType>(
     }
 
     override fun getNextAlarm(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             now: ExactTimeStamp
     ): TimeStamp {
         val today = Date.today()

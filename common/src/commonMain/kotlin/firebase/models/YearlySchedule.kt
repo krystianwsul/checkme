@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.YearlyScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.years
+import firebase.models.interval.ScheduleInterval
 
 class YearlySchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -46,7 +46,7 @@ class YearlySchedule<T : ProjectType>(
     }
 
     override fun getNextAlarm(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             now: ExactTimeStamp
     ): TimeStamp? {
         val dateThisYear = now.date.run { getDate(year) }

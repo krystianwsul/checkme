@@ -11,6 +11,9 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
+import firebase.models.interval.HierarchyInterval
+import firebase.models.interval.ScheduleInterval
+import firebase.models.interval.Type
 
 class Task<T : ProjectType>(
         val project: Project<T>,
@@ -60,12 +63,12 @@ class Task<T : ProjectType>(
 
     val scheduleIntervals
         get() = intervals.mapNotNull {
-            (it.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(it)
+            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
         }.flatten()
 
     val parentHierarchyIntervals
         get() = intervals.mapNotNull {
-            (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it)
+            (it.type as? Type.Child)?.getHierarchyInterval(it)
         }
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
@@ -97,11 +100,11 @@ class Task<T : ProjectType>(
             exactTimeStamp: ExactTimeStamp
     ): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
-    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<IntervalBuilder.ScheduleInterval<T>> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> {
         requireCurrent(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let { interval ->
-            (interval.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(interval)
+            (interval.type as? Type.Schedule)?.getScheduleIntervals(interval)
                     ?.filter { it.schedule.current(exactTimeStamp) }
                     ?: listOf()
         }
@@ -166,11 +169,11 @@ class Task<T : ProjectType>(
     fun endAllCurrentSchedules(now: ExactTimeStamp) =
             schedules.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
-    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): IntervalBuilder.HierarchyInterval<T>? {
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireNotDeleted(exactTimeStamp)
 
         return if (current(exactTimeStamp)) {
-            getInterval(exactTimeStamp).let { (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it) }
+            getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
         } else {
             // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
             // żeby można było dodawać child instances do past parent instance
@@ -181,7 +184,7 @@ class Task<T : ProjectType>(
             check(taskHierarchies.size <= 1)
 
             taskHierarchies.singleOrNull()?.let {
-                IntervalBuilder.HierarchyInterval(it.startExactTimeStamp, it.endExactTimeStamp, it)
+                HierarchyInterval(it.startExactTimeStamp, it.endExactTimeStamp, it)
             }
         }
     }

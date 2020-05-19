@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
+import firebase.models.interval.ScheduleInterval
 
 class SingleSchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -29,12 +29,12 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun getNextAlarm(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             now: ExactTimeStamp
     ) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
     override fun getInstances(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
@@ -57,7 +57,7 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun isVisible(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
             now: ExactTimeStamp,
             hack24: Boolean
@@ -71,7 +71,7 @@ class SingleSchedule<T : ProjectType>(
     override val oldestVisible: Date? = null
 
     override fun updateOldestVisible(
-            scheduleInterval: IntervalBuilder.ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<T>,
             now: ExactTimeStamp
     ) = Unit
 

@@ -587,7 +587,9 @@ class DomainFactory(
             val hierarchyData = if (task.isRootTask(hierarchyExactTimeStamp))
                 null
             else
-                task.getParentTaskHierarchy(hierarchyExactTimeStamp)!!.run { HierarchyData(taskHierarchyKey, ordinal) }
+                task.getParentTaskHierarchy(hierarchyExactTimeStamp)!!
+                        .taskHierarchy
+                        .run { HierarchyData(taskHierarchyKey, ordinal) }
 
             val instanceData = GroupListFragment.InstanceData(
                     it.done,
@@ -814,7 +816,8 @@ class DomainFactory(
 
         val childTaskDatas = task.getChildTaskHierarchies(hierarchyTimeStamp)
                 .map {
-                    val childTask = it.childTask
+                    val taskHierarchy = it.taskHierarchy
+                    val childTask = taskHierarchy.childTask
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,
@@ -823,10 +826,11 @@ class DomainFactory(
                             childTask.note,
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
-                            HierarchyData(it.taskHierarchyKey, it.ordinal),
+                            HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
-                            true)
+                            true
+                    )
                 }
                 .sorted()
 
@@ -1245,7 +1249,7 @@ class DomainFactory(
             setName(name, note)
 
             if (!isRootTask(now))
-                getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
+                getParentTaskHierarchy(now)!!.taskHierarchy.setEndExactTimeStamp(now)
 
             updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
@@ -1435,7 +1439,7 @@ class DomainFactory(
             updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
         }.apply {
             setName(name, note)
-            getParentTaskHierarchy(now)?.setEndExactTimeStamp(now)
+            getParentTaskHierarchy(now)?.taskHierarchy?.setEndExactTimeStamp(now)
             getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
         }
 
@@ -1586,7 +1590,9 @@ class DomainFactory(
 
             newParentTask.addChild(task, now)
         } else if (oldParentTask !== newParentTask) {
-            task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
+            task.getParentTaskHierarchy(now)!!
+                    .taskHierarchy
+                    .setEndExactTimeStamp(now)
 
             newParentTask.addChild(task, now)
         }
@@ -2165,10 +2171,12 @@ class DomainFactory(
     ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
             parentTask.getChildTaskHierarchies(now)
                     .asSequence()
+                    .map { it.taskHierarchy }
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
                     .map {
                         val childTask = it.childTask
                         val taskParentKey = EditViewModel.ParentKey.Task(it.childTaskKey)
+
                         val parentTreeData = EditViewModel.ParentTreeData(
                                 childTask.name,
                                 getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
@@ -2354,9 +2362,9 @@ class DomainFactory(
             if (joinTask.isRootTask(now)) {
                 joinTask.getCurrentSchedules(now).forEach { it.schedule.setEndExactTimeStamp(now) }
             } else {
-                val taskHierarchy = joinTask.getParentTaskHierarchy(now)!!
-
-                taskHierarchy.setEndExactTimeStamp(now)
+                joinTask.getParentTaskHierarchy(now)!!
+                        .taskHierarchy
+                        .setEndExactTimeStamp(now)
             }
 
             newParentTask.addChild(joinTask, now)
@@ -2381,26 +2389,23 @@ class DomainFactory(
             alwaysShow: Boolean = true,
             hierarchyExactTimeStamp: ExactTimeStamp = now
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp)
-                .asSequence()
-                .sortedBy { it.ordinal }
-                .map {
-                    val childTask = it.childTask
+        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp).map {
+            val taskHierarchy = it.taskHierarchy
+            val childTask = taskHierarchy.childTask
 
-                    TaskListFragment.ChildTaskData(
-                            childTask.name,
-                            childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                            getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp),
-                            childTask.note,
-                            childTask.startExactTimeStamp,
-                            childTask.taskKey,
-                            HierarchyData(it.taskHierarchyKey, it.ordinal),
-                            childTask.getImage(deviceDbInfo),
-                            childTask.current(now),
-                            alwaysShow
-                    )
-                }
-                .toList()
+            TaskListFragment.ChildTaskData(
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                    getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp),
+                    childTask.note,
+                    childTask.startExactTimeStamp,
+                    childTask.taskKey,
+                    HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
+                    childTask.getImage(deviceDbInfo),
+                    childTask.current(now),
+                    alwaysShow
+            )
+        }
     }
 
     private fun getExistingInstances() = projectsFactory.existingInstances
@@ -2409,7 +2414,7 @@ class DomainFactory(
             parentTask: Task<*>,
             now: ExactTimeStamp
     ): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now).map {
-        val childTask = it.childTask
+        val childTask = it.taskHierarchy.childTask
 
         GroupListFragment.TaskData(
                 childTask.taskKey,
@@ -2417,7 +2422,8 @@ class DomainFactory(
                 getGroupListChildTaskDatas(childTask, now),
                 childTask.startExactTimeStamp,
                 childTask.note,
-                childTask.getImage(deviceDbInfo))
+                childTask.getImage(deviceDbInfo)
+        )
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
@@ -2776,10 +2782,17 @@ class DomainFactory(
         val copiedTask = getTaskForce(copyTaskKey)
 
         copiedTask.getChildTaskHierarchies(now).forEach {
-            val copiedChildTask = it.childTask
+            val copiedChildTask = it.taskHierarchy.childTask
             copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
-            createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
+            createChildTask(
+                    now,
+                    task,
+                    copiedChildTask.name,
+                    copiedChildTask.note,
+                    copiedChildTask.imageJson,
+                    copiedChildTask.taskKey
+            )
         }
     }
 

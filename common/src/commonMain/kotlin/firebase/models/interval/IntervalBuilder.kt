@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ProjectType
 object IntervalBuilder {
 
     /*
-     todo group task use the intervals for checking taskHierarchies in by overloading all members of
+     todo group task use the intervals for checking taskHierarchies by overloading all members of
        Current, and looking for references.  Presumably add wrapper
      */
 
@@ -288,6 +288,22 @@ object IntervalBuilder {
         data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
 
             override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
+
+            fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
+                check(parentTaskHierarchy.startExactTimeStamp == interval.startExactTimeStamp)
+
+                parentTaskHierarchy.endExactTimeStamp?.let {
+                    val intervalEndExactTimeStamp = interval.endExactTimeStamp
+                    checkNotNull(intervalEndExactTimeStamp)
+                    check(it >= intervalEndExactTimeStamp)
+                }
+
+                return HierarchyInterval(
+                        interval.startExactTimeStamp,
+                        interval.endExactTimeStamp,
+                        parentTaskHierarchy
+                )
+            }
         }
 
         data class Schedule<T : ProjectType>(
@@ -345,4 +361,10 @@ object IntervalBuilder {
 
         fun getNextAlarm(now: ExactTimeStamp) = schedule.getNextAlarm(this, now)
     }
+
+    class HierarchyInterval<T : ProjectType>(
+            override val startExactTimeStamp: ExactTimeStamp,
+            override val endExactTimeStamp: ExactTimeStamp?,
+            val taskHierarchy: TaskHierarchy<T>
+    ) : Current
 }

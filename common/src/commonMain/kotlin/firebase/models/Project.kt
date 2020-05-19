@@ -293,9 +293,9 @@ abstract class Project<T : ProjectType> : Current {
         @Suppress("UNCHECKED_CAST")
         val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
-        remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
+        remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies.map { it.taskHierarchy })
 
-        childTaskHierarchies.map { it.childTask }.forEach {
+        childTaskHierarchies.map { it.taskHierarchy.childTask }.forEach {
             it.requireCurrent(now)
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)

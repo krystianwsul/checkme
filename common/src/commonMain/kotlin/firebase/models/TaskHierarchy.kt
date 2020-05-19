@@ -33,6 +33,32 @@ class TaskHierarchy<T : ProjectType>(
 
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
+    // todo group task check all of these usages
+
+    override fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
+        return super.notDeleted(exactTimeStamp)
+    }
+
+    override fun afterStart(exactTimeStamp: ExactTimeStamp): Boolean {
+        return super.afterStart(exactTimeStamp)
+    }
+
+    override fun current(exactTimeStamp: ExactTimeStamp): Boolean {
+        return super.current(exactTimeStamp)
+    }
+
+    override fun requireNotDeleted(exactTimeStamp: ExactTimeStamp) {
+        super.requireNotDeleted(exactTimeStamp)
+    }
+
+    override fun requireCurrent(exactTimeStamp: ExactTimeStamp) {
+        super.requireCurrent(exactTimeStamp)
+    }
+
+    override fun requireNotCurrent(exactTimeStamp: ExactTimeStamp) {
+        super.requireNotCurrent(exactTimeStamp)
+    }
+
     fun setEndExactTimeStamp(now: ExactTimeStamp) {
         requireCurrent(now)
 

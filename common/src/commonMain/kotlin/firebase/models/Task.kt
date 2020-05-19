@@ -63,6 +63,12 @@ class Task<T : ProjectType>(
             (it.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(it)
         }.flatten()
 
+    // todo group task use this instead of parentTaskHierarchies where needed
+    val hierarchyIntervals
+        get() = intervals.mapNotNull {
+            (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it)
+        }
+
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
@@ -125,31 +131,33 @@ class Task<T : ProjectType>(
         }
 
         getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndData(endData, taskUndoData, true)
+            val taskHierarchy = it.taskHierarchy
+            taskHierarchy.childTask.setEndData(endData, taskUndoData, true)
 
-            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+            taskUndoData?.taskHierarchyKeys?.add(taskHierarchy.taskHierarchyKey)
 
-            it.setEndExactTimeStamp(now)
+            taskHierarchy.setEndExactTimeStamp(now)
         }
 
         if (!recursive) {
             getParentTaskHierarchy(now)?.let {
                 it.requireCurrent(now)
+                it.taskHierarchy.requireCurrent(now)
 
-                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchy.taskHierarchyKey)
 
-                it.setEndExactTimeStamp(now)
+                it.taskHierarchy.setEndExactTimeStamp(now)
             }
         }
 
         setMyEndExactTimeStamp(endData)
     }
 
-    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T>? {
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): IntervalBuilder.HierarchyInterval<T>? {
         requireNotDeleted(exactTimeStamp)
 
         return if (current(exactTimeStamp)) {
-            (getInterval(exactTimeStamp).type as? IntervalBuilder.Type.Child)?.parentTaskHierarchy
+            getInterval(exactTimeStamp).let { (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it) }
         } else {
             // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
             // żeby można było dodawać child instances do past parent instance
@@ -159,7 +167,9 @@ class Task<T : ProjectType>(
             val taskHierarchies = parentTaskHierarchies.filter { it.startExactTimeStamp == startExactTimeStamp }
             check(taskHierarchies.size <= 1)
 
-            taskHierarchies.singleOrNull()
+            taskHierarchies.singleOrNull()?.let {
+                IntervalBuilder.HierarchyInterval(it.startExactTimeStamp, it.endExactTimeStamp, it)
+            }
         }
     }
 
@@ -176,8 +186,9 @@ class Task<T : ProjectType>(
 
         return getParentTaskHierarchy(exactTimeStamp)?.run {
             requireNotDeleted(exactTimeStamp)
+            taskHierarchy.requireNotDeleted(exactTimeStamp)
 
-            parentTask.apply { requireNotDeleted(exactTimeStamp) }
+            taskHierarchy.parentTask.apply { requireNotDeleted(exactTimeStamp) }
         }
     }
 
@@ -317,11 +328,11 @@ class Task<T : ProjectType>(
 
             oldMockPair.second
                     .setInstanceDateTime(
-                    shownFactory,
-                    ownerKey,
-                    singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
-                    now
-            )
+                            shownFactory,
+                            ownerKey,
+                            singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
+                            now
+                    )
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now) }
             addSchedules(ownerKey, addScheduleDatas, now)
@@ -331,13 +342,14 @@ class Task<T : ProjectType>(
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
-        it.current(exactTimeStamp) &&
-                it.childTask.current(exactTimeStamp) &&
-                it.childTask
-                        .getInterval(exactTimeStamp)
-                        .type
-                        .matches(it)
-    }.sortedBy { it.ordinal }
+        it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
+    }
+            .mapNotNull {
+                it.childTask.getParentTaskHierarchy(exactTimeStamp)?.takeIf { hierarchyInterval ->
+                    hierarchyInterval.taskHierarchy == it && hierarchyInterval.current(exactTimeStamp)
+                }
+            }
+            .sortedBy { it.taskHierarchy.ordinal }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = taskRecord.image ?: return null

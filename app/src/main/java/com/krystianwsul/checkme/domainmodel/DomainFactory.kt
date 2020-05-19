@@ -1482,7 +1482,14 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val childTask = createChildTask(now, parentTask, name, note, imageUuid?.let { TaskJson.Image(it, uuid) }, copyTaskKey)
+        val childTask = createChildTask(
+                now,
+                parentTask,
+                name,
+                note,
+                imageUuid?.let { TaskJson.Image(it, uuid) },
+                copyTaskKey
+        )
 
         updateNotifications(now)
 

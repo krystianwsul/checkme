@@ -69,7 +69,14 @@ abstract class Project<T : ProjectType> : Current {
             childTask: Task<T>,
             now: ExactTimeStamp
     ) {
-        val taskHierarchyJson = TaskHierarchyJson(parentTask.id, childTask.id, now.long, null, null)
+        val taskHierarchyJson = TaskHierarchyJson(
+                parentTask.id,
+                childTask.id,
+                now.long,
+                null,
+                null
+        )
+
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
         val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)

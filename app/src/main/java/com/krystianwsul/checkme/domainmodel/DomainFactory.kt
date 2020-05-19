@@ -1643,7 +1643,7 @@ class DomainFactory(
 
         val remoteProject = projectsFactory.getProjectForce(projectId)
         val taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
-        taskHierarchy.requireCurrent(now)
+        taskHierarchy.requireCurrent(now) // technically, I should check the HierarchyInterval too, but it shouldn't make a difference here
 
         taskHierarchy.ordinal = hierarchyData.ordinal
 
@@ -1745,14 +1745,12 @@ class DomainFactory(
                 }
 
         taskUndoData.taskHierarchyKeys
+                .asSequence()
                 .map { projectsFactory.getTaskHierarchy(it) }
-                .forEach {
-                    it.requireNotCurrent(now)
-
-                    it.clearEndExactTimeStamp(now)
-                }
+                .forEach { it.clearEndExactTimeStamp(now) }
 
         taskUndoData.scheduleIds
+                .asSequence()
                 .map { projectsFactory.getSchedule(it) }
                 .forEach { it.clearEndExactTimeStamp(now) }
     }

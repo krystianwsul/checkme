@@ -12,11 +12,6 @@ import com.krystianwsul.common.utils.ProjectType
 object IntervalBuilder {
 
     /*
-     todo group task use the intervals for checking taskHierarchies by overloading all members of
-       Current, and looking for references.  Presumably add wrapper
-     */
-
-    /*
      Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */

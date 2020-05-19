@@ -260,8 +260,10 @@ class Task<T : ProjectType>(
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }
 
-        val parentDatas = parentTaskHierarchies.map {
-            it.parentTask.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+        val parentDatas = hierarchyIntervals.map {
+            it.taskHierarchy
+                    .parentTask
+                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
         }
 
         val parentInstances = parentDatas.flatMap { it.first }

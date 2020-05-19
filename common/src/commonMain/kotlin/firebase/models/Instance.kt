@@ -120,7 +120,7 @@ class Instance<T : ProjectType> private constructor(
 
         return task.getChildTaskHierarchies()
                 .asSequence()
-                .mapNotNull { it.takeIf { it.current(hierarchyExactTimeStamp) }?.taskHierarchy }
+                .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
                 .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
                 .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                 .filter { it.first.getParentInstance(now)?.instanceKey == instanceKey }

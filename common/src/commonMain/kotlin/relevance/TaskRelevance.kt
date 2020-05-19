@@ -23,12 +23,20 @@ class TaskRelevance(val task: Task<*>) {
 
         relevant = true
 
-        (task.parentTaskHierarchies + task.getChildTaskHierarchies())
+        (task.hierarchyIntervals + task.getChildTaskHierarchies())
+                .asSequence()
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
-                    it.notDeleted(hierarchyExactTimeStamp)
+                    it.notDeleted(hierarchyExactTimeStamp) && it.taskHierarchy.notDeleted(hierarchyExactTimeStamp)
                 }
-                .forEach { taskHierarchyRelevances.getValue(it.taskHierarchyKey).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+                .forEach {
+                    taskHierarchyRelevances.getValue(it.taskHierarchy.taskHierarchyKey).setRelevant(
+                            taskRelevances,
+                            taskHierarchyRelevances,
+                            instanceRelevances,
+                            now
+                    )
+                }
 
         val oldestVisible = task.getOldestVisible()
 

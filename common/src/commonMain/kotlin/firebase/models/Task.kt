@@ -342,14 +342,10 @@ class Task<T : ProjectType>(
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
-        it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
-    }
-            .mapNotNull {
-                it.childTask.getParentTaskHierarchy(exactTimeStamp)?.takeIf { hierarchyInterval ->
-                    hierarchyInterval.taskHierarchy == it && hierarchyInterval.current(exactTimeStamp)
-                }
-            }
-            .sortedBy { it.taskHierarchy.ordinal }
+        it.current(exactTimeStamp) &&
+                it.taskHierarchy.current(exactTimeStamp) &&
+                it.taskHierarchy.childTask.current(exactTimeStamp)
+    }.sortedBy { it.taskHierarchy.ordinal }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = taskRecord.image ?: return null
@@ -679,6 +675,8 @@ class Task<T : ProjectType>(
     fun invalidateIntervals() = intervalsProperty.invalidate()
 
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
+            .flatMap { it.childTask.hierarchyIntervals }
+            .filter { it.taskHierarchy.parentTaskKey == taskKey }
 
     fun updateProject(
             projectUpdater: ProjectUpdater,

@@ -675,6 +675,7 @@ class Task<T : ProjectType>(
 
     fun invalidateIntervals() = intervalsProperty.invalidate()
 
+    // todo group task after testing intervals, make this lazy
     fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
             .flatMap { it.childTask.hierarchyIntervals }
             .filter { it.taskHierarchy.parentTaskKey == taskKey }

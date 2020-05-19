@@ -63,7 +63,6 @@ class Task<T : ProjectType>(
             (it.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(it)
         }.flatten()
 
-    // todo group task use this instead of parentTaskHierarchies where needed
     val hierarchyIntervals
         get() = intervals.mapNotNull {
             (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it)

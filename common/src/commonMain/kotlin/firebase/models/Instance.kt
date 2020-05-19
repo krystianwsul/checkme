@@ -190,28 +190,16 @@ class Instance<T : ProjectType> private constructor(
         return done > cutoff
     }
 
+    private fun isEligibleParentInstance(now: ExactTimeStamp): Boolean =
+            getParentInstance(now)?.isEligibleParentInstance(now) ?: matchesSchedule()
+
     fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
-        fun tryLog(message: String) {
-            if (name == "child (schedule test)")
-                log("magic: $message")
-        }
-
-        tryLog("scheduleDateTime: $scheduleDateTime, parentTask: $parentTask")
-
         return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
-            val parentInstance = parentTask.getInstance(scheduleDateTime)
-            tryLog("parentInstance: $parentInstance")
-
-            tryLog("parentInstance.isRootInstance: " + parentInstance.isRootInstance(now))
-            tryLog("parentInstance.matchesSchedule: " + parentInstance.matchesSchedule())
-            return if (parentInstance.isRootInstance(now) && !parentInstance.matchesSchedule())
-                null
-            else
-                parentInstance
+            parentTask.getInstance(scheduleDateTime).takeIf { it.isEligibleParentInstance(now) }
         } else {
             fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
 

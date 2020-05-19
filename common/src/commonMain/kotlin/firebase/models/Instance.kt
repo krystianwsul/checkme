@@ -161,6 +161,11 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
+
+    private fun matchesSchedule() = task.scheduleIntervals.any {
+        it.matchesScheduleDateTime(scheduleDateTime)
+    }
+
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (data.hidden)
             return false
@@ -172,7 +177,7 @@ class Instance<T : ProjectType> private constructor(
         if (parentInstance != null)
             return parentInstance.isVisible(now, hack24)
 
-        if (!exists() && task.scheduleIntervals.none { it.matchesScheduleDateTime(scheduleDateTime) })
+        if (!exists() && !matchesSchedule())
             return false
 
         val done = done ?: return true
@@ -190,8 +195,23 @@ class Instance<T : ProjectType> private constructor(
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
+        fun tryLog(message: String) {
+            if (name == "child (schedule test)")
+                log("magic: $message")
+        }
+
+        tryLog("scheduleDateTime: $scheduleDateTime, parentTask: $parentTask")
+
         return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
-            parentTask.getInstance(scheduleDateTime)
+            val parentInstance = parentTask.getInstance(scheduleDateTime)
+            tryLog("parentInstance: $parentInstance")
+
+            tryLog("parentInstance.isRootInstance: " + parentInstance.isRootInstance(now))
+            tryLog("parentInstance.matchesSchedule: " + parentInstance.matchesSchedule())
+            return if (parentInstance.isRootInstance(now) && !parentInstance.matchesSchedule())
+                null
+            else
+                parentInstance
         } else {
             fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
 

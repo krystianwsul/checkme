@@ -24,7 +24,11 @@ class DayViewModel : ViewModel() {
 
     class Entry(private val timeRange: MainActivity.TimeRange, private val position: Int) : DomainListener<DayData>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(
+                ExactTimeStamp.now,
+                position,
+                timeRange
+        )
     }
 
     data class DayData(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()

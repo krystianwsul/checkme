@@ -95,6 +95,7 @@ class Task<T : ProjectType>(
 
         return getInterval(exactTimeStamp).let { interval ->
             (interval.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(interval)
+                    ?.filter { it.schedule.current(exactTimeStamp) }
                     ?: listOf()
         }
     }

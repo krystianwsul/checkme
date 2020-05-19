@@ -23,7 +23,7 @@ class TaskRelevance(val task: Task<*>) {
 
         relevant = true
 
-        (task.hierarchyIntervals + task.getChildTaskHierarchies())
+        (task.parentHierarchyIntervals + task.childHierarchyIntervals)
                 .asSequence()
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)

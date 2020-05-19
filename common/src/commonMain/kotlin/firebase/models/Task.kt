@@ -63,10 +63,17 @@ class Task<T : ProjectType>(
             (it.type as? IntervalBuilder.Type.Schedule)?.getScheduleIntervals(it)
         }.flatten()
 
-    val hierarchyIntervals
+    val parentHierarchyIntervals
         get() = intervals.mapNotNull {
             (it.type as? IntervalBuilder.Type.Child)?.getHierarchyInterval(it)
         }
+
+    private val childHierarchyIntervalsProperty = invalidatableLazy {
+        project.getTaskHierarchiesByParentTaskKey(taskKey)
+                .flatMap { it.childTask.parentHierarchyIntervals }
+                .filter { it.taskHierarchy.parentTaskKey == taskKey }
+    }
+    val childHierarchyIntervals by childHierarchyIntervalsProperty
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
@@ -260,7 +267,7 @@ class Task<T : ProjectType>(
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }
 
-        val parentDatas = hierarchyIntervals.map {
+        val parentDatas = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
@@ -343,7 +350,7 @@ class Task<T : ProjectType>(
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = childHierarchyIntervals.filter {
         it.current(exactTimeStamp) &&
                 it.taskHierarchy.current(exactTimeStamp) &&
                 it.taskHierarchy.childTask.current(exactTimeStamp)
@@ -674,12 +681,9 @@ class Task<T : ProjectType>(
         invalidateIntervals()
     }
 
-    fun invalidateIntervals() = intervalsProperty.invalidate()
+    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
-    // todo group task after testing intervals, make this lazy
-    fun getChildTaskHierarchies() = project.getTaskHierarchiesByParentTaskKey(taskKey)
-            .flatMap { it.childTask.hierarchyIntervals }
-            .filter { it.taskHierarchy.parentTaskKey == taskKey }
+    fun invalidateIntervals() = intervalsProperty.invalidate()
 
     fun updateProject(
             projectUpdater: ProjectUpdater,

@@ -38,7 +38,7 @@ class TaskHierarchy<T : ProjectType>(
 
         taskHierarchyRecord.endTime = now.long
 
-        childTask.invalidateParentTaskHierarchies()
+        invalidateTasks()
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
@@ -46,6 +46,11 @@ class TaskHierarchy<T : ProjectType>(
 
         taskHierarchyRecord.endTime = null
 
+        invalidateTasks()
+    }
+
+    fun invalidateTasks() {
+        parentTask.invalidateChildTaskHierarchies()
         childTask.invalidateParentTaskHierarchies()
     }
 

@@ -118,7 +118,7 @@ class Instance<T : ProjectType> private constructor(
 
         val scheduleDateTime = scheduleDateTime
 
-        return task.getChildTaskHierarchies()
+        return task.childHierarchyIntervals
                 .asSequence()
                 .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
                 .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }

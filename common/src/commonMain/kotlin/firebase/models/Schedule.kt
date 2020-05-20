@@ -106,4 +106,6 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     }
 
     protected abstract fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean
+
+    override fun toString() = super.toString() + ", scheduleId: $scheduleId, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 }

@@ -59,4 +59,6 @@ class TaskHierarchy<T : ProjectType>(
 
         taskHierarchyRecord.delete()
     }
+
+    override fun toString() = super.toString() + ", taskHierarchyKey: $taskHierarchyKey, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp, parentTaskKey: $parentTaskKey, childTaskKey: $childTaskKey"
 }

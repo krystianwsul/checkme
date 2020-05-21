@@ -16,8 +16,6 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
     override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
     override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
 
-    val startTime by lazy { scheduleRecord.startTime }
-
     val endTime get() = scheduleRecord.endTime
 
     val customTimeKey get() = scheduleRecord.customTimeKey

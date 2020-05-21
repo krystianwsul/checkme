@@ -138,6 +138,8 @@ abstract class Project<T : ProjectType> : Current {
 
         newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now).map { it.schedule })
 
+        // todo no schedule record copy it as well
+
         return newTask
     }
 

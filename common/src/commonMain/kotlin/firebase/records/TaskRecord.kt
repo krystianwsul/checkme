@@ -30,6 +30,10 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord<T>> = HashMap()
 
+    val noScheduleOrParentRecords = taskJson.noScheduleOrParent
+            .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
+            .toMutableMap()
+
     override val createObject: TaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
@@ -55,6 +59,8 @@ class TaskRecord<T : ProjectType> private constructor(
                 scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject
 
             taskJson.schedules = scheduleWrappers
+
+            taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
             return taskJson
         }
@@ -183,7 +189,8 @@ class TaskRecord<T : ProjectType> private constructor(
                 weeklyScheduleRecords.values +
                 monthlyDayScheduleRecords.values +
                 monthlyWeekScheduleRecords.values +
-                yearlyScheduleRecords.values
+                yearlyScheduleRecords.values +
+                noScheduleOrParentRecords.values
 
     fun setOldestVisible(uuid: String, newOldestVisibleJson: OldestVisibleJson) {
         val oldOldestVisibleJson = getOldestVisibleJson(uuid)
@@ -291,6 +298,8 @@ class TaskRecord<T : ProjectType> private constructor(
 
     fun getCustomTimeId(id: String) = projectRecord.getCustomTimeId(id)
     fun getCustomTimeKey(id: String) = projectRecord.getCustomTimeKey(id)
+
+    fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
 }

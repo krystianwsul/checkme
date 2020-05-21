@@ -136,6 +136,8 @@ class SharedProjectRecord(
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) = CustomTimeKey.Shared(projectKey, customTimeId)
 
+    override fun newNoScheduleOrParentRecordId(taskId: String) = databaseWrapper.newSharedNoScheduleOrParentRecord(projectKey, taskId)
+
     interface Parent {
 
         fun remove(key: ProjectKey.Shared)

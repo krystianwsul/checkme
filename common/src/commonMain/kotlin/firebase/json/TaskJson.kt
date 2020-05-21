@@ -14,7 +14,8 @@ data class TaskJson @JvmOverloads constructor(
         val oldestVisible: MutableMap<String, OldestVisibleJson> = mutableMapOf(), // todo oldest visible May 30th remove
         var oldestVisibleServer: String? = null, // todo oldest visible May 30th remove
         var image: Image? = null,
-        var endData: EndData? = null
+        var endData: EndData? = null,
+        var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf()
 ) {
 
     @Serializable

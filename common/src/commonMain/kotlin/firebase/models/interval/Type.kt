@@ -1,6 +1,8 @@
 package firebase.models.interval
 
+import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.TaskHierarchy
+import com.krystianwsul.common.firebase.models.interval.NoScheduleOrParentInterval
 import com.krystianwsul.common.utils.ProjectType
 
 sealed class Type<T : ProjectType> {
@@ -55,5 +57,14 @@ sealed class Type<T : ProjectType> {
         }
     }
 
-    data class NoSchedule<T : ProjectType>(val unit: Unit = Unit) : Type<T>()
+    data class NoSchedule<T : ProjectType>(val noScheduleOrParent: NoScheduleOrParent<T>? = null) : Type<T>() {
+
+        fun getNoScheduleOrParentInterval(interval: Interval<T>) = noScheduleOrParent?.let {
+            NoScheduleOrParentInterval(
+                    interval.startExactTimeStamp,
+                    interval.endExactTimeStamp,
+                    it
+            )
+        }
+    }
 }

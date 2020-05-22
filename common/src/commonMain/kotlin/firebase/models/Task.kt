@@ -75,6 +75,9 @@ class Task<T : ProjectType>(
             (it.type as? Type.Child)?.getHierarchyInterval(it)
         }
 
+    val noScheduleOrParentIntervals
+        get() = intervals.mapNotNull { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
+
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         project.getTaskHierarchiesByParentTaskKey(taskKey)
                 .flatMap { it.childTask.parentHierarchyIntervals }

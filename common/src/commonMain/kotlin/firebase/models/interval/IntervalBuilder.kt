@@ -231,7 +231,7 @@ object IntervalBuilder {
 
             override val endExactTimeStamp = noScheduleOrParent?.endExactTimeStamp
 
-            override fun toType() = Type.NoSchedule<T>()
+            override fun toType() = Type.NoSchedule(noScheduleOrParent)
 
             // endExactTimeStamp is meaningful only when the record is present
             override fun badOverlap(nextEndExactTimeStamp: ExactTimeStamp): Boolean {

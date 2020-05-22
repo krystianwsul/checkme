@@ -183,7 +183,23 @@ class ProjectsFactory(
         createSchedules(deviceDbInfo.key, now, scheduleDatas)
     }
 
-    fun createTaskHelper(
+    fun createNoScheduleOrParentTask(
+            now: ExactTimeStamp,
+            name: String,
+            note: String?,
+            projectKey: ProjectKey<*>,
+            imageUuid: String?,
+            deviceDbInfo: DeviceDbInfo
+    ) = createTaskHelper(
+            now,
+            name,
+            note,
+            projectKey,
+            imageUuid,
+            deviceDbInfo
+    ).apply { setNoScheduleOrParent(now) }
+
+    private fun createTaskHelper(
             now: ExactTimeStamp,
             name: String,
             note: String?,

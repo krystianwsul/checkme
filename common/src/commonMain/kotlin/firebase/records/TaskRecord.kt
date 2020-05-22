@@ -292,6 +292,14 @@ class TaskRecord<T : ProjectType> private constructor(
         return yearlyScheduleRecord
     }
 
+    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord<T> {
+        val noScheduleOrParentRecord = NoScheduleOrParentRecord(this, noScheduleOrParentJson, null)
+        check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
+
+        noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
+        return noScheduleOrParentRecord
+    }
+
     override fun deleteFromParent() = check(projectRecord.taskRecords.remove(id) == this)
 
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)

@@ -1249,6 +1249,7 @@ class DomainFactory(
             setName(name, note)
 
             endAllCurrentTaskHierarchies(now)
+            endAllCurrentNoScheduleOrParents(now)
 
             updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
@@ -1341,7 +1342,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val task = projectsFactory.createTaskHelper(
+        val task = projectsFactory.createNoScheduleOrParentTask(
                 now,
                 name,
                 note,
@@ -1392,7 +1393,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val newParentTask = projectsFactory.createTaskHelper(
+        val newParentTask = projectsFactory.createNoScheduleOrParentTask(
                 now,
                 name,
                 note,
@@ -1441,6 +1442,9 @@ class DomainFactory(
 
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
+            endAllCurrentNoScheduleOrParents(now)
+
+            setNoScheduleOrParent(now)
         }
 
         val imageUuid = imagePath?.value?.let { newUuid() }
@@ -1593,6 +1597,7 @@ class DomainFactory(
 
         task.endAllCurrentTaskHierarchies(now)
         task.endAllCurrentSchedules(now)
+        task.endAllCurrentNoScheduleOrParents(now)
 
         newParentTask.addChild(task, now)
 
@@ -2358,6 +2363,7 @@ class DomainFactory(
 
             joinTask.endAllCurrentTaskHierarchies(now)
             joinTask.endAllCurrentSchedules(now)
+            joinTask.endAllCurrentNoScheduleOrParents(now)
 
             newParentTask.addChild(joinTask, now)
         }

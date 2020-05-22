@@ -20,7 +20,7 @@ class NoScheduleOrParentRecord<T : ProjectType>(
 
     val startTime = createObject.startTime
 
-    val endTime by Committer(createObject::endTime)
+    var endTime by Committer(createObject::endTime)
 
     override fun deleteFromParent() = check(taskRecord.noScheduleOrParentRecords.remove(id) == this)
 }

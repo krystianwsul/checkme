@@ -37,7 +37,9 @@ class Task<T : ProjectType>(
 
     private val _schedules = mutableListOf<Schedule<T>>()
 
-    val noScheduleOrParents = taskRecord.noScheduleOrParentRecords.mapValues { NoScheduleOrParent(it.value) }
+    val noScheduleOrParents = taskRecord.noScheduleOrParentRecords
+            .mapValues { NoScheduleOrParent(this, it.value) }
+            .toMutableMap()
 
     val name get() = taskRecord.name
 
@@ -170,6 +172,10 @@ class Task<T : ProjectType>(
 
     fun endAllCurrentSchedules(now: ExactTimeStamp) =
             schedules.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
+
+    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp) = noScheduleOrParents.values
+            .filter { it.current(now) }
+            .forEach { it.setEndExactTimeStamp(now) }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireNotDeleted(exactTimeStamp)
@@ -745,6 +751,15 @@ class Task<T : ProjectType>(
 
     private fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
         it.containsExactTimeStamp(exactTimeStamp)
+    }
+
+    fun setNoScheduleOrParent(now: ExactTimeStamp) {
+        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(now.long))
+        check(!noScheduleOrParents.containsKey(noScheduleOrParentRecord.id))
+
+        noScheduleOrParents[noScheduleOrParentRecord.id] = NoScheduleOrParent(this, noScheduleOrParentRecord)
+
+        invalidateIntervals()
     }
 
     interface ScheduleTextFactory {

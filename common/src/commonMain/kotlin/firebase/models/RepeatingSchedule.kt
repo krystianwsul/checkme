@@ -139,6 +139,9 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     }
 
     override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean {
+        if (timePair != scheduleDateTime.time.timePair)
+            return false
+
         if (from?.let { scheduleDateTime.date < it } == true)
             return false
 

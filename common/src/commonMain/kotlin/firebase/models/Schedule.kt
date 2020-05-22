@@ -8,7 +8,6 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.interval.ScheduleInterval
 
-
 abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Current {
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
@@ -97,9 +96,6 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
             return false
 
         if (oldestVisible?.let { scheduleDateTime.date < it } == true)
-            return false
-
-        if (timePair != scheduleDateTime.time.timePair)
             return false
 
         return matchesScheduleDateTimeHelper(scheduleDateTime)

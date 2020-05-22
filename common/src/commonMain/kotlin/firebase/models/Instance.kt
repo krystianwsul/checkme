@@ -123,7 +123,11 @@ class Instance<T : ProjectType> private constructor(
                 .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
                 .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
                 .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
-                .filter { it.first.getParentInstance(now)?.instanceKey == instanceKey }
+                .filter {
+                    it.first
+                            .getParentInstance(now)
+                            ?.instanceKey == instanceKey
+                }
                 .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
                 .values
                 .toList()
@@ -161,7 +165,6 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
-
     private fun matchesSchedule() = task.scheduleIntervals.any {
         it.matchesScheduleDateTime(scheduleDateTime)
     }
@@ -191,7 +194,7 @@ class Instance<T : ProjectType> private constructor(
     }
 
     private fun isEligibleParentInstance(now: ExactTimeStamp): Boolean =
-            getParentInstance(now)?.isEligibleParentInstance(now) ?: matchesSchedule()
+            getParentInstance(now)?.isEligibleParentInstance(now) ?: (exists() || matchesSchedule())
 
     fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)

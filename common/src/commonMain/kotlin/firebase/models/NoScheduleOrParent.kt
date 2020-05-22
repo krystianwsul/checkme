@@ -10,5 +10,8 @@ class NoScheduleOrParent<T : ProjectType>(private val noScheduleOrParentRecord: 
     override val startExactTimeStamp = ExactTimeStamp(noScheduleOrParentRecord.startTime)
     override val endExactTimeStamp get() = noScheduleOrParentRecord.endTime?.let(::ExactTimeStamp)
 
-    // todo no schedule record add to invervalbuilder, invalidate task stuff, add in DomainFactory create calls
+    /*
+     todo use for determining root task, invalidate task stuff, clean out along with
+       taskHierarchies and schedules, add in DomainFactory create calls, relevance
+     */
 }

@@ -37,7 +37,7 @@ class Task<T : ProjectType>(
 
     private val _schedules = mutableListOf<Schedule<T>>()
 
-    private val noScheduleOrParents = taskRecord.noScheduleOrParentRecords.mapValues { NoScheduleOrParent(it.value) }
+    val noScheduleOrParents = taskRecord.noScheduleOrParentRecords.mapValues { NoScheduleOrParent(it.value) }
 
     val name get() = taskRecord.name
 

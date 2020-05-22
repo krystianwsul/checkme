@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.models.Schedule
+import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -18,34 +18,23 @@ object IntervalBuilder {
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val schedules = task.schedules.toMutableList()
         val parentTaskHierarchies = task.parentTaskHierarchies.toMutableList()
+        val noScheduleOrParents = task.noScheduleOrParents.values.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {
-            val nextSchedule = schedules.minBy { it.startExactTimeStamp }
-            val nextParentTaskHierarchy = parentTaskHierarchies.minBy { it.startExactTimeStamp }
+            val nextSchedule = schedules.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Schedule(it) }
+            val nextParentTaskHierarchy = parentTaskHierarchies.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Parent(it) }
+            val nextNoScheduleOrParent = noScheduleOrParents.minBy { it.startExactTimeStamp }?.let { TypeBuilder.NoScheduleOrParent(it) }
 
-            fun returnSchedule(nextSchedule: Schedule<T>): TypeBuilder.Schedule<T> {
-                schedules.remove(nextSchedule)
-
-                return TypeBuilder.Schedule(nextSchedule)
-            }
-
-            fun returnParent(nextParentTaskHierarchy: TaskHierarchy<T>): TypeBuilder.Parent<T> {
-                parentTaskHierarchies.remove(nextParentTaskHierarchy)
-
-                return TypeBuilder.Parent(nextParentTaskHierarchy)
-            }
-
-            return if (nextSchedule != null && nextParentTaskHierarchy != null) {
-                if (nextSchedule.startExactTimeStamp < nextParentTaskHierarchy.startExactTimeStamp) // parents take precedence (arbitrarily)
-                    returnSchedule(nextSchedule)
-                else
-                    returnParent(nextParentTaskHierarchy)
-            } else if (nextParentTaskHierarchy != null) {
-                returnParent(nextParentTaskHierarchy)
-            } else if (nextSchedule != null) {
-                returnSchedule(nextSchedule)
-            } else {
-                null
+            return listOfNotNull(
+                    nextNoScheduleOrParent,
+                    nextParentTaskHierarchy,
+                    nextSchedule
+            ).minBy { it.startExactTimeStamp }?.also {
+                when (it) {
+                    is TypeBuilder.NoScheduleOrParent -> noScheduleOrParents.remove(it.noScheduleOrParent)
+                    is TypeBuilder.Parent -> parentTaskHierarchies.remove(it.parentTaskHierarchy)
+                    is TypeBuilder.Schedule -> schedules.remove(it.schedule)
+                }
             }
         }
 
@@ -80,16 +69,8 @@ object IntervalBuilder {
 
             while (typeBuilder != null) {
                 fun addIntervalBuilder(endExactTimeStamp: ExactTimeStamp, newIntervalBuilder: IntervalBuilder<T>) {
-                    /*
-                     todo group tasks: endExactTimeStamp isn't meaningful for NoSchedule constructed
-                      from an absence of records.  It will be, however, for NoSchedule constructed
-                      from the records I'll be adding to represent a root task without a schedule.
-                     */
-                    if (intervalBuilder !is IntervalBuilder.NoSchedule &&
-                            intervalBuilder.endExactTimeStamp?.let { it <= endExactTimeStamp } != true
-                    ) {
+                    if (intervalBuilder.badOverlap(endExactTimeStamp))
                         ErrorLogger.instance.logException(OverlapException("task: ${task.name}, taskKey: ${task.taskKey}, endExactTimeStamp: $endExactTimeStamp, old interval builder: $intervalBuilder, new interval builder: $newIntervalBuilder"))
-                    }
 
                     check(intervalBuilder.endExactTimeStamp?.let { it < endExactTimeStamp } != true)
 
@@ -186,6 +167,13 @@ object IntervalBuilder {
 
             override fun toIntervalBuilder() = IntervalBuilder.Schedule(startExactTimeStamp, mutableListOf(schedule))
         }
+
+        class NoScheduleOrParent<T : ProjectType>(val noScheduleOrParent: com.krystianwsul.common.firebase.models.NoScheduleOrParent<T>) : TypeBuilder<T>() {
+
+            override val startExactTimeStamp = noScheduleOrParent.startExactTimeStamp
+
+            override fun toIntervalBuilder() = IntervalBuilder.NoSchedule<T>(startExactTimeStamp)
+        }
     }
 
     private sealed class IntervalBuilder<T : ProjectType> {
@@ -207,6 +195,8 @@ object IntervalBuilder {
         }
 
         abstract fun toType(): Type<T>
+
+        open fun badOverlap(nextEndExactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it <= nextEndExactTimeStamp } != true
 
         data class Child<T : ProjectType>(
                 override val startExactTimeStamp: ExactTimeStamp,
@@ -235,12 +225,21 @@ object IntervalBuilder {
         }
 
         data class NoSchedule<T : ProjectType>(
-                override val startExactTimeStamp: ExactTimeStamp
+                override val startExactTimeStamp: ExactTimeStamp,
+                val noScheduleOrParent: NoScheduleOrParent<T>? = null
         ) : IntervalBuilder<T>() {
 
-            override val endExactTimeStamp: ExactTimeStamp? = null
+            override val endExactTimeStamp = noScheduleOrParent?.endExactTimeStamp
 
             override fun toType() = Type.NoSchedule<T>()
+
+            // endExactTimeStamp is meaningful only when the record is present
+            override fun badOverlap(nextEndExactTimeStamp: ExactTimeStamp): Boolean {
+                return if (noScheduleOrParent != null)
+                    super.badOverlap(nextEndExactTimeStamp)
+                else
+                    false
+            }
         }
     }
 }

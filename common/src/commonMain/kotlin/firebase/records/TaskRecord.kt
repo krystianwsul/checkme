@@ -16,6 +16,15 @@ class TaskRecord<T : ProjectType> private constructor(
     companion object {
 
         const val TASKS = "tasks"
+
+        private fun <T : ProjectType> dateTimeStringToSchedulePair(
+                projectRecord: ProjectRecord<T>,
+                dateTimeString: String
+        ): Pair<ScheduleKey, CustomTimeId<T>?> {
+            val (dateString, timeString) = dateTimeString.split(':')
+
+            return RootInstanceRecord.dateTimeStringsToSchedulePair(projectRecord, dateString, timeString)
+        }
     }
 
     val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()
@@ -100,6 +109,10 @@ class TaskRecord<T : ProjectType> private constructor(
     var image by Committer(taskJson::image)
 
     var oldestVisibleServer by Committer(taskJson::oldestVisibleServer)
+
+    val groupSchedulePair = taskJson.groupScheduleKey?.let {
+        dateTimeStringToSchedulePair(projectRecord, it)
+    }
 
     constructor(
             id: String,

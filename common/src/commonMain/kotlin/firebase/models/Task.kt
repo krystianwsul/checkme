@@ -472,7 +472,14 @@ class Task<T : ProjectType>(
         check(_schedules.contains(schedule))
 
         _schedules.remove(schedule)
-        intervalsProperty.invalidate()
+        invalidateIntervals()
+    }
+
+    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent<T>) {
+        check(noScheduleOrParents.containsKey(noScheduleOrParent.id))
+
+        noScheduleOrParents.remove(noScheduleOrParent.id)
+        invalidateIntervals()
     }
 
     fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {

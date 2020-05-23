@@ -13,6 +13,8 @@ class NoScheduleOrParent<T : ProjectType>(
     override val startExactTimeStamp = ExactTimeStamp(noScheduleOrParentRecord.startTime)
     override val endExactTimeStamp get() = noScheduleOrParentRecord.endTime?.let(::ExactTimeStamp)
 
+    val id = noScheduleOrParentRecord.id
+
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)
 
@@ -21,7 +23,8 @@ class NoScheduleOrParent<T : ProjectType>(
         task.invalidateIntervals()
     }
 
-    /*
-     todo no schedule record relevance, invalidate task stuff
-     */
+    fun delete() {
+        task.deleteNoScheduleOrParent(this)
+        noScheduleOrParentRecord.delete()
+    }
 }

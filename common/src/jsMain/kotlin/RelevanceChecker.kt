@@ -15,7 +15,12 @@ import firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
 
-    fun checkRelevance(admin: dynamic, response: MutableList<String>, onComplete: () -> Unit) {
+    fun checkRelevance(
+            admin: dynamic,
+            response: MutableList<String>,
+            onComplete: () -> Unit,
+            updateDatabase: Boolean
+    ) {
         val roots = listOf("development", "production")
 
         val completed = roots.associateWith { false }.toMutableMap()
@@ -73,12 +78,17 @@ object RelevanceChecker {
                         sharedData!!.third.forEach { it.save(values) }
                         rootUserManager?.save(values)
 
-                        databaseWrapper.update(values) { message, _, exception ->
-                            ErrorLogger.instance.apply {
-                                log(message)
-                                exception?.let { logException(it) }
-                            }
+                        ErrorLogger.instance.log("updateDatabase: $updateDatabase")
+                        if (updateDatabase) {
+                            databaseWrapper.update(values) { message, _, exception ->
+                                ErrorLogger.instance.apply {
+                                    log(message)
+                                    exception?.let { logException(it) }
+                                }
 
+                                callback(root)
+                            }
+                        } else {
                             callback(root)
                         }
                     }

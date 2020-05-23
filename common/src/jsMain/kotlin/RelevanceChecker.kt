@@ -18,8 +18,8 @@ object RelevanceChecker {
     fun checkRelevance(
             admin: dynamic,
             response: MutableList<String>,
-            onComplete: () -> Unit,
-            updateDatabase: Boolean
+            updateDatabase: Boolean,
+            onComplete: () -> Unit
     ) {
         val roots = listOf("development", "production")
 
@@ -79,6 +79,7 @@ object RelevanceChecker {
                         rootUserManager?.save(values)
 
                         ErrorLogger.instance.log("updateDatabase: $updateDatabase")
+                        ErrorLogger.instance.log("all database values: $values")
                         if (updateDatabase) {
                             databaseWrapper.update(values) { message, _, exception ->
                                 ErrorLogger.instance.apply {

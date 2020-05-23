@@ -136,9 +136,16 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks[newTask.id] = newTask
 
-        newTask.copySchedules(deviceDbInfo, now, oldTask.getCurrentSchedules(now).map { it.schedule })
+        val currentSchedules = oldTask.getCurrentSchedules(now).map { it.schedule }
+        val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
-        // todo no schedule record copy it as well
+        if (currentSchedules.isNotEmpty()) {
+            check(currentNoScheduleOrParent == null)
+
+            newTask.copySchedules(deviceDbInfo, now, currentSchedules)
+        } else {
+            currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
+        }
 
         return newTask
     }

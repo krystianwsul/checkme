@@ -113,11 +113,18 @@ class Task<T : ProjectType>(
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> {
         requireCurrent(exactTimeStamp)
 
-        return getInterval(exactTimeStamp).let { interval ->
-            (interval.type as? Type.Schedule)?.getScheduleIntervals(interval)
+        return getInterval(exactTimeStamp).let {
+            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
                     ?.filter { it.schedule.current(exactTimeStamp) }
                     ?: listOf()
         }
+    }
+
+    fun getCurrentNoScheduleOrParent(exactTimeStamp: ExactTimeStamp) = getInterval(exactTimeStamp).let {
+        (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
+    }?.also {
+        check(it.current(exactTimeStamp))
+        check(it.noScheduleOrParent.current(exactTimeStamp))
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {

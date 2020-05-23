@@ -32,7 +32,7 @@ abstract class DatabaseWrapper {
 
     fun newSharedScheduleRecordId(projectId: ProjectKey<ProjectType.Shared>, taskId: String) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${ScheduleRecord.SCHEDULES}")
 
-    fun newSharedNoScheduleOrParentRecord(projectId: ProjectKey<ProjectType.Shared>, taskId: String) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
+    fun newSharedNoScheduleOrParentRecordId(projectId: ProjectKey<ProjectType.Shared>, taskId: String) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
 
     fun newSharedTaskRecordId(projectId: ProjectKey<ProjectType.Shared>) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}")
 

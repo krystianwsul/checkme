@@ -16,7 +16,7 @@ class NoScheduleOrParentRecord<T : ProjectType>(
 
     val id = _id ?: taskRecord.newNoScheduleOrParentRecordId()
 
-    override val key = "${taskRecord.id}/$NO_SCHEDULE_OR_PARENT/$id"
+    override val key = "${taskRecord.key}/$NO_SCHEDULE_OR_PARENT/$id"
 
     val startTime = createObject.startTime
 

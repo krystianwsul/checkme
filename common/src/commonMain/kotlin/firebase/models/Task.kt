@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import firebase.models.interval.HierarchyInterval
+import firebase.models.interval.Interval
 import firebase.models.interval.ScheduleInterval
 import firebase.models.interval.Type
 
@@ -37,9 +38,11 @@ class Task<T : ProjectType>(
 
     private val _schedules = mutableListOf<Schedule<T>>()
 
-    val noScheduleOrParents = taskRecord.noScheduleOrParentRecords
+    private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
             .mapValues { NoScheduleOrParent(this, it.value) }
             .toMutableMap()
+
+    val noScheduleOrParents: Collection<NoScheduleOrParent<T>> get() = noScheduleOrParentsMap.values
 
     val name get() = taskRecord.name
 
@@ -176,9 +179,8 @@ class Task<T : ProjectType>(
     fun endAllCurrentSchedules(now: ExactTimeStamp) =
             schedules.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
-    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp) = noScheduleOrParents.values
-            .filter { it.current(now) }
-            .forEach { it.setEndExactTimeStamp(now) }
+    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp) =
+            noScheduleOrParents.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireNotDeleted(exactTimeStamp)
@@ -476,9 +478,9 @@ class Task<T : ProjectType>(
     }
 
     fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent<T>) {
-        check(noScheduleOrParents.containsKey(noScheduleOrParent.id))
+        check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))
 
-        noScheduleOrParents.remove(noScheduleOrParent.id)
+        noScheduleOrParentsMap.remove(noScheduleOrParent.id)
         invalidateIntervals()
     }
 
@@ -765,12 +767,16 @@ class Task<T : ProjectType>(
 
     fun setNoScheduleOrParent(now: ExactTimeStamp) {
         val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(now.long))
-        check(!noScheduleOrParents.containsKey(noScheduleOrParentRecord.id))
+        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
 
-        noScheduleOrParents[noScheduleOrParentRecord.id] = NoScheduleOrParent(this, noScheduleOrParentRecord)
+        noScheduleOrParentsMap[noScheduleOrParentRecord.id] = NoScheduleOrParent(this, noScheduleOrParentRecord)
 
         invalidateIntervals()
     }
+
+    fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
+            .filterIsInstance<Interval.Ended<T>>()
+            .forEach { it.correctEndExactTimeStamps() }
 
     interface ScheduleTextFactory {
 

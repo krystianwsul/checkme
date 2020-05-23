@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.TaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
@@ -11,7 +10,7 @@ import com.krystianwsul.common.utils.TaskKey
 class TaskHierarchy<T : ProjectType>(
         private val project: Project<T>,
         private val taskHierarchyRecord: TaskHierarchyRecord
-) : Current {
+) : TaskParentEntry {
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
     override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
@@ -33,10 +32,10 @@ class TaskHierarchy<T : ProjectType>(
 
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp) {
-        requireCurrent(now)
+    override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+        requireCurrent(endExactTimeStamp)
 
-        taskHierarchyRecord.endTime = now.long
+        taskHierarchyRecord.endTime = endExactTimeStamp.long
 
         invalidateTasks()
     }

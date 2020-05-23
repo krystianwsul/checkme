@@ -11,6 +11,8 @@ object Irrelevant {
         val tasks = project.tasks
 
         tasks.forEach {
+            it.correctIntervalEndExactTimeStamps()
+
             it.updateOldestVisibleServer(now)
 
             it.scheduleIntervals.forEach { it.updateOldestVisible(now) }
@@ -153,6 +155,12 @@ object Irrelevant {
 
                 result
             }.forEach { it.schedule.delete() }
+
+            val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
+                    .filter { it.current(now) }
+                    .map { it.noScheduleOrParent }
+            val unusedNoScheduleOrParents = it.noScheduleOrParents - relevantNoScheduleOrParents
+            unusedNoScheduleOrParents.forEach { it.delete() }
         }
 
         return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })

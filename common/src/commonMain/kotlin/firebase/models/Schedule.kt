@@ -3,12 +3,11 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.interval.ScheduleInterval
 
-abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Current {
+abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
 
@@ -29,7 +28,7 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Curr
             ?.let { rootTask.project.getCustomTime(it.customTimeId) }
             ?: Time.Normal(hourMinute!!)
 
-    fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+    override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)
 
         scheduleRecord.endTime = endExactTimeStamp.long

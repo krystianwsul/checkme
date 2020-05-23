@@ -32,5 +32,12 @@ sealed class Interval<T : ProjectType> {
 
             return endExactTimeStamp > exactTimeStamp
         }
+
+        fun correctEndExactTimeStamps() {
+            type.taskParentEntries.forEach {
+                if (it.endExactTimeStamp?.let { it > endExactTimeStamp } != false)
+                    it.setEndExactTimeStamp(endExactTimeStamp)
+            }
+        }
     }
 }

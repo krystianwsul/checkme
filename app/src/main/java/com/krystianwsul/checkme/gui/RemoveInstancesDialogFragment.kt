@@ -23,12 +23,12 @@ class RemoveInstancesDialogFragment : AbstractDialogFragment() {
 
     private lateinit var payload: Serializable
 
-    lateinit var listener: (Serializable, Boolean) -> Unit
+    lateinit var listener: (Serializable, Boolean) -> Unit // todo group task change to relay
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        payload = arguments!!.getSerializable(KEY_PAYLOAD)!!
+        payload = requireArguments().getSerializable(KEY_PAYLOAD)!!
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.removeInstancesMessage)

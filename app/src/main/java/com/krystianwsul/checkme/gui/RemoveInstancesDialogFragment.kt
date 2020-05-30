@@ -23,7 +23,7 @@ class RemoveInstancesDialogFragment : AbstractDialogFragment() {
 
     private lateinit var payload: Serializable
 
-    lateinit var listener: (Serializable, Boolean) -> Unit // todo group task change to relay
+    lateinit var listener: (Serializable, Boolean) -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

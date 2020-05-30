@@ -88,6 +88,8 @@ class Task<T : ProjectType>(
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
 
+    val groupSchedulePair = taskRecord.groupSchedulePair
+
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {

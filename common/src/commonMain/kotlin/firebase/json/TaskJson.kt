@@ -16,7 +16,7 @@ data class TaskJson @JvmOverloads constructor(
         var image: Image? = null,
         var endData: EndData? = null,
         var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
-        val groupScheduleKey: String? = null
+        val groupScheduleKey: String? = null // if this becomes mutable, make sure not to change lazy {} to get()
 ) {
 
     @Serializable

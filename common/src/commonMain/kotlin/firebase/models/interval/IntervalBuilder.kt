@@ -17,7 +17,11 @@ object IntervalBuilder {
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val schedules = task.schedules.toMutableList()
-        val parentTaskHierarchies = task.parentTaskHierarchies.toMutableList()
+
+        val parentTaskHierarchies = task.parentTaskHierarchies
+                .filterNot { it.parentIsGroupTask }
+                .toMutableList()
+
         val noScheduleOrParents = task.noScheduleOrParents.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {

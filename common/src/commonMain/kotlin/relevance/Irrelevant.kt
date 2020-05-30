@@ -92,8 +92,8 @@ object Irrelevant {
         }
 
         irrelevantExistingInstances.forEach { it.delete() }
-        irrelevantTasks.forEach { it.delete() }
         irrelevantTaskHierarchies.forEach { it.delete() }
+        irrelevantTasks.forEach { it.delete() }
 
         val remoteCustomTimes = project.customTimes
         val remoteCustomTimeRelevances = remoteCustomTimes.map { it.key to RemoteCustomTimeRelevance(it) }.toMap()

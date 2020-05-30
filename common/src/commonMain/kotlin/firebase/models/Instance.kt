@@ -124,7 +124,11 @@ class Instance<T : ProjectType> private constructor(
                 it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
             })
 
-            childTaskHierarchies.map {
+            /*
+                no idea why this sortedBy is necessary, but apparently something else is sorting the
+                other branch of the if statement
+             */
+            childTaskHierarchies.sortedBy { it.id }.map {
                 val childInstance = it.childTask.getInstance(scheduleDateTime)
                 check(childInstance.getParentInstance(now)?.instanceKey == instanceKey)
 

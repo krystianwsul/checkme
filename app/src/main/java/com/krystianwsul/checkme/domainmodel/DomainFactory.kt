@@ -1313,7 +1313,7 @@ class DomainFactory(
                 allReminders
         )
 
-        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
+        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
 
         updateNotifications(now)
 
@@ -2360,7 +2360,8 @@ class DomainFactory(
             newParentTask: Task<*>,
             joinTasks: List<Task<*>>,
             now: ExactTimeStamp,
-            removeInstanceKeys: List<InstanceKey>
+            removeInstanceKeys: List<InstanceKey>,
+            allReminders: Boolean = true
     ) {
         newParentTask.requireCurrent(now)
         check(joinTasks.size > 1)
@@ -2368,9 +2369,11 @@ class DomainFactory(
         for (joinTask in joinTasks) {
             joinTask.requireCurrent(now)
 
-            joinTask.endAllCurrentTaskHierarchies(now)
-            joinTask.endAllCurrentSchedules(now)
-            joinTask.endAllCurrentNoScheduleOrParents(now)
+            if (allReminders) {
+                joinTask.endAllCurrentTaskHierarchies(now)
+                joinTask.endAllCurrentSchedules(now)
+                joinTask.endAllCurrentNoScheduleOrParents(now)
+            }
 
             newParentTask.addChild(joinTask, now)
         }

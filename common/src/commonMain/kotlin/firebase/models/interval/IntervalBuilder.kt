@@ -100,6 +100,7 @@ object IntervalBuilder {
             }
 
             val intervalEndExactTimeStamp = intervalBuilder.endExactTimeStamp
+                    ?: taskEndExactTimeStamp
 
             var currentInterval: Interval.Current<T>? = null
 

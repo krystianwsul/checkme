@@ -147,7 +147,20 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         }
     }
 
+    fun showAllRemindersDialog(): Boolean {
+        if (!data.showAllInstancesDialog)
+            return false
+
+        val singleSchedule = parentScheduleManager.schedules
+                .singleOrNull()
+                ?: return false
+
+        return singleSchedule.scheduleDataWrapper.scheduleData is ScheduleData.Single
+    }
+
     fun createTask(createParameters: CreateParameters): TaskKey {
+        check(createParameters.allReminders || showAllRemindersDialog())
+
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
 
         return when {
@@ -188,7 +201,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
     }
 
-    class CreateParameters(val name: String, val note: String?)
+    class CreateParameters(val name: String, val note: String?, val allReminders: Boolean)
 
     enum class ScheduleError(@StringRes val resource: Int) {
 

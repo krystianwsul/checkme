@@ -25,6 +25,12 @@ class TaskRecord<T : ProjectType> private constructor(
 
             return RootInstanceRecord.dateTimeStringsToSchedulePair(projectRecord, dateString, timeString)
         }
+
+        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {
+            InstanceRecord.run {
+                scheduleKeyToDateString(it, true) + ":" + scheduleKeyToTimeString(it, true)
+            }
+        }
     }
 
     val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()

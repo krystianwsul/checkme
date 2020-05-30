@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -178,9 +179,22 @@ class ProjectsFactory(
             note: String?,
             projectId: ProjectKey<*>,
             imageUuid: String?,
-            deviceDbInfo: DeviceDbInfo
-    ) = createTaskHelper(now, name, note, projectId, imageUuid, deviceDbInfo).apply {
-        createSchedules(deviceDbInfo.key, now, scheduleDatas)
+            deviceDbInfo: DeviceDbInfo,
+            allReminders: Boolean = true
+    ): Task<*> {
+        val groupScheduleKey = scheduleDatas.takeUnless { allReminders }
+                ?.let { it.single().first as ScheduleData.Single }
+                ?.run { ScheduleKey(date, timePair) }
+
+        return createTaskHelper(
+                now,
+                name,
+                note,
+                projectId,
+                imageUuid,
+                deviceDbInfo,
+                groupScheduleKey
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas) }
     }
 
     fun createNoScheduleOrParentTask(
@@ -205,10 +219,19 @@ class ProjectsFactory(
             note: String?,
             projectId: ProjectKey<*>,
             imageUuid: String?,
-            deviceDbInfo: DeviceDbInfo
+            deviceDbInfo: DeviceDbInfo,
+            groupScheduleKey: ScheduleKey? = null
     ): Task<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
-        val taskJson = TaskJson(name, now.long, null, note, image = image)
+
+        val taskJson = TaskJson(
+                name,
+                now.long,
+                null,
+                note,
+                image = image,
+                groupScheduleKey = groupScheduleKey?.let { TaskRecord.scheduleKeyToString(it) }
+        )
 
         return getProjectForce(projectId).newTask(taskJson)
     }

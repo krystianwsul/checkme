@@ -18,6 +18,7 @@ class JoinTasksEditDelegate(
 ) : EditDelegate(editImageState) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
+    override val showSaveAndOpen = false
 
     private fun initialStateGetter(): ParentScheduleState {
         val (initialParentKey, schedule) = parameters.run {
@@ -66,7 +67,8 @@ class JoinTasksEditDelegate(
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        parameters.removeInstanceKeys
+                        parameters.removeInstanceKeys,
+                        createParameters.allReminders
                 )
                 .also { EditActivity.createdTaskKey = it }
     }
@@ -75,6 +77,8 @@ class JoinTasksEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createJoinChildTask(
                         data.dataId,
@@ -95,6 +99,8 @@ class JoinTasksEditDelegate(
             createParameters: CreateParameters,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createJoinRootTask(
                         data.dataId,

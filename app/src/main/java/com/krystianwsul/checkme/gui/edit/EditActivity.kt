@@ -14,6 +14,7 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -78,6 +79,7 @@ class EditActivity : NavBarActivity() {
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
+        private const val TAG_ALL_REMINDERS = "allReminders"
 
         private const val REQUEST_CREATE_PARENT = 982
 
@@ -134,6 +136,7 @@ class EditActivity : NavBarActivity() {
         )
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupParent(view: View) {
         if (view !is EditText) {
             view.setOnTouchListener { _, _ ->
@@ -184,6 +187,10 @@ class EditActivity : NavBarActivity() {
         override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
     }
 
+    private val allRemindersListener = { allReminders: Boolean ->
+        save(false, allReminders)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -197,34 +204,25 @@ class EditActivity : NavBarActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        fun save(andOpen: Boolean) {
+        fun trySave(andOpen: Boolean) {
             checkNotNull(toolbarEditText)
 
             if (!updateError()) {
-                val name = toolbarEditText.text.toString().trim { it <= ' ' }
-                check(!TextUtils.isEmpty(name))
+                if (delegate.showAllRemindersDialog()) {
+                    check(!andOpen)
 
-                editViewModel.stop()
-
-                val createParameters = EditDelegate.CreateParameters(name, note)
-
-                val taskKey = delegate.createTask(createParameters)
-
-                if (andOpen)
-                    startActivity(ShowTaskActivity.newIntent(taskKey))
-
-                setResult(
-                        Activity.RESULT_OK,
-                        Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) }
-                )
-
-                finish()
+                    AllRemindersDialogFragment.newInstance()
+                            .apply { listener = allRemindersListener }
+                            .show(supportFragmentManager, TAG_ALL_REMINDERS)
+                } else {
+                    save(andOpen, true)
+                }
             }
         }
 
         when (item.itemId) {
-            R.id.action_save -> save(false)
-            R.id.action_save_and_open -> save(true)
+            R.id.action_save -> trySave(false)
+            R.id.action_save_and_open -> trySave(true)
             android.R.id.home -> {
                 if (tryClose())
                     finish()
@@ -252,7 +250,13 @@ class EditActivity : NavBarActivity() {
 
         parameters = EditParameters.fromIntent(intent)
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
+        supportFragmentManager.run {
+            @Suppress("UNCHECKED_CAST")
+            fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
+
+            find<DiscardDialogFragment>(DISCARD_TAG)?.discardDialogListener = discardDialogListener
+            find<AllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
+        }
 
         if (!noteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
@@ -470,6 +474,27 @@ class EditActivity : NavBarActivity() {
                 delegate.parentScheduleManager.setParentTask(taskKey)
             }
         }
+    }
+
+    private fun save(andOpen: Boolean, allReminders: Boolean) {
+        val name = toolbarEditText.text.toString().trim { it <= ' ' }
+        check(!TextUtils.isEmpty(name))
+
+        editViewModel.stop()
+
+        val createParameters = EditDelegate.CreateParameters(name, note, allReminders)
+
+        val taskKey = delegate.createTask(createParameters)
+
+        if (andOpen)
+            startActivity(ShowTaskActivity.newIntent(taskKey))
+
+        setResult(
+                Activity.RESULT_OK,
+                Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) }
+        )
+
+        finish()
     }
 
     sealed class Hint : Parcelable {

@@ -250,7 +250,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val taskData: TaskData?,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-            val defaultReminder: Boolean
+            val defaultReminder: Boolean,
+            val showAllInstancesDialog: Boolean
     ) : DomainData()
 
     data class CustomTimeData(
@@ -342,7 +343,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             override val excludedTaskKeys = setOf(taskKey)
         }
 
-        class Join(joinTaskKeys: List<TaskKey>) : StartParameters() {
+        class Join(val joinTaskKeys: List<TaskKey>) : StartParameters() {
 
             override val excludedTaskKeys = joinTaskKeys.toSet()
         }

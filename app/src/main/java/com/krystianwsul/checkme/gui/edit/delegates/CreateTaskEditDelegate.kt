@@ -85,6 +85,8 @@ class CreateTaskEditDelegate(
             scheduleDatas: List<ScheduleData>,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createScheduleRootTask(
                         data.dataId,
@@ -104,6 +106,8 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
+        check(createParameters.allReminders)
+
         if (parameters is EditParameters.Share)
             ShortcutManager.addShortcut(parentTaskKey)
 
@@ -125,6 +129,8 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createRootTask(
                         data.dataId,

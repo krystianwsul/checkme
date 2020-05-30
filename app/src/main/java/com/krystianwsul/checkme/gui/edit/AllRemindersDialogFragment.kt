@@ -15,8 +15,8 @@ class AllRemindersDialogFragment : AbstractDialogFragment() {
     lateinit var listener: (Boolean) -> Unit
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.editAllReminders)
-            .setNegativeButton(R.string.allReminders) { _, _ -> listener(false) }
-            .setPositiveButton(R.string.justThisOne) { _, _ -> listener(true) }
+            .setNegativeButton(R.string.allReminders) { _, _ -> listener(true) }
+            .setPositiveButton(R.string.justThisOne) { _, _ -> listener(false) }
             .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
             .create()
 }

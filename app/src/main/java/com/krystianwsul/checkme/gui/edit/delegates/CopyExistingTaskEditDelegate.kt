@@ -23,6 +23,8 @@ class CopyExistingTaskEditDelegate(
             scheduleDatas: List<ScheduleData>,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createScheduleRootTask(
                         data.dataId,
@@ -43,6 +45,8 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createChildTask(
                         data.dataId,
@@ -62,6 +66,8 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance
                 .createRootTask(
                         data.dataId,

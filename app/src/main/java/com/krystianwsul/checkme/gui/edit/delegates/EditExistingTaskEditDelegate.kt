@@ -45,6 +45,8 @@ class EditExistingTaskEditDelegate(
             scheduleDatas: List<ScheduleData>,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance.updateScheduleTask(
                 data.dataId,
                 SaveService.Source.GUI,
@@ -61,6 +63,8 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance.updateChildTask(
                 ExactTimeStamp.now,
                 data.dataId,
@@ -77,6 +81,8 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             projectKey: ProjectKey.Shared?
     ): TaskKey {
+        check(createParameters.allReminders)
+
         return DomainFactory.instance.updateRootTask(
                 data.dataId,
                 SaveService.Source.GUI,

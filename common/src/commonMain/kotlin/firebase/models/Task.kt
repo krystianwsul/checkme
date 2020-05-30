@@ -785,6 +785,9 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
+    fun hasFutureReminders(now: ExactTimeStamp) =
+            current(now) && getRootTask(now).getCurrentSchedules(now).any { it.schedule is RepeatingSchedule<*> }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

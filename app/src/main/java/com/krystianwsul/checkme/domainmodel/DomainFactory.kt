@@ -797,11 +797,16 @@ class DomainFactory(
             it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
         }
 
+        val showAllInstancesDialog = (startParameters as? EditViewModel.StartParameters.Join)?.let {
+            it.joinTaskKeys.any { getTaskForce(it).hasFutureReminders(now) }
+        } ?: false
+
         return EditViewModel.Data(
                 taskData,
                 parentTreeDatas,
                 customTimeDatas,
-                myUserFactory.user.defaultReminder
+                myUserFactory.user.defaultReminder,
+                showAllInstancesDialog
         )
     }
 
@@ -1281,7 +1286,8 @@ class DomainFactory(
             note: String?,
             projectId: ProjectKey<*>?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>
+            removeInstanceKeys: List<InstanceKey>,
+            allReminders: Boolean
     ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -1303,7 +1309,8 @@ class DomainFactory(
                 note,
                 finalProjectId,
                 imageUuid,
-                deviceDbInfo
+                deviceDbInfo,
+                allReminders
         )
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)

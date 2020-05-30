@@ -18,15 +18,17 @@ object IntervalBuilder {
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val schedules = task.schedules.toMutableList()
 
-        val parentTaskHierarchies = task.parentTaskHierarchies
-                .filterNot { it.parentIsGroupTask }
+        val groupParentTaskHierarchies = task.parentTaskHierarchies
+                .filter { it.parentIsGroupTask }
                 .toMutableList()
+
+        val normalParentTaskHierarchies = (task.parentTaskHierarchies - groupParentTaskHierarchies).toMutableList()
 
         val noScheduleOrParents = task.noScheduleOrParents.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {
             val nextSchedule = schedules.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Schedule(it) }
-            val nextParentTaskHierarchy = parentTaskHierarchies.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Parent(it) }
+            val nextParentTaskHierarchy = normalParentTaskHierarchies.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Parent(it) }
             val nextNoScheduleOrParent = noScheduleOrParents.minBy { it.startExactTimeStamp }?.let { TypeBuilder.NoScheduleOrParent(it) }
 
             return listOfNotNull(
@@ -36,7 +38,7 @@ object IntervalBuilder {
             ).minBy { it.startExactTimeStamp }?.also {
                 when (it) {
                     is TypeBuilder.NoScheduleOrParent -> noScheduleOrParents.remove(it.noScheduleOrParent)
-                    is TypeBuilder.Parent -> parentTaskHierarchies.remove(it.parentTaskHierarchy)
+                    is TypeBuilder.Parent -> normalParentTaskHierarchies.remove(it.parentTaskHierarchy)
                     is TypeBuilder.Schedule -> schedules.remove(it.schedule)
                 }
             }
@@ -45,10 +47,27 @@ object IntervalBuilder {
         val taskStartExactTimeStamp = task.startExactTimeStamp
         val taskEndExactTimeStamp = task.endExactTimeStamp
 
+        fun getCurrentPlaceholder(startExactTimeStamp: ExactTimeStamp): Interval.Current<T> {
+            /*
+                since the only way for a task to not have a NoScheduleOrParentRecord is
+                    1. it's been garbage collected, so it's really a moot point, and
+                    2. the task was created directly as a child of a group task,
+                I think group task hierarchies are relevant only to avoid displaying #2
+                children as unscheduled root tasks, which is what I fix here.
+             */
+
+            val type = groupParentTaskHierarchies.filter { it.current(ExactTimeStamp.now) }
+                    .maxBy { it.startExactTimeStamp }
+                    ?.let { Type.Child(it) }
+                    ?: Type.NoSchedule<T>()
+
+            return Interval.Current(type, startExactTimeStamp)
+        }
+
         var typeBuilder = getNextTypeBuilder()
         if (typeBuilder == null) {
             val interval = if (taskEndExactTimeStamp == null) {
-                Interval.Current<T>(Type.NoSchedule(), taskStartExactTimeStamp)
+                getCurrentPlaceholder(taskStartExactTimeStamp)
             } else {
                 Interval.Ended<T>(Type.NoSchedule(), taskStartExactTimeStamp, taskEndExactTimeStamp)
             }
@@ -115,7 +134,7 @@ object IntervalBuilder {
 
                 when {
                     taskEndExactTimeStamp == null -> {
-                        currentInterval = Interval.Current(Type.NoSchedule(), intervalEndExactTimeStamp)
+                        currentInterval = getCurrentPlaceholder(intervalEndExactTimeStamp)
                     }
                     taskEndExactTimeStamp > intervalEndExactTimeStamp -> {
                         endedIntervals += Interval.Ended(Type.NoSchedule(), intervalEndExactTimeStamp, taskEndExactTimeStamp)

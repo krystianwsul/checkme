@@ -119,21 +119,22 @@ class Instance<T : ProjectType> private constructor(
         val scheduleDateTime = scheduleDateTime
 
         return if (task.groupSchedulePair != null) {
-            val childTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.parentIsGroupTask }
-            check(childTaskHierarchies.all {
-                it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
-            })
-
             /*
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
              */
-            childTaskHierarchies.sortedBy { it.id }.map {
-                val childInstance = it.childTask.getInstance(scheduleDateTime)
-                check(childInstance.getParentInstance(now)?.instanceKey == instanceKey)
+            project.getTaskHierarchiesByParentTaskKey(taskKey)
+                    .asSequence()
+                    .filter { it.parentIsGroupTask }
+                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.childTask.notDeleted(hierarchyExactTimeStamp) }
+                    .toList()
+                    .map {
+                        val childInstance = it.childTask.getInstance(scheduleDateTime)
+                        check(childInstance.getParentInstance(now)?.instanceKey == instanceKey)
 
-                Pair(childInstance, it)
-            }
+                        Pair(childInstance, it)
+                    }
         } else {
             task.childHierarchyIntervals
                     .asSequence()

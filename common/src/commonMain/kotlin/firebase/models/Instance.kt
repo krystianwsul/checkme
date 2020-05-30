@@ -118,19 +118,33 @@ class Instance<T : ProjectType> private constructor(
 
         val scheduleDateTime = scheduleDateTime
 
-        return task.childHierarchyIntervals
-                .asSequence()
-                .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
-                .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
-                .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
-                .filter {
-                    it.first
-                            .getParentInstance(now)
-                            ?.instanceKey == instanceKey
-                }
-                .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
-                .values
-                .toList()
+        return if (task.groupSchedulePair != null) {
+            val childTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.parentIsGroupTask }
+            check(childTaskHierarchies.all {
+                it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
+            })
+
+            childTaskHierarchies.map {
+                val childInstance = it.childTask.getInstance(scheduleDateTime)
+                check(childInstance.getParentInstance(now)?.instanceKey == instanceKey)
+
+                Pair(childInstance, it)
+            }
+        } else {
+            task.childHierarchyIntervals
+                    .asSequence()
+                    .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
+                    .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
+                    .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
+                    .filter {
+                        it.first
+                                .getParentInstance(now)
+                                ?.instanceKey == instanceKey
+                    }
+                    .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
+                    .values
+                    .toList()
+        }
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
@@ -199,7 +213,15 @@ class Instance<T : ProjectType> private constructor(
     fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
-        val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
+        val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey).filter {
+            it.parentTask.groupSchedulePair?.first == scheduleKey
+        }
+
+        val parentTask = if (groupMatches.isNotEmpty()) {
+            groupMatches.single().parentTask
+        } else {
+            task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
+        }
 
         return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             parentTask.getInstance(scheduleDateTime).takeIf { it.isEligibleParentInstance(now) }

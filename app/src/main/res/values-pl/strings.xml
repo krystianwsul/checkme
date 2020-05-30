@@ -116,7 +116,7 @@
     <string name="until">Do</string>
     <string name="endDate">Data końcowa nie może być przed datą startową</string>
     <string name="allDays">Wszystkie dni</string>
-    <string name="editAllReminders">Edytować wszystkie przypomnienia dla tego zadania?</string>
+    <string name="editAllReminders">Edytować wszystkie przypomnienia?</string>
     <string name="allReminders">Wszystkie przypomnienia</string>
-    <string name="justThisReminder">Tylko to przypomnienie</string>
+    <string name="justThisOne">Tylko to</string>
 </resources>

@@ -1256,6 +1256,11 @@ class DomainFactory(
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
 
+            if (isGroupTask(now)) {
+                project.getTaskHierarchiesByParentTaskKey(taskKey).forEach { it.childTask.invalidateParentTaskHierarchies() }
+                invalidateChildTaskHierarchies()
+            }
+
             updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
             if (imagePath != null)

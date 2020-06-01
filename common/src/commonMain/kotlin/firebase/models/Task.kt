@@ -168,6 +168,14 @@ class Task<T : ProjectType>(
             taskHierarchy.setEndExactTimeStamp(now)
         }
 
+        if (groupSchedulePair != null) {
+            val remainingTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.notDeleted(now) }
+
+            taskUndoData?.taskHierarchyKeys?.addAll(remainingTaskHierarchies.map { it.taskHierarchyKey })
+
+            remainingTaskHierarchies.forEach { it.setEndExactTimeStamp(now) }
+        }
+
         if (!recursive) {
             getParentTaskHierarchy(now)?.let {
                 it.requireCurrent(now)

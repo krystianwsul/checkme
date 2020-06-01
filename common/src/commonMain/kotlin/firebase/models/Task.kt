@@ -790,6 +790,10 @@ class Task<T : ProjectType>(
     fun hasFutureReminders(now: ExactTimeStamp) =
             current(now) && getRootTask(now).getCurrentSchedules(now).any { it.schedule is RepeatingSchedule<*> }
 
+    override fun toString(): String {
+        return super.toString() + ", name: $name, taskKey: $taskKey"
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

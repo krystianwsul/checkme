@@ -12,5 +12,6 @@ data class SingleScheduleJson @JvmOverloads constructor(
         val day: Int = 0,
         override val customTimeId: String? = null,
         override val hour: Int? = null,
-        override val minute: Int? = null
+        override val minute: Int? = null,
+        val group: Boolean = false
 ) : ScheduleJson

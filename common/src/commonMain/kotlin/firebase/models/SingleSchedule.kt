@@ -20,7 +20,7 @@ class SingleSchedule<T : ProjectType>(
 
     val date get() = scheduleRecord.date
 
-    private val dateTime get() = DateTime(date, time)
+    val dateTime get() = DateTime(date, time)
 
     override val scheduleType get() = ScheduleType.SINGLE
 
@@ -94,4 +94,6 @@ class SingleSchedule<T : ProjectType>(
 
         return scheduleDateTime.date == date
     }
+
+    val group = singleScheduleRecord.group
 }

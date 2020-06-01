@@ -16,10 +16,14 @@ object IntervalBuilder {
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
+        val now = ExactTimeStamp.now
+
         val schedules = task.schedules.toMutableList()
 
         val groupParentTaskHierarchies = task.parentTaskHierarchies
-                .filter { it.parentIsGroupTask }
+                .filter {
+                    it.isParentGroupTask(now)
+                }
                 .toMutableList()
 
         val normalParentTaskHierarchies = (task.parentTaskHierarchies - groupParentTaskHierarchies).toMutableList()
@@ -56,7 +60,7 @@ object IntervalBuilder {
                 children as unscheduled root tasks, which is what I fix here.
              */
 
-            val type = groupParentTaskHierarchies.filter { it.current(ExactTimeStamp.now) }
+            val type = groupParentTaskHierarchies.filter { it.current(now) }
                     .maxBy { it.startExactTimeStamp }
                     ?.let { Type.Child(it) }
                     ?: Type.NoSchedule<T>()

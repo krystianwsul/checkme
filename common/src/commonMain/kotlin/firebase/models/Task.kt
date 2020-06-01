@@ -88,8 +88,6 @@ class Task<T : ProjectType>(
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
 
-    val groupSchedulePair = taskRecord.groupSchedulePair
-
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
@@ -146,6 +144,8 @@ class Task<T : ProjectType>(
 
         taskUndoData?.taskKeys?.add(taskKey)
 
+        val group = isGroupTask(endData.exactTimeStamp)
+
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
             schedules.forEach {
@@ -168,7 +168,7 @@ class Task<T : ProjectType>(
             taskHierarchy.setEndExactTimeStamp(now)
         }
 
-        if (groupSchedulePair != null) {
+        if (group) {
             val remainingTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.notDeleted(now) }
 
             taskUndoData?.taskHierarchyKeys?.addAll(remainingTaskHierarchies.map { it.taskHierarchyKey })
@@ -189,6 +189,21 @@ class Task<T : ProjectType>(
 
         setMyEndExactTimeStamp(endData)
     }
+
+    fun getGroupScheduleDateTime(now: ExactTimeStamp): DateTime? {
+        val currentSchedules = getCurrentSchedules(now)
+        val groupSingleSchedules = currentSchedules.filter { it.schedule is SingleSchedule<*> && it.schedule.group }
+
+        return if (groupSingleSchedules.isEmpty()) {
+            null
+        } else {
+            groupSingleSchedules.single().schedule
+                    .let { it as SingleSchedule<T> }
+                    .dateTime
+        }
+    }
+
+    fun isGroupTask(now: ExactTimeStamp) = getGroupScheduleDateTime(now) != null
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
             parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
@@ -542,7 +557,15 @@ class Task<T : ProjectType>(
         return existingInstance ?: generateInstance(scheduleDateTime)
     }
 
-    fun createSchedules(ownerKey: UserKey, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
+    fun createSchedules(
+            ownerKey: UserKey,
+            now: ExactTimeStamp,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            allReminders: Boolean = true
+    ) {
+        if (!allReminders)
+            check(scheduleDatas.single().first is ScheduleData.Single)
+
         for ((scheduleData, time) in scheduleDatas) {
             val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(ownerKey, time)
 
@@ -558,7 +581,8 @@ class Task<T : ProjectType>(
                             date.day,
                             customTimeId?.value,
                             hour,
-                            minute
+                            minute,
+                            !allReminders
                     ))
 
                     _schedules += SingleSchedule(this, singleScheduleRecord)
@@ -636,6 +660,10 @@ class Task<T : ProjectType>(
     }
 
     fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*>>) {
+        val hasGroupSchedule = schedules.any { it is SingleSchedule<*> && it.group }
+        if (hasGroupSchedule)
+            check(schedules.size == 1)
+
         for (schedule in schedules) {
             val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
@@ -651,7 +679,8 @@ class Task<T : ProjectType>(
                             date.day,
                             customTimeId?.value,
                             hour,
-                            minute
+                            minute,
+                            schedule.group
                     ))
 
                     _schedules += SingleSchedule(this, singleScheduleRecord)

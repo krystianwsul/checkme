@@ -14,7 +14,6 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -182,19 +181,14 @@ class ProjectsFactory(
             deviceDbInfo: DeviceDbInfo,
             allReminders: Boolean = true
     ): Task<*> {
-        val groupScheduleKey = scheduleDatas.takeUnless { allReminders }
-                ?.let { it.single().first as ScheduleData.Single }
-                ?.run { ScheduleKey(date, timePair) }
-
         return createTaskHelper(
                 now,
                 name,
                 note,
                 projectId,
                 imageUuid,
-                deviceDbInfo,
-                groupScheduleKey
-        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas) }
+                deviceDbInfo
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, allReminders) }
     }
 
     fun createNoScheduleOrParentTask(
@@ -219,8 +213,7 @@ class ProjectsFactory(
             note: String?,
             projectId: ProjectKey<*>,
             imageUuid: String?,
-            deviceDbInfo: DeviceDbInfo,
-            groupScheduleKey: ScheduleKey? = null
+            deviceDbInfo: DeviceDbInfo
     ): Task<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
 
@@ -229,8 +222,7 @@ class ProjectsFactory(
                 now.long,
                 null,
                 note,
-                image = image,
-                groupScheduleKey = groupScheduleKey?.let { TaskRecord.scheduleKeyToString(it) }
+                image = image
         )
 
         return getProjectForce(projectId).newTask(taskJson)

@@ -118,14 +118,14 @@ class Instance<T : ProjectType> private constructor(
 
         val scheduleDateTime = scheduleDateTime
 
-        return if (task.groupSchedulePair != null) {
+        return if (task.isGroupTask(now)) {
             /*
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
              */
             project.getTaskHierarchiesByParentTaskKey(taskKey)
                     .asSequence()
-                    .filter { it.parentIsGroupTask }
+                    .filter { it.isParentGroupTask(now) }
                     .filter { it.notDeleted(hierarchyExactTimeStamp) }
                     .filter { it.childTask.notDeleted(hierarchyExactTimeStamp) }
                     .toList()
@@ -219,7 +219,7 @@ class Instance<T : ProjectType> private constructor(
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey).filter {
-            it.parentTask.groupSchedulePair?.first == scheduleKey
+            it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime
         }
 
         val parentTask = if (groupMatches.isNotEmpty()) {

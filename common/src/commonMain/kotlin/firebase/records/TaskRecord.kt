@@ -116,10 +116,6 @@ class TaskRecord<T : ProjectType> private constructor(
 
     var oldestVisibleServer by Committer(taskJson::oldestVisibleServer)
 
-    val groupSchedulePair = taskJson.groupScheduleKey?.let {
-        dateTimeStringToSchedulePair(projectRecord, it)
-    }
-
     constructor(
             id: String,
             projectRecord: ProjectRecord<T>,

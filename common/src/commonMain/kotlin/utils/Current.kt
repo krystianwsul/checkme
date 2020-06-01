@@ -28,7 +28,7 @@ interface Current {
             throwTime(exactTimeStamp)
     }
 
-    fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw TimeException("start: $startExactTimeStamp, end: $endExactTimeStamp, time: $exactTimeStamp")
+    fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw TimeException("$this start: $startExactTimeStamp, end: $endExactTimeStamp, time: $exactTimeStamp")
 
     private class TimeException(message: String) : Exception(message)
 }

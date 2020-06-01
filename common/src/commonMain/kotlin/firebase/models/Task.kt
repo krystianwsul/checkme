@@ -785,6 +785,10 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
+    override fun toString(): String {
+        return super.toString() + ", name: $name, taskKey: $taskKey"
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

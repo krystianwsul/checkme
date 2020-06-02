@@ -218,9 +218,11 @@ class Instance<T : ProjectType> private constructor(
     fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
-        val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey).filter {
-            it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime
-        }
+        val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
+                .asSequence()
+                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
+                .filter { it.current(hierarchyExactTimeStamp.first) }
+                .toList()
 
         val parentTask = if (groupMatches.isNotEmpty()) {
             groupMatches.single().parentTask

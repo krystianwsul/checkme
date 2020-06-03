@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer

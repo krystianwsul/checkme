@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer

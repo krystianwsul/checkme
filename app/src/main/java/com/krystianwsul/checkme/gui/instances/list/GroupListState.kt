@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.instances.list
 
 import android.os.Parcelable
 import com.krystianwsul.common.time.TimeStamp

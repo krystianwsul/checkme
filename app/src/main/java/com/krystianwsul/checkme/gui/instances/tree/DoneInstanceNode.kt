@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode

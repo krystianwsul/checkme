@@ -11,6 +11,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
+import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper

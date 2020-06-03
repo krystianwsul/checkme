@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.common.firebase.models.ImageState

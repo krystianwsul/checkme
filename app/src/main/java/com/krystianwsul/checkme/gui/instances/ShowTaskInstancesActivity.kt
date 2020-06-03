@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListListener
+import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate

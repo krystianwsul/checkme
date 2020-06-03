@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode

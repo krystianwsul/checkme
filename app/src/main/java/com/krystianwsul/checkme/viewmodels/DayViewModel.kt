@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import androidx.lifecycle.ViewModel
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 
 class DayViewModel : ViewModel() {

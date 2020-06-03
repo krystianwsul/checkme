@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey

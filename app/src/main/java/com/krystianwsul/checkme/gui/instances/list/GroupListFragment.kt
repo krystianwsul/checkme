@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.instances.list
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*

@@ -42,7 +42,6 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.view.*
 import kotlinx.android.synthetic.main.fragment_group_list.view.*
 import java.util.*
@@ -122,7 +121,7 @@ class GroupListFragment @JvmOverloads constructor(
     private val parametersRelay = BehaviorRelay.create<Parameters>()
     val parameters get() = parametersRelay.value!!
 
-    private var state = State()
+    private var state = GroupListState()
 
     val dragHelper: DragHelper by lazy {
         object : DragHelper() {
@@ -478,7 +477,7 @@ class GroupListFragment @JvmOverloads constructor(
     public override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             state.apply {
-                classLoader = State::class.java.classLoader
+                classLoader = GroupListState::class.java.classLoader
                 if (containsKey(EXPANSION_STATE_KEY))
                     this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
 
@@ -569,7 +568,7 @@ class GroupListFragment @JvmOverloads constructor(
             putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
             if (this@GroupListFragment::treeViewAdapter.isInitialized)
-                putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).state)
+                putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState)
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
 
@@ -579,7 +578,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private fun initialize() {
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage != true) {
-            state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
+            state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(
@@ -826,7 +825,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         private lateinit var nodeCollection: NodeCollection
 
-        val state: State
+        val groupListState: GroupListState
             get() {
                 val expandedGroups = nodeCollection.expandedGroups
 
@@ -846,7 +845,7 @@ class GroupListFragment @JvmOverloads constructor(
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                         .map { it.exactTimeStamp.long }
 
-                return State(
+                return GroupListState(
                         doneExpanded,
                         expandedGroups,
                         expandedInstances,
@@ -869,7 +868,7 @@ class GroupListFragment @JvmOverloads constructor(
                 customTimeDatas: List<CustomTimeData>,
                 useGroups: Boolean,
                 instanceDatas: Collection<InstanceData>,
-                state: State,
+                groupListState: GroupListState,
                 taskDatas: List<TaskData>,
                 note: String?,
                 imageState: ImageState?,
@@ -892,15 +891,15 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                     instanceDatas,
-                    state.expandedGroups,
-                    state.expandedInstances,
-                    state.doneExpanded,
-                    state.selectedInstances,
-                    state.selectedGroups,
+                    groupListState.expandedGroups,
+                    groupListState.expandedInstances,
+                    groupListState.doneExpanded,
+                    groupListState.selectedInstances,
+                    groupListState.selectedGroups,
                     taskDatas,
-                    state.unscheduledExpanded,
-                    state.expandedTaskKeys,
-                    state.selectedTaskKeys,
+                    groupListState.unscheduledExpanded,
+                    groupListState.expandedTaskKeys,
+                    groupListState.selectedTaskKeys,
                     imageState?.let {
                         ImageNode.ImageData(
                                 it,
@@ -941,18 +940,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun scrollToTop() = groupListFragment.scrollToTop()
     }
-
-    @Parcelize
-    data class State(
-            val doneExpanded: Boolean = false,
-            val expandedGroups: List<TimeStamp> = listOf(),
-            val expandedInstances: Map<InstanceKey, Boolean> = mapOf(),
-            val unscheduledExpanded: Boolean = false,
-            val expandedTaskKeys: List<TaskKey> = listOf(),
-            val selectedInstances: List<InstanceKey> = listOf(),
-            val selectedGroups: List<Long> = listOf(),
-            val selectedTaskKeys: List<TaskKey> = listOf()
-    ) : Parcelable
 
     data class DataWrapper(
             val customTimeDatas: List<CustomTimeData>,

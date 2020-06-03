@@ -2,6 +2,9 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
+import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
+import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel

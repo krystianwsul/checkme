@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.net.Uri
 import android.os.Build
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -21,9 +20,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -46,7 +43,7 @@ import java.util.*
 
 @Suppress("LeakingThis")
 class DomainFactory(
-        private val localFactory: LocalFactory,
+        val localFactory: LocalFactory,
         private val myUserFactory: MyUserFactory,
         val projectsFactory: ProjectsFactory,
         val friendsFactory: FriendsFactory,
@@ -154,7 +151,7 @@ class DomainFactory(
         updateShortcuts(now)
     }
 
-    private val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
+    val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
 
     // misc
 
@@ -1197,352 +1194,7 @@ class DomainFactory(
         save(0, source)
     }
 
-    @Synchronized
-    fun createScheduleRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            scheduleDatas: List<ScheduleData>,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createScheduleRootTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        check(name.isNotEmpty())
-        check(scheduleDatas.isNotEmpty())
-
-        val finalProjectId = projectId ?: defaultProjectId
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val task = projectsFactory.createScheduleRootTask(
-                now,
-                name,
-                scheduleDatas.map { it to getTime(it.timePair) },
-                note,
-                finalProjectId,
-                imageUuid,
-                deviceDbInfo
-        )
-
-        copyTaskKey?.let { copyTask(now, task, it) }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
-        }
-
-        return task.taskKey
-    }
-
-    @Synchronized
-    fun updateScheduleTask(
-            dataId: Int,
-            source: SaveService.Source,
-            taskKey: TaskKey,
-            name: String,
-            scheduleDatas: List<ScheduleData>,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.updateScheduleTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(scheduleDatas.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        check(name.isNotEmpty())
-        check(scheduleDatas.isNotEmpty())
-
-        val imageUuid = imagePath?.value?.let { newUuid() }
-
-        val task = getTaskForce(taskKey).run {
-            requireCurrent(now)
-            updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
-        }.apply {
-            setName(name, note)
-
-            endAllCurrentTaskHierarchies(now)
-            endAllCurrentNoScheduleOrParents(now)
-
-            if (isGroupTask(now)) {
-                project.getTaskHierarchiesByParentTaskKey(taskKey).forEach { it.childTask.invalidateParentTaskHierarchies() }
-                invalidateChildTaskHierarchies()
-            }
-
-            updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
-
-            if (imagePath != null)
-                setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
-        }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-        }
-
-        return task.taskKey
-    }
-
-    @Synchronized
-    fun createScheduleJoinRootTask(
-            now: ExactTimeStamp,
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            scheduleDatas: List<ScheduleData>,
-            joinTaskKeys: List<TaskKey>,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>,
-            allReminders: Boolean
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(scheduleDatas.isNotEmpty())
-        check(joinTaskKeys.size > 1)
-
-        val finalProjectId = projectId ?: defaultProjectId
-
-        val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val newParentTask = projectsFactory.createScheduleRootTask(
-                now,
-                name,
-                scheduleDatas.map { it to getTime(it.timePair) },
-                note,
-                finalProjectId,
-                imageUuid,
-                deviceDbInfo,
-                allReminders
-        )
-
-        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(newParentTask.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
-        }
-
-        return newParentTask.taskKey
-    }
-
-    @Synchronized
-    fun createRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createRootTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val finalProjectId = projectId ?: defaultProjectId
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val task = projectsFactory.createNoScheduleOrParentTask(
-                now,
-                name,
-                note,
-                finalProjectId,
-                imageUuid,
-                deviceDbInfo
-        )
-
-        copyTaskKey?.let { copyTask(now, task, it) }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
-        }
-
-        return task.taskKey
-    }
-
-    @Synchronized
-    fun createJoinRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            joinTaskKeys: List<TaskKey>,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createJoinRootTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(joinTaskKeys.size > 1)
-
-        val now = ExactTimeStamp.now
-
-        val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
-                .distinct()
-                .single()
-
-        val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val newParentTask = projectsFactory.createNoScheduleOrParentTask(
-                now,
-                name,
-                note,
-                finalProjectId,
-                imageUuid,
-                deviceDbInfo
-        )
-
-        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(newParentTask.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
-        }
-
-        return newParentTask.taskKey
-    }
-
-    @Synchronized
-    fun updateRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            taskKey: TaskKey,
-            name: String,
-            note: String?,
-            projectId: ProjectKey<*>?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.updateRootTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val task = getTaskForce(taskKey).run {
-            requireCurrent(now)
-            updateProject(this@DomainFactory, now, projectId ?: defaultProjectId)
-        }.apply {
-            setName(name, note)
-
-            endAllCurrentTaskHierarchies(now)
-            endAllCurrentSchedules(now)
-            endAllCurrentNoScheduleOrParents(now)
-
-            setNoScheduleOrParent(now)
-        }
-
-        val imageUuid = imagePath?.value?.let { newUuid() }
-        if (imagePath != null)
-            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-        }
-
-        return task.taskKey
-    }
-
-    @Synchronized
-    fun createChildTask(
-            dataId: Int,
-            source: SaveService.Source,
-            parentTaskKey: TaskKey,
-            name: String,
-            note: String?,
-            imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createChildTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        check(name.isNotEmpty())
-
-        val parentTask = getTaskForce(parentTaskKey)
-        parentTask.requireCurrent(now)
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val childTask = createChildTask(
-                now,
-                parentTask,
-                name,
-                note,
-                imageUuid?.let { TaskJson.Image(it, uuid) },
-                copyTaskKey
-        )
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(childTask.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
-        }
-
-        return childTask.taskKey
-    }
-
-    private fun <T : ProjectType> createChildTask(
+    fun <T : ProjectType> createChildTask(
             now: ExactTimeStamp,
             parentTask: Task<T>,
             name: String,
@@ -1558,98 +1210,6 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, childTask, it) }
 
         return childTask
-    }
-
-    @Synchronized
-    fun createJoinChildTask(
-            dataId: Int,
-            source: SaveService.Source,
-            parentTaskKey: TaskKey,
-            name: String,
-            joinTaskKeys: List<TaskKey>,
-            note: String?,
-            imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.createJoinChildTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(joinTaskKeys.size > 1)
-
-        val now = ExactTimeStamp.now
-
-        val parentTask = getTaskForce(parentTaskKey)
-        parentTask.requireCurrent(now)
-
-        check(joinTaskKeys.map { it.projectKey }.distinct().size == 1)
-
-        val joinTasks = joinTaskKeys.map { getTaskForce(it) }
-
-        val imageUuid = imagePath?.let { newUuid() }
-
-        val childTask = parentTask.createChildTask(now, name, note, imageUuid?.let { TaskJson.Image(it, uuid) })
-
-        joinTasks(childTask, joinTasks, now, removeInstanceKeys)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(childTask.project)
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
-        }
-
-        return childTask.taskKey
-    }
-
-    @Synchronized
-    fun updateChildTask(
-            now: ExactTimeStamp,
-            dataId: Int,
-            source: SaveService.Source,
-            taskKey: TaskKey,
-            name: String,
-            parentTaskKey: TaskKey,
-            note: String?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?
-    ): TaskKey {
-        MyCrashlytics.log("DomainFactory.updateChildTask")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-
-        val task = getTaskForce(taskKey)
-        task.requireCurrent(now)
-
-        val newParentTask = getTaskForce(parentTaskKey)
-        newParentTask.requireCurrent(now)
-
-        task.setName(name, note)
-
-        task.endAllCurrentTaskHierarchies(now)
-        task.endAllCurrentSchedules(now)
-        task.endAllCurrentNoScheduleOrParents(now)
-
-        newParentTask.addChild(task, now)
-
-        val imageUuid = imagePath?.value?.let { newUuid() }
-        if (imagePath != null)
-            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project) // todo image on server, purge images after this call
-
-        imageUuid?.let {
-            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-        }
-
-        return task.taskKey
     }
 
     @Synchronized
@@ -2335,7 +1895,7 @@ class DomainFactory(
                 .toMap()
     }
 
-    private val ownerKey get() = myUserFactory.user.userKey
+    val ownerKey get() = myUserFactory.user.userKey
 
     override fun <T : ProjectType> convert(
             now: ExactTimeStamp,
@@ -2384,7 +1944,7 @@ class DomainFactory(
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }
 
-    private fun joinTasks(
+    fun joinTasks(
             newParentTask: Task<*>,
             joinTasks: List<Task<*>>,
             now: ExactTimeStamp,
@@ -2488,7 +2048,7 @@ class DomainFactory(
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
-    private fun notifyCloud(project: Project<*>) = notifyCloud(setOf(project))
+    fun notifyCloud(project: Project<*>) = notifyCloud(setOf(project))
 
     private fun notifyCloud(projects: Set<Project<*>>) {
         if (projects.isNotEmpty())
@@ -2522,7 +2082,7 @@ class DomainFactory(
         BackendNotifier.notify(projects, deviceDbInfo.deviceInfo, userKeys)
     }
 
-    private fun updateNotifications(
+    fun updateNotifications(
             now: ExactTimeStamp,
             clear: Boolean = false,
             silent: Boolean = true,
@@ -2816,7 +2376,7 @@ class DomainFactory(
         return dataWrapper
     }
 
-    private fun copyTask(now: ExactTimeStamp, task: Task<*>, copyTaskKey: TaskKey) {
+    fun copyTask(now: ExactTimeStamp, task: Task<*>, copyTaskKey: TaskKey) {
         val copiedTask = getTaskForce(copyTaskKey)
 
         copiedTask.getChildTaskHierarchies(now).forEach {
@@ -2834,7 +2394,7 @@ class DomainFactory(
         }
     }
 
-    private fun getTime(timePair: TimePair) = timePair.customTimeKey
+    fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { projectsFactory.getCustomTime(it) }
             ?: Time.Normal(timePair.hourMinute!!)
 
@@ -2846,7 +2406,7 @@ class DomainFactory(
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException : Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
+    inner class SavedFactoryException : Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
 
     private class AggregateData {
 

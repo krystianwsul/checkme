@@ -2,6 +2,9 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
+import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
+import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters

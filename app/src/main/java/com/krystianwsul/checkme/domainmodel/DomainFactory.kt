@@ -28,7 +28,10 @@ import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.domain.RemoteToRemoteConversion
+import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
@@ -44,7 +47,7 @@ import java.util.*
 @Suppress("LeakingThis")
 class DomainFactory(
         val localFactory: LocalFactory,
-        private val myUserFactory: MyUserFactory,
+        val myUserFactory: MyUserFactory,
         val projectsFactory: ProjectsFactory,
         val friendsFactory: FriendsFactory,
         _deviceDbInfo: DeviceDbInfo,
@@ -719,95 +722,6 @@ class DomainFactory(
                 displayText,
                 task.taskKey,
                 instance.isRepeatingGroupChild(now)
-        )
-    }
-
-    @Synchronized
-    fun getCreateTaskData(
-            startParameters: EditViewModel.StartParameters,
-            parentTaskKeyHint: TaskKey?
-    ): EditViewModel.Data {
-        MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
-
-        val now = ExactTimeStamp.now
-
-        val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.key
-        }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-        val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
-
-        fun checkHintPresent(
-                task: EditViewModel.ParentKey.Task,
-                parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
-        ): Boolean = parentTreeDatas.containsKey(task) || parentTreeDatas.any {
-            checkHintPresent(task, it.value.parentTreeDatas)
-        }
-
-        fun checkHintPresent(
-                parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
-        ) = parentTaskKeyHint?.let {
-            checkHintPresent(EditViewModel.ParentKey.Task(it), parentTreeDatas)
-        } ?: true
-
-        val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
-            val task = getTaskForce(it.taskKey)
-
-            val parentKey: EditViewModel.ParentKey?
-            var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
-
-            if (task.isRootTask(now)) {
-                val schedules = task.getCurrentSchedules(now)
-
-                customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                    it to task.project.getCustomTime(it.customTimeId)
-                }
-
-                parentKey = task.project
-                        .projectKey
-                        .let {
-                            (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                        }
-
-                if (schedules.isNotEmpty()) {
-                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
-                        EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
-                    }
-                }
-            } else {
-                val parentTask = task.getParentTask(now)!!
-                parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
-                includeTaskKeys.add(parentTask.taskKey)
-            }
-
-            EditViewModel.TaskData(
-                    task.name,
-                    parentKey,
-                    scheduleDataWrappers,
-                    task.note,
-                    task.project.name,
-                    task.getImage(deviceDbInfo)
-            )
-        }
-
-        val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, includeTaskKeys)
-
-        check(checkHintPresent(parentTreeDatas))
-
-        val customTimeDatas = customTimes.values.associate {
-            it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
-        }
-
-        val showAllInstancesDialog = (startParameters as? EditViewModel.StartParameters.Join)?.let {
-            it.joinTaskKeys.any { getTaskForce(it).hasFutureReminders(now) }
-        } ?: false
-
-        return EditViewModel.Data(
-                taskData,
-                parentTreeDatas,
-                customTimeDatas,
-                myUserFactory.user.defaultReminder,
-                showAllInstancesDialog
         )
     }
 
@@ -1718,7 +1632,7 @@ class DomainFactory(
             .values
             .flatMap { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
 
-    private fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
             .customTimes
             .filter { it.current(now) }
 
@@ -1820,7 +1734,7 @@ class DomainFactory(
         return true
     }
 
-    private fun getParentTreeDatas(
+    fun getParentTreeDatas(
             now: ExactTimeStamp,
             excludedTaskKeys: Set<TaskKey>,
             includedTaskKeys: Set<TaskKey>

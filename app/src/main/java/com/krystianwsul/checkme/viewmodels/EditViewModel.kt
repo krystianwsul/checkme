@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.dialogs.ScheduleDialogFragment
 import com.krystianwsul.common.firebase.models.ImageState

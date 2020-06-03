@@ -234,11 +234,13 @@ fun DomainFactory.updateChildTask(
 
     task.setName(name, note)
 
-    task.endAllCurrentTaskHierarchies(now)
+    if (task.getParentTask(now) != newParentTask) {
+        task.endAllCurrentTaskHierarchies(now)
+        newParentTask.addChild(task, now)
+    }
+
     task.endAllCurrentSchedules(now)
     task.endAllCurrentNoScheduleOrParents(now)
-
-    newParentTask.addChild(task, now)
 
     val imageUuid = imagePath?.value?.let { newUuid() }
     if (imagePath != null)

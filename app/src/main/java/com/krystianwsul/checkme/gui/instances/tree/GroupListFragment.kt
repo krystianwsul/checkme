@@ -954,21 +954,6 @@ class GroupListFragment @JvmOverloads constructor(
             val selectedTaskKeys: List<TaskKey> = listOf()
     ) : Parcelable
 
-    interface GroupListListener : SnackbarListener, ListItemAddedListener {
-
-        fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>)
-
-        fun onDestroyGroupActionMode()
-
-        fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean)
-
-        fun getBottomBar(): MyBottomBar
-
-        fun initBottomBar()
-
-        fun deleteTasks(taskKeys: Set<TaskKey>)
-    }
-
     data class DataWrapper(
             val customTimeDatas: List<CustomTimeData>,
             val taskEditable: Boolean?,

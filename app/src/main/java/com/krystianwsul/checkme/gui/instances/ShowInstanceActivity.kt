@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
-class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
+class ShowInstanceActivity : ToolbarActivity(), GroupListListener {
 
     companion object {
 

@@ -28,7 +28,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
@@ -57,7 +57,7 @@ import java.io.Serializable
 
 class MainActivity :
         ToolbarActivity(),
-        GroupListFragment.GroupListListener,
+        GroupListListener,
         ShowCustomTimesFragment.CustomTimesListListener,
         TaskListFragment.TaskListListener,
         DayFragment.Host,

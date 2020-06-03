@@ -121,4 +121,5 @@
     <string name="justThisOne">Just this one</string>
     <string name="joinAllFutureReminders">Join all future reminders?</string>
     <string name="justThese">Just these</string>
+    <string name="removeFromParent">Remove from parent</string>
 </resources>

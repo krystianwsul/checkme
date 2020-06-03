@@ -809,7 +809,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
+    fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
         it.containsExactTimeStamp(exactTimeStamp)
     }
 

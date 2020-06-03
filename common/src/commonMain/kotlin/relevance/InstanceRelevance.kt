@@ -32,7 +32,7 @@ class InstanceRelevance(val instance: Instance<*>) {
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
-            val parentInstance = instance.getParentInstance(now)!!
+            val (parentInstance, _) = instance.getParentInstance(now)!!
 
             val parentInstanceKey = parentInstance.instanceKey
 

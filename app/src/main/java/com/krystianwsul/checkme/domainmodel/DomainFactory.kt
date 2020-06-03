@@ -502,7 +502,8 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo)
+                    task.getImage(deviceDbInfo),
+                    instance.isRepeatingGroupChild(now)
             )
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -607,7 +608,8 @@ class DomainFactory(
                     hierarchyData,
                     it.ordinal,
                     it.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo)
+                    task.getImage(deviceDbInfo),
+                    it.isRepeatingGroupChild(now)
             )
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -668,7 +670,8 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo)
+                    task.getImage(deviceDbInfo),
+                    instance.isRepeatingGroupChild(now)
             )
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -2168,7 +2171,8 @@ class DomainFactory(
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
                             childInstance.getNotificationShown(localFactory),
-                            childTask.getImage(deviceDbInfo)
+                            childTask.getImage(deviceDbInfo),
+                            childInstance.isRepeatingGroupChild(now)
                     )
 
                     children.values.forEach { it.instanceDataParent = instanceData }
@@ -2384,7 +2388,7 @@ class DomainFactory(
         }
 
         removeInstanceKeys.map(::getInstance)
-                .filter { it.getParentInstance(now)?.task != newParentTask && it.isVisible(now, true) }
+                .filter { it.getParentInstance(now)?.first?.task != newParentTask && it.isVisible(now, true) }
                 .forEach { it.hide(now) }
     }
 
@@ -2722,7 +2726,8 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo)
+                    task.getImage(deviceDbInfo),
+                    instance.isRepeatingGroupChild(now)
             )
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -2769,7 +2774,8 @@ class DomainFactory(
                     HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                     childInstance.ordinal,
                     childInstance.getNotificationShown(localFactory),
-                    childTask.getImage(deviceDbInfo)
+                    childTask.getImage(deviceDbInfo),
+                    childInstance.isRepeatingGroupChild(now)
             )
 
             children.values.forEach { it.instanceDataParent = instanceData }

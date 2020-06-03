@@ -87,7 +87,7 @@ object Irrelevant {
                         ", parent: " +
                         it.getParentName(ExactTimeStamp.now) +
                         ", parent exists: " +
-                        it.getParentInstance(ExactTimeStamp.now)?.exists()
+                        it.getParentInstance(ExactTimeStamp.now)?.first?.exists()
             })
         }
 

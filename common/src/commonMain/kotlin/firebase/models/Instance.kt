@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
+import firebase.models.interval.Type
 
 class Instance<T : ProjectType> private constructor(
         val project: Project<T>,
@@ -131,7 +132,7 @@ class Instance<T : ProjectType> private constructor(
                     .toList()
                     .map {
                         val childInstance = it.childTask.getInstance(scheduleDateTime)
-                        check(childInstance.getParentInstance(now)?.instanceKey == instanceKey)
+                        check(childInstance.getParentInstance(now)?.first?.instanceKey == instanceKey)
 
                         Pair(childInstance, it)
                     }
@@ -144,6 +145,7 @@ class Instance<T : ProjectType> private constructor(
                     .filter {
                         it.first
                                 .getParentInstance(now)
+                                ?.first
                                 ?.instanceKey == instanceKey
                     }
                     .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
@@ -168,7 +170,7 @@ class Instance<T : ProjectType> private constructor(
             return it
         }
 
-        getParentInstance(now)?.createInstanceHierarchy(now)
+        getParentInstance(now)?.first?.createInstanceHierarchy(now)
 
         return createInstanceRecord()
     }
@@ -197,7 +199,7 @@ class Instance<T : ProjectType> private constructor(
 
         val parentInstance = getParentInstance(now)
         if (parentInstance != null)
-            return parentInstance.isVisible(now, hack24)
+            return parentInstance.first.isVisible(now, hack24)
 
         if (!exists() && !matchesSchedule())
             return false
@@ -213,9 +215,11 @@ class Instance<T : ProjectType> private constructor(
     }
 
     private fun isEligibleParentInstance(now: ExactTimeStamp): Boolean =
-            getParentInstance(now)?.isEligibleParentInstance(now) ?: (exists() || matchesSchedule())
+            getParentInstance(now)?.first
+                    ?.isEligibleParentInstance(now)
+                    ?: (exists() || matchesSchedule())
 
-    fun getParentInstance(now: ExactTimeStamp): Instance<T>? {
+    fun getParentInstance(now: ExactTimeStamp): Pair<Instance<T>, Boolean>? { // isRepeatingGroup
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
@@ -224,13 +228,19 @@ class Instance<T : ProjectType> private constructor(
                 .filter { it.current(hierarchyExactTimeStamp.first) }
                 .toList()
 
-        val parentTask = if (groupMatches.isNotEmpty()) {
-            groupMatches.single().parentTask
+        val (parentTask, isRepeatingGroup) = if (groupMatches.isNotEmpty()) {
+            val parentTask = groupMatches.single().parentTask
+            val intervalType = task.getInterval(hierarchyExactTimeStamp.first).type
+
+            parentTask to (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask)
         } else {
-            task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
+            task.getParentTask(hierarchyExactTimeStamp.first) to false
         }
 
-        return if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
+        if (parentTask == null)
+            return null
+
+        val parentInstance = if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             parentTask.getInstance(scheduleDateTime).takeIf { it.isEligibleParentInstance(now) }
         } else {
             fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
@@ -240,6 +250,8 @@ class Instance<T : ProjectType> private constructor(
 
             null
         }
+
+        return parentInstance?.let { it to isRepeatingGroup }
     }
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
@@ -263,7 +275,9 @@ class Instance<T : ProjectType> private constructor(
         createInstanceHierarchy(now).instanceRecord.hidden = true
     }
 
-    fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
+    fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.first
+            ?.name
+            ?: project.name
 
     fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
@@ -360,6 +374,8 @@ class Instance<T : ProjectType> private constructor(
             instanceTimePair
         }
     }
+
+    fun isRepeatingGroupChild(now: ExactTimeStamp) = getParentInstance(now)?.second ?: false
 
     private sealed class Data<T : ProjectType> {
 

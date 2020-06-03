@@ -344,7 +344,8 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.actionGroupHour to showHour(selectedDatas),
                     R.id.action_group_edit_instance to selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null },
                     R.id.action_group_mark_done to selectedDatas.all { it is InstanceData && it.done == null },
-                    R.id.action_group_mark_not_done to selectedDatas.all { it is InstanceData && it.done != null }
+                    R.id.action_group_mark_not_done to selectedDatas.all { it is InstanceData && it.done != null },
+                    R.id.actionGroupRemoveFromParent to selectedDatas.all { it is InstanceData && it.isRecurringGroupChild }
             )
 
             if (selectedDatas.size == 1) {
@@ -994,7 +995,8 @@ class GroupListFragment @JvmOverloads constructor(
             val hierarchyData: HierarchyData?,
             var ordinal: Double,
             var notificationShown: Boolean,
-            val imageState: ImageState?
+            val imageState: ImageState?,
+            val isRecurringGroupChild: Boolean
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
 
         lateinit var instanceDataParent: InstanceDataParent

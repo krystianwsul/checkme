@@ -26,7 +26,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<NodeHolder>,
-            doneInstanceDatas: List<GroupListFragment.InstanceData>,
+            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
@@ -41,7 +41,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     }
 
     private fun newChildTreeNode(
-            instanceData: GroupListFragment.InstanceData,
+            instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
         checkNotNull(instanceData.done)
@@ -73,7 +73,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
         treeNode.remove(doneInstanceNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
+    fun add(instanceData: GroupListDataWrapper.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
 
     override fun compareTo(other: ModelNode<NodeHolder>): Int {
         check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode || other is ImageNode)

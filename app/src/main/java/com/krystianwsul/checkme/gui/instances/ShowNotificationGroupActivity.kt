@@ -77,7 +77,7 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListListener {
             start(this@ShowNotificationGroupActivity.instanceKeys)
 
             createDisposable += data.subscribe {
-                groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.dataWrapper)
+                groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.groupListDataWrapper)
             }
         }
 

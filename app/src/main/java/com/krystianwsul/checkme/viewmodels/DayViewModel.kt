@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import androidx.lifecycle.ViewModel
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 
 class DayViewModel : ViewModel() {
@@ -31,5 +31,5 @@ class DayViewModel : ViewModel() {
         )
     }
 
-    data class DayData(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
+    data class DayData(val groupListDataWrapper: GroupListDataWrapper) : DomainData()
 }

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.common.utils.TaskKey
 
 class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Data>() {
@@ -27,7 +27,7 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
     }
 
     data class Data(
-            val dataWrapper: GroupListFragment.DataWrapper,
+            val groupListDataWrapper: GroupListDataWrapper,
             val showLoader: Boolean
     ) : DomainData()
 }

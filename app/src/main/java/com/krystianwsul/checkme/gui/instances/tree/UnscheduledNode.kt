@@ -12,7 +12,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     data class Id(val id: Any)
 
-    private lateinit var taskDatas: List<GroupListFragment.TaskData>
+    private lateinit var taskDatas: List<GroupListDataWrapper.TaskData>
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -26,7 +26,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<NodeHolder>,
-            taskDatas: List<GroupListFragment.TaskData>,
+            taskDatas: List<GroupListDataWrapper.TaskData>,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>): TreeNode<NodeHolder> {
         check(!expanded || taskDatas.isNotEmpty())
@@ -41,7 +41,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     }
 
     private fun newChildTreeNode(
-            taskData: GroupListFragment.TaskData,
+            taskData: GroupListDataWrapper.TaskData,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)

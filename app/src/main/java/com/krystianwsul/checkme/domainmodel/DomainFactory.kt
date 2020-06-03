@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -459,13 +459,13 @@ class DomainFactory(
         }
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
         }
 
         val taskDatas = if (position == 0) {
             getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map {
-                        GroupListFragment.TaskData(
+                        GroupListDataWrapper.TaskData(
                                 it.taskKey,
                                 it.name,
                                 getGroupListChildTaskDatas(it, now),
@@ -486,7 +486,7 @@ class DomainFactory(
 
             val children = getChildInstanceDatas(instance, now)
 
-            val instanceData = GroupListFragment.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                     instance.done,
                     instance.instanceKey,
                     instance.getDisplayData(now)?.getDisplayText(),
@@ -511,7 +511,7 @@ class DomainFactory(
             instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(
+        val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
                 null,
                 taskDatas,
@@ -551,7 +551,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
         }
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
@@ -592,7 +592,7 @@ class DomainFactory(
                         .taskHierarchy
                         .run { HierarchyData(taskHierarchyKey, ordinal) }
 
-            val instanceData = GroupListFragment.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                     it.done,
                     it.instanceKey,
                     it.instanceDateTime.getDisplayText(),
@@ -617,7 +617,7 @@ class DomainFactory(
             instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(
+        val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
                 task.current(now),
                 listOf(),
@@ -644,7 +644,7 @@ class DomainFactory(
                 .sortedBy { it.instanceDateTime }
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
         }
 
         val instanceDatas = instances.map { instance ->
@@ -654,7 +654,7 @@ class DomainFactory(
 
             val children = getChildInstanceDatas(instance, now)
 
-            val instanceData = GroupListFragment.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                     instance.done,
                     instance.instanceKey,
                     instance.getDisplayData(now)?.getDisplayText(),
@@ -679,7 +679,7 @@ class DomainFactory(
             instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(
+        val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
                 null,
                 listOf(),
@@ -1639,7 +1639,7 @@ class DomainFactory(
     private fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp
-    ): MutableMap<InstanceKey, GroupListFragment.InstanceData> {
+    ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
                 .map { (childInstance, taskHierarchy) ->
                     val childTask = childInstance.task
@@ -1648,7 +1648,7 @@ class DomainFactory(
 
                     val children = getChildInstanceDatas(childInstance, now)
 
-                    val instanceData = GroupListFragment.InstanceData(
+                    val instanceData = GroupListDataWrapper.InstanceData(
                             childInstance.done,
                             childInstance.instanceKey,
                             null,
@@ -1923,10 +1923,10 @@ class DomainFactory(
     private fun getGroupListChildTaskDatas(
             parentTask: Task<*>,
             now: ExactTimeStamp
-    ): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now).map {
+    ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
         val childTask = it.taskHierarchy.childTask
 
-        GroupListFragment.TaskData(
+        GroupListDataWrapper.TaskData(
                 childTask.taskKey,
                 childTask.name,
                 getGroupListChildTaskDatas(childTask, now),
@@ -2186,7 +2186,7 @@ class DomainFactory(
         }
     }
 
-    private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {
+    private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListDataWrapper {
         val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
         val endTimeStamp = TimeStamp(endCalendar.toDateTimeSoy())
 
@@ -2194,7 +2194,7 @@ class DomainFactory(
 
         val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val instanceDatas = currentInstances.map { instance ->
             val task = instance.task
@@ -2203,7 +2203,7 @@ class DomainFactory(
 
             val children = getChildInstanceDatas(instance, now)
 
-            val instanceData = GroupListFragment.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                     instance.done,
                     instance.instanceKey,
                     null,
@@ -2228,7 +2228,7 @@ class DomainFactory(
             instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
+        val dataWrapper = GroupListDataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
 
         instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
@@ -2239,9 +2239,9 @@ class DomainFactory(
             instance: Instance<*>,
             task: Task<*>,
             now: ExactTimeStamp
-    ): GroupListFragment.DataWrapper {
+    ): GroupListDataWrapper {
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
         }
 
         val instanceDatas = instance.getChildInstances(now).map { (childInstance, taskHierarchy) ->
@@ -2251,7 +2251,7 @@ class DomainFactory(
 
             val children = getChildInstanceDatas(childInstance, now)
 
-            val instanceData = GroupListFragment.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                     childInstance.done,
                     childInstance.instanceKey,
                     null,
@@ -2276,7 +2276,7 @@ class DomainFactory(
             instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(
+        val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
                 task.current(now),
                 listOf(),

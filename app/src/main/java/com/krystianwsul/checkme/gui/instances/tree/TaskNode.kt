@@ -7,7 +7,7 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class TaskNode(
         indentation: Int,
-        val taskData: GroupListFragment.TaskData,
+        val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
@@ -49,7 +49,7 @@ class TaskNode(
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListDataWrapper.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)

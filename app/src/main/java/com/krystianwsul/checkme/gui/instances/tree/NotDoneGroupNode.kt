@@ -17,7 +17,7 @@ import java.util.*
 class NotDoneGroupNode(
         indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
-        val instanceDatas: MutableList<GroupListFragment.InstanceData>
+        val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>
 ) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
@@ -238,7 +238,7 @@ class NotDoneGroupNode(
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         if (singleInstance() &&
-                groupListFragment.parameters.dataWrapper.taskEditable != false &&
+                groupListFragment.parameters.groupListDataWrapper.taskEditable != false &&
                 treeNodeCollection.selectedChildren.isEmpty() &&
                 indentation == 0 &&
                 treeNodeCollection.nodes.none { it.isExpanded } &&
@@ -330,7 +330,7 @@ class NotDoneGroupNode(
         else -> throw IllegalArgumentException()
     }
 
-    fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
+    fun addInstanceData(instanceData: GroupListDataWrapper.InstanceData, x: TreeViewAdapter.Placeholder) {
         check(instanceData.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
         check(instanceDatas.isNotEmpty())
@@ -354,7 +354,7 @@ class NotDoneGroupNode(
     }
 
     private fun newChildTreeNode(
-            instanceData: GroupListFragment.InstanceData,
+            instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, Boolean>,
             selected: Boolean,
             selectedInstances: List<InstanceKey>,
@@ -422,7 +422,7 @@ class NotDoneGroupNode(
 
     class NotDoneInstanceNode(
             indentation: Int,
-            val instanceData: GroupListFragment.InstanceData,
+            val instanceData: GroupListDataWrapper.InstanceData,
             private val parentNotDoneGroupNode: NotDoneGroupNode
     ) : GroupHolderNode(indentation), NodeCollectionParent {
 
@@ -430,7 +430,7 @@ class NotDoneGroupNode(
 
             fun getChildrenNew(
                     treeNode: TreeNode<NodeHolder>,
-                    instanceData: GroupListFragment.InstanceData
+                    instanceData: GroupListDataWrapper.InstanceData
             ) = instanceData.children
                     .values
                     .filter { it.done == null }

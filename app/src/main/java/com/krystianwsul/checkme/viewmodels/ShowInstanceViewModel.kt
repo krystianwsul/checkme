@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -28,7 +28,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
             var exists: Boolean,
-            val dataWrapper: GroupListFragment.DataWrapper,
+            val groupListDataWrapper: GroupListDataWrapper,
             var notificationShown: Boolean,
             val displayText: String,
             val taskKey: TaskKey,

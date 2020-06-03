@@ -30,8 +30,8 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeNode
@@ -83,8 +83,8 @@ class GroupListFragment @JvmOverloads constructor(
             return Date(calendar.toDateTimeTz())
         }
 
-        private fun nodesToSelectedDatas(treeNodes: List<TreeNode<NodeHolder>>, includeGroups: Boolean): Set<SelectedData> {
-            val instanceDatas = ArrayList<SelectedData>()
+        private fun nodesToSelectedDatas(treeNodes: List<TreeNode<NodeHolder>>, includeGroups: Boolean): Set<GroupListDataWrapper.SelectedData> {
+            val instanceDatas = ArrayList<GroupListDataWrapper.SelectedData>()
             treeNodes.map { it.modelNode }.forEach {
                 when (it) {
                     is NotDoneGroupNode -> {
@@ -101,13 +101,13 @@ class GroupListFragment @JvmOverloads constructor(
             return instanceDatas.toSet()
         }
 
-        fun recursiveExists(instanceData: InstanceData) {
+        fun recursiveExists(instanceData: GroupListDataWrapper.InstanceData) {
             instanceData.exists = true
 
-            if (instanceData.instanceDataParent is InstanceData) {
-                recursiveExists(instanceData.instanceDataParent as InstanceData)
+            if (instanceData.instanceDataParent is GroupListDataWrapper.InstanceData) {
+                recursiveExists(instanceData.instanceDataParent as GroupListDataWrapper.InstanceData)
             } else {
-                check(instanceData.instanceDataParent is DataWrapper)
+                check(instanceData.instanceDataParent is GroupListDataWrapper)
             }
         }
     }
@@ -118,7 +118,7 @@ class GroupListFragment @JvmOverloads constructor(
     lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
-    private val parametersRelay = BehaviorRelay.create<Parameters>()
+    private val parametersRelay = BehaviorRelay.create<GroupListParameters>()
     val parameters get() = parametersRelay.value!!
 
     private var state = GroupListState()
@@ -156,14 +156,14 @@ class GroupListFragment @JvmOverloads constructor(
             when (itemId) {
                 R.id.actionGroupHour -> {
                     check(showHour(selectedDatas))
-                    val instanceKeys = selectedDatas.map { (it as InstanceData).instanceKey }
+                    val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
                     addHour(instanceKeys)
                 }
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
 
-                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
                     check(instanceDatas.isNotEmpty())
                     check(instanceDatas.all { it.isRootInstance })
 
@@ -204,10 +204,10 @@ class GroupListFragment @JvmOverloads constructor(
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
 
-                    if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(taskKeys, EditActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey))))
+                    if (parameters is GroupListParameters.InstanceKey) {
+                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(taskKeys, EditActivity.Hint.Task((parameters as GroupListParameters.InstanceKey).instanceKey.taskKey))))
                     } else {
-                        val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
+                        val instanceDatas = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
 
                         val scheduleHint = instanceDatas.minBy { it.instanceTimeStamp }?.let {
                             val date = it.instanceTimeStamp.date
@@ -222,7 +222,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
                     check(instanceDatas.all { it.done == null })
 
@@ -268,7 +268,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 R.id.action_group_mark_not_done -> {
-                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
                     check(instanceDatas.all { it.done != null })
 
@@ -297,7 +297,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 R.id.action_group_notify -> {
-                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
                     instanceDatas.all { it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
 
@@ -313,7 +313,7 @@ class GroupListFragment @JvmOverloads constructor(
                     activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(instanceData.taskKey)))
                 }
                 R.id.actionGroupRemoveFromParent -> {
-                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
                     check(instanceDatas.all { it.isRecurringGroupChild })
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
@@ -338,7 +338,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
-        private fun showHour(selectedDatas: Collection<SelectedData>) = selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now }
+        private fun showHour(selectedDatas: Collection<GroupListDataWrapper.SelectedData>) = selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now }
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)
@@ -347,12 +347,12 @@ class GroupListFragment @JvmOverloads constructor(
             check(selectedDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
-                    R.id.action_group_notify to selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown },
+                    R.id.action_group_notify to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown },
                     R.id.actionGroupHour to showHour(selectedDatas),
-                    R.id.action_group_edit_instance to selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null },
-                    R.id.action_group_mark_done to selectedDatas.all { it is InstanceData && it.done == null },
-                    R.id.action_group_mark_not_done to selectedDatas.all { it is InstanceData && it.done != null },
-                    R.id.actionGroupRemoveFromParent to selectedDatas.all { it is InstanceData && it.isRecurringGroupChild }
+                    R.id.action_group_edit_instance to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null },
+                    R.id.action_group_mark_done to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done == null },
+                    R.id.action_group_mark_not_done to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done != null },
+                    R.id.actionGroupRemoveFromParent to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRecurringGroupChild }
             )
 
             if (selectedDatas.size == 1) {
@@ -400,7 +400,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     val shareData: String?
         get() {
-            val instanceDatas = parameters.dataWrapper
+            val instanceDatas = parameters.groupListDataWrapper
                     .instanceDatas
                     .sorted()
 
@@ -430,14 +430,14 @@ class GroupListFragment @JvmOverloads constructor(
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = groupListRecycler
 
-    private fun getShareData(selectedDatas: Collection<SelectedData>): String {
+    private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
-        val instanceDatas = selectedDatas.mapNotNull { it as? InstanceData }
-        val taskDatas = selectedDatas.mapNotNull { it as? TaskData }
+        val instanceDatas = selectedDatas.mapNotNull { it as? GroupListDataWrapper.InstanceData }
+        val taskDatas = selectedDatas.mapNotNull { it as? GroupListDataWrapper.TaskData }
 
-        val instanceMap = LinkedHashMap<InstanceKey, InstanceData>()
-        val taskList = mutableListOf<TaskData>()
+        val instanceMap = LinkedHashMap<InstanceKey, GroupListDataWrapper.InstanceData>()
+        val taskList = mutableListOf<GroupListDataWrapper.TaskData>()
 
         instanceDatas.filterNot { inTree(instanceMap, it) }.forEach { instanceMap[it.instanceKey] = it }
         taskDatas.filterNot { inTree(taskList, it) }.forEach { taskList.add(it) }
@@ -450,16 +450,16 @@ class GroupListFragment @JvmOverloads constructor(
         return lines.joinToString("\n")
     }
 
-    private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean = if (shareTree.containsKey(instanceData.instanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
+    private fun inTree(shareTree: Map<InstanceKey, GroupListDataWrapper.InstanceData>, instanceData: GroupListDataWrapper.InstanceData): Boolean = if (shareTree.containsKey(instanceData.instanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
 
-    private fun inTree(shareTree: List<TaskData>, childTaskData: TaskData): Boolean {
+    private fun inTree(shareTree: List<GroupListDataWrapper.TaskData>, childTaskData: GroupListDataWrapper.TaskData): Boolean {
         if (shareTree.isEmpty())
             return false
 
         return if (shareTree.contains(childTaskData)) true else shareTree.any { inTree(it.children, childTaskData) }
     }
 
-    private fun printTree(lines: MutableList<String>, indentation: Int, selectedData: SelectedData) {
+    private fun printTree(lines: MutableList<String>, indentation: Int, selectedData: GroupListDataWrapper.SelectedData) {
         lines.add("-".repeat(indentation) + selectedData.name)
         selectedData.note?.let { lines.add("-".repeat(indentation + 1) + it) }
 
@@ -499,7 +499,7 @@ class GroupListFragment @JvmOverloads constructor(
             if (it)
                 parametersRelay
             else
-                Observable.never<Parameters>()
+                Observable.never<GroupListParameters>()
         }
 
         compositeDisposable += observable.subscribe { initialize() }
@@ -522,46 +522,46 @@ class GroupListFragment @JvmOverloads constructor(
             position: Int,
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper
+            groupListDataWrapper: GroupListDataWrapper
     ) {
         check(position >= 0)
 
-        val differentPage = (parametersRelay.value as? Parameters.All)?.let {
+        val differentPage = (parametersRelay.value as? GroupListParameters.All)?.let {
             it.timeRange != timeRange || it.position != position
         } ?: false
 
-        parametersRelay.accept(Parameters.All(dataId, immediate, dataWrapper, position, timeRange, differentPage))
+        parametersRelay.accept(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, timeRange, differentPage))
     }
 
     fun setTimeStamp(
             timeStamp: TimeStamp,
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper
-    ) = parametersRelay.accept(Parameters.TimeStamp(dataId, immediate, dataWrapper, timeStamp))
+            groupListDataWrapper: GroupListDataWrapper
+    ) = parametersRelay.accept(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
 
     fun setInstanceKey(
             instanceKey: InstanceKey,
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper
-    ) = parametersRelay.accept(Parameters.InstanceKey(dataId, immediate, dataWrapper, instanceKey))
+            groupListDataWrapper: GroupListDataWrapper
+    ) = parametersRelay.accept(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
 
     fun setInstanceKeys(
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper
-    ) = parametersRelay.accept(Parameters.InstanceKeys(dataId, immediate, dataWrapper))
+            groupListDataWrapper: GroupListDataWrapper
+    ) = parametersRelay.accept(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
 
     fun setTaskKey(
             taskKey: TaskKey,
             dataId: Int,
             immediate: Boolean,
-            dataWrapper: DataWrapper,
+            groupListDataWrapper: GroupListDataWrapper,
             showLoader: Boolean
-    ) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey, showLoader))
+    ) = parametersRelay.accept(GroupListParameters.TaskKey(dataId, immediate, groupListDataWrapper, taskKey, showLoader))
 
-    private fun useGroups() = parameters is Parameters.All
+    private fun useGroups() = parameters is GroupListParameters.All
 
     public override fun onSaveInstanceState(): Bundle {
         return Bundle().apply {
@@ -577,19 +577,19 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
-        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage != true) {
+        if (this::treeViewAdapter.isInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(
                         parameters.dataId,
-                        parameters.dataWrapper.customTimeDatas,
+                        parameters.groupListDataWrapper.customTimeDatas,
                         useGroups(),
-                        parameters.dataWrapper.instanceDatas,
+                        parameters.groupListDataWrapper.instanceDatas,
                         state,
-                        parameters.dataWrapper.taskDatas,
-                        parameters.dataWrapper.note,
-                        parameters.dataWrapper.imageData,
+                        parameters.groupListDataWrapper.taskDatas,
+                        parameters.groupListDataWrapper.note,
+                        parameters.groupListDataWrapper.imageData,
                         parameters.showProgress,
                         parameters.useDoneNode
                 )
@@ -601,13 +601,13 @@ class GroupListFragment @JvmOverloads constructor(
 
             groupAdapter.initialize(
                     parameters.dataId,
-                    parameters.dataWrapper.customTimeDatas,
+                    parameters.groupListDataWrapper.customTimeDatas,
                     useGroups(),
-                    parameters.dataWrapper.instanceDatas,
+                    parameters.groupListDataWrapper.instanceDatas,
                     state,
-                    parameters.dataWrapper.taskDatas,
-                    parameters.dataWrapper.note,
-                    parameters.dataWrapper.imageData,
+                    parameters.groupListDataWrapper.taskDatas,
+                    parameters.groupListDataWrapper.note,
+                    parameters.groupListDataWrapper.imageData,
                     parameters.showProgress,
                     parameters.useDoneNode
             )
@@ -632,8 +632,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         val emptyTextId = when (val parameters = parameters) {
-            is Parameters.All -> R.string.instances_empty_root
-            is Parameters.InstanceKey -> if (parameters.dataWrapper.taskEditable!!) {
+            is GroupListParameters.All -> R.string.instances_empty_root
+            is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!) {
                 R.string.empty_child
             } else {
                 R.string.empty_disabled
@@ -668,7 +668,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private fun setGroupMenuItemVisibility() {
         listener.apply {
-            val position = (parametersRelay.value as? Parameters.All)?.position
+            val position = (parametersRelay.value as? GroupListParameters.All)?.position
 
             if (this@GroupListFragment::treeViewAdapter.isInitialized)
                 setGroupMenuItemVisibility(
@@ -695,17 +695,17 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton.setOnClickListener {
             check(showFab())
 
-            fun List<InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
+            fun List<GroupListDataWrapper.InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
                     ?: first()).let {
                 EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
             }
 
             val hint = when (val parameters = parameters) {
-                is Parameters.All -> {
+                is GroupListParameters.All -> {
                     val actionMode = selectionCallback.actionMode
 
                     if (actionMode != null) {
-                        val hint = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.getHint()
+                        val hint = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as GroupListDataWrapper.InstanceData }.getHint()
 
                         actionMode.finish()
 
@@ -714,10 +714,10 @@ class GroupListFragment @JvmOverloads constructor(
                         EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
                     }
                 }
-                is Parameters.TimeStamp -> parameters.dataWrapper
+                is GroupListParameters.TimeStamp -> parameters.groupListDataWrapper
                         .instanceDatas
                         .getHint()
-                is Parameters.InstanceKey -> EditActivity.Hint.Task(parameters.instanceKey.taskKey)
+                is GroupListParameters.InstanceKey -> EditActivity.Hint.Task(parameters.instanceKey.taskKey)
                 else -> throw IllegalStateException()
             }
 
@@ -728,12 +728,12 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun showFab() = when (val parameters = parameters) {
-        is Parameters.All -> {
+        is GroupListParameters.All -> {
             if (selectionCallback.hasActionMode) {
                 val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
-                if (selectedDatas.all { it is InstanceData }) {
+                if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
                     selectedDatas.asSequence()
-                            .map { it as InstanceData }
+                            .map { it as GroupListDataWrapper.InstanceData }
                             .filter { it.isRootInstance }
                             .map { it.instanceTimeStamp }
                             .distinct()
@@ -746,8 +746,8 @@ class GroupListFragment @JvmOverloads constructor(
                 true
             }
         }
-        is Parameters.TimeStamp -> (parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode
-        is Parameters.InstanceKey -> parameters.dataWrapper.taskEditable!! && !selectionCallback.hasActionMode
+        is GroupListParameters.TimeStamp -> (parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode
+        is GroupListParameters.InstanceKey -> parameters.groupListDataWrapper.taskEditable!! && !selectionCallback.hasActionMode
         else -> false
     }
 
@@ -765,11 +765,11 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton = null
     }
 
-    private fun getAllInstanceDatas(instanceData: InstanceData): List<InstanceData> {
+    private fun getAllInstanceDatas(instanceData: GroupListDataWrapper.InstanceData): List<GroupListDataWrapper.InstanceData> {
         return listOf(listOf(listOf(instanceData)), instanceData.children.values.map { getAllInstanceDatas(it) }).flatten().flatten()
     }
 
-    private val InstanceData.allTaskKeys get() = getAllInstanceDatas(this).map { it.taskKey }
+    private val GroupListDataWrapper.InstanceData.allTaskKeys get() = getAllInstanceDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
         if (!this::treeViewAdapter.isInitialized)
@@ -838,8 +838,8 @@ class GroupListFragment @JvmOverloads constructor(
 
                 val selectedNodes = treeViewAdapter.selectedNodes
                 val selectedDatas = nodesToSelectedDatas(selectedNodes, false)
-                val selectedInstances = selectedDatas.filterIsInstance<InstanceData>().map { it.instanceKey }
-                val selectedTasks = selectedDatas.filterIsInstance<TaskData>().map { it.taskKey }
+                val selectedInstances = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>().map { it.instanceKey }
+                val selectedTasks = selectedDatas.filterIsInstance<GroupListDataWrapper.TaskData>().map { it.taskKey }
 
                 val selectedGroups = selectedNodes.map { it.modelNode }
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
@@ -860,16 +860,16 @@ class GroupListFragment @JvmOverloads constructor(
         var dataId = -1
             private set
 
-        lateinit var customTimeDatas: List<CustomTimeData>
+        lateinit var customTimeDatas: List<GroupListDataWrapper.CustomTimeData>
             private set
 
         fun initialize(
                 dataId: Int,
-                customTimeDatas: List<CustomTimeData>,
+                customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
                 useGroups: Boolean,
-                instanceDatas: Collection<InstanceData>,
+                instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
                 groupListState: GroupListState,
-                taskDatas: List<TaskData>,
+                taskDatas: List<GroupListDataWrapper.TaskData>,
                 note: String?,
                 imageState: ImageState?,
                 showProgress: Boolean,
@@ -939,151 +939,6 @@ class GroupListFragment @JvmOverloads constructor(
         override val groupAdapter = this
 
         override fun scrollToTop() = groupListFragment.scrollToTop()
-    }
-
-    data class DataWrapper(
-            val customTimeDatas: List<CustomTimeData>,
-            val taskEditable: Boolean?,
-            val taskDatas: List<TaskData>,
-            val note: String?,
-            val instanceDatas: List<InstanceData>,
-            val imageData: ImageState?
-    ) : InstanceDataParent
-
-    interface SelectedData {
-
-        val taskCurrent: Boolean
-        val taskKey: TaskKey
-        val name: String
-        val note: String?
-        val childSelectedDatas: Collection<SelectedData>
-    }
-
-    data class InstanceData(
-            var done: ExactTimeStamp?,
-            val instanceKey: InstanceKey,
-            var displayText: String?,
-            override val name: String,
-            var instanceTimeStamp: TimeStamp,
-            override var taskCurrent: Boolean,
-            val isRootInstance: Boolean,
-            var isRootTask: Boolean?,
-            var exists: Boolean,
-            val createTaskTimePair: TimePair,
-            override val note: String?,
-            val children: MutableMap<InstanceKey, InstanceData>,
-            val hierarchyData: HierarchyData?,
-            var ordinal: Double,
-            var notificationShown: Boolean,
-            val imageState: ImageState?,
-            val isRecurringGroupChild: Boolean
-    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
-
-        lateinit var instanceDataParent: InstanceDataParent
-
-        init {
-            check(name.isNotEmpty())
-        }
-
-        override fun compareTo(other: InstanceData): Int {
-            check(this::instanceDataParent.isInitialized) // sanity check
-
-            val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
-            if (timeStampComparison != 0)
-                return timeStampComparison
-
-            return if (hierarchyData != null) {
-                checkNotNull(other.hierarchyData)
-
-                hierarchyData.ordinal.compareTo(other.hierarchyData.ordinal)
-            } else {
-                check(other.hierarchyData == null)
-
-                ordinal.compareTo(other.ordinal)
-            }
-        }
-
-        override val taskKey = instanceKey.taskKey
-
-        override val childSelectedDatas get() = children.values
-    }
-
-    data class CustomTimeData(val Name: String, val HourMinutes: SortedMap<DayOfWeek, HourMinute>) {
-
-        init {
-            check(Name.isNotEmpty())
-            check(HourMinutes.size == 7)
-        }
-    }
-
-    interface InstanceDataParent
-
-    data class TaskData(
-            override val taskKey: TaskKey,
-            override val name: String,
-            val children: List<TaskData>,
-            val startExactTimeStamp: ExactTimeStamp,
-            override val note: String?,
-            val imageState: ImageState?
-    ) : SelectedData {
-
-        init {
-            check(name.isNotEmpty())
-        }
-
-        override val taskCurrent = true
-
-        override val childSelectedDatas get() = children
-    }
-
-    sealed class Parameters(val draggable: Boolean = true) {
-
-        abstract val dataId: Int
-        abstract val immediate: Boolean
-        abstract val dataWrapper: DataWrapper
-
-        open val showProgress: Boolean = false
-        open val useDoneNode = true
-
-        class All(
-                override val dataId: Int,
-                override val immediate: Boolean,
-                override val dataWrapper: DataWrapper,
-                val position: Int,
-                val timeRange: MainActivity.TimeRange,
-                val differentPage: Boolean
-        ) : Parameters(false)
-
-        class TimeStamp(
-                override val dataId: Int,
-                override val immediate: Boolean,
-                override val dataWrapper: DataWrapper,
-                val timeStamp: com.krystianwsul.common.time.TimeStamp
-        ) : Parameters()
-
-        class InstanceKey(
-                override val dataId: Int,
-                override val immediate: Boolean,
-                override val dataWrapper: DataWrapper,
-                val instanceKey: com.krystianwsul.common.utils.InstanceKey
-        ) : Parameters()
-
-        class InstanceKeys(
-                override val dataId: Int,
-                override val immediate: Boolean,
-                override val dataWrapper: DataWrapper
-        ) : Parameters(false)
-
-        class TaskKey(
-                override val dataId: Int,
-                override val immediate: Boolean,
-                override val dataWrapper: DataWrapper,
-                val taskKey: com.krystianwsul.common.utils.TaskKey,
-                override val showProgress: Boolean
-        ) : Parameters(false) {
-
-            override val useDoneNode = false
-        }
     }
 
     private class NoSelectionException(message: String) : Exception(message)

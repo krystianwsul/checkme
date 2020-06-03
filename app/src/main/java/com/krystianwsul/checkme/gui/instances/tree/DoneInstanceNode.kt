@@ -10,7 +10,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class DoneInstanceNode(
         indentation: Int,
-        val instanceData: GroupListFragment.InstanceData,
+        val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode) : GroupHolderNode(indentation), NodeCollectionParent {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>

@@ -17,7 +17,7 @@ class NotDoneGroupCollection(
     val expandedGroups get() = notDoneGroupNodes.filter { !it.singleInstance() && it.expanded() }.map { it.exactTimeStamp.toTimeStamp() }
 
     fun initialize(
-            notDoneInstanceDatas: List<GroupListFragment.InstanceData>,
+            notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedGroups: List<TimeStamp>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
@@ -55,7 +55,7 @@ class NotDoneGroupCollection(
         nodeContainer.remove(notDoneGroupNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
+    fun add(instanceData: GroupListDataWrapper.InstanceData, x: TreeViewAdapter.Placeholder) {
         val exactTimeStamp = instanceData.instanceTimeStamp.toExactTimeStamp()
 
         notDoneGroupNodes.filter { it.exactTimeStamp == exactTimeStamp }.let {
@@ -69,7 +69,7 @@ class NotDoneGroupCollection(
 
     private fun newNotDoneGroupNode(
             notDoneGroupCollection: NotDoneGroupCollection,
-            instanceDatas: MutableList<GroupListFragment.InstanceData>,
+            instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
             expandedGroups: List<TimeStamp>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,

@@ -95,13 +95,13 @@ class ShowGroupActivity : ToolbarActivity(), GroupListListener {
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
         toolbar.title = data.displayText
 
-        if (data.dataWrapper == null) {
+        if (data.groupListDataWrapper == null) {
             finish()
 
             return
         }
 
-        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.immediate, data.dataWrapper)
+        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.immediate, data.groupListDataWrapper)
     }
 
     override fun onDestroy() {

@@ -266,7 +266,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListListener {
         updateTopMenu()
         updateBottomMenu()
 
-        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.immediate, data.dataWrapper)
+        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.immediate, data.groupListDataWrapper)
     }
 
     private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, done)

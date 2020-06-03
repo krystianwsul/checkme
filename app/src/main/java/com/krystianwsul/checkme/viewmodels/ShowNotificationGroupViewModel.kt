@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.common.utils.InstanceKey
 
 class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupViewModel.Data>() {
@@ -21,5 +21,5 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
         internalStart()
     }
 
-    data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
+    data class Data(val groupListDataWrapper: GroupListDataWrapper) : DomainData()
 }

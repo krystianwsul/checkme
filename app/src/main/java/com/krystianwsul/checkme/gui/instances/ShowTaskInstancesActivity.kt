@@ -80,7 +80,7 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListListener {
             page = savedInstanceState.getInt(KEY_PAGE)
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
-            data.doOnNext { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper, it.showLoader) }
+            data.doOnNext { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.groupListDataWrapper, it.showLoader) }
                     .switchMap { groupListFragment.treeViewAdapter.progressShown }
                     .doOnNext { page += 1 }
                     .startWith(Unit)

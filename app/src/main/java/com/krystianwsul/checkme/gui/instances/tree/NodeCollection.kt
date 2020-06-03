@@ -32,19 +32,19 @@ class NodeCollection(
     val doneExpanded get() = dividerNode.expanded()
 
     fun initialize(
-            instanceDatas: Collection<GroupListFragment.InstanceData>,
+            instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
             expandedGroups: List<TimeStamp>,
             expandedInstances: Map<InstanceKey, Boolean>,
             doneExpanded: Boolean,
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
-            taskDatas: List<GroupListFragment.TaskData>,
+            taskDatas: List<GroupListDataWrapper.TaskData>,
             unscheduledExpanded: Boolean,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
             imageData: ImageNode.ImageData?
     ): List<TreeNode<NodeHolder>> {
-        fun GroupListFragment.InstanceData.filterNotDone() = done == null || !useDoneNode
+        fun GroupListDataWrapper.InstanceData.filterNotDone() = done == null || !useDoneNode
         val notDoneInstanceDatas = instanceDatas.filter { it.filterNotDone() }
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 

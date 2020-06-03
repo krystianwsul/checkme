@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListDataWrapper
 import com.krystianwsul.common.time.TimeStamp
 
 class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
@@ -19,7 +19,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
         internalStart()
     }
 
-    data class Data(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : DomainData() {
+    data class Data(val displayText: String, val groupListDataWrapper: GroupListDataWrapper?) : DomainData() {
 
         init {
             check(displayText.isNotEmpty())

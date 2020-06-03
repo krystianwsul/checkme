@@ -734,9 +734,8 @@ class DomainFactory(
         val task = getTaskForce(taskKey)
         val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-        val childTaskDatas = task.getChildTaskHierarchies(hierarchyTimeStamp)
-                .map {
-                    val taskHierarchy = it.taskHierarchy
+        val childTaskDatas = task.getChildTaskHierarchies(hierarchyTimeStamp, true)
+                .map { taskHierarchy ->
                     val childTask = taskHierarchy.childTask
 
                     TaskListFragment.ChildTaskData(
@@ -783,7 +782,7 @@ class DomainFactory(
                     TaskListFragment.ChildTaskData(
                             task.name,
                             task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                            getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp),
+                            getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
                             task.note,
                             task.startExactTimeStamp,
                             task.taskKey,
@@ -1682,7 +1681,6 @@ class DomainFactory(
     ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
             parentTask.getChildTaskHierarchies(now)
                     .asSequence()
-                    .map { it.taskHierarchy }
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
                     .map {
                         val childTask = it.childTask
@@ -1897,16 +1895,16 @@ class DomainFactory(
             parentTask: Task<*>,
             now: ExactTimeStamp,
             alwaysShow: Boolean = true,
-            hierarchyExactTimeStamp: ExactTimeStamp = now
+            hierarchyExactTimeStamp: ExactTimeStamp = now,
+            groups: Boolean = false
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp).map {
-            val taskHierarchy = it.taskHierarchy
+        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp, groups).map { taskHierarchy ->
             val childTask = taskHierarchy.childTask
 
             TaskListFragment.ChildTaskData(
                     childTask.name,
                     childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                    getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp),
+                    getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp, groups),
                     childTask.note,
                     childTask.startExactTimeStamp,
                     childTask.taskKey,
@@ -1924,7 +1922,7 @@ class DomainFactory(
             parentTask: Task<*>,
             now: ExactTimeStamp
     ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
-        val childTask = it.taskHierarchy.childTask
+        val childTask = it.childTask
 
         GroupListDataWrapper.TaskData(
                 childTask.taskKey,
@@ -2294,7 +2292,7 @@ class DomainFactory(
         val copiedTask = getTaskForce(copyTaskKey)
 
         copiedTask.getChildTaskHierarchies(now).forEach {
-            val copiedChildTask = it.taskHierarchy.childTask
+            val copiedChildTask = it.childTask
             copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
             createChildTask(

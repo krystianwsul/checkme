@@ -444,6 +444,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private inner class TaskAdapter(val taskListFragment: TaskListFragment) : GroupHolderAdapter(), TaskParent {
 
+        override val keyChain = listOf<TaskKey>()
+
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
 
@@ -517,7 +519,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val childTaskData: ChildTaskData
         ) : GroupHolderNode(indentation), TaskParent, Sortable {
 
-            override val id = childTaskData.taskKey
+            override val keyChain = taskParent.keyChain + childTaskData.taskKey
+
+            override val id = keyChain
 
             public override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
@@ -651,6 +655,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private interface TaskParent {
 
         val taskAdapter: TaskAdapter
+
+        val keyChain: List<TaskKey>
     }
 
     data class Data(

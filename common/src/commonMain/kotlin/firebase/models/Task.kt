@@ -162,12 +162,11 @@ class Task<T : ProjectType>(
         }
 
         getChildTaskHierarchies(now).forEach {
-            val taskHierarchy = it.taskHierarchy
-            taskHierarchy.childTask.setEndData(endData, taskUndoData, true)
+            it.childTask.setEndData(endData, taskUndoData, true)
 
-            taskUndoData?.taskHierarchyKeys?.add(taskHierarchy.taskHierarchyKey)
+            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
-            taskHierarchy.setEndExactTimeStamp(now)
+            it.setEndExactTimeStamp(now)
         }
 
         if (group) {
@@ -192,8 +191,8 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(endData)
     }
 
-    fun getGroupScheduleDateTime(now: ExactTimeStamp): DateTime? {
-        val currentSchedules = getCurrentSchedules(now)
+    fun getGroupScheduleDateTime(exactTimeStamp: ExactTimeStamp): DateTime? {
+        val currentSchedules = getCurrentSchedules(exactTimeStamp)
         val groupSingleSchedules = currentSchedules.filter { it.schedule is SingleSchedule<*> && it.schedule.group }
 
         return if (groupSingleSchedules.isEmpty()) {
@@ -205,7 +204,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun isGroupTask(now: ExactTimeStamp) = getGroupScheduleDateTime(now) != null
+    fun isGroupTask(exactTimeStamp: ExactTimeStamp) = getGroupScheduleDateTime(exactTimeStamp) != null
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
             parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
@@ -406,11 +405,20 @@ class Task<T : ProjectType>(
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
 
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = childHierarchyIntervals.filter {
-        it.current(exactTimeStamp) &&
-                it.taskHierarchy.current(exactTimeStamp) &&
-                it.taskHierarchy.childTask.current(exactTimeStamp)
-    }.sortedBy { it.taskHierarchy.ordinal }
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp, groups: Boolean = false): List<TaskHierarchy<T>> {
+        val taskHierarchies = childHierarchyIntervals.filter {
+            it.current(exactTimeStamp) &&
+                    it.taskHierarchy.current(exactTimeStamp) &&
+                    it.taskHierarchy.childTask.current(exactTimeStamp)
+        }
+                .map { it.taskHierarchy }
+                .toMutableSet()
+
+        if (groups && isGroupTask(exactTimeStamp))
+            taskHierarchies += project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.current(exactTimeStamp) }
+
+        return taskHierarchies.sortedBy { it.ordinal }
+    }
 
     fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = taskRecord.image ?: return null

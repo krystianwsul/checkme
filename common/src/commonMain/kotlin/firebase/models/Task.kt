@@ -83,7 +83,9 @@ class Task<T : ProjectType>(
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         project.getTaskHierarchiesByParentTaskKey(taskKey)
-                .flatMap { it.childTask.parentHierarchyIntervals }
+                .map { it.childTask }
+                .distinct()
+                .flatMap { it.parentHierarchyIntervals }
                 .filter { it.taskHierarchy.parentTaskKey == taskKey }
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty

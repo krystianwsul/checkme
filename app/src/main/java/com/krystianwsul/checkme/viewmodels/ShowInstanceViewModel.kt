@@ -31,7 +31,8 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val dataWrapper: GroupListFragment.DataWrapper,
             var notificationShown: Boolean,
             val displayText: String,
-            val taskKey: TaskKey
+            val taskKey: TaskKey,
+            val isRecurringGroupChild: Boolean
     ) : DomainData() {
 
         init {

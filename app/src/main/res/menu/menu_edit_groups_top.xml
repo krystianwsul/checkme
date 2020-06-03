@@ -31,8 +31,10 @@
     <item
         android:id="@+id/actionGroupRemoveFromParent"
         android:icon="@drawable/ic_baseline_remove_circle_outline_24"
-        android:title="@string/remove"
-        android:visible="false" />
+        android:title="@string/removeFromParent"
+        android:visible="false"
+        android:orderInCategory="300"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_group_mark_done"

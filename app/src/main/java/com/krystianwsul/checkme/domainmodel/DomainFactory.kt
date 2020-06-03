@@ -720,7 +720,8 @@ class DomainFactory(
                 getGroupListData(instance, task, now),
                 instance.getNotificationShown(localFactory),
                 displayText,
-                task.taskKey
+                task.taskKey,
+                instance.isRepeatingGroupChild(now)
         )
     }
 

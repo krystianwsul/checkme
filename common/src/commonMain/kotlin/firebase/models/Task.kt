@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
@@ -216,26 +215,10 @@ class Task<T : ProjectType>(
             noScheduleOrParents.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
-        requireNotDeleted(exactTimeStamp)
+        requireCurrent(exactTimeStamp)
 
-        return if (current(exactTimeStamp)) {
-            getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
-        } else {
-            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
-            // żeby można było dodawać child instances do past parent instance
-
-            ErrorLogger.instance.logException(PastParentException("name: $name, taskKey: $taskKey, exactTimeStamp: $startExactTimeStamp, start: $startExactTimeStamp"))
-
-            val taskHierarchies = parentTaskHierarchies.filter { it.startExactTimeStamp == startExactTimeStamp }
-            check(taskHierarchies.size <= 1)
-
-            taskHierarchies.singleOrNull()?.let {
-                HierarchyInterval(it.startExactTimeStamp, it.endExactTimeStamp, it)
-            }
-        }
+        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
     }
-
-    private class PastParentException(message: String) : Exception(message) // todo group task this is a sanity check, since I don't think the code is used anywhere
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         requireNotCurrent(now)

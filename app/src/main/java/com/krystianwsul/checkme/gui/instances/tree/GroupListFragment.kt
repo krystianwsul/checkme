@@ -313,6 +313,14 @@ class GroupListFragment @JvmOverloads constructor(
 
                     activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(instanceData.taskKey)))
                 }
+                R.id.actionGroupRemoveFromParent -> {
+                    val instanceDatas = selectedDatas.map { it as InstanceData }
+                    check(instanceDatas.all { it.isRecurringGroupChild })
+
+                    val instanceKeys = instanceDatas.map { it.instanceKey }
+
+                    DomainFactory.instance.removeFromParent(SaveService.Source.GUI, instanceKeys)
+                }
                 else -> throw UnsupportedOperationException()
             }
 

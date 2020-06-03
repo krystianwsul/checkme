@@ -1126,6 +1126,24 @@ class DomainFactory(
     }
 
     @Synchronized
+    fun removeFromParent(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
+        MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
+        if (projectsFactory.isSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+        instanceKeys.forEach {
+            getInstance(it).getParentInstance(now)!!
+                    .third!!
+                    .setEndExactTimeStamp(now)
+        }
+
+        updateNotifications(now)
+
+        save(0, source)
+    }
+
+    @Synchronized
     fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>, done: Boolean): ExactTimeStamp {
         MyCrashlytics.log("DomainFactory.setInstancesDone")
         if (projectsFactory.isSaved) throw SavedFactoryException()

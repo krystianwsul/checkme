@@ -219,7 +219,7 @@ class Instance<T : ProjectType> private constructor(
                     ?.isEligibleParentInstance(now)
                     ?: (exists() || matchesSchedule())
 
-    fun getParentInstance(now: ExactTimeStamp): Pair<Instance<T>, Boolean>? { // isRepeatingGroup
+    fun getParentInstance(now: ExactTimeStamp): Triple<Instance<T>, Boolean, TaskHierarchy<T>?>? { // isRepeatingGroup
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
@@ -228,13 +228,18 @@ class Instance<T : ProjectType> private constructor(
                 .filter { it.current(hierarchyExactTimeStamp.first) }
                 .toList()
 
-        val (parentTask, isRepeatingGroup) = if (groupMatches.isNotEmpty()) {
-            val parentTask = groupMatches.single().parentTask
+        val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
+            val groupMatch = groupMatches.single()
+            val parentTask = groupMatch.parentTask
             val intervalType = task.getInterval(hierarchyExactTimeStamp.first).type
 
-            parentTask to (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask)
+            Triple(
+                    parentTask,
+                    (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
+                    groupMatch
+            )
         } else {
-            task.getParentTask(hierarchyExactTimeStamp.first) to false
+            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
         }
 
         if (parentTask == null)
@@ -251,7 +256,7 @@ class Instance<T : ProjectType> private constructor(
             null
         }
 
-        return parentInstance?.let { it to isRepeatingGroup }
+        return parentInstance?.let { Triple(it, isRepeatingGroup, parentTaskHierarchy) }
     }
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"

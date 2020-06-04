@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.TimePair
@@ -204,6 +205,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListListener {
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
             findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
             findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
+            findItem(R.id.instanceMenuWebSearch).isVisible = data != null
         }
     }
 
@@ -327,6 +329,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListListener {
                         R.id.instanceMenuCopyTask -> {
                             startActivity(EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey)))
                         }
+                        R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                         else -> throw UnsupportedOperationException()
                     }
                 }

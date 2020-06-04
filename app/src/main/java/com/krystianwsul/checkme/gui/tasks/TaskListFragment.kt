@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -112,6 +113,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 R.id.action_task_add -> startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Task(taskKeys.single()))))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
                 R.id.actionTaskCopy -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKeys.single())))
+                R.id.actionTaskWebSearch -> startActivity(webSearchIntent(childTaskDatas.single().name))
                 else -> throw UnsupportedOperationException()
             }
 
@@ -141,7 +143,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
                     R.id.action_task_show_instances to single,
-                    R.id.actionTaskCopy to (singleData?.current == true)
+                    R.id.actionTaskCopy to (singleData?.current == true),
+                    R.id.actionTaskWebSearch to single
             )
         }
 

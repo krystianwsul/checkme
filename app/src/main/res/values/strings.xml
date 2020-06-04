@@ -122,4 +122,5 @@
     <string name="joinAllFutureReminders">Join all future reminders?</string>
     <string name="justThese">Just these</string>
     <string name="removeFromParent">Remove from parent</string>
+    <string name="webSearch">Web search</string>
 </resources>

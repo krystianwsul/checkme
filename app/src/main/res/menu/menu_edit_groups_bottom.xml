@@ -48,7 +48,7 @@
         android:orderInCategory="500"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_assignment_white_24dp"
-        android:visible="false"/>
+        android:visible="false" />
 
     <item
         android:id="@+id/actionGroupCopyTask"
@@ -57,5 +57,12 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_content_copy_white_24dp"
         android:visible="false" />
+
+    <item
+        android:id="@+id/actionGroupWebSearch"
+        android:title="@string/webSearch"
+        android:orderInCategory="700"
+        android:icon="@drawable/ic_baseline_open_in_browser_24"
+        app:showAsAction="ifRoom" />
 
 </menu>

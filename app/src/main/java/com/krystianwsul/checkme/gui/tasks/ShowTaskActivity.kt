@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -176,6 +177,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
             findItem(R.id.task_menu_show_instances).isVisible = data != null
             findItem(R.id.taskMenuCopyTask).isVisible = data?.current == true
+            findItem(R.id.taskMenuWebSearch).isVisible = data != null
         }
     }
 
@@ -209,6 +211,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                     }
                     R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
                     R.id.taskMenuCopyTask -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
+                    R.id.taskMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                     else -> throw UnsupportedOperationException()
                 }
 

@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.utils
 
+import android.annotation.SuppressLint
+import android.app.SearchManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -278,6 +280,7 @@ fun newUuid() = UUID.randomUUID().toString()
 
 fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixedOnClickListener(listener, listener)
 
+@SuppressLint("ClickableViewAccessibility")
 fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit, iconListener: () -> Unit) {
     setOnClickListener { listener() }
 
@@ -384,3 +387,5 @@ fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) 
 
 @Suppress("unused")
 fun Disposable.ignore() = Unit
+
+fun webSearchIntent(query: String) = Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)

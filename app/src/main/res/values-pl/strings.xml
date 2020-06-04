@@ -122,4 +122,5 @@
     <string name="joinAllFutureReminders">Połączyć wszystkie pszyszłe przypomnienia?</string>
     <string name="justThese">Tylko te</string>
     <string name="removeFromParent">Usuń z nadrzędnego przypomnienia</string>
+    <string name="webSearch">Szukaj w internecie</string>
 </resources>

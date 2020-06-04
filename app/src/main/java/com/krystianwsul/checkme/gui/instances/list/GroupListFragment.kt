@@ -321,6 +321,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.instance.removeFromParent(SaveService.Source.GUI, instanceKeys)
                 }
+                R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
                 else -> throw UnsupportedOperationException()
             }
 
@@ -365,7 +366,8 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
                         R.id.action_group_add_task to instanceData.taskCurrent,
-                        R.id.actionGroupCopyTask to instanceData.taskCurrent
+                        R.id.actionGroupCopyTask to instanceData.taskCurrent,
+                        R.id.actionGroupWebSearch to true
                 )
             } else {
                 check(selectedDatas.size > 1)
@@ -374,7 +376,8 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
                         R.id.action_group_add_task to false,
-                        R.id.actionGroupCopyTask to false
+                        R.id.actionGroupCopyTask to false,
+                        R.id.actionGroupWebSearch to false
                 )
 
                 val allCurrent = selectedDatas.all { it.taskCurrent }

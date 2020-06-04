@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/appBarLayout"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/collapseAppBarHeight"
+    android:layout_height="wrap_content"
     android:stateListAnimator="@animator/collapse_elevation">
 
     <com.google.android.material.appbar.CollapsingToolbarLayout

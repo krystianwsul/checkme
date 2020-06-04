@@ -474,9 +474,17 @@ fun DomainFactory.createJoinChildTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
+    val ordinal = joinTasks.map { it.getParentTaskHierarchy(now)!!.taskHierarchy.ordinal }.min()
+
     val imageUuid = imagePath?.let { newUuid() }
 
-    val childTask = parentTask.createChildTask(now, name, note, imageUuid?.let { TaskJson.Image(it, uuid) })
+    val childTask = parentTask.createChildTask(
+            now,
+            name,
+            note,
+            imageUuid?.let { TaskJson.Image(it, uuid) },
+            ordinal
+    )
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 

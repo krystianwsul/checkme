@@ -67,14 +67,14 @@ abstract class Project<T : ProjectType> : Current {
     fun createTaskHierarchy(
             parentTask: Task<T>,
             childTask: Task<T>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp,
+            ordinal: Double? = null
     ) {
         val taskHierarchyJson = TaskHierarchyJson(
                 parentTask.id,
                 childTask.id,
                 now.long,
-                null,
-                null
+                ordinal = ordinal
         )
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)

@@ -447,13 +447,14 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp,
             name: String,
             note: String?,
-            image: TaskJson.Image?
+            image: TaskJson.Image?,
+            ordinal: Double? = null
     ): Task<T> {
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         val childTask = project.newTask(taskJson)
 
-        project.createTaskHierarchy(this, childTask, now)
+        project.createTaskHierarchy(this, childTask, now, ordinal)
 
         return childTask
     }

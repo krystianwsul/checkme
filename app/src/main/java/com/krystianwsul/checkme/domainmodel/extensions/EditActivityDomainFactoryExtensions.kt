@@ -347,7 +347,6 @@ fun DomainFactory.updateChildTask(
     return task.taskKey
 }
 
-
 @Synchronized
 fun DomainFactory.updateRootTask(
         dataId: Int,
@@ -474,7 +473,10 @@ fun DomainFactory.createJoinChildTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-    val ordinal = joinTasks.map { it.getParentTaskHierarchy(now)!!.taskHierarchy.ordinal }.min()
+    val ordinal = joinTasks.mapNotNull { it.getParentTaskHierarchy(now)?.taskHierarchy }
+            .filter { it.parentTaskKey == parentTaskKey }
+            .map { it.ordinal }
+            .min()
 
     val imageUuid = imagePath?.let { newUuid() }
 

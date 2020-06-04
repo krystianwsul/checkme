@@ -21,9 +21,7 @@ object IntervalBuilder {
         val schedules = task.schedules.toMutableList()
 
         val groupParentTaskHierarchies = task.parentTaskHierarchies
-                .filter {
-                    it.isParentGroupTask(now)
-                }
+                .filter { it.isParentGroupTask(now) }
                 .toMutableList()
 
         val normalParentTaskHierarchies = (task.parentTaskHierarchies - groupParentTaskHierarchies).toMutableList()

@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener

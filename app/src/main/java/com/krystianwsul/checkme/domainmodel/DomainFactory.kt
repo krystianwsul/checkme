@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.HierarchyData
-import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -162,7 +161,6 @@ class DomainFactory(
     val instanceCount get() = projectsFactory.instanceCount
 
     lateinit var instanceInfo: Pair<Int, Int>
-        private set
 
     val customTimeCount get() = customTimes.size
 
@@ -399,130 +397,6 @@ class DomainFactory(
         }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
-    }
-
-    @Synchronized
-    fun getGroupListData(
-            now: ExactTimeStamp,
-            position: Int,
-            timeRange: MainActivity.TimeRange
-    ): DayViewModel.DayData {
-        MyCrashlytics.log("DomainFactory.getGroupListData")
-
-        check(position >= 0)
-
-        val startExactTimeStamp: ExactTimeStamp?
-        val endExactTimeStamp: ExactTimeStamp
-
-        if (position == 0) {
-            startExactTimeStamp = null
-        } else {
-            val startCalendar = now.calendar
-
-            when (timeRange) {
-                MainActivity.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
-                MainActivity.TimeRange.WEEK -> {
-                    startCalendar.add(Calendar.WEEK_OF_YEAR, position)
-                    startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
-                }
-                MainActivity.TimeRange.MONTH -> {
-                    startCalendar.add(Calendar.MONTH, position)
-                    startCalendar.set(Calendar.DAY_OF_MONTH, 1)
-                }
-            }
-
-            startExactTimeStamp = ExactTimeStamp(Date(startCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
-        }
-
-        val endCalendar = now.calendar
-
-        when (timeRange) {
-            MainActivity.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
-            MainActivity.TimeRange.WEEK -> {
-                endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
-                endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
-            }
-            MainActivity.TimeRange.MONTH -> {
-                endCalendar.add(Calendar.MONTH, position + 1)
-                endCalendar.set(Calendar.DAY_OF_MONTH, 1)
-            }
-        }
-
-        endExactTimeStamp = ExactTimeStamp(Date(endCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
-
-        val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
-
-        if (position == 0 && timeRange == MainActivity.TimeRange.DAY) {
-            instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->
-                Pair(existingInstanceCount, currentInstances.size - existingInstanceCount)
-            }
-        }
-
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
-        }
-
-        val taskDatas = if (position == 0) {
-            getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
-                    .map {
-                        GroupListDataWrapper.TaskData(
-                                it.taskKey,
-                                it.name,
-                                getGroupListChildTaskDatas(it, now),
-                                it.startExactTimeStamp,
-                                it.note,
-                                it.getImage(deviceDbInfo)
-                        )
-                    }
-                    .toList()
-        } else {
-            listOf()
-        }
-
-        val instanceDatas = currentInstances.map { instance ->
-            val task = instance.task
-
-            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
-            val children = getChildInstanceDatas(instance, now)
-
-            val instanceData = GroupListDataWrapper.InstanceData(
-                    instance.done,
-                    instance.instanceKey,
-                    instance.getDisplayData(now)?.getDisplayText(),
-                    instance.name,
-                    instance.instanceDateTime.timeStamp,
-                    task.current(now),
-                    instance.isRootInstance(now),
-                    isRootTask,
-                    instance.exists(),
-                    instance.getCreateTaskTimePair(ownerKey),
-                    task.note,
-                    children,
-                    null,
-                    instance.ordinal,
-                    instance.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo),
-                    instance.isRepeatingGroupChild(now)
-            )
-
-            children.values.forEach { it.instanceDataParent = instanceData }
-
-            instanceData
-        }
-
-        val dataWrapper = GroupListDataWrapper(
-                customTimeDatas,
-                null,
-                taskDatas,
-                null,
-                instanceDatas,
-                null
-        )
-
-        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
-
-        return DayViewModel.DayData(dataWrapper)
     }
 
     @Synchronized
@@ -764,40 +638,6 @@ class DomainFactory(
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.current(now)),
                 task.getImage(deviceDbInfo),
                 task.current(now)
-        )
-    }
-
-    @Synchronized
-    fun getMainData(): MainViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getMainData")
-
-        val now = ExactTimeStamp.now
-
-        val childTaskDatas = getTasks().map {
-            val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
-            Pair(it, hierarchyExactTimeStamp)
-        }
-                .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
-                .map { (task, hierarchyExactTimeStamp) ->
-                    TaskListFragment.ChildTaskData(
-                            task.name,
-                            task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                            getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
-                            task.note,
-                            task.startExactTimeStamp,
-                            task.taskKey,
-                            null,
-                            task.getImage(deviceDbInfo),
-                            task.current(now),
-                            false
-                    )
-                }
-                .sortedDescending()
-                .toMutableList()
-
-        return MainViewModel.Data(
-                TaskListFragment.TaskData(childTaskDatas, null, true),
-                myUserFactory.user.defaultTab
         )
     }
 
@@ -1165,7 +1005,7 @@ class DomainFactory(
         notifyCloud(remoteProject)
     }
 
-    private fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, now: ExactTimeStamp): TaskUndoData {
+    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, now: ExactTimeStamp): TaskUndoData {
         check(taskKeys.isNotEmpty())
 
         val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
@@ -1196,14 +1036,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        return setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
-    }
-
-    @Synchronized
     fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, instanceKey: InstanceKey): Pair<TaskUndoData, Boolean> {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -1226,27 +1058,7 @@ class DomainFactory(
         return Pair(taskUndoData, visible)
     }
 
-    @Synchronized
-    fun clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) {
-        MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        processTaskUndoData(taskUndoData, now)
-
-        updateNotifications(now)
-
-        save(0, source)
-
-        val remoteProjects = taskUndoData.taskKeys
-                .map { getTaskForce(it).project }
-                .toSet()
-
-        notifyCloud(remoteProjects)
-    }
-
-    private fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp) {
+    fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp) {
         taskUndoData.taskKeys
                 .map { getTaskForce(it) }
                 .forEach {
@@ -1623,7 +1435,7 @@ class DomainFactory(
         return generateInstance(instanceKey.taskKey, dateTime)
     }
 
-    private fun getRootInstances(
+    fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
@@ -1635,7 +1447,7 @@ class DomainFactory(
             .customTimes
             .filter { it.current(now) }
 
-    private fun getChildInstanceDatas(
+    fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
@@ -1883,7 +1695,7 @@ class DomainFactory(
                 .forEach { it.hide(now) }
     }
 
-    private fun getTasks() = projectsFactory.tasks.asSequence()
+    fun getTasks() = projectsFactory.tasks.asSequence()
 
     private val customTimes get() = projectsFactory.remoteCustomTimes
 
@@ -1891,7 +1703,7 @@ class DomainFactory(
 
     fun getTaskIfPresent(taskKey: TaskKey) = projectsFactory.getTaskIfPresent(taskKey)
 
-    private fun getTaskListChildTaskDatas(
+    fun getTaskListChildTaskDatas(
             parentTask: Task<*>,
             now: ExactTimeStamp,
             alwaysShow: Boolean = true,
@@ -1918,7 +1730,7 @@ class DomainFactory(
 
     private fun getExistingInstances() = projectsFactory.existingInstances
 
-    private fun getGroupListChildTaskDatas(
+    fun getGroupListChildTaskDatas(
             parentTask: Task<*>,
             now: ExactTimeStamp
     ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
@@ -1962,7 +1774,7 @@ class DomainFactory(
 
     fun notifyCloud(project: Project<*>) = notifyCloud(setOf(project))
 
-    private fun notifyCloud(projects: Set<Project<*>>) {
+    fun notifyCloud(projects: Set<Project<*>>) {
         if (projects.isNotEmpty())
             notifyCloudPrivateFixed(projects.toMutableSet(), mutableListOf())
     }

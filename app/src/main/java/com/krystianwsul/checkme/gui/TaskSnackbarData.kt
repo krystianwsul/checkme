@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.TaskUndoData
 

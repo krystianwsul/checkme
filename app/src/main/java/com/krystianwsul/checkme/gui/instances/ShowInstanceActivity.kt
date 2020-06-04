@@ -11,6 +11,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity

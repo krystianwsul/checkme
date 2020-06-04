@@ -25,6 +25,8 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment

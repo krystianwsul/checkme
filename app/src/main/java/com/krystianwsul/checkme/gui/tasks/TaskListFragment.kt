@@ -15,6 +15,8 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters

@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.common.time.ExactTimeStamp
 import kotlinx.android.synthetic.main.fragment_debug.*

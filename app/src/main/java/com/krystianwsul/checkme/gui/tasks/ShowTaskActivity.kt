@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
@@ -138,7 +139,9 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
+        Handler().post { // apparently included layout isn't immediately available in onCreate
+            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
+        }
 
         updateBottomMenu()
 

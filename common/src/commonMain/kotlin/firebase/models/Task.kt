@@ -137,7 +137,7 @@ class Task<T : ProjectType>(
         return getParentTask(exactTimeStamp) == null
     }
 
-    fun setEndData(
+    fun setEndData( // this is not recursive on children.  Get the whole tree beforehand.
             endData: EndData,
             taskUndoData: TaskUndoData? = null,
             recursive: Boolean = false
@@ -161,14 +161,6 @@ class Task<T : ProjectType>(
             }
         } else {
             check(schedules.isEmpty())
-        }
-
-        getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndData(endData, taskUndoData, true)
-
-            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
-
-            it.setEndExactTimeStamp(now)
         }
 
         if (group) {
@@ -206,7 +198,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun isGroupTask(exactTimeStamp: ExactTimeStamp) = getGroupScheduleDateTime(exactTimeStamp) != null
+    fun isGroupTask(exactTimeStamp: ExactTimeStamp) = getGroupScheduleDateTime(getHierarchyExactTimeStamp(exactTimeStamp)) != null
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
             parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }

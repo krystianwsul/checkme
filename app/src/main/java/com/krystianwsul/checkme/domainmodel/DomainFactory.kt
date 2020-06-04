@@ -1005,20 +1005,16 @@ class DomainFactory(
         notifyCloud(remoteProject)
     }
 
-    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, now: ExactTimeStamp): TaskUndoData {
+    fun setTaskEndTimeStamps(
+            source: SaveService.Source,
+            taskKeys: Set<TaskKey>,
+            deleteInstances: Boolean,
+            now: ExactTimeStamp
+    ): TaskUndoData {
         check(taskKeys.isNotEmpty())
 
         val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
         tasks.forEach { it.requireCurrent(now) }
-
-        fun parentPresent(task: Task<*>): Boolean = task.getParentTask(now)?.let {
-            tasks.contains(it) || parentPresent(it)
-        } ?: false
-
-        tasks.toMutableSet().forEach {
-            if (parentPresent(it))
-                tasks.remove(it)
-        }
 
         val taskUndoData = TaskUndoData()
 
@@ -1659,6 +1655,7 @@ class DomainFactory(
                     it.hide(now)
             }
 
+            // I think this might no longer be necessary, since setEndData doesn't recurse on children
             if (pair.first.getEndData() != null)
                 check(pair.first.getEndData() == endData)
             else

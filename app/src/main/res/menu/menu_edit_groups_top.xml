@@ -34,7 +34,7 @@
         android:title="@string/removeFromParent"
         android:visible="false"
         android:orderInCategory="300"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_group_mark_done"

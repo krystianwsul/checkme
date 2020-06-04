@@ -38,9 +38,8 @@ class TaskRelevance(val task: Task<*>) {
                     )
                 }
 
-        val oldestVisible = task.getOldestVisible()
-
-        fun Instance<*>.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
+        fun Instance<*>.filterOldestVisible() = getOldestVisible()?.let { scheduleDate >= it }
+                ?: true
 
         // mark instances relevant
         task.getPastRootInstances(now)

@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.*
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
@@ -103,14 +102,6 @@ class TaskRecord<T : ProjectType> private constructor(
         }
 
     var note by Committer(taskJson::note)
-
-    val oldestVisible
-        get() = taskJson.oldestVisibleServer
-                ?.let { Date.fromJson(it) }
-                ?: taskJson.oldestVisible
-                        .values
-                        .map { it.toDate() }
-                        .min()
 
     var image by Committer(taskJson::image)
 

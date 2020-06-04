@@ -8,7 +8,10 @@ import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import firebase.models.interval.HierarchyInterval
 import firebase.models.interval.Interval
@@ -273,11 +276,6 @@ class Task<T : ProjectType>(
                 startExactTimeStamp
         ).max()!!
 
-        val scheduleStartExactTimeStamp = listOfNotNull(
-                startExactTimeStamp,
-                getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
-        ).max()!!
-
         val endExactTimeStamp = listOfNotNull(
                 endExactTimeStamp,
                 givenEndExactTimeStamp
@@ -297,10 +295,10 @@ class Task<T : ProjectType>(
 
         val existingHaveMore = _existingInstances.size > existingInstances.size
 
-        val (scheduleInstances, schedulesHaveMore) = if (scheduleStartExactTimeStamp >= endExactTimeStamp) {
+        val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
         } else {
-            val scheduleResults = scheduleIntervals.map { it.getInstances(this, scheduleStartExactTimeStamp, endExactTimeStamp) }
+            val scheduleResults = scheduleIntervals.map { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
 
             scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
         }

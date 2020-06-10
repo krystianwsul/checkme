@@ -79,7 +79,11 @@ object RelevanceChecker {
                         rootUserManager?.save(values)
 
                         ErrorLogger.instance.log("updateDatabase: $updateDatabase")
-                        ErrorLogger.instance.log("all database values: $values")
+                        ErrorLogger.instance.log(
+                            "all database values: ${values.entries.joinToString(
+                                "<br>\n"
+                            )}"
+                        )
                         if (updateDatabase) {
                             databaseWrapper.update(values) { message, _, exception ->
                                 ErrorLogger.instance.apply {

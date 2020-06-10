@@ -14,19 +14,19 @@ class ScheduleInterval<T : ProjectType>(
 ) : Current {
 
     fun isVisible(
-            task: Task<T>,
-            now: ExactTimeStamp,
-            hack24: Boolean
+        task: Task<T>,
+        now: ExactTimeStamp,
+        hack24: Boolean
     ) = schedule.isVisible(this, task, now, hack24)
 
     fun getInstances(
-            task: Task<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp?
+        task: Task<T>,
+        givenStartExactTimeStamp: ExactTimeStamp?,
+        givenExactEndTimeStamp: ExactTimeStamp?
     ) = schedule.getInstances(this, task, givenStartExactTimeStamp, givenExactEndTimeStamp)
 
-    fun matchesScheduleDateTime(scheduleDateTime: DateTime) =
-            schedule.matchesScheduleDateTime(this, scheduleDateTime)
+    fun matchesScheduleDateTime(scheduleDateTime: DateTime, checkOldestVisible: Boolean) =
+        schedule.matchesScheduleDateTime(this, scheduleDateTime, checkOldestVisible)
 
     fun updateOldestVisible(now: ExactTimeStamp) = schedule.updateOldestVisible(this, now)
 

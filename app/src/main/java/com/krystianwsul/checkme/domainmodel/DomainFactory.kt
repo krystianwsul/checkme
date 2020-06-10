@@ -36,6 +36,7 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
@@ -1744,19 +1745,20 @@ class DomainFactory(
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        /*
-        if (true) {
+        if (false) {
             Irrelevant.setIrrelevant(
-                    object : Project.Parent {
+                object : Project.Parent {
 
-                        override fun deleteProject(project: Project<*>) {
-                            TODO("Not yet implemented")
-                        }
-                    },
-                    projectsFactory.privateProject,
-                    now
+                    override fun deleteProject(project: Project<*>) {
+                        TODO("Not yet implemented")
+                    }
+                },
+                projectsFactory.privateProject,
+                now
             )
-        }*/
+
+            throw Exception()
+        }
 
         val instances = projectsFactory.projects
                 .values

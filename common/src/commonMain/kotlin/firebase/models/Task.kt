@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -238,21 +237,6 @@ class Task<T : ProjectType>(
             now
     ).first.filter { it.isRootInstance(now) }
 
-    fun updateOldestVisibleServer(now: ExactTimeStamp) {
-        // 24 hack
-        val oldestVisible = listOfNotNull(
-                getPastRootInstances(now).filter { it.isVisible(now, true) && !it.exists() }.map { it.scheduleDate },
-                listOf(now.date)
-        ).flatten().min()!!
-
-        taskRecord.oldestVisibleServer = oldestVisible.toJson()
-
-        taskRecord.taskJson
-                .oldestVisible
-                .keys
-                .forEach { taskRecord.setOldestVisible(it, OldestVisibleJson.fromDate(oldestVisible)) }
-    }
-
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents
       and schedules would need to go through a mechanism that would somehow grab the next element
@@ -457,8 +441,6 @@ class Task<T : ProjectType>(
 
         return childTask
     }
-
-    fun getOldestVisible() = taskRecord.oldestVisibleServer?.let { Date.fromJson(it) }
 
     fun delete() {
         schedules.toMutableList().forEach { it.delete() }

@@ -5,14 +5,12 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -94,13 +92,7 @@ abstract class Project<T : ProjectType> : Current {
     ): Task<T> {
         val endTime = oldTask.endExactTimeStamp?.long
 
-        val oldestVisible = oldTask.getOldestVisible()
-
         val instanceDatas = instances.map { it to getInstanceJson(deviceDbInfo.key, it) }
-
-        val oldestVisibleMap = oldestVisible?.let {
-            mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day)))
-        } ?: mapOf()
 
         val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
             mutableMapOf()
@@ -115,8 +107,7 @@ abstract class Project<T : ProjectType> : Current {
                 now.long,
                 endTime,
                 oldTask.note,
-                instanceJsons,
-                oldestVisible = oldestVisibleMap.toMutableMap()
+                instanceJsons
         )
 
         val taskRecord = projectRecord.newTaskRecord(taskJson)

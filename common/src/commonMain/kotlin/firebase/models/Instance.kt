@@ -176,7 +176,7 @@ class Instance<T : ProjectType> private constructor(
     }
 
     fun getOldestVisible() = task.scheduleIntervals
-            .filter { it.matchesScheduleDateTime(scheduleDateTime) }
+        .filter { it.matchesScheduleDateTime(scheduleDateTime, false) }
             .map { it.schedule.oldestVisible }
             .run { if (contains(null)) null else requireNoNulls().min() }
 
@@ -194,7 +194,7 @@ class Instance<T : ProjectType> private constructor(
     }
 
     private fun matchesSchedule() = task.scheduleIntervals.any {
-        it.matchesScheduleDateTime(scheduleDateTime)
+        it.matchesScheduleDateTime(scheduleDateTime, true)
     }
 
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {

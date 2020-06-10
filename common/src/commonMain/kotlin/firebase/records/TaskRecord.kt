@@ -105,8 +105,6 @@ class TaskRecord<T : ProjectType> private constructor(
 
     var image by Committer(taskJson::image)
 
-    var oldestVisibleServer by Committer(taskJson::oldestVisibleServer)
-
     constructor(
             id: String,
             projectRecord: ProjectRecord<T>,
@@ -187,8 +185,6 @@ class TaskRecord<T : ProjectType> private constructor(
         }
     }
 
-    private fun getOldestVisibleJson(uuid: String) = taskJson.oldestVisible[uuid]
-
     override val children
         get() = instanceRecords.values +
                 singleScheduleRecords.values +
@@ -197,24 +193,6 @@ class TaskRecord<T : ProjectType> private constructor(
                 monthlyWeekScheduleRecords.values +
                 yearlyScheduleRecords.values +
                 noScheduleOrParentRecords.values
-
-    fun setOldestVisible(uuid: String, newOldestVisibleJson: OldestVisibleJson) {
-        val oldOldestVisibleJson = getOldestVisibleJson(uuid)
-
-        taskJson.oldestVisible[uuid] = newOldestVisibleJson
-
-        if (oldOldestVisibleJson?.date != newOldestVisibleJson.date)
-            addValue("$key/oldestVisible/$uuid/date", newOldestVisibleJson.date)
-
-        if (oldOldestVisibleJson?.year != newOldestVisibleJson.year)
-            addValue("$key/oldestVisible/$uuid/year", newOldestVisibleJson.year)
-
-        if (oldOldestVisibleJson?.month != newOldestVisibleJson.month)
-            addValue("$key/oldestVisible/$uuid/month", newOldestVisibleJson.month)
-
-        if (oldOldestVisibleJson?.day != newOldestVisibleJson.day)
-            addValue("$key/oldestVisible/$uuid/day", newOldestVisibleJson.day)
-    }
 
     fun newInstanceRecord(
             instanceJson: InstanceJson,

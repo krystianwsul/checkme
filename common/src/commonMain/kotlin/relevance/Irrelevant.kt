@@ -13,8 +13,6 @@ object Irrelevant {
         tasks.forEach {
             it.correctIntervalEndExactTimeStamps()
 
-            it.updateOldestVisibleServer(now)
-
             it.scheduleIntervals.forEach { it.updateOldestVisible(now) }
         }
 

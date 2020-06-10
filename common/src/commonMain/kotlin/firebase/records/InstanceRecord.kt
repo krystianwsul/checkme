@@ -123,7 +123,6 @@ abstract class InstanceRecord<T : ProjectType>(
         setProperty(createObject::instanceTime, value?.toJson())
     }
 
-    var ordinal by Committer(createObject::ordinal)
     var hidden by Committer(createObject::hidden)
 
     val instanceKey by lazy { InstanceKey(taskRecord.taskKey, scheduleKey) }

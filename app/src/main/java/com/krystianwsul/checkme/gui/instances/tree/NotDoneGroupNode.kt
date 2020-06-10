@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -381,19 +382,17 @@ class NotDoneGroupNode(
 
     override val isSelectable = true
 
-    override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
+    override fun getOrdinal() = singleInstanceData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
         singleInstanceData.let {
-            if (it.hierarchyData != null) {
-                it.hierarchyData.ordinal = ordinal
+            it.ordinal = ordinal
 
-                DomainFactory.instance.setTaskHierarchyOrdinal(groupListFragment.parameters.dataId, it.hierarchyData)
-            } else {
-                it.ordinal = ordinal
-
-                DomainFactory.instance.setInstanceOrdinal(groupListFragment.parameters.dataId, it.instanceKey, ordinal)
-            }
+            DomainFactory.instance.setOrdinal(
+                groupListFragment.parameters.dataId,
+                it.taskKey,
+                ordinal
+            )
         }
     }
 
@@ -560,7 +559,7 @@ class NotDoneGroupNode(
     }
 
     override fun ordinalDesc() = if (singleInstance()) {
-        singleInstanceData.run { hierarchyData?.let { name + " " + it.ordinal } }
+        singleInstanceData.run { "$name $ordinal" }
     } else {
         null
     }

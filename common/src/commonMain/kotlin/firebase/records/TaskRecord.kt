@@ -105,15 +105,17 @@ class TaskRecord<T : ProjectType> private constructor(
 
     var image by Committer(taskJson::image)
 
+    var ordinal by Committer(taskJson::ordinal)
+
     constructor(
-            id: String,
-            projectRecord: ProjectRecord<T>,
-            taskJson: TaskJson
+        id: String,
+        projectRecord: ProjectRecord<T>,
+        taskJson: TaskJson
     ) : this(
-            false,
-            id,
-            projectRecord,
-            taskJson
+        false,
+        id,
+        projectRecord,
+        taskJson
     )
 
     constructor(

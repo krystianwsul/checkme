@@ -209,10 +209,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(now)
-            .asSequence()
-            .filter { it.first.done == null }
-            .sortedBy { it.second.ordinal }
+    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(
+        now
+    )
+        .asSequence()
+        .filter { it.first.done == null }
+        .sortedBy { it.second.childTask.ordinal }
             .map { it.first.name }
             .toList()
 
@@ -520,7 +522,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .timeStamp
                 .long
 
-        val ordinal = instance.ordinal
+        val ordinal = instance.task.ordinal
 
         val name = instance.name
 

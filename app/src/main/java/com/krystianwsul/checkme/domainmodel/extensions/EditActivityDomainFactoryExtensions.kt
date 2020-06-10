@@ -17,8 +17,8 @@ import com.krystianwsul.common.utils.*
 
 @Synchronized
 fun DomainFactory.getCreateTaskData(
-        startParameters: EditViewModel.StartParameters,
-        parentTaskKeyHint: TaskKey?
+    startParameters: EditViewModel.StartParameters,
+    parentTaskKeyHint: TaskKey?
 ): EditViewModel.Data {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
@@ -31,14 +31,14 @@ fun DomainFactory.getCreateTaskData(
     val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
     fun checkHintPresent(
-            task: EditViewModel.ParentKey.Task,
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
+        task: EditViewModel.ParentKey.Task,
+        parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
     ): Boolean = parentTreeDatas.containsKey(task) || parentTreeDatas.any {
         checkHintPresent(task, it.value.parentTreeDatas)
     }
 
     fun checkHintPresent(
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
+        parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
     ) = parentTaskKeyHint?.let {
         checkHintPresent(EditViewModel.ParentKey.Task(it), parentTreeDatas)
     } ?: true
@@ -57,10 +57,10 @@ fun DomainFactory.getCreateTaskData(
             }
 
             parentKey = task.project
-                    .projectKey
-                    .let {
-                        (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                    }
+                .projectKey
+                .let {
+                    (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
+                }
 
             if (schedules.isNotEmpty()) {
                 scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
@@ -74,12 +74,12 @@ fun DomainFactory.getCreateTaskData(
         }
 
         EditViewModel.TaskData(
-                task.name,
-                parentKey,
-                scheduleDataWrappers,
-                task.note,
-                task.project.name,
-                task.getImage(deviceDbInfo)
+            task.name,
+            parentKey,
+            scheduleDataWrappers,
+            task.note,
+            task.project.name,
+            task.getImage(deviceDbInfo)
         )
     }
 
@@ -96,24 +96,24 @@ fun DomainFactory.getCreateTaskData(
     } ?: false
 
     return EditViewModel.Data(
-            taskData,
-            parentTreeDatas,
-            customTimeDatas,
-            myUserFactory.user.defaultReminder,
-            showAllInstancesDialog
+        taskData,
+        parentTreeDatas,
+        customTimeDatas,
+        myUserFactory.user.defaultReminder,
+        showAllInstancesDialog
     )
 }
 
 @Synchronized
 fun DomainFactory.createScheduleRootTask(
-        dataId: Int,
-        source: SaveService.Source,
-        name: String,
-        scheduleDatas: List<ScheduleData>,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+    dataId: Int,
+    source: SaveService.Source,
+    name: String,
+    scheduleDatas: List<ScheduleData>,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: Pair<String, Uri>?,
+    copyTaskKey: TaskKey? = null
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -128,13 +128,13 @@ fun DomainFactory.createScheduleRootTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val task = projectsFactory.createScheduleRootTask(
-            now,
-            name,
-            scheduleDatas.map { it to getTime(it.timePair) },
-            note,
-            finalProjectId,
-            imageUuid,
-            deviceDbInfo
+        now,
+        name,
+        scheduleDatas.map { it to getTime(it.timePair) },
+        note,
+        finalProjectId,
+        imageUuid,
+        deviceDbInfo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -154,13 +154,13 @@ fun DomainFactory.createScheduleRootTask(
 
 @Synchronized
 fun DomainFactory.createChildTask(
-        dataId: Int,
-        source: SaveService.Source,
-        parentTaskKey: TaskKey,
-        name: String,
-        note: String?,
-        imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+    dataId: Int,
+    source: SaveService.Source,
+    parentTaskKey: TaskKey,
+    name: String,
+    note: String?,
+    imagePath: Pair<String, Uri>?,
+    copyTaskKey: TaskKey? = null
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -175,12 +175,12 @@ fun DomainFactory.createChildTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val childTask = createChildTask(
-            now,
-            parentTask,
-            name,
-            note,
-            imageUuid?.let { TaskJson.Image(it, uuid) },
-            copyTaskKey
+        now,
+        parentTask,
+        name,
+        note,
+        imageUuid?.let { TaskJson.Image(it, uuid) },
+        copyTaskKey
     )
 
     updateNotifications(now)
@@ -198,13 +198,13 @@ fun DomainFactory.createChildTask(
 
 @Synchronized
 fun DomainFactory.createRootTask(
-        dataId: Int,
-        source: SaveService.Source,
-        name: String,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+    dataId: Int,
+    source: SaveService.Source,
+    name: String,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: Pair<String, Uri>?,
+    copyTaskKey: TaskKey? = null
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -218,12 +218,12 @@ fun DomainFactory.createRootTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val task = projectsFactory.createNoScheduleOrParentTask(
-            now,
-            name,
-            note,
-            finalProjectId,
-            imageUuid,
-            deviceDbInfo
+        now,
+        name,
+        note,
+        finalProjectId,
+        imageUuid,
+        deviceDbInfo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -243,14 +243,14 @@ fun DomainFactory.createRootTask(
 
 @Synchronized
 fun DomainFactory.updateScheduleTask(
-        dataId: Int,
-        source: SaveService.Source,
-        taskKey: TaskKey,
-        name: String,
-        scheduleDatas: List<ScheduleData>,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: NullableWrapper<Pair<String, Uri>>?
+    dataId: Int,
+    source: SaveService.Source,
+    taskKey: TaskKey,
+    name: String,
+    scheduleDatas: List<ScheduleData>,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: NullableWrapper<Pair<String, Uri>>?
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -275,11 +275,17 @@ fun DomainFactory.updateScheduleTask(
         endAllCurrentNoScheduleOrParents(now)
 
         if (isGroupTask(now)) {
-            project.getTaskHierarchiesByParentTaskKey(taskKey).forEach { it.childTask.invalidateParentTaskHierarchies() }
+            project.getTaskHierarchiesByParentTaskKey(taskKey)
+                .forEach { it.childTask.invalidateParentTaskHierarchies() }
             invalidateChildTaskHierarchies()
         }
 
-        updateSchedules(ownerKey, localFactory, scheduleDatas.map { it to getTime(it.timePair) }, now)
+        updateSchedules(
+            ownerKey,
+            localFactory,
+            scheduleDatas.map { it to getTime(it.timePair) },
+            now
+        )
 
         if (imagePath != null)
             setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -300,14 +306,14 @@ fun DomainFactory.updateScheduleTask(
 
 @Synchronized
 fun DomainFactory.updateChildTask(
-        now: ExactTimeStamp,
-        dataId: Int,
-        source: SaveService.Source,
-        taskKey: TaskKey,
-        name: String,
-        parentTaskKey: TaskKey,
-        note: String?,
-        imagePath: NullableWrapper<Pair<String, Uri>>?
+    now: ExactTimeStamp,
+    dataId: Int,
+    source: SaveService.Source,
+    taskKey: TaskKey,
+    name: String,
+    parentTaskKey: TaskKey,
+    note: String?,
+    imagePath: NullableWrapper<Pair<String, Uri>>?
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -349,13 +355,13 @@ fun DomainFactory.updateChildTask(
 
 @Synchronized
 fun DomainFactory.updateRootTask(
-        dataId: Int,
-        source: SaveService.Source,
-        taskKey: TaskKey,
-        name: String,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: NullableWrapper<Pair<String, Uri>>?
+    dataId: Int,
+    source: SaveService.Source,
+    taskKey: TaskKey,
+    name: String,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: NullableWrapper<Pair<String, Uri>>?
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.updateRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -396,17 +402,17 @@ fun DomainFactory.updateRootTask(
 
 @Synchronized
 fun DomainFactory.createScheduleJoinRootTask(
-        now: ExactTimeStamp,
-        dataId: Int,
-        source: SaveService.Source,
-        name: String,
-        scheduleDatas: List<ScheduleData>,
-        joinTaskKeys: List<TaskKey>,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>,
-        allReminders: Boolean
+    now: ExactTimeStamp,
+    dataId: Int,
+    source: SaveService.Source,
+    name: String,
+    scheduleDatas: List<ScheduleData>,
+    joinTaskKeys: List<TaskKey>,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: Pair<String, Uri>?,
+    removeInstanceKeys: List<InstanceKey>,
+    allReminders: Boolean
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -419,17 +425,20 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
+    val ordinal = joinTasks.map { it.ordinal }.min()
+
     val imageUuid = imagePath?.let { newUuid() }
 
     val newParentTask = projectsFactory.createScheduleRootTask(
-            now,
-            name,
-            scheduleDatas.map { it to getTime(it.timePair) },
-            note,
-            finalProjectId,
-            imageUuid,
-            deviceDbInfo,
-            allReminders
+        now,
+        name,
+        scheduleDatas.map { it to getTime(it.timePair) },
+        note,
+        finalProjectId,
+        imageUuid,
+        deviceDbInfo,
+        allReminders,
+        ordinal
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
@@ -449,14 +458,14 @@ fun DomainFactory.createScheduleJoinRootTask(
 
 @Synchronized
 fun DomainFactory.createJoinChildTask(
-        dataId: Int,
-        source: SaveService.Source,
-        parentTaskKey: TaskKey,
-        name: String,
-        joinTaskKeys: List<TaskKey>,
-        note: String?,
-        imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>
+    dataId: Int,
+    source: SaveService.Source,
+    parentTaskKey: TaskKey,
+    name: String,
+    joinTaskKeys: List<TaskKey>,
+    note: String?,
+    imagePath: Pair<String, Uri>?,
+    removeInstanceKeys: List<InstanceKey>
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createJoinChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -473,19 +482,16 @@ fun DomainFactory.createJoinChildTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-    val ordinal = joinTasks.mapNotNull { it.getParentTaskHierarchy(now)?.taskHierarchy }
-            .filter { it.parentTaskKey == parentTaskKey }
-            .map { it.ordinal }
-            .min()
+    val ordinal = joinTasks.map { it.ordinal }.min()
 
     val imageUuid = imagePath?.let { newUuid() }
 
     val childTask = parentTask.createChildTask(
-            now,
-            name,
-            note,
-            imageUuid?.let { TaskJson.Image(it, uuid) },
-            ordinal
+        now,
+        name,
+        note,
+        imageUuid?.let { TaskJson.Image(it, uuid) },
+        ordinal
     )
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
@@ -505,14 +511,14 @@ fun DomainFactory.createJoinChildTask(
 
 @Synchronized
 fun DomainFactory.createJoinRootTask(
-        dataId: Int,
-        source: SaveService.Source,
-        name: String,
-        joinTaskKeys: List<TaskKey>,
-        note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>
+    dataId: Int,
+    source: SaveService.Source,
+    name: String,
+    joinTaskKeys: List<TaskKey>,
+    note: String?,
+    projectId: ProjectKey<*>?,
+    imagePath: Pair<String, Uri>?,
+    removeInstanceKeys: List<InstanceKey>
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.createJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -523,20 +529,23 @@ fun DomainFactory.createJoinRootTask(
     val now = ExactTimeStamp.now
 
     val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
-            .distinct()
-            .single()
+        .distinct()
+        .single()
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
+
+    val ordinal = joinTasks.map { it.ordinal }.min()
 
     val imageUuid = imagePath?.let { newUuid() }
 
     val newParentTask = projectsFactory.createNoScheduleOrParentTask(
-            now,
-            name,
-            note,
-            finalProjectId,
-            imageUuid,
-            deviceDbInfo
+        now,
+        name,
+        note,
+        finalProjectId,
+        imageUuid,
+        deviceDbInfo,
+        ordinal
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)

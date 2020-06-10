@@ -52,9 +52,9 @@ abstract class Project<T : ProjectType> : Current {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = Task(
-                this,
-                taskRecord,
-                newRootInstanceManager(taskRecord)
+            this,
+            taskRecord,
+            newRootInstanceManager(taskRecord)
         )
         check(!_tasks.containsKey(task.id))
         _tasks[task.id] = task
@@ -63,16 +63,14 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun createTaskHierarchy(
-            parentTask: Task<T>,
-            childTask: Task<T>,
-            now: ExactTimeStamp,
-            ordinal: Double? = null
+        parentTask: Task<T>,
+        childTask: Task<T>,
+        now: ExactTimeStamp
     ) {
         val taskHierarchyJson = TaskHierarchyJson(
-                parentTask.id,
-                childTask.id,
-                now.long,
-                ordinal = ordinal
+            parentTask.id,
+            childTask.id,
+            now.long
         )
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
@@ -85,10 +83,10 @@ abstract class Project<T : ProjectType> : Current {
 
     @Suppress("ConstantConditionIf")
     fun copyTask(
-            deviceDbInfo: DeviceDbInfo,
-            oldTask: Task<*>,
-            instances: Collection<Instance<*>>,
-            now: ExactTimeStamp
+        deviceDbInfo: DeviceDbInfo,
+        oldTask: Task<*>,
+        instances: Collection<Instance<*>>,
+        now: ExactTimeStamp
     ): Task<T> {
         val endTime = oldTask.endExactTimeStamp?.long
 
@@ -103,11 +101,12 @@ abstract class Project<T : ProjectType> : Current {
         }
 
         val taskJson = TaskJson(
-                oldTask.name,
-                now.long,
-                endTime,
-                oldTask.note,
-                instanceJsons
+            oldTask.name,
+            now.long,
+            endTime,
+            oldTask.note,
+            instanceJsons,
+            ordinal = oldTask.ordinal
         )
 
         val taskRecord = projectRecord.newTaskRecord(taskJson)
@@ -118,9 +117,9 @@ abstract class Project<T : ProjectType> : Current {
         if (Task.USE_ROOT_INSTANCES) {
             instanceDatas.forEach {
                 newTask.rootInstanceManager.newRootInstanceRecord(
-                        it.second,
-                        it.first.scheduleKey,
-                        getOrCopyAndDestructureTime(deviceDbInfo.key, it.first.scheduleTime).first
+                    it.second,
+                    it.first.scheduleKey,
+                    getOrCopyAndDestructureTime(deviceDbInfo.key, it.first.scheduleTime).first
                 )
             }
         }
@@ -128,7 +127,8 @@ abstract class Project<T : ProjectType> : Current {
         _tasks[newTask.id] = newTask
 
         val currentSchedules = oldTask.getCurrentSchedules(now).map { it.schedule }
-        val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
+        val currentNoScheduleOrParent =
+            oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
         if (currentSchedules.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
@@ -142,8 +142,8 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     protected abstract fun getOrCreateCustomTime(
-            ownerKey: UserKey,
-            customTime: Time.Custom<*>
+        ownerKey: UserKey,
+        customTime: Time.Custom<*>
     ): Time.Custom<T>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
@@ -155,8 +155,8 @@ abstract class Project<T : ProjectType> : Current {
 
     @Suppress("UNCHECKED_CAST")
     fun getOrCopyAndDestructureTime(
-            ownerKey: UserKey,
-            time: Time
+        ownerKey: UserKey,
+        time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
         is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId<T>, null, null)
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
@@ -176,24 +176,23 @@ abstract class Project<T : ProjectType> : Current {
 
         val instanceTimeString = when (newInstanceTime) {
             is Time.Custom<*> -> newInstanceTime.key
-                    .customTimeId
-                    .value
+                .customTimeId
+                .value
             is Time.Normal -> newInstanceTime.hourMinute.toJson()
         }
 
         return InstanceJson(
-                done,
-                instanceDate.toJson(),
-                instanceTimeString,
-                instance.ordinal
+            done,
+            instanceDate.toJson(),
+            instanceTimeString
         )
     }
 
     fun <V : TaskHierarchy<*>> copyTaskHierarchy(
-            now: ExactTimeStamp,
-            startTaskHierarchy: V,
-            parentTaskId: String,
-            childTaskId: String
+        now: ExactTimeStamp,
+        startTaskHierarchy: V,
+        parentTaskId: String,
+        childTaskId: String
     ): TaskHierarchy<T> {
         check(parentTaskId.isNotEmpty())
         check(childTaskId.isNotEmpty())
@@ -201,11 +200,10 @@ abstract class Project<T : ProjectType> : Current {
         val endTime = startTaskHierarchy.endExactTimeStamp?.long
 
         val taskHierarchyJson = TaskHierarchyJson(
-                parentTaskId,
-                childTaskId,
-                now.long,
-                endTime,
-                startTaskHierarchy.ordinal
+            parentTaskId,
+            childTaskId,
+            now.long,
+            endTime
         )
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
@@ -232,7 +230,7 @@ abstract class Project<T : ProjectType> : Current {
     fun getTaskIfPresent(taskId: String) = _tasks[taskId]
 
     fun getTaskForce(taskId: String) = _tasks[taskId]
-            ?: throw MissingTaskException(projectKey, taskId)
+        ?: throw MissingTaskException(projectKey, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> {
         check(childTaskKey.taskId.isNotEmpty())
@@ -252,14 +250,18 @@ abstract class Project<T : ProjectType> : Current {
         projectRecord.delete()
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
+    fun setEndExactTimeStamp(
+        now: ExactTimeStamp,
+        projectUndoData: ProjectUndoData,
+        removeInstances: Boolean
+    ) {
         requireCurrent(now)
 
         _tasks.values
-                .filter { it.current(now) }
-                .forEach {
-                    it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
-                }
+            .filter { it.current(now) }
+            .forEach {
+                it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
+            }
 
         projectUndoData.projectIds.add(projectKey)
 
@@ -279,19 +281,22 @@ abstract class Project<T : ProjectType> : Current {
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
 
     fun convertRemoteToRemoteHelper(
-            now: ExactTimeStamp,
-            remoteToRemoteConversion: RemoteToRemoteConversion<T>,
-            startTask: Task<T>
+        now: ExactTimeStamp,
+        remoteToRemoteConversion: RemoteToRemoteConversion<T>,
+        startTask: Task<T>
     ) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 
         remoteToRemoteConversion.startTasks[startTask.id] = Pair(
-                startTask,
-                startTask.existingInstances
-                        .values
-                        .toList()
-                        .filter { listOf(it.scheduleDateTime, it.instanceDateTime).max()!!.toExactTimeStamp() >= now }
+            startTask,
+            startTask.existingInstances
+                .values
+                .toList()
+                .filter {
+                    listOf(it.scheduleDateTime, it.instanceDateTime).max()!!
+                        .toExactTimeStamp() >= now
+                }
         )
 
         @Suppress("UNCHECKED_CAST")
@@ -307,18 +312,18 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun fixNotificationShown(
-            shownFactory: Instance.ShownFactory,
-            now: ExactTimeStamp
+        shownFactory: Instance.ShownFactory,
+        now: ExactTimeStamp
     ) = tasks.forEach {
         it.existingInstances
-                .values
-                .forEach { it.fixNotificationShown(shownFactory, now) }
+            .values
+            .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
     fun getRootInstances(
-            startExactTimeStamp: ExactTimeStamp?,
-            endExactTimeStamp: ExactTimeStamp,
-            now: ExactTimeStamp
+        startExactTimeStamp: ExactTimeStamp?,
+        endExactTimeStamp: ExactTimeStamp,
+        now: ExactTimeStamp
     ): List<Instance<T>> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
@@ -326,8 +331,8 @@ abstract class Project<T : ProjectType> : Current {
 
         for (instance in existingInstances) {
             val instanceExactTimeStamp = instance.instanceDateTime
-                    .timeStamp
-                    .toExactTimeStamp()
+                .timeStamp
+                .toExactTimeStamp()
 
             if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                 continue
@@ -341,8 +346,8 @@ abstract class Project<T : ProjectType> : Current {
         tasks.forEach { task ->
             for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now).first) {
                 val instanceExactTimeStamp = instance.instanceDateTime
-                        .timeStamp
-                        .toExactTimeStamp()
+                    .timeStamp
+                    .toExactTimeStamp()
 
                 if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                     continue
@@ -357,7 +362,8 @@ abstract class Project<T : ProjectType> : Current {
         return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
 
-    private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")
+    private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
+        Exception("projectId: $projectId, taskId: $taskId")
 
     interface Parent {
 

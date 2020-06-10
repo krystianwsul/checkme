@@ -270,17 +270,6 @@ class Instance<T : ProjectType> private constructor(
 
     private class ParentInstanceException(message: String) : Exception(message)
 
-    val ordinal
-        get() = data.ordinal ?: task.startExactTimeStamp
-                .long
-                .toDouble()
-
-    fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
-        createInstanceHierarchy(now)
-
-        (data as Data.Real).instanceRecord.ordinal = ordinal
-    }
-
     fun hide(now: ExactTimeStamp) {
         check(!data.hidden)
 
@@ -407,8 +396,6 @@ class Instance<T : ProjectType> private constructor(
 
         abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
 
-        abstract val ordinal: Double?
-
         class Real<T : ProjectType>(
                 private val project: Project<T>,
                 val instanceRecord: InstanceRecord<T>
@@ -452,8 +439,6 @@ class Instance<T : ProjectType> private constructor(
                 get() = instanceRecord.scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-
-            override val ordinal get() = instanceRecord.ordinal
         }
 
         class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() {
@@ -473,8 +458,6 @@ class Instance<T : ProjectType> private constructor(
             override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>? = null
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
-
-            override val ordinal: Double? = null
         }
     }
 

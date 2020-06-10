@@ -8,6 +8,5 @@ data class InstanceJson @JvmOverloads constructor(
         var done: Long? = null,
         var instanceDate: String? = null,
         var instanceTime: String? = null,
-        var ordinal: Double? = null,
         var hidden: Boolean = false
 )

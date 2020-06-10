@@ -33,8 +33,26 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     save(0, source)
 
     val remoteProjects = taskUndoData.taskKeys
-            .map { getTaskForce(it).project }
-            .toSet()
+        .map { getTaskForce(it).project }
+        .toSet()
 
     notifyCloud(remoteProjects)
+}
+
+@Synchronized
+fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) {
+    MyCrashlytics.log("DomainFactory.setOrdinal")
+    if (projectsFactory.isSaved) throw SavedFactoryException()
+
+    val now = ExactTimeStamp.now
+
+    val task = getTaskForce(taskKey)
+
+    task.ordinal = ordinal
+
+    updateNotifications(now)
+
+    save(dataId, SaveService.Source.GUI)
+
+    notifyCloud(task.project)
 }

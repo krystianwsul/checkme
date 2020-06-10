@@ -26,10 +26,6 @@ class TaskHierarchy<T : ProjectType>(
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
     val childTaskId by lazy { taskHierarchyRecord.childTaskId }
 
-    var ordinal: Double
-        get() = taskHierarchyRecord.ordinal ?: taskHierarchyRecord.startTime.toDouble()
-        set(ordinal) = taskHierarchyRecord.setOrdinal(ordinal)
-
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
     fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now)

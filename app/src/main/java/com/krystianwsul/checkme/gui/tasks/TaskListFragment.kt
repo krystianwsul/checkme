@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -29,6 +30,7 @@ import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -645,12 +647,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 1
             }
 
-            override fun getOrdinal() = childTaskData.hierarchyData!!.ordinal
+            override fun getOrdinal() = childTaskData.ordinal
 
             override fun setOrdinal(ordinal: Double) {
-                childTaskData.hierarchyData!!.ordinal = ordinal
+                childTaskData.ordinal = ordinal
 
-                DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.data!!.dataId, childTaskData.hierarchyData)
+                DomainFactory.instance.setOrdinal(
+                    taskListFragment.data!!.dataId,
+                    childTaskData.taskKey,
+                    ordinal
+                )
             }
 
             override fun filter() = childTaskData.matchesSearch(searchData)
@@ -677,25 +683,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     )
 
     data class ChildTaskData(
-            val name: String,
-            val scheduleText: String?,
-            val children: List<ChildTaskData>,
-            val note: String?,
-            private val startExactTimeStamp: ExactTimeStamp,
-            val taskKey: TaskKey,
-            val hierarchyData: HierarchyData?,
-            val imageState: ImageState?,
-            val current: Boolean,
-            val alwaysShow: Boolean
+        val name: String,
+        val scheduleText: String?,
+        val children: List<ChildTaskData>,
+        val note: String?,
+        private val startExactTimeStamp: ExactTimeStamp,
+        val taskKey: TaskKey,
+        val taskHierarchyKey: TaskHierarchyKey?,
+        val imageState: ImageState?,
+        val current: Boolean,
+        val alwaysShow: Boolean,
+        var ordinal: Double
     ) : Comparable<ChildTaskData> {
 
-        override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
-            hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
-        } else {
-            check(other.hierarchyData == null)
-
-            startExactTimeStamp.compareTo(other.startExactTimeStamp)
-        }
+        override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
         fun matchesSearch(searchData: SearchData?): Boolean {
             if (searchData == null)

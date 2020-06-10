@@ -23,8 +23,6 @@ class TaskHierarchyRecord(
 
     val childTaskId get() = createObject.childTaskId
 
-    val ordinal get() = createObject.ordinal
-
     constructor(
             id: String,
             projectRecord: ProjectRecord<*>,
@@ -42,8 +40,6 @@ class TaskHierarchyRecord(
     )
 
     var endTime by Committer(createObject::endTime)
-
-    fun setOrdinal(ordinal: Double) = setProperty(createObject::ordinal, ordinal)
 
     override fun deleteFromParent() = check(projectRecord.taskHierarchyRecords.remove(id) == this)
 }

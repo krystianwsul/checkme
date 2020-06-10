@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
@@ -35,23 +35,23 @@ data class GroupListDataWrapper(
     }
 
     data class InstanceData(
-            var done: ExactTimeStamp?,
-            val instanceKey: InstanceKey,
-            var displayText: String?,
-            override val name: String,
-            var instanceTimeStamp: TimeStamp,
-            override var taskCurrent: Boolean,
-            val isRootInstance: Boolean,
-            var isRootTask: Boolean?,
-            var exists: Boolean,
-            val createTaskTimePair: TimePair,
-            override val note: String?,
-            val children: MutableMap<InstanceKey, InstanceData>,
-            val hierarchyData: HierarchyData?,
-            var ordinal: Double,
-            var notificationShown: Boolean,
-            val imageState: ImageState?,
-            val isRecurringGroupChild: Boolean
+        var done: ExactTimeStamp?,
+        val instanceKey: InstanceKey,
+        var displayText: String?,
+        override val name: String,
+        var instanceTimeStamp: TimeStamp,
+        override var taskCurrent: Boolean,
+        val isRootInstance: Boolean,
+        var isRootTask: Boolean?,
+        var exists: Boolean,
+        val createTaskTimePair: TimePair,
+        override val note: String?,
+        val children: MutableMap<InstanceKey, InstanceData>,
+        val taskHierarchyKey: TaskHierarchyKey?,
+        var ordinal: Double,
+        var notificationShown: Boolean,
+        val imageState: ImageState?,
+        val isRecurringGroupChild: Boolean
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
 
         lateinit var instanceDataParent: InstanceDataParent
@@ -67,15 +67,7 @@ data class GroupListDataWrapper(
             if (timeStampComparison != 0)
                 return timeStampComparison
 
-            return if (hierarchyData != null) {
-                checkNotNull(other.hierarchyData)
-
-                hierarchyData.ordinal.compareTo(other.hierarchyData.ordinal)
-            } else {
-                check(other.hierarchyData == null)
-
-                ordinal.compareTo(other.ordinal)
-            }
+            return ordinal.compareTo(other.ordinal)
         }
 
         override val taskKey = instanceKey.taskKey

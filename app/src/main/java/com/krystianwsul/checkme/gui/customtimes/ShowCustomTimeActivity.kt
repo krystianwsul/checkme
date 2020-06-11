@@ -14,6 +14,8 @@ import android.widget.AutoCompleteTextView
 import androidx.transition.TransitionManager
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
+import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
@@ -127,9 +129,20 @@ class ShowCustomTimeActivity : NavBarActivity() {
                                 hourMinutes
                         )
                     } else {
-                        val customTimeKey = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
+                        val customTimeKey = DomainFactory.instance.createCustomTime(
+                            SaveService.Source.GUI,
+                            name, hourMinutes
+                        )
 
-                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable) })
+                        setResult(
+                            Activity.RESULT_OK,
+                            Intent().apply {
+                                putExtra(
+                                    CUSTOM_TIME_KEY,
+                                    customTimeKey as Parcelable
+                                )
+                            }
+                        )
                     }
 
                     finish()

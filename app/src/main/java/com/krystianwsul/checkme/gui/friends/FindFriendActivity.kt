@@ -18,6 +18,7 @@ import com.jakewharton.rxbinding3.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService

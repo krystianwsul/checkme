@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
@@ -199,4 +200,21 @@ fun DomainFactory.setInstanceDone(
     notifyCloud(instance.project)
 
     return instance.done
+}
+
+@Synchronized
+fun DomainFactory.setInstanceNotified(
+    dataId: Int,
+    source: SaveService.Source,
+    instanceKey: InstanceKey
+) {
+    MyCrashlytics.log("DomainFactory.setInstanceNotified")
+    if (projectsFactory.isSaved) throw SavedFactoryException()
+
+    val instance = getInstance(instanceKey)
+
+    Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
+    setInstanceNotified(instanceKey)
+
+    save(dataId, source)
 }

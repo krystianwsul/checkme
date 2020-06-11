@@ -29,7 +29,6 @@ import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -380,19 +379,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceNotified")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val instance = getInstance(instanceKey)
-
-        Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
-        setInstanceNotified(instanceKey)
-
-        save(dataId, source)
-    }
-
-    @Synchronized
     fun setInstancesNotified(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified")
         if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -487,17 +473,6 @@ class DomainFactory(
         setIrrelevant(now)
 
         projectsFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
-    }
-
-    @Synchronized
-    fun addFriend(source: SaveService.Source, userKey: UserKey, userWrapper: UserWrapper) {
-        MyCrashlytics.log("DomainFactory.addFriend")
-        check(!myUserFactory.isSaved)
-
-        myUserFactory.user.addFriend(userKey)
-        friendsFactory.addFriend(userKey, userWrapper)
-
-        save(0, source)
     }
 
     @Synchronized
@@ -1201,7 +1176,7 @@ class DomainFactory(
     private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp) =
         NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
 
-    private fun setInstanceNotified(instanceKey: InstanceKey) {
+    fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
             setNotified(localFactory, true)
             setNotificationShown(localFactory, false)

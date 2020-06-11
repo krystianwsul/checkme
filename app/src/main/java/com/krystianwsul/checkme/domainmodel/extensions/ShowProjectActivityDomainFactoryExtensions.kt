@@ -2,9 +2,12 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 @Synchronized
 fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
@@ -31,4 +34,72 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
     }
 
     return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
+}
+
+@Synchronized
+fun DomainFactory.createProject(
+    dataId: Int,
+    source: SaveService.Source,
+    name: String,
+    friends: Set<UserKey>
+) {
+    MyCrashlytics.log("DomainFactory.createProject")
+
+    check(name.isNotEmpty())
+
+    val now = ExactTimeStamp.now
+
+    val recordOf = friends.toMutableSet()
+
+    val key = deviceDbInfo.key
+    check(!recordOf.contains(key))
+    recordOf.add(key)
+
+    val remoteProject = projectsFactory.createProject(
+        name,
+        now,
+        recordOf,
+        myUserFactory.user,
+        deviceDbInfo.userInfo,
+        friendsFactory
+    )
+
+    myUserFactory.user.addProject(remoteProject.projectKey)
+    friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
+
+    save(dataId, source)
+
+    notifyCloud(remoteProject)
+}
+
+@Synchronized
+fun DomainFactory.updateProject(
+    dataId: Int,
+    source: SaveService.Source,
+    projectId: ProjectKey.Shared,
+    name: String,
+    addedFriends: Set<UserKey>,
+    removedFriends: Set<UserKey>
+) {
+    MyCrashlytics.log("DomainFactory.updateProject")
+
+    check(name.isNotEmpty())
+
+    val now = ExactTimeStamp.now
+
+    val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
+
+    remoteProject.name = name
+    remoteProject.updateUsers(
+        addedFriends.map { friendsFactory.getFriend(it) }.toSet(),
+        removedFriends
+    )
+
+    friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
+
+    updateNotifications(now)
+
+    save(dataId, source)
+
+    notifyCloud(remoteProject, removedFriends)
 }

@@ -555,74 +555,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateProject(
-        dataId: Int,
-        source: SaveService.Source,
-        projectId: ProjectKey.Shared,
-        name: String,
-        addedFriends: Set<UserKey>,
-        removedFriends: Set<UserKey>
-    ) {
-        MyCrashlytics.log("DomainFactory.updateProject")
-
-        check(name.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
-
-        remoteProject.name = name
-        remoteProject.updateUsers(
-            addedFriends.map { friendsFactory.getFriend(it) }.toSet(),
-            removedFriends
-        )
-
-        friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(remoteProject, removedFriends)
-    }
-
-    @Synchronized
-    fun createProject(
-        dataId: Int,
-        source: SaveService.Source,
-        name: String,
-        friends: Set<UserKey>
-    ) {
-        MyCrashlytics.log("DomainFactory.createProject")
-
-        check(name.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val recordOf = friends.toMutableSet()
-
-        val key = deviceDbInfo.key
-        check(!recordOf.contains(key))
-        recordOf.add(key)
-
-        val remoteProject = projectsFactory.createProject(
-            name,
-            now,
-            recordOf,
-            myUserFactory.user,
-            deviceDbInfo.userInfo,
-            friendsFactory
-        )
-
-        myUserFactory.user.addProject(remoteProject.projectKey)
-        friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
-
-        save(dataId, source)
-
-        notifyCloud(remoteProject)
-    }
-
-    @Synchronized
     fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
         if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -1043,7 +975,7 @@ class DomainFactory(
             notifyCloudPrivateFixed(projects.toMutableSet(), mutableListOf())
     }
 
-    private fun notifyCloud(
+    fun notifyCloud(
         project: Project<*>,
         userKeys: Collection<UserKey>
     ) = notifyCloudPrivateFixed(mutableSetOf(project), userKeys.toMutableList())

@@ -10,7 +10,7 @@ abstract class NotificationWrapper {
 
     companion object {
 
-        var instance: NotificationWrapper = when {
+        val instance = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NotificationWrapperImplOMr1()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NotificationWrapperImplO()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN()

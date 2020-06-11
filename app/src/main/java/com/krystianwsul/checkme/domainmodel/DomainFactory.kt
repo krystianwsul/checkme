@@ -498,38 +498,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getShowInstanceData")
-
-        val task = getTaskForce(instanceKey.taskKey)
-
-        val now = ExactTimeStamp.now
-
-        val instance = getInstance(instanceKey)
-        val instanceDateTime = instance.instanceDateTime
-        val parentInstance = instance.getParentInstance(now)
-
-        val displayText = listOfNotNull(
-            instance.getParentName(now).takeIf { it.isNotEmpty() },
-            instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
-        ).joinToString("\n\n")
-
-        return ShowInstanceViewModel.Data(
-            instance.name,
-            instanceDateTime,
-            instance.done != null,
-            task.current(now),
-            parentInstance == null,
-            instance.exists(),
-            getGroupListData(instance, task, now),
-            instance.getNotificationShown(localFactory),
-            displayText,
-            task.taskKey,
-            instance.isRepeatingGroupChild(now)
-        )
-    }
-
-    @Synchronized
     fun getDrawerData(): DrawerViewModel.Data {
         MyCrashlytics.log("DomainFactory.getDrawerData")
 
@@ -676,71 +644,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setInstancesAddHourActivity(
-        dataId: Int,
-        source: SaveService.Source,
-        instanceKeys: Collection<InstanceKey>
-    ): HourUndoData {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-        val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
-
-        val date = Date(calendar.toDateTimeTz())
-        val hourMinute = HourMinute(calendar.toDateTimeTz())
-
-        val instances = instanceKeys.map(this::getInstance)
-
-        val instanceDateTimes = instances.associate { it.instanceKey to it.instanceDateTime }
-
-        instances.forEach {
-            it.setInstanceDateTime(
-                localFactory,
-                ownerKey,
-                DateTime(date, Time.Normal(hourMinute)),
-                now
-            )
-        }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        val remoteProjects = instances.map { it.project }.toSet()
-
-        notifyCloud(remoteProjects)
-
-        return HourUndoData(instanceDateTimes)
-    }
-
-    @Synchronized
-    fun undoInstancesAddHour(dataId: Int, source: SaveService.Source, hourUndoData: HourUndoData) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
-            Pair(
-                getInstance(instanceKey), instanceDateTime
-            )
-        }
-
-        pairs.forEach { (instance, instanceDateTime) ->
-            instance.setInstanceDateTime(localFactory, ownerKey, instanceDateTime, now)
-        }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        val remoteProjects = pairs.map { it.first.project }.toSet()
-
-        notifyCloud(remoteProjects)
-    }
-
-    @Synchronized
     fun setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
         if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -758,103 +661,6 @@ class DomainFactory(
         save(0, source)
 
         notifyCloud(instance.project)
-    }
-
-    @Synchronized
-    fun setInstanceDone(
-        dataId: Int,
-        source: SaveService.Source,
-        instanceKey: InstanceKey,
-        done: Boolean
-    ): ExactTimeStamp? {
-        MyCrashlytics.log("DomainFactory.setInstanceDone")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        val instance = getInstance(instanceKey)
-
-        instance.setDone(localFactory, done, now)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(instance.project)
-
-        return instance.done
-    }
-
-    @Synchronized
-    fun setInstancesNotNotified(
-        dataId: Int,
-        source: SaveService.Source,
-        instanceKeys: List<InstanceKey>
-    ) {
-        MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        instanceKeys.forEach {
-            val instance = getInstance(it)
-            check(instance.done == null)
-            check(instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
-            check(!instance.getNotificationShown(localFactory))
-            check(instance.isRootInstance(now))
-
-            instance.setNotified(localFactory, false)
-            instance.setNotificationShown(localFactory, false)
-        }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-    }
-
-    @Synchronized
-    fun removeFromParent(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
-        MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        instanceKeys.forEach {
-            getInstance(it).getParentInstance(now)!!
-                .third!!
-                .setEndExactTimeStamp(now)
-        }
-
-        updateNotifications(now)
-
-        save(0, source)
-    }
-
-    @Synchronized
-    fun setInstancesDone(
-        dataId: Int,
-        source: SaveService.Source,
-        instanceKeys: List<InstanceKey>,
-        done: Boolean
-    ): ExactTimeStamp {
-        MyCrashlytics.log("DomainFactory.setInstancesDone")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        val instances = instanceKeys.map(this::getInstance)
-
-        instances.forEach { it.setDone(localFactory, done, now) }
-
-        val remoteProjects = instances.map { it.project }.toSet()
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(remoteProjects)
-
-        return now
     }
 
     @Synchronized
@@ -930,35 +736,6 @@ class DomainFactory(
         notifyCloud(remoteProjects)
 
         return taskUndoData
-    }
-
-    @Synchronized
-    fun setTaskEndTimeStamps(
-        source: SaveService.Source,
-        taskKeys: Set<TaskKey>,
-        deleteInstances: Boolean,
-        instanceKey: InstanceKey
-    ): Pair<TaskUndoData, Boolean> {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        val taskUndoData = setTaskEndTimeStamps(source, taskKeys, deleteInstances, now)
-
-        val instance = getInstance(instanceKey)
-        val task = instance.task
-
-        val instanceExactTimeStamp by lazy {
-            instance.instanceDateTime
-                .timeStamp
-                .toExactTimeStamp()
-        }
-
-        val visible =
-            task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
-
-        return Pair(taskUndoData, visible)
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp) {
@@ -2037,7 +1814,7 @@ class DomainFactory(
         return dataWrapper
     }
 
-    private fun getGroupListData(
+    fun getGroupListData(
         instance: Instance<*>,
         task: Task<*>,
         now: ExactTimeStamp

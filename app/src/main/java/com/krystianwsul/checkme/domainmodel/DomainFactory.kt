@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.calendar
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.*
@@ -326,68 +325,6 @@ class DomainFactory(
     }
 
     // gets
-
-    @Synchronized
-    fun getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
-
-        check(instanceKeys.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val instances = instanceKeys.map { getInstance(it) }
-            .filter { it.isRootInstance(now) }
-            .sortedBy { it.instanceDateTime }
-
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-            GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
-        }
-
-        val instanceDatas = instances.map { instance ->
-            val task = instance.task
-
-            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
-            val children = getChildInstanceDatas(instance, now)
-
-            val instanceData = GroupListDataWrapper.InstanceData(
-                instance.done,
-                instance.instanceKey,
-                instance.getDisplayData(now)?.getDisplayText(),
-                instance.name,
-                instance.instanceDateTime.timeStamp,
-                task.current(now),
-                instance.isRootInstance(now),
-                isRootTask,
-                instance.exists(),
-                instance.getCreateTaskTimePair(ownerKey),
-                task.note,
-                children,
-                null,
-                instance.task.ordinal,
-                instance.getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
-                instance.isRepeatingGroupChild(now)
-            )
-
-            children.values.forEach { it.instanceDataParent = instanceData }
-
-            instanceData
-        }
-
-        val dataWrapper = GroupListDataWrapper(
-            customTimeDatas,
-            null,
-            listOf(),
-            null,
-            instanceDatas,
-            null
-        )
-
-        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
-
-        return ShowNotificationGroupViewModel.Data(dataWrapper)
-    }
 
     @Synchronized
     fun getDrawerData(): DrawerViewModel.Data {

@@ -2,10 +2,13 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -69,4 +72,59 @@ fun DomainFactory.setTaskEndTimeStamps(
         task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
 
     return Pair(taskUndoData, visible)
+}
+
+private fun DomainFactory.getGroupListData(
+    instance: Instance<*>,
+    task: Task<*>,
+    now: ExactTimeStamp
+): GroupListDataWrapper {
+    val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+        GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
+    }
+
+    val instanceDatas = instance.getChildInstances(now).map { (childInstance, taskHierarchy) ->
+        val childTask = childInstance.task
+
+        val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+
+        val children = getChildInstanceDatas(childInstance, now)
+
+        val instanceData = GroupListDataWrapper.InstanceData(
+            childInstance.done,
+            childInstance.instanceKey,
+            null,
+            childInstance.name,
+            childInstance.instanceDateTime.timeStamp,
+            childTask.current(now),
+            childInstance.isRootInstance(now),
+            isRootTask,
+            childInstance.exists(),
+            childInstance.getCreateTaskTimePair(ownerKey),
+            childTask.note,
+            children,
+            taskHierarchy.taskHierarchyKey,
+            childTask.ordinal,
+            childInstance.getNotificationShown(localFactory),
+            childTask.getImage(deviceDbInfo),
+            childInstance.isRepeatingGroupChild(now)
+        )
+
+        children.values.forEach { it.instanceDataParent = instanceData }
+
+        instanceData
+    }
+
+    val dataWrapper = GroupListDataWrapper(
+        customTimeDatas,
+        task.current(now),
+        listOf(),
+        task.note,
+        instanceDatas,
+        task.getImage(deviceDbInfo)
+    )
+
+    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
+
+    return dataWrapper
 }

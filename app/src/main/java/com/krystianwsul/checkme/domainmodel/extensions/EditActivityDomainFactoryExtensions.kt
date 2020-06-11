@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import android.net.Uri
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
@@ -11,6 +12,9 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -561,4 +565,203 @@ fun DomainFactory.createJoinRootTask(
     }
 
     return newParentTask.taskKey
+}
+
+private fun DomainFactory.getParentTreeDatas(
+    now: ExactTimeStamp,
+    excludedTaskKeys: Set<TaskKey>,
+    includedTaskKeys: Set<TaskKey>
+): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
+    val parentTreeDatas = mutableMapOf<EditViewModel.ParentKey, EditViewModel.ParentTreeData>()
+
+    parentTreeDatas += projectsFactory.privateProject
+        .tasks
+        .asSequence()
+        .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+        .associate {
+            val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
+            val parentTreeData = EditViewModel.ParentTreeData(
+                it.name,
+                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                taskParentKey,
+                it.getScheduleText(ScheduleText, now),
+                it.note,
+                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
+                null
+            )
+
+            taskParentKey to parentTreeData
+        }
+
+    parentTreeDatas += projectsFactory.sharedProjects
+        .values
+        .asSequence()
+        .filter { it.current(now) }
+        .associate {
+            val projectParentKey = EditViewModel.ParentKey.Project(it.projectKey)
+
+            val users = it.users.joinToString(", ") { it.name }
+            val parentTreeData = EditViewModel.ParentTreeData(
+                it.name,
+                getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys),
+                projectParentKey,
+                users,
+                null,
+                EditViewModel.SortKey.ProjectSortKey(it.projectKey),
+                it.projectKey
+            )
+
+            projectParentKey to parentTreeData
+        }
+
+    return parentTreeDatas
+}
+
+private fun DomainFactory.getProjectTaskTreeDatas(
+    now: ExactTimeStamp,
+    project: Project<*>,
+    excludedTaskKeys: Set<TaskKey>,
+    includedTaskKeys: Set<TaskKey>
+): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
+    return project.tasks
+        .asSequence()
+        .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+        .associate {
+            val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
+            val parentTreeData = EditViewModel.ParentTreeData(
+                it.name,
+                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                taskParentKey,
+                it.getScheduleText(ScheduleText, now),
+                it.note,
+                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
+                (it.project as? SharedProject)?.projectKey
+            )
+
+            taskParentKey to parentTreeData
+        }
+}
+
+private fun Task<*>.showAsParent(
+    now: ExactTimeStamp,
+    excludedTaskKeys: Set<TaskKey>,
+    includedTaskKeys: Set<TaskKey>
+): Boolean {
+    check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
+
+    if (!current(now)) {
+        check(!includedTaskKeys.contains(taskKey))
+
+        return false
+    }
+
+    if (!isRootTask(now))
+        return false
+
+    if (excludedTaskKeys.contains(taskKey))
+        return false
+
+    if (includedTaskKeys.contains(taskKey)) { // todo this doesn't account for a parent that isn't a root instance
+        check(isVisible(now, true))
+
+        return true
+    }
+
+    if (!isVisible(now, false))
+        return false
+
+    return true
+}
+
+private fun DomainFactory.joinTasks(
+    newParentTask: Task<*>,
+    joinTasks: List<Task<*>>,
+    now: ExactTimeStamp,
+    removeInstanceKeys: List<InstanceKey>,
+    allReminders: Boolean = true
+) {
+    newParentTask.requireCurrent(now)
+    check(joinTasks.size > 1)
+
+    for (joinTask in joinTasks) {
+        joinTask.requireCurrent(now)
+
+        if (allReminders) {
+            joinTask.endAllCurrentTaskHierarchies(now)
+            joinTask.endAllCurrentSchedules(now)
+            joinTask.endAllCurrentNoScheduleOrParents(now)
+        }
+
+        newParentTask.addChild(joinTask, now)
+    }
+
+    removeInstanceKeys.map(::getInstance)
+        .filter {
+            it.getParentInstance(now)?.first?.task != newParentTask && it.isVisible(
+                now,
+                true
+            )
+        }
+        .forEach { it.hide(now) }
+}
+
+private fun DomainFactory.getTaskListChildTaskDatas(
+    now: ExactTimeStamp,
+    parentTask: Task<*>,
+    excludedTaskKeys: Set<TaskKey>
+): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
+    parentTask.getChildTaskHierarchies(now)
+        .asSequence()
+        .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
+        .associate {
+            val childTask = it.childTask
+            val taskParentKey = EditViewModel.ParentKey.Task(it.childTaskKey)
+
+            val parentTreeData = EditViewModel.ParentTreeData(
+                childTask.name,
+                getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
+                EditViewModel.ParentKey.Task(childTask.taskKey),
+                childTask.getScheduleText(ScheduleText, now),
+                childTask.note,
+                EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
+                (childTask.project as? SharedProject)?.projectKey
+            )
+
+            taskParentKey to parentTreeData
+        }
+
+private fun DomainFactory.copyTask(now: ExactTimeStamp, task: Task<*>, copyTaskKey: TaskKey) {
+    val copiedTask = getTaskForce(copyTaskKey)
+
+    copiedTask.getChildTaskHierarchies(now).forEach {
+        val copiedChildTask = it.childTask
+        copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
+
+        createChildTask(
+            now,
+            task,
+            copiedChildTask.name,
+            copiedChildTask.note,
+            copiedChildTask.imageJson,
+            copiedChildTask.taskKey
+        )
+    }
+}
+
+private fun <T : ProjectType> DomainFactory.createChildTask(
+    now: ExactTimeStamp,
+    parentTask: Task<T>,
+    name: String,
+    note: String?,
+    imageJson: TaskJson.Image?,
+    copyTaskKey: TaskKey? = null
+): Task<T> {
+    check(name.isNotEmpty())
+    parentTask.requireCurrent(now)
+
+    val childTask = parentTask.createChildTask(now, name, note, imageJson)
+
+    copyTaskKey?.let { copyTask(now, childTask, it) }
+
+    return childTask
 }

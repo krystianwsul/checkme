@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
@@ -179,4 +180,20 @@ fun DomainFactory.getGroupListData(
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
     return DayViewModel.DayData(dataWrapper)
+}
+
+private fun DomainFactory.getGroupListChildTaskDatas(
+    parentTask: Task<*>,
+    now: ExactTimeStamp
+): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
+    val childTask = it.childTask
+
+    GroupListDataWrapper.TaskData(
+        childTask.taskKey,
+        childTask.name,
+        getGroupListChildTaskDatas(childTask, now),
+        childTask.startExactTimeStamp,
+        childTask.note,
+        childTask.getImage(deviceDbInfo)
+    )
 }

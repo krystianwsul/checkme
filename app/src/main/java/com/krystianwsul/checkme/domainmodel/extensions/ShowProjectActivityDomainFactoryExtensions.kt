@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -103,3 +104,8 @@ fun DomainFactory.updateProject(
 
     notifyCloud(remoteProject, removedFriends)
 }
+
+private fun DomainFactory.notifyCloud(
+    project: Project<*>,
+    userKeys: Collection<UserKey>
+) = notifyCloudPrivateFixed(mutableSetOf(project), userKeys.toMutableList())

@@ -4,6 +4,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.getSettingsData
 import com.krystianwsul.checkme.utils.toSingle
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo

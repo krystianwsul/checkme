@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
@@ -324,15 +323,6 @@ class DomainFactory(
         APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
-    // gets
-
-    @Synchronized
-    fun getSettingsData(): SettingsViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getSettingsData")
-
-        return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
-    }
-
     // sets
 
     @Synchronized
@@ -530,26 +520,6 @@ class DomainFactory(
 
         myUserFactory.user.photoUrl = photoUrl
         projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
-
-        save(0, source)
-    }
-
-    @Synchronized
-    fun updateDefaultReminder(dataId: Int, source: SaveService.Source, defaultReminder: Boolean) {
-        MyCrashlytics.log("DomainFactory.updateDefaultReminder")
-        if (myUserFactory.isSaved) throw SavedFactoryException()
-
-        myUserFactory.user.defaultReminder = defaultReminder
-
-        save(dataId, source)
-    }
-
-    @Synchronized
-    fun updateDefaultTab(source: SaveService.Source, defaultTab: Int) {
-        MyCrashlytics.log("DomainFactory.updateDefaultTab")
-        if (myUserFactory.isSaved) throw SavedFactoryException()
-
-        myUserFactory.user.defaultTab = defaultTab
 
         save(0, source)
     }

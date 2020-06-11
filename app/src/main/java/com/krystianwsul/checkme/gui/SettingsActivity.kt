@@ -15,6 +15,8 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
+import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
@@ -136,7 +138,11 @@ class SettingsActivity : NavBarActivity() {
                             isChecked = it.defaultReminder
 
                             setOnPreferenceChangeListener { _, newValue ->
-                                DomainFactory.instance.updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+                                DomainFactory.instance.updateDefaultReminder(
+                                    it.dataId,
+                                    SaveService.Source.GUI,
+                                    newValue as Boolean
+                                )
 
                                 true
                             }

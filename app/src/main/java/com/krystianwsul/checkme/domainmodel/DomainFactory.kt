@@ -328,25 +328,6 @@ class DomainFactory(
     // gets
 
     @Synchronized
-    fun getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getShowGroupData")
-
-        val now = ExactTimeStamp.now
-
-        val date = timeStamp.date
-        val dayOfWeek = date.dayOfWeek
-        val hourMinute = timeStamp.hourMinute
-
-        val time =
-            getCurrentRemoteCustomTimes(now).firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-                ?: Time.Normal(hourMinute)
-
-        val displayText = DateTime(date, time).getDisplayText()
-
-        return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
-    }
-
-    @Synchronized
     fun getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
@@ -1543,7 +1524,7 @@ class DomainFactory(
         }
     }
 
-    private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListDataWrapper {
+    fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListDataWrapper {
         val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
         val endTimeStamp = TimeStamp(endCalendar.toDateTimeSoy())
 

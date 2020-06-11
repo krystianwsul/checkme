@@ -18,7 +18,7 @@ fun <T, U, V> Observable<T>.processChanges(
         addedKeys.forEach { put(it, adder(newData, it)) }
     }
 
-    fun Set<U>.entries(map: Map<U, V>) = map { it to map.getValue(it) }.toMap()
+    fun Set<U>.entries(map: Map<U, V>) = associate { it to map.getValue(it) }
 
     val removedEntries = removedKeys.entries(oldMap)
 

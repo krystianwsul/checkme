@@ -41,15 +41,14 @@ abstract class ProjectFactory<T : ProjectType>(
             projectRecord: ProjectRecord<T>,
             snapshots: Map<TaskKey, Snapshot>
     ) = projectRecord.taskRecords
-            .values
-            .map {
-                it.taskKey to AndroidRootInstanceManager(
-                        it,
-                        snapshots.getValue(it.taskKey),
-                        factoryProvider
-                )
-            }
-            .toMap()
+        .values
+        .associate {
+            it.taskKey to AndroidRootInstanceManager(
+                it,
+                snapshots.getValue(it.taskKey),
+                factoryProvider
+            )
+        }
             .toMutableMap()
 
     protected fun newRootInstanceManager(

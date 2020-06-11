@@ -10,14 +10,14 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateProjectRecord(
-        private val databaseWrapper: DatabaseWrapper,
-        create: Boolean,
-        override val projectKey: ProjectKey.Private,
-        private val projectJson: PrivateProjectJson
+    private val databaseWrapper: DatabaseWrapper,
+    create: Boolean,
+    override val projectKey: ProjectKey.Private,
+    private val projectJson: PrivateProjectJson
 ) : ProjectRecord<ProjectType.Private>(
-        create,
-        projectJson,
-        projectKey
+    create,
+    projectJson,
+    projectKey
 ) {
 
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
@@ -31,27 +31,27 @@ class PrivateProjectRecord(
         super.initChildRecords(create)
 
         customTimeRecords = projectJson.customTimes
-                .map { (id, customTimeJson) ->
-                    check(id.isNotEmpty())
+            .entries
+            .associate { (id, customTimeJson) ->
+                check(id.isNotEmpty())
 
-                    val customTimeId = CustomTimeId.Private(id)
+                val customTimeId = CustomTimeId.Private(id)
 
-                    customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
-                }
-                .toMap()
-                .toMutableMap()
+                customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
+            }
+            .toMutableMap()
     }
 
     constructor(
-            databaseWrapper: DatabaseWrapper,
-            id: ProjectKey.Private,
-            projectJson: PrivateProjectJson
+        databaseWrapper: DatabaseWrapper,
+        id: ProjectKey.Private,
+        projectJson: PrivateProjectJson
     ) : this(databaseWrapper, false, id, projectJson)
 
     constructor(
-            databaseWrapper: DatabaseWrapper,
-            userInfo: UserInfo,
-            projectJson: PrivateProjectJson
+        databaseWrapper: DatabaseWrapper,
+        userInfo: UserInfo,
+        projectJson: PrivateProjectJson
     ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): PrivateCustomTimeRecord {
@@ -65,16 +65,16 @@ class PrivateProjectRecord(
     private val createProjectJson
         get() = projectJson.apply {
             tasks = taskRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
+                .associateBy({ it.id }, { it.createObject })
+                .toMutableMap()
 
             taskHierarchies = taskHierarchyRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
+                .associateBy({ it.id }, { it.createObject })
+                .toMutableMap()
 
             customTimes = customTimeRecords.values
-                    .associateBy({ it.id.value }, { it.createObject })
-                    .toMutableMap()
+                .associateBy({ it.id.value }, { it.createObject })
+                .toMutableMap()
         }
 
     override val createObject get() = createProjectJson
@@ -83,19 +83,25 @@ class PrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun getCustomTimeRecordId() = CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(projectKey))
+    fun getCustomTimeRecordId() =
+        CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(projectKey)
 
-    override fun getScheduleRecordId(taskId: String) = databaseWrapper.getPrivateScheduleRecordId(projectKey, taskId)
+    override fun getScheduleRecordId(taskId: String) =
+        databaseWrapper.getPrivateScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)
+    override fun getTaskHierarchyRecordId() =
+        databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)
 
-    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(CustomTimeId.Private(id))
+    override fun getCustomTimeRecord(id: String) =
+        customTimeRecords.getValue(CustomTimeId.Private(id))
 
     override fun getCustomTimeId(id: String) = CustomTimeId.Private(id)
 
-    override fun newNoScheduleOrParentRecordId(taskId: String) = databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
+    override fun newNoScheduleOrParentRecordId(taskId: String) =
+        databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
 
-    override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) = CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Private)
+    override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) =
+        CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Private)
 }

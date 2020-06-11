@@ -1376,7 +1376,7 @@ class DomainFactory(
         now: ExactTimeStamp
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
-            .map { (childInstance, taskHierarchy) ->
+            .associate { (childInstance, taskHierarchy) ->
                 val childTask = childInstance.task
 
                 val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
@@ -1406,7 +1406,6 @@ class DomainFactory(
                 children.values.forEach { it.instanceDataParent = instanceData }
                 childInstance.instanceKey to instanceData
             }
-            .toMap()
             .toMutableMap()
     }
 
@@ -1418,7 +1417,7 @@ class DomainFactory(
         parentTask.getChildTaskHierarchies(now)
             .asSequence()
             .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
-            .map {
+            .associate {
                 val childTask = it.childTask
                 val taskParentKey = EditViewModel.ParentKey.Task(it.childTaskKey)
 
@@ -1434,8 +1433,6 @@ class DomainFactory(
 
                 taskParentKey to parentTreeData
             }
-            .toList()
-            .toMap()
 
     private fun Task<*>.showAsParent(
         now: ExactTimeStamp,
@@ -1477,8 +1474,9 @@ class DomainFactory(
 
         parentTreeDatas += projectsFactory.privateProject
             .tasks
+            .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
-            .map {
+            .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
                 val parentTreeData = EditViewModel.ParentTreeData(
                     it.name,
@@ -1492,12 +1490,12 @@ class DomainFactory(
 
                 taskParentKey to parentTreeData
             }
-            .toMap()
 
         parentTreeDatas += projectsFactory.sharedProjects
             .values
+            .asSequence()
             .filter { it.current(now) }
-            .map {
+            .associate {
                 val projectParentKey = EditViewModel.ParentKey.Project(it.projectKey)
 
                 val users = it.users.joinToString(", ") { it.name }
@@ -1513,7 +1511,6 @@ class DomainFactory(
 
                 projectParentKey to parentTreeData
             }
-            .toMap()
 
         return parentTreeDatas
     }
@@ -1525,8 +1522,9 @@ class DomainFactory(
         includedTaskKeys: Set<TaskKey>
     ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
         return project.tasks
+            .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
-            .map {
+            .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
                 val parentTreeData = EditViewModel.ParentTreeData(
                     it.name,
@@ -1540,7 +1538,6 @@ class DomainFactory(
 
                 taskParentKey to parentTreeData
             }
-            .toMap()
     }
 
     val ownerKey get() = myUserFactory.user.userKey

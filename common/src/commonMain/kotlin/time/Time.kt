@@ -37,10 +37,7 @@ sealed class Time {
 
         val name get() = customTimeRecord.name
 
-        val hourMinutes
-            get() = DayOfWeek.values()
-                    .map { it to getHourMinute(it) }
-                    .toMap()
+        val hourMinutes get() = DayOfWeek.values().associate { it to getHourMinute(it) }
 
         override val timePair by lazy { TimePair(key, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 

@@ -17,7 +17,7 @@ object Irrelevant {
         }
 
         // relevant hack
-        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(it) }.toMap()
+        val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
         val taskHierarchies = project.taskHierarchies
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
@@ -26,11 +26,9 @@ object Irrelevant {
         val rootInstances = project.getRootInstances(null, now.plusOne(), now)
 
         val instanceRelevances = (existingInstances + rootInstances)
-                .asSequence()
-                .distinct()
-                .map { it.instanceKey to InstanceRelevance(it) }
-                .toList()
-                .toMap()
+            .asSequence()
+            .distinct()
+            .associate { it.instanceKey to InstanceRelevance(it) }
                 .toMutableMap()
 
         val yesterday = ExactTimeStamp(now.toDateTimeSoy() - 1.days)
@@ -94,7 +92,8 @@ object Irrelevant {
         irrelevantTasks.forEach { it.delete() }
 
         val remoteCustomTimes = project.customTimes
-        val remoteCustomTimeRelevances = remoteCustomTimes.map { it.key to RemoteCustomTimeRelevance(it) }.toMap()
+        val remoteCustomTimeRelevances =
+            remoteCustomTimes.associate { it.key to RemoteCustomTimeRelevance(it) }
 
         if (project is PrivateProject) {
             project.customTimes
@@ -103,7 +102,8 @@ object Irrelevant {
         }
 
         val remoteProjects = listOf(project)
-        val remoteProjectRelevances = remoteProjects.map { it.projectKey to RemoteProjectRelevance(it) }.toMap()
+        val remoteProjectRelevances =
+            remoteProjects.associate { it.projectKey to RemoteProjectRelevance(it) }
 
         remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
                 .map { remoteProjectRelevances.getValue(it.projectKey) }

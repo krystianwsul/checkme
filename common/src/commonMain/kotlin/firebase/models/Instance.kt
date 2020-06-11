@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -252,23 +251,14 @@ class Instance<T : ProjectType> private constructor(
         if (parentTask == null)
             return null
 
-        val parentInstance = if (parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
-            parentTask.getInstance(scheduleDateTime).takeIf { it.isEligibleParentInstance(now) }
-        } else {
-            fun message(task: Task<*>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: ${task.endExactTimeStamp}"
+        check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
 
-            // todo remove after June 17th 2020
-            ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
-
-            null
-        }
-
-        return parentInstance?.let { Triple(it, isRepeatingGroup, parentTaskHierarchy) }
+        return parentTask.getInstance(scheduleDateTime)
+            .takeIf { it.isEligibleParentInstance(now) }
+            ?.let { Triple(it, isRepeatingGroup, parentTaskHierarchy) }
     }
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
-
-    private class ParentInstanceException(message: String) : Exception(message)
 
     fun hide(now: ExactTimeStamp) {
         check(!data.hidden)

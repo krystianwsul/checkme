@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.setProjectEndTimeStamps
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode

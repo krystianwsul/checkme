@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
@@ -325,26 +324,6 @@ class DomainFactory(
     }
 
     // gets
-
-    @Synchronized
-    fun getProjectListData(): ProjectListViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getProjectListData")
-
-        val remoteProjects = projectsFactory.sharedProjects
-
-        val now = ExactTimeStamp.now
-
-        val projectDatas = remoteProjects.values
-            .filter { it.current(now) }
-            .associate {
-                val users = it.users.joinToString(", ") { it.name }
-
-                it.projectKey to ProjectListViewModel.ProjectData(it.projectKey, it.name, users)
-            }
-            .toSortedMap()
-
-        return ProjectListViewModel.Data(projectDatas)
-    }
 
     @Synchronized
     fun getFriendListData(): FriendListViewModel.Data {
@@ -709,65 +688,6 @@ class DomainFactory(
         save(dataId, source)
 
         notifyCloud(remoteProject)
-    }
-
-    @Synchronized
-    fun setProjectEndTimeStamps(
-        dataId: Int,
-        source: SaveService.Source,
-        projectIds: Set<ProjectKey<*>>,
-        removeInstances: Boolean
-    ): ProjectUndoData {
-        MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
-
-        check(projectIds.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val projectUndoData = ProjectUndoData()
-
-        val remoteProjects = projectIds.map { projectsFactory.getProjectForce(it) }.toSet()
-
-        remoteProjects.forEach {
-            it.requireCurrent(now)
-            it.setEndExactTimeStamp(now, projectUndoData, removeInstances)
-        }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(remoteProjects)
-
-        return projectUndoData
-    }
-
-    @Synchronized
-    fun clearProjectEndTimeStamps(
-        dataId: Int,
-        source: SaveService.Source,
-        projectUndoData: ProjectUndoData
-    ) {
-        MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
-
-        val now = ExactTimeStamp.now
-
-        val remoteProjects = projectUndoData.projectIds
-            .map { projectsFactory.getProjectForce(it) }
-            .toSet()
-
-        remoteProjects.forEach {
-            it.requireNotCurrent(now)
-            it.clearEndExactTimeStamp(now)
-        }
-
-        processTaskUndoData(projectUndoData.taskUndoData, now)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(remoteProjects)
     }
 
     @Synchronized

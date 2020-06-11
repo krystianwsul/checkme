@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -96,15 +97,28 @@ class DoneInstanceNode(
                 groupAdapter.treeNodeCollection
                         .treeViewAdapter
                         .updateDisplayedNodes {
-                            instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.instanceKey, false)
+                            instanceData.done = DomainFactory.instance.setInstanceDone(
+                                groupAdapter.dataId,
+                                SaveService.Source.GUI,
+                                instanceData.instanceKey,
+                                false
+                            )
 
                             dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
-                            nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
+                            nodeCollection.notDoneGroupCollection.add(
+                                instanceData,
+                                TreeViewAdapter.Placeholder
+                            )
                         }
 
                 groupListFragment.listener.showSnackbarNotDone(1) {
-                    DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceData.instanceKey, true)
+                    DomainFactory.instance.setInstanceDone(
+                        0,
+                        SaveService.Source.GUI,
+                        instanceData.instanceKey,
+                        true
+                    )
                 }
             }
         }

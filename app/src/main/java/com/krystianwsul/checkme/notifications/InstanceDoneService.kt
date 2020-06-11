@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDone
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
@@ -18,7 +19,12 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         private const val NOTIFICATION_ID_KEY = "notificationId"
         private const val KEY_NAME = "name"
 
-        fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int, name: String) = Intent(context, InstanceDoneService::class.java).apply {
+        fun getIntent(
+            context: Context,
+            instanceKey: InstanceKey,
+            notificationId: Int,
+            name: String
+        ) = Intent(context, InstanceDoneService::class.java).apply {
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
             putExtra(NOTIFICATION_ID_KEY, notificationId)
             putExtra(KEY_NAME, name)

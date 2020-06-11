@@ -489,17 +489,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
-        MyCrashlytics.log("DomainFactory.updatePhotoUrl")
-        if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
-
-        myUserFactory.user.photoUrl = photoUrl
-        projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
-
-        save(0, source)
-    }
-
-    @Synchronized
     fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
         if (projectsFactory.isSaved) throw SavedFactoryException()

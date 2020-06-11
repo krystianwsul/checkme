@@ -218,3 +218,14 @@ fun DomainFactory.setInstanceNotified(
 
     save(dataId, source)
 }
+
+@Synchronized
+fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
+    MyCrashlytics.log("DomainFactory.updatePhotoUrl")
+    if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
+
+    myUserFactory.user.photoUrl = photoUrl
+    projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
+
+    save(0, source)
+}

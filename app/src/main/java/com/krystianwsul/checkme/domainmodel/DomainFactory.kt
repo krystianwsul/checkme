@@ -22,8 +22,10 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
-import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.checkme.viewmodels.SettingsViewModel
+import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
@@ -326,25 +328,6 @@ class DomainFactory(
     // gets
 
     @Synchronized
-    fun getFriendListData(): FriendListViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getFriendListData")
-
-        val friends = friendsFactory.friends
-
-        val userListDatas = friends.map {
-            FriendListViewModel.UserListData(
-                it.name,
-                it.email,
-                it.userKey,
-                it.photoUrl,
-                it.userWrapper
-            )
-        }.toMutableSet()
-
-        return FriendListViewModel.Data(userListDatas)
-    }
-
-    @Synchronized
     fun getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
@@ -545,35 +528,12 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun removeFriends(source: SaveService.Source, keys: Set<UserKey>) {
-        MyCrashlytics.log("DomainFactory.removeFriends")
-        check(!friendsFactory.isSaved)
-
-        keys.forEach { myUserFactory.user.removeFriend(it) }
-
-        save(0, source)
-    }
-
-    @Synchronized
     fun addFriend(source: SaveService.Source, userKey: UserKey, userWrapper: UserWrapper) {
         MyCrashlytics.log("DomainFactory.addFriend")
         check(!myUserFactory.isSaved)
 
         myUserFactory.user.addFriend(userKey)
         friendsFactory.addFriend(userKey, userWrapper)
-
-        save(0, source)
-    }
-
-    @Synchronized
-    fun addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) {
-        MyCrashlytics.log("DomainFactory.addFriends")
-        check(!myUserFactory.isSaved)
-
-        userMap.forEach {
-            myUserFactory.user.addFriend(it.key)
-            friendsFactory.addFriend(it.key, it.value)
-        }
 
         save(0, source)
     }

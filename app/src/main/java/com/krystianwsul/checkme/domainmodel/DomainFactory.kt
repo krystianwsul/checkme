@@ -330,52 +330,6 @@ class DomainFactory(
     // gets
 
     @Synchronized
-    fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getEditInstancesData")
-
-        check(instanceKeys.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.key
-        }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-        val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
-
-        for (instanceKey in instanceKeys) {
-            val instance = getInstance(instanceKey)
-            check(instance.isRootInstance(now))
-            check(instance.done == null)
-
-            instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(
-                instance.instanceDateTime,
-                instance.name,
-                instance.done != null
-            )
-
-            (instance.instanceTime as? Time.Custom<*>)?.let {
-                currentCustomTimes[it.key] = it
-            }
-        }
-
-        val customTimeDatas = currentCustomTimes.mapValues {
-            it.value.let {
-                EditInstancesViewModel.CustomTimeData(
-                    it.key,
-                    it.name,
-                    it.hourMinutes.toSortedMap()
-                )
-            }
-        }
-
-        val showHour =
-            instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
-
-        return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
-    }
-
-    @Synchronized
     fun getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
@@ -578,41 +532,6 @@ class DomainFactory(
     }
 
     // sets
-
-    @Synchronized
-    fun setInstancesDateTime(
-        dataId: Int,
-        source: SaveService.Source,
-        instanceKeys: Set<InstanceKey>,
-        instanceDate: Date,
-        instanceTimePair: TimePair
-    ) {
-        MyCrashlytics.log("DomainFactory.setInstancesDateTime")
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        check(instanceKeys.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        val instances = instanceKeys.map(this::getInstance)
-
-        instances.forEach {
-            it.setInstanceDateTime(
-                localFactory,
-                ownerKey,
-                DateTime(instanceDate, getTime(instanceTimePair)),
-                now
-            )
-        }
-
-        val projects = instances.map { it.project }.toSet()
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(projects)
-    }
 
     @Synchronized
     fun setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {

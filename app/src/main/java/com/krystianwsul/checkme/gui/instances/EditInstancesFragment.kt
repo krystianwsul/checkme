@@ -12,6 +12,7 @@ import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -161,7 +162,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
                         editInstancesViewModel.stop()
 
-                        DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
+                        DomainFactory.instance.setInstancesDateTime(
+                            data!!.dataId,
+                            SaveService.Source.GUI,
+                            data!!.instanceDatas.keys,
+                            date!!,
+                            timePairPersist!!.timePair
+                        )
 
                         dismiss()
 

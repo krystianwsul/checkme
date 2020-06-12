@@ -29,7 +29,9 @@ import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.ScheduleDialogFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.getCurrentValue
@@ -178,7 +180,7 @@ class EditActivity : NavBarActivity() {
 
     private lateinit var editViewModel: EditViewModel
 
-    private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
+    private val parametersRelay = PublishRelay.create<ScheduleDialogParameters>()
 
     private val timeRelay = BehaviorRelay.createDefault(Unit)
 
@@ -285,7 +287,7 @@ class EditActivity : NavBarActivity() {
         ).merge()
                 .subscribe { result ->
                     when (result) {
-                        is ScheduleDialogFragment.Result.Change -> {
+                        is ScheduleDialogResult.Change -> {
                             if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
                                 check(result.scheduleDialogData.monthlyDay)
                             } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
@@ -301,17 +303,20 @@ class EditActivity : NavBarActivity() {
 
                                 val oldId = if (position < delegate.parentScheduleManager.schedules.size) {
                                     delegate.parentScheduleManager
-                                            .schedules[position]
-                                            .id
+                                        .schedules[position]
+                                        .id
                                 } else {
                                     null
                                 }
 
-                                delegate.parentScheduleManager.setSchedule(position, result.scheduleDialogData.toScheduleEntry(oldId))
+                                delegate.parentScheduleManager.setSchedule(
+                                    position,
+                                    result.scheduleDialogData.toScheduleEntry(oldId)
+                                )
                             }
                         }
-                        is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
-                        is ScheduleDialogFragment.Result.Cancel -> Unit
+                        is ScheduleDialogResult.Delete -> removeSchedule(result.position)
+                        is ScheduleDialogResult.Cancel -> Unit
                     }
                 }
                 .addTo(createDisposable)
@@ -719,18 +724,19 @@ class EditActivity : NavBarActivity() {
                         setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.customTimeDatas, activity))
 
                         setFixedOnClickListener(
-                                {
-                                    val parameters = ScheduleDialogFragment.Parameters(
-                                            adapterPosition,
-                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
-                                                    Date.today(),
-                                                    activity.delegate.scheduleHint
-                                            ),
-                                            true
+                            {
+                                val parameters =
+                                    ScheduleDialogParameters(
+                                        adapterPosition,
+                                        scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
+                                            Date.today(),
+                                            activity.delegate.scheduleHint
+                                        ),
+                                        true
                                     )
 
-                                    activity.parametersRelay.accept(parameters)
-                                },
+                                activity.parametersRelay.accept(parameters)
+                            },
                                 { activity.removeSchedule(adapterPosition) }
                         )
                     }
@@ -777,17 +783,18 @@ class EditActivity : NavBarActivity() {
                         text = null
 
                         setFixedOnClickListener {
-                            val parameters = ScheduleDialogFragment.Parameters(
+                            val parameters =
+                                ScheduleDialogParameters(
                                     null,
                                     activity.delegate
-                                            .firstScheduleEntry
-                                            .scheduleDataWrapper
-                                            .getScheduleDialogData(
-                                                    Date.today(),
-                                                    activity.delegate.scheduleHint
-                                            ),
+                                        .firstScheduleEntry
+                                        .scheduleDataWrapper
+                                        .getScheduleDialogData(
+                                            Date.today(),
+                                            activity.delegate.scheduleHint
+                                        ),
                                     false
-                            )
+                                )
 
                             activity.parametersRelay.accept(parameters)
                         }

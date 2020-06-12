@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.edit.dialogs
+package com.krystianwsul.checkme.gui.edit.dialogs.schedule
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
@@ -24,21 +23,16 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleType
-import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
-import kotlin.random.Random
 import kotlin.reflect.KMutableProperty0
 
 class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
@@ -55,13 +49,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TIME_PICKER_TAG = "timePicker"
 
-        fun newInstance(parameters: Parameters) = ScheduleDialogFragment().apply {
-            arguments = Bundle().apply {
-                parameters.position?.let { putInt(KEY_POSITION, it) }
-                putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
-                putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
+        fun newInstance(parameters: ScheduleDialogParameters) = ScheduleDialogFragment()
+            .apply {
+                arguments = Bundle().apply {
+                    parameters.position?.let { putInt(KEY_POSITION, it) }
+                    putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
+                    putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
+                }
             }
-        }
     }
 
     private lateinit var customView: ViewGroup
@@ -94,7 +89,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             TimePickerDialogFragment.newInstance(scheduleDialogData.timePairPersist.hourMinute, SerializableUnit).let {
                 it.listener = timePickerDialogFragmentListener
-                it.show(childFragmentManager, TIME_PICKER_TAG)
+                it.show(
+                    childFragmentManager,
+                    TIME_PICKER_TAG
+                )
             }
         }
 
@@ -193,7 +191,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var position: Int? = null
 
-    val result = PublishRelay.create<Result>()
+    val result = PublishRelay.create<ScheduleDialogResult>()
 
     private val dateFieldDatas by lazy {
         listOf(
@@ -201,14 +199,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                         customView.scheduleDialogFrom,
                         customView.scheduleDialogFromLayout,
                         scheduleDialogData::from,
-                        TAG_FROM_FRAGMENT
+                    TAG_FROM_FRAGMENT
                 ),
                 DateFieldData(
-                        customView.scheduleDialogUntil,
-                        customView.scheduleDialogUntilLayout,
-                        scheduleDialogData::until,
-                        TAG_UNTIL_FRAGMENT,
-                        { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
+                    customView.scheduleDialogUntil,
+                    customView.scheduleDialogUntilLayout,
+                    scheduleDialogData::until,
+                    TAG_UNTIL_FRAGMENT,
+                    { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
                 )
         )
     }
@@ -240,7 +238,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 check(customTimeDatas != null)
                 check(checkValid())
 
-                result.accept(Result.Change(position, scheduleDialogData))
+                result.accept(
+                    ScheduleDialogResult.Change(
+                        position,
+                        scheduleDialogData
+                    )
+                )
 
                 dismiss()
             }
@@ -252,7 +255,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     visibility = View.VISIBLE
 
                     setOnClickListener {
-                        result.accept(Result.Delete(position!!))
+                        result.accept(
+                            ScheduleDialogResult.Delete(
+                                position!!
+                            )
+                        )
 
                         dismiss()
                     }
@@ -316,7 +323,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
                 it.timeDialogListener = timeDialogListener
-                it.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
+                it.show(
+                    childFragmentManager,
+                    TIME_LIST_FRAGMENT_TAG
+                )
             }
         }
 
@@ -336,7 +346,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 else -> throw IllegalArgumentException()
             }.let {
                 it.listener = datePickerDialogFragmentListener
-                it.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                it.show(
+                    childFragmentManager,
+                    DATE_FRAGMENT_TAG
+                )
             }
         }
 
@@ -642,85 +655,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
 
-        result.accept(Result.Cancel)
-    }
-
-    @Parcelize
-    class ScheduleDialogData(
-            var date: Date,
-            var daysOfWeek: MutableSet<DayOfWeek>,
-            var allDays: Boolean,
-            var monthlyDay: Boolean,
-            var monthDayNumber: Int,
-            var monthWeekNumber: Int,
-            var monthWeekDay: DayOfWeek,
-            var beginningOfMonth: Boolean,
-            val timePairPersist: TimePairPersist,
-            var scheduleType: ScheduleType,
-            var from: Date?,
-            var until: Date?
-    ) : Parcelable {
-
-        companion object {
-
-            const val MAX_MONTH_DAY = 28
-        }
-
-        init {
-            check(monthDayNumber > 0)
-            check(monthDayNumber <= MAX_MONTH_DAY)
-            check(monthWeekNumber > 0)
-            check(monthWeekNumber < 5)
-        }
-
-        fun toScheduleEntry(id: Int? = null) = ScheduleEntry(
-                when (scheduleType) {
-                    ScheduleType.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
-                            date,
-                            timePairPersist.timePair
-                    ))
-                    ScheduleType.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
-                            if (allDays) DayOfWeek.set else daysOfWeek,
-                            timePairPersist.timePair,
-                            from,
-                            until
-                    ))
-                    ScheduleType.MONTHLY_DAY -> EditViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
-                            monthDayNumber,
-                            beginningOfMonth,
-                            timePairPersist.timePair,
-                            from,
-                            until
-                    ))
-                    ScheduleType.MONTHLY_WEEK -> EditViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
-                            monthWeekNumber,
-                            monthWeekDay,
-                            beginningOfMonth,
-                            timePairPersist.timePair,
-                            from,
-                            until
-                    ))
-                    ScheduleType.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(ScheduleData.Yearly(
-                            date.month,
-                            date.day,
-                            timePairPersist.timePair,
-                            from,
-                            until
-                    ))
-                },
-                id ?: Random.nextInt()
-        )
-    }
-
-    class Parameters(val position: Int?, val scheduleDialogData: ScheduleDialogData, val showDelete: Boolean)
-
-    sealed class Result {
-
-        class Change(val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
-
-        class Delete(val position: Int) : Result()
-
-        object Cancel : Result()
+        result.accept(ScheduleDialogResult.Cancel)
     }
 
     private inner class DateFieldData(

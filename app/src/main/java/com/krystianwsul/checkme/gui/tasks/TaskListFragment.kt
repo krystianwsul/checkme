@@ -247,9 +247,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         Observables.combineLatest(dataRelay, taskListListener.search)
                 .subscribe { (_, searchWrapper) ->
+                    val emptyBefore = treeViewAdapter.displayedNodes.isEmpty()
                     treeViewAdapter.updateDisplayedNodes {
                         search(searchWrapper.value, TreeViewAdapter.Placeholder)
                     }
+
+                    val emptyAfter = treeViewAdapter.displayedNodes.isEmpty()
+                    if (emptyBefore && !emptyAfter)
+                        taskListRecycler.scrollToPosition(0)
 
                     val hide = mutableListOf<View>(taskListProgress)
                     val show = mutableListOf<View>()
@@ -259,7 +264,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         show.add(emptyTextLayout)
 
                         val (emptyTextId, emptyDrawableId) = when {
-                            searchWrapper.value != null -> Pair(R.string.noResults, R.drawable.search)
+                            searchWrapper.value != null -> Pair(
+                                R.string.noResults,
+                                R.drawable.search
+                            )
                             rootTaskData != null -> Pair(R.string.empty_child, R.drawable.empty)
                             else -> Pair(R.string.tasks_empty_root, R.drawable.empty)
                         }

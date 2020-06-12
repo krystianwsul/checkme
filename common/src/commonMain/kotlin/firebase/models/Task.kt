@@ -201,8 +201,9 @@ class Task<T : ProjectType>(
         val hierarchyTimeStamp = getHierarchyExactTimeStamp(exactTimeStamp)
 
         val currentSchedules = getCurrentSchedules(hierarchyTimeStamp)
-        val groupSingleSchedules =
-            currentSchedules.filter { it.schedule is SingleSchedule<*> && it.schedule.group }
+        val groupSingleSchedules = currentSchedules.filter {
+            it.schedule is SingleSchedule<*> && it.schedule.group
+        }
 
         return if (groupSingleSchedules.isEmpty()) {
             null

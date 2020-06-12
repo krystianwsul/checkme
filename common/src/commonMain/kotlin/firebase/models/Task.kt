@@ -198,7 +198,9 @@ class Task<T : ProjectType>(
     }
 
     fun getGroupScheduleDateTime(exactTimeStamp: ExactTimeStamp): DateTime? {
-        val currentSchedules = getCurrentSchedules(exactTimeStamp)
+        val hierarchyTimeStamp = getHierarchyExactTimeStamp(exactTimeStamp)
+
+        val currentSchedules = getCurrentSchedules(hierarchyTimeStamp)
         val groupSingleSchedules =
             currentSchedules.filter { it.schedule is SingleSchedule<*> && it.schedule.group }
 
@@ -212,7 +214,7 @@ class Task<T : ProjectType>(
     }
 
     fun isGroupTask(exactTimeStamp: ExactTimeStamp) =
-        getGroupScheduleDateTime(getHierarchyExactTimeStamp(exactTimeStamp)) != null
+        getGroupScheduleDateTime(exactTimeStamp) != null
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
         parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }

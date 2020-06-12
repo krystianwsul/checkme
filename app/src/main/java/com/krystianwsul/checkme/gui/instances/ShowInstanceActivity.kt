@@ -50,17 +50,22 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListListener {
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply { putExtra(INSTANCE_KEY, instanceKey as Parcelable) }
+        fun getIntent(context: Context, instanceKey: InstanceKey) =
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+            }
 
-        fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
-            putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-            putExtra(NOTIFICATION_ID_KEY, notificationId)
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                putExtra(NOTIFICATION_ID_KEY, notificationId)
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
 
-        fun getForwardIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
-            putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-            putExtra(NOTIFICATION_ID_KEY, notificationId)
+        fun getForwardIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                putExtra(NOTIFICATION_ID_KEY, notificationId)
         }
     }
 

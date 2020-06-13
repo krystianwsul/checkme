@@ -126,6 +126,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
     }
 
+    private lateinit var delegate: Delegate
+
     //cached data doesn't contain new custom time
     private fun isValid(): Boolean {
         if (customTimeDatas == null)
@@ -282,6 +284,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         scheduleDialogData = (savedInstanceState ?: requireArguments()).run {
             getParcelable(SCHEDULE_DIALOG_DATA_KEY)!!
         }
+        updateDelegate()
 
         customView.scheduleType.run {
             setItems(resources.getStringArray(R.array.schedule_types).toList())
@@ -302,6 +305,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                         3 -> ScheduleType.YEARLY
                         else -> throw UnsupportedOperationException()
                     }
+                    updateDelegate()
 
                     if (activity != null && customTimeDatas != null)
                         updateScheduleTypeFields(true)
@@ -394,8 +398,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                if (scheduleDialogData.scheduleType.isMonthly)
+                if (scheduleDialogData.scheduleType.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
+                    updateDelegate()
+                }
 
                 customView.scheduleDialogMonthWeekRadio.isChecked = false
 
@@ -431,8 +437,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                if (scheduleDialogData.scheduleType.isMonthly)
+                if (scheduleDialogData.scheduleType.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
+                    updateDelegate()
+                }
 
                 customView.scheduleDialogMonthDayRadio.isChecked = false
 
@@ -500,6 +508,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (customTimeDatas != null)
             initialize()
+    }
+
+    private fun updateDelegate() {
+        delegate = when (scheduleDialogData.scheduleType) {
+            ScheduleType.SINGLE -> Delegate.Single
+            ScheduleType.WEEKLY -> Delegate.Repeating.Weekly
+            ScheduleType.MONTHLY_DAY -> Delegate.Repeating.Monthly.MonthlyDay
+            ScheduleType.MONTHLY_WEEK -> Delegate.Repeating.Monthly.MonthlyWeek
+            ScheduleType.YEARLY -> Delegate.Repeating.Yearly
+        }
     }
 
     override fun onStart() {

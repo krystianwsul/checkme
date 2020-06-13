@@ -274,18 +274,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
 
-            val customTimeDatas = if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
-                val dayOfWeek = scheduleDialogData.date.dayOfWeek
-                list.sortedBy { it.hourMinutes[dayOfWeek] }.map {
-                    TimeDialogFragment.CustomTimeData(
-                        it.customTimeKey,
-                        it.name + " (" + it.hourMinutes[dayOfWeek] + ")"
-                    )
-                }
-            } else {
-                list.sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }
-                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
-            }
+            val customTimeDatas = delegate.getCustomTimeDatas(list)
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
                 it.timeDialogListener = timeDialogListener
@@ -713,6 +702,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         open fun fixDate(date: Date): Date = throw IllegalStateException()
 
         abstract fun isValid(): ErrorData
+
+        abstract fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData>
     }
 
     private val singleDelegate = object : Delegate() {
@@ -745,6 +736,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     ErrorData()
             }
         }
+
+        override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
+            val dayOfWeek = scheduleDialogData.date.dayOfWeek
+
+            return list.sortedBy { it.hourMinutes[dayOfWeek] }.map {
+                TimeDialogFragment.CustomTimeData(
+                    it.customTimeKey,
+                    it.name + " (" + it.hourMinutes[dayOfWeek] + ")"
+                )
+            }
+        }
     }
 
     private abstract inner class Repeating : Delegate() {
@@ -768,6 +770,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             return ErrorData(from = fromError, until = untilError)
+        }
+
+        override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
+            return list.sortedBy {
+                it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum()
+            }.map {
+                TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name)
+            }
         }
     }
 

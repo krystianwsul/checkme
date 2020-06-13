@@ -182,55 +182,55 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(requireArguments().containsKey(SHOW_DELETE_KEY))
 
-        customView =
-            requireActivity().layoutInflater.inflate(R.layout.fragment_schedule_dialog, null)
-                .apply {
-                    scheduleDialogDays = mapOf(
-                        DayOfWeek.SUNDAY to scheduleDialogSunday,
-                        DayOfWeek.MONDAY to scheduleDialogMonday,
-                        DayOfWeek.TUESDAY to scheduleDialogTuesday,
-                        DayOfWeek.WEDNESDAY to scheduleDialogWednesday,
-                        DayOfWeek.THURSDAY to scheduleDialogThursday,
-                        DayOfWeek.FRIDAY to scheduleDialogFriday,
-                        DayOfWeek.SATURDAY to scheduleDialogSaturday
+        customView = requireActivity().layoutInflater
+            .inflate(R.layout.fragment_schedule_dialog, null)
+            .apply {
+                scheduleDialogDays = mapOf(
+                    DayOfWeek.SUNDAY to scheduleDialogSunday,
+                    DayOfWeek.MONDAY to scheduleDialogMonday,
+                    DayOfWeek.TUESDAY to scheduleDialogTuesday,
+                    DayOfWeek.WEDNESDAY to scheduleDialogWednesday,
+                    DayOfWeek.THURSDAY to scheduleDialogThursday,
+                    DayOfWeek.FRIDAY to scheduleDialogFriday,
+                    DayOfWeek.SATURDAY to scheduleDialogSaturday
+                )
+
+                scheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
+
+                scheduleDialogSave.setOnClickListener {
+                    check(customTimeDatas != null)
+                    check(checkValid())
+
+                    result.accept(
+                        ScheduleDialogResult.Change(
+                            position,
+                            scheduleDialogData
+                        )
                     )
 
-                    scheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
+                    dismiss()
+                }
 
-                    scheduleDialogSave.setOnClickListener {
-                        check(customTimeDatas != null)
-                        check(checkValid())
+                if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
+                    checkNotNull(position)
 
-                        result.accept(
-                            ScheduleDialogResult.Change(
-                                position,
-                                scheduleDialogData
-                            )
-                        )
+                    scheduleDialogRemove.apply {
+                        visibility = View.VISIBLE
 
-                        dismiss()
-                    }
-
-                    if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
-                        checkNotNull(position)
-
-                        scheduleDialogRemove.apply {
-                            visibility = View.VISIBLE
-
-                            setOnClickListener {
-                                result.accept(
-                                    ScheduleDialogResult.Delete(
-                                        position!!
-                                    )
+                        setOnClickListener {
+                            result.accept(
+                                ScheduleDialogResult.Delete(
+                                    position!!
                                 )
+                            )
 
-                                dismiss()
-                            }
+                            dismiss()
                         }
                     }
+                }
 
-                    scheduleDialogCancel.setOnClickListener { dialog!!.cancel() }
-                } as ViewGroup
+                scheduleDialogCancel.setOnClickListener { dialog!!.cancel() }
+            } as ViewGroup
 
         return TransparentNavigationDialog().apply {
             setCancelable(true)

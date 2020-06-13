@@ -393,7 +393,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                if (scheduleDialogData.scheduleType.isMonthly) {
+                if (delegate.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
                     updateDelegate()
                 }
@@ -432,7 +432,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                if (scheduleDialogData.scheduleType.isMonthly) {
+                if (delegate.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
                     updateDelegate()
                 }
@@ -693,6 +693,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         open val hasDate = false
 
+        open val isMonthly = false
+
         object Single : Delegate() {
 
             override val selection = 0
@@ -710,6 +712,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             abstract class Monthly : Repeating() {
 
                 override val selection = 2
+
+                override val isMonthly = true
 
                 object MonthlyDay : Monthly()
 

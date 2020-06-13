@@ -659,11 +659,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private inner class DateFieldData(
-            val field: AutoCompleteTextView,
-            val layout: TextInputLayout,
-            val property: KMutableProperty0<Date?>,
-            val tag: String,
-            val min: (() -> Date)? = null
+        val field: AutoCompleteTextView,
+        val layout: TextInputLayout,
+        val property: KMutableProperty0<Date?>,
+        val tag: String,
+        val min: (() -> Date)? = null
     ) {
 
         val listener = { date: Date ->
@@ -671,6 +671,25 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             property.set(date)
             updateFields()
+        }
+    }
+
+    private abstract class Delegate {
+
+        object Single : Delegate()
+
+        abstract class Repeating : Delegate() {
+
+            object Weekly : Repeating()
+
+            object Yearly : Repeating()
+
+            abstract class Monthly : Repeating() {
+
+                object MonthlyDay : Monthly()
+
+                object MonthlyWeek : Monthly()
+            }
         }
     }
 }

@@ -538,34 +538,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (animate)
             TransitionManager.beginDelayedTransition(customView)
 
-        when (scheduleDialogData.scheduleType) {
-            ScheduleType.SINGLE -> {
-                customView.scheduleDialogDateLayout.visibility = View.VISIBLE
-                customView.scheduleDialogDayLayout.visibility = View.GONE
-                customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogFromLayout.visibility = View.GONE
-                customView.scheduleDialogUntilLayout.visibility = View.GONE
-            }
-            ScheduleType.WEEKLY -> {
-                customView.scheduleDialogDateLayout.visibility = View.GONE
-                customView.scheduleDialogDayLayout.visibility = View.VISIBLE
-                customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogFromLayout.visibility = View.VISIBLE
-                customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
-            }
-            ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
-                customView.scheduleDialogDateLayout.visibility = View.GONE
-                customView.scheduleDialogDayLayout.visibility = View.GONE
-                customView.scheduleDialogMonthLayout.visibility = View.VISIBLE
-                customView.scheduleDialogFromLayout.visibility = View.VISIBLE
-                customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
-            }
-            ScheduleType.YEARLY -> {
-                customView.scheduleDialogDateLayout.visibility = View.VISIBLE
-                customView.scheduleDialogDayLayout.visibility = View.GONE
-                customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogFromLayout.visibility = View.VISIBLE
-                customView.scheduleDialogUntilLayout.visibility = View.VISIBLE
+        customView.run {
+            delegate.visibilities.run {
+                scheduleDialogDateLayout.isVisible = date
+                scheduleDialogDayLayout.isVisible = day
+                scheduleDialogMonthLayout.isVisible = month
+                scheduleDialogFromLayout.isVisible = from
+                scheduleDialogUntilLayout.isVisible = until
             }
         }
 
@@ -695,6 +674,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         open val isMonthly = false
 
+        abstract val visibilities: Visibilities
+
         open fun fixDate(date: Date): Date = throw IllegalStateException()
 
         abstract fun isValid(): ErrorData
@@ -709,6 +690,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val selection = 0
 
         override val hasDate = true
+
+        override val visibilities = Visibilities(date = true)
 
         override fun fixDate(date: Date) = date
 
@@ -751,6 +734,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private abstract inner class Repeating : Delegate() {
 
+        protected val repeatingVisibilities = Visibilities(from = true, until = true)
+
         override fun isValid(): ErrorData {
             var fromError: String? = null
             var untilError: String? = null
@@ -784,6 +769,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val weeklyDelegate = object : Repeating() {
 
         override val selection = 1
+
+        override val visibilities = repeatingVisibilities.copy(day = true)
     }
 
     private abstract inner class Monthly : Repeating() {
@@ -791,6 +778,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val selection = 2
 
         override val isMonthly = true
+
+        override val visibilities = repeatingVisibilities.copy(month = true)
     }
 
     private val monthlyDayDelegate = object : Monthly() {
@@ -806,6 +795,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val selection = 3
 
         override val hasDate = true
+
+        override val visibilities = repeatingVisibilities.copy(date = true)
 
         override fun fixDate(date: Date): Date {
             return if (date.month == 2 && date.day == 29)
@@ -823,5 +814,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val time: String? = null,
         val from: String? = null,
         val until: String? = null
+    )
+
+    private data class Visibilities(
+        val date: Boolean = false,
+        val day: Boolean = false,
+        val month: Boolean = false,
+        val from: Boolean = false,
+        val until: Boolean = false
     )
 }

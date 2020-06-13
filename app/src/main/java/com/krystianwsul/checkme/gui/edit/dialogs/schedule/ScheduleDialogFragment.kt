@@ -109,7 +109,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private val datePickerDialogFragmentListener = { date: Date ->
-        check(scheduleDialogData.scheduleType.hasDate)
+        check(delegate.hasDate)
 
         val fixedDate = when (scheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> date
@@ -289,12 +289,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView.scheduleType.run {
             setItems(resources.getStringArray(R.array.schedule_types).toList())
 
-            setSelection(when (scheduleDialogData.scheduleType) {
-                ScheduleType.SINGLE -> 0
-                ScheduleType.WEEKLY -> 1
-                ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
-                ScheduleType.YEARLY -> 3
-            })
+            setSelection(delegate.selection)
 
             addOneShotGlobalLayoutListener {
                 addListener {
@@ -342,7 +337,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogDate.setFixedOnClickListener {
-            check(scheduleDialogData.scheduleType.hasDate)
+            check(delegate.hasDate)
 
             when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> DatePickerDialogFragment.newInstance(scheduleDialogData.date)
@@ -358,7 +353,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
-            check(scheduleDialogData.scheduleType.hasDate)
+            check(delegate.hasDate)
 
             listener = datePickerDialogFragmentListener
         }
@@ -694,19 +689,38 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private abstract class Delegate {
 
-        object Single : Delegate()
+        abstract val selection: Int
+
+        open val hasDate = false
+
+        object Single : Delegate() {
+
+            override val selection = 0
+
+            override val hasDate = true
+        }
 
         abstract class Repeating : Delegate() {
 
-            object Weekly : Repeating()
+            object Weekly : Repeating() {
 
-            object Yearly : Repeating()
+                override val selection = 1
+            }
 
             abstract class Monthly : Repeating() {
+
+                override val selection = 2
 
                 object MonthlyDay : Monthly()
 
                 object MonthlyWeek : Monthly()
+            }
+
+            object Yearly : Repeating() {
+
+                override val selection = 3
+
+                override val hasDate = true
             }
         }
     }

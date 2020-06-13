@@ -297,11 +297,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView.scheduleDialogDate.setFixedOnClickListener {
             check(delegate.hasDate)
 
-            when (scheduleDialogData.scheduleType) {
-                ScheduleType.SINGLE -> DatePickerDialogFragment.newInstance(scheduleDialogData.date)
-                ScheduleType.YEARLY -> DatePickerDialogFragment.newYearInstance(scheduleDialogData.date)
-                else -> throw IllegalArgumentException()
-            }.let {
+            delegate.getDatePicker().let {
                 it.listener = datePickerDialogFragmentListener
                 it.show(
                     childFragmentManager,
@@ -704,6 +700,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         abstract fun isValid(): ErrorData
 
         abstract fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData>
+
+        open fun getDatePicker(): DatePickerDialogFragment = throw IllegalStateException()
     }
 
     private val singleDelegate = object : Delegate() {
@@ -747,6 +745,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 )
             }
         }
+
+        override fun getDatePicker() = DatePickerDialogFragment.newInstance(scheduleDialogData.date)
     }
 
     private abstract inner class Repeating : Delegate() {
@@ -813,6 +813,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             else
                 date
         }
+
+        override fun getDatePicker() =
+            DatePickerDialogFragment.newYearInstance(scheduleDialogData.date)
     }
 
     private class ErrorData(

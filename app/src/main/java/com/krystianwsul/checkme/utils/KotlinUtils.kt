@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.utils
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.SearchManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,7 +12,9 @@ import android.content.res.Resources
 import android.os.Build
 import android.util.Base64
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
@@ -377,13 +380,41 @@ fun <T> Observable<T>.tryGetCurrentValue(): T? {
 fun <T> Observable<T>.getCurrentValue() = tryGetCurrentValue()!!
 
 fun <T, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
-        map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()
+    map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()
 
-fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) = publish().apply { compositeDisposable += connect() }!!
-fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) = cache().apply { compositeDisposable += subscribe() }!!
-fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) = replay().apply { compositeDisposable += connect() }!!
+fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
+    publish().apply { compositeDisposable += connect() }!!
+
+fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
+    cache().apply { compositeDisposable += subscribe() }!!
+
+fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) =
+    replay().apply { compositeDisposable += connect() }!!
 
 @Suppress("unused")
 fun Disposable.ignore() = Unit
 
-fun webSearchIntent(query: String) = Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
+fun webSearchIntent(query: String) =
+    Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
+
+@SuppressLint("ClickableViewAccessibility")
+fun hideKeyboardOnClickOutside(view: View) {
+    if (view !is EditText) {
+        view.setOnTouchListener { _, _ ->
+            hideSoftKeyboard(view)
+            false
+        }
+    }
+
+    if (view is ViewGroup) {
+        for (i in 0 until view.childCount) {
+            hideKeyboardOnClickOutside(view.getChildAt(i))
+        }
+    }
+}
+
+fun hideSoftKeyboard(view: View) {
+    val inputMethodManager =
+        view.context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}

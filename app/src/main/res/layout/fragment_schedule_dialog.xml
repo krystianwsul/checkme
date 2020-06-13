@@ -69,7 +69,7 @@
                         style="@style/NewTextInput">
 
                     <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/noteText"
+                            android:id="@+id/scheduleDialogEveryXWeeks"
                             android:layout_width="48dp"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/textPrimary"

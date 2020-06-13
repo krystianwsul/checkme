@@ -11,8 +11,6 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.CustomItemAnimator
@@ -33,10 +31,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.checkme.utils.setFixedOnClickListener
-import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
@@ -136,27 +131,6 @@ class EditActivity : NavBarActivity() {
                 )),
                 REQUEST_CREATE_PARENT
         )
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupParent(view: View) {
-        if (view !is EditText) {
-            view.setOnTouchListener { _, _ ->
-                hideSoftKeyboard()
-                false
-            }
-        }
-
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                setupParent(view.getChildAt(i))
-            }
-        }
-    }
-
-    private fun hideSoftKeyboard() {
-        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(editRoot.windowToken, 0)
     }
 
     private var note: String? = null
@@ -269,7 +243,7 @@ class EditActivity : NavBarActivity() {
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
 
-        setupParent(editRoot)
+        hideKeyboardOnClickOutside(editRoot)
 
         listOfNotNull(
                 parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(

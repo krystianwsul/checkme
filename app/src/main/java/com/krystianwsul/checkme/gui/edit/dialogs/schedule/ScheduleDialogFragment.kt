@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
@@ -237,7 +239,38 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 scheduleDialogMonthWeekNumber.setDense()
                 scheduleDialogMonthWeekDay.setDense()
                 scheduleDialogMonthEnd.setDense()
+
+                scheduleDialogEveryXWeeks.addTextChangedListener(object : TextWatcher {
+
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) = Unit
+
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) = Unit
+
+                    override fun afterTextChanged(s: Editable) {
+                        val text = s.toString()
+                        if (text == "0") {
+                            scheduleDialogEveryXWeeks.setText("1")
+                            scheduleDialogEveryXWeeks.setSelection(1)
+                        } else if (text.startsWith('0')) {
+                            val newText = text.trimStart('0')
+                            scheduleDialogEveryXWeeks.setText(newText)
+                            scheduleDialogEveryXWeeks.setSelection(newText.length)
+                        }
+                    }
+                })
             } as ViewGroup
+
+        hideKeyboardOnClickOutside(customView)
 
         return TransparentNavigationDialog().apply {
             setCancelable(true)

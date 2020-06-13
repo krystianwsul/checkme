@@ -592,54 +592,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 .toString()
         }
 
-        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
-            customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
-
-            customView.scheduleDialogTime.setText(customTimeData?.let {
-                it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
-            } ?: hourMinuteString)
-        } else {
-            customView.scheduleDialogDate.setText(scheduleDialogData.date.run {
-                ScheduleText.Yearly.getDateText(
-                    month,
-                    day
-                )
-            })
-
-            customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
-
-            dateFieldDatas.forEach { data ->
-                val date = data.property.get()
-
-                val dropdown = date == null
-
-                data.field.setText(date?.getDisplayText())
-
-                data.layout.endIconMode =
-                    if (dropdown) TextInputLayout.END_ICON_DROPDOWN_MENU else TextInputLayout.END_ICON_CLEAR_TEXT
-
-                data.field.apply {
-                    setFixedOnClickListener {
-                        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-
-                        DatePickerDialogFragment.newInstance(
-                            data.property.get() ?: Date.today(),
-                            data.min?.invoke()
-                        ).let {
-                            it.listener = data.listener
-                            it.show(childFragmentManager, data.tag)
-                        }
-                    }
-                }
-
-                if (!dropdown) {
-                    data.layout.setEndIconOnClickListener {
-                        data.property.set(null)
-                        updateFields()
-                    }
-                }
-            }
-        }
+        delegate.updateFields(customTimeData, hourMinuteString)
 
         checkValid()
     }
@@ -683,6 +636,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         abstract fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData>
 
         open fun getDatePicker(): DatePickerDialogFragment = throw IllegalStateException()
+
+        abstract fun updateFields(
+            customTimeData: EditViewModel.CustomTimeData?,
+            hourMinuteString: String
+        )
     }
 
     private val singleDelegate = object : Delegate() {
@@ -730,6 +688,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun getDatePicker() = DatePickerDialogFragment.newInstance(scheduleDialogData.date)
+
+        override fun updateFields(
+            customTimeData: EditViewModel.CustomTimeData?,
+            hourMinuteString: String
+        ) {
+            customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
+
+            customView.scheduleDialogTime.setText(customTimeData?.let {
+                it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
+            } ?: hourMinuteString)
+        }
     }
 
     private abstract inner class Repeating : Delegate() {
@@ -762,6 +731,52 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum()
             }.map {
                 TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name)
+            }
+        }
+
+        override fun updateFields(
+            customTimeData: EditViewModel.CustomTimeData?,
+            hourMinuteString: String
+        ) {
+            customView.scheduleDialogDate.setText(scheduleDialogData.date.run {
+                ScheduleText.Yearly.getDateText(
+                    month,
+                    day
+                )
+            })
+
+            customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
+
+            dateFieldDatas.forEach { data ->
+                val date = data.property.get()
+
+                val dropdown = date == null
+
+                data.field.setText(date?.getDisplayText())
+
+                data.layout.endIconMode =
+                    if (dropdown) TextInputLayout.END_ICON_DROPDOWN_MENU else TextInputLayout.END_ICON_CLEAR_TEXT
+
+                data.field.apply {
+                    setFixedOnClickListener {
+                        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+                        DatePickerDialogFragment.newInstance(
+                            data.property.get() ?: Date.today(),
+                            data.min?.invoke()
+                        ).let {
+                            it.listener = data.listener
+                            it.show(childFragmentManager, data.tag)
+                        }
+                    }
+                }
+
+                if (!dropdown) {
+                    data.layout.setEndIconOnClickListener {
+                        data.property.set(null)
+                        updateFields()
+                    }
+                }
             }
         }
     }

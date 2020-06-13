@@ -8,11 +8,17 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.updatePadding
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import kotlinx.android.synthetic.main.view_my_spinner.view.*
 
-class MySpinner @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+class MySpinner @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr) {
 
     init {
         View.inflate(context, R.layout.view_my_spinner, this)
@@ -62,5 +68,19 @@ class MySpinner @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 listener(items.indexOf(item))
             }
         })
+    }
+
+    fun setDense() = mySpinnerText.updatePadding(top = 0, bottom = 0)
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+
+        mySpinnerLayout.isEnabled = enabled
+        mySpinnerText.setTextColor(
+            ContextCompat.getColor(
+                context,
+                if (enabled) R.color.textPrimary else R.color.textDisabled
+            )
+        )
     }
 }

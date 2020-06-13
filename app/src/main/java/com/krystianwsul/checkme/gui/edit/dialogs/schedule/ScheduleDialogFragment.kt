@@ -11,7 +11,9 @@ import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AutoCompleteTextView
+import android.widget.CheckBox
+import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.textfield.TextInputLayout
@@ -230,6 +232,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
 
                 scheduleDialogCancel.setOnClickListener { dialog!!.cancel() }
+
+                scheduleDialogMonthDayNumber.setDense()
+                scheduleDialogMonthWeekNumber.setDense()
+                scheduleDialogMonthWeekDay.setDense()
+                scheduleDialogMonthEnd.setDense()
             } as ViewGroup
 
         return TransparentNavigationDialog().apply {
@@ -368,25 +375,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogMonthDayNumber.apply {
-            adapter = ArrayAdapter(
-                requireContext(),
-                R.layout.spinner_no_padding,
-                (1..28).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            setItems((1..28).map { Utils.ordinal(it) })
+
             setSelection(scheduleDialogData.monthDayNumber - 1)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    check(position in (0 until 28))
+            addListener {
+                check(it in (0 until 28))
 
-                    scheduleDialogData.monthDayNumber = position + 1
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+                scheduleDialogData.monthDayNumber = it + 1
             }
         }
 
@@ -415,82 +411,40 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogMonthWeekNumber.run {
-            adapter = ArrayAdapter(
-                requireContext(),
-                R.layout.spinner_no_padding,
-                listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply {
-                setDropDownViewResource(
-                    android.R.layout.simple_spinner_dropdown_item
-                )
-            }
+            setItems(listOf(1, 2, 3, 4).map { Utils.ordinal(it) })
+
             setSelection(scheduleDialogData.monthWeekNumber - 1)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    check(position in (0..3))
+            addListener {
+                check(it in (0..3))
 
-                    scheduleDialogData.monthWeekNumber = position + 1
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) = Unit
+                scheduleDialogData.monthWeekNumber = it + 1
             }
         }
 
         customView.scheduleDialogMonthWeekDay.run {
-            val monthWeekDayAdapter = ArrayAdapter(
-                context,
-                R.layout.spinner_no_padding,
-                DayOfWeek.values()
-            ).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-            adapter = monthWeekDayAdapter
-            setSelection(monthWeekDayAdapter.getPosition(scheduleDialogData.monthWeekDay))
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            setItems(DayOfWeek.values().toList())
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    val dayOfWeek = monthWeekDayAdapter.getItem(position)!!
+            setSelection(scheduleDialogData.monthWeekDay.ordinal)
 
-                    scheduleDialogData.monthWeekDay = dayOfWeek
+            addListener {
+                val dayOfWeek = DayOfWeek.values()[it]
 
-                    updateFields()
-                }
+                scheduleDialogData.monthWeekDay = dayOfWeek
 
-                override fun onNothingSelected(parent: AdapterView<*>) = Unit
+                updateFields()
             }
         }
 
         customView.scheduleDialogMonthEnd.run {
-            adapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.month,
-                R.layout.spinner_no_padding
-            ).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            setItems(resources.getStringArray(R.array.month).toList())
 
             setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1)
 
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            addListener {
+                check(it in (0..1))
 
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    check(position in (0..1))
-
-                    scheduleDialogData.beginningOfMonth = position == 0
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) = Unit
+                scheduleDialogData.beginningOfMonth = it == 0
             }
         }
 

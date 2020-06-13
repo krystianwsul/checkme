@@ -1,251 +1,262 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-        tools:context=".gui.edit.dialogs.schedule.ScheduleDialogFragment"
-        android:fitsSystemWindows="true">
-
-    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
+        android:fitsSystemWindows="true"
+        tools:context=".gui.edit.dialogs.schedule.ScheduleDialogFragment">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin">
 
         <com.krystianwsul.checkme.gui.MySpinner
-            android:id="@+id/scheduleType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
+                android:id="@+id/scheduleType"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/scheduleDialogDateLayout"
-            style="@style/MySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="17dp"
-            app:errorEnabled="true"
-            app:hintEnabled="false">
-
-            <AutoCompleteTextView
-                android:id="@+id/scheduleDialogDate"
+                android:id="@+id/scheduleDialogDateLayout"
+                style="@style/MySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySpinnerText"
-                tools:ignore="LabelFor" />
+                android:layout_marginTop="17dp"
+                app:errorEnabled="true"
+                app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                    android:id="@+id/scheduleDialogDate"
+                    style="@style/MySpinnerText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
-            android:id="@+id/scheduleDialogDayLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <CheckBox
-                android:id="@+id/scheduleDialogAllDays"
+                android:id="@+id/scheduleDialogDayLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/allDays" />
+                android:orientation="vertical">
 
             <CheckBox
-                android:id="@+id/scheduleDialogSunday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogAllDays"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/allDays" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogMonday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogSunday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogTuesday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogMonday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogWednesday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogTuesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogThursday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogWednesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogFriday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogThursday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             <CheckBox
-                android:id="@+id/scheduleDialogSaturday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    android:id="@+id/scheduleDialogFriday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            <CheckBox
+                    android:id="@+id/scheduleDialogSaturday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
         </LinearLayout>
 
         <RadioGroup
-            android:id="@+id/scheduleDialogMonthLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
+                android:id="@+id/scheduleDialogMonthLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginTop="17dp"
+                android:layout_marginBottom="22dp"
+                android:orientation="vertical">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/scheduleDialogMonthDayRadio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                        android:id="@+id/scheduleDialogMonthDayRadio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/denseSpinnerRadioOffset" />
 
-                <Spinner
-                    android:id="@+id/scheduleDialogMonthDayNumber"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <com.krystianwsul.checkme.gui.MySpinner
+                        android:id="@+id/scheduleDialogMonthDayNumber"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp" />
 
                 <TextView
-                    android:id="@+id/scheduleDialogMonthDayLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/monthDay"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/textPrimary" />
+                        android:id="@+id/scheduleDialogMonthDayLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/denseSpinnerSpacing"
+                        android:layout_marginTop="@dimen/denseSpinnerTextOffset"
+                        android:text="@string/monthDay"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textPrimary" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/scheduleDialogMonthWeekRadio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                        android:id="@+id/scheduleDialogMonthWeekRadio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/denseSpinnerRadioOffset" />
 
-                <Spinner
-                    android:id="@+id/scheduleDialogMonthWeekNumber"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <com.krystianwsul.checkme.gui.MySpinner
+                        android:id="@+id/scheduleDialogMonthWeekNumber"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp" />
 
-                <Spinner
-                    android:id="@+id/scheduleDialogMonthWeekDay"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <com.krystianwsul.checkme.gui.MySpinner
+                        android:id="@+id/scheduleDialogMonthWeekDay"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="@dimen/denseSpinnerSpacing" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/monthDayStart"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/textPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="@dimen/denseSpinnerSpacing"
+                        android:text="@string/monthDayStart"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textPrimary" />
 
-                <Spinner
-                    android:id="@+id/scheduleDialogMonthEnd"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <com.krystianwsul.checkme.gui.MySpinner
+                        android:id="@+id/scheduleDialogMonthEnd"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/monthDayEnd"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/textPrimary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginStart="@dimen/denseSpinnerSpacing"
+                        android:text="@string/monthDayEnd"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textPrimary" />
 
             </LinearLayout>
 
         </RadioGroup>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/scheduleDialogTimeLayout"
-            style="@style/MySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:errorEnabled="true"
-            app:hintEnabled="false">
-
-            <AutoCompleteTextView
-                android:id="@+id/scheduleDialogTime"
+                android:id="@+id/scheduleDialogTimeLayout"
+                style="@style/MySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySpinnerText"
-                tools:ignore="LabelFor" />
+                app:errorEnabled="true"
+                app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                    android:id="@+id/scheduleDialogTime"
+                    style="@style/MySpinnerText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/scheduleDialogFromLayout"
-            style="@style/MySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:errorEnabled="true"
-            app:hintEnabled="true">
-
-            <AutoCompleteTextView
-                android:id="@+id/scheduleDialogFrom"
+                android:id="@+id/scheduleDialogFromLayout"
+                style="@style/MySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySpinnerText"
-                tools:ignore="LabelFor"
-                android:hint="@string/from" />
+                app:errorEnabled="true"
+                app:hintEnabled="true">
+
+            <AutoCompleteTextView
+                    android:id="@+id/scheduleDialogFrom"
+                    style="@style/MySpinnerText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/from"
+                    tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/scheduleDialogUntilLayout"
-            style="@style/MySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:errorEnabled="true"
-            app:hintEnabled="true">
-
-            <AutoCompleteTextView
-                android:id="@+id/scheduleDialogUntil"
+                android:id="@+id/scheduleDialogUntilLayout"
+                style="@style/MySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/MySpinnerText"
-                tools:ignore="LabelFor"
-                android:hint="@string/until" />
+                app:errorEnabled="true"
+                app:hintEnabled="true">
+
+            <AutoCompleteTextView
+                    android:id="@+id/scheduleDialogUntil"
+                    style="@style/MySpinnerText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/until"
+                    tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scheduleDialogSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/save" />
+                android:id="@+id/scheduleDialogSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/save" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scheduleDialogRemove"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/delete"
-            android:visibility="gone" />
+                android:id="@+id/scheduleDialogRemove"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/delete"
+                android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scheduleDialogCancel"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@android:string/cancel" />
+                android:id="@+id/scheduleDialogCancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@android:string/cancel" />
 
     </LinearLayout>
 

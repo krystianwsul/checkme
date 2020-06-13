@@ -143,15 +143,19 @@ fun <T> removeFromGetter(getter: () -> List<T>, action: (T) -> Unit) {
     } while (list.isNotEmpty())
 }
 
-fun Context.dpToPx(dp: Int): Float {
-    val density = resources.displayMetrics.density
+fun Resources.dpToPx(dp: Int): Float {
+    val density = displayMetrics.density
     return dp * density
 }
 
-fun View.dpToPx(dp: Int): Float {
-    val density = resources.displayMetrics.density
-    return dp * density
+fun Resources.pxToDp(px: Int): Float {
+    val density = displayMetrics.density
+    return px / density
 }
+
+fun Context.dpToPx(dp: Int) = resources.dpToPx(dp)
+
+fun View.dpToPx(dp: Int) = resources.dpToPx(dp)
 
 fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
@@ -161,7 +165,8 @@ fun Context.startDate(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
 }
 
-fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }!!
+fun <T> Observable<NullableWrapper<T>>.filterNotNull() =
+    filter { it.value != null }.map { it.value!! }!!
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 

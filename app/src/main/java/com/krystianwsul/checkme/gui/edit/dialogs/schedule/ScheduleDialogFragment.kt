@@ -759,8 +759,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 data.field.apply {
                     setFixedOnClickListener {
-                        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-
                         DatePickerDialogFragment.newInstance(
                             data.property.get() ?: Date.today(),
                             data.min?.invoke()

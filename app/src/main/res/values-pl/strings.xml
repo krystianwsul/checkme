@@ -123,4 +123,6 @@
     <string name="justThese">Tylko te</string>
     <string name="removeFromParent">Usuń z nadrzędnego przypomnienia</string>
     <string name="webSearch">Szukaj w internecie</string>
+    <string name="weeksPrefix">co</string>
+    <string name="weeksSuffix">tygodni</string>
 </resources>

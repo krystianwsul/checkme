@@ -45,6 +45,54 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="11.5dp"
+                        android:layout_marginEnd="@dimen/denseSpinnerSpacing"
+                        android:text="@string/weeksPrefix"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textPrimary" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="17dp"
+                        app:hintAnimationEnabled="false"
+                        app:hintEnabled="false"
+                        app:errorEnabled="false"
+                        style="@style/NewTextInput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/noteText"
+                            android:layout_width="48dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/textPrimary"
+                            android:gravity="center_horizontal"
+                            tools:ignore="HardcodedText,LabelFor"
+                            android:inputType="number"
+                            android:importantForAutofill="no"
+                            tools:targetApi="o"
+                            android:text="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/denseSpinnerSpacing"
+                        android:layout_marginTop="11.5dp"
+                        android:text="@string/weeksSuffix"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="@dimen/textPrimary" />
+
+            </LinearLayout>
+
             <CheckBox
                     android:id="@+id/scheduleDialogAllDays"
                     android:layout_width="match_parent"

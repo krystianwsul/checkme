@@ -111,18 +111,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val datePickerDialogFragmentListener = { date: Date ->
         check(delegate.hasDate)
 
-        val fixedDate = when (scheduleDialogData.scheduleType) {
-            ScheduleType.SINGLE -> date
-            ScheduleType.YEARLY -> {
-                if (date.month == 2 && date.day == 29)
-                    Date(date.year, 2, 28)
-                else
-                    date
-            }
-            else -> throw IllegalArgumentException()
-        }
-
-        scheduleDialogData.date = fixedDate
+        scheduleDialogData.date = delegate.fixDate(date)
         updateFields()
     }
 
@@ -695,11 +684,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         open val isMonthly = false
 
+        open fun fixDate(date: Date): Date = throw IllegalStateException()
+
         object Single : Delegate() {
 
             override val selection = 0
 
             override val hasDate = true
+
+            override fun fixDate(date: Date) = date
         }
 
         abstract class Repeating : Delegate() {
@@ -725,6 +718,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 override val selection = 3
 
                 override val hasDate = true
+
+                override fun fixDate(date: Date): Date {
+                    return if (date.month == 2 && date.day == 29)
+                        Date(date.year, 2, 28)
+                    else
+                        date
+                }
             }
         }
     }

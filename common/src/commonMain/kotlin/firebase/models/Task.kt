@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.*
 import firebase.models.interval.HierarchyInterval
 import firebase.models.interval.Interval
@@ -324,6 +325,17 @@ class Task<T : ProjectType>(
                         .toList(),
                 existingHaveMore || schedulesHaveMore || parentsHaveMore
         )
+    }
+
+    fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
+        val existingInstances = existingInstances.values
+        val scheduleNextInstances = getCurrentSchedules(now).mapNotNull {
+            it.getInstances(this, now, null)
+                    .first
+                    .firstOrNull()
+        }
+
+        return (existingInstances + scheduleNextInstances).map { it.instanceDateTime.timeStamp }.min()
     }
 
     fun updateSchedules(

@@ -58,11 +58,6 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Task
             hack24: Boolean
     ): Boolean
 
-    abstract fun getNextAlarm(
-            scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
-    ): TimeStamp?
-
     fun delete() {
         rootTask.deleteSchedule(this)
         scheduleRecord.delete()

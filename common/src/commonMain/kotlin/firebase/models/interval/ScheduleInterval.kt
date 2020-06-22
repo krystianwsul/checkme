@@ -29,6 +29,4 @@ class ScheduleInterval<T : ProjectType>(
         schedule.matchesScheduleDateTime(this, scheduleDateTime, checkOldestVisible)
 
     fun updateOldestVisible(now: ExactTimeStamp) = schedule.updateOldestVisible(this, now)
-
-    fun getNextAlarm(now: ExactTimeStamp) = schedule.getNextAlarm(this, now)
 }

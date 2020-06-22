@@ -2,11 +2,12 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
-import com.soywiz.klock.days
-import firebase.models.interval.ScheduleInterval
 
 class WeeklySchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -50,28 +51,6 @@ class WeeklySchedule<T : ProjectType>(
         task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
-    }
-
-    override fun getNextAlarm(
-            scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
-    ): TimeStamp {
-        val today = Date.today()
-
-        val nowDayOfWeek = today.dayOfWeek
-        val nowHourMinute = HourMinute(now.toDateTimeTz())
-
-        val ordinalDifference = dayOfWeek.ordinal - nowDayOfWeek.ordinal
-        val addDays = if (ordinalDifference == 0 && time.getHourMinute(nowDayOfWeek) > nowHourMinute)
-            0
-        else if (ordinalDifference > 0)
-            ordinalDifference
-        else
-            ordinalDifference + 7
-
-        val thisDate = Date(today.toDateTimeTz() + addDays.days)
-
-        return DateTime(thisDate, time).timeStamp
     }
 
     override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime) =

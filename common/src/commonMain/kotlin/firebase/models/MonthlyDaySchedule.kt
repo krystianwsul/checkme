@@ -2,12 +2,12 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.MonthlyDayScheduleRecord
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
-import com.soywiz.klock.months
-import firebase.models.interval.ScheduleInterval
 
 class MonthlyDaySchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -45,27 +45,6 @@ class MonthlyDaySchedule<T : ProjectType>(
         task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
-    }
-
-    override fun getNextAlarm(
-            scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
-    ): TimeStamp? {
-        val dateThisMonth = now.date.run { getDate(year, month) }
-        val thisMonth = DateTime(dateThisMonth, time)
-
-        val endExactTimeStamp = listOfNotNull(endExactTimeStamp, scheduleInterval.endExactTimeStamp).min()
-
-        val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
-            thisMonth
-        } else {
-            DateTime(Date(now.toDateTimeTz() + 1.months), time)
-        }.timeStamp
-
-        return if (endExactTimeStamp?.let { it <= checkMonth.toExactTimeStamp() } != false)
-            null
-        else
-            checkMonth
     }
 
     private fun getDate(year: Int, month: Int) = getDateInMonth(

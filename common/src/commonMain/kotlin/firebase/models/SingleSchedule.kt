@@ -28,11 +28,6 @@ class SingleSchedule<T : ProjectType>(
         task.getInstance(DateTime(date, originalTimePair.toTime()))
     }
 
-    override fun getNextAlarm(
-            scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
-    ) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
-
     override fun getInstances(
             scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,

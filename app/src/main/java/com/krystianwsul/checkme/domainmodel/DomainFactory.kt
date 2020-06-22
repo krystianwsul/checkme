@@ -844,10 +844,8 @@ class DomainFactory(
                 .takeUnless { clear }
 
         val minSchedulesTimeStamp = getTasks().filter {
-            it.current(now)
-                    && it.isRootTask(now)
+            it.current(now) && it.isRootTask(now)
         }
-                .flatMap { it.getCurrentSchedules(now).asSequence() }
                 .mapNotNull { it.getNextAlarm(now) }
                 .min()
 

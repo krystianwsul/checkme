@@ -2,11 +2,11 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.YearlyScheduleRecord
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
-import com.soywiz.klock.years
-import firebase.models.interval.ScheduleInterval
 
 class YearlySchedule<T : ProjectType>(
         rootTask: Task<T>,
@@ -43,27 +43,6 @@ class YearlySchedule<T : ProjectType>(
         task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
 
         return task.getInstance(scheduleDateTime)
-    }
-
-    override fun getNextAlarm(
-            scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
-    ): TimeStamp? {
-        val dateThisYear = now.date.run { getDate(year) }
-        val thisMonth = DateTime(dateThisYear, time)
-
-        val endExactTimeStamp = listOfNotNull(endExactTimeStamp, scheduleInterval.endExactTimeStamp).min()
-
-        val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
-            thisMonth
-        } else {
-            DateTime(Date(now.toDateTimeTz() + 1.years), time)
-        }.timeStamp
-
-        return if (endExactTimeStamp?.let { it <= checkMonth.toExactTimeStamp() } != false)
-            null
-        else
-            checkMonth
     }
 
     private fun getDate(year: Int) = Date(year, month, day)

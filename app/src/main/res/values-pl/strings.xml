@@ -125,4 +125,5 @@
     <string name="webSearch">Szukaj w internecie</string>
     <string name="weeksPrefix">co</string>
     <string name="weeksSuffix">tygodni</string>
+    <string name="dateCannotBeEmpty">Date cannot be empty</string>
 </resources>

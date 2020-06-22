@@ -203,16 +203,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                     scheduleDialogSave.setOnClickListener {
                         check(customTimeDatas != null)
-                        check(checkValid())
 
-                        result.accept(
-                                ScheduleDialogResult.Change(
-                                        position,
-                                        scheduleDialogData
-                                )
-                        )
+                        if (checkValid()) {
+                            result.accept(
+                                    ScheduleDialogResult.Change(
+                                            position,
+                                            scheduleDialogData
+                                    )
+                            )
 
-                        dismiss()
+                            dismiss()
+                        }
                     }
 
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
@@ -271,6 +272,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                             }
 
                             scheduleDialogData.interval = value
+
+                            if (s.isNotBlank())
+                                checkValid()
                         }
                     })
                 } as ViewGroup
@@ -778,6 +782,21 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val selection = 1
 
         override val visibilities = repeatingVisibilities.copy(day = true)
+
+        override fun isValid(): ErrorData {
+            val errorData = super.isValid()
+
+            if (!errorData.from.isNullOrEmpty())
+                return errorData
+
+            if (scheduleDialogData.interval == 1)
+                return errorData
+
+            if (scheduleDialogData.from != null)
+                return errorData
+
+            return errorData.copy(from = getString(R.string.dateCannotBeEmpty))
+        }
     }
 
     private abstract inner class Monthly : Repeating() {
@@ -816,7 +835,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 DatePickerDialogFragment.newYearInstance(scheduleDialogData.date)
     }
 
-    private class ErrorData(
+    private data class ErrorData(
             val date: String? = null,
             val time: String? = null,
             val from: String? = null,

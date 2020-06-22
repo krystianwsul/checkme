@@ -125,4 +125,5 @@
     <string name="webSearch">Web search</string>
     <string name="weeksPrefix">every</string>
     <string name="weeksSuffix">weeks</string>
+    <string name="dateCannotBeEmpty">Date cannot be empty</string>
 </resources>

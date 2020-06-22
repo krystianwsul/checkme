@@ -27,10 +27,33 @@ sealed class ScheduleGroup<T : ProjectType> {
                     ))
                     .map { Single(it) }
 
+            data class WeeklyKey(
+                    val timePair: TimePair,
+                    val from: Date?,
+                    val until: Date?,
+                    val interval: Int
+            )
+
             val weeklySchedules = schedules.asSequence()
                     .filterIsInstance<WeeklySchedule<T>>()
-                    .groupBy { Triple(it.timePair, it.from, it.until) }
-                    .map { it.value.first().time to Weekly(it.value.first().customTimeKey, it.key.first, it.value, it.key.second, it.key.third) }
+                    .groupBy { WeeklyKey(it.timePair, it.from, it.until, it.interval) }
+                    .map {
+                        Pair(
+                                it.value
+                                        .first()
+                                        .time,
+                                Weekly(
+                                        it.value
+                                                .first()
+                                                .customTimeKey,
+                                        it.key.timePair,
+                                        it.value,
+                                        it.key.from,
+                                        it.key.until,
+                                        it.key.interval
+                                )
+                        )
+                    }
                     .sortedBy { it.first.getTimeFloat(it.second.daysOfWeek) }
                     .map { it.second }
                     .toList()
@@ -84,12 +107,13 @@ sealed class ScheduleGroup<T : ProjectType> {
             private val timePair: TimePair,
             private val weeklySchedules: List<WeeklySchedule<T>>,
             val from: Date?,
-            val until: Date?
+            val until: Date?,
+            private val interval: Int
     ) : ScheduleGroup<T>() {
 
         val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
-        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair, from, until)
+        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair, from, until, interval)
 
         override val schedules get() = weeklySchedules
     }

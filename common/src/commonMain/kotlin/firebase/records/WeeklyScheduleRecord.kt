@@ -21,5 +21,7 @@ class WeeklyScheduleRecord<T : ProjectType>(
 
     val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
 
+    val interval by lazy { weeklyScheduleJson.interval }
+
     override fun deleteFromParent() = check(taskRecord.weeklyScheduleRecords.remove(id) == this)
 }

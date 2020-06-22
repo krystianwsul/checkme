@@ -13,5 +13,6 @@ data class WeeklyScheduleJson @JvmOverloads constructor(
         override val minute: Int? = null,
         override val from: String? = null,
         override val until: String? = null,
+        val interval: Int = 1,
         override var oldestVisible: String? = null
 ) : RepeatingScheduleJson

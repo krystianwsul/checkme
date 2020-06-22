@@ -19,6 +19,8 @@ class WeeklySchedule<T : ProjectType>(
 
     override val scheduleType = ScheduleType.WEEKLY
 
+    val interval = repeatingScheduleRecord.interval
+
     override fun <T : ProjectType> getInstanceInDate(
             task: Task<T>,
             date: Date,

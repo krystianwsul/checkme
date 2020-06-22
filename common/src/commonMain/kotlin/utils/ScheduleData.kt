@@ -17,7 +17,8 @@ sealed class ScheduleData : Serializable {
             val daysOfWeek: Set<DayOfWeek>,
             override val timePair: TimePair,
             val from: Date?,
-            val until: Date?
+            val until: Date?,
+            val interval: Int
     ) : ScheduleData()
 
     data class MonthlyDay(

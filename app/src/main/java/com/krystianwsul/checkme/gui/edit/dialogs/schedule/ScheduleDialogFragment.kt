@@ -264,9 +264,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                             if (value < 1) {
                                 value = 1
 
-                                scheduleDialogEveryXWeeks.setText("1")
-                                scheduleDialogEveryXWeeks.setSelection(1)
+                                if (s.isNotBlank()) {
+                                    scheduleDialogEveryXWeeks.setText("1")
+                                    scheduleDialogEveryXWeeks.setSelection(1)
+                                }
                             }
+
+                            scheduleDialogData.interval = value
                         }
                     })
                 } as ViewGroup
@@ -734,6 +738,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             })
 
             customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
+
+            customView.scheduleDialogEveryXWeeks.setText(scheduleDialogData.interval.toString())
 
             dateFieldDatas.forEach { data ->
                 val date = data.property.get()

@@ -599,7 +599,8 @@ class Task<T : ProjectType>(
                                         hour,
                                         minute,
                                         scheduleData.from?.toJson(),
-                                        scheduleData.until?.toJson()
+                                        scheduleData.until?.toJson(),
+                                        scheduleData.interval
                                 )
                         )
 
@@ -713,7 +714,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     schedule.from?.toJson(),
-                                    schedule.until?.toJson()
+                                    schedule.until?.toJson(),
+                                    schedule.interval
                             )
                     )
 

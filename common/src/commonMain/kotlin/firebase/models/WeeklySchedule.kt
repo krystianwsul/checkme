@@ -32,6 +32,12 @@ class WeeklySchedule<T : ProjectType>(
         if (dayOfWeek != day)
             return null
 
+        if (interval != 1) {
+            val timeSpan = date.toDateTimeTz() - from!!.toDateTimeTz()
+            if (timeSpan.weeks.toInt().rem(interval) != 0)
+                return null
+        }
+
         val hourMinute = time.getHourMinute(day)
 
         if (startHourMilli != null && startHourMilli > hourMinute.toHourMilli())

@@ -126,4 +126,5 @@
     <string name="weeksPrefix">every</string>
     <string name="weeksSuffix">weeks</string>
     <string name="dateCannotBeEmpty">Date cannot be empty</string>
+    <string name="everyXWeeks">every %d weeks</string>
 </resources>

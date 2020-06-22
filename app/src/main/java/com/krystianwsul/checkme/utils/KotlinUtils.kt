@@ -53,7 +53,7 @@ fun Set<DayOfWeek>.prettyPrint(): String {
     if (size == 1)
         return single().toString() + ", "
 
-    val ranges = getRanges(this.toList())
+    val ranges = getRanges(toList())
 
     return ranges.joinToString(", ") {
         check(it.isNotEmpty())

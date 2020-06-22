@@ -31,7 +31,7 @@ sealed class ScheduleText {
             is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
         }.getScheduleText(project)
 
-        fun fromUntil(from: Date?, until: Date?): String {
+        fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
             fun getString(@StringRes id: Int) = MyApplication.instance
                     .getString(id)
                     .toLowerCase(Locale.getDefault())
@@ -44,6 +44,8 @@ sealed class ScheduleText {
                 from != null -> "${getString(R.string.from)} $fromStr"
                 until != null -> "${getString(R.string.until)} $untilStr"
                 else -> null
+            }?.let {
+                it + (intervalText?.let { ", $it" } ?: "")
             }
 
             return ret?.let { " ($it)" } ?: ""
@@ -81,9 +83,14 @@ sealed class ScheduleText {
                     scheduleData: ScheduleData.Weekly,
                     timePairCallback: (TimePair) -> String
             ): String {
+                val intervalText = if (scheduleData.interval == 1)
+                    ""
+                else
+                    MyApplication.instance.getString(R.string.everyXWeeks, scheduleData.interval)
+
                 val days = scheduleData.daysOfWeek.prettyPrint()
                 val time = timePairCallback(scheduleData.timePair)
-                return "$days$time" + fromUntil(scheduleData.from, scheduleData.until)
+                return "$days$time" + fromUntil(scheduleData.from, scheduleData.until, intervalText)
             }
         }
 

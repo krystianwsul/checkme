@@ -31,12 +31,20 @@ sealed class ScheduleGroup<T : ProjectType> {
                     val timePair: TimePair,
                     val from: Date?,
                     val until: Date?,
-                    val interval: Int
+                    val interval: Weekly.Interval
             )
 
             val weeklySchedules = schedules.asSequence()
                     .filterIsInstance<WeeklySchedule<T>>()
-                    .groupBy { WeeklyKey(it.timePair, it.from, it.until, it.interval) }
+                    .groupBy {
+                        val interval = if (it.interval == 1) {
+                            Weekly.Interval.One
+                        } else {
+                            Weekly.Interval.More(it.from!!, it.interval)
+                        }
+
+                        WeeklyKey(it.timePair, it.from, it.until, interval)
+                    }
                     .map {
                         Pair(
                                 it.value
@@ -108,14 +116,33 @@ sealed class ScheduleGroup<T : ProjectType> {
             private val weeklySchedules: List<WeeklySchedule<T>>,
             val from: Date?,
             val until: Date?,
-            private val interval: Int
+            private val interval: Interval
     ) : ScheduleGroup<T>() {
 
         val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
-        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair, from, until, interval)
+        override val scheduleData
+            get() = ScheduleData.Weekly(
+                    daysOfWeek,
+                    timePair,
+                    from,
+                    until,
+                    interval.interval
+            )
 
         override val schedules get() = weeklySchedules
+
+        sealed class Interval {
+
+            abstract val interval: Int
+
+            object One : Interval() {
+
+                override val interval = 1
+            }
+
+            data class More(val from: Date, override val interval: Int) : Interval()
+        }
     }
 
     class MonthlyDay<T : ProjectType>(

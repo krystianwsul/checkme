@@ -330,7 +330,14 @@ class DomainFactory(
     ): TaskUndoData {
         check(taskKeys.isNotEmpty())
 
-        val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
+        fun Task<*>.getAllChildren(): List<Task<*>> = listOf(this) + getChildTaskHierarchies(now).map {
+            it.childTask.getAllChildren()
+        }.flatten()
+
+        val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
+                .flatten()
+                .toSet()
+
         tasks.forEach { it.requireCurrent(now) }
 
         val taskUndoData = TaskUndoData()
@@ -832,14 +839,17 @@ class DomainFactory(
             Preferences.lastTick = now.long
 
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
-            .filter { it.toExactTimeStamp() > now }
-            .min()
-            .takeUnless { clear }
+                .filter { it.toExactTimeStamp() > now }
+                .min()
+                .takeUnless { clear }
 
-        val minSchedulesTimeStamp = getTasks().filter { it.current(now) && it.isRootTask(now) }
-            .flatMap { it.getCurrentSchedules(now).asSequence() }
-            .mapNotNull { it.getNextAlarm(now) }
-            .min()
+        val minSchedulesTimeStamp = getTasks().filter {
+            it.current(now)
+                    && it.isRootTask(now)
+        }
+                .flatMap { it.getCurrentSchedules(now).asSequence() }
+                .mapNotNull { it.getNextAlarm(now) }
+                .min()
 
         if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
             nextAlarm = minSchedulesTimeStamp

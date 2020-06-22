@@ -153,7 +153,11 @@ class MainActivity :
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         @Suppress("UNCHECKED_CAST")
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(
+                SaveService.Source.GUI,
+                taskKeys as Set<TaskKey>,
+                removeInstances
+        )
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)

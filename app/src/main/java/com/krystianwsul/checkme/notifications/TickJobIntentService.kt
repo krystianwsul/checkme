@@ -62,8 +62,6 @@ class TickJobIntentService : JobIntentService() {
 
                 NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick skipping")
             } else {
-                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick $sourceName")
-
                 DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
             }
         }

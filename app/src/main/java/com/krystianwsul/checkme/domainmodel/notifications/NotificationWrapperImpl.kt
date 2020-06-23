@@ -210,11 +210,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(
-        now
+            now
     )
-        .asSequence()
-        .filter { it.first.done == null }
-        .sortedBy { it.second.childTask.ordinal }
+            .asSequence()
+            .filter { it.first.done == null }
+            .sortedBy { it.second.childTask.ordinal }
             .map { it.first.name }
             .toList()
 
@@ -435,7 +435,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun logNotificationIds(source: String) = Unit
 
-    protected val showTemporary by lazy {
+    private val showTemporary by lazy {
         !MyApplication.instance
                 .resources
                 .getBoolean(R.bool.release)
@@ -479,8 +479,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun hideTemporary(source: String) {
-        if (showTemporary)
-            throw UnsupportedOperationException()
+        Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
+
+        cancelNotification(NOTIFICATION_ID_TEMPORARY)
     }
 
     protected data class NotificationHash(

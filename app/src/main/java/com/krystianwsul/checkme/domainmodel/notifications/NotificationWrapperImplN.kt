@@ -52,7 +52,10 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
         }
     }
 
-    override fun getExtraCount(lines: List<String>, group: Boolean) = if (group) 0 else lines.size - MAX_INBOX_LINES
+    override fun getExtraCount(
+            lines: List<String>,
+            group: Boolean
+    ) = if (group) 0 else lines.size - MAX_INBOX_LINES
 
     override fun getNotificationBuilder(
             title: String,
@@ -67,7 +70,8 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash) = super.getNotificationBuilder(
+            notificationHash: NotificationHash
+    ) = super.getNotificationBuilder(
             title,
             text,
             deleteIntent,
@@ -80,7 +84,8 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             summary,
             sortKey,
             largeIcon,
-            notificationHash).apply {
+            notificationHash
+    ).apply {
         setGroup(TickJobIntentService.GROUP_KEY)
 
         if (summary)
@@ -88,23 +93,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     }
 
     override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
-
-    override fun hideTemporary(source: String) {
-        Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: start")
-        if (showTemporary) {
-            val statusBarNotifications = notificationManager.activeNotifications!!
-
-            if (statusBarNotifications.any { it.id == NOTIFICATION_ID_TEMPORARY }) {
-                Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source success")
-
-                cancelNotification(NOTIFICATION_ID_TEMPORARY)
-            } else {
-                Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: not found")
-            }
-        } else {
-            Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source: !showTemporary")
-        }
-    }
 
     private class NotificationException(
             lastNotificationId: Int,

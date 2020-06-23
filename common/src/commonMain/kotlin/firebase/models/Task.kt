@@ -296,7 +296,7 @@ class Task<T : ProjectType>(
                 )
             }
 
-            scheduleResults.flatMap { it.first.toList() } to scheduleResults.any { it.second!! }
+            scheduleResults.flatMap { it.instances.toList() } to scheduleResults.any { it.hasMore!! }
         }
 
         val parentDatas = parentHierarchyIntervals.map {
@@ -331,11 +331,14 @@ class Task<T : ProjectType>(
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentSchedules(now).mapNotNull {
             it.getInstances(this, now, null)
-                    .first
+                    .instances
                     .firstOrNull()
         }
 
-        return (existingInstances + scheduleNextInstances).map { it.instanceDateTime.timeStamp }.min()
+        return (existingInstances + scheduleNextInstances)
+                .map { it.instanceDateTime.timeStamp }
+                .filter { it.toExactTimeStamp() > now }
+                .min()
     }
 
     fun updateSchedules(

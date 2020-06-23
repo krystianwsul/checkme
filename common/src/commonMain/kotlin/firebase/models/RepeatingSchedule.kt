@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
@@ -22,7 +23,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Pair<Sequence<Instance<T>>, Boolean?> {
+    ): InstanceSequenceData<T> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleRecord.from
@@ -48,8 +49,9 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 givenExactEndTimeStamp
         ).min()
 
-        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true)
-            return Pair(emptySequence(), false)
+        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) {
+            return InstanceSequenceData(emptySequence(), false)
+        }
 
         val nullableSequence: Sequence<Instance<*>?>
 
@@ -96,7 +98,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             null // meaningless for open sequence
         }
 
-        return Pair(nullableSequence.filterNotNull(), hasMore)
+        return InstanceSequenceData(nullableSequence.filterNotNull(), hasMore)
     }
 
     protected abstract fun <T : ProjectType> getInstanceInDate(
@@ -116,7 +118,12 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         requireCurrent(now)
 
         return until?.let {
-            getInstances(scheduleInterval, task, null, null).first.any { it.isVisible(now, hack24) }
+            getInstances(
+                    scheduleInterval,
+                    task,
+                    null,
+                    null
+            ).instances.any { it.isVisible(now, hack24) }
         } ?: true
     }
 
@@ -126,7 +133,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 rootTask,
                 null,
                 now.plusOne()
-        ).first.filter { it.isRootInstance(now) }
+        ).instances.filter { it.isRootInstance(now) }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }

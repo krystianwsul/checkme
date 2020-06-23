@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.interval.ScheduleInterval
@@ -33,22 +34,22 @@ class SingleSchedule<T : ProjectType>(
             task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Pair<Sequence<Instance<T>>, Boolean> {
+    ): InstanceSequenceData<T> {
         val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > singleScheduleExactTimeStamp } == true)
-            return Pair(emptySequence(), false)
+            return InstanceSequenceData(emptySequence(), false)
 
         if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
-            return Pair(emptySequence(), true)
+            return InstanceSequenceData(emptySequence(), true)
 
         if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
-            return Pair(emptySequence(), false)
+            return InstanceSequenceData(emptySequence(), false)
 
         if (scheduleInterval.endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
-            return Pair(emptySequence(), false)
+            return InstanceSequenceData(emptySequence(), false)
 
-        return Pair(sequenceOf(getInstance(task)), false)
+        return InstanceSequenceData(sequenceOf(getInstance(task)), false)
     }
 
     override fun isVisible(

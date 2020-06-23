@@ -838,19 +838,10 @@ class DomainFactory(
         if (!silent)
             Preferences.lastTick = now.long
 
-        var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
-                .filter { it.toExactTimeStamp() > now }
-                .min()
-                .takeUnless { clear }
-
-        val minSchedulesTimeStamp = getTasks().filter {
-            it.current(now) && it.isRootTask(now)
-        }
+        val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
                 .mapNotNull { it.getNextAlarm(now) }
                 .min()
-
-        if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
-            nextAlarm = minSchedulesTimeStamp
+                .takeUnless { clear }
 
         NotificationWrapper.instance.updateAlarm(nextAlarm)
 

@@ -50,7 +50,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).min()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) {
-            return InstanceSequenceData(emptySequence(), false)
+            checkNotNull(givenExactEndTimeStamp)
+
+            val hasMore = intrinsicEndExactTimeStamp?.let { it > givenExactEndTimeStamp } != false
+
+            return InstanceSequenceData(emptySequence(), hasMore)
         }
 
         val nullableSequence: Sequence<Instance<*>?>
@@ -89,11 +93,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         }
 
         val hasMore = if (givenExactEndTimeStamp != null) {
-            if (intrinsicEndExactTimeStamp != null) {
-                intrinsicEndExactTimeStamp > givenExactEndTimeStamp
-            } else {
-                true
-            }
+            intrinsicEndExactTimeStamp?.let { it > givenExactEndTimeStamp } != false
         } else {
             null // meaningless for open sequence
         }

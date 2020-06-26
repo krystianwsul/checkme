@@ -83,10 +83,9 @@ sealed class ScheduleText {
                     scheduleData: ScheduleData.Weekly,
                     timePairCallback: (TimePair) -> String
             ): String {
-                val intervalText = if (scheduleData.interval == 1)
-                    ""
-                else
-                    MyApplication.instance.getString(R.string.everyXWeeks, scheduleData.interval)
+                val intervalText = scheduleData.interval
+                        .takeIf { it > 1 }
+                        ?.let { MyApplication.instance.getString(R.string.everyXWeeks, scheduleData.interval) }
 
                 val days = scheduleData.daysOfWeek.prettyPrint()
                 val time = timePairCallback(scheduleData.timePair)

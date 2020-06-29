@@ -22,9 +22,9 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
             Pair(it.value.first, it.value.first.getValues(myValues))
         }.toMutableMap()
 
-        ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
-
         if (myValues.isNotEmpty()) {
+            ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
+
             check(!isSaved)
 
             recordPairs = newRecords

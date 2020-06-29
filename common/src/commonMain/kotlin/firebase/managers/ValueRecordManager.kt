@@ -22,10 +22,10 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
 
         val newIsSaved = records.map { it.getValues(myValues) }.any { it }
 
-        ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
-
         check(newIsSaved == myValues.isNotEmpty())
         if (myValues.isNotEmpty()) {
+            ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
+
             check(!isSaved)
 
             isSaved = newIsSaved

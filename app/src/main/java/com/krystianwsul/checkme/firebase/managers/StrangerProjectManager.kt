@@ -20,7 +20,8 @@ class StrangerProjectManager {
         }
         strangerProjects = null
 
-        MyCrashlytics.log("StrangerProjectManager.save values: $myValues")
+        if (myValues.isNotEmpty())
+            MyCrashlytics.log("StrangerProjectManager.save values: $myValues")
 
         values += myValues.mapKeys { "${DatabaseWrapper.USERS_KEY}/${it.key}" }
     }

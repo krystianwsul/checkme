@@ -119,7 +119,11 @@ abstract class SelectionCallback : ActionMode.Callback {
         checkNotNull(actionMode)
 
         when {
-            removingLast -> actionMode = null
+            removingLast -> {
+                MyCrashlytics.log("actionMode = null from onDestroyActionMode")
+
+                actionMode = null
+            }
             menuClick -> countdown()
             else -> getTreeViewAdapter().updateDisplayedNodes { countdown() }
         }
@@ -140,6 +144,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
             when (selected) {
                 0 -> {
+                    MyCrashlytics.log("actionMode = null from countdown")
                     actionMode = null
 
                     onLastRemoved(TreeViewAdapter.Placeholder)

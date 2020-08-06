@@ -752,26 +752,33 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 data.field.setText(date?.getDisplayText())
 
-                data.layout.endIconMode =
-                        if (dropdown) TextInputLayout.END_ICON_DROPDOWN_MENU else TextInputLayout.END_ICON_CLEAR_TEXT
-
-                data.field.apply {
-                    setFixedOnClickListener {
-                        DatePickerDialogFragment.newInstance(
-                                data.property.get() ?: Date.today(),
-                                data.min?.invoke()
-                        ).let {
-                            it.listener = data.listener
-                            it.show(childFragmentManager, data.tag)
-                        }
+                data.layout.apply {
+                    if (dropdown) {
+                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
+                    } else {
+                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
+                        isEndIconVisible = true
                     }
                 }
 
-                if (!dropdown) {
-                    data.layout.setEndIconOnClickListener {
-                        data.property.set(null)
-                        updateFields()
-                    }
+                fun showDialog() = DatePickerDialogFragment.newInstance(
+                        data.property.get() ?: Date.today(),
+                        data.min?.invoke()
+                ).let {
+                    it.listener = data.listener
+                    it.show(childFragmentManager, data.tag)
+                }
+
+                fun clearField() {
+                    data.property.set(null)
+                    updateFields()
+                }
+
+                data.field.apply {
+                    if (dropdown)
+                        setFixedOnClickListener(::showDialog)
+                    else
+                        setFixedOnClickListener(::showDialog, ::clearField)
                 }
             }
         }

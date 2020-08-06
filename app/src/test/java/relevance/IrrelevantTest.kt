@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -16,13 +17,17 @@ import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IrrelevantTest {
 
     @Test
     fun testDisappearingTask() {
+        // 1: create task with single schedule
+
         val day1 = Date(2020, 1, 1)
+        val day2 = Date(2020, 1, 2)
         val hour1 = HourMinute(1, 1).toHourMilli()
         val hour2 = HourMinute(2, 1).toHourMilli()
         val hour3 = HourMinute(3, 1).toHourMilli()
@@ -31,7 +36,8 @@ class IrrelevantTest {
         val parent = mockk<Project.Parent>()
 
         val databaseWrapper = mockk<DatabaseWrapper> {
-            every { getPrivateTaskRecordId(any()) } returns "taskKey"
+            every { getPrivateTaskRecordId(any()) } returns "taskRecordId"
+            every { newPrivateNoScheduleOrParentRecordId(any(), any()) } returns "noScheduleOrParentRecordId"
         }
 
         val userKey = UserKey("key")
@@ -72,6 +78,8 @@ class IrrelevantTest {
 
         val task = project.newTask(taskJson)
 
+        // 2: once reminded, add one hour
+
         now = ExactTimeStamp(day1, hour3)
 
         val instance = task.getPastRootInstances(now).single()
@@ -82,6 +90,30 @@ class IrrelevantTest {
 
         instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)), now)
 
+        // 3: after second reminder, remove schedule, then set reminder done
+
+        now = ExactTimeStamp(day1, hour4.toHourMilli())
+
+        task.apply {
+            endAllCurrentTaskHierarchies(now)
+            endAllCurrentSchedules(now)
+            endAllCurrentNoScheduleOrParents(now)
+
+            setNoScheduleOrParent(now)
+        }
+
+        instance.setDone(shownFactory, true, now)
+
+        fun Task<*>.isReminderless() = current(now) && isVisible(now, true) && isRootTask(now) && getCurrentSchedules(now).isEmpty()
+
+        assertTrue(task.isReminderless())
+
+        // 4: next day, task should still be reminderless, instead of ending up with expired schedule again
+
+        now = ExactTimeStamp(day2, hour1)
+
         Irrelevant.setIrrelevant(parent, project, now)
+
+        assertTrue(task.isReminderless())
     }
 }

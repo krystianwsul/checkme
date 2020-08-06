@@ -116,6 +116,7 @@ object IntervalBuilder {
                         when (typeBuilder) {
                             is TypeBuilder.Parent -> addIntervalBuilder()
                             is TypeBuilder.Schedule -> currentIntervalBuilder.schedules += typeBuilder.schedule
+                            is TypeBuilder.NoScheduleOrParent -> addIntervalBuilder()
                         }
                     }
                     is IntervalBuilder.NoSchedule -> addIntervalBuilder()
@@ -198,7 +199,7 @@ object IntervalBuilder {
 
             override val startExactTimeStamp = noScheduleOrParent.startExactTimeStamp
 
-            override fun toIntervalBuilder() = IntervalBuilder.NoSchedule<T>(startExactTimeStamp)
+            override fun toIntervalBuilder() = IntervalBuilder.NoSchedule(startExactTimeStamp, noScheduleOrParent)
         }
     }
 

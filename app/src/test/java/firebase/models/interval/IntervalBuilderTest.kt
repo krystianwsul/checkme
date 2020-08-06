@@ -1,6 +1,7 @@
 package firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
@@ -26,13 +27,15 @@ class IntervalBuilderTest {
             start: ExactTimeStamp,
             end: ExactTimeStamp? = null,
             taskHierarchies: Collection<TaskHierarchy<ProjectType.Private>> = setOf(),
-            scheduleList: List<Schedule<ProjectType.Private>> = listOf()
+            scheduleList: List<Schedule<ProjectType.Private>> = listOf(),
+            noScheduleOrParentList: List<NoScheduleOrParent<ProjectType.Private>> = listOf()
     ): Task<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { endExactTimeStamp } returns end
             every { parentTaskHierarchies } returns taskHierarchies.toSet()
             every { schedules } returns scheduleList
+            every { noScheduleOrParents } returns noScheduleOrParentList
         }
     }
 
@@ -50,6 +53,16 @@ class IntervalBuilderTest {
             start: ExactTimeStamp,
             end: ExactTimeStamp? = null
     ): Schedule<ProjectType.Private> {
+        return mockk(relaxed = true) {
+            every { startExactTimeStamp } returns start
+            every { endExactTimeStamp } returns end
+        }
+    }
+
+    private fun noScheduleOrParentMock(
+            start: ExactTimeStamp,
+            end: ExactTimeStamp? = null
+    ): NoScheduleOrParent<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { endExactTimeStamp } returns end
@@ -366,6 +379,27 @@ class IntervalBuilderTest {
         task.check(
                 Interval.Ended(Type.Schedule(listOf(schedule1, schedule2)), taskStart, schedule2End),
                 Interval.Current(Type.NoSchedule(), schedule2End)
+        )
+    }
+
+    @Test
+    fun testScheduleRemoved() {
+        val taskStart = ExactTimeStamp(date, HourMinute(12, 0).toHourMilli())
+
+        val scheduleEnd = ExactTimeStamp(date, HourMinute(12, 1).toHourMilli())
+        val schedule = scheduleMock(taskStart, scheduleEnd)
+
+        val noScheduleOrParent = noScheduleOrParentMock(scheduleEnd)
+
+        val task = taskMock(
+                taskStart,
+                scheduleList = listOf(schedule),
+                noScheduleOrParentList = listOf(noScheduleOrParent)
+        )
+
+        task.check(
+                Interval.Ended(Type.Schedule(listOf(schedule)), taskStart, scheduleEnd),
+                Interval.Current(Type.NoSchedule(noScheduleOrParent), scheduleEnd)
         )
     }
 }

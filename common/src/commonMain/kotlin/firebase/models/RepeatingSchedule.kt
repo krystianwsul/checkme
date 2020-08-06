@@ -50,9 +50,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).min()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) {
-            checkNotNull(givenExactEndTimeStamp)
-
-            val hasMore = intrinsicEndExactTimeStamp?.let { it > givenExactEndTimeStamp } != false
+            val hasMore = when {
+                givenExactEndTimeStamp != null && intrinsicEndExactTimeStamp != null -> intrinsicEndExactTimeStamp > givenExactEndTimeStamp
+                givenExactEndTimeStamp != null -> true
+                else -> false // intrinsicEndExactTimeStamp != null
+            }
 
             return InstanceSequenceData(emptySequence(), hasMore)
         }

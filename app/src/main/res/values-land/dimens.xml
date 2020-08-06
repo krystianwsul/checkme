@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="expandedTitleMarginTop">7dp</dimen>
+    <dimen name="expandedTitleMarginTop">20dp</dimen>
 </resources>

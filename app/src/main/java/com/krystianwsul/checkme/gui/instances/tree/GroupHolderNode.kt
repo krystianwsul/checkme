@@ -152,9 +152,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 val textWidthRelay = textWidths[widthKey]
 
                 val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
-                var remainingLines = TOTAL_LINES - minLines
 
                 fun allocateLines(textViews: List<TextView>) {
+                    var remainingLines = TOTAL_LINES - minLines
+
                     textViews.forEach { textView ->
                         fun getWantLines(text: String) = Rect().run {
                             if (textWidthRelay.value != null) {

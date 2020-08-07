@@ -82,6 +82,12 @@ class SingleSchedule<T : ProjectType>(
         override val timePair get() = instance.instanceTimePair
 
         override val originalTimePair get() = singleScheduleRecord.timePair
+
+        override var endTime
+            get() = singleScheduleRecord.endTime
+            set(value) {
+                singleScheduleRecord.endTime = value
+            }
     }
 
     override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean {

@@ -34,15 +34,15 @@ class TaskRecord<T : ProjectType> private constructor(
 
     val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()
 
-    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = HashMap()
+    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = mutableMapOf()
 
-    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord<T>> = HashMap()
+    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord<T>> = mutableMapOf()
 
-    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord<T>> = HashMap()
+    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord<T>> = mutableMapOf()
 
-    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord<T>> = HashMap()
+    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord<T>> = mutableMapOf()
 
-    val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord<T>> = HashMap()
+    val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord<T>> = mutableMapOf()
 
     val noScheduleOrParentRecords = taskJson.noScheduleOrParent
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }

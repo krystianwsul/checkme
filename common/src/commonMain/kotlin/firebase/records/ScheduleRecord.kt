@@ -29,7 +29,7 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     val startTime get() = scheduleJson.startTime
 
-    var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
+    open var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
     val projectKey = taskRecord.projectKey
 

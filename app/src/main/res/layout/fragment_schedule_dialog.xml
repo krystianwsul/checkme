@@ -83,56 +83,27 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/denseSpinnerSpacing"
-                        android:layout_marginTop="11.5dp"
-                        android:text="@string/weeksSuffix"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="@dimen/textPrimary" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/denseSpinnerSpacing"
+                    android:layout_marginTop="11.5dp"
+                    android:text="@string/weeksSuffix"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="@dimen/textPrimary" />
 
             </LinearLayout>
 
             <CheckBox
-                    android:id="@+id/scheduleDialogAllDays"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/allDays" />
+                android:id="@+id/scheduleDialogAllDays"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/allDays" />
 
-            <CheckBox
-                    android:id="@+id/scheduleDialogSunday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogMonday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogTuesday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogWednesday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogThursday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogFriday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            <CheckBox
-                    android:id="@+id/scheduleDialogSaturday"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+            <ca.antonious.materialdaypicker.MaterialDayPicker
+                android:id="@+id/scheduleDialogDayPicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
 
         </LinearLayout>
 

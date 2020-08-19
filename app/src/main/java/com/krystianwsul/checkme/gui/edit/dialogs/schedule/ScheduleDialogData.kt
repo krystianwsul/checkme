@@ -14,7 +14,7 @@ import kotlin.random.Random
 @Parcelize
 class ScheduleDialogData(
         var date: Date,
-        var daysOfWeek: MutableSet<DayOfWeek>,
+        var daysOfWeek: Set<DayOfWeek>,
         var allDays: Boolean,
         var monthlyDay: Boolean,
         var monthDayNumber: Int,

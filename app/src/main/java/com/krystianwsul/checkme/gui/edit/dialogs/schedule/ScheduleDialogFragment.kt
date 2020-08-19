@@ -14,10 +14,10 @@ import android.transition.TransitionManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
-import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
@@ -62,7 +62,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private lateinit var customView: ViewGroup
-    private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
     private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
 
@@ -187,18 +186,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView = requireActivity().layoutInflater
                 .inflate(R.layout.fragment_schedule_dialog, null)
                 .apply {
-                    scheduleDialogDays = mapOf(
-                            DayOfWeek.SUNDAY to scheduleDialogSunday,
-                            DayOfWeek.MONDAY to scheduleDialogMonday,
-                            DayOfWeek.TUESDAY to scheduleDialogTuesday,
-                            DayOfWeek.WEDNESDAY to scheduleDialogWednesday,
-                            DayOfWeek.THURSDAY to scheduleDialogThursday,
-                            DayOfWeek.FRIDAY to scheduleDialogFriday,
-                            DayOfWeek.SATURDAY to scheduleDialogSaturday
-                    )
-
-                    scheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
-
                     scheduleDialogSave.setOnClickListener {
                         check(customTimeDatas != null)
 
@@ -374,12 +361,29 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        scheduleDialogData.daysOfWeek.forEach { scheduleDialogDays.getValue(it).isChecked = true }
-        scheduleDialogDays.forEach { (day, view) ->
-            view.setOnCheckedChangeListener { _, isChecked ->
-                scheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
+        val daysOfWeekMap = mapOf(
+                DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
+                DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
+                DayOfWeek.TUESDAY to MaterialDayPicker.Weekday.TUESDAY,
+                DayOfWeek.WEDNESDAY to MaterialDayPicker.Weekday.WEDNESDAY,
+                DayOfWeek.THURSDAY to MaterialDayPicker.Weekday.THURSDAY,
+                DayOfWeek.FRIDAY to MaterialDayPicker.Weekday.FRIDAY,
+                DayOfWeek.SATURDAY to MaterialDayPicker.Weekday.SATURDAY
+        )
 
-                updateFields()
+        val weekdaysMap = daysOfWeekMap.entries
+                .map { it.value to it.key }
+                .toMap()
+
+        customView.scheduleDialogDayPicker.apply {
+            setSelectedDays(scheduleDialogData.daysOfWeek.map(daysOfWeekMap::getValue))
+
+            daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
+
+                override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) {
+                    // todo require at least one
+                    scheduleDialogData.daysOfWeek = selectedDays.map(weekdaysMap::getValue).toSet()
+                }
             }
         }
 
@@ -566,7 +570,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (animate)
             TransitionManager.beginDelayedTransition(customView)
 
-        scheduleDialogDays.values.forEach { it.isVisible = !scheduleDialogData.allDays }
+        customView.scheduleDialogDayPicker.isVisible = !scheduleDialogData.allDays
     }
 
     @SuppressLint("SetTextI18n")

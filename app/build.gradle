@@ -153,6 +153,8 @@ dependencies {
 
     implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
     implementation "com.badoo.reaktive:rxjava2-interop:$reaktiveVersion"
+
+    implementation 'ca.antonious:materialdaypicker:0.7.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

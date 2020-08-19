@@ -344,16 +344,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        customView.scheduleDialogAllDays.apply {
-            isChecked = scheduleDialogData.allDays
-
-            setOnCheckedChangeListener { _, isChecked ->
-                scheduleDialogData.allDays = isChecked
-
-                updateDays(true)
-            }
-        }
-
         val daysOfWeekMap = mapOf(
                 DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
                 DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
@@ -513,19 +503,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             initialize()
     }
 
-    private fun initialize() {
-        customView.addOneShotGlobalLayoutListener { // needed so animations run correctly
-            updateScheduleTypeFields()
-            updateDays()
-        }
+    private fun initialize() = customView.addOneShotGlobalLayoutListener { // needed so animations run correctly
+        updateScheduleTypeFields()
     }
 
     private fun updateScheduleTypeFields(animate: Boolean = false) {
         check(customTimeDatas != null)
         check(activity != null)
 
-        if (animate)
-            TransitionManager.beginDelayedTransition(customView)
+        if (animate) TransitionManager.beginDelayedTransition(customView)
 
         customView.run {
             delegate.visibilities.run {
@@ -558,13 +544,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (resultCode == Activity.RESULT_OK)
             scheduleDialogData.timePairPersist.customTimeKey =
                     data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
-    }
-
-    private fun updateDays(animate: Boolean = false) {
-        if (animate)
-            TransitionManager.beginDelayedTransition(customView)
-
-        customView.scheduleDialogDayPicker.isVisible = !scheduleDialogData.allDays
     }
 
     @SuppressLint("SetTextI18n")

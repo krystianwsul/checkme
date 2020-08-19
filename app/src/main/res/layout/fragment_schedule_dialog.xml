@@ -93,16 +93,11 @@
 
             </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/scheduleDialogAllDays"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/allDays" />
-
             <ca.antonious.materialdaypicker.MaterialDayPicker
                 android:id="@+id/scheduleDialogDayPicker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp" />
 
         </LinearLayout>

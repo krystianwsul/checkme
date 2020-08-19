@@ -15,7 +15,6 @@ import kotlin.random.Random
 class ScheduleDialogData(
         var date: Date,
         var daysOfWeek: Set<DayOfWeek>,
-        var allDays: Boolean,
         var monthlyDay: Boolean,
         var monthDayNumber: Int,
         var monthWeekNumber: Int,
@@ -51,7 +50,7 @@ class ScheduleDialogData(
                         )
                         ScheduleType.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
                                 ScheduleData.Weekly(
-                                        if (allDays) DayOfWeek.set else daysOfWeek,
+                                        daysOfWeek,
                                         timePairPersist.timePair,
                                         from,
                                         until,

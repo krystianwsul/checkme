@@ -104,7 +104,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                         scheduleData.date,
                         mutableSetOf(scheduleData.date.dayOfWeek),
                         true,
-                        true,
                         monthDayNumber,
                         monthWeekNumber,
                         scheduleData.date.dayOfWeek,
@@ -145,7 +144,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 return ScheduleDialogData(
                         date,
                         days,
-                        days == DayOfWeek.set,
                         true,
                         monthDayNumber,
                         monthWeekNumber,
@@ -185,7 +183,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 return ScheduleDialogData(
                         date,
                         mutableSetOf(date.dayOfWeek),
-                        true,
                         true,
                         scheduleData.dayOfMonth,
                         (scheduleData.dayOfMonth - 1) / 7 + 1,
@@ -231,12 +228,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 return ScheduleDialogData(
                         date,
                         mutableSetOf(scheduleData.dayOfWeek),
-                        true,
                         false,
-                        listOf(
-                                dayNumber,
-                                ScheduleDialogData.MAX_MONTH_DAY
-                        ).min()!!,
+                        listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).min()!!,
                         scheduleData.dayOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth,
@@ -269,7 +262,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 return ScheduleDialogData(
                         date,
                         mutableSetOf(date.dayOfWeek),
-                        true,
                         true,
                         scheduleData.day,
                         (scheduleData.day - 1) / 7 + 1,

@@ -102,7 +102,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         updateError()
     }
 
-    private val datePickerDialogFragmentListener = { date: Date ->
+    private val materialDatePickerListener = { date: Date ->
         this.date = date
         updateDateText()
     }
@@ -121,8 +121,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         this.savedInstanceState = savedInstanceState
 
-        val datePickerDialogFragment = childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
-        datePickerDialogFragment?.listener = datePickerDialogFragmentListener
+        childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.addListener(materialDatePickerListener)
 
         if (savedInstanceState != null && savedInstanceState.containsKey(DATE_KEY)) {
             date = savedInstanceState.getParcelable(DATE_KEY)!!
@@ -149,9 +148,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 .inflate(R.layout.fragment_edit_instances, null)
                 .apply {
                     editInstanceDate.setFixedOnClickListener {
-                            val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
-                            datePickerDialogFragment.listener = datePickerDialogFragmentListener
-                            datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                        newMaterialDatePicker(date!!).let {
+                            it.addListener(materialDatePickerListener)
+                            it.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                        }
                     }
 
                     editInstanceSave.setOnClickListener {
@@ -163,11 +163,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         editInstancesViewModel.stop()
 
                         DomainFactory.instance.setInstancesDateTime(
-                            data!!.dataId,
-                            SaveService.Source.GUI,
-                            data!!.instanceDatas.keys,
-                            date!!,
-                            timePairPersist!!.timePair
+                                data!!.dataId,
+                                SaveService.Source.GUI,
+                                data!!.instanceDatas.keys,
+                                date!!,
+                                timePairPersist!!.timePair
                         )
 
                         dismiss()

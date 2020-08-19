@@ -18,14 +18,12 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.gui.DatePickerDialogFragment
-import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.TimeDialogFragment
-import com.krystianwsul.checkme.gui.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -347,25 +345,22 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             check(delegate.hasDate)
 
             delegate.getDatePicker().let {
-                it.listener = datePickerDialogFragmentListener
-                it.show(
-                        childFragmentManager,
-                        DATE_FRAGMENT_TAG
-                )
+                it.addListener(datePickerDialogFragmentListener)
+                it.show(childFragmentManager, DATE_FRAGMENT_TAG)
             }
         }
 
-        (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
+        childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.run {
             check(delegate.hasDate)
 
-            listener = datePickerDialogFragmentListener
+            addListener(datePickerDialogFragmentListener)
         }
 
         dateFieldDatas.forEach { data ->
-            (childFragmentManager.findFragmentByTag(data.tag) as? DatePickerDialogFragment)?.let {
+            childFragmentManager.getMaterialDatePicker(data.tag)?.let {
                 check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-                it.listener = data.listener
+                it.addListener(data.listener)
             }
         }
 
@@ -631,7 +626,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         abstract fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData>
 
-        open fun getDatePicker(): DatePickerDialogFragment = throw IllegalStateException()
+        open fun getDatePicker(): MaterialDatePicker<Long> = throw IllegalStateException()
 
         abstract fun updateFields(
                 customTimeData: EditViewModel.CustomTimeData?,
@@ -683,7 +678,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        override fun getDatePicker() = DatePickerDialogFragment.newInstance(scheduleDialogData.date)
+        override fun getDatePicker() = newMaterialDatePicker(scheduleDialogData.date)
 
         override fun updateFields(
                 customTimeData: EditViewModel.CustomTimeData?,
@@ -761,11 +756,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     }
                 }
 
-                fun showDialog() = DatePickerDialogFragment.newInstance(
+                fun showDialog() = newMaterialDatePicker(
                         data.property.get() ?: Date.today(),
                         data.min?.invoke()
                 ).let {
-                    it.listener = data.listener
+                    it.addListener(data.listener)
                     it.show(childFragmentManager, data.tag)
                 }
 
@@ -838,8 +833,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 date
         }
 
-        override fun getDatePicker() =
-                DatePickerDialogFragment.newYearInstance(scheduleDialogData.date)
+        override fun getDatePicker() = newYearMaterialDatePicker(scheduleDialogData.date)
     }
 
     private data class ErrorData(

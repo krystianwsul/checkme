@@ -576,8 +576,6 @@ class DomainFactory(
             }
     }
 
-    private fun getExistingInstances() = projectsFactory.existingInstances
-
     private fun setIrrelevant(now: ExactTimeStamp) {
         if (false) {
             Irrelevant.setIrrelevant(

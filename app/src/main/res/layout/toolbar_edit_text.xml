@@ -34,21 +34,21 @@
                 style="@style/OldTextInput"
                 android:textColorHint="@color/textDisabledWhite">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <com.krystianwsul.checkme.gui.NoNewlineTextInputEditText
                     android:id="@+id/toolbarEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:inputType="text"
+                    android:inputType="textMultiLine"
                     android:textColor="@color/textPrimaryWhite"
                     android:hint="@string/name_hint"
                     android:textColorHint="@color/textDisabledWhite"
                     tools:ignore="Deprecated"
-                    android:importantForAutofill="noExcludeDescendants">
+                    android:importantForAutofill="noExcludeDescendants"
+                    android:maxLines="3">
 
                     <requestFocus />
 
-                </com.google.android.material.textfield.TextInputEditText>
+                </com.krystianwsul.checkme.gui.NoNewlineTextInputEditText>
 
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -144,9 +144,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        return errorData.run {
-            listOf(date, time, from, until).all { it.isNullOrEmpty() }
-        }
+        return errorData.isValid()
     }
 
     private fun checkValid() = isValid().also { customView.scheduleDialogSave.isEnabled = it }
@@ -190,12 +188,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                         check(customTimeDatas != null)
 
                         if (checkValid()) {
-                            result.accept(
-                                    ScheduleDialogResult.Change(
-                                            position,
-                                            scheduleDialogData
-                                    )
-                            )
+                            result.accept(ScheduleDialogResult.Change(position, scheduleDialogData))
 
                             dismiss()
                         }
@@ -381,8 +374,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
 
                 override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) {
-                    // todo require at least one
                     scheduleDialogData.daysOfWeek = selectedDays.map(weekdaysMap::getValue).toSet()
+
+                    checkValid()
                 }
             }
         }
@@ -792,16 +786,19 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun isValid(): ErrorData {
             val errorData = super.isValid()
 
-            if (!errorData.from.isNullOrEmpty())
-                return errorData
+            val from = errorData.from ?: getIntervalFromError()
 
+            return errorData.copy(from = from, noDaysChosen = scheduleDialogData.daysOfWeek.isEmpty())
+        }
+
+        private fun getIntervalFromError(): String? {
             if (scheduleDialogData.interval == 1)
-                return errorData
+                return null
 
             if (scheduleDialogData.from != null)
-                return errorData
+                return null
 
-            return errorData.copy(from = getString(R.string.dateCannotBeEmpty))
+            return getString(R.string.dateCannotBeEmpty)
         }
     }
 
@@ -844,8 +841,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             val date: String? = null,
             val time: String? = null,
             val from: String? = null,
-            val until: String? = null
-    )
+            val until: String? = null,
+            val noDaysChosen: Boolean = false
+    ) {
+
+        fun isValid() = listOf(date, time, from, until).all { it.isNullOrEmpty() } && !noDaysChosen
+    }
 
     private data class Visibilities(
             val date: Boolean = false,

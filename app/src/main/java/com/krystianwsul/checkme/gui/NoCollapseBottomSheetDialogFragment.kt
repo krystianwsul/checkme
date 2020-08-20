@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -75,8 +74,6 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
         fun setInsetViews(outer: View, inner: View) {
             outer.setOnApplyWindowInsetsListener { _, insets ->
-                Log.e("asdf", "magic")
-
                 outer.setPadding(0, insets.systemWindowInsetTop, 0, 0)
 
                 inner.setPadding(

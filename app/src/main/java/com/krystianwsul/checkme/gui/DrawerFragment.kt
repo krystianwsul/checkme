@@ -33,6 +33,11 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
         setCancelable(true)
         setContentView(R.layout.main_navigation)
+
+        setInsetViews(
+                findViewById(R.id.drawerRoot)!!,
+                findViewById(R.id.drawerBackgroundLayout)!!
+        )
     }
 
     override fun onStart() {

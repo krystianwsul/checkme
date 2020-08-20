@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AutoCompleteTextView
@@ -258,31 +257,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     })
                 } as ViewGroup
 
-        customView.setOnApplyWindowInsetsListener { _, insets ->
-            Log.e("asdf", "magic paddingTop: " + customView.paddingTop + ", inset top " + insets.systemWindowInsetTop)
-
-            customView.setPadding(
-                    0,
-                    insets.systemWindowInsetTop,
-                    0,
-                    0
-            )
-
-            customView.scheduleDialogBackgroundLayout.setPadding(
-                    insets.systemWindowInsetLeft,
-                    0,
-                    insets.systemWindowInsetRight,
-                    insets.systemWindowInsetBottom
-            )
-
-            insets.consumeSystemWindowInsets()
-        }
-
         hideKeyboardOnClickOutside(customView)
 
         return TransparentNavigationDialog().apply {
             setCancelable(true)
             setContentView(customView)
+            setInsetViews(customView, customView.scheduleDialogBackgroundLayout)
         }
     }
 

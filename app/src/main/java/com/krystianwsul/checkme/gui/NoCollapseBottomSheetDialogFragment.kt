@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -70,6 +71,25 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
             window!!.setTransparentNavigation(landscape)
+        }
+
+        fun setInsetViews(outer: View, inner: View) {
+            outer.setOnApplyWindowInsetsListener { _, insets ->
+                Log.e("asdf", "magic")
+
+                outer.setPadding(0, insets.systemWindowInsetTop, 0, 0)
+
+                inner.setPadding(
+                        insets.systemWindowInsetLeft,
+                        0,
+                        insets.systemWindowInsetRight,
+                        insets.systemWindowInsetBottom
+                )
+
+                insets.consumeSystemWindowInsets()
+            }
+
+            outer.requestApplyInsets()
         }
     }
 }

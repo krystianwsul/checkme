@@ -218,43 +218,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     scheduleDialogMonthWeekNumber.setDense()
                     scheduleDialogMonthWeekDay.setDense()
                     scheduleDialogMonthEnd.setDense()
-
-                    scheduleDialogEveryXWeeks.addTextChangedListener(object : TextWatcher {
-
-                        override fun beforeTextChanged(
-                                s: CharSequence?,
-                                start: Int,
-                                count: Int,
-                                after: Int
-                        ) = Unit
-
-                        override fun onTextChanged(
-                                s: CharSequence?,
-                                start: Int,
-                                before: Int,
-                                count: Int
-                        ) = Unit
-
-                        override fun afterTextChanged(s: Editable) {
-                            var value = s.toString()
-                                    .toIntOrNull()
-                                    ?: 0
-
-                            if (value < 1) {
-                                value = 1
-
-                                if (s.isNotBlank()) {
-                                    scheduleDialogEveryXWeeks.setText("1")
-                                    scheduleDialogEveryXWeeks.setSelection(1)
-                                }
-                            }
-
-                            scheduleDialogData.interval = value
-
-                            if (s.isNotBlank())
-                                checkValid()
-                        }
-                    })
                 } as ViewGroup
 
         hideKeyboardOnClickOutside(customView)
@@ -476,6 +439,30 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (customTimeDatas != null)
             initialize()
+
+        customView.scheduleDialogEveryXWeeks.addTextChangedListener(object : TextWatcher {
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable) {
+                var value = s.toString().toIntOrNull() ?: 0
+
+                if (value < 1) {
+                    value = 1
+
+                    if (s.isNotBlank()) {
+                        customView.scheduleDialogEveryXWeeks.setText("1")
+                        customView.scheduleDialogEveryXWeeks.setSelection(1)
+                    }
+                }
+
+                scheduleDialogData.interval = value
+
+                if (s.isNotBlank()) checkValid()
+            }
+        })
     }
 
     private fun updateDelegate() {

@@ -37,11 +37,16 @@
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- set the rounded drawable as background to your bottom sheet -->
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bg_bottom_sheet_dialog_fragment</item>
+        <item name="android:clipChildren">true</item>
+    </style>
+
+    <style name="BottomSheet.Navbar">
+        <item name="android:background">@null</item>
         <item name="android:clipChildren">true</item>
     </style>
 
@@ -56,6 +61,7 @@
     </style>
 
     <style name="BottomSheetDialogTheme.Navbar" parent="BaseBottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheet.Navbar</item>
         <item name="android:statusBarColor">#152026</item>
         <item name="android:navigationBarColor">@color/primaryColor12</item>
     </style>

@@ -499,7 +499,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         check(customTimeDatas != null)
         check(activity != null)
 
-        if (animate) TransitionManager.beginDelayedTransition(customView)
+        if (animate) TransitionManager.beginDelayedTransition(customView.scheduleDialogBackgroundLayout)
 
         customView.run {
             delegate.visibilities.run {

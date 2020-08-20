@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
-    tools:context=".gui.edit.dialogs.schedule.ScheduleDialogFragment">
+    tools:context=".gui.edit.dialogs.schedule.ScheduleDialogFragment"
+    android:background="@drawable/bottom_sheet_backdrop">
 
     <FrameLayout
         android:id="@+id/scheduleDialogBackgroundLayout"

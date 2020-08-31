@@ -62,7 +62,7 @@ fun DomainFactory.setInstancesDateTime(
     instanceKeys: Set<InstanceKey>,
     instanceDate: Date,
     instanceTimePair: TimePair
-) {
+) : DomainFactory.EditInstancesUndoData {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -71,6 +71,10 @@ fun DomainFactory.setInstancesDateTime(
     val now = ExactTimeStamp.now
 
     val instances = instanceKeys.map(this::getInstance)
+
+    val editInstancesUndoData = DomainFactory.EditInstancesUndoData(
+            instances.map { it.instanceKey to it.instanceDateTime }
+    )
 
     instances.forEach {
         it.setInstanceDateTime(
@@ -88,4 +92,6 @@ fun DomainFactory.setInstancesDateTime(
     save(dataId, source)
 
     notifyCloud(projects)
+
+    return editInstancesUndoData
 }

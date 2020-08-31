@@ -811,8 +811,12 @@ class GroupListFragment @JvmOverloads constructor(
                 }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
     }
 
-    private fun onEditInstances() {
+    private fun onEditInstances(editInstancesUndoData: DomainFactory.EditInstancesUndoData) {
         selectionCallback.actionMode!!.finish()
+
+        listener.showSnackbarHour(editInstancesUndoData.data.size) {
+            DomainFactory.instance.undoSetInstancesDateTime(0, SaveService.Source.GUI, editInstancesUndoData)
+        }
     }
 
     class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {

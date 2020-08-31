@@ -866,6 +866,8 @@ class DomainFactory(
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
+    class EditInstancesUndoData(val data: List<Pair<InstanceKey, DateTime>>)
+
     class ReadTimes(start: ExactTimeStamp, read: ExactTimeStamp, stop: ExactTimeStamp) {
 
         val readMillis = read.long - start.long

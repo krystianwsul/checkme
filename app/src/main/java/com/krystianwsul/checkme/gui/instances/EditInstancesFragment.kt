@@ -114,7 +114,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var myView: View
 
-    var listener: (() -> Unit)? = null
+    var listener: ((DomainFactory.EditInstancesUndoData) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -162,7 +162,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
                         editInstancesViewModel.stop()
 
-                        DomainFactory.instance.setInstancesDateTime(
+                        val editInstancesUndoData = DomainFactory.instance.setInstancesDateTime(
                                 data!!.dataId,
                                 SaveService.Source.GUI,
                                 data!!.instanceDatas.keys,
@@ -172,7 +172,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
                         dismiss()
 
-                        listener?.invoke()
+                        listener?.invoke(editInstancesUndoData)
                     }
 
                     editInstanceCancel.setOnClickListener { requireDialog().cancel() }

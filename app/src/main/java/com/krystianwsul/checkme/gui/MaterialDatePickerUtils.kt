@@ -17,13 +17,17 @@ fun Long.toMaterialDatePickerDate() = ExactTimeStamp(DateTime(this, DateTimeZone
 fun newMaterialDatePicker(date: Date, min: Date? = null): MaterialDatePicker<Long> {
     val startDate = min ?: Date.today()
 
+    val dateLong = date.toMaterialDatePickerLong()
+    val startDateLong = startDate.toMaterialDatePickerLong()
+
     return MaterialDatePicker.Builder
             .datePicker()
-            .setSelection(date.toMaterialDatePickerLong())
+            .setSelection(dateLong)
             .setCalendarConstraints(
                     CalendarConstraints.Builder()
-                            .setValidator(DateValidatorPointForward.from(startDate.toMaterialDatePickerLong()))
-                            .setStart(startDate.toMaterialDatePickerLong())
+                            .setValidator(DateValidatorPointForward.from(startDateLong))
+                            .setStart(startDateLong)
+                            .setOpenAt(dateLong)
                             .build()
             )
             .build()
@@ -33,13 +37,16 @@ fun newYearMaterialDatePicker(date: Date): MaterialDatePicker<Long> {
     val min = Date(date.year, 1, 1).toMaterialDatePickerLong()
     val max = Date(date.year, 12, 31).toMaterialDatePickerLong()
 
+    val dateLong = date.toMaterialDatePickerLong()
+
     return MaterialDatePicker.Builder
             .datePicker()
-            .setSelection(date.toMaterialDatePickerLong())
+            .setSelection(dateLong)
             .setCalendarConstraints(
                     CalendarConstraints.Builder()
                             .setStart(min)
                             .setEnd(max)
+                            .setOpenAt(dateLong)
                             .build()
             )
             .build()

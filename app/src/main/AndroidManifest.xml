@@ -47,6 +47,9 @@
             android:name=".gui.tasks.ShowTaskActivity"
             android:theme="@style/AppTheme.Toolbar" />
         <activity
+            android:name=".gui.tasks.ShowTasksActivity"
+            android:theme="@style/AppTheme.Toolbar" />
+        <activity
             android:name=".gui.instances.ShowGroupActivity"
             android:theme="@style/AppTheme.Toolbar" />
         <activity

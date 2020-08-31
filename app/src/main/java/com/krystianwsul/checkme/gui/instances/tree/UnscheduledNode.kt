@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -44,7 +45,8 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     private fun newChildTreeNode(
             taskData: GroupListDataWrapper.TaskData,
             expandedTaskKeys: List<TaskKey>,
-            selectedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
+            selectedTaskKeys: List<TaskKey>
+    ) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
@@ -53,6 +55,8 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     fun expanded() = treeNode.isExpanded
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
+
+    override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent())
 
     override fun compareTo(other: ModelNode<NodeHolder>) = if (other is DividerNode) {
         -1

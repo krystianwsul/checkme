@@ -55,7 +55,6 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         val parameters = intent.getParcelableExtra<Parameters>(KEY_PARAMETERS)!!
 
-        parameters.title?.let(toolbar::setTitle)
         toolbar.inflateMenu(R.menu.empty_menu)
 
         initBottomBar()
@@ -94,7 +93,7 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 data.dataId,
                 data.immediate,
                 data.taskData,
-                false
+                true
         ))
     }
 
@@ -148,15 +147,10 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         open val taskKeys: List<TaskKey>? = null
 
-        open val title: Int? = null
-
         @Parcelize
         object Unscheduled : Parameters()
 
         @Parcelize
-        data class Copy(override val taskKeys: List<TaskKey>) : Parameters() {
-
-            override val title get() = R.string.copyTask
-        }
+        data class Copy(override val taskKeys: List<TaskKey>) : Parameters()
     }
 }

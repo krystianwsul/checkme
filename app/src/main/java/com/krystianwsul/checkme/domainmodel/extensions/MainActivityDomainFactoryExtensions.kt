@@ -27,36 +27,36 @@ fun DomainFactory.getMainData(): MainViewModel.Data {
         val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
         Pair(it, hierarchyExactTimeStamp)
     }
-        .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
-        .map { (task, hierarchyExactTimeStamp) ->
-            TaskListFragment.ChildTaskData(
-                task.name,
-                task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
-                task.note,
-                task.startExactTimeStamp,
-                task.taskKey,
-                null,
-                task.getImage(deviceDbInfo),
-                task.current(now),
-                false,
-                task.ordinal
-            )
-        }
-        .sortedDescending()
-        .toMutableList()
+            .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
+            .map { (task, hierarchyExactTimeStamp) ->
+                TaskListFragment.ChildTaskData(
+                        task.name,
+                        task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                        getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
+                        task.note,
+                        task.startExactTimeStamp,
+                        task.taskKey,
+                        null,
+                        task.getImage(deviceDbInfo),
+                        task.current(now),
+                        false,
+                        task.ordinal
+                )
+            }
+            .sortedDescending()
+            .toMutableList()
 
     return MainViewModel.Data(
-        TaskListFragment.TaskData(childTaskDatas, null, true),
-        myUserFactory.user.defaultTab
+            TaskListFragment.TaskData(childTaskDatas, null, true),
+            myUserFactory.user.defaultTab
     )
 }
 
 @Synchronized
 fun DomainFactory.getGroupListData(
-    now: ExactTimeStamp,
-    position: Int,
-    timeRange: MainActivity.TimeRange
+        now: ExactTimeStamp,
+        position: Int,
+        timeRange: MainActivity.TimeRange
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
@@ -83,7 +83,7 @@ fun DomainFactory.getGroupListData(
         }
 
         startExactTimeStamp =
-            ExactTimeStamp(Date(startCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
+                ExactTimeStamp(Date(startCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
     }
 
     val endCalendar = now.calendar
@@ -115,23 +115,16 @@ fun DomainFactory.getGroupListData(
     }
 
     val taskDatas = if (position == 0) {
-        getTasks().filter {
-            it.current(now) && it.isVisible(
-                now,
-                true
-            ) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty()
-        }
-            .map {
-                GroupListDataWrapper.TaskData(
+        getUnscheduledTasks(now).map {
+            GroupListDataWrapper.TaskData(
                     it.taskKey,
                     it.name,
                     getGroupListChildTaskDatas(it, now),
                     it.startExactTimeStamp,
                     it.note,
                     it.getImage(deviceDbInfo)
-                )
-            }
-            .toList()
+            )
+        }.toList()
     } else {
         listOf()
     }
@@ -144,23 +137,23 @@ fun DomainFactory.getGroupListData(
         val children = getChildInstanceDatas(instance, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(
-            instance.done,
-            instance.instanceKey,
-            instance.getDisplayData(now)?.getDisplayText(),
-            instance.name,
-            instance.instanceDateTime.timeStamp,
-            task.current(now),
-            instance.isRootInstance(now),
-            isRootTask,
-            instance.exists(),
-            instance.getCreateTaskTimePair(ownerKey),
-            task.note,
-            children,
-            null,
-            instance.task.ordinal,
-            instance.getNotificationShown(localFactory),
-            task.getImage(deviceDbInfo),
-            instance.isRepeatingGroupChild(now)
+                instance.done,
+                instance.instanceKey,
+                instance.getDisplayData(now)?.getDisplayText(),
+                instance.name,
+                instance.instanceDateTime.timeStamp,
+                task.current(now),
+                instance.isRootInstance(now),
+                isRootTask,
+                instance.exists(),
+                instance.getCreateTaskTimePair(ownerKey),
+                task.note,
+                children,
+                null,
+                instance.task.ordinal,
+                instance.getNotificationShown(localFactory),
+                task.getImage(deviceDbInfo),
+                instance.isRepeatingGroupChild(now)
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }
@@ -169,12 +162,12 @@ fun DomainFactory.getGroupListData(
     }
 
     val dataWrapper = GroupListDataWrapper(
-        customTimeDatas,
-        null,
-        taskDatas,
-        null,
-        instanceDatas,
-        null
+            customTimeDatas,
+            null,
+            taskDatas,
+            null,
+            instanceDatas,
+            null
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
@@ -183,17 +176,17 @@ fun DomainFactory.getGroupListData(
 }
 
 private fun DomainFactory.getGroupListChildTaskDatas(
-    parentTask: Task<*>,
-    now: ExactTimeStamp
+        parentTask: Task<*>,
+        now: ExactTimeStamp
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
     val childTask = it.childTask
 
     GroupListDataWrapper.TaskData(
-        childTask.taskKey,
-        childTask.name,
-        getGroupListChildTaskDatas(childTask, now),
-        childTask.startExactTimeStamp,
-        childTask.note,
-        childTask.getImage(deviceDbInfo)
+            childTask.taskKey,
+            childTask.name,
+            getGroupListChildTaskDatas(childTask, now),
+            childTask.startExactTimeStamp,
+            childTask.note,
+            childTask.getImage(deviceDbInfo)
     )
 }

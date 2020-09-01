@@ -685,7 +685,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     )
 
     data class TaskData(
-            val childTaskDatas: MutableList<ChildTaskData>,
+            val childTaskDatas: List<ChildTaskData>,
             val note: String?,
             val showFab: Boolean
     )

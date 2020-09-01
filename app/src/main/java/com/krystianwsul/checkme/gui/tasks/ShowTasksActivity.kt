@@ -49,13 +49,14 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         initBottomBar()
 
-        taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
+        taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTasksFragment) as? TaskListFragment)
                 ?: TaskListFragment.newInstance().also {
                     supportFragmentManager
                             .beginTransaction()
-                            .add(R.id.showTaskFragment, it)
+                            .add(R.id.showTasksFragment, it)
                             .commit()
-                }).also { it.setFab(bottomFab) }
+                }).also { it.setFab(bottomFab) } // todo add utility method
+        // todo don't add reminder when adding through fab
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
             start()
@@ -100,7 +101,7 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         updateBottomMenu()
     }
 
-    override val snackbarParent get() = showTaskCoordinator!!
+    override val snackbarParent get() = showTasksCoordinator!!
 
     private fun updateBottomMenu() {
         bottomAppBar.menu.run {

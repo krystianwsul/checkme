@@ -664,7 +664,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 if (!copying)
                     taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
                 else if (indentation == 0)
-                    taskListFragment.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(childTaskData.taskKey)))
+                    taskListFragment.taskListListener.startCopy(childTaskData.taskKey)
             }
 
             override val isVisibleWhenEmpty = true
@@ -768,6 +768,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
+
+        fun startCopy(taskKey: TaskKey): Unit = throw UnsupportedOperationException()
     }
 
     data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,8 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.ToolbarActivity
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -28,6 +31,9 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     companion object {
 
         private const val KEY_PARAMETERS = "parameters"
+        private const val KEY_COPIED_TASK_KEY = "copiedTaskKey"
+
+        private const val REQUEST_COPY = 347
 
         fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTasksActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, parameters)
@@ -49,11 +55,15 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showTasksViewModel.refresh()
     }
 
+    private lateinit var parameters: Parameters
+    private var copiedTaskKey: TaskKey? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_tasks)
 
-        val parameters = intent.getParcelableExtra<Parameters>(KEY_PARAMETERS)!!
+        parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
+        copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
         toolbar.inflateMenu(R.menu.empty_menu)
 
@@ -142,6 +152,42 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+
+    override fun startCopy(taskKey: TaskKey) {
+        copiedTaskKey = taskKey
+
+        startActivityForResult(
+                EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
+                REQUEST_COPY
+        )
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_COPY && resultCode == Activity.RESULT_OK) {
+            val oldParameters = parameters as Parameters.Copy
+            val newTaskKeys = oldParameters.taskKeys - copiedTaskKey!!
+
+            if (newTaskKeys.isEmpty()) {
+                finish()
+            } else {
+                parameters = oldParameters.copy(taskKeys = newTaskKeys)
+
+                copiedTaskKey = null
+
+                showTasksViewModel.stop()
+                showTasksViewModel.start(parameters.taskKeys)
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(KEY_PARAMETERS, parameters)
+        copiedTaskKey?.let { outState.putParcelable(KEY_COPIED_TASK_KEY, it) }
+    }
 
     sealed class Parameters : Parcelable {
 

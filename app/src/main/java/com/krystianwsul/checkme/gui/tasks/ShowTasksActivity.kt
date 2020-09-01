@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
@@ -13,9 +14,11 @@ import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_show_tasks.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
@@ -24,7 +27,11 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     companion object {
 
-        fun newIntent() = Intent(MyApplication.instance, ShowTasksActivity::class.java)
+        private const val KEY_PARAMETERS = "parameters"
+
+        fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTasksActivity::class.java).apply {
+            putExtra(KEY_PARAMETERS, parameters)
+        }
     }
 
     private var data: ShowTasksViewModel.Data? = null
@@ -48,15 +55,16 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         toolbar.inflateMenu(R.menu.empty_menu)
 
+        val parameters = intent.getParcelableExtra<Parameters>(KEY_PARAMETERS)!!
+
         initBottomBar()
 
         taskListFragment = getOrInitializeFragment(R.id.showTasksFragment) {
             TaskListFragment.newInstance()
         }.also { it.setFab(bottomFab) }
-        // todo don't add reminder when adding through fab
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
-            start()
+            start(parameters.taskKeys)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -134,4 +142,18 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+
+    sealed class Parameters : Parcelable {
+
+        abstract val taskKeys: List<TaskKey>?
+
+        @Parcelize
+        object Unscheduled : Parameters() {
+
+            override val taskKeys: List<TaskKey>? get() = null
+        }
+
+        @Parcelize
+        data class Copy(override val taskKeys: List<TaskKey>) : Parameters()
+    }
 }

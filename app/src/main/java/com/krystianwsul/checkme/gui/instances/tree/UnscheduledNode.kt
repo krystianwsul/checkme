@@ -56,7 +56,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent())
+    override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
 
     override fun compareTo(other: ModelNode<NodeHolder>) = if (other is DividerNode) {
         -1

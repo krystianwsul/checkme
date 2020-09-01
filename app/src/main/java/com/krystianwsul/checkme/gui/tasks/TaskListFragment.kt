@@ -424,7 +424,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint())))
+            startActivity(EditActivity.getParametersIntent(EditParameters.Create(
+                    hint(),
+                    showFirstSchedule = data!!.showFirstScheduleInFab
+            )))
         }
 
         updateFabVisibility("setFab")
@@ -681,7 +684,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     data class Data(
             val dataId: Int,
             val immediate: Boolean,
-            val taskData: TaskData
+            val taskData: TaskData,
+            val showFirstScheduleInFab: Boolean = true
     )
 
     data class TaskData(

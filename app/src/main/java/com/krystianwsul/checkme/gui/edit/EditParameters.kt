@@ -65,7 +65,8 @@ sealed class EditParameters : Parcelable {
     class Create(
             val hint: EditActivity.Hint? = null,
             val parentScheduleState: ParentScheduleState? = null,
-            val nameHint: String? = null
+            val nameHint: String? = null,
+            val showFirstSchedule: Boolean = true
     ) : EditParameters() {
 
         override fun startViewModel(viewModel: EditViewModel) =

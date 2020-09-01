@@ -84,7 +84,8 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         taskListFragment.setAllTasks(TaskListFragment.Data(
                 data.dataId,
                 data.immediate,
-                data.taskData
+                data.taskData,
+                false
         ))
     }
 

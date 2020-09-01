@@ -8,6 +8,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.ToolbarActivity
+import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
@@ -49,13 +50,9 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         initBottomBar()
 
-        taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTasksFragment) as? TaskListFragment)
-                ?: TaskListFragment.newInstance().also {
-                    supportFragmentManager
-                            .beginTransaction()
-                            .add(R.id.showTasksFragment, it)
-                            .commit()
-                }).also { it.setFab(bottomFab) } // todo add utility method
+        taskListFragment = getOrInitializeFragment(R.id.showTasksFragment) {
+            TaskListFragment.newInstance()
+        }.also { it.setFab(bottomFab) }
         // todo don't add reminder when adding through fab
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {

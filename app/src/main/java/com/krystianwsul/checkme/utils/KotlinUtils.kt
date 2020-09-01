@@ -19,6 +19,8 @@ import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
@@ -30,6 +32,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -415,6 +418,16 @@ fun hideKeyboardOnClickOutside(view: View) {
 
 fun hideSoftKeyboard(view: View) {
     val inputMethodManager =
-        view.context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            view.context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 }
+
+inline fun <reified T : Fragment> FragmentManager.getOrInitializeFragment(
+        @IdRes id: Int,
+        initializer: () -> T
+) = (findFragmentById(id) as? T) ?: initializer().also { beginTransaction().add(id, it).commit() }
+
+inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
+        @IdRes id: Int,
+        initializer: () -> T
+) = supportFragmentManager.getOrInitializeFragment(id, initializer)

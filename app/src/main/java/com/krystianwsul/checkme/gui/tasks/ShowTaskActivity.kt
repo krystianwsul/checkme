@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -92,13 +93,9 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         taskKey = (savedInstanceState ?: intent.extras!!).getParcelable(TASK_KEY_KEY)!!
 
-        taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
-                ?: TaskListFragment.newInstance().also {
-            supportFragmentManager
-                    .beginTransaction()
-                    .add(R.id.showTaskFragment, it)
-                    .commit()
-                }).also { it.setFab(bottomFab) }
+        taskListFragment = getOrInitializeFragment(R.id.showTaskFragment) {
+            TaskListFragment.newInstance()
+        }.also { it.setFab(bottomFab) }
 
         showTaskViewModel = getViewModel<ShowTaskViewModel>().apply {
             start(taskKey)

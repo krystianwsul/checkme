@@ -116,7 +116,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 }
                 R.id.action_task_add -> startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Task(taskKeys.single()))))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
-                R.id.actionTaskCopy -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKeys.single())))
+                R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(childTaskDatas.single().name))
                 else -> throw UnsupportedOperationException()
             }
@@ -138,16 +138,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val selectedNodes = treeViewAdapter.selectedNodes
             check(selectedNodes.isNotEmpty())
 
-            val single = selectedNodes.size < 2
+            val single = selectedNodes.size == 1
 
-            val singleData = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }.singleOrNull()
+            val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
             return listOf(
                     R.id.action_task_join to !single,
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
                     R.id.action_task_show_instances to single,
-                    R.id.actionTaskCopy to (singleData?.current == true),
+                    R.id.actionTaskCopy to datas.all { it.current },
                     R.id.actionTaskWebSearch to single
             )
         }

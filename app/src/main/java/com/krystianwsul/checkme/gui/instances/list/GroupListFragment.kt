@@ -309,11 +309,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     instanceDatas.forEach { it.notificationShown = true }
                 }
-                R.id.actionGroupCopyTask -> {
-                    val instanceData = selectedDatas.single()
-
-                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(instanceData.taskKey)))
-                }
+                R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupRemoveFromParent -> {
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
                     check(instanceDatas.all { it.isRecurringGroupChild })
@@ -355,7 +351,8 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_edit_instance to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null },
                     R.id.action_group_mark_done to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done == null },
                     R.id.action_group_mark_not_done to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done != null },
-                    R.id.actionGroupRemoveFromParent to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRecurringGroupChild }
+                    R.id.actionGroupRemoveFromParent to selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRecurringGroupChild },
+                    R.id.actionGroupCopyTask to selectedDatas.all { it.taskCurrent }
             )
 
             if (selectedDatas.size == 1) {
@@ -367,7 +364,6 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
                         R.id.action_group_add_task to instanceData.taskCurrent,
-                        R.id.actionGroupCopyTask to instanceData.taskCurrent,
                         R.id.actionGroupWebSearch to true
                 )
             } else {
@@ -377,7 +373,6 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
                         R.id.action_group_add_task to false,
-                        R.id.actionGroupCopyTask to false,
                         R.id.actionGroupWebSearch to false
                 )
 

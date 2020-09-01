@@ -21,7 +21,7 @@
     <string name="list">Lista</string>
     <string name="edit_instance">Zmień czas przypomnienia</string>
     <string name="show_task">Pokaż zadanie</string>
-    <string name="copyTask">Kopiuj zadanie</string>
+    <string name="copyTask">Kopiuj</string>
     <string name="navigation_drawer_open">Otwórz navigation drawer</string>
     <string name="navigation_drawer_close">Zamknij navigation drawer</string>
     <string name="mark_done">Oznacz jako zrobione</string>

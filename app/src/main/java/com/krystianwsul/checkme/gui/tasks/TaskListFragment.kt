@@ -431,7 +431,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab!!.setOnClickListener {
             startActivity(EditActivity.getParametersIntent(EditParameters.Create(
                     hint(),
-                    showFirstSchedule = !data!!.copying // todo copy disable longPress
+                    showFirstSchedule = !data!!.copying
             )))
         }
 

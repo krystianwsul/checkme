@@ -25,15 +25,16 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
         Pair(it, hierarchyExactTimeStamp)
     }
             .map { (task, hierarchyExactTimeStamp) ->
-                val childTaskDatas = if (copying)
-                    listOf()
-                else
-                    getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true)
-
                 TaskListFragment.ChildTaskData(
                         task.name,
                         task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        childTaskDatas,
+                        getTaskListChildTaskDatas(
+                                task,
+                                now,
+                                false,
+                                hierarchyExactTimeStamp,
+                                true
+                        ),
                         task.note,
                         task.startExactTimeStamp,
                         task.taskKey,

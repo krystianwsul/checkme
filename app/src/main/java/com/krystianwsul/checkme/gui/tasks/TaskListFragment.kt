@@ -326,7 +326,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
 
             treeViewAdapter.updateDisplayedNodes {
-                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds)
+                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(
+                        data!!.taskData,
+                        selectedTaskKeys,
+                        expandedTaskIds,
+                        data!!.copying
+                )
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
@@ -334,7 +339,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             }
         } else {
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds)
+            taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds, data!!.copying)
             treeViewAdapter = taskAdapter.treeViewAdapter
             taskListRecycler.adapter = treeViewAdapter
             taskListRecycler.itemAnimator = CustomItemAnimator()
@@ -476,7 +481,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         val expandedTaskKeys get() = taskWrappers.flatMap { it.expandedTaskKeys }
 
-        fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?) {
+        fun initialize(
+                taskData: TaskData,
+                selectedTaskKeys: List<TaskKey>?,
+                expandedTaskKeys: List<TaskKey>?,
+                copying: Boolean
+        ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
@@ -511,9 +521,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             taskWrappers = mutableListOf()
             for (childTaskData in taskData.childTaskDatas) {
-                val taskWrapper = TaskWrapper(0, this, childTaskData)
+                val taskWrapper = TaskWrapper(0, this, childTaskData, copying)
 
-                treeNodes.add(taskWrapper.initialize(selectedTaskKeys, this.treeNodeCollection, expandedTaskKeys))
+                treeNodes.add(taskWrapper.initialize(
+                        selectedTaskKeys,
+                        treeNodeCollection,
+                        expandedTaskKeys
+                ))
 
                 taskWrappers.add(taskWrapper)
             }
@@ -534,7 +548,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         inner class TaskWrapper(
                 indentation: Int,
                 private val taskParent: TaskParent,
-                val childTaskData: ChildTaskData
+                val childTaskData: ChildTaskData,
+                private val copying: Boolean
         ) : GroupHolderNode(indentation), TaskParent, Sortable {
 
             override val keyChain = taskParent.keyChain + childTaskData.taskKey
@@ -587,7 +602,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
 
                 for (childTaskData in childTaskData.children) {
-                    val taskWrapper = TaskWrapper(indentation + 1, this, childTaskData)
+                    val taskWrapper = TaskWrapper(
+                            indentation + 1,
+                            this,
+                            childTaskData,
+                            copying
+                    )
 
                     treeNodes.add(taskWrapper.initialize(selectedTaskKeys, treeNode, expandedTaskKeys))
 
@@ -626,6 +646,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val name get() = NameData(childTaskData.name, disabledOverride ?: colorPrimary)
 
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
+                if (copying) return
+
                 val treeNodeCollection = taskAdapter.treeNodeCollection
 
                 if (taskListFragment.rootTaskData != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
@@ -638,7 +660,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val isSelectable = true
 
-            override fun onClick(holder: NodeHolder) = taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+            override fun onClick(holder: NodeHolder) {
+                if (!copying)
+                    taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+                else if (indentation == 0)
+                    taskListFragment.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(childTaskData.taskKey)))
+            }
 
             override val isVisibleWhenEmpty = true
 

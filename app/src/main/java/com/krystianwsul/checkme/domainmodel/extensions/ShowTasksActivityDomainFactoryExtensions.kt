@@ -40,5 +40,5 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
             .sortedDescending()
             .toList()
 
-    return ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, true))
+    return ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, taskKeys == null))
 }

@@ -14,6 +14,8 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
 
     val now = ExactTimeStamp.now
 
+    val copying = taskKeys != null
+
     val tasks = taskKeys?.map { getTaskForce(it) }
             ?.asSequence()
             ?: getUnscheduledTasks(now)
@@ -23,10 +25,15 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
         Pair(it, hierarchyExactTimeStamp)
     }
             .map { (task, hierarchyExactTimeStamp) ->
+                val childTaskDatas = if (copying)
+                    listOf()
+                else
+                    getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true)
+
                 TaskListFragment.ChildTaskData(
                         task.name,
                         task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
+                        childTaskDatas,
                         task.note,
                         task.startExactTimeStamp,
                         task.taskKey,
@@ -40,5 +47,5 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
             .sortedDescending()
             .toList()
 
-    return ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, taskKeys == null))
+    return ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, !copying))
 }

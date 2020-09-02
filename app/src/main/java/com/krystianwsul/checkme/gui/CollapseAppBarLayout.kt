@@ -25,10 +25,8 @@ class CollapseAppBarLayout : AppBarLayout {
     fun setText(title: String, text: String?, paddingLayout: View) {
         toolbarCollapseLayout.title = title
 
-        val showText = text.isNullOrEmpty()
-
         toolbarCollapseText.also {
-            it.visibility = if (showText) View.INVISIBLE else View.VISIBLE
+            it.visibility = if (text.isNullOrEmpty()) View.GONE else View.VISIBLE
             it.text = text
 
             it.addOneShotGlobalLayoutListener {

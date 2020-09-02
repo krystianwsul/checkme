@@ -677,7 +677,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun compareTo(other: ModelNode<NodeHolder>) = if (other is TaskWrapper) {
                 var comparison = childTaskData.compareTo(other.childTaskData)
-                if (taskListFragment.rootTaskData == null && indentation == 0)
+                if (taskListFragment.data!!.reverseOrderForTopLevelNodes && indentation == 0)
                     comparison = -comparison
 
                 comparison
@@ -712,6 +712,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val dataId: Int,
             val immediate: Boolean,
             val taskData: TaskData,
+            val reverseOrderForTopLevelNodes: Boolean,
             val copying: Boolean = false,
             val showFirstSchedule: Boolean = true
     )

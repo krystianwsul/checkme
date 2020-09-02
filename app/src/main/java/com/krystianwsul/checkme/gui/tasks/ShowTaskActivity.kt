@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
@@ -141,7 +142,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        Handler().post { // apparently included layout isn't immediately available in onCreate
+        Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
             appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
         }
 
@@ -149,7 +150,12 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         taskListFragment.setTaskKey(
                 TaskListFragment.RootTaskData(taskKey, data.imageData),
-                TaskListFragment.Data(data.dataId, data.immediate, data.taskData)
+                TaskListFragment.Data(
+                        data.dataId,
+                        data.immediate,
+                        data.taskData,
+                        false
+                )
         )
     }
 
@@ -190,7 +196,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            replaceMenu(R.menu.show_task_menu)
+            animateReplaceMenu(R.menu.show_task_menu) { updateBottomMenu() }
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -223,8 +229,6 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 true
             }
         }
-
-        updateBottomMenu()
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)

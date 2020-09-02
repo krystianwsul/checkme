@@ -111,7 +111,8 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 data.dataId,
                 data.immediate,
                 data.taskData,
-                parameters is Parameters.Copy,
+                parameters.reverseOrderForTopLevelNodes,
+                parameters.copying,
                 false
         ))
     }
@@ -141,7 +142,7 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            replaceMenu(R.menu.menu_select_all)
+            animateReplaceMenu(R.menu.menu_select_all) { updateBottomMenu() }
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -156,8 +157,6 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 true
             }
         }
-
-        updateBottomMenu()
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
@@ -219,16 +218,28 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         abstract val title: Int
 
+        abstract val reverseOrderForTopLevelNodes: Boolean
+
+        abstract val copying: Boolean
+
         @Parcelize
         object Unscheduled : Parameters() {
 
             override val title get() = R.string.noReminder
+
+            override val reverseOrderForTopLevelNodes get() = true
+
+            override val copying get() = false
         }
 
         @Parcelize
         data class Copy(override val taskKeys: List<TaskKey>) : Parameters() {
 
             override val title get() = R.string.copyingTasksTitle
+
+            override val reverseOrderForTopLevelNodes get() = false
+
+            override val copying get() = true
         }
     }
 }

@@ -464,7 +464,14 @@ class MainActivity :
         mainViewModel = getViewModel<MainViewModel>().apply {
             start()
 
-            createDisposable += data.subscribe { taskListFragment.setAllTasks(TaskListFragment.Data(it.dataId, it.immediate, it.taskData)) }
+            createDisposable += data.subscribe {
+                taskListFragment.setAllTasks(TaskListFragment.Data(
+                        it.dataId,
+                        it.immediate,
+                        it.taskData,
+                        true
+                ))
+            }
 
             if (overrideTab == null) {
                 data.firstOrError()

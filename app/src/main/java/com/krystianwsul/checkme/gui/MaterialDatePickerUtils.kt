@@ -17,7 +17,7 @@ fun Long.toMaterialDatePickerDate() = ExactTimeStamp(DateTime(this, DateTimeZone
 fun newMaterialDatePicker(date: Date, min: Date? = null): MaterialDatePicker<Long> {
     val startDate = min ?: Date.today()
 
-    val dateLong = date.toMaterialDatePickerLong()
+    val dateLong = listOf(date, startDate).max()!!.toMaterialDatePickerLong()
     val startDateLong = startDate.toMaterialDatePickerLong()
 
     return MaterialDatePicker.Builder

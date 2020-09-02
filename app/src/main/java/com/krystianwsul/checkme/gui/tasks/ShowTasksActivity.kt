@@ -111,7 +111,8 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 data.dataId,
                 data.immediate,
                 data.taskData,
-                parameters is Parameters.Copy
+                parameters is Parameters.Copy,
+                false
         ))
     }
 

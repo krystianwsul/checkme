@@ -431,7 +431,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab!!.setOnClickListener {
             startActivity(EditActivity.getParametersIntent(EditParameters.Create(
                     hint(),
-                    showFirstSchedule = !data!!.copying
+                    showFirstSchedule = data!!.showFirstSchedule
             )))
         }
 
@@ -712,7 +712,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val dataId: Int,
             val immediate: Boolean,
             val taskData: TaskData,
-            val copying: Boolean = false
+            val copying: Boolean = false,
+            val showFirstSchedule: Boolean = true
     )
 
     data class TaskData(

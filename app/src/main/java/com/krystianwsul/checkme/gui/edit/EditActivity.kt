@@ -22,7 +22,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.DiscardDialogFragment
+import com.krystianwsul.checkme.gui.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
@@ -230,7 +230,7 @@ class EditActivity : NavBarActivity() {
             @Suppress("UNCHECKED_CAST")
             fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
 
-            find<DiscardDialogFragment>(DISCARD_TAG)?.discardDialogListener = discardDialogListener
+            find<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
             find<AllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
         }
 
@@ -409,8 +409,8 @@ class EditActivity : NavBarActivity() {
 
     private fun tryClose(): Boolean {
         return if (dataChanged()) {
-            DiscardDialogFragment.newInstance().let {
-                it.discardDialogListener = discardDialogListener
+            ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters.Discard).let {
+                it.listener = discardDialogListener
                 it.show(supportFragmentManager, DISCARD_TAG)
             }
 

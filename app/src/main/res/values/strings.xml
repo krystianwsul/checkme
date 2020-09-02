@@ -47,7 +47,7 @@
     <string name="nameError">Enter a name</string>
     <string name="add_subtask">Add subtask</string>
     <string name="add_task">Add task</string>
-    <string name="noReminder">No reminder</string>
+    <string name="noReminder">No reminders</string>
     <string name="addReminder">Add a reminder</string>
     <string name="selectAll">Select all</string>
     <string name="note">Note</string>
@@ -127,4 +127,7 @@
     <string name="weeksSuffix">weeks</string>
     <string name="dateCannotBeEmpty">Date cannot be empty</string>
     <string name="everyXWeeks">every %d weeks</string>
+    <string name="copyingTasksTitle">Copying tasks</string>
+    <string name="stopCopyingMessage">Do you want to stop copying these tasks?</string>
+    <string name="stopCopyingYes">Stop</string>
 </resources>

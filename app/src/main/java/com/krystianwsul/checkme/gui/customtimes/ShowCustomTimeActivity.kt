@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
-import com.krystianwsul.checkme.gui.DiscardDialogFragment
+import com.krystianwsul.checkme.gui.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -218,7 +218,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
             check(intent.hasExtra(NEW_KEY))
         }
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
+        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
 
         timeAllDaysText.setFixedOnClickListener {
             allDaysExpanded = !allDaysExpanded
@@ -333,8 +333,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     private fun tryClose() = if (dataChanged()) {
-        DiscardDialogFragment.newInstance().also {
-            it.discardDialogListener = discardDialogListener
+        ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters.Discard).also {
+            it.listener = discardDialogListener
             it.show(supportFragmentManager, DISCARD_TAG)
         }
 

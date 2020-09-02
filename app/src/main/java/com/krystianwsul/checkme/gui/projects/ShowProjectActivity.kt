@@ -11,7 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.DiscardDialogFragment
+import com.krystianwsul.checkme.gui.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
@@ -133,7 +133,7 @@ class ShowProjectActivity : ToolbarActivity(), UserListFragment.UserListListener
 
         userListFragment.setFab(bottomFab)
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
+        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
 
         showProjectViewModel = getViewModel<ShowProjectViewModel>().apply {
             start(projectId)
@@ -166,9 +166,10 @@ class ShowProjectActivity : ToolbarActivity(), UserListFragment.UserListListener
 
     private fun tryClose(): Boolean {
         return if (dataChanged()) {
-            val discardDialogFragment = DiscardDialogFragment.newInstance()
-            discardDialogFragment.discardDialogListener = discardDialogListener
-            discardDialogFragment.show(supportFragmentManager, DISCARD_TAG)
+            ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters.Discard).also {
+                it.listener = discardDialogListener
+                it.show(supportFragmentManager, DISCARD_TAG)
+            }
 
             false
         } else {

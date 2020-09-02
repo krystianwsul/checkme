@@ -46,7 +46,7 @@
     <string name="sendTo">Prześlij do:</string>
     <string name="nameError">Wprowadź nazwę</string>
     <string name="add_subtask">Dodaj zadanie podrzędne</string>
-    <string name="noReminder">Bez przypomnienia</string>
+    <string name="noReminder">Bez przypomnień</string>
     <string name="addReminder">Dodaj przypomnienie</string>
     <string name="selectAll">Zaznacz wszystko</string>
     <string name="note">Notatka</string>
@@ -127,4 +127,7 @@
     <string name="weeksSuffix">tygodni</string>
     <string name="dateCannotBeEmpty">Date cannot be empty</string>
     <string name="everyXWeeks">co %d tygodnie</string>
+    <string name="copyingTasksTitle">Kopiowanie zadań</string>
+    <string name="stopCopyingMessage">Czy chcesz przerwać kopiowanie tych zadań?</string>
+    <string name="stopCopyingYes">Przerwij</string>
 </resources>

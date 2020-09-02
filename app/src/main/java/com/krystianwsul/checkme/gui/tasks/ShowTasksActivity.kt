@@ -9,6 +9,7 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -34,6 +35,8 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         private const val KEY_COPIED_TASK_KEY = "copiedTaskKey"
 
         private const val REQUEST_COPY = 347
+
+        private const val TAG_CONFIRM = "confirm"
 
         fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTasksActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, parameters)
@@ -65,7 +68,10 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
-        toolbar.inflateMenu(R.menu.empty_menu)
+        toolbar.apply {
+            setTitle(parameters.title)
+            inflateMenu(R.menu.empty_menu)
+        }
 
         initBottomBar()
 
@@ -80,6 +86,8 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         }
 
         startDate(receiver)
+
+        (supportFragmentManager.findFragmentByTag(TAG_CONFIRM) as? ConfirmDialogFragment)?.listener = this::onConfirm
     }
 
     override fun onStart() {
@@ -103,7 +111,7 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                 data.dataId,
                 data.immediate,
                 data.taskData,
-                true
+                parameters is Parameters.Copy
         ))
     }
 
@@ -182,6 +190,21 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         }
     }
 
+    override fun onBackPressed() {
+        when (parameters) {
+            Parameters.Unscheduled -> super.onBackPressed()
+            is Parameters.Copy -> ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters(
+                    R.string.stopCopyingMessage,
+                    R.string.stopCopyingYes
+            )).also {
+                it.listener = this::onConfirm
+                it.show(supportFragmentManager, TAG_CONFIRM)
+            }
+        }
+    }
+
+    private fun onConfirm() = finish()
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -193,10 +216,18 @@ class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         open val taskKeys: List<TaskKey>? = null
 
-        @Parcelize
-        object Unscheduled : Parameters()
+        abstract val title: Int
 
         @Parcelize
-        data class Copy(override val taskKeys: List<TaskKey>) : Parameters()
+        object Unscheduled : Parameters() {
+
+            override val title get() = R.string.noReminder
+        }
+
+        @Parcelize
+        data class Copy(override val taskKeys: List<TaskKey>) : Parameters() {
+
+            override val title get() = R.string.copyingTasksTitle
+        }
     }
 }

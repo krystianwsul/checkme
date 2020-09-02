@@ -21,11 +21,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         versionCode 252
         versionName "0.31.9"

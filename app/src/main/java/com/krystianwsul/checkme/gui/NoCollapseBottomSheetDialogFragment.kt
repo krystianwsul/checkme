@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -46,13 +45,6 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
                     state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            dialog!!.window!!
-                    .decorView
-                    .apply {
-                        systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                    }
     }
 
     override fun onStop() {

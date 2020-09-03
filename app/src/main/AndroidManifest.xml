@@ -26,7 +26,7 @@
         <activity
             android:name=".gui.SettingsActivity"
             android:label="@string/settings"
-            android:theme="@style/AppTheme.NavBar" />
+            android:theme="@style/AppTheme" />
         <activity android:name=".gui.TutorialActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,10 +64,10 @@
             android:theme="@style/AppTheme.Toolbar" />
         <activity
             android:name=".gui.customtimes.ShowCustomTimeActivity"
-            android:theme="@style/AppTheme.NavBar" />
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".gui.edit.EditActivity"
-            android:theme="@style/AppTheme.NavBar.NoSplash"
+            android:theme="@style/AppTheme.NoSplash"
             android:windowSoftInputMode="stateHidden|adjustResize"> <!-- keyboard hack -->
 
             <intent-filter>
@@ -88,7 +88,7 @@
         <activity
             android:name=".gui.friends.FindFriendActivity"
             android:windowSoftInputMode="stateVisible"
-            android:theme="@style/AppTheme.NavBar" />
+            android:theme="@style/AppTheme" />
 
         <receiver
             android:name=".notifications.BootReceiver"

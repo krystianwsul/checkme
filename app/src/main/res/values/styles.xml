@@ -28,11 +28,7 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <style name="AppTheme.NavBar">
-        <item name="android:navigationBarColor">@color/primaryColor12</item>
-    </style>
-
-    <style name="AppTheme.NavBar.NoSplash">
+    <style name="AppTheme.NoSplash">
         <item name="android:windowBackground">@color/materialBackground</item>
     </style>
 

@@ -18,6 +18,4 @@ data class UserData(
                 .toLowerCase()
                 .toBase64())
     }
-
-    fun getKey() = getKey(email)
 }

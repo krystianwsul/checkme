@@ -154,9 +154,6 @@ class ProjectsFactory(
             .map { it.existingInstances.size }
             .sum()
 
-    val existingInstances
-        get() = projects.values.flatMap { it.existingInstances }
-
     val taskKeys
         get() = projects.values
             .flatMap {

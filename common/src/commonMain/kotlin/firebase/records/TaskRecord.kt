@@ -9,27 +9,12 @@ class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
         val projectRecord: ProjectRecord<T>,
-        val taskJson: TaskJson
+        private val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
     companion object {
 
         const val TASKS = "tasks"
-
-        private fun <T : ProjectType> dateTimeStringToSchedulePair(
-                projectRecord: ProjectRecord<T>,
-                dateTimeString: String
-        ): Pair<ScheduleKey, CustomTimeId<T>?> {
-            val (dateString, timeString) = dateTimeString.split(':')
-
-            return RootInstanceRecord.dateTimeStringsToSchedulePair(projectRecord, dateString, timeString)
-        }
-
-        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {
-            InstanceRecord.run {
-                scheduleKeyToDateString(it, true) + ":" + scheduleKeyToTimeString(it, true)
-            }
-        }
     }
 
     val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()

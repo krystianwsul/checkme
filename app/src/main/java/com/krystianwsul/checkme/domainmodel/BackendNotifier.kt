@@ -19,7 +19,7 @@ object BackendNotifier {
 
     private const val PREFIX = "https://us-central1-check-me-add47.cloudfunctions.net/notify?"
 
-    fun getUrl(projects: Set<ProjectKey<*>>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
+    private fun getUrl(projects: Set<ProjectKey<*>>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=${it.key}" }.toMutableSet()

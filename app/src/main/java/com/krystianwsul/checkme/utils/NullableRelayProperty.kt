@@ -19,10 +19,6 @@ open class NullableRelayProperty<T : Any>(initialValue: T?, private val beforeSe
             relay.accept(NullableWrapper(value))
         }
 
-    protected fun mutate(mutator: (T?) -> T?) {
-        value = mutator(value)
-    }
-
     override fun getValue(thisRef: Any, property: KProperty<*>) = value
 
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T?) {

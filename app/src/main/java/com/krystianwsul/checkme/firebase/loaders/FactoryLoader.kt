@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -37,7 +36,6 @@ class FactoryLoader(
         val domainDisposable = CompositeDisposable()
 
         fun <T> Single<T>.cacheImmediate() = cacheImmediate(domainDisposable)
-        fun <T> Observable<T>.publishImmediate() = publishImmediate(domainDisposable)
 
         domainFactoryObservable = userInfoObservable.switchMapSingle {
             domainDisposable.clear()

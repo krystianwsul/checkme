@@ -78,26 +78,6 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
     }
 })
 
-fun View.addOneShotScrollChangedListener(action: () -> Unit) = viewTreeObserver.addOnScrollChangedListener(object : ViewTreeObserver.OnScrollChangedListener {
-
-    override fun onScrollChanged() {
-        viewTreeObserver.removeOnScrollChangedListener(this)
-
-        action()
-    }
-})
-
-fun View.addOneShotPreDrawListener(action: () -> Unit) = viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-
-    override fun onPreDraw(): Boolean {
-        viewTreeObserver.removeOnPreDrawListener(this)
-
-        action()
-
-        return true
-    }
-})
-
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)
 
@@ -154,11 +134,6 @@ fun Resources.dpToPx(dp: Int): Float {
     return dp * density
 }
 
-fun Resources.pxToDp(px: Int): Float {
-    val density = displayMetrics.density
-    return px / density
-}
-
 fun Context.dpToPx(dp: Int) = resources.dpToPx(dp)
 
 fun View.dpToPx(dp: Int) = resources.dpToPx(dp)
@@ -211,34 +186,7 @@ fun checkError(domainFactory: DomainFactory, caller: String, values: Map<String,
     }
 }
 
-fun checkError(caller: String): DatabaseCallback {
-    return { databaseMessage, successful, exception ->
-        val message = "firebase write: $caller $databaseMessage"
-        if (successful) {
-            MyCrashlytics.log(message)
-        } else {
-            MyCrashlytics.logException(FirebaseWriteException(message, exception))
-        }
-    }
-}
-
 fun Task<Void>.getMessage() = "isCanceled: $isCanceled, isComplete: $isComplete, isSuccessful: $isSuccessful, exception: $exception"
-
-fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
-    val taskKeysBefore = values?.let { domainFactory.getTaskKeys() }
-
-    addOnCompleteListener {
-        onComplete(
-                domainFactory,
-                caller,
-                values,
-                taskKeysBefore,
-                it.getMessage(),
-                it.isSuccessful,
-                it.exception
-        )
-    }
-}
 
 val ViewGroup.children get() = ViewGroupChildrenIterable(this)
 
@@ -276,8 +224,6 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
 }
 
 fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else resources.getResourceName(id)!!
-
-fun View.normalizedId() = context.normalizedId(id)
 
 fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .load(url)
@@ -391,9 +337,6 @@ fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable)
 fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
     cache().apply { compositeDisposable += subscribe() }!!
 
-fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) =
-    replay().apply { compositeDisposable += connect() }!!
-
 @Suppress("unused")
 fun Disposable.ignore() = Unit
 
@@ -431,10 +374,3 @@ inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         @IdRes id: Int,
         initializer: () -> T
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
-
-fun Context.dimensionFromAttribute(attribute: Int): Int {
-    val attributes = obtainStyledAttributes(intArrayOf(attribute))
-    val dimension = attributes.getDimensionPixelSize(0, 0)
-    attributes.recycle()
-    return dimension
-}

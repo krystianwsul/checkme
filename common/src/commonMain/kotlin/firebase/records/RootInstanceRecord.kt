@@ -31,7 +31,7 @@ class RootInstanceRecord<T : ProjectType>(
         private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)$")
         private val hourMinuteRegex = Regex("^(\\d\\d)-(\\d\\d)$")
 
-        fun dateStringToDate(dateString: String): Date {
+        private fun dateStringToDate(dateString: String): Date {
             val result = dateRegex.find(dateString)!!
 
             val year = result.getInt(1)
@@ -41,7 +41,7 @@ class RootInstanceRecord<T : ProjectType>(
             return Date(year, month, day)
         }
 
-        fun <T : ProjectType> timeStringToTime(
+        private fun <T : ProjectType> timeStringToTime(
                 projectRecord: ProjectRecord<T>,
                 timeString: String
         ): Pair<TimePair, CustomTimeId<T>?> {

@@ -9,7 +9,7 @@ import org.junit.Assert
 fun EmissionChecker<ChangeType>.checkChangeType(changeType: ChangeType, action: () -> Unit) {
     addHandler {
         Assert.assertTrue(
-                "$name expected $changeType: actual: ${it}",
+                "$name expected $changeType: actual: $it",
                 it == changeType
         )
     }

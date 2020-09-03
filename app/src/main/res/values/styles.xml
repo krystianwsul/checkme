@@ -20,8 +20,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:navigationBarColor">@color/primaryDarkColor</item>
+        <item name="android:statusBarColor">@color/primaryDarkColor</item>
         <item name="android:windowBackground">@drawable/splash</item>
-
     </style>
 
     <style name="AppTheme.Toolbar">

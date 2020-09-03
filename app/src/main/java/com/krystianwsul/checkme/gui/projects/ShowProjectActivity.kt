@@ -11,8 +11,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.ConfirmDialogFragment
-import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
-class ShowProjectActivity : ToolbarActivity(), UserListFragment.UserListListener {
+class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListener {
 
     companion object {
 

@@ -11,8 +11,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
-import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 import java.io.Serializable
 
-class ShowTaskInstancesActivity : ToolbarActivity(), GroupListListener {
+class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 

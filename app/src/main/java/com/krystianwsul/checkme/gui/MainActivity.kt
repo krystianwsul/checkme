@@ -58,7 +58,7 @@ import org.joda.time.LocalDate
 import java.io.Serializable
 
 class MainActivity :
-        ToolbarActivity(),
+        AbstractActivity(),
         GroupListListener,
         ShowCustomTimesFragment.CustomTimesListListener,
         TaskListFragment.TaskListListener,

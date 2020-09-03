@@ -13,8 +13,8 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
-import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
@@ -36,7 +36,7 @@ import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
-class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
+class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     companion object {
 

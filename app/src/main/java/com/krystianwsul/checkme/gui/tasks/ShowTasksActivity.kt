@@ -9,8 +9,8 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.ConfirmDialogFragment
-import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.activity_show_tasks.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTasksActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
+class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     companion object {
 

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
@@ -78,12 +79,13 @@ abstract class SelectionCallback : ActionMode.Callback {
 
         oldNavigationBarColor = activity.window.navigationBarColor
 
+        activity.window.statusBarColor = Color.BLACK
         activity.window.navigationBarColor = Color.BLACK
 
         return true
     }
 
-    private fun BottomAppBar.animateBottom(final: Int) {
+    private fun BottomAppBar.animateBottom(final: Int, endCallback: (() -> Unit)? = null) {
         val initial = backgroundTint!!.defaultColor
 
         ValueAnimator.ofArgb(initial, final).apply {
@@ -92,6 +94,20 @@ abstract class SelectionCallback : ActionMode.Callback {
             addUpdateListener { valueAnimator ->
                 backgroundTint = ColorStateList.valueOf(valueAnimator.animatedValue as Int)
             }
+
+            addListener(object : Animator.AnimatorListener {
+
+                override fun onAnimationStart(animator: Animator) = Unit
+
+                override fun onAnimationRepeat(animator: Animator) = Unit
+
+                override fun onAnimationCancel(animator: Animator) = Unit
+
+                override fun onAnimationEnd(animator: Animator) {
+                    endCallback?.invoke()
+                }
+            })
+
             start()
         }
     }
@@ -129,11 +145,13 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
 
         bottomBarData.apply {
-            first.animateBottom(initialBottomColor!!)
+            first.animateBottom(initialBottomColor!!) {
+                activity.window.statusBarColor = oldNavigationBarColor
+                activity.window.navigationBarColor = oldNavigationBarColor
+            }
+
             third.invoke()
         }
-
-        activity.window.navigationBarColor = oldNavigationBarColor
     }
 
     private fun countdown() {

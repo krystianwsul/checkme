@@ -431,3 +431,10 @@ inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         @IdRes id: Int,
         initializer: () -> T
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
+
+fun Context.dimensionFromAttribute(attribute: Int): Int {
+    val attributes = obtainStyledAttributes(intArrayOf(attribute))
+    val dimension = attributes.getDimensionPixelSize(0, 0)
+    attributes.recycle()
+    return dimension
+}

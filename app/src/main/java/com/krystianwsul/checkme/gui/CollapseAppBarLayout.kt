@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
 import kotlinx.android.synthetic.main.toolbar_collapse.view.*
+import kotlin.math.abs
 
 class CollapseAppBarLayout : AppBarLayout {
 
@@ -22,33 +23,51 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var valueAnimator: ValueAnimator? = null
 
+    private var initialHeight: Int? = null
+
     fun setText(title: String, text: String?, paddingLayout: View) {
+        valueAnimator?.cancel()
+
         toolbarCollapseLayout.title = title
 
         toolbarCollapseText.also {
-            it.visibility = if (text.isNullOrEmpty()) View.GONE else View.VISIBLE
+            val hideText = text.isNullOrEmpty()
+
+            it.visibility = if (hideText) View.GONE else View.VISIBLE
             it.text = text
 
             it.addOneShotGlobalLayoutListener {
                 val collapsingTextHelper: CollapsingTextHelper = toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
                 val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
 
-                val newHeight = textLayout.height + context.dpToPx(35).toInt() + it.height
+                if (initialHeight == null) initialHeight = it.height
 
-                valueAnimator?.cancel()
-
-                valueAnimator = ValueAnimator.ofInt(height, newHeight).apply {
-                    addUpdateListener {
-                        val currentHeight = it.animatedValue as Int
-
-                        updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                            height = currentHeight
-                        }
-
-                        paddingLayout.setPadding(0, 0, 0, currentHeight)
+                fun setNewHeight(newHeight: Int) {
+                    updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                        height = newHeight
                     }
 
-                    start()
+                    paddingLayout.setPadding(0, 0, 0, newHeight)
+                }
+
+                val newHeight = if (hideText) {
+                    toolbar.height + 1 // stupid hack because otherwise title doesn't show
+                } else {
+                    initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
+                }
+
+                if (abs(newHeight - height) <= 1) { // same stupid hack
+                    setNewHeight(newHeight)
+                } else {
+                    valueAnimator = ValueAnimator.ofInt(height, newHeight).apply {
+                        addUpdateListener {
+                            val currentHeight = it.animatedValue as Int
+
+                            setNewHeight(currentHeight)
+                        }
+
+                        start()
+                    }
                 }
             }
         }

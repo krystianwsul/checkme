@@ -87,8 +87,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 .setPositiveButton(R.string.add_task) { _, _ -> listener.onNewParent(searchField.text?.toString()) }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
-                    @Suppress("DEPRECATION")
-                    if (arguments!!.getBoolean(SHOW_DELETE_KEY))
+                    if (requireArguments().getBoolean(SHOW_DELETE_KEY))
                         setNeutralButton(R.string.delete) { _, _ -> listener.onTaskDeleted() }
                 }
                 .create()

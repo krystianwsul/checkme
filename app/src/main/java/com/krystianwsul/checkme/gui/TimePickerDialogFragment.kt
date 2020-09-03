@@ -25,7 +25,7 @@ class TimePickerDialogFragment<T> : AbstractDialogFragment() {
     lateinit var listener: (HourMinute, T) -> Unit
 
     @Suppress("UNCHECKED_CAST")
-    override fun onCreateDialog(savedInstanceState: Bundle?) = arguments!!.run {
+    override fun onCreateDialog(savedInstanceState: Bundle?) = requireArguments().run {
         check(containsKey(HOUR_MINUTE_KEY))
 
         val hourMinute = getParcelable<HourMinute>(HOUR_MINUTE_KEY)!!
@@ -33,9 +33,7 @@ class TimePickerDialogFragment<T> : AbstractDialogFragment() {
 
         TimePickerDialog(
                 requireActivity(),
-                TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
-                    listener(HourMinute(hourOfDay, minute), extra)
-                },
+                { _, hourOfDay, minute -> listener(HourMinute(hourOfDay, minute), extra) },
                 hourMinute.hour,
                 hourMinute.minute,
                 DateFormat.is24HourFormat(requireActivity())

@@ -18,12 +18,9 @@
     <string name="delete">Usuń</string>
     <string name="edit">Edytuj</string>
     <string name="expand">Rozwiń</string>
-    <string name="list">Lista</string>
     <string name="edit_instance">Zmień czas przypomnienia</string>
     <string name="show_task">Pokaż zadanie</string>
     <string name="copyTask">Kopiuj</string>
-    <string name="navigation_drawer_open">Otwórz navigation drawer</string>
-    <string name="navigation_drawer_close">Zamknij navigation drawer</string>
     <string name="mark_done">Oznacz jako zrobione</string>
     <string name="mark_not_done">Oznacz jako nie zrobione</string>
     <string name="name_hint">Nazwa</string>
@@ -53,7 +50,6 @@
     <string name="monthDay">dzień</string>
     <string name="monthDayStart">od</string>
     <string name="monthDayEnd">miesiąca</string>
-    <string name="signIn">Zaloguj się</string>
     <string name="signOut">Wyloguj się</string>
     <string name="signInFailed">Logowanie nie powiodło się.</string>
     <string name="signInAs">Zalogowano jako</string>
@@ -67,14 +63,12 @@
     <string name="instanceMarkedDone">To przypomnienie zostało oznaczone jako zrobione.</string>
     <string name="projects">Projekty</string>
     <string name="projects_empty">Dodaj projekt klikając w plusa na dole.</string>
-    <string name="parentProject">Projekt</string>
     <string name="showInstances">Pokaż przypomnienia</string>
     <string name="tutorial1">Rozpocznij od utworzenia zadania. Zadanie może mieć nazwę, notatki i podzadania.</string>
     <string name="tutorial2">Możesz również dodać przypomnienia do zadania, żeby otrzymać powiadomienie o nim o danej porze. Możesz otrzymać powiadomienie raz, w pewne dni tygodnia lub w pewien dzień każdego miesiąca.</string>
     <string name="tutorial3">Możesz ustawić powadomienie na konkretną godzinę. Możesz również utworzyć porę dnia jako skrót, jeśli często masz coś do zrobienia o pewnej porze dnia.</string>
     <string name="tutorial4">Zaloguj się do konta Google, żeby dzielić się zadaniami z innymi użytkownikami. Zacznij od wyszukania użytkowników po adresie e-mailowym, żeby dodać ich jako znajomych. Utwórz projekt, dodaj do niegogo znajomych. Tworząc zadanie, ustaw jego przynależność do danego projektu.</string>
     <string name="tutorial">Przewodnik</string>
-    <string name="open">Otwórz</string>
     <string name="snackbarRemoved">Usunięto %1$s</string>
     <string name="undo">cofnij</string>
     <string name="add_task_this_time">Dodaj zadanie z tym samym czasem</string>
@@ -94,9 +88,7 @@
     <string name="gallery">Wybierz obraz</string>
     <string name="remove">Usuń obraz</string>
     <string name="addTo">Dodaj do</string>
-    <string name="howOften">Jak często</string>
     <string name="settings">Ustawienia</string>
-    <string name="account">Konto</string>
     <string name="accountDetails">Profil</string>
     <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
     <string name="profileUpdated">Zaktualizowano profil</string>
@@ -116,9 +108,7 @@
     <string name="until">Do</string>
     <string name="endDate">Data końcowa nie może być przed datą startową</string>
     <string name="allDays">Wszystkie dni</string>
-    <string name="editAllReminders">Edytować wszystkie pszyszłe przypomnienia?</string>
     <string name="allFutureReminders">Wszystkie pszyszłe przypomnienia</string>
-    <string name="justThisOne">Tylko to</string>
     <string name="joinAllFutureReminders">Połączyć wszystkie pszyszłe przypomnienia?</string>
     <string name="justThese">Tylko te</string>
     <string name="removeFromParent">Usuń z nadrzędnego przypomnienia</string>

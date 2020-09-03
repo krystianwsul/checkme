@@ -26,7 +26,7 @@ class TutorialFragment : AbstractFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        position = arguments!!.getInt(POSITION_KEY)
+        position = requireArguments().getInt(POSITION_KEY)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_tutorial, container, false)!!

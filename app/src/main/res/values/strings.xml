@@ -18,12 +18,9 @@
     <string name="delete">Remove</string>
     <string name="edit">Edit</string>
     <string name="expand">Expand</string>
-    <string name="list">List</string>
     <string name="edit_instance">Change reminder time</string>
     <string name="show_task">Show task</string>
     <string name="copyTask">Copy</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="mark_done">Mark done</string>
     <string name="mark_not_done">Mark not done</string>
     <string name="name_hint">Name</string>
@@ -54,7 +51,6 @@
     <string name="monthDay">day</string>
     <string name="monthDayStart">from the</string>
     <string name="monthDayEnd">of the month</string>
-    <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>
     <string name="signInFailed">Sign in failed.</string>
     <string name="signInAs">Signed in as</string>
@@ -68,14 +64,12 @@
     <string name="instanceMarkedDone">This reminder has been marked as done.</string>
     <string name="projects">Projects</string>
     <string name="projects_empty">Add a project by clicking the plus at the bottom.</string>
-    <string name="parentProject">Project</string>
     <string name="showInstances">Show reminders</string>
     <string name="tutorial1">Begin by creating a task.  A task can have a name, notes, and subtasks.</string>
     <string name="tutorial2">You can also add reminders to a task, to get notified about it at a specific time. You can be notified once, on certain days of the week, or on a certain day of every month.</string>
     <string name="tutorial3">You can set a reminder for a specific hour.  Also, you can add a named time of day as a shortcut, if you often have things to do at a specific time.</string>
     <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>
     <string name="tutorial">Tutorial</string>
-    <string name="open">Open</string>
     <string name="snackbarRemoved">%1$s removed</string>
     <string name="undo">undo</string>
     <string name="add_task_this_time">Add task at this time</string>
@@ -94,9 +88,7 @@
     <string name="gallery">Choose image</string>
     <string name="remove">Remove image</string>
     <string name="addTo">Add to</string>
-    <string name="howOften">How often</string>
     <string name="settings">Settings</string>
-    <string name="account">Account</string>
     <string name="accountDetails">Profile</string>
     <string name="accountUpdate">Update your profile based on your Google account</string>
     <string name="profileUpdated">Profile updated</string>
@@ -116,9 +108,7 @@
     <string name="until">Until</string>
     <string name="endDate">End date cannot be before start date</string>
     <string name="allDays">All days</string>
-    <string name="editAllReminders">Edit all future reminders?</string>
     <string name="allFutureReminders">All future reminders</string>
-    <string name="justThisOne">Just this one</string>
     <string name="joinAllFutureReminders">Join all future reminders?</string>
     <string name="justThese">Just these</string>
     <string name="removeFromParent">Remove from parent</string>

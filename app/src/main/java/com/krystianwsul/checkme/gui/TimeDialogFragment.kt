@@ -27,9 +27,9 @@ class TimeDialogFragment : AbstractDialogFragment() {
     lateinit var timeDialogListener: TimeDialogListener
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(arguments!!.containsKey(CUSTOM_TIMES_KEY))
+        check(requireArguments().containsKey(CUSTOM_TIMES_KEY))
 
-        val customTimeDatas = arguments!!.getParcelableArrayList<CustomTimeData>(CUSTOM_TIMES_KEY)!!
+        val customTimeDatas = requireArguments().getParcelableArrayList<CustomTimeData>(CUSTOM_TIMES_KEY)!!
 
         val names = customTimeDatas.map { it.name } + getString(R.string.other) + getString(R.string.add)
 

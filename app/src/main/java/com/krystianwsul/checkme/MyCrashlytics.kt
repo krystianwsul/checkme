@@ -1,10 +1,8 @@
 package com.krystianwsul.checkme
 
 import android.util.Log
-import com.crashlytics.android.Crashlytics
-import com.crashlytics.android.answers.Answers
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.krystianwsul.common.ErrorLogger
-import io.fabric.sdk.android.Fabric
 
 object MyCrashlytics : ErrorLogger() {
 
@@ -13,8 +11,7 @@ object MyCrashlytics : ErrorLogger() {
             .getBoolean(R.bool.crashlytics_enabled)
 
     fun init() {
-        if (enabled)
-            Fabric.with(MyApplication.instance, Answers(), Crashlytics())
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(enabled)
 
         instance = this
     }
@@ -24,13 +21,13 @@ object MyCrashlytics : ErrorLogger() {
 
         Log.e("asdf", "MyCrashLytics.log: $message")
         if (enabled)
-            Crashlytics.log(message)
+            FirebaseCrashlytics.getInstance().log(message)
     }
 
     override fun logException(throwable: Throwable) {
         Log.e("asdf", "MyCrashLytics.logException", throwable)
         if (enabled)
-            Crashlytics.logException(throwable)
+            FirebaseCrashlytics.getInstance().recordException(throwable)
     }
 
     override fun logMethod(obj: Any) {
@@ -50,6 +47,4 @@ object MyCrashlytics : ErrorLogger() {
 
         log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode() + ": $message")
     }
-
-    val answers get() = if (enabled) Answers.getInstance() else null
 }

@@ -49,12 +49,12 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
                 @Suppress("unused")
                 val jsonWrappers = snapshot
-            }).jsonWrappers)
+            }).jsonWrappers ?: mapOf())
         }
     }
 
     @Serializable
-    private class SharedProjects(val jsonWrappers: Map<String, JsonWrapper> = mapOf())
+    private class SharedProjects(val jsonWrappers: Map<String, JsonWrapper>?)
 
     fun getUsers(callback: (Map<String, UserWrapper>) -> Unit) {
         rootReference.child(USERS_KEY).once("value") { snapshot ->

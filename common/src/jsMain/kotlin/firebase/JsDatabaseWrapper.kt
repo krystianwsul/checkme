@@ -6,9 +6,9 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.UserWrapper
+import json
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
@@ -86,5 +86,5 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     private fun <T> parse(
             serializer: DeserializationStrategy<T>,
             data: dynamic
-    ) = Json.nonstrict.parse(serializer, JSON.stringify(data))
+    ) = json.decodeFromString(serializer, JSON.stringify(data))
 }

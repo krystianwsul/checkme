@@ -1,9 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.crashlytics.android.answers.CustomEvent
 import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -21,7 +19,6 @@ class TutorialViewModel : ViewModel() {
         val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
 
         if (googleSignInResult.isSuccess) {
-            MyCrashlytics.answers?.logCustom(CustomEvent("google success"))
             val googleSignInAccount = googleSignInResult.signInAccount!!
 
             val credential = GoogleAuthProvider.getCredential(googleSignInAccount.idToken, null)
@@ -45,11 +42,6 @@ class TutorialViewModel : ViewModel() {
                         }
                     }
         } else {
-            MyCrashlytics.answers?.logCustom(CustomEvent("google error"))
-            val message = "google signin error: $googleSignInResult"
-
-            Log.e("asdf", message)
-
             state.apply {
                 accept(State.Error)
                 accept(State.Initial)

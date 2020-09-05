@@ -1,48 +1,12 @@
 package com.krystianwsul.common.utils
 
-import kotlin.jvm.Volatile
 import kotlin.reflect.KProperty
 
-private object UNINITIALIZED_VALUE
+expect class InvalidatableLazyImpl<T>(initializer: () -> T, lock: Any? = null) : Lazy<T>, Serializable {
 
-@Suppress("UNCHECKED_CAST")
-class InvalidatableLazyImpl<T>(private val initializer: () -> T, lock: Any? = null) : Lazy<T>, Serializable {
+    fun invalidate()
 
-    @Volatile
-    private var _value: Any? = UNINITIALIZED_VALUE
-    private val lock = lock ?: this
-
-    fun invalidate() {
-        _value = UNINITIALIZED_VALUE
-    }
-
-    override val value: T
-        get() {
-            val _v1 = _value
-            if (_v1 !== UNINITIALIZED_VALUE) {
-                return _v1 as T
-            }
-
-            return synchronized(lock) {
-                val _v2 = _value
-                if (_v2 !== UNINITIALIZED_VALUE) {
-                    _v2 as T
-                } else {
-                    val typedValue = initializer()
-                    _value = typedValue
-                    typedValue
-                }
-            }
-        }
-
-
-    override fun isInitialized(): Boolean = _value !== UNINITIALIZED_VALUE
-
-    override fun toString(): String = if (isInitialized()) value.toString() else "Lazy value not initialized yet."
-
-    operator fun setValue(any: Any, property: KProperty<*>, t: T) {
-        _value = t
-    }
+    operator fun setValue(any: Any, property: KProperty<*>, t: T)
 }
 
 fun <T> invalidatableLazy(initializer: () -> T) = InvalidatableLazyImpl(initializer)

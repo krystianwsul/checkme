@@ -98,6 +98,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     private var allDaysExpanded = false
 
+    override val rootView get() = showCustomTimeRoot!!
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true

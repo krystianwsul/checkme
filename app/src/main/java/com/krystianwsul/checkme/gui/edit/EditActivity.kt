@@ -167,6 +167,8 @@ class EditActivity : NavBarActivity() {
         save(false, allReminders)
     }
 
+    override val rootView get() = editRoot!!
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true

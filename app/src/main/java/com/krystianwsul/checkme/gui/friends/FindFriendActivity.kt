@@ -47,6 +47,8 @@ class FindFriendActivity : NavBarActivity() {
     private var databaseReference: DatabaseReference? = null
     private var valueEventListener: ValueEventListener? = null
 
+    override val rootView get() = findFriendRoot!!
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_find_friend, menu)
         return true

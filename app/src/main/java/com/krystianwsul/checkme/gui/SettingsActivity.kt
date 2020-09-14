@@ -37,6 +37,8 @@ class SettingsActivity : NavBarActivity() {
 
     private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
 
+    override val rootView get() = settingsRoot!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)

@@ -7,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.utils.setNavBarColor
 import com.krystianwsul.checkme.gui.utils.setNavBarTransparency
 import com.krystianwsul.checkme.utils.isLandscape
 import io.reactivex.disposables.CompositeDisposable
@@ -64,7 +65,13 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
             findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
-            window!!.setNavBarTransparency(landscape)
+            setNavBarTransparency(window!!, landscape)
+        }
+
+        override fun setContentView(view: View) {
+            super.setContentView(view)
+
+            setNavBarColor(window!!, view, landscape)
         }
 
         fun setInsetViews(outer: View, inner: View) {

@@ -36,6 +36,8 @@ class TutorialActivity : NavBarActivity() {
     var help: Boolean = false
         private set
 
+    override val rootView get() = tutorialCoordinator!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

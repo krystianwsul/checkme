@@ -13,7 +13,7 @@ object TickHolder {
 
         val expires = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
                 .map { it.expires }
-                .max()
+                .maxOrNull()
 
         return expires?.let { TickData.Lock(silent, source, it) } ?: TickData.Normal(silent, source)
     }

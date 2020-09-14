@@ -429,7 +429,7 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
-    val ordinal = joinTasks.map { it.ordinal }.min()
+    val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -486,7 +486,7 @@ fun DomainFactory.createJoinChildTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-    val ordinal = joinTasks.map { it.ordinal }.min()
+    val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -538,7 +538,7 @@ fun DomainFactory.createJoinRootTask(
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
-    val ordinal = joinTasks.map { it.ordinal }.min()
+    val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
     val imageUuid = imagePath?.let { newUuid() }
 

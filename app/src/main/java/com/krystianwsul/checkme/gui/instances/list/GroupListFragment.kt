@@ -211,7 +211,7 @@ class GroupListFragment @JvmOverloads constructor(
                     } else {
                         val instanceDatas = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
 
-                        val scheduleHint = instanceDatas.minBy { it.instanceTimeStamp }?.let {
+                        val scheduleHint = instanceDatas.minByOrNull { it.instanceTimeStamp }?.let {
                             val date = it.instanceTimeStamp.date
                             val timePair = it.createTaskTimePair
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.os.Bundle
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
@@ -33,7 +32,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
         showRemove = requireArguments().getBoolean(KEY_SHOW_REMOVE)
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+    override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
         setCancelable(true)
         setContentView(R.layout.dialog_camera_gallery)
     }

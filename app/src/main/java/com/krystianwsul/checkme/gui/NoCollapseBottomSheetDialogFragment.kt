@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StyleRes
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -53,7 +54,9 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         super.onStop()
     }
 
-    inner class TransparentNavigationDialog : BottomSheetDialog(requireContext(), R.style.BottomSheetDialogThemeNavbar) {
+    inner class TransparentNavigationDialog(
+            @StyleRes styleId: Int = R.style.BottomSheetDialogTheme
+    ) : BottomSheetDialog(requireContext(), styleId) {
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)

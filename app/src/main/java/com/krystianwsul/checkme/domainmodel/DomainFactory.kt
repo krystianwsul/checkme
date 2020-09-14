@@ -838,7 +838,7 @@ class DomainFactory(
 
         val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
                 .mapNotNull { it.getNextAlarm(now) }
-                .min()
+                .minOrNull()
                 .takeUnless { clear }
 
         NotificationWrapper.instance.updateAlarm(nextAlarm)

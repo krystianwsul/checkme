@@ -166,7 +166,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                         customView.scheduleDialogUntilLayout,
                         scheduleDialogData::until,
                         TAG_UNTIL_FRAGMENT,
-                        { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
+                        { listOfNotNull(scheduleDialogData.from, Date.today()).maxOrNull()!! }
                 )
         )
     }

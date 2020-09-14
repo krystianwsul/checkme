@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:background="@drawable/bottom_sheet_backdrop">
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/cameraGalleryNavigation"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/menu_camera_gallery"
-        android:theme="@style/BottomNavigationDrawer" />
+        android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+        tools:ignore="UselessParent">
+
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/cameraGalleryNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/BottomNavigationDrawer"
+            app:menu="@menu/menu_camera_gallery" />
+
+    </FrameLayout>
 
 </FrameLayout>

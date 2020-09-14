@@ -37,29 +37,20 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/bg_bottom_sheet_dialog_fragment</item>
-        <item name="android:clipChildren">true</item>
-    </style>
-
-    <style name="BottomSheetNavbar" parent="@style/Widget.Design.BottomSheet.Modal">
         <item name="android:background">@null</item>
         <item name="android:clipChildren">true</item>
     </style>
 
-    <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme" parent="@style/Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
-    </style>
-
-    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheet</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/primaryColor12Solid</item>
-    </style>
-
-    <style name="BottomSheetDialogThemeNavbar" parent="BaseBottomSheetDialog">
-        <item name="bottomSheetStyle">@style/BottomSheetNavbar</item>
         <item name="android:statusBarColor">#273238</item>
         <item name="android:navigationBarColor">#273238</item>
+    </style>
+
+    <style name="BottomSheetDialogTheme.ActionMode">
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
     </style>
 
     <style name="OldTextInput" parent="@style/Widget.Design.TextInputLayout" />

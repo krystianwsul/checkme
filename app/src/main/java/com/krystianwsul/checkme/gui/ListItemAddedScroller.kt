@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Handler
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -75,7 +76,7 @@ interface ListItemAddedScroller {
         }
     }
 
-    fun delay(action: () -> Unit) = Handler().postDelayed(action, 500)
+    fun delay(action: () -> Unit) = Handler(Looper.getMainLooper()).postDelayed(action, 500)
 
     fun checkCreatedTaskKey() {
         scrollToTaskKey = EditActivity.createdTaskKey

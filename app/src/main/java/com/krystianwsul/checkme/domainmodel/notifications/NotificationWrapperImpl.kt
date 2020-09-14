@@ -88,7 +88,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val reallySilent = if (silent) {
             true
         } else {
-            lastNotificationBeeps.values.max()
+            lastNotificationBeeps.values
+                    .maxOrNull()
                     ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
                     ?.let { true } ?: false
         }

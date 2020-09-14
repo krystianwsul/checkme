@@ -229,7 +229,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                         date,
                         mutableSetOf(scheduleData.dayOfWeek),
                         false,
-                        listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).min()!!,
+                        listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).minOrNull()!!,
                         scheduleData.dayOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth,

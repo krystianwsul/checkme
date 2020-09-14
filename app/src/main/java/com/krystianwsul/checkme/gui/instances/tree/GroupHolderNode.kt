@@ -171,7 +171,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                                 .split('\n')
                                 .map { getWantLines(it) }.sum()
 
-                        val lines = listOf(wantLines, remainingLines + 1).min()!!
+                        val lines = listOf(wantLines, remainingLines + 1).minOrNull()!!
 
                         remainingLines -= (lines - 1)
 

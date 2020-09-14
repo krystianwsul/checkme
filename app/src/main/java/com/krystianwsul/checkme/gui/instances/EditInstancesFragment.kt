@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
@@ -53,7 +52,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private var date: Date? = null
+    private lateinit var date: Date
     private var data: EditInstancesViewModel.Data? = null
 
     private var savedInstanceState: Bundle? = null
@@ -148,14 +147,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 .inflate(R.layout.fragment_edit_instances, null)
                 .apply {
                     editInstanceDate.setFixedOnClickListener {
-                        newMaterialDatePicker(date!!).let {
+                        newMaterialDatePicker(date).let {
                             it.addListener(materialDatePickerListener)
                             it.show(childFragmentManager, DATE_FRAGMENT_TAG)
                         }
                     }
 
                     editInstanceSave.setOnClickListener {
-                        checkNotNull(date)
                         checkNotNull(data)
                         check(isValidDate)
                         check(isValidDateTime)
@@ -166,7 +164,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                                 data!!.dataId,
                                 SaveService.Source.GUI,
                                 data!!.instanceDatas.keys,
-                                date!!,
+                                date,
                                 timePairPersist!!.timePair
                         )
 
@@ -178,7 +176,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     editInstanceCancel.setOnClickListener { requireDialog().cancel() }
                 }
 
-        return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+        return TransparentNavigationDialog(R.style.BottomSheetDialogTheme_ActionMode).apply {
             setCancelable(true)
             setContentView(myView)
         }
@@ -211,7 +209,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         super.onSaveInstanceState(outState)
 
         if (data != null) {
-            checkNotNull(date)
             outState.putParcelable(DATE_KEY, date)
 
             checkNotNull(timePairPersist)
@@ -241,7 +238,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         myView.editInstanceLayout.visibility = View.VISIBLE
 
         if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(DATE_KEY))) {
-            check(date == null)
+            check(!this::date.isInitialized)
             check(timePairPersist == null)
             check(initialTimePair == null)
             check(initialDate == null)
@@ -251,7 +248,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             val dateTime = data.instanceDatas
                     .values
-                    .map { it.instanceDateTime }.min()!!
+                    .map { it.instanceDateTime }
+                    .minOrNull()!!
 
             date = dateTime.date
             timePairPersist = TimePairPersist(dateTime.time.timePair)
@@ -270,8 +268,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
-                    .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
-                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") }
+                    .sortedBy { it.hourMinutes[date.dayOfWeek] }
+                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date.dayOfWeek] + ")") }
             )
 
             TimeDialogFragment.newInstance(customTimeDatas).also {
@@ -285,9 +283,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private fun updateDateText() {
-        checkNotNull(date)
-
-        myView.editInstanceDate.setText(date!!.getDisplayText())
+        myView.editInstanceDate.setText(date.getDisplayText())
 
         updateTimeText()
 
@@ -298,19 +294,18 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private fun updateTimeText() {
         checkNotNull(timePairPersist)
         checkNotNull(data)
-        checkNotNull(date)
 
         if (timePairPersist!!.customTimeKey != null) {
             val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
 
-            myView.editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
+            myView.editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date.dayOfWeek] + ")")
         } else {
             myView.editInstanceTime.setText(timePairPersist!!.hourMinute.toString())
         }
     }
 
     private val isValidDate: Boolean
-        get() = if (data != null) date!! >= Date.today() else false
+        get() = if (data != null) date >= Date.today() else false
 
     //cached data doesn't contain new custom time
     private val isValidDateTime: Boolean
@@ -320,12 +315,15 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     if (!data!!.customTimeDatas.containsKey(timePairPersist!!.customTimeKey))
                         return false
 
-                    data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!).hourMinutes[date!!.dayOfWeek]!!
+                    data!!.customTimeDatas
+                            .getValue(timePairPersist!!.customTimeKey!!)
+                            .hourMinutes
+                            .getValue(date.dayOfWeek)
                 } else {
                     timePairPersist!!.hourMinute
                 }
 
-                return TimeStamp(date!!, hourMinute) > TimeStamp.now
+                return TimeStamp(date, hourMinute) > TimeStamp.now
             } else {
                 return false
             }

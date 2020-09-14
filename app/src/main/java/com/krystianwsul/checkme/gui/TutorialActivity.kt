@@ -48,7 +48,7 @@ class TutorialActivity : NavBarActivity() {
 
         setContentView(R.layout.activity_tutorial)
 
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.primaryColor12Solid)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.primaryColor12)
 
         tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 

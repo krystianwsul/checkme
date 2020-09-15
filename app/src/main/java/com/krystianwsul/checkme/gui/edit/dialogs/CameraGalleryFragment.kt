@@ -25,8 +25,8 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    override val outerView get() = cameraGalleryRoot!!
-    override val innerView get() = cameraGalleryBackground!!
+    override val backgroundView get() = cameraGalleryRoot!!
+    override val contentView get() = cameraGalleryBackground!!
 
     private var showRemove = false
 

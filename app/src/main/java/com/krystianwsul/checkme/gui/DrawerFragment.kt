@@ -23,8 +23,8 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     override val alwaysExpand = false
 
-    override val outerView get() = drawerRoot!!
-    override val innerView get() = drawerBackgroundLayout!!
+    override val backgroundView get() = drawerRoot!!
+    override val contentView get() = drawerBackgroundLayout!!
 
     private val mainActivity get() = activity as MainActivity
 

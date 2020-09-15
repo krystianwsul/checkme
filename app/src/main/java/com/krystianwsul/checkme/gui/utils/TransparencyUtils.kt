@@ -10,9 +10,9 @@ import androidx.core.view.doOnLayout
 import com.krystianwsul.checkme.R
 
 fun setNavBarTransparency(window: Window, rootView: View, landscape: Boolean) {
-    if (!landscape) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+    WindowCompat.setDecorFitsSystemWindows(window, false)
 
+    if (!landscape) {
         window.navigationBarColor = ContextCompat.getColor(window.context, R.color.primaryColor12)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

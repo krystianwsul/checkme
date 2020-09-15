@@ -55,8 +55,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     override val dialogStyle = R.style.BottomSheetDialogTheme_ActionMode
 
-    override val outerView get() = editInstancesRoot!!
-    override val innerView get() = editInstancesBackground!!
+    override val backgroundView get() = editInstancesRoot!!
+    override val contentView get() = editInstancesBackground!!
 
     private lateinit var date: Date
     private var data: EditInstancesViewModel.Data? = null

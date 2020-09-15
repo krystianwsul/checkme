@@ -2,11 +2,14 @@ package com.krystianwsul.checkme.gui
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
 import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -38,26 +41,35 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
     @StyleRes
     protected open val dialogStyle = R.style.BottomSheetDialogTheme
 
-    protected abstract val outerView: View
-    protected abstract val innerView: View
+    protected abstract val backgroundView: View
+    protected abstract val contentView: View
 
     final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = TransparentNavigationDialog()
 
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewCompat.setOnApplyWindowInsetsListener(outerView) { _, windowInsetsCompat ->
+        ViewCompat.setOnApplyWindowInsetsListener(backgroundView) { _, windowInsetsCompat ->
             val mask = WindowInsetsCompat.Type.systemBars()
 
             val insets = windowInsetsCompat.getInsets(mask)
 
-            outerView.setPadding(0, insets.top, 0, 0)
+            Log.e("asdf", "insets " + insets.left + "-" + insets.top + "-" + insets.right + "-" + insets.bottom)
 
-            innerView.setPadding(
-                    insets.left,
+            backgroundView.updateLayoutParams<FrameLayout.LayoutParams> {
+                leftMargin = insets.left
+                topMargin = insets.top
+                rightMargin = insets.right
+            }
+
+            contentView.setPadding(
                     0,
-                    insets.right,
+                    0,
+                    0,
                     insets.bottom
             )
+
+            // todo check if this is necessary
+            requireDialog().findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
             WindowInsetsCompat.CONSUMED
         }
@@ -91,10 +103,11 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
+            // todo check if this is necessary
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
             findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
-            setNavBarTransparency(window!!, outerView, landscape)
+            setNavBarTransparency(window!!, backgroundView, landscape)
         }
     }
 }

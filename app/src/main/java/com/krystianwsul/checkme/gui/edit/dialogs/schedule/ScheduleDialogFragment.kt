@@ -61,8 +61,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
     }
 
-    override val outerView get() = scheduleDialogRoot!!
-    override val innerView get() = scheduleDialogBackgroundLayout!!
+    override val backgroundView get() = scheduleDialogRoot!!
+    override val contentView get() = scheduleDialogContentWrapper!!
 
     private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
 
@@ -493,7 +493,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         check(customTimeDatas != null)
         check(activity != null)
 
-        if (animate) TransitionManager.beginDelayedTransition(scheduleDialogBackgroundLayout)
+        if (animate) TransitionManager.beginDelayedTransition(scheduleDialogContentLayout)
 
         run {
             delegate.visibilities.run {

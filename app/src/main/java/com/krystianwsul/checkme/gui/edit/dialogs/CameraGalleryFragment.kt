@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
+import kotlinx.android.synthetic.main.dialog_camera_gallery.*
 
 class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -23,6 +24,9 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
     }
+
+    override val outerView get() = cameraGalleryRoot!!
+    override val innerView get() = cameraGalleryBackground!!
 
     private var showRemove = false
 

@@ -5,10 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
+    android:id="@+id/cameraGalleryRoot"
     android:orientation="vertical"
     android:background="@drawable/bottom_sheet_backdrop">
 
     <FrameLayout
+        android:id="@+id/cameraGalleryBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_bottom_sheet_dialog_fragment"
@@ -18,8 +20,12 @@
             android:id="@+id/cameraGalleryNavigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/bottom_sheet_corner_radius"
             android:theme="@style/BottomNavigationDrawer"
-            app:menu="@menu/menu_camera_gallery" />
+            app:headerLayout="@layout/empty"
+            app:menu="@menu/menu_camera_gallery"
+            android:background="#FFF"
+            app:elevation="0dp" />
 
     </FrameLayout>
 

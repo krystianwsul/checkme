@@ -23,6 +23,9 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     override val alwaysExpand = false
 
+    override val outerView get() = drawerRoot!!
+    override val innerView get() = drawerBackgroundLayout!!
+
     private val mainActivity get() = activity as MainActivity
 
     private val drawerViewModel by lazy { DrawerViewModel() }
@@ -40,7 +43,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
     ) = inflater.inflate(R.layout.main_navigation, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setInsetViews(drawerRoot, drawerBackgroundLayout)
+        super.onViewCreated(view, savedInstanceState)
 
         mainActivityNavigation.apply {
             mainActivity.apply {

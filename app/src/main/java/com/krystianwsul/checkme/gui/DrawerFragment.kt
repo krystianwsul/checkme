@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
-import com.google.android.material.navigation.NavigationView
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
@@ -9,6 +11,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
 import io.reactivex.rxkotlin.addTo
+import kotlinx.android.synthetic.main.main_navigation.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
@@ -30,20 +33,16 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         drawerViewModel.start()
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
-        setCancelable(true)
-        setContentView(R.layout.main_navigation)
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) = inflater.inflate(R.layout.main_navigation, container, false)!!
 
-        setInsetViews(
-                findViewById(R.id.drawerRoot)!!,
-                findViewById(R.id.drawerBackgroundLayout)!!
-        )
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setInsetViews(drawerRoot, drawerBackgroundLayout)
 
-    override fun onStart() {
-        super.onStart()
-
-        dialog!!.findViewById<NavigationView>(R.id.mainActivityNavigation)!!.apply {
+        mainActivityNavigation.apply {
             mainActivity.apply {
                 setCheckedItem(when (visibleTab.value!!) {
                     MainActivity.Tab.INSTANCES -> R.id.main_drawer_instances
@@ -106,9 +105,13 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                                 navHeaderName.text = it.name
                                 navHeaderEmail.text = it.email
                             }
-                            .addTo(startDisposable)
+                            .addTo(viewCreatedDisposable)
                 }
             }
         }
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
+        setCancelable(true)
     }
 }

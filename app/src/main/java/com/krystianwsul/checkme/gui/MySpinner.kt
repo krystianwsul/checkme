@@ -54,20 +54,22 @@ class MySpinner @JvmOverloads constructor(
     }
 
     fun addListener(listener: (Int) -> Unit) {
-        text.addTextChangedListener(object : TextWatcher {
+        addOneShotGlobalLayoutListener {
+            text.addTextChangedListener(object : TextWatcher {
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
-            override fun afterTextChanged(s: Editable?) {
-                val stringValue = text.text.toString()
+                override fun afterTextChanged(s: Editable?) {
+                    val stringValue = text.text.toString()
 
-                val item = items.single { it.toString() == stringValue }
+                    val item = items.single { it.toString() == stringValue }
 
-                listener(items.indexOf(item))
-            }
-        })
+                    listener(items.indexOf(item))
+                }
+            })
+        }
     }
 
     fun setDense() = mySpinnerText.updatePadding(top = 0, bottom = 0)

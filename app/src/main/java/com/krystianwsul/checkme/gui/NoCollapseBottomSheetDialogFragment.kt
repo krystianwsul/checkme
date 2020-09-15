@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -43,20 +45,22 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        outerView.setOnApplyWindowInsetsListener { _, insets ->
-            outerView.setPadding(0, insets.systemWindowInsetTop, 0, 0)
+        ViewCompat.setOnApplyWindowInsetsListener(outerView) { _, windowInsetsCompat ->
+            val mask = WindowInsetsCompat.Type.systemBars()
+
+            val insets = windowInsetsCompat.getInsets(mask)
+
+            outerView.setPadding(0, insets.top, 0, 0)
 
             innerView.setPadding(
-                    insets.systemWindowInsetLeft,
+                    insets.left,
                     0,
-                    insets.systemWindowInsetRight,
-                    insets.systemWindowInsetBottom
+                    insets.right,
+                    insets.bottom
             )
 
-            insets.consumeSystemWindowInsets()
+            WindowInsetsCompat.CONSUMED
         }
-
-        outerView.requestApplyInsets()
     }
 
     override fun onStart() {

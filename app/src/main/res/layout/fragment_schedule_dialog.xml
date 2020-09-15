@@ -1,9 +1,8 @@
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fitsSystemWindows="true"
     tools:context=".gui.edit.dialogs.schedule.ScheduleDialogFragment"
     android:id="@+id/scheduleDialogRoot"
     android:background="@drawable/bottom_sheet_backdrop"
@@ -286,4 +285,4 @@
 
     </FrameLayout>
 
-</androidx.core.widget.NestedScrollView>
+</FrameLayout>

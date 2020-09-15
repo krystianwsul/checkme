@@ -13,10 +13,12 @@ import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.utils.setNavBarTransparency
 import com.krystianwsul.checkme.utils.isLandscape
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
 
 abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
@@ -46,12 +48,14 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = TransparentNavigationDialog()
 
+    private val insetsRelay = BehaviorRelay.create<WindowInsetsCompat>()
+
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         ViewCompat.setOnApplyWindowInsetsListener(backgroundView) { _, windowInsetsCompat ->
-            val mask = WindowInsetsCompat.Type.systemBars()
+            insetsRelay.accept(windowInsetsCompat)
 
-            val insets = windowInsetsCompat.getInsets(mask)
+            val insets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
 
             Log.e("asdf", "insets " + insets.left + "-" + insets.top + "-" + insets.right + "-" + insets.bottom)
 
@@ -62,9 +66,6 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             }
 
             contentView.setPadding(0, 0, 0, insets.bottom)
-
-            // todo check if this is necessary
-            //requireDialog().findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
             WindowInsetsCompat.CONSUMED
         }
@@ -100,7 +101,9 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
 
-            setNavBarTransparency(window!!, backgroundView, landscape)
+            setNavBarTransparency(window!!, backgroundView, landscape) { callback ->
+                viewCreatedDisposable += insetsRelay.subscribe { callback(it) }
+            }
         }
     }
 }

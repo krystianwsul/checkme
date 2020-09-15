@@ -38,6 +38,8 @@ class TutorialActivity : NavBarActivity() {
 
     override val rootView get() = tutorialCoordinator!!
 
+    override val applyBottomInset = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

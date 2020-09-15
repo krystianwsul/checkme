@@ -110,8 +110,4 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
     }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
-        setCancelable(true)
-    }
 }

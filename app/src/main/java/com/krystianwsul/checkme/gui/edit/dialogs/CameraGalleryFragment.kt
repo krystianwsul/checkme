@@ -40,10 +40,6 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
             savedInstanceState: Bundle?
     ) = inflater.inflate(R.layout.dialog_camera_gallery, container, false)!!
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = TransparentNavigationDialog().apply {
-        setCancelable(true)
-    }
-
     override fun onStart() {
         super.onStart()
 

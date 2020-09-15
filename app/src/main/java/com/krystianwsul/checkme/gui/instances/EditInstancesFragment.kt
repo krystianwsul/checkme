@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -53,6 +52,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
     }
+
+    override val dialogStyle = R.style.BottomSheetDialogTheme_ActionMode
 
     private lateinit var date: Date
     private var data: EditInstancesViewModel.Data? = null
@@ -180,13 +181,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         editInstancesViewModel.data
                 .subscribe(this::onLoadFinished)
                 .addTo(viewCreatedDisposable)
-    }
-
-    @SuppressLint("InflateParams")
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return TransparentNavigationDialog(R.style.BottomSheetDialogTheme_ActionMode).apply {
-            setCancelable(true)
-        }
     }
 
     override fun onResume() {

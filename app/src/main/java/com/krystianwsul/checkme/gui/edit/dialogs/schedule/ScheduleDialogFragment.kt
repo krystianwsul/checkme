@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.edit.dialogs.schedule
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
@@ -221,15 +220,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         scheduleDialogMonthEnd.setDense()
 
         hideKeyboardOnClickOutside(scheduleDialogRoot)
-    }
-
-    @SuppressLint("InflateParams")
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(requireArguments().containsKey(SHOW_DELETE_KEY))
-
-        return TransparentNavigationDialog().apply {
-            setCancelable(true)
-        }
     }
 
     @SuppressLint("SetTextI18n")

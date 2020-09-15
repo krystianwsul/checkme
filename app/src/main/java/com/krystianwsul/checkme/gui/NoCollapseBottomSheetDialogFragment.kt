@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StyleRes
@@ -30,6 +31,11 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
                 dialog!!.cancel()
         }
     }
+
+    @StyleRes
+    protected open val dialogStyle = R.style.BottomSheetDialogTheme
+
+    final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = TransparentNavigationDialog()
 
     protected fun setInsetViews(outer: View, inner: View) {
         outer.setOnApplyWindowInsetsListener { _, insets ->
@@ -71,9 +77,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         super.onDestroyView()
     }
 
-    inner class TransparentNavigationDialog(
-            @StyleRes styleId: Int = R.style.BottomSheetDialogTheme
-    ) : BottomSheetDialog(requireContext(), styleId) {
+    private inner class TransparentNavigationDialog : BottomSheetDialog(requireContext(), dialogStyle) {
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)

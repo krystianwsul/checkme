@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StyleRes
@@ -16,7 +17,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     private var first = true
 
-    protected val startDisposable = CompositeDisposable()
+    protected val viewCreatedDisposable = CompositeDisposable()
 
     protected open val alwaysExpand = false
 
@@ -32,10 +33,32 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         }
     }
 
+    @StyleRes
+    protected open val dialogStyle = R.style.BottomSheetDialogTheme
+
+    final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = TransparentNavigationDialog()
+
+    protected fun setInsetViews(outer: View, inner: View) {
+        outer.setOnApplyWindowInsetsListener { _, insets ->
+            outer.setPadding(0, insets.systemWindowInsetTop, 0, 0)
+
+            inner.setPadding(
+                    insets.systemWindowInsetLeft,
+                    0,
+                    insets.systemWindowInsetRight,
+                    insets.systemWindowInsetBottom
+            )
+
+            insets.consumeSystemWindowInsets()
+        }
+
+        outer.requestApplyInsets()
+    }
+
     override fun onStart() {
         super.onStart()
 
-        BottomSheetBehavior.from(requireDialog().window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
+        BottomSheetBehavior.from(requireDialog().window!!.findViewById(R.id.design_bottom_sheet)).apply {
             skipCollapsed = true
 
             addBottomSheetCallback(bottomSheetCallback)
@@ -49,15 +72,13 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         }
     }
 
-    override fun onStop() {
-        startDisposable.clear()
+    override fun onDestroyView() {
+        viewCreatedDisposable.clear()
 
-        super.onStop()
+        super.onDestroyView()
     }
 
-    inner class TransparentNavigationDialog(
-            @StyleRes styleId: Int = R.style.BottomSheetDialogTheme
-    ) : BottomSheetDialog(requireContext(), styleId) {
+    private inner class TransparentNavigationDialog : BottomSheetDialog(requireContext(), dialogStyle) {
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -72,23 +93,6 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             super.setContentView(view)
 
             setNavBarColor(window!!, view, landscape)
-        }
-
-        fun setInsetViews(outer: View, inner: View) {
-            outer.setOnApplyWindowInsetsListener { _, insets ->
-                outer.setPadding(0, insets.systemWindowInsetTop, 0, 0)
-
-                inner.setPadding(
-                        insets.systemWindowInsetLeft,
-                        0,
-                        insets.systemWindowInsetRight,
-                        insets.systemWindowInsetBottom
-                )
-
-                insets.consumeSystemWindowInsets()
-            }
-
-            outer.requestApplyInsets()
         }
     }
 }

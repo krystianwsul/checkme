@@ -61,6 +61,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
     }
 
+    override val outerView get() = scheduleDialogRoot!!
+    override val innerView get() = scheduleDialogBackgroundLayout!!
+
     private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
@@ -182,7 +185,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     ) = inflater.inflate(R.layout.fragment_schedule_dialog, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setInsetViews(scheduleDialogRoot, scheduleDialogBackgroundLayout)
+        super.onViewCreated(view, savedInstanceState)
 
         scheduleDialogSave.setOnClickListener {
             check(customTimeDatas != null)

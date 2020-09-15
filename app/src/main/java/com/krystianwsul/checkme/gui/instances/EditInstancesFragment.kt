@@ -55,6 +55,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     override val dialogStyle = R.style.BottomSheetDialogTheme_ActionMode
 
+    override val outerView get() = editInstancesRoot!!
+    override val innerView get() = editInstancesBackground!!
+
     private lateinit var date: Date
     private var data: EditInstancesViewModel.Data? = null
 
@@ -149,6 +152,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     ) = inflater.inflate(R.layout.fragment_edit_instances, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         editInstanceDate.setFixedOnClickListener {
             newMaterialDatePicker(date).let {
                 it.addListener(materialDatePickerListener)

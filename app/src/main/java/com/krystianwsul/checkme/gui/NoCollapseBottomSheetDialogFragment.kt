@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -36,13 +37,17 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
     @StyleRes
     protected open val dialogStyle = R.style.BottomSheetDialogTheme
 
+    protected abstract val outerView: View
+    protected abstract val innerView: View
+
     final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = TransparentNavigationDialog()
 
-    protected fun setInsetViews(outer: View, inner: View) {
-        outer.setOnApplyWindowInsetsListener { _, insets ->
-            outer.setPadding(0, insets.systemWindowInsetTop, 0, 0)
+    @CallSuper
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        outerView.setOnApplyWindowInsetsListener { _, insets ->
+            outerView.setPadding(0, insets.systemWindowInsetTop, 0, 0)
 
-            inner.setPadding(
+            innerView.setPadding(
                     insets.systemWindowInsetLeft,
                     0,
                     insets.systemWindowInsetRight,
@@ -52,7 +57,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             insets.consumeSystemWindowInsets()
         }
 
-        outer.requestApplyInsets()
+        outerView.requestApplyInsets()
     }
 
     override fun onStart() {

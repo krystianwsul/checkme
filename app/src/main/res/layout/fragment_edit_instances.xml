@@ -7,7 +7,8 @@
     tools:context="com.krystianwsul.checkme.gui.instances.EditInstancesFragment"
     android:fitsSystemWindows="true"
     android:id="@+id/editInstancesRoot"
-    android:background="@drawable/bottom_sheet_backdrop">
+    android:background="@drawable/bottom_sheet_backdrop"
+    android:theme="@style/AppTheme">
 
     <FrameLayout
         android:id="@+id/editInstancesBackground"

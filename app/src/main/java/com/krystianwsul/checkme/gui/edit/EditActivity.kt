@@ -12,6 +12,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.DiffUtil
@@ -829,6 +830,8 @@ class EditActivity : NavBarActivity() {
                     imageImage.setOnClickListener { listener() }
                     imageEdit.setOnClickListener { listener() }
                     imageLayoutText.setFixedOnClickListener(::listener)
+
+                    itemView.updatePadding(bottom = activity.bottomInset)
                 }
             }
 

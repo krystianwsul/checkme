@@ -14,6 +14,9 @@ abstract class NavBarActivity : AbstractActivity() {
 
     protected open val applyBottomInset = false
 
+    protected var bottomInset = 0
+        private set
+
     override fun setContentView(layoutResID: Int) {
         super.setContentView(layoutResID)
 
@@ -23,6 +26,8 @@ abstract class NavBarActivity : AbstractActivity() {
             insetsRelay.accept(windowInsetsCompat)
 
             val insets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            bottomInset = insets.bottom
 
             rootView.setPadding(
                     insets.left,

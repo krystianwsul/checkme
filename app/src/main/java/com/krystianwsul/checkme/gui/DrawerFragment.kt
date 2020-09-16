@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.gui
 
+import android.graphics.Outline
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
@@ -24,7 +26,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
     override val alwaysExpand = false
 
     override val backgroundView get() = drawerRoot!!
-    override val contentView get() = drawerBackgroundLayout!!
+    override val contentView get() = drawerContentWrapper!!
 
     private val mainActivity get() = activity as MainActivity
 
@@ -44,6 +46,25 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        drawerBackgroundLayout.apply {
+            outlineProvider = object : ViewOutlineProvider() {
+
+                private val radius = resources.getDimension(R.dimen.bottom_sheet_corner_radius)
+
+                override fun getOutline(view: View, outline: Outline) {
+                    outline.setRoundRect(
+                            0,
+                            0,
+                            view.width,
+                            view.height + radius.toInt(),
+                            radius
+                    )
+                }
+            }
+
+            clipToOutline = true
+        }
 
         mainActivityNavigation.apply {
             mainActivity.apply {

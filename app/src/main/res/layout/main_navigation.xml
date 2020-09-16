@@ -14,19 +14,32 @@
         tools:ignore="UselessParent"
         android:background="@drawable/bg_bottom_sheet_dialog_fragment">
 
-        <com.google.android.material.navigation.NavigationView
-            android:id="@+id/mainActivityNavigation"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/bottom_sheet_corner_radius"
-            app:headerLayout="@layout/nav_header_main"
-            app:menu="@menu/activity_main_drawer"
-            android:theme="@style/BottomNavigationDrawer"
-            app:itemShapeFillColor="@color/navigation_color_background"
-            app:itemTextColor="@color/navigation_color_text"
-            app:itemIconTint="@color/navigation_color_text"
-            android:background="#FFF"
-            app:elevation="0dp" />
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:id="@+id/drawerContentWrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.navigation.NavigationView
+                    android:id="@+id/mainActivityNavigation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/bottom_sheet_corner_radius"
+                    app:headerLayout="@layout/nav_header_main"
+                    app:menu="@menu/activity_main_drawer"
+                    android:theme="@style/BottomNavigationDrawer"
+                    app:itemShapeFillColor="@color/navigation_color_background"
+                    app:itemTextColor="@color/navigation_color_text"
+                    app:itemIconTint="@color/navigation_color_text"
+                    android:background="@android:color/transparent"
+                    app:elevation="0dp" />
+
+            </FrameLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
     </FrameLayout>
 

@@ -77,12 +77,12 @@ class DebugFragment : AbstractFragment() {
                 append("\ncrashlytics enabled: ")
                 append(MyCrashlytics.enabled)
 
-                append("\n\ntemporary notification log:")
+                append("\n\ntemporary notification log:\n\n")
                 append(Preferences.temporaryNotificationLog.log)
 
                 append("\n\nlast beeping tick: ")
                 append(lastTickExactTimeStamp.toString())
-                append("\n\ntick log:\n")
+                append("\n\ntick log:\n\n")
                 append(tickLog)
             }
         }

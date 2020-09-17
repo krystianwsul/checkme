@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 
 class NotificationActionReceiver : BroadcastReceiver() {
 
@@ -26,10 +27,14 @@ class NotificationActionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // todo notify temporary
-
         val notificationAction = intent.getParcelableExtra<NotificationAction>(KEY_NOTIFICATION_ACTION)!!
 
-        notificationAction.perform() // todo hide temporary in callback
+        val source = "NotificationActionReceiver $notificationAction"
+
+        NotificationWrapper.instance.notifyTemporary(notificationAction.requestCode, source)
+
+        notificationAction.perform {
+            NotificationWrapper.instance.hideTemporary(notificationAction.requestCode, source)
+        }
     }
 }

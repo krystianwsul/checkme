@@ -15,8 +15,13 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
+        const val TICK_NOTIFICATION_ID = 1
+
         private fun start(intent: Intent, source: String) {
-            NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start $source")
+            NotificationWrapper.instance.notifyTemporary(
+                    TICK_NOTIFICATION_ID,
+                    "TickJobIntentService.start $source"
+            )
 
             val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
@@ -57,7 +62,10 @@ class TickJobIntentService : JobIntentService() {
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.tickLog.logLineHour("TickJobIntentService.tick skipping, no userInfo")
 
-                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick skipping")
+                NotificationWrapper.instance.hideTemporary(
+                        TICK_NOTIFICATION_ID,
+                        "TickJobIntentService.tick skipping"
+                )
             } else {
                 DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
             }

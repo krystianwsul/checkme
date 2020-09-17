@@ -16,18 +16,19 @@ sealed class NotificationAction : Parcelable {
 
     abstract val requestCode: Int
 
-    abstract fun perform()
+    abstract fun perform(callback: (() -> Unit)? = null)
 
     @Parcelize
     data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
 
         override val requestCode get() = 0
 
-        override fun perform() {
+        override fun perform(callback: (() -> Unit)?) {
             check(instanceKeys.isNotEmpty())
 
             DomainFactory.addFirebaseListener {
                 it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
+                callback?.invoke()
             }
         }
     }
@@ -42,7 +43,7 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform() {
+        override fun perform(callback: (() -> Unit)?) {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
 
             val notificationWrapper = NotificationWrapper.instance
@@ -50,6 +51,7 @@ sealed class NotificationAction : Parcelable {
 
             DomainFactory.addFirebaseListener("InstanceDoneService $name") {
                 it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
+                callback?.invoke()
             }
         }
     }
@@ -64,7 +66,7 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform() {
+        override fun perform(callback: (() -> Unit)?) {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
             val notificationWrapper = NotificationWrapper.instance
@@ -72,6 +74,7 @@ sealed class NotificationAction : Parcelable {
 
             DomainFactory.addFirebaseListener("InstanceHourService $name") {
                 it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
+                callback?.invoke()
             }
         }
     }
@@ -84,10 +87,11 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform() {
+        override fun perform(callback: (() -> Unit)?) {
             DomainFactory.addFirebaseListener {
                 it.checkSave()
                 it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
+                callback?.invoke()
             }
         }
     }

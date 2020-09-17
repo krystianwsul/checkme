@@ -48,9 +48,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         private const val NOTIFICATION_ID_GROUP = 0
 
-        @JvmStatic
-        protected val NOTIFICATION_ID_TEMPORARY = 1
-
         val showTemporary by lazy {
             !MyApplication.instance
                     .resources
@@ -445,21 +442,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun logNotificationIds(source: String) = Unit
 
-    override fun notifyTemporary(source: String) {
+    override fun notifyTemporary(notificationId: Int, source: String) {
         Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
 
         if (!showTemporary)
             return
 
-        val contentIntent = MainActivity.newIntent()
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val title = "You may have new reminders" // todo this does show up. ATM I'm assuming it's a bug in the cancellation code
+        val pendingContentIntent = PendingIntent.getActivity(
+                MyApplication.context,
+                0,
+                MainActivity.newIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         notify(
-                title,
+                source,
                 null,
-                NOTIFICATION_ID_TEMPORARY,
+                notificationId,
                 null,
                 pendingContentIntent,
                 true,
@@ -471,9 +470,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 sortKey = "1",
                 largeIcon = null,
                 notificationHash = NotificationHash(
-                        title,
+                        source,
                         null,
-                        NOTIFICATION_ID_TEMPORARY,
+                        notificationId,
                         null,
                         null,
                         "1",
@@ -482,10 +481,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
     }
 
-    override fun hideTemporary(source: String) {
+    override fun hideTemporary(notificationId: Int, source: String) {
         Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
 
-        cancelNotification(NOTIFICATION_ID_TEMPORARY)
+        cancelNotification(notificationId)
     }
 
     protected data class NotificationHash(

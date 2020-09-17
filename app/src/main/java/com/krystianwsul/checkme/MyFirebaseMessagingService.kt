@@ -23,7 +23,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             check(data[REFRESH_KEY] == "true")
 
             if (MyApplication.instance.hasUserInfo)
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(false, "MyFirebaseMessagingService"))
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock("MyFirebaseMessagingService"))
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

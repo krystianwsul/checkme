@@ -15,7 +15,7 @@ object TickHolder {
                 .map { it.expires }
                 .maxOrNull()
 
-        return expires?.let { TickData.Lock(silent, source, it) } ?: TickData.Normal(silent, source)
+        return expires?.let { TickData.Lock(source, it) } ?: TickData.Normal(silent, source)
     }
 
     private fun tryClearTickData() {

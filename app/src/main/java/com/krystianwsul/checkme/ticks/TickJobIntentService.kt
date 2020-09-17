@@ -56,7 +56,7 @@ class TickJobIntentService : JobIntentService() {
                         "TickJobIntentService.tick skipping"
                 )
             } else {
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(false, sourceName))
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(sourceName))
             }
         }
     }

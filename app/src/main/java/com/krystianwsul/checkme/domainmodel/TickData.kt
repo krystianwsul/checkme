@@ -36,12 +36,13 @@ sealed class TickData {
     }
 
     class Lock(
-            override val silent: Boolean,
             override val source: String,
             val expires: ExactTimeStamp = DateTime.now()
                     .plusMillis(DURATION)
                     .toExactTimeStamp()
     ) : TickData() {
+
+        override val silent = false
 
         companion object {
 

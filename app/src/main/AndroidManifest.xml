@@ -91,7 +91,7 @@
             android:theme="@style/AppTheme" />
 
         <receiver
-            android:name=".notifications.BootReceiver"
+            android:name=".ticks.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -99,7 +99,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".notifications.TimeChangeReceiver"
+            android:name=".ticks.TimeChangeReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -108,11 +108,11 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".notifications.AlarmReceiver"
+            android:name=".ticks.AlarmReceiver"
             android:enabled="true" />
 
         <service
-            android:name=".notifications.TickJobIntentService"
+            android:name=".ticks.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".notifications.GroupNotificationDeleteService"

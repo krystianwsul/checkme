@@ -1,14 +1,14 @@
-package com.krystianwsul.checkme.notifications
+package com.krystianwsul.checkme.ticks
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
-class BootReceiver : BroadcastReceiver() {
+class TimeChangeReceiver : BroadcastReceiver() {
 
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
-        TickJobIntentService.startServiceSilent(context, "BootReceiver")
+        TickJobIntentService.startServiceNormal(context, "TimeChangeReceiver")
     }
 }

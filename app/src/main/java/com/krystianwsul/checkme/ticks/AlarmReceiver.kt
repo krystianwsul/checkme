@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.notifications
+package com.krystianwsul.checkme.ticks
 
 import android.content.BroadcastReceiver
 import android.content.Context

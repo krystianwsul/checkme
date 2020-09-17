@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
 
     implementation 'com.google.firebase:firebase-core:17.5.0'
-    implementation 'com.google.firebase:firebase-auth:19.3.2'
+    implementation 'com.google.firebase:firebase-auth:19.4.0'
     implementation 'com.google.firebase:firebase-database:19.4.0'
     implementation 'com.google.firebase:firebase-messaging:20.2.4'
     implementation 'com.google.firebase:firebase-config:19.2.0'
@@ -108,7 +108,7 @@ dependencies {
 
     implementation 'com.android.volley:volley:1.1.1'
     implementation "net.danlew:android.joda:$jodaVersion"
-    testImplementation "joda-time:joda-time:$jodaVersion"
+    testImplementation "joda-time:joda-time:2.10.6"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion"

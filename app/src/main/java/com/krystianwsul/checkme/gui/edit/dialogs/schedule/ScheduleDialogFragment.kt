@@ -223,6 +223,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         scheduleDialogMonthEnd.setDense()
 
         hideKeyboardOnClickOutside(scheduleDialogRoot)
+
+        scheduleDialogSelectAllDays.setOnClickListener {
+            scheduleDialogDayPicker.selectAllDays()
+        }
     }
 
     @SuppressLint("SetTextI18n")

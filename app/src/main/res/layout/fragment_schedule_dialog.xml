@@ -105,6 +105,18 @@
                             android:textColor="@color/textPrimary"
                             android:textSize="@dimen/textPrimary" />
 
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/scheduleDialogSelectAllDays"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/selectAll"
+                            android:layout_gravity="bottom" />
+
                     </LinearLayout>
 
                     <ca.antonious.materialdaypicker.MaterialDayPicker

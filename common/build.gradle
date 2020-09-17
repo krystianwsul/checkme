@@ -50,7 +50,6 @@ kotlin {
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 
                 implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
-                implementation "com.badoo.reaktive:rxjava2-interop:$reaktiveVersion"
             }
         }
 

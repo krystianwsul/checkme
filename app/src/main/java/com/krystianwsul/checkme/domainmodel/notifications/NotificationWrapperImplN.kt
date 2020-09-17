@@ -8,11 +8,15 @@ import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.notifications.TickJobIntentService
 
 
 @SuppressLint("NewApi")
 open class NotificationWrapperImplN : NotificationWrapperImpl() {
+
+    companion object {
+
+        private const val GROUP_KEY = "group"
+    }
 
     override fun cleanGroup(lastNotificationId: Int?) {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -86,7 +90,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             largeIcon,
             notificationHash
     ).apply {
-        setGroup(TickJobIntentService.GROUP_KEY)
+        setGroup(GROUP_KEY)
 
         if (summary)
             setGroupSummary(true)

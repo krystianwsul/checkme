@@ -25,9 +25,6 @@ class TickJobIntentService : JobIntentService() {
             //enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
 
-        const val MAX_NOTIFICATIONS = 3
-        const val GROUP_KEY = "group"
-
         private const val SILENT_KEY = "silent"
         private const val SOURCE_KEY = "source"
 

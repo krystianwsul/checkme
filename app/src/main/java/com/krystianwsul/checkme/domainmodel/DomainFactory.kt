@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -42,6 +41,8 @@ class DomainFactory(
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
+
+        private const val MAX_NOTIFICATIONS = 3
 
         val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
 
@@ -765,15 +766,15 @@ class DomainFactory(
         Preferences.tickLog.logLineHour("silent? $silent")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
+            if (notificationInstances.size > MAX_NOTIFICATIONS) { // show group
+                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
                     val silentParam =
-                        if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
+                            if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
 
                     NotificationWrapper.instance.notifyGroup(
-                        notificationInstances.values,
-                        silentParam,
-                        now
+                            notificationInstances.values,
+                            silentParam,
+                            now
                     )
                 } else { // instances shown
                     for (shownInstanceKey in shownInstanceKeys)
@@ -786,7 +787,7 @@ class DomainFactory(
                     )
                 }
             } else { // show instances
-                if (shownInstanceKeys.size > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
+                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
                     NotificationWrapper.instance.cancelNotification(0)
 
                     for (instance in notificationInstances.values)

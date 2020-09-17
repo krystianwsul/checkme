@@ -22,7 +22,11 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
-import com.krystianwsul.checkme.notifications.*
+import com.krystianwsul.checkme.notifications.GroupNotificationDeleteService
+import com.krystianwsul.checkme.notifications.InstanceDoneService
+import com.krystianwsul.checkme.notifications.InstanceHourService
+import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService
+import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp

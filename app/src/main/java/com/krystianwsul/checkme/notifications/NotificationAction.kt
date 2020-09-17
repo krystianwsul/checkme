@@ -14,10 +14,15 @@ import kotlinx.android.parcel.Parcelize
 
 sealed class NotificationAction : Parcelable {
 
+    protected abstract val actionId: Int // to generate unique hashCode
+
     abstract fun perform()
 
     @Parcelize
-    data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
+    data class DeleteGroupNotification(
+            private val instanceKeys: List<InstanceKey>,
+            override val actionId: Int = 1
+    ) : NotificationAction() {
 
         override fun perform() {
             check(instanceKeys.isNotEmpty())
@@ -32,7 +37,8 @@ sealed class NotificationAction : Parcelable {
     data class InstanceDone(
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
-            private val name: String
+            private val name: String,
+            override val actionId: Int = 2
     ) : NotificationAction() {
 
         override fun perform() {
@@ -51,7 +57,8 @@ sealed class NotificationAction : Parcelable {
     data class InstanceHour(
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
-            private val name: String
+            private val name: String,
+            override val actionId: Int = 3
     ) : NotificationAction() {
 
         override fun perform() {
@@ -67,7 +74,10 @@ sealed class NotificationAction : Parcelable {
     }
 
     @Parcelize
-    data class DeleteInstanceNotification(private val instanceKey: InstanceKey) : NotificationAction() {
+    data class DeleteInstanceNotification(
+            val instanceKey: InstanceKey,
+            override val actionId: Int = 4
+    ) : NotificationAction() {
 
         override fun perform() {
             DomainFactory.addFirebaseListener {

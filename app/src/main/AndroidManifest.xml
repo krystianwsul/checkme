@@ -119,6 +119,11 @@
             android:name=".notifications.NotificationActionService"
             android:exported="false" />
 
+        <receiver
+            android:name=".notifications.NotificationActionReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <service
             android:name=".MyFirebaseMessagingService"
             tools:ignore="ExportedService">

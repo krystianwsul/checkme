@@ -50,6 +50,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         @JvmStatic
         protected val NOTIFICATION_ID_TEMPORARY = 1
+
+        val showTemporary by lazy {
+            !MyApplication.instance
+                    .resources
+                    .getBoolean(R.bool.release)
+        }
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -438,12 +444,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun logNotificationIds(source: String) = Unit
-
-    private val showTemporary by lazy {
-        !MyApplication.instance
-                .resources
-                .getBoolean(R.bool.release)
-    }
 
     override fun notifyTemporary(source: String) {
         Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")

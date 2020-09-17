@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.app.PendingIntent
 import android.content.Intent
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
 
 class NotificationActionService : IntentService("NotificationActionService") {
 
@@ -16,12 +17,18 @@ class NotificationActionService : IntentService("NotificationActionService") {
                 NotificationActionService::class.java
         ).apply { putExtra(KEY_NOTIFICATION_ACTION, notificationAction) }
 
-        fun newPendingIntent(notificationAction: NotificationAction) = PendingIntent.getService(
-                MyApplication.context,
-                notificationAction.requestCode,
-                newIntent(notificationAction),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        )!!
+        fun newPendingIntent(notificationAction: NotificationAction): PendingIntent {
+            return if (NotificationWrapperImpl.showTemporary) {
+                NotificationActionReceiver.newPendingIntent(notificationAction)
+            } else {
+                PendingIntent.getService(
+                        MyApplication.context,
+                        notificationAction.requestCode,
+                        newIntent(notificationAction),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                )!!
+            }
+        }
     }
 
     override fun onHandleIntent(intent: Intent?) {

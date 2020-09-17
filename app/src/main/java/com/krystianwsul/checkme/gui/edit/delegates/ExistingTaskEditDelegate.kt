@@ -46,5 +46,13 @@ abstract class ExistingTaskEditDelegate(
         imageUrl = BehaviorRelay.createDefault(final)
     }
 
+    override fun checkImageChanged(): Boolean {
+        val defaultEditImageState = taskData.imageState
+                ?.let { EditImageState.Existing(it) }
+                ?: EditImageState.None
+
+        return imageUrl.value != defaultEditImageState
+    }
+
     override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)
 }

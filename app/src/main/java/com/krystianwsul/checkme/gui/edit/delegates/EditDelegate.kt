@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class EditDelegate(editImageState: EditImageState?) {
+abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
     companion object {
 
@@ -24,16 +24,16 @@ abstract class EditDelegate(editImageState: EditImageState?) {
                 data: EditViewModel.Data,
                 savedInstanceState: Bundle?
         ): EditDelegate {
-            val editImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
+            val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
             return when (parameters) {
-                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
-                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
-                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedInstanceState, editImageState)
+                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
+                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
+                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
                 is EditParameters.Create,
                 is EditParameters.Share,
                 is EditParameters.Shortcut,
-                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedInstanceState, editImageState)
+                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
             }
         }
     }
@@ -65,7 +65,7 @@ abstract class EditDelegate(editImageState: EditImageState?) {
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open val imageUrl = BehaviorRelay.createDefault(editImageState
+    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState
             ?: EditImageState.None)
 
     protected val parentLookup by lazy { ParentLookup() }
@@ -80,11 +80,14 @@ abstract class EditDelegate(editImageState: EditImageState?) {
         }!!
 
     fun checkDataChanged(name: String, note: String?): Boolean {
-        if (parentScheduleManager.changed)
-            return true
+        if (parentScheduleManager.changed) return true
+
+        if (checkImageChanged()) return true
 
         return checkNameNoteChanged(name, note)
     }
+
+    protected open fun checkImageChanged() = imageUrl.value != EditImageState.None
 
     protected open fun checkNameNoteChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 

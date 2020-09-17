@@ -114,18 +114,11 @@
         <service
             android:name=".ticks.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
         <service
-            android:name=".notifications.GroupNotificationDeleteService"
+            android:name=".notifications.NotificationActionService"
             android:exported="false" />
-        <service
-            android:name=".notifications.InstanceDoneService"
-            android:exported="false" />
-        <service
-            android:name=".notifications.InstanceHourService"
-            android:exported="false" />
-        <service
-            android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false" />
+
         <service
             android:name=".MyFirebaseMessagingService"
             tools:ignore="ExportedService">

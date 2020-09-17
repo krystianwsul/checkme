@@ -14,15 +14,14 @@ import kotlinx.android.parcel.Parcelize
 
 sealed class NotificationAction : Parcelable {
 
-    protected abstract val actionId: Int // to generate unique hashCode
+    abstract val requestCode: Int
 
     abstract fun perform()
 
     @Parcelize
-    data class DeleteGroupNotification(
-            private val instanceKeys: List<InstanceKey>,
-            override val actionId: Int = 1
-    ) : NotificationAction() {
+    data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
+
+        override val requestCode get() = 0
 
         override fun perform() {
             check(instanceKeys.isNotEmpty())
@@ -38,8 +37,10 @@ sealed class NotificationAction : Parcelable {
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
             private val name: String,
-            override val actionId: Int = 2
+            private val actionId: Int = 2
     ) : NotificationAction() {
+
+        override val requestCode get() = hashCode()
 
         override fun perform() {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
@@ -58,8 +59,10 @@ sealed class NotificationAction : Parcelable {
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
             private val name: String,
-            override val actionId: Int = 3
+            private val actionId: Int = 3
     ) : NotificationAction() {
+
+        override val requestCode get() = hashCode()
 
         override fun perform() {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
@@ -76,8 +79,10 @@ sealed class NotificationAction : Parcelable {
     @Parcelize
     data class DeleteInstanceNotification(
             val instanceKey: InstanceKey,
-            override val actionId: Int = 4
+            private val actionId: Int = 4
     ) : NotificationAction() {
+
+        override val requestCode get() = hashCode()
 
         override fun perform() {
             DomainFactory.addFirebaseListener {

@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.notifications
 
 import android.app.IntentService
-import android.content.Context
+import android.app.PendingIntent
 import android.content.Intent
+import com.krystianwsul.checkme.MyApplication
 
 class NotificationActionService : IntentService("NotificationActionService") {
 
@@ -10,9 +11,17 @@ class NotificationActionService : IntentService("NotificationActionService") {
 
         private const val KEY_NOTIFICATION_ACTION = "notificationAction"
 
-        fun newIntent(context: Context, notificationAction: NotificationAction) = Intent(context, NotificationActionService::class.java).apply {
-            putExtra(KEY_NOTIFICATION_ACTION, notificationAction)
-        }
+        private fun newIntent(notificationAction: NotificationAction) = Intent(
+                MyApplication.context,
+                NotificationActionService::class.java
+        ).apply { putExtra(KEY_NOTIFICATION_ACTION, notificationAction) }
+
+        fun newPendingIntent(notificationAction: NotificationAction) = PendingIntent.getService(
+                MyApplication.context,
+                notificationAction.requestCode,
+                newIntent(notificationAction),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        )!!
     }
 
     override fun onHandleIntent(intent: Intent?) {

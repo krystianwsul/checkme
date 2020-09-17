@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
@@ -22,10 +21,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
-import com.krystianwsul.checkme.notifications.GroupNotificationDeleteService
-import com.krystianwsul.checkme.notifications.InstanceDoneService
-import com.krystianwsul.checkme.notifications.InstanceHourService
-import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService
+import com.krystianwsul.checkme.notifications.NotificationAction
+import com.krystianwsul.checkme.notifications.NotificationActionService
 import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
@@ -109,14 +106,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val instanceKey = instanceData.instanceKey
 
-        fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingContentIntent = PendingIntent.getActivity(
+                MyApplication.instance,
+                notificationId,
+                ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId), PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingDeleteIntent = NotificationActionService.newPendingIntent(NotificationAction.DeleteInstanceNotification(instanceKey))
 
-        val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, instanceKey))
-
-        val pendingDoneIntent = pendingService(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId, instanceData.name))
-        val pendingHourIntent = pendingService(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId, instanceData.name))
+        val pendingDoneIntent = NotificationActionService.newPendingIntent(NotificationAction.InstanceDone(instanceKey, notificationId, instanceData.name))
+        val pendingHourIntent = NotificationActionService.newPendingIntent(NotificationAction.InstanceHour(instanceKey, notificationId, instanceData.name))
 
         fun action(@DrawableRes icon: Int, @StringRes text: Int, pendingIntent: PendingIntent) = NotificationCompat.Action
                 .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
@@ -384,8 +384,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             instanceKeys.add(it.instanceKey)
         }
 
-        val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, instanceKeys)
-        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingDeleteIntent = NotificationActionService.newPendingIntent(NotificationAction.DeleteGroupNotification(instanceKeys))
 
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)

@@ -18,44 +18,33 @@ class TickJobIntentService : JobIntentService() {
         const val TICK_NOTIFICATION_ID = 1
 
         private fun start(intent: Intent, source: String) {
-            NotificationWrapper.instance.notifyTemporary(
-                    TICK_NOTIFICATION_ID,
-                    "TickJobIntentService.start $source"
-            )
+            NotificationWrapper.instance.notifyTemporary(TICK_NOTIFICATION_ID, "TickJobIntentService.start $source")
 
-            val silent = intent.getBooleanExtra(SILENT_KEY, false)
-
-            tick(silent, source) // todo if this works, clean up calls
+            tick(source) // todo if this works, clean up calls
 
             //enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
 
-        private const val SILENT_KEY = "silent"
         private const val SOURCE_KEY = "source"
 
         // DON'T HOLD STATE IN STATIC VARIABLES
 
-        fun startServiceSilent(context: Context, source: String) {
-            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceSilent from $source")
-            start(getIntent(context, true, source), source)
-        }
-
         fun startServiceNormal(context: Context, source: String) {
-            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceNormal from $source")
-            start(getIntent(context, false, source), source)
-        }
-
-        private fun getIntent(context: Context, silent: Boolean, source: String): Intent {
             check(source.isNotEmpty())
 
-            return Intent(context, TickJobIntentService::class.java).apply {
-                putExtra(SILENT_KEY, silent)
-                putExtra(SOURCE_KEY, source)
-            }
+            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceNormal from $source")
+
+            start(
+                    Intent(
+                            context,
+                            TickJobIntentService::class.java
+                    ).apply { putExtra(SOURCE_KEY, source) },
+                    source
+            )
         }
 
         // still running?
-        private fun tick(silent: Boolean, sourceName: String) {
+        private fun tick(sourceName: String) {
             Preferences.tickLog.logLineHour("TickJobIntentService.tick from $sourceName")
             Preferences.temporaryNotificationLog.logLineHour("TickJobIntentService.tick from $sourceName")
 
@@ -67,20 +56,17 @@ class TickJobIntentService : JobIntentService() {
                         "TickJobIntentService.tick skipping"
                 )
             } else {
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(false, sourceName))
             }
         }
     }
 
     override fun onHandleWork(intent: Intent) {
-        check(intent.hasExtra(SILENT_KEY))
         check(intent.hasExtra(SOURCE_KEY))
-
-        val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
         val sourceName = intent.getStringExtra(SOURCE_KEY)!!
         check(sourceName.isNotEmpty())
 
-        tick(silent, sourceName)
+        tick(sourceName)
     }
 }

@@ -88,7 +88,21 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
-        toolbar.inflateMenu(R.menu.empty_menu)
+        toolbar.apply {
+            inflateMenu(R.menu.show_task_menu_top)
+
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.actionShowTaskSearch -> {
+                        // todo search
+                    }
+                    else -> throw IllegalArgumentException()
+                }
+
+                true
+            }
+        }
+        updateTopMenu()
 
         initBottomBar()
 
@@ -146,6 +160,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
         }
 
+        updateTopMenu()
         updateBottomMenu()
 
         taskListFragment.setTaskKey(
@@ -157,6 +172,12 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                         false
                 )
         )
+    }
+
+    private fun updateTopMenu() {
+        toolbar.menu.apply {
+            findItem(R.id.actionShowTaskSearch).isVisible = data != null
+        }
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit
@@ -196,7 +217,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            animateReplaceMenu(R.menu.show_task_menu) { updateBottomMenu() }
+            animateReplaceMenu(R.menu.show_task_menu_bottom) { updateBottomMenu() }
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {

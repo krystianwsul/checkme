@@ -8,27 +8,26 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.getOrInitializeFragment
-import com.krystianwsul.checkme.utils.startDate
-import com.krystianwsul.checkme.utils.webSearchIntent
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -60,7 +59,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())
+    override val search = BehaviorRelay.createDefault(NullableWrapper<TaskListFragment.SearchData>())
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         showTaskViewModel.stop()
@@ -94,7 +93,15 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.actionShowTaskSearch -> {
-                        // todo search
+                        appBarLayout.hideText()
+
+                        animateVisibility(listOf(searchToolbar), listOf(), duration = MyBottomBar.duration)
+
+                        searchToolbarText.apply {
+                            requestFocus()
+
+                            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                        }
                     }
                     else -> throw IllegalArgumentException()
                 }

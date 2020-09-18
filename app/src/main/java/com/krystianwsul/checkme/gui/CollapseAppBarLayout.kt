@@ -6,6 +6,7 @@ import android.text.StaticLayout
 import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.CollapsingTextHelper
@@ -25,51 +26,71 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var initialHeight: Int? = null
 
+    private lateinit var paddingLayout: View
+
+    private val collapsingTextHelper: CollapsingTextHelper by lazy {
+        toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
+    }
+
+    private val textLayout: StaticLayout by lazy {
+        collapsingTextHelper.getPrivateField("textLayout")
+    }
+
     fun setText(title: String, text: String?, paddingLayout: View) {
         valueAnimator?.cancel()
+
+        this.paddingLayout = paddingLayout
 
         toolbarCollapseLayout.title = title
 
         toolbarCollapseText.also {
             val hideText = text.isNullOrEmpty()
 
-            it.visibility = if (hideText) View.GONE else View.VISIBLE
+            it.isVisible = !hideText
             it.text = text
 
             it.addOneShotGlobalLayoutListener {
-                val collapsingTextHelper: CollapsingTextHelper = toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
-                val textLayout: StaticLayout = collapsingTextHelper.getPrivateField("textLayout")
-
                 if (initialHeight == null) initialHeight = it.height
 
-                fun setNewHeight(newHeight: Int) {
-                    updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                        height = newHeight
-                    }
-
-                    paddingLayout.setPadding(0, 0, 0, newHeight)
-                }
-
-                val newHeight = if (hideText) {
-                    toolbar.height + 1 // stupid hack because otherwise title doesn't show
-                } else {
-                    initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
-                }
-
-                if (abs(newHeight - height) <= 1) { // same stupid hack
-                    setNewHeight(newHeight)
-                } else {
-                    valueAnimator = ValueAnimator.ofInt(height, newHeight).apply {
-                        addUpdateListener {
-                            val currentHeight = it.animatedValue as Int
-
-                            setNewHeight(currentHeight)
-                        }
-
-                        start()
-                    }
-                }
+                animateHeight(hideText)
             }
         }
+    }
+
+    private fun animateHeight(hideText: Boolean) {
+        fun setNewHeight(newHeight: Int) {
+            updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                height = newHeight
+            }
+
+            paddingLayout.setPadding(0, 0, 0, newHeight)
+        }
+
+        val newHeight = if (hideText) {
+            toolbar.height + 1 // stupid hack because otherwise title doesn't show
+        } else {
+            initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
+        }
+
+        if (abs(newHeight - height) <= 1) { // same stupid hack
+            setNewHeight(newHeight)
+        } else {
+            valueAnimator = ValueAnimator.ofInt(height, newHeight).apply {
+                addUpdateListener {
+                    val currentHeight = it.animatedValue as Int
+
+                    setNewHeight(currentHeight)
+                }
+
+                start()
+            }
+        }
+    }
+
+    fun hideText() {
+        toolbarCollapseLayout.title = null
+        toolbarCollapseText.isVisible = false
+
+        animateHeight(true)
     }
 }

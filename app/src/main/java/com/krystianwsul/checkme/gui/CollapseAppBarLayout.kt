@@ -26,6 +26,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var initialHeight: Int? = null
 
+    private lateinit var title: String
     private lateinit var paddingLayout: View
 
     private val collapsingTextHelper: CollapsingTextHelper by lazy {
@@ -36,15 +37,16 @@ class CollapseAppBarLayout : AppBarLayout {
         collapsingTextHelper.getPrivateField("textLayout")
     }
 
-    fun setText(title: String, text: String?, paddingLayout: View) {
-        valueAnimator?.cancel()
-
+    fun setText(title: String, text: String?, paddingLayout: View, hide: Boolean = false) {
+        this.title = title
         this.paddingLayout = paddingLayout
 
-        toolbarCollapseLayout.title = title
+        valueAnimator?.cancel()
+
+        if (!hide) toolbarCollapseLayout.title = title
 
         toolbarCollapseText.also {
-            val hideText = text.isNullOrEmpty()
+            val hideText = text.isNullOrEmpty() || hide
 
             it.isVisible = !hideText
             it.text = text
@@ -92,5 +94,14 @@ class CollapseAppBarLayout : AppBarLayout {
         toolbarCollapseText.isVisible = false
 
         animateHeight(true)
+    }
+
+    fun showText() {
+        toolbarCollapseLayout.title = title
+
+        val hideText = toolbarCollapseText.text.isEmpty()
+        toolbarCollapseText.isVisible = !hideText
+
+        animateHeight(hideText)
     }
 }

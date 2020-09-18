@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
+import androidx.core.view.isVisible
+import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
@@ -28,6 +31,8 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -46,6 +51,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
         private const val TAG_REMOVE_INSTANCES = "removeInstances"
 
+        private const val KEY_SEARCH_DATA = "searchData"
+
         fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
     }
 
@@ -59,7 +66,21 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    override val search = BehaviorRelay.createDefault(NullableWrapper<TaskListFragment.SearchData>())
+    private val searching = BehaviorRelay.createDefault(false)
+    private val showDeleted = BehaviorRelay.createDefault(false)
+
+    override val search = searching.flatMap {
+        if (it) {
+            Observables.combineLatest(
+                    searchToolbarText.textChanges(),
+                    showDeleted
+            ) { searchText, showDeleted ->
+                NullableWrapper(TaskListFragment.SearchData(searchText.toString(), showDeleted))
+            }
+        } else {
+            Observable.just(NullableWrapper())
+        }
+    }!!
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         showTaskViewModel.stop()
@@ -93,6 +114,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.actionShowTaskSearch -> {
+                        searching.accept(true)
+
                         appBarLayout.hideText()
 
                         animateVisibility(listOf(searchToolbar), listOf(), duration = MyBottomBar.duration)
@@ -115,6 +138,21 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
         taskKey = (savedInstanceState ?: intent.extras!!).getParcelable(TASK_KEY_KEY)!!
 
+        savedInstanceState?.getParcelable<TaskListFragment.SearchData>(KEY_SEARCH_DATA)?.let {
+            searching.accept(true)
+            showDeleted.accept(it.showDeleted)
+
+            searchToolbarText.apply {
+                setText(it.query)
+
+                requestFocus()
+
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+            }
+
+            searchToolbar.isVisible = true
+        }
+
         taskListFragment = getOrInitializeFragment(R.id.showTaskFragment) {
             TaskListFragment.newInstance()
         }.also { it.setFab(bottomFab) }
@@ -128,6 +166,40 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         (supportFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
         startDate(receiver)
+
+        searchToolbar.apply {
+            inflateMenu(R.menu.main_activity_search)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.actionSearchClose -> searchToolbarText.text = null
+                    R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
+                    else -> throw IllegalArgumentException()
+                }
+
+                true
+            }
+
+            setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
+
+            setNavigationOnClickListener { closeSearch() }
+
+            createDisposable += showDeleted.subscribe {
+                menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
+            }
+        }
+    }
+
+    private fun closeSearch() {
+        appBarLayout.showText()
+
+        searchToolbar.apply {
+            check(visibility == View.VISIBLE)
+
+            animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+        }
+
+        searchToolbarText.text = null
     }
 
     override fun onStart() {
@@ -164,7 +236,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         this.data = data
 
         Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
-            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
+            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout, searching.value!!)
         }
 
         updateTopMenu()
@@ -202,7 +274,13 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable(TASK_KEY_KEY, taskKey)
+        outState.apply {
+            putParcelable(TASK_KEY_KEY, taskKey)
+
+            search.getCurrentValue()
+                    ?.value
+                    ?.let { putParcelable(KEY_SEARCH_DATA, it) }
+        }
     }
 
     private fun updateBottomMenu() {
@@ -260,4 +338,11 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+
+    override fun onBackPressed() {
+        if (searchToolbar.visibility == View.VISIBLE)
+            closeSearch()
+        else
+            super.onBackPressed()
+    }
 }

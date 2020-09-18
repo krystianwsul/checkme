@@ -108,9 +108,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
-        toolbar.apply {
+        appBarLayout.apply {
             inflateMenu(R.menu.show_task_menu_top)
-
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.actionShowTaskSearch -> {
@@ -128,10 +127,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                     }
                     else -> throw IllegalArgumentException()
                 }
-
-                true
             }
         }
+
         updateTopMenu()
 
         initBottomBar()
@@ -254,7 +252,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     }
 
     private fun updateTopMenu() {
-        toolbar.menu.apply {
+        appBarLayout.menu.apply {
             findItem(R.id.actionShowTaskSearch).isVisible = data != null
         }
     }

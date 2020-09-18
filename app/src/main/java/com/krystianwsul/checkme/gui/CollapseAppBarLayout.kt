@@ -4,7 +4,9 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.text.StaticLayout
 import android.util.AttributeSet
+import android.view.MenuItem
 import android.view.View
+import androidx.annotation.MenuRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -36,6 +38,8 @@ class CollapseAppBarLayout : AppBarLayout {
     private val textLayout: StaticLayout by lazy {
         collapsingTextHelper.getPrivateField("textLayout")
     }
+
+    val menu get() = toolbar.menu!!
 
     fun setText(title: String, text: String?, paddingLayout: View, hide: Boolean = false) {
         this.title = title
@@ -103,5 +107,15 @@ class CollapseAppBarLayout : AppBarLayout {
         toolbarCollapseText.isVisible = !hideText
 
         animateHeight(hideText)
+    }
+
+    fun inflateMenu(@MenuRes resId: Int) = toolbar.inflateMenu(resId)
+
+    fun setOnMenuItemClickListener(listener: (MenuItem) -> Unit) {
+        toolbar.setOnMenuItemClickListener {
+            listener(it)
+
+            true
+        }
     }
 }

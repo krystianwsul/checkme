@@ -112,8 +112,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_instance)
 
-        toolbar.apply {
-            menuInflater.inflate(R.menu.show_instance_menu_top, menu)
+        appBarLayout.apply {
+            inflateMenu(R.menu.show_instance_menu_top)
 
             setOnMenuItemClickListener { item ->
                 data!!.also {
@@ -157,10 +157,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         }
                     }
                 }
-
-                true
             }
         }
+
         updateTopMenu()
 
         initBottomBar()
@@ -189,7 +188,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
 
     private fun updateTopMenu() {
-        toolbar.menu.apply {
+        appBarLayout.menu.apply {
             findItem(R.id.instanceMenuEditInstance).isVisible = data?.run { !done && isRootInstance } == true
             findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown } == true
             findItem(R.id.instanceMenuHour).isVisible = showHour()

@@ -15,17 +15,15 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_show_tasks.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.*
+import kotlinx.android.synthetic.main.toolbar_collapse.*
 
 class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
@@ -51,7 +49,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
 
     private lateinit var showTasksViewModel: ShowTasksViewModel
 
-    override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())
+    override val search by lazy { appBarLayout.searchData }
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -68,10 +66,20 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
         parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
-        toolbar.apply {
-            setTitle(parameters.title)
-            inflateMenu(R.menu.empty_menu)
+        appBarLayout.apply {
+            setText(getString(parameters.title), null, null)
+
+            inflateMenu(R.menu.show_task_menu_top)
+
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.actionShowTaskSearch -> appBarLayout.startSearch()
+                    else -> throw IllegalArgumentException()
+                }
+            }
         }
+
+        updateTopMenu()
 
         initBottomBar()
 
@@ -105,6 +113,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
     private fun onLoadFinished(data: ShowTasksViewModel.Data) {
         this.data = data
 
+        updateTopMenu()
         updateBottomMenu()
 
         taskListFragment.setAllTasks(TaskListFragment.Data(
@@ -191,14 +200,18 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
     }
 
     override fun onBackPressed() {
-        when (parameters) {
-            Parameters.Unscheduled -> super.onBackPressed()
-            is Parameters.Copy -> ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters(
-                    R.string.stopCopyingMessage,
-                    R.string.stopCopyingYes
-            )).also {
-                it.listener = this::onConfirm
-                it.show(supportFragmentManager, TAG_CONFIRM)
+        if (appBarLayout.isSearching) {
+            appBarLayout.closeSearch()
+        } else {
+            when (parameters) {
+                Parameters.Unscheduled -> super.onBackPressed()
+                is Parameters.Copy -> ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters(
+                        R.string.stopCopyingMessage,
+                        R.string.stopCopyingYes
+                )).also {
+                    it.listener = this::onConfirm
+                    it.show(supportFragmentManager, TAG_CONFIRM)
+                }
             }
         }
     }
@@ -210,6 +223,12 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
 
         outState.putParcelable(KEY_PARAMETERS, parameters)
         copiedTaskKey?.let { outState.putParcelable(KEY_COPIED_TASK_KEY, it) }
+    }
+
+    private fun updateTopMenu() {
+        appBarLayout.menu.apply {
+            findItem(R.id.actionShowTaskSearch).isVisible = data != null
+        }
     }
 
     sealed class Parameters : Parcelable {

@@ -40,7 +40,7 @@ class CollapseAppBarLayout : AppBarLayout {
     private var initialHeight: Int? = null
 
     private lateinit var title: String
-    private lateinit var paddingLayout: View
+    private var paddingLayout: View? = null
 
     private val collapsingTextHelper: CollapsingTextHelper by lazy {
         toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
@@ -119,7 +119,7 @@ class CollapseAppBarLayout : AppBarLayout {
         super.onDetachedFromWindow()
     }
 
-    fun setText(title: String, text: String?, paddingLayout: View) {
+    fun setText(title: String, text: String?, paddingLayout: View?) {
         this.title = title
         this.paddingLayout = paddingLayout
 
@@ -127,7 +127,8 @@ class CollapseAppBarLayout : AppBarLayout {
 
         val hide = searchingRelay.value!!
 
-        if (!hide) toolbarCollapseLayout.title = title
+        if (!hide)
+            toolbarCollapseLayout.title = title
 
         toolbarCollapseText.also {
             val hideText = text.isNullOrEmpty() || hide
@@ -149,7 +150,7 @@ class CollapseAppBarLayout : AppBarLayout {
                 height = newHeight
             }
 
-            paddingLayout.setPadding(0, 0, 0, newHeight)
+            paddingLayout?.setPadding(0, 0, 0, newHeight)
         }
 
         val newHeight = if (hideText) {
@@ -235,13 +236,16 @@ class CollapseAppBarLayout : AppBarLayout {
                 searchingRelay.accept(true)
                 showDeleted.accept(it.showDeleted)
 
+                searchToolbar.isVisible = true
+
+                toolbarCollapseLayout.title = null
+                toolbarCollapseText.isVisible = false
+
                 searchToolbarText.apply {
                     setText(it.query)
 
                     requestFocus()
                 }
-
-                searchToolbar.isVisible = true
             }
         } else {
             super.onRestoreInstanceState(state)

@@ -37,6 +37,8 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     override fun onClick(holder: NodeHolder) = showImage(holder.rowBigImage!!, imageData)
 
+    override fun filter(filterCriteria: Any) = false
+
     class ImageData(
             val imageState: ImageState,
             val onImageShown: (StfalconImageViewer<ImageState>) -> Unit,

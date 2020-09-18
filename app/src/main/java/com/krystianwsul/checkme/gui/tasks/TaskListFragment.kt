@@ -457,6 +457,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private fun search(searchData: SearchData?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
+        treeViewAdapter.filterCriteria = searchData
     }
 
     override fun onDestroyView() {
@@ -496,13 +497,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (!taskData.note.isNullOrEmpty()) {
                 val noteNode = NoteNode(taskData.note, false)
 
-                treeNodes.add(noteNode.initialize(treeNodeCollection))
+                treeNodes += noteNode.initialize(treeNodeCollection)
             }
 
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes.add(ImageNode(ImageNode.ImageData(
+                        treeNodes += ImageNode(ImageNode.ImageData(
                                 it,
                                 { viewer ->
                                     check(taskListFragment.imageViewerData == null)
@@ -514,7 +515,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                                     taskListFragment.imageViewerData = null
                                 },
-                                taskListFragment.showImage)).initialize(treeNodeCollection))
+                                taskListFragment.showImage
+                        )).initialize(treeNodeCollection)
                     }
 
             taskListFragment.showImage = false
@@ -523,11 +525,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             for (childTaskData in taskData.childTaskDatas) {
                 val taskWrapper = TaskWrapper(0, this, childTaskData, copying)
 
-                treeNodes.add(taskWrapper.initialize(
+                treeNodes += taskWrapper.initialize(
                         selectedTaskKeys,
                         treeNodeCollection,
                         expandedTaskKeys
-                ))
+                )
 
                 taskWrappers.add(taskWrapper)
             }
@@ -697,7 +699,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
             }
 
-            override fun filter() = childTaskData.matchesSearch(searchData)
+            override fun filter(filterCriteria: Any) = childTaskData.matchesSearch(filterCriteria as SearchData)
         }
     }
 

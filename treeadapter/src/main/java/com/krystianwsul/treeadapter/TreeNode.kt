@@ -205,7 +205,11 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            return if ((!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty()) || (!modelNode.isVisibleDuringActionMode && hasActionMode()) || !modelNode.filter()) {
+            return if (
+                    (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty())
+                    || (!modelNode.isVisibleDuringActionMode && hasActionMode())
+                    || treeViewAdapter.filterCriteria?.let { modelNode.filter(it) } == false
+            ) {
                 0
             } else {
                 1 + if (expanded) childTreeNodes!!.map { it.displayedSize }.sum() else 0
@@ -217,7 +221,11 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode() || !modelNode.filter()) {
+            return if (
+                    !modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty()
+                    || !modelNode.isVisibleDuringActionMode && hasActionMode()
+                    || treeViewAdapter.filterCriteria?.let { modelNode.filter(it) } == false
+            ) {
                 listOf()
             } else {
                 if (expanded)
@@ -318,8 +326,10 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (!modelNode.isVisibleDuringActionMode && hasActionMode())
             return false
 
-        if (!modelNode.filter())
-            return false
+        treeViewAdapter.filterCriteria?.let {
+            if (!modelNode.filter(it))
+                return false
+        }
 
         return !(!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty())
     }

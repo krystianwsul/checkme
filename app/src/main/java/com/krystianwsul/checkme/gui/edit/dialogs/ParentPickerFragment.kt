@@ -188,6 +188,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         this.query = query
+        treeViewAdapter!!.filterCriteria = query
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : GroupHolderAdapter(), TaskParent {
@@ -359,7 +360,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return comparison
             }
 
-            override fun filter() = parentTreeData.matchesSearch(query)
+            override fun filter(filterCriteria: Any) = parentTreeData.matchesSearch(filterCriteria as String)
         }
     }
 

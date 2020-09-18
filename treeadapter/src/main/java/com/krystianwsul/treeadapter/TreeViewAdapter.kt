@@ -13,6 +13,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         private val padding: Pair<Int, Int>?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    var filterCriteria: Any? = null
+
     companion object {
 
         private const val TYPE_PADDING = 1000

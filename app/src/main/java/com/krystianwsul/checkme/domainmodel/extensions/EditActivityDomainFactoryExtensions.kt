@@ -697,9 +697,9 @@ private fun DomainFactory.joinTasks(
 
     removeInstanceKeys.map(::getInstance)
         .filter {
-            it.getParentInstance(now)?.first?.task != newParentTask && it.isVisible(
-                now,
-                true
+            it.getParentInstance(now)?.instance?.task != newParentTask && it.isVisible(
+                    now,
+                    true
             )
         }
         .forEach { it.hide(now) }

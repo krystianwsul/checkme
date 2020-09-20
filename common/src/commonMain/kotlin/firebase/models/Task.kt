@@ -194,17 +194,17 @@ class Task<T : ProjectType>(
     fun getGroupScheduleDateTime(exactTimeStamp: ExactTimeStamp): DateTime? {
         val hierarchyTimeStamp = getHierarchyExactTimeStamp(exactTimeStamp)
 
-        val currentSchedules = getCurrentSchedules(hierarchyTimeStamp)
-        val groupSingleSchedules = currentSchedules.filter {
-            it.schedule is SingleSchedule<*> && it.schedule.group
-        }
+        val groupSingleSchedules = getCurrentSchedules(hierarchyTimeStamp)
+                .asSequence()
+                .map { it.schedule }
+                .filterIsInstance<SingleSchedule<*>>()
+                .filter { it.group }
+                .toList()
 
         return if (groupSingleSchedules.isEmpty()) {
             null
         } else {
-            groupSingleSchedules.single().schedule
-                    .let { it as SingleSchedule<T> }
-                    .dateTime
+            groupSingleSchedules.single().originalDateTime
         }
     }
 
@@ -262,12 +262,12 @@ class Task<T : ProjectType>(
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp
-        ).max()!!
+        ).maxOrNull()!!
 
         val endExactTimeStamp = listOfNotNull(
                 endExactTimeStamp,
                 givenEndExactTimeStamp
-        ).min()!!
+        ).minOrNull()!!
 
         val existingInstances = _existingInstances.values.filter {
             val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
@@ -336,7 +336,7 @@ class Task<T : ProjectType>(
         return (existingInstances + scheduleNextInstances)
                 .map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
-                .min()
+                .minOrNull()
     }
 
     fun updateSchedules(
@@ -400,7 +400,7 @@ class Task<T : ProjectType>(
     }
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) =
-            listOfNotNull(now, endExactTimeStamp?.minusOne()).min()!!
+            listOfNotNull(now, endExactTimeStamp?.minusOne()).minOrNull()!!
 
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,

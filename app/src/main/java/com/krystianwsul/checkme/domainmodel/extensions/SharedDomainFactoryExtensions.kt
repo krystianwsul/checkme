@@ -99,7 +99,7 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
 
     instanceKeys.forEach {
         getInstance(it).getParentInstance(now)!!
-            .third!!
+                .taskHierarchy!!
             .setEndExactTimeStamp(now)
     }
 

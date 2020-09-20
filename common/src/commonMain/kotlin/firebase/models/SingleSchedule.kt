@@ -23,6 +23,8 @@ class SingleSchedule<T : ProjectType>(
 
     val dateTime get() = DateTime(date, time)
 
+    val originalDateTime get() = DateTime(scheduleRecord.originalDate, scheduleRecord.originalTimePair.toTime())
+
     override val scheduleType get() = ScheduleType.SINGLE
 
     fun <T : ProjectType> getInstance(task: Task<T>) = singleScheduleRecord.run { // specifically not scheduleRecord
@@ -82,6 +84,8 @@ class SingleSchedule<T : ProjectType>(
         override val timePair get() = instance.instanceTimePair
 
         override val originalTimePair get() = singleScheduleRecord.timePair
+
+        override val originalDate get() = singleScheduleRecord.date
 
         override var endTime
             get() = singleScheduleRecord.endTime

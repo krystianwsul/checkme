@@ -166,7 +166,6 @@ class CollapseAppBarLayout : AppBarLayout {
         val newHeight = if (hideText) {
             toolbar.height + if (titleHack) 1 else 0 // stupid hack because otherwise title doesn't show
         } else {
-            // todo fails on rotation during actionMode
             initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
         }
 

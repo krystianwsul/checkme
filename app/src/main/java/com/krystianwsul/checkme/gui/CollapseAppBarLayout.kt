@@ -119,7 +119,7 @@ class CollapseAppBarLayout : AppBarLayout {
         super.onDetachedFromWindow()
     }
 
-    fun setText(title: String, text: String?, paddingLayout: View?) {
+    fun setText(title: String, text: String?, paddingLayout: View?, immediate: Boolean) {
         this.title = title
         this.paddingLayout = paddingLayout
 
@@ -139,12 +139,12 @@ class CollapseAppBarLayout : AppBarLayout {
             it.addOneShotGlobalLayoutListener {
                 if (initialHeight == null) initialHeight = it.height
 
-                animateHeight(hideText)
+                animateHeight(hideText, immediate)
             }
         }
     }
 
-    private fun animateHeight(hideText: Boolean) {
+    private fun animateHeight(hideText: Boolean, immediate: Boolean) {
         fun setNewHeight(newHeight: Int) {
             updateLayoutParams<CoordinatorLayout.LayoutParams> {
                 height = newHeight
@@ -159,7 +159,7 @@ class CollapseAppBarLayout : AppBarLayout {
             initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
         }
 
-        if (abs(newHeight - height) <= 1) { // same stupid hack
+        if (immediate || abs(newHeight - height) <= 1) { // same stupid hack
             setNewHeight(newHeight)
         } else {
             valueAnimator = ValueAnimator.ofInt(height, newHeight).apply {
@@ -190,7 +190,7 @@ class CollapseAppBarLayout : AppBarLayout {
         val hideText = toolbarCollapseText.text.isEmpty()
         toolbarCollapseText.isVisible = !hideText
 
-        animateHeight(hideText)
+        animateHeight(hideText, false)
 
         searchToolbar.apply {
             check(isVisible)
@@ -209,7 +209,7 @@ class CollapseAppBarLayout : AppBarLayout {
         toolbarCollapseLayout.title = null
         toolbarCollapseText.isVisible = false
 
-        animateHeight(true)
+        animateHeight(true, immediate = true)
 
         animateVisibility(listOf(searchToolbar), listOf(), duration = MyBottomBar.duration)
 

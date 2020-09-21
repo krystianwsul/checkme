@@ -67,7 +67,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
         appBarLayout.apply {
-            setText(getString(parameters.title), null, null)
+            setText(getString(parameters.title), null, null, true)
 
             inflateMenu(R.menu.show_task_menu_top)
 

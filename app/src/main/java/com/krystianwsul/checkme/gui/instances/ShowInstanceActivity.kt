@@ -268,7 +268,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        appBarLayout.setText(data.name, data.displayText, emptyTextLayout)
+        appBarLayout.setText(data.name, data.displayText, emptyTextLayout, data.immediate)
 
         updateTopMenu()
         updateBottomMenu()

@@ -151,7 +151,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         this.data = data
 
         Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
-            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout)
+            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout, data.immediate)
         }
 
         updateTopMenu()

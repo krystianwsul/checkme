@@ -45,6 +45,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import java.io.*
+import java.text.Normalizer
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -361,3 +362,7 @@ inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         @IdRes id: Int,
         initializer: () -> T
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
+
+fun String.normalized() = Normalizer.normalize(this, Normalizer.Form.NFKD)
+        .replace(Regex("[\\p{M}]"), "")
+        .toLowerCase(Locale.getDefault())

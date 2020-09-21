@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
@@ -79,7 +80,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     recyclerView = parentPickerRecycler as RecyclerView
 
                     searchField = parentPickerSearch as EditText
-                    searchChanges = searchField.textChanges().map { it.toString() }
+                    searchChanges = searchField.textChanges().map { it.toString().normalized() }
                 }
 
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)

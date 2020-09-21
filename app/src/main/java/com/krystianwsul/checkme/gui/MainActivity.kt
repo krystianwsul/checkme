@@ -142,7 +142,7 @@ class MainActivity :
                 Observables.combineLatest(
                         mainSearchText.textChanges(),
                         showDeleted
-                ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString(), it.second)) }
+                ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString().normalized(), it.second)) }
             } else {
                 Observable.just(NullableWrapper())
             }

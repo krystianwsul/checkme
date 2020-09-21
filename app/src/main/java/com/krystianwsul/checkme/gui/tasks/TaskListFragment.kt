@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
@@ -753,10 +754,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (query.isEmpty())
                 return false
 
-            if (name.toLowerCase(Locale.getDefault()).contains(query))
+            if (name.normalized().contains(query))
                 return true
 
-            if (note?.toLowerCase(Locale.getDefault())?.contains(query) == true)
+            if (note?.normalized()?.contains(query) == true)
                 return true
 
             return children.any { it.matchesSearch(searchData) }

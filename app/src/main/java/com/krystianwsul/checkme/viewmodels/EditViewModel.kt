@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
+import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -314,10 +315,10 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             if (query.isNullOrEmpty())
                 return true
 
-            if (name.toLowerCase(Locale.getDefault()).contains(query))
+            if (name.normalized().contains(query))
                 return true
 
-            if (note?.toLowerCase(Locale.getDefault())?.contains(query) == true)
+            if (note?.normalized()?.contains(query) == true)
                 return true
 
             return parentTreeDatas.values.any { it.matchesSearch(query) }

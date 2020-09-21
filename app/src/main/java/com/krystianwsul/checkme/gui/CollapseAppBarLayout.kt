@@ -103,7 +103,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         searchToolbarText.textChanges(),
                         showDeleted
                 ) { searchText, showDeleted ->
-                    NullableWrapper(TaskListFragment.SearchData(searchText.toString(), showDeleted))
+                    NullableWrapper(TaskListFragment.SearchData(searchText.toString().normalized(), showDeleted))
                 }
             } else {
                 Observable.just(NullableWrapper())

@@ -150,8 +150,10 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
+        val immediate = data.immediate
+
         Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
-            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout, data.immediate)
+            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout, immediate)
         }
 
         updateTopMenu()
@@ -161,7 +163,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                 TaskListFragment.RootTaskData(taskKey, data.imageData),
                 TaskListFragment.Data(
                         data.dataId,
-                        data.immediate,
+                        immediate,
                         data.taskData,
                         false
                 )
@@ -174,9 +176,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         }
     }
 
-    override fun onCreateActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateActionMode(actionMode: ActionMode) = appBarLayout.collapse()
 
-    override fun onDestroyActionMode() = Unit
+    override fun onDestroyActionMode() = appBarLayout.expand()
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible

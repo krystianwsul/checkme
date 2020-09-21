@@ -268,19 +268,24 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        appBarLayout.setText(data.name, data.displayText, emptyTextLayout, data.immediate)
+        val immediate = data.immediate
+
+        appBarLayout.setText(data.name, data.displayText, emptyTextLayout, immediate)
 
         updateTopMenu()
         updateBottomMenu()
 
-        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.immediate, data.groupListDataWrapper)
+        groupListFragment.setInstanceKey(instanceKey, data.dataId, immediate, data.groupListDataWrapper)
     }
 
     private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, done)
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit
+    override fun onCreateGroupActionMode(
+            actionMode: ActionMode,
+            treeViewAdapter: TreeViewAdapter<NodeHolder>
+    ) = appBarLayout.collapse()
 
-    override fun onDestroyGroupActionMode() = Unit
+    override fun onDestroyGroupActionMode() = appBarLayout.expand()
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible

@@ -65,6 +65,10 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private val attachedToWindowDisposable = CompositeDisposable()
 
+    private val globalLayoutPerformed = BehaviorRelay.create<Unit>()
+
+    private var collapseState: CollapseState = CollapseState.Expanded
+
     init {
         View.inflate(context, R.layout.collapse_app_bar_layout, this)
 
@@ -85,6 +89,8 @@ class CollapseAppBarLayout : AppBarLayout {
 
             setNavigationOnClickListener { closeSearch() }
         }
+
+        toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
     override fun onAttachedToWindow() {
@@ -125,26 +131,30 @@ class CollapseAppBarLayout : AppBarLayout {
 
         valueAnimator?.cancel()
 
-        val hide = searchingRelay.value!!
+        attachedToWindowDisposable += globalLayoutPerformed.subscribe {
+            val hide = searchingRelay.value!! || collapseState is CollapseState.Collapsed
 
-        if (!hide)
-            toolbarCollapseLayout.title = title
+            if (!hide)
+                toolbarCollapseLayout.title = title
 
-        toolbarCollapseText.also {
-            val hideText = text.isNullOrEmpty() || hide
+            toolbarCollapseText.also {
+                val hideText = text.isNullOrEmpty() || hide
 
-            it.isVisible = !hideText
-            it.text = text
+                it.isVisible = !hideText
+                it.text = text
 
-            it.addOneShotGlobalLayoutListener {
                 if (initialHeight == null) initialHeight = it.height
 
-                animateHeight(hideText, immediate)
+                animateHeight(
+                        hideText,
+                        immediate,
+                        (collapseState as? CollapseState.Collapsed)?.titleHack ?: true
+                )
             }
         }
     }
 
-    private fun animateHeight(hideText: Boolean, immediate: Boolean) {
+    private fun animateHeight(hideText: Boolean, immediate: Boolean, titleHack: Boolean) {
         fun setNewHeight(newHeight: Int) {
             updateLayoutParams<CoordinatorLayout.LayoutParams> {
                 height = newHeight
@@ -154,8 +164,9 @@ class CollapseAppBarLayout : AppBarLayout {
         }
 
         val newHeight = if (hideText) {
-            toolbar.height + 1 // stupid hack because otherwise title doesn't show
+            toolbar.height + if (titleHack) 1 else 0 // stupid hack because otherwise title doesn't show
         } else {
+            // todo fails on rotation during actionMode
             initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
         }
 
@@ -185,12 +196,7 @@ class CollapseAppBarLayout : AppBarLayout {
     }
 
     fun closeSearch() {
-        toolbarCollapseLayout.title = title
-
-        val hideText = toolbarCollapseText.text.isEmpty()
-        toolbarCollapseText.isVisible = !hideText
-
-        animateHeight(hideText, false)
+        expand(true)
 
         searchToolbar.apply {
             check(isVisible)
@@ -203,13 +209,32 @@ class CollapseAppBarLayout : AppBarLayout {
         searchingRelay.accept(false)
     }
 
+    fun collapse(titleHack: Boolean = false) {
+        collapseState = CollapseState.Collapsed(titleHack)
+
+        attachedToWindowDisposable += globalLayoutPerformed.subscribe {
+            toolbarCollapseLayout.title = null
+            toolbarCollapseText.isVisible = false
+
+            animateHeight(true, immediate = false, titleHack = titleHack)
+        }
+    }
+
+    fun expand(titleHack: Boolean = false) {
+        collapseState = CollapseState.Expanded
+
+        toolbarCollapseLayout.title = title
+
+        val hideText = toolbarCollapseText.text.isEmpty()
+        toolbarCollapseText.isVisible = !hideText
+
+        animateHeight(hideText, false, titleHack = titleHack)
+    }
+
     fun startSearch() {
         searchingRelay.accept(true)
 
-        toolbarCollapseLayout.title = null
-        toolbarCollapseText.isVisible = false
-
-        animateHeight(true, immediate = true)
+        collapse(true)
 
         animateVisibility(listOf(searchToolbar), listOf(), duration = MyBottomBar.duration)
 
@@ -279,5 +304,12 @@ class CollapseAppBarLayout : AppBarLayout {
 
             out.writeParcelable(searchData, 0)
         }
+    }
+
+    private sealed class CollapseState {
+
+        data class Collapsed(val titleHack: Boolean) : CollapseState()
+
+        object Expanded : CollapseState()
     }
 }

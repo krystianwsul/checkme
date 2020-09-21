@@ -290,7 +290,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
-                    @SuppressWarnings("TargetApi")
                     foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
                 }
             }

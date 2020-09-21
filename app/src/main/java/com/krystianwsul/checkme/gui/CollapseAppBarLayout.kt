@@ -203,7 +203,11 @@ class CollapseAppBarLayout : AppBarLayout {
             animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
         }
 
-        searchToolbarText.text = null
+        searchToolbarText.apply {
+            text = null
+
+            inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+        }
 
         searchingRelay.accept(false)
     }

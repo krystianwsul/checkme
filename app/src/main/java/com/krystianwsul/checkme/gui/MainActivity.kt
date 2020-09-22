@@ -712,9 +712,11 @@ class MainActivity :
             hideViews.add(mainAboutFrame)
         }
 
+        val searchingFromInstances = (restoreInstances.value?.value ?: false) || changingSearch
+
         mainActivityToolbar.title = when (tab) {
             Tab.INSTANCES -> getString(R.string.instances)
-            Tab.TASKS -> getString(R.string.tasks)
+            Tab.TASKS -> getString(if (searchingFromInstances) R.string.instances else R.string.tasks)
             Tab.PROJECTS -> getString(R.string.projects)
             Tab.CUSTOM_TIMES -> getString(R.string.times)
             Tab.FRIENDS -> getString(R.string.friends)

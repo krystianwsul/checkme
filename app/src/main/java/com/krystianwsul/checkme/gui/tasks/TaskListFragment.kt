@@ -742,6 +742,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
+        private val normalizedName by lazy { name.normalized() }
+        private val normalizedNote by lazy { note?.normalized() }
+
         fun matchesSearch(searchData: SearchData?): Boolean {
             if (searchData == null)
                 return alwaysShow || current
@@ -754,10 +757,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (query.isEmpty())
                 return false
 
-            if (name.normalized().contains(query))
+            if (normalizedName.contains(query))
                 return true
 
-            if (note?.normalized()?.contains(query) == true)
+            if (normalizedNote?.contains(query) == true)
                 return true
 
             return children.any { it.matchesSearch(searchData) }

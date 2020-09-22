@@ -311,14 +311,17 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val projectId: ProjectKey.Shared?
     ) {
 
+        private val normalizedName by lazy { name.normalized() }
+        private val normalizedNote by lazy { note?.normalized() }
+
         fun matchesSearch(query: String?): Boolean {
             if (query.isNullOrEmpty())
                 return true
 
-            if (name.normalized().contains(query))
+            if (normalizedName.contains(query))
                 return true
 
-            if (note?.normalized()?.contains(query) == true)
+            if (normalizedNote?.contains(query) == true)
                 return true
 
             return parentTreeDatas.values.any { it.matchesSearch(query) }

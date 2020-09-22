@@ -18,4 +18,6 @@
     <dimen name="denseSpinnerRadioOffset">3dp</dimen>
     <dimen name="denseSpinnerTextOffset">3.5dp</dimen>
     <dimen name="denseSpinnerSpacing">8dp</dimen>
+
+    <dimen name="mainToolbarElevation">6dp</dimen>
 </resources>

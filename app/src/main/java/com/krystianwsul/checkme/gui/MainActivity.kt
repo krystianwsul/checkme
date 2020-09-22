@@ -78,9 +78,6 @@ class MainActivity :
         private const val KEY_SHOW_DELETED = "showDeleted"
         private const val KEY_DATE = "date"
 
-        private const val NORMAL_ELEVATION = 6f
-        private const val INSTANCES_ELEVATION = 0f
-
         private const val DRAWER_TAG = "drawer"
 
         private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
@@ -170,6 +167,9 @@ class MainActivity :
     }
 
     private lateinit var date: Date
+
+    private val mainToolbarElevation by lazy { resources.getDimension(R.dimen.mainToolbarElevation) }
+    private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -635,23 +635,41 @@ class MainActivity :
         }
     }
 
-    fun showTab(tab: Tab, immediate: Boolean = false, changingSearch: Boolean = false) {
-        var closeSearch = false
+    private var elevationValueAnimator: ValueAnimator? = null
 
-        val density = resources.displayMetrics.density
+    fun showTab(tab: Tab, immediate: Boolean = false, changingSearch: Boolean = false) {
+        elevationValueAnimator?.cancel()
+
+        var closeSearch = false
 
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
 
+        val currentElevation = mainActivityAppBarLayout.elevation
+        val targetElevation: Float
+
         if (tab == Tab.INSTANCES) {
-            showViews.add(mainDaysLayout)
+            showViews += mainDaysLayout
             hideViews += mainProgress
-            ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
+
+            targetElevation = 0f
         } else {
             showViews += mainProgress
-            hideViews.add(mainDaysLayout)
-            ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+            hideViews += mainDaysLayout
+
+            targetElevation = mainToolbarElevation
+
             calendarOpen = false
+        }
+
+        if (targetElevation != currentElevation) {
+            elevationValueAnimator = ValueAnimator.ofFloat(currentElevation, targetElevation).apply {
+                addUpdateListener {
+                    ViewCompat.setElevation(mainActivityAppBarLayout, it.animatedValue as Float)
+                }
+
+                start()
+            }
         }
 
         if (tab == Tab.TASKS) {
@@ -751,7 +769,7 @@ class MainActivity :
 
         visibleTab.accept(tab)
 
-        animateVisibility(showViews, hideViews, immediate, resources.getInteger(android.R.integer.config_shortAnimTime))
+        animateVisibility(showViews, hideViews, immediate, shortAnimTime)
 
         updateCalendarHeight()
         if (!changingSearch) {

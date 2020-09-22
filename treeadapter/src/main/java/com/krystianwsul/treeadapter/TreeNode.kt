@@ -413,6 +413,12 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             deselect(x, false)
     }
 
+    fun normalize() {
+        modelNode.normalize()
+
+        childTreeNodes!!.forEach { it.normalize() }
+    }
+
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")
 
     class SetChildTreeNodesCalledTwiceException : InitializationException("TreeNode.setChildTreeNodes() has already been called.")

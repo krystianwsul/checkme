@@ -150,11 +150,8 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun initialize() {
-        if (data == null)
-            return
-
-        if (friendListRecycler == null)
-            return
+        if (data == null) return
+        if (friendListRecycler == null) return
 
         if (this::treeViewAdapter.isInitialized) {
             saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
@@ -286,13 +283,17 @@ class UserListFragment : AbstractFragment(), FabUser {
         lateinit var userNodes: MutableList<UserNode>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                viewCreatedDisposable
+        )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
         fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
-            check(data != null)
+            checkNotNull(data)
 
             val userListMap = userListDatas.associateBy { it.id }.toMutableMap()
 

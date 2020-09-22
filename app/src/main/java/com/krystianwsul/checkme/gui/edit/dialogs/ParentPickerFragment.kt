@@ -107,8 +107,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(activity)
 
-        if (taskDatas != null)
-            initialize()
+        if (taskDatas != null) initialize()
     }
 
     private fun initialize() {
@@ -185,16 +184,16 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+    private fun search(query: String, placeholder: TreeViewAdapter.Placeholder) {
         this.query = query
-        treeViewAdapter!!.filterCriteria = query
+        treeViewAdapter!!.setFilterCriteria(query, placeholder)
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : GroupHolderAdapter(), TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
-        val treeViewAdapter = TreeViewAdapter(this, null)
+        val treeViewAdapter = TreeViewAdapter(this, null, viewCreatedDisposable)
 
         override val taskAdapter = this
 
@@ -358,6 +357,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 return comparison
             }
+
+            override fun normalize() = parentTreeData.normalize()
 
             override fun filter(filterCriteria: Any) = parentTreeData.matchesSearch(filterCriteria as String)
         }

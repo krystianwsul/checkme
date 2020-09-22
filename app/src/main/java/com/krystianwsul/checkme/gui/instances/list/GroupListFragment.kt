@@ -412,7 +412,7 @@ class GroupListFragment @JvmOverloads constructor(
             return lines.joinToString("\n")
         }
 
-    private val compositeDisposable = CompositeDisposable()
+    private val attachedToWindowDisposable = CompositeDisposable()
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -502,7 +502,7 @@ class GroupListFragment @JvmOverloads constructor(
                 Observable.never()
         }
 
-        compositeDisposable += observable.subscribe { initialize() }
+        attachedToWindowDisposable += observable.subscribe { initialize() }
 
         activity.startTicks(receiver)
 
@@ -510,7 +510,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
-        compositeDisposable.clear()
+        attachedToWindowDisposable.clear()
 
         activity.unregisterReceiver(receiver)
 
@@ -597,7 +597,7 @@ class GroupListFragment @JvmOverloads constructor(
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
-            val groupAdapter = GroupAdapter(this)
+            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable)
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -622,7 +622,7 @@ class GroupListFragment @JvmOverloads constructor(
                         setGroupMenuItemVisibility()
                         updateFabVisibility()
                     }
-                    .addTo(compositeDisposable)
+                    .addTo(attachedToWindowDisposable)
 
             dragHelper.attachToRecyclerView(groupListRecycler)
 
@@ -812,7 +812,10 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {
+    class GroupAdapter(
+            val groupListFragment: GroupListFragment,
+            compositeDisposable: CompositeDisposable
+    ) : GroupHolderAdapter(), NodeCollectionParent {
 
         companion object {
 
@@ -820,7 +823,11 @@ class GroupListFragment @JvmOverloads constructor(
             const val TYPE_IMAGE = 1
         }
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                compositeDisposable
+        )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set

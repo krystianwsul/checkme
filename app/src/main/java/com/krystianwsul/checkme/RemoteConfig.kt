@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.krystianwsul.checkme.utils.getCurrentValue
 import com.krystianwsul.checkme.utils.toSingle
+import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 

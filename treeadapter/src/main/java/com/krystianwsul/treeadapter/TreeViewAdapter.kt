@@ -6,14 +6,24 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.schedulers.Schedulers
 
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
-        private val padding: Pair<Int, Int>?
+        private val padding: Pair<Int, Int>?,
+        private val compositeDisposable: CompositeDisposable
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var filterCriteria: Any? = null
+    internal var filterCriteria: Any? = null
+        private set
 
     companion object {
 
@@ -43,8 +53,27 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             field = value
         }
 
+    private val normalizeRelay = BehaviorRelay.create<Unit>()
+
+    private val normalizedObservable = normalizeRelay.switchMap {
+        treeNodeCollection!!.nodesObservable
+                .firstOrError()
+                .flatMapObservable {
+                    Observable.fromCallable { treeNodeCollection!!.normalize() }
+                            .subscribeOn(Schedulers.computation())
+                            .map { true }
+                            .startWith(false)
+                            .observeOn(AndroidSchedulers.mainThread())
+                }
+    }
+            .startWith(false)
+            .replay(1)
+            .apply { compositeDisposable += connect() }
+
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection = treeNodeCollection
+
+        normalizeRelay.accept(Unit)
     }
 
     override fun getItemCount(): Int {
@@ -93,22 +122,26 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
                 return null
             }
 
-            override fun areItemsTheSame(
-                    oldItemPosition: Int,
-                    newItemPosition: Int
-            ) = paddingComparison(oldItemPosition, newItemPosition)
-                    ?: oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
+
+                return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
+            }
 
             override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)
 
             override fun getNewListSize() = newStates.size + (if (showPadding) 1 else 0)
 
-            override fun areContentsTheSame(
-                    oldItemPosition: Int,
-                    newItemPosition: Int
-            ) = paddingComparison(oldItemPosition, newItemPosition)
-                    ?.let { it && oldShowProgress == newShowProgress }
-                    ?: oldStates[oldItemPosition] == newStates[newItemPosition]
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                paddingComparison(oldItemPosition, newItemPosition)?.let {
+                    return if (it)
+                        oldShowProgress == newShowProgress
+                    else
+                        it
+                }
+
+                return oldStates[oldItemPosition] == newStates[newItemPosition]
+            }
         }).dispatchUpdatesTo(object : ListUpdateCallback {
 
             override fun onInserted(position: Int, count: Int) {
@@ -216,6 +249,22 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             throw SetTreeNodeCollectionNotCalledException()
 
         treeNodeCollection!!.setNewItemPosition(position)
+    }
+
+    private var updatingAfterNormalizationDisposable: Disposable? = null
+
+    fun setFilterCriteria(filterCriteria: Any?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
+        updatingAfterNormalizationDisposable?.dispose()
+
+        if (normalizedObservable.getCurrentValue()) {
+            this.filterCriteria = filterCriteria
+        } else {
+            updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
+                    .subscribe {
+                        updateDisplayedNodes { this.filterCriteria = filterCriteria }
+                    }
+                    .addTo(compositeDisposable)
+        }
     }
 
     fun getTreeNodeCollection() = treeNodeCollection

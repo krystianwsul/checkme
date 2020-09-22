@@ -308,14 +308,6 @@ fun <T> Single<T>.tryGetCurrentValue(): T? {
 
 fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
 
-fun <T> Observable<T>.tryGetCurrentValue(): T? {
-    var value: T? = null
-    subscribe { t -> value = t }.dispose()
-    return value
-}
-
-fun <T> Observable<T>.getCurrentValue() = tryGetCurrentValue()!!
-
 fun <T, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
     map<NullableWrapper<U>> { NullableWrapper(mapper(it)) }.filterNotNull()
 

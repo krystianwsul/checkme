@@ -209,7 +209,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                viewCreatedDisposable
+        )
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
@@ -235,10 +239,10 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
-        fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+        fun removeSelected(@Suppress("UNUSED_PARAMETER") placeHolder: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = userDataWrappers.filter { it.treeNode.isSelected }
 
-            selectedUserDataWrappers.forEach { treeNodeCollection.remove(it.treeNode, x) }
+            selectedUserDataWrappers.forEach { treeNodeCollection.remove(it.treeNode, placeHolder) }
 
             selectedUserDataWrappers.forEach { userDataWrappers.remove(it) }
 

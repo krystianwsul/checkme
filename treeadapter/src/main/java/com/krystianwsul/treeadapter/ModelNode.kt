@@ -18,6 +18,8 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun onClick(holder: T) = Unit
 
+    fun normalize() = Unit
+
     fun filter(filterCriteria: Any) = true
 
     val state: ModelState

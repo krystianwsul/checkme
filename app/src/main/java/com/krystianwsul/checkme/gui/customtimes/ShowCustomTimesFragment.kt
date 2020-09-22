@@ -220,7 +220,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                viewCreatedDisposable
+        )
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set

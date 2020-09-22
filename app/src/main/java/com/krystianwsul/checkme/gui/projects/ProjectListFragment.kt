@@ -230,7 +230,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private inner class ProjectListAdapter : GroupHolderAdapter() {
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                viewCreatedDisposable
+        )
 
         private lateinit var projectNodes: MutableList<ProjectNode>
 

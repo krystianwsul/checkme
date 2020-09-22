@@ -314,6 +314,11 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
         private val normalizedName by lazy { name.normalized() }
         private val normalizedNote by lazy { note?.normalized() }
 
+        fun normalize() {
+            normalizedName
+            normalizedNote
+        }
+
         fun matchesSearch(query: String?): Boolean {
             if (query.isNullOrEmpty())
                 return true

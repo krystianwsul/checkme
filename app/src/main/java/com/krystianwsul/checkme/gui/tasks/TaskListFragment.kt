@@ -450,9 +450,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(searchData: SearchData?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+    private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
-        treeViewAdapter.filterCriteria = searchData
+        treeViewAdapter.setFilterCriteria(searchData, placeholder)
     }
 
     override fun onDestroyView() {
@@ -468,7 +468,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
 
-        val treeViewAdapter = TreeViewAdapter(this, Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress))
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                viewCreatedDisposable
+        )
 
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
@@ -694,6 +698,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
             }
 
+            override fun normalize() = childTaskData.normalize()
+
             override fun filter(filterCriteria: Any) = childTaskData.matchesSearch(filterCriteria as SearchData)
         }
     }
@@ -738,6 +744,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         private val normalizedName by lazy { name.normalized() }
         private val normalizedNote by lazy { note?.normalized() }
+
+        fun normalize() {
+            normalizedName
+            normalizedNote
+        }
 
         fun matchesSearch(searchData: SearchData?): Boolean {
             if (searchData == null)

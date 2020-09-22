@@ -1,49 +1,38 @@
 package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import com.jakewharton.rxrelay2.BehaviorRelay
+import io.reactivex.Observable
 import kotlin.math.ceil
 import kotlin.math.min
 
 class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
-    private lateinit var treeNodes: MutableList<TreeNode<T>>
+    private val treeNodesRelay = BehaviorRelay.create<List<TreeNode<T>>>()
 
-    val selectedNodes: List<TreeNode<T>>
-        get() {
-            if (!this::treeNodes.isInitialized)
-                throw SetTreeNodesNotCalledException()
+    val selectedNodes
+        get() = treeNodesRelay.value
+                ?.flatMap { it.selectedNodes }
+                ?: throw SetTreeNodesNotCalledException()
 
-            return treeNodes.flatMap { it.selectedNodes }
-        }
+    val nodesObservable: Observable<List<TreeNode<T>>> = treeNodesRelay
 
-    var nodes: List<TreeNode<T>>
-        get() {
-            if (!this::treeNodes.isInitialized)
-                throw SetTreeNodesNotCalledException()
-
-            return treeNodes
-        }
+    var nodes
+        get() = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
         set(rootTreeNodes) {
-            if (this::treeNodes.isInitialized)
-                throw SetTreeNodesCalledTwiceException()
+            if (treeNodesRelay.value != null) throw SetTreeNodesCalledTwiceException()
 
-            treeNodes = ArrayList(rootTreeNodes)
-            treeNodes.sort()
+            treeNodesRelay.accept(rootTreeNodes.sorted())
 
             printOrdinals("setNodes")
         }
 
-    private fun printOrdinals(prefix: String) {
-        val lines = treeNodes.mapNotNull { it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" } }
-
-        if (lines.isEmpty())
-            return
+    private fun printOrdinals(prefix: String) = treeNodesRelay.value!!.mapNotNull {
+        it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" }
     }
 
     fun getNode(position: Int): TreeNode<T> {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
 
         var currPosition = position
         check(currPosition >= 0)
@@ -60,8 +49,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
     }
 
     override fun getPosition(treeNode: TreeNode<T>): Int {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
 
         var offset = 0
         for (currTreeNode in treeNodes) {
@@ -80,47 +68,41 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         return treeNode.itemViewType
     }
 
-    override val displayedSize: Int
-        get() {
-            if (!this::treeNodes.isInitialized)
-                throw SetTreeNodesNotCalledException()
+    override val displayedSize
+        get() = treeNodesRelay.value
+                ?.sumBy { it.displayedSize }
+                ?: throw SetTreeNodesNotCalledException()
 
-            var displayedSize = 0
-            for (treeNode in treeNodes)
-                displayedSize += treeNode.displayedSize
-            return displayedSize
-        }
+    val displayedNodes
+        get() = treeNodesRelay.value
+                ?.flatMap { it.displayedNodes }
+                ?: throw SetTreeNodesNotCalledException()
 
-    val displayedNodes: List<TreeNode<T>>
-        get() {
-            if (!this::treeNodes.isInitialized)
-                throw SetTreeNodesNotCalledException()
-
-            return treeNodes.flatMap { it.displayedNodes }
-        }
-
-    fun unselect(x: TreeViewAdapter.Placeholder) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
-
-        treeNodes.forEach { it.unselect(x) }
-    }
+    fun unselect(x: TreeViewAdapter.Placeholder) = treeNodesRelay.value
+            ?.forEach { it.unselect(x) }
+            ?: throw SetTreeNodesNotCalledException()
 
     override fun add(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value
+                ?.toMutableList()
+                ?: throw SetTreeNodesNotCalledException()
 
         treeNodes.add(treeNode)
         treeNodes.sort()
+
+        treeNodesRelay.accept(treeNodes)
     }
 
     override fun remove(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value
+                ?.toMutableList()
+                ?: throw SetTreeNodesNotCalledException()
 
         check(treeNodes.contains(treeNode))
 
         treeNodes.remove(treeNode)
+
+        treeNodesRelay.accept(treeNodes)
     }
 
     override val isExpanded = true
@@ -129,18 +111,16 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
     override val treeNodeCollection = this
 
-    fun selectAll(x: TreeViewAdapter.Placeholder) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
-
-        treeNodes.forEach { it.selectAll(x) }
-    }
+    fun selectAll(placeholder: TreeViewAdapter.Placeholder) = treeNodesRelay.value
+            ?.forEach { it.selectAll(placeholder) }
+            ?: throw SetTreeNodesNotCalledException()
 
     override val indentation = 0
 
     fun moveItem(fromPosition: Int, toPosition: Int, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value
+                ?.toMutableList()
+                ?: throw SetTreeNodesNotCalledException()
 
         val treeNode = treeNodes[fromPosition]
 
@@ -148,11 +128,12 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
             removeAt(fromPosition)
             add(toPosition, treeNode)
         }
+
+        treeNodesRelay.accept(treeNodes)
     }
 
     fun setNewItemPosition(position: Int) {
-        if (!this::treeNodes.isInitialized)
-            throw SetTreeNodesNotCalledException()
+        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
 
         val visibleNodes = treeNodes.filter { it.canBeShown() }
 
@@ -184,6 +165,10 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
         printOrdinals("setNewItemPosition after")
     }
+
+    fun normalize() = treeNodesRelay.value
+            ?.forEach { it.normalize() }
+            ?: throw SetTreeNodesNotCalledException()
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")
 

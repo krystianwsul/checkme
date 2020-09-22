@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables

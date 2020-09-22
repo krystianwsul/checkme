@@ -93,26 +93,22 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
                 return null
             }
 
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
-
-                return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
-            }
+            override fun areItemsTheSame(
+                    oldItemPosition: Int,
+                    newItemPosition: Int
+            ) = paddingComparison(oldItemPosition, newItemPosition)
+                    ?: oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
 
             override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)
 
             override fun getNewListSize() = newStates.size + (if (showPadding) 1 else 0)
 
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                paddingComparison(oldItemPosition, newItemPosition)?.let {
-                    return if (it)
-                        oldShowProgress == newShowProgress
-                    else
-                        it
-                }
-
-                return oldStates[oldItemPosition] == newStates[newItemPosition]
-            }
+            override fun areContentsTheSame(
+                    oldItemPosition: Int,
+                    newItemPosition: Int
+            ) = paddingComparison(oldItemPosition, newItemPosition)
+                    ?.let { it && oldShowProgress == newShowProgress }
+                    ?: oldStates[oldItemPosition] == newStates[newItemPosition]
         }).dispatchUpdatesTo(object : ListUpdateCallback {
 
             override fun onInserted(position: Int, count: Int) {

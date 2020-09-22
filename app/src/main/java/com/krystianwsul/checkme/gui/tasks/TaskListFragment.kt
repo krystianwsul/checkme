@@ -249,9 +249,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         Observables.combineLatest(dataRelay, taskListListener.search)
                 .subscribe { (_, searchWrapper) ->
                     val emptyBefore = treeViewAdapter.displayedNodes.isEmpty()
-                    treeViewAdapter.updateDisplayedNodes {
-                        search(searchWrapper.value, TreeViewAdapter.Placeholder)
-                    }
+                    treeViewAdapter.updateDisplayedNodes { search(searchWrapper.value, it) }
 
                     val emptyAfter = treeViewAdapter.displayedNodes.isEmpty()
                     if (emptyBefore && !emptyAfter)
@@ -334,9 +332,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         data!!.copying
                 )
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
 
-                search(searchData, TreeViewAdapter.Placeholder)
+                search(searchData, it)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
@@ -347,9 +345,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             dragHelper.attachToRecyclerView(taskListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
 
-                search(searchData, TreeViewAdapter.Placeholder)
+                search(searchData, it)
             }
         }
 
@@ -423,8 +421,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
     }
-
-    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         taskListFragmentFab = floatingActionButton

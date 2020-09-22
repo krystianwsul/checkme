@@ -561,27 +561,19 @@ class MainActivity :
                         Tab.INSTANCES -> selectAllRelay.accept(Unit)
                         Tab.TASKS -> {
                             val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
-                            taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                                taskListFragment.selectAll(TreeViewAdapter.Placeholder)
-                            }
+                            taskListFragment.treeViewAdapter.selectAll()
                         }
                         Tab.CUSTOM_TIMES -> {
                             val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
-                            showCustomTimesFragment.treeViewAdapter.updateDisplayedNodes {
-                                showCustomTimesFragment.selectAll(TreeViewAdapter.Placeholder)
-                            }
+                            showCustomTimesFragment.treeViewAdapter.selectAll()
                         }
                         Tab.FRIENDS -> {
                             val friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
-                            friendListFragment.treeViewAdapter.updateDisplayedNodes {
-                                friendListFragment.selectAll(TreeViewAdapter.Placeholder)
-                            }
+                            friendListFragment.treeViewAdapter.selectAll()
                         }
                         Tab.PROJECTS -> {
                             val projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
-                            projectListFragment.treeViewAdapter.updateDisplayedNodes {
-                                projectListFragment.treeViewAdapter.selectAll(TreeViewAdapter.Placeholder)
-                            }
+                            projectListFragment.treeViewAdapter.selectAll()
                         }
                         else -> throw UnsupportedOperationException()
                     }

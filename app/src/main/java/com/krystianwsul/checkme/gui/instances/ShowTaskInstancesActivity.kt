@@ -134,9 +134,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             setOnMenuItemClickListener { item ->
                 check(item.itemId == R.id.action_select_all)
 
-                groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                    groupListFragment.selectAll(TreeViewAdapter.Placeholder)
-                }
+                groupListFragment.treeViewAdapter.selectAll()
 
                 true
             }

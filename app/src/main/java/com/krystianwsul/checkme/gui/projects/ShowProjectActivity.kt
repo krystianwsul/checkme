@@ -17,7 +17,6 @@ import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -208,9 +207,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
             setOnMenuItemClickListener { item ->
                 check(item.itemId == R.id.action_select_all)
 
-                userListFragment.treeViewAdapter.updateDisplayedNodes {
-                    userListFragment.treeViewAdapter.selectAll(TreeViewAdapter.Placeholder)
-                }
+                userListFragment.treeViewAdapter.selectAll()
 
                 true
             }

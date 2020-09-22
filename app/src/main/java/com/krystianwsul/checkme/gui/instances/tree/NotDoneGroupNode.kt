@@ -212,9 +212,9 @@ class NotDoneGroupNode(
 
                                     GroupListFragment.recursiveExists(singleInstanceData)
 
-                                    nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
+                                    nodeCollection.dividerNode.add(singleInstanceData, it)
 
-                                    notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
+                                    notDoneGroupCollection.remove(this, it)
                                 }
                     } else {
                         updateDone()
@@ -529,13 +529,18 @@ class NotDoneGroupNode(
                     groupAdapter.treeNodeCollection
                             .treeViewAdapter
                             .updateDisplayedNodes {
-                                instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
+                                instanceData.done = DomainFactory.instance.setInstanceDone(
+                                        groupAdapter.dataId,
+                                        SaveService.Source.GUI,
+                                        instanceKey,
+                                        true
+                                )!!
 
                                 GroupListFragment.recursiveExists(instanceData)
 
-                                parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
+                                parentNotDoneGroupNode.remove(this, it)
 
-                                parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                                parentNodeCollection.dividerNode.add(instanceData, it)
                             }
 
                     groupListFragment.listener.showSnackbarDone(1) {

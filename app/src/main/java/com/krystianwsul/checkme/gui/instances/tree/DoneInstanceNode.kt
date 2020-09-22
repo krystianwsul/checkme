@@ -104,12 +104,9 @@ class DoneInstanceNode(
                                 false
                             )
 
-                            dividerNode.remove(this, TreeViewAdapter.Placeholder)
+                            dividerNode.remove(this, it)
 
-                            nodeCollection.notDoneGroupCollection.add(
-                                instanceData,
-                                TreeViewAdapter.Placeholder
-                            )
+                            nodeCollection.notDoneGroupCollection.add(instanceData, it)
                         }
 
                 groupListFragment.listener.showSnackbarNotDone(1) {

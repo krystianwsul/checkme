@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_show_tasks.*
@@ -151,15 +150,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener 
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            animateReplaceMenu(R.menu.menu_select_all) { updateBottomMenu() }
+            animateReplaceMenu(R.menu.menu_select_all, ::updateBottomMenu)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_select_all -> {
-                        taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                            taskListFragment.selectAll(TreeViewAdapter.Placeholder)
-                        }
-                    }
+                    R.id.action_select_all -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }
 

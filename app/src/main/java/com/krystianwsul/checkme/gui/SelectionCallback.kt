@@ -26,7 +26,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     var actionMode by observable<ActionMode?>(null) { _, _, newValue -> MyCrashlytics.log("actionMode = $newValue") }
         private set
 
-    private var menuClick = false
+    private var menuClickPlaceholder: TreeViewAdapter.Placeholder? = null
     private var removingLast = false
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter<NodeHolder>
@@ -116,15 +116,15 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         getTreeViewAdapter().updateDisplayedNodes {
-            val close = onMenuClick(item.itemId, TreeViewAdapter.Placeholder)
+            val close = onMenuClick(item.itemId, it)
 
             check(!removingLast)
-            check(!menuClick)
+            check(menuClickPlaceholder == null)
 
             if (close) {
-                menuClick = true
+                menuClickPlaceholder = it
                 actionMode?.finish()
-                menuClick = false
+                menuClickPlaceholder = null
             }
         }
 
@@ -140,8 +140,8 @@ abstract class SelectionCallback : ActionMode.Callback {
 
                 actionMode = null
             }
-            menuClick -> countdown()
-            else -> getTreeViewAdapter().updateDisplayedNodes { countdown() }
+            menuClickPlaceholder != null -> countdown(menuClickPlaceholder!!)
+            else -> getTreeViewAdapter().updateDisplayedNodes(::countdown)
         }
 
         bottomBarData.apply {
@@ -154,7 +154,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
     }
 
-    private fun countdown() {
+    private fun countdown(placeholder: TreeViewAdapter.Placeholder) {
         check(selected > 0)
 
         for (i in selected downTo 1) {
@@ -165,14 +165,14 @@ abstract class SelectionCallback : ActionMode.Callback {
                     MyCrashlytics.log("actionMode = null from countdown")
                     actionMode = null
 
-                    onLastRemoved(TreeViewAdapter.Placeholder)
+                    onLastRemoved(placeholder)
                 }
                 1 -> onSecondToLastRemoved()
                 else -> onOtherRemoved()
             }
         }
 
-        unselect(TreeViewAdapter.Placeholder)
+        unselect(placeholder)
     }
 
     fun setSelected(selected: Int, x: TreeViewAdapter.Placeholder) {
@@ -219,7 +219,7 @@ abstract class SelectionCallback : ActionMode.Callback {
             }
             0 -> {
                 check(!removingLast)
-                check(!menuClick)
+                check(menuClickPlaceholder == null)
 
                 removingLast = true
                 actionMode!!.finish()

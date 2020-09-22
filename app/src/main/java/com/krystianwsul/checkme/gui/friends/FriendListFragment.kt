@@ -139,6 +139,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize()
+
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
             val friendListAdapter = FriendListAdapter()
@@ -146,9 +148,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
             friendListRecycler.itemAnimator = CustomItemAnimator()
-        }
 
-        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+            }
+        }
 
         updateFabVisibility()
 
@@ -178,8 +182,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateSelectAll() = (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
-
-    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         friendListFab = floatingActionButton

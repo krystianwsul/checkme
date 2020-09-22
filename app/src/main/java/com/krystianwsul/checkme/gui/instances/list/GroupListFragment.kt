@@ -499,7 +499,7 @@ class GroupListFragment @JvmOverloads constructor(
             if (it)
                 parametersRelay
             else
-                Observable.never<GroupListParameters>()
+                Observable.never()
         }
 
         compositeDisposable += observable.subscribe { initialize() }
@@ -594,7 +594,7 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.useDoneNode
                 )
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
             val groupAdapter = GroupAdapter(this)
@@ -627,7 +627,7 @@ class GroupListFragment @JvmOverloads constructor(
             dragHelper.attachToRecyclerView(groupListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         }
 
@@ -686,8 +686,6 @@ class GroupListFragment @JvmOverloads constructor(
             DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
         }
     }
-
-    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         this.floatingActionButton = floatingActionButton

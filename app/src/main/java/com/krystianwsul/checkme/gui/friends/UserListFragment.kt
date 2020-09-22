@@ -134,7 +134,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).apply {
                     userNodes.add(userNode)
-                    treeNodeCollection.add(userNode.initialize(treeNodeCollection), TreeViewAdapter.Placeholder)
+                    treeNodeCollection.add(userNode.initialize(treeNodeCollection), it)
                 }
             }
 
@@ -161,6 +161,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data!!.userListDatas, saveState)
+
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
             val friendListAdapter = FriendListAdapter()
@@ -168,9 +170,11 @@ class UserListFragment : AbstractFragment(), FabUser {
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
             friendListRecycler.itemAnimator = CustomItemAnimator()
-        }
 
-        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+            }
+        }
 
         updateFabVisibility()
         updateVisibility(data!!.immediate)

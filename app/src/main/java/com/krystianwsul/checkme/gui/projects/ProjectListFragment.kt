@@ -174,7 +174,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as ProjectListAdapter).initialize(data.projectDatas)
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
             val projectListAdapter = ProjectListAdapter()
@@ -184,7 +184,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             projectListRecycler.itemAnimator = CustomItemAnimator()
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         }
 

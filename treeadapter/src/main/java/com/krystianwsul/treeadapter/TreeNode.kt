@@ -16,17 +16,11 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     val itemViewType = modelNode.itemViewType
 
-    fun onLongClick() {
-        treeViewAdapter.updateDisplayedNodes {
-            toggleSelected(TreeViewAdapter.Placeholder)
-        }
-    }
+    fun onLongClick() = treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
 
     fun onClick(holder: T) {
         if (hasActionMode()) {
-            treeViewAdapter.updateDisplayedNodes {
-                toggleSelected(TreeViewAdapter.Placeholder)
-            }
+            treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
         } else {
             modelNode.onClick(holder)
         }
@@ -84,14 +78,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (childTreeNodes!!.isEmpty())
             throw EmptyExpandedException()
 
-        treeViewAdapter.updateDisplayedNodes {
+        treeViewAdapter.updateDisplayedNodes { placeholder ->
             expanded = if (expanded) { // collapsing
-                childTreeNodes!!.forEach { it.deselectRecursive(TreeViewAdapter.Placeholder) }
+                childTreeNodes!!.forEach { it.deselectRecursive(placeholder) }
 
                 false
             } else { // expanding
-                if (selected)
-                    propagateSelection(true, TreeViewAdapter.Placeholder)
+                if (selected) propagateSelection(true, placeholder)
 
                 true
             }
@@ -161,24 +154,24 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         updateSelect(x, recursive)
     }
 
-    private fun updateSelect(x: TreeViewAdapter.Placeholder, recursive: Boolean) {
+    private fun updateSelect(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean) {
         if (selected) {
-            incrementSelected(x)
+            incrementSelected(placeholder)
         } else {
-            decrementSelected(x)
+            decrementSelected(placeholder)
         }
 
         if (recursive && expanded)
-            propagateSelection(selected, x)
+            propagateSelection(selected, placeholder)
 
         if (recursive && !selected && modelNode.deselectParent) {
-            (parent as TreeNode).takeIf { it.selected }?.toggleSelected(x, false)
+            (parent as TreeNode).takeIf { it.selected }?.toggleSelected(placeholder, false)
         }
     }
 
-    private fun propagateSelection(selected: Boolean, x: TreeViewAdapter.Placeholder) {
+    private fun propagateSelection(selected: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         if (modelNode.toggleDescendants)
-            childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(x, false) }
+            childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(placeholder, false) }
     }
 
     fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
@@ -189,9 +182,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         modelNode.onBindViewHolder(viewHolder, startingDrag)
 
-        treeViewAdapter.updateDisplayedNodes {
-            updateSelect(TreeViewAdapter.Placeholder, true)
-        }
+        treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode()

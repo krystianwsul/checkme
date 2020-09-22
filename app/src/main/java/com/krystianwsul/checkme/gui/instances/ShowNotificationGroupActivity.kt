@@ -126,11 +126,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_select_all -> {
-                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
-                        }
-                    }
+                    R.id.action_select_all -> groupListFragment.treeViewAdapter.selectAll()
                     else -> throw IllegalArgumentException()
                 }
 

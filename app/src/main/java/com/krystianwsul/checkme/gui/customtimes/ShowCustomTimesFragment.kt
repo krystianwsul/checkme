@@ -142,6 +142,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).initialize()
+
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         } else {
             val customTimesAdapter = CustomTimesAdapter()
@@ -149,9 +151,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             treeViewAdapter = customTimesAdapter.treeViewAdapter
             showTimesList.adapter = treeViewAdapter
             showTimesList.itemAnimator = CustomItemAnimator()
-        }
 
-        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+            }
+        }
 
         val show: View
         val hide: View
@@ -188,8 +192,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateSelectAll() = (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
-
-    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         showTimesFab = floatingActionButton

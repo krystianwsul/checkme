@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -137,11 +136,7 @@ class DayFragment @JvmOverloads constructor(
                 setFab(event.floatingActionButton)
 
                 activity.selectAllRelay
-                        .subscribe {
-                            groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                                selectAll(TreeViewAdapter.Placeholder)
-                            }
-                        }
+                        .subscribe { groupListFragment.treeViewAdapter.selectAll() }
                         .addTo(compositeDisposable)
             } else {
                 clearFab()
@@ -157,7 +152,7 @@ class DayFragment @JvmOverloads constructor(
             if (event is Event.PageVisible && event.position == key.second)
                 activity.started
             else
-                Observable.never<Boolean>()
+                Observable.never()
         }
                 .filter { it }
                 .subscribe { groupListFragment.checkCreatedTaskKey() }
@@ -169,8 +164,6 @@ class DayFragment @JvmOverloads constructor(
 
         super.onDetachedFromWindow()
     }
-
-    fun selectAll(x: TreeViewAdapter.Placeholder) = groupListFragment.selectAll(x)
 
     private fun setFab(floatingActionButton: FloatingActionButton) {
         if (this.floatingActionButton === floatingActionButton)

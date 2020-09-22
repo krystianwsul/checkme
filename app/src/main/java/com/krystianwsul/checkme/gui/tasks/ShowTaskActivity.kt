@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -232,11 +231,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                                 .also { it.listener = deleteInstancesListener }
                                 .show(supportFragmentManager, TAG_REMOVE_INSTANCES)
                     }
-                    R.id.task_menu_select_all -> {
-                        taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                            taskListFragment.selectAll(TreeViewAdapter.Placeholder)
-                        }
-                    }
+                    R.id.task_menu_select_all -> taskListFragment.treeViewAdapter.selectAll()
                     R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
                     R.id.taskMenuCopyTask -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
                     R.id.taskMenuWebSearch -> startActivity(webSearchIntent(data!!.name))

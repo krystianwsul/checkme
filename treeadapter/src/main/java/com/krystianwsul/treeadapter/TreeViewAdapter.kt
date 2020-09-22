@@ -60,7 +60,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     fun decrementSelected(x: Placeholder) = treeModelAdapter.decrementSelected(x)
 
-    fun updateDisplayedNodes(action: () -> Unit) {
+    fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
@@ -72,7 +72,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val showPadding = padding != null
 
         updating = true
-        action()
+        action(Placeholder.instance)
         updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
@@ -142,17 +142,15 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     }
 
     fun unselect(x: Placeholder) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
+        if (treeNodeCollection == null) throw SetTreeNodeCollectionNotCalledException()
 
         treeNodeCollection!!.unselect(x)
     }
 
-    fun selectAll(x: Placeholder) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
+    fun selectAll() {
+        if (treeNodeCollection == null) throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.selectAll(x)
+        updateDisplayedNodes(treeNodeCollection!!::selectAll)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -236,5 +234,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         }
     }
 
-    object Placeholder
+    class Placeholder private constructor() {
+
+        companion object {
+
+            val instance = Placeholder()
+        }
+    }
 }

@@ -326,11 +326,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                             deleteTasks(setOf(instanceKey.taskKey))
                         }
-                        R.id.instance_menu_select_all -> {
-                            groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                                groupListFragment.selectAll(TreeViewAdapter.Placeholder)
-                            }
-                        }
+                        R.id.instance_menu_select_all -> groupListFragment.treeViewAdapter.selectAll()
                         R.id.instance_menu_add_task -> {
                             data!!.instanceDateTime.let {
                                 startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Schedule(it.date, it.time.timePair))))

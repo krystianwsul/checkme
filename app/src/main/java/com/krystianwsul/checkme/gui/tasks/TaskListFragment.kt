@@ -264,8 +264,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                         val (emptyTextId, emptyDrawableId) = when {
                             searchWrapper.value != null -> Pair(
-                                R.string.noResults,
-                                R.drawable.search
+                                    R.string.noResults,
+                                    R.drawable.search
                             )
                             rootTaskData != null -> Pair(R.string.empty_child, R.drawable.empty)
                             else -> Pair(R.string.tasks_empty_root, R.drawable.empty)
@@ -301,11 +301,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     private fun initialize() {
-        if (view == null)
-            return
-
-        if (data == null)
-            return
+        if (view == null) return
+        if (data == null) return
 
         initializeDisposable.clear()
 
@@ -360,15 +357,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         tryScroll()
     }
 
-    private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> {
-        return listOf(listOf(listOf(childTaskData)), childTaskData.children.map { getAllChildTaskDatas(it) }).flatten().flatten()
-    }
+    private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> = listOf(
+            listOf(listOf(childTaskData)),
+            childTaskData.children.map(::getAllChildTaskDatas)
+    ).flatten().flatten()
 
     private val ChildTaskData.allTaskKeys get() = getAllChildTaskDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
-        if (!this::treeViewAdapter.isInitialized)
-            return null
+        if (!this::treeViewAdapter.isInitialized) return null
 
         return treeViewAdapter.displayedNodes
                 .firstOrNull {
@@ -385,7 +382,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     } else {
                         false
                     }
-                }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+                }
+                ?.let(treeViewAdapter.getTreeNodeCollection()::getPosition)
     }
 
     private fun updateSelectAll() {
@@ -690,9 +688,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 childTaskData.ordinal = ordinal
 
                 DomainFactory.instance.setOrdinal(
-                    taskListFragment.data!!.dataId,
-                    childTaskData.taskKey,
-                    ordinal
+                        taskListFragment.data!!.dataId,
+                        childTaskData.taskKey,
+                        ordinal
                 )
             }
 
@@ -723,17 +721,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     )
 
     data class ChildTaskData(
-        val name: String,
-        val scheduleText: String?,
-        val children: List<ChildTaskData>,
-        val note: String?,
-        private val startExactTimeStamp: ExactTimeStamp,
-        val taskKey: TaskKey,
-        val taskHierarchyKey: TaskHierarchyKey?,
-        val imageState: ImageState?,
-        val current: Boolean,
-        val alwaysShow: Boolean,
-        var ordinal: Double
+            val name: String,
+            val scheduleText: String?,
+            val children: List<ChildTaskData>,
+            val note: String?,
+            private val startExactTimeStamp: ExactTimeStamp,
+            val taskKey: TaskKey,
+            val taskHierarchyKey: TaskHierarchyKey?,
+            val imageState: ImageState?,
+            val current: Boolean,
+            val alwaysShow: Boolean,
+            var ordinal: Double
     ) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)

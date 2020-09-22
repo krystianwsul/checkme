@@ -330,8 +330,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
-
-                search(searchData, it)
             }
         } else {
             val taskAdapter = TaskAdapter(this)

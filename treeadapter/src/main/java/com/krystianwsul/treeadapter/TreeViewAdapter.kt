@@ -253,7 +253,6 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
-    // todo search clean up setting null filterCriteria if no filtering is happening
     fun setFilterCriteria(filterCriteria: Any?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 

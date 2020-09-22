@@ -121,10 +121,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter!!.updateDisplayedNodes { placeholder ->
+            treeViewAdapter!!.updateDisplayedNodes {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
-
-                query.takeIf { it.isNotEmpty() }?.let { search(it, placeholder) }
             }
         } else {
             val taskAdapter = TaskAdapter(this)
@@ -133,9 +131,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             recyclerView.adapter = treeViewAdapter
             recyclerView.itemAnimator = CustomItemAnimator()
 
-            treeViewAdapter!!.updateDisplayedNodes { placeholder ->
-                query.takeIf { it.isNotEmpty() }?.let { search(it, placeholder) }
-            }
+            if (query.isNotEmpty()) treeViewAdapter!!.updateDisplayedNodes { search(query, it) }
         }
 
         initializeDisposable += searchChanges.subscribe { query ->
@@ -186,7 +182,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private fun search(query: String, placeholder: TreeViewAdapter.Placeholder) {
         this.query = query
-        treeViewAdapter!!.setFilterCriteria(query, placeholder)
+        treeViewAdapter!!.setFilterCriteria(query.takeIf { it.isNotEmpty() }, placeholder)
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : GroupHolderAdapter(), TaskParent {

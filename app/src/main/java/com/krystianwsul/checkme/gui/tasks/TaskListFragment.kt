@@ -81,7 +81,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         @Suppress("UNCHECKED_CAST")
         val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
-        taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
+        listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
         }
     }
@@ -92,7 +92,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override val bottomBarData by lazy { Triple(taskListListener.getBottomBar(), R.menu.menu_edit_tasks, taskListListener::initBottomBar) }
+        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_tasks, listener::initBottomBar) }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
@@ -178,13 +178,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private val initializeDisposable = CompositeDisposable()
 
-    private val taskListListener get() = activity as Listener
+    private val listener get() = activity as Listener
 
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     override var scrollToTaskKey: TaskKey? = null
-    override val listItemAddedListener get() = taskListListener
+    override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = taskListRecycler
 
     private val dataRelay = BehaviorRelay.create<Unit>()
@@ -246,7 +246,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
 
-        Observables.combineLatest(dataRelay, taskListListener.search)
+        Observables.combineLatest(dataRelay, listener.search)
                 .subscribe { (_, searchWrapper) ->
                     val emptyBefore = treeViewAdapter.displayedNodes.isEmpty()
                     treeViewAdapter.updateDisplayedNodes { search(searchWrapper.value, it) }
@@ -663,7 +663,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 if (!copying)
                     taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
                 else if (indentation == 0)
-                    taskListFragment.taskListListener.startCopy(childTaskData.taskKey)
+                    taskListFragment.listener.startCopy(childTaskData.taskKey)
             }
 
             override val isVisibleWhenEmpty = true

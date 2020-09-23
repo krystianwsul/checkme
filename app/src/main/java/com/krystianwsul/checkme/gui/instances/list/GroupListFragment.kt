@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.annotation.IdRes
@@ -28,9 +27,11 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.utils.observeEmptySearchState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimeStamp
@@ -430,6 +431,8 @@ class GroupListFragment @JvmOverloads constructor(
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = groupListRecycler
 
+    private val initializedRelay = BehaviorRelay.create<Unit>()
+
     private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
@@ -507,6 +510,28 @@ class GroupListFragment @JvmOverloads constructor(
         activity.startTicks(receiver)
 
         (activity.supportFragmentManager.findFragmentByTag(EDIT_INSTANCES_TAG) as? EditInstancesFragment)?.listener = this::onEditInstances
+
+        attachedToWindowDisposable += observeEmptySearchState(
+                initializedRelay,
+                Observable.just(NullableWrapper()), // todo search
+                { treeViewAdapter },
+                { _, _ -> }, // todo search
+                groupListRecycler,
+                groupListProgress,
+                emptyTextLayout,
+                { parameters.immediate },
+                {
+                    when (val parameters = parameters) {
+                        is GroupListParameters.All -> R.string.instances_empty_root
+                        is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!) {
+                            R.string.empty_child
+                        } else {
+                            R.string.empty_disabled
+                        }
+                        else -> null
+                    }
+                }
+        )
     }
 
     override fun onDetachedFromWindow() {
@@ -631,39 +656,12 @@ class GroupListFragment @JvmOverloads constructor(
             }
         }
 
-        val emptyTextId = when (val parameters = parameters) {
-            is GroupListParameters.All -> R.string.instances_empty_root
-            is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!) {
-                R.string.empty_child
-            } else {
-                R.string.empty_disabled
-            }
-            else -> null
-        }
-
-        val hide = mutableListOf<View>(groupListProgress)
-        val show = mutableListOf<View>()
-
-        if (treeViewAdapter.displayedNodes.isEmpty()) {
-            hide += groupListRecycler
-
-            if (emptyTextId != null) {
-                show += emptyTextLayout
-                emptyText.setText(emptyTextId)
-            } else {
-                hide += emptyTextLayout
-            }
-        } else {
-            show += groupListRecycler
-            hide += emptyTextLayout
-        }
-
-        animateVisibility(show, hide, immediate = parameters.immediate)
-
         setGroupMenuItemVisibility()
         updateFabVisibility()
 
         tryScroll()
+
+        initializedRelay.accept(Unit)
     }
 
     private fun setGroupMenuItemVisibility() {

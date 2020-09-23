@@ -23,9 +23,9 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.utils.observeEmptySearchState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -37,8 +37,7 @@ import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
@@ -187,7 +186,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = taskListRecycler
 
-    private val dataRelay = BehaviorRelay.create<Unit>()
+    private val initializedRelay = BehaviorRelay.create<Unit>()
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
@@ -246,41 +245,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
 
-        Observables.combineLatest(dataRelay, listener.taskSearch)
-                .subscribe { (_, searchWrapper) ->
-                    val emptyBefore = treeViewAdapter.displayedNodes.isEmpty()
-                    treeViewAdapter.updateDisplayedNodes { search(searchWrapper.value, it) }
-
-                    val emptyAfter = treeViewAdapter.displayedNodes.isEmpty()
-                    if (emptyBefore && !emptyAfter)
-                        taskListRecycler.scrollToPosition(0)
-
-                    val hide = mutableListOf<View>(taskListProgress)
-                    val show = mutableListOf<View>()
-
-                    if (emptyAfter) {
-                        hide += taskListRecycler
-                        show += emptyTextLayout
-
-                        val (emptyTextId, emptyDrawableId) = when {
-                            searchWrapper.value != null -> Pair(
-                                    R.string.noResults,
-                                    R.drawable.search
-                            )
-                            rootTaskData != null -> Pair(R.string.empty_child, R.drawable.empty)
-                            else -> Pair(R.string.tasks_empty_root, R.drawable.empty)
-                        }
-
-                        emptyText.setText(emptyTextId)
-                        emptyImage.setImageResource(emptyDrawableId)
-                    } else {
-                        show += taskListRecycler
-                        hide += emptyTextLayout
-                    }
-
-                    animateVisibility(show, hide, immediate = data!!.immediate)
-                }
-                .addTo(viewCreatedDisposable)
+        viewCreatedDisposable += observeEmptySearchState(
+                initializedRelay,
+                listener.taskSearch,
+                { treeViewAdapter },
+                this::search,
+                taskListRecycler,
+                taskListProgress,
+                emptyTextLayout,
+                { data!!.immediate },
+                { rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root }
+        )
 
         initialize()
     }
@@ -349,7 +324,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         updateFabVisibility("initialize")
 
-        dataRelay.accept(Unit)
+        initializedRelay.accept(Unit)
 
         updateSelectAll()
 

@@ -246,7 +246,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
 
-        Observables.combineLatest(dataRelay, listener.search)
+        Observables.combineLatest(dataRelay, listener.taskSearch)
                 .subscribe { (_, searchWrapper) ->
                     val emptyBefore = treeViewAdapter.displayedNodes.isEmpty()
                     treeViewAdapter.updateDisplayedNodes { search(searchWrapper.value, it) }
@@ -773,9 +773,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
+        val taskSearch: Observable<NullableWrapper<SearchData>>
 
-        val search: Observable<NullableWrapper<SearchData>>
+        fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
         fun getBottomBar(): MyBottomBar
 

@@ -79,7 +79,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
     }
 
-    override val search by lazy { appBarLayout.searchData }
+    override val taskSearch by lazy { appBarLayout.searchData }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

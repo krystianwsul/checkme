@@ -645,17 +645,17 @@ class GroupListFragment @JvmOverloads constructor(
         val show = mutableListOf<View>()
 
         if (treeViewAdapter.displayedNodes.isEmpty()) {
-            hide.add(groupListRecycler)
+            hide += groupListRecycler
 
             if (emptyTextId != null) {
-                show.add(emptyTextLayout)
+                show += emptyTextLayout
                 emptyText.setText(emptyTextId)
             } else {
-                hide.add(emptyTextLayout)
+                hide += emptyTextLayout
             }
         } else {
-            show.add(groupListRecycler)
-            hide.add(emptyTextLayout)
+            show += groupListRecycler
+            hide += emptyTextLayout
         }
 
         animateVisibility(show, hide, immediate = parameters.immediate)

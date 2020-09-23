@@ -48,7 +48,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var showTasksViewModel: ShowTasksViewModel
 
-    override val search by lazy { appBarLayout.searchData }
+    override val taskSearch by lazy { appBarLayout.searchData }
 
     private val receiver = object : BroadcastReceiver() {
 

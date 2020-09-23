@@ -133,7 +133,7 @@ class MainActivity :
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
-    override val search by lazy {
+    override val taskSearch by lazy {
         restoreInstances.switchMap {
             if (it.value != null) {
                 Observables.combineLatest(
@@ -439,7 +439,7 @@ class MainActivity :
 
         initBottomBar()
 
-        search.filter { visibleTab.value == Tab.TASKS }
+        taskSearch.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
                     if (it.value != null)
                         bottomFab.show()

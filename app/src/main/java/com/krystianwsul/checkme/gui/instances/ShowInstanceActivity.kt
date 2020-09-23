@@ -108,19 +108,19 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         }
     }
 
-    override val instanceSearch by lazy { appBarLayout.searchData }
+    override val instanceSearch by lazy { collapseAppBarLayout.searchData }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_instance)
 
-        appBarLayout.apply {
+        collapseAppBarLayout.apply {
             inflateMenu(R.menu.show_instance_menu_top)
 
             setOnMenuItemClickListener { item ->
                 data!!.also {
                     when (item.itemId) {
-                        R.id.instanceMenuSearch -> appBarLayout.startSearch()
+                        R.id.instanceMenuSearch -> collapseAppBarLayout.startSearch()
                         R.id.instanceMenuNotify -> {
                             check(!it.done)
                             check(it.instanceDateTime.timeStamp <= TimeStamp.now)
@@ -191,7 +191,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
 
     private fun updateTopMenu() {
-        appBarLayout.menu.apply {
+        collapseAppBarLayout.menu.apply {
             findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
                     ?.instanceDatas
                     .isNullOrEmpty()
@@ -278,7 +278,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         val immediate = data.immediate
 
-        appBarLayout.setText(data.name, data.displayText, emptyTextLayout, immediate)
+        collapseAppBarLayout.setText(data.name, data.displayText, emptyTextLayout, immediate)
 
         updateTopMenu()
         updateBottomMenu()
@@ -291,9 +291,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     override fun onCreateGroupActionMode(
             actionMode: ActionMode,
             treeViewAdapter: TreeViewAdapter<NodeHolder>
-    ) = appBarLayout.collapse()
+    ) = collapseAppBarLayout.collapse()
 
-    override fun onDestroyGroupActionMode() = appBarLayout.expand()
+    override fun onDestroyGroupActionMode() = collapseAppBarLayout.expand()
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
@@ -394,11 +394,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         super.onDestroy()
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
 
     override fun onBackPressed() {
-        if (appBarLayout.isSearching)
-            appBarLayout.closeSearch()
+        if (collapseAppBarLayout.isSearching)
+            collapseAppBarLayout.closeSearch()
         else
             super.onBackPressed()
     }

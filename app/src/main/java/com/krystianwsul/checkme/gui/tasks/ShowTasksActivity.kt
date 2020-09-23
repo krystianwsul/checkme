@@ -48,7 +48,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var showTasksViewModel: ShowTasksViewModel
 
-    override val taskSearch by lazy { appBarLayout.searchData }
+    override val taskSearch by lazy { collapseAppBarLayout.searchData }
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -65,14 +65,14 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
-        appBarLayout.apply {
+        collapseAppBarLayout.apply {
             setText(getString(parameters.title), null, null, true)
 
             inflateMenu(R.menu.show_task_menu_top)
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.actionShowTaskSearch -> appBarLayout.startSearch()
+                    R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()
                     else -> throw IllegalArgumentException()
                 }
             }
@@ -163,7 +163,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
 
     override fun startCopy(taskKey: TaskKey) {
         copiedTaskKey = taskKey
@@ -195,8 +195,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override fun onBackPressed() {
-        if (appBarLayout.isSearching) {
-            appBarLayout.closeSearch()
+        if (collapseAppBarLayout.isSearching) {
+            collapseAppBarLayout.closeSearch()
         } else {
             when (parameters) {
                 Parameters.Unscheduled -> super.onBackPressed()
@@ -221,7 +221,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
-        appBarLayout.menu.apply {
+        collapseAppBarLayout.menu.apply {
             findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
                     ?.childTaskDatas
                     .isNullOrEmpty()

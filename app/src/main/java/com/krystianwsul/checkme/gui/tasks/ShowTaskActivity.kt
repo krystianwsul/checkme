@@ -79,17 +79,17 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
     }
 
-    override val taskSearch by lazy { appBarLayout.searchData }
+    override val taskSearch by lazy { collapseAppBarLayout.searchData }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
-        appBarLayout.apply {
+        collapseAppBarLayout.apply {
             inflateMenu(R.menu.show_task_menu_top)
             setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.actionShowTaskSearch -> appBarLayout.startSearch()
+                    R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()
                     else -> throw IllegalArgumentException()
                 }
             }
@@ -152,7 +152,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         val immediate = data.immediate
 
         Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
-            appBarLayout.setText(data.name, data.collapseText, emptyTextLayout, immediate)
+            collapseAppBarLayout.setText(data.name, data.collapseText, emptyTextLayout, immediate)
         }
 
         updateTopMenu()
@@ -170,16 +170,16 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
-        appBarLayout.menu.apply {
+        collapseAppBarLayout.menu.apply {
             findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
                     ?.childTaskDatas
                     .isNullOrEmpty()
         }
     }
 
-    override fun onCreateActionMode(actionMode: ActionMode) = appBarLayout.collapse()
+    override fun onCreateActionMode(actionMode: ActionMode) = collapseAppBarLayout.collapse()
 
-    override fun onDestroyActionMode() = appBarLayout.expand()
+    override fun onDestroyActionMode() = collapseAppBarLayout.expand()
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
@@ -245,11 +245,11 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
 
     override fun onBackPressed() {
-        if (appBarLayout.isSearching)
-            appBarLayout.closeSearch()
+        if (collapseAppBarLayout.isSearching)
+            collapseAppBarLayout.closeSearch()
         else
             super.onBackPressed()
     }

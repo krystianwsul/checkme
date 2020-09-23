@@ -42,7 +42,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var initialHeight: Int? = null
 
-    private lateinit var title: String
+    private var title: String? = null
     private var paddingLayout: View? = null
 
     private val collapsingTextHelper: CollapsingTextHelper by lazy {
@@ -155,15 +155,15 @@ class CollapseAppBarLayout : AppBarLayout {
                 it.isVisible = !hideText
                 it.text = text
 
-                initialHeight = StaticLayout(
-                        text,
-                        it.paint,
-                        textWidth,
-                        Layout.Alignment.ALIGN_NORMAL,
-                        it.lineSpacingMultiplier,
-                        it.lineSpacingExtra,
-                        it.includeFontPadding
-                ).height
+                if (!text.isNullOrEmpty()) {
+                    initialHeight = StaticLayout.Builder
+                            .obtain(text, 0, text.length, it.paint, textWidth)
+                            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                            .setLineSpacing(it.lineSpacingExtra, it.lineSpacingMultiplier)
+                            .setIncludePad(it.includeFontPadding)
+                            .build()
+                            .height
+                }
 
                 animateHeight(
                         hideText,

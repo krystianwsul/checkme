@@ -13,21 +13,19 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.*
+import kotlinx.android.synthetic.main.empty_text.*
+import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
 class ShowGroupActivity : AbstractActivity(), GroupListListener {
@@ -65,10 +63,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy {
-        Observable.just(NullableWrapper<SearchData>())
-        // todo search appBarLayout.searchData
-    }
+    override val instanceSearch by lazy { collapseAppBarLayout.searchData }
+
+    private var data: ShowGroupViewModel.Data? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,17 +80,36 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         groupListFragment.setFab(bottomFab)
 
+        collapseAppBarLayout.apply {
+            inflateMenu(R.menu.show_task_menu_top)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()
+                    else -> throw IllegalArgumentException()
+                }
+            }
+        }
+
+        updateTopMenu()
+        initBottomBar()
+
         showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
             start(timeStamp)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
 
-        initBottomBar()
-
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
         startDate(receiver)
+    }
+
+    private fun updateTopMenu() {
+        collapseAppBarLayout.menu.apply {
+            findItem(R.id.actionShowTaskSearch).isVisible = !data?.groupListDataWrapper
+                    ?.instanceDatas
+                    .isNullOrEmpty()
+        }
     }
 
     override fun onStart() {
@@ -103,7 +119,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
-        toolbar.title = data.displayText
+        this.data = data
+
+        val immediate = data.immediate
+
+        collapseAppBarLayout.setText(data.displayText, null, emptyTextLayout, immediate)
 
         if (data.groupListDataWrapper == null) {
             finish()
@@ -111,7 +131,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             return
         }
 
-        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.immediate, data.groupListDataWrapper)
+        groupListFragment.setTimeStamp(timeStamp, data.dataId, immediate, data.groupListDataWrapper)
+
+        updateTopMenu()
     }
 
     override fun onDestroy() {
@@ -156,5 +178,5 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         bottomAppBar.menu.findItem(R.id.action_select_all)?.isVisible = selectAllVisible
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
 }

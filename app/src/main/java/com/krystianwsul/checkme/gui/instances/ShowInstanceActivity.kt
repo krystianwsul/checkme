@@ -118,6 +118,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             setOnMenuItemClickListener { item ->
                 data!!.also {
                     when (item.itemId) {
+                        R.id.instanceMenuSearch -> appBarLayout.startSearch()
                         R.id.instanceMenuNotify -> {
                             check(!it.done)
                             check(it.instanceDateTime.timeStamp <= TimeStamp.now)
@@ -189,8 +190,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private fun updateTopMenu() {
         appBarLayout.menu.apply {
+            findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
+                    ?.instanceDatas
+                    .isNullOrEmpty()
             findItem(R.id.instanceMenuEditInstance).isVisible = data?.run { !done && isRootInstance } == true
-            findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown } == true
+            findItem(R.id.instanceMenuNotify).isVisible = data?.run {
+                !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown
+            } == true
             findItem(R.id.instanceMenuHour).isVisible = showHour()
             findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
             findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
@@ -387,4 +393,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+
+    override fun onBackPressed() {
+        if (appBarLayout.isSearching)
+            appBarLayout.closeSearch()
+        else
+            super.onBackPressed()
+    }
 }

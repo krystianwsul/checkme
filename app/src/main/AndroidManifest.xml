@@ -53,14 +53,17 @@
             android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.instances.ShowGroupActivity"
-            android:theme="@style/AppTheme.Toolbar" />
+            android:theme="@style/AppTheme.Toolbar"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.instances.ShowNotificationGroupActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme.Toolbar" />
+            android:theme="@style/AppTheme.Toolbar"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.instances.ShowInstanceActivity"
-            android:theme="@style/AppTheme.Toolbar" />
+            android:theme="@style/AppTheme.Toolbar"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
             android:theme="@style/AppTheme.Toolbar" />

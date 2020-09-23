@@ -115,6 +115,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         setContentView(R.layout.activity_show_instance)
 
         collapseAppBarLayout.apply {
+            hideShowDeleted()
+
             inflateMenu(R.menu.show_instance_menu_top)
 
             setOnMenuItemClickListener { item ->

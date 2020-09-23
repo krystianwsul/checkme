@@ -96,6 +96,12 @@ class CollapseAppBarLayout : AppBarLayout {
         toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
+    fun hideShowDeleted() {
+        searchToolbar.menu
+                .findItem(R.id.actionSearchShowDeleted)
+                .isVisible = false
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 

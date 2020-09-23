@@ -81,6 +81,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         groupListFragment.setFab(bottomFab)
 
         collapseAppBarLayout.apply {
+            hideShowDeleted()
+
             inflateMenu(R.menu.show_task_menu_top)
             setOnMenuItemClickListener {
                 when (it.itemId) {

@@ -80,6 +80,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         this.instanceKeys = HashSet(instanceKeys)
 
         collapseAppBarLayout.apply {
+            hideShowDeleted()
+
             inflateMenu(R.menu.show_task_menu_top)
             setOnMenuItemClickListener {
                 when (it.itemId) {

@@ -20,4 +20,7 @@
     <dimen name="denseSpinnerSpacing">8dp</dimen>
 
     <dimen name="mainToolbarElevation">6dp</dimen>
+
+    <dimen name="collapseTextStartMargin">20dp</dimen>
+    <dimen name="collapseTextEndMargin">16dp</dimen>
 </resources>

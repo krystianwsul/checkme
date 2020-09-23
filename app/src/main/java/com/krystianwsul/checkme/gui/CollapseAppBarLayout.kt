@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.Layout
 import android.text.StaticLayout
 import android.util.AttributeSet
 import android.view.MenuItem
@@ -29,6 +30,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.collapse_app_bar_layout.view.*
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class CollapseAppBarLayout : AppBarLayout {
 
@@ -126,6 +128,15 @@ class CollapseAppBarLayout : AppBarLayout {
         super.onDetachedFromWindow()
     }
 
+
+    private val textWidth by lazy {
+        val screenWidth = resources.displayMetrics.widthPixels
+        val collapseTextStartMargin = resources.getDimension(R.dimen.collapseTextStartMargin)
+        val collapseTextEndMargin = resources.getDimension(R.dimen.collapseTextEndMargin)
+
+        (screenWidth - collapseTextStartMargin - collapseTextEndMargin).roundToInt()
+    }
+
     fun setText(title: String, text: String?, paddingLayout: View?, immediate: Boolean) {
         this.title = title
         this.paddingLayout = paddingLayout
@@ -144,7 +155,15 @@ class CollapseAppBarLayout : AppBarLayout {
                 it.isVisible = !hideText
                 it.text = text
 
-                if (initialHeight == null) initialHeight = it.height
+                initialHeight = StaticLayout(
+                        text,
+                        it.paint,
+                        textWidth,
+                        Layout.Alignment.ALIGN_NORMAL,
+                        it.lineSpacingMultiplier,
+                        it.lineSpacingExtra,
+                        it.includeFontPadding
+                ).height
 
                 animateHeight(
                         hideText,

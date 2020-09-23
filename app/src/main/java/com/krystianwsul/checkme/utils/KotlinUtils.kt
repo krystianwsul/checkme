@@ -139,6 +139,13 @@ fun Context.dpToPx(dp: Int) = resources.dpToPx(dp)
 
 fun View.dpToPx(dp: Int) = resources.dpToPx(dp)
 
+fun Resources.pxToDp(px: Int): Float {
+    val density = displayMetrics.density
+    return px / density
+}
+
+fun View.pxToDp(px: Int) = resources.pxToDp(px)
+
 fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 }

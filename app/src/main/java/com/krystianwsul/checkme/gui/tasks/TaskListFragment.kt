@@ -258,9 +258,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     val hide = mutableListOf<View>(taskListProgress)
                     val show = mutableListOf<View>()
 
-                    if (treeViewAdapter.displayedNodes.isEmpty()) {
-                        hide.add(taskListRecycler)
-                        show.add(emptyTextLayout)
+                    if (emptyAfter) {
+                        hide += taskListRecycler
+                        show += emptyTextLayout
 
                         val (emptyTextId, emptyDrawableId) = when {
                             searchWrapper.value != null -> Pair(
@@ -274,12 +274,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         emptyText.setText(emptyTextId)
                         emptyImage.setImageResource(emptyDrawableId)
                     } else {
-                        show.add(taskListRecycler)
-                        hide.add(emptyTextLayout)
+                        show += taskListRecycler
+                        hide += emptyTextLayout
                     }
 
                     animateVisibility(show, hide, immediate = data!!.immediate)
-                }.addTo(viewCreatedDisposable)
+                }
+                .addTo(viewCreatedDisposable)
 
         initialize()
     }

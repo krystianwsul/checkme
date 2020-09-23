@@ -171,7 +171,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     private fun updateTopMenu() {
         appBarLayout.menu.apply {
-            findItem(R.id.actionShowTaskSearch).isVisible = data != null
+            findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
+                    ?.childTaskDatas
+                    .isNullOrEmpty()
         }
     }
 

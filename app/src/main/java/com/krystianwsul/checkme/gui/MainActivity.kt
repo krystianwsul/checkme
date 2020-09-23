@@ -61,7 +61,7 @@ class MainActivity :
         AbstractActivity(),
         GroupListListener,
         ShowCustomTimesFragment.CustomTimesListListener,
-        TaskListFragment.TaskListListener,
+        TaskListFragment.Listener,
         DayFragment.Host,
         FriendListFragment.FriendListListener,
         ProjectListFragment.ProjectListListener {

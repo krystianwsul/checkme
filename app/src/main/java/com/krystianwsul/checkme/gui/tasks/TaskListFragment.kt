@@ -130,7 +130,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             updateFabVisibility("onFirstAdded")
 
-            (activity as TaskListListener).onCreateActionMode(actionMode!!)
+            (activity as Listener).onCreateActionMode(actionMode!!)
 
             super.onFirstAdded(x)
         }
@@ -156,7 +156,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility("onLastRemoved")
 
-            (activity as TaskListListener).onDestroyActionMode()
+            (activity as Listener).onDestroyActionMode()
         }
     }
 
@@ -178,7 +178,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private val initializeDisposable = CompositeDisposable()
 
-    private val taskListListener get() = activity as TaskListListener
+    private val taskListListener get() = activity as Listener
 
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
@@ -215,7 +215,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        check(context is TaskListListener)
+        check(context is Listener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -387,7 +387,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
 
-        (activity as TaskListListener).setTaskSelectAllVisibility(taskAdapter.taskWrappers.isNotEmpty())
+        (activity as Listener).setTaskSelectAllVisibility(taskAdapter.taskWrappers.isNotEmpty())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -770,7 +770,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    interface TaskListListener : ActionModeListener, SnackbarListener, ListItemAddedListener {
+    interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

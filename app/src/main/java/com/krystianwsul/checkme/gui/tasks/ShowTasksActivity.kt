@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_show_tasks.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 
-class ShowTasksActivity : AbstractActivity(), TaskListFragment.TaskListListener {
+class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     companion object {
 

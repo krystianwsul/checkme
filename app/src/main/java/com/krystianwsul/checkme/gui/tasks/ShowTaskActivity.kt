@@ -33,7 +33,7 @@ import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
-class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
+class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
     companion object {
 

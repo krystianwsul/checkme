@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -32,6 +33,14 @@ data class GroupListDataWrapper(
         override val taskCurrent = true
 
         override val childSelectedDatas get() = children
+
+        private val normalizedName by lazy { name.normalized() }
+        private val normalizedNote by lazy { note?.normalized() }
+
+        fun normalize() {
+            normalizedName
+            normalizedNote
+        }
     }
 
     data class InstanceData(
@@ -56,6 +65,9 @@ data class GroupListDataWrapper(
 
         lateinit var instanceDataParent: InstanceDataParent
 
+        private val normalizedName by lazy { name.normalized() }
+        private val normalizedNote by lazy { note?.normalized() }
+
         init {
             check(name.isNotEmpty())
         }
@@ -73,6 +85,24 @@ data class GroupListDataWrapper(
         override val taskKey = instanceKey.taskKey
 
         override val childSelectedDatas get() = children.values
+
+        fun normalize() {
+            normalizedName
+            normalizedNote
+        }
+
+        fun matchesSearch(query: String): Boolean {
+            if (query.isEmpty())
+                return false
+
+            if (normalizedName.contains(query))
+                return true
+
+            if (normalizedNote?.contains(query) == true)
+                return true
+
+            return children.values.any { it.matchesSearch(query) }
+        }
     }
 
     interface SelectedData {

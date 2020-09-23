@@ -9,7 +9,8 @@ import com.krystianwsul.treeadapter.TreeNode
 class TaskNode(
         indentation: Int,
         val taskData: GroupListDataWrapper.TaskData,
-        private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
+        private val taskParent: TaskParent
+) : GroupHolderNode(indentation), TaskParent {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set

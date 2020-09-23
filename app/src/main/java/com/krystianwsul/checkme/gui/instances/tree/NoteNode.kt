@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.utils.SearchData
+import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -14,6 +16,8 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
     override val id get() = Id(nodeContainer.id)
 
     data class Id(val id: Any)
+
+    private val normalizedNote by lazy { note.normalized() }
 
     init {
         check(note.isNotEmpty())
@@ -39,4 +43,17 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
     override fun compareTo(other: ModelNode<NodeHolder>) = -1
 
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
+
+    override fun normalize() {
+        normalizedNote
+    }
+
+    override fun filter(filterCriteria: Any): Boolean {
+        val query = (filterCriteria as SearchData).query
+
+        if (query.isEmpty())
+            return false
+
+        return normalizedNote.contains(query)
+    }
 }

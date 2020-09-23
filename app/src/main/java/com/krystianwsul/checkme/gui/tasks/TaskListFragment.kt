@@ -723,10 +723,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             normalizedNote
         }
 
-        fun matchesSearch(searchData: SearchData?): Boolean {
-            if (searchData == null)
-                return alwaysShow || current
-
+        fun matchesSearch(searchData: SearchData): Boolean {
             if (!searchData.showDeleted && !current)
                 return false
 

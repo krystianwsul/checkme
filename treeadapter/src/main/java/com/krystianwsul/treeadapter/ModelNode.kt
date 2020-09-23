@@ -20,7 +20,7 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun normalize() = Unit
 
-    fun filter(filterCriteria: Any) = true
+    fun filter(filterCriteria: Any): Boolean = throw UnsupportedOperationException()
 
     val state: ModelState
 

@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
@@ -405,6 +406,10 @@ class NotDoneGroupNode(
 
     override val toggleDescendants get() = !singleInstance()
 
+    override fun normalize() = instanceDatas.forEach { it.normalize() }
+
+    override fun filter(filterCriteria: Any) = instanceDatas.any { it.matchesSearch((filterCriteria as SearchData).query) }
+
     data class SingleId(val instanceKey: InstanceKey)
 
     class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp) {
@@ -560,6 +565,10 @@ class NotDoneGroupNode(
         override val deselectParent get() = true
 
         override val thumbnail = instanceData.imageState
+
+        override fun normalize() = instanceData.normalize()
+
+        override fun filter(filterCriteria: Any) = instanceData.matchesSearch((filterCriteria as SearchData).query)
 
         data class Id(val instanceKey: InstanceKey)
     }

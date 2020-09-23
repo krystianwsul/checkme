@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -13,7 +14,8 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 class DoneInstanceNode(
         indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
-        val dividerNode: DividerNode) : GroupHolderNode(indentation), NodeCollectionParent {
+        val dividerNode: DividerNode
+) : GroupHolderNode(indentation), NodeCollectionParent {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -140,4 +142,8 @@ class DoneInstanceNode(
     }
 
     override val id = instanceData.instanceKey
+
+    override fun normalize() = instanceData.normalize()
+
+    override fun filter(filterCriteria: Any) = instanceData.matchesSearch((filterCriteria as SearchData).query)
 }

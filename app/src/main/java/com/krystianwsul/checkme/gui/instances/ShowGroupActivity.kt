@@ -13,14 +13,17 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -60,6 +63,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     private val receiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) = showGroupViewModel.refresh()
+    }
+
+    override val instanceSearch by lazy {
+        Observable.just(NullableWrapper<SearchData>())
+        // todo search appBarLayout.searchData
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

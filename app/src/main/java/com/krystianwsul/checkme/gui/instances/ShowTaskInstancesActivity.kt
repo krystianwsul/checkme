@@ -15,12 +15,15 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
 import kotlinx.android.synthetic.main.bottom.*
@@ -65,6 +68,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     }
 
     private var page = 0
+
+    override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

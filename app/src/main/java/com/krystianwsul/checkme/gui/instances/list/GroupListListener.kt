@@ -5,10 +5,15 @@ import com.krystianwsul.checkme.gui.ListItemAddedListener
 import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.utils.SearchData
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 
 interface GroupListListener : SnackbarListener, ListItemAddedListener {
+
+    val instanceSearch: Observable<NullableWrapper<SearchData>>
 
     fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>)
 

@@ -34,6 +34,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
@@ -133,13 +134,15 @@ class MainActivity :
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
+    override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+
     override val taskSearch by lazy {
         restoreInstances.switchMap {
             if (it.value != null) {
                 Observables.combineLatest(
                         mainSearchText.textChanges(),
                         showDeleted
-                ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString().normalized(), it.second)) }
+                ).map { NullableWrapper(SearchData(it.first.toString().normalized(), it.second)) }
             } else {
                 Observable.just(NullableWrapper())
             }

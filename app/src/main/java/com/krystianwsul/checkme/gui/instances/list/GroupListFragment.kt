@@ -27,11 +27,11 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.gui.utils.observeEmptySearchState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimeStamp
@@ -63,6 +63,7 @@ class GroupListFragment @JvmOverloads constructor(
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
         private const val EDIT_INSTANCES_TAG = "editInstances"
         private const val KEY_SHOW_IMAGE = "showImage"
+        private const val KEY_SEARCH_DATA = "searchData"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -433,6 +434,8 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
+    private var searchData: SearchData? = null
+
     private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
@@ -487,6 +490,8 @@ class GroupListFragment @JvmOverloads constructor(
                 groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
+
+                searchData = getParcelable(KEY_SEARCH_DATA)
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -513,9 +518,9 @@ class GroupListFragment @JvmOverloads constructor(
 
         attachedToWindowDisposable += observeEmptySearchState(
                 initializedRelay,
-                Observable.just(NullableWrapper()), // todo search
+                listener.instanceSearch,
                 { treeViewAdapter },
-                { _, _ -> }, // todo search
+                ::search,
                 groupListRecycler,
                 groupListProgress,
                 emptyTextLayout,
@@ -598,6 +603,8 @@ class GroupListFragment @JvmOverloads constructor(
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
 
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
+
+            putParcelable(KEY_SEARCH_DATA, searchData)
         }
     }
 
@@ -620,6 +627,8 @@ class GroupListFragment @JvmOverloads constructor(
                 )
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+
+                search(searchData, it)
             }
         } else {
             val groupAdapter = GroupAdapter(this, attachedToWindowDisposable)
@@ -662,6 +671,11 @@ class GroupListFragment @JvmOverloads constructor(
         tryScroll()
 
         initializedRelay.accept(Unit)
+    }
+
+    private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
+        this.searchData = searchData
+        treeViewAdapter.setFilterCriteria(searchData, placeholder)
     }
 
     private fun setGroupMenuItemVisibility() {

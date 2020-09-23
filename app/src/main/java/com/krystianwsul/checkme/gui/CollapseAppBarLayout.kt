@@ -18,7 +18,7 @@ import com.google.android.material.internal.CollapsingTextHelper
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.getCurrentValue
@@ -62,7 +62,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    val searchData = BehaviorRelay.create<NullableWrapper<TaskListFragment.SearchData>>()
+    val searchData = BehaviorRelay.create<NullableWrapper<SearchData>>()
 
     private val attachedToWindowDisposable = CompositeDisposable()
 
@@ -110,7 +110,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         searchToolbarText.textChanges(),
                         showDeleted
                 ) { searchText, showDeleted ->
-                    NullableWrapper(TaskListFragment.SearchData(searchText.toString().normalized(), showDeleted))
+                    NullableWrapper(SearchData(searchText.toString().normalized(), showDeleted))
                 }
             } else {
                 Observable.just(NullableWrapper())
@@ -295,7 +295,7 @@ class CollapseAppBarLayout : AppBarLayout {
             }
         }
 
-        var searchData: TaskListFragment.SearchData? = null
+        var searchData: SearchData? = null
 
         constructor(source: Parcel) : super(source) {
             searchData = source.readParcelable(SavedState::class.java.classLoader)

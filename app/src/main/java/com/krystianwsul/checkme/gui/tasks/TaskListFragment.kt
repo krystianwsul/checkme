@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +22,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.gui.utils.observeEmptySearchState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
@@ -38,7 +38,6 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import java.io.Serializable
@@ -249,7 +248,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 initializedRelay,
                 listener.taskSearch,
                 { treeViewAdapter },
-                this::search,
+                ::search,
                 taskListRecycler,
                 taskListProgress,
                 emptyTextLayout,
@@ -760,7 +759,4 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)
-
-    @Parcelize
-    data class SearchData(val query: String, val showDeleted: Boolean) : Parcelable
 }

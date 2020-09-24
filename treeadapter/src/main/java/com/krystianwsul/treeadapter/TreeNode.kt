@@ -185,7 +185,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
     }
 
-    private fun hasActionMode() = treeViewAdapter.hasActionMode()
+    private fun hasActionMode() = treeViewAdapter.hasActionMode
 
     private fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.incrementSelected(placeholder)
 

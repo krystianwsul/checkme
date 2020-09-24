@@ -3,15 +3,9 @@ package com.krystianwsul.treeadapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
-interface TreeModelAdapter<T : RecyclerView.ViewHolder> {
+interface TreeModelAdapter<T : RecyclerView.ViewHolder> : ActionModeAdapter {
 
     fun onCreateViewHolder(parent: ViewGroup, viewType: Int): T
-
-    val hasActionMode: Boolean
-
-    fun incrementSelected(x: TreeViewAdapter.Placeholder)
-
-    fun decrementSelected(x: TreeViewAdapter.Placeholder)
 
     fun scrollToTop() = Unit
 

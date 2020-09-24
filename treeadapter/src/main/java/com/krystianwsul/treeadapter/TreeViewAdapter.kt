@@ -20,7 +20,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val padding: Pair<Int, Int>?,
         private val compositeDisposable: CompositeDisposable
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeAdapter by treeModelAdapter {
 
     internal var filterCriteria: Any? = null
         private set
@@ -77,12 +77,6 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     }
 
     override fun getItemCount() = displayedNodes.size + if (padding != null) 1 else 0
-
-    fun hasActionMode() = treeModelAdapter.hasActionMode
-
-    fun incrementSelected(placeholder: Placeholder) = treeModelAdapter.incrementSelected(placeholder) // todo search consider delegate
-
-    fun decrementSelected(placeholder: Placeholder) = treeModelAdapter.decrementSelected(placeholder)
 
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
         check(!updating)
@@ -219,19 +213,15 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             treeNodeCollection!!.getItemViewType(position)
     }
 
-    fun moveItem(from: Int, to: Int, placeholder: Placeholder) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
+    fun moveItem(
+            from: Int,
+            to: Int,
+            placeholder: Placeholder
+    ) = treeNodeCollection?.moveItem(from, to, placeholder)
+            ?: throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.moveItem(from, to, placeholder)
-    }
-
-    fun setNewItemPosition(position: Int) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
-        treeNodeCollection!!.setNewItemPosition(position)
-    }
+    fun setNewItemPosition(position: Int) = treeNodeCollection?.setNewItemPosition(position)
+            ?: throw SetTreeNodeCollectionNotCalledException()
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 

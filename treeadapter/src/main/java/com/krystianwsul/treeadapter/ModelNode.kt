@@ -8,7 +8,7 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     val isSelectable get() = false
 
-    val isVisibleWhenEmpty get() = true
+    val isVisibleWhenEmpty get() = true // todo remove overrides
 
     val isVisibleDuringActionMode get() = true
 

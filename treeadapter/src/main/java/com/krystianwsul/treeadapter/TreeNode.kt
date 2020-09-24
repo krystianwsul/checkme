@@ -111,8 +111,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             return nextTreeNode.isExpanded || modelNode.isSeparatorVisibleWhenNotExpanded
         }
 
-    val allChildren: List<TreeNode<T>> = childTreeNodes
-            ?: throw SetChildTreeNodesNotCalledException()
+    val allChildren: List<TreeNode<T>>
+        get() = childTreeNodes
+                ?: throw SetChildTreeNodesNotCalledException()
 
     init {
         if (selected && !modelNode.isSelectable)
@@ -186,25 +187,6 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     private fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.incrementSelected(placeholder)
 
     private fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.decrementSelected(placeholder)
-
-    override val displayedNodes: List<TreeNode<T>>
-        get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
-
-            return if (
-                    !modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() // todo search
-                    || !modelNode.isVisibleDuringActionMode && hasActionMode()
-                    || treeViewAdapter.filterCriteria?.let { modelNode.filter(it) } == false
-            ) {
-                listOf()
-            } else {
-                if (expanded)
-                    listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
-                else
-                    listOf(this)
-            }
-        }
 
     fun getNode(position: Int): TreeNode<T> {
         var currPosition = position
@@ -292,6 +274,17 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         }
     }
 
+    override val displayedNodes: List<TreeNode<T>>
+        get() {
+            if (!canBeShown())
+                return listOf()
+
+            return if (expanded)
+                listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
+            else
+                listOf(this)
+        }
+
     fun canBeShown(): Boolean {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
@@ -299,12 +292,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (!modelNode.isVisibleDuringActionMode && hasActionMode())
             return false
 
-        treeViewAdapter.filterCriteria?.let {
-            if (!modelNode.filter(it))
-                return false
-        }
+        if (treeViewAdapter.filterCriteria?.let { modelNode.filter(it) } == false)
+            return false
 
-        return !(!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty())
+        if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.none { it.canBeShown() })
+            return false
+
+        return true
     }
 
     private fun visible(): Boolean {

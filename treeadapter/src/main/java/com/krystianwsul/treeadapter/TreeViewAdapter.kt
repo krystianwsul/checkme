@@ -76,26 +76,18 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         normalizeRelay.accept(Unit)
     }
 
-    override fun getItemCount(): Int {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
-        return treeNodeCollection!!.displayedSize + if (padding != null) 1 else 0
-    }
+    override fun getItemCount() = displayedNodes.size + if (padding != null) 1 else 0
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
 
-    fun incrementSelected(x: Placeholder) = treeModelAdapter.incrementSelected(x)
+    fun incrementSelected(placeholder: Placeholder) = treeModelAdapter.incrementSelected(placeholder) // todo search consider delegate
 
-    fun decrementSelected(x: Placeholder) = treeModelAdapter.decrementSelected(x)
+    fun decrementSelected(placeholder: Placeholder) = treeModelAdapter.decrementSelected(placeholder)
 
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
         check(!updating)
 
-        val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
+        val oldStates = displayedNodes.map { it.state }
         val oldShowProgress = showProgress
 
         val showPadding = padding != null
@@ -104,7 +96,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         action(Placeholder.instance)
         updating = false
 
-        val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
+        val newStates = displayedNodes.map { it.state }
         val newShowProgress = showProgress
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -170,17 +162,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         updates.accept(Unit)
     }
 
-    fun unselect(x: Placeholder) {
-        if (treeNodeCollection == null) throw SetTreeNodeCollectionNotCalledException()
+    fun unselect(placeholder: Placeholder) = treeNodeCollection?.unselect(placeholder)
+            ?: throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.unselect(x)
-    }
-
-    fun selectAll() {
-        if (treeNodeCollection == null) throw SetTreeNodeCollectionNotCalledException()
-
-        updateDisplayedNodes(treeNodeCollection!!::selectAll)
-    }
+    fun selectAll() = treeNodeCollection?.let { updateDisplayedNodes(it::selectAll) }
+            ?: throw SetTreeNodeCollectionNotCalledException()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_PADDING) {
@@ -196,14 +182,10 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
-        val displayedSize = treeNodeCollection!!.displayedSize
+        val displayedSize = displayedNodes.size
 
         if (position < displayedSize) {
-            val treeNode = treeNodeCollection!!.getNode(position)
-            treeNode.onBindViewHolder(holder)
+            treeNodeCollection!!.getNode(position).onBindViewHolder(holder)
         } else {
             check(position == displayedSize)
             checkNotNull(padding)
@@ -231,17 +213,17 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return if (padding != null && position == treeNodeCollection!!.displayedSize)
+        return if (padding != null && position == displayedNodes.size)
             TYPE_PADDING
         else
             treeNodeCollection!!.getItemViewType(position)
     }
 
-    fun moveItem(from: Int, to: Int, x: Placeholder) {
+    fun moveItem(from: Int, to: Int, placeholder: Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.moveItem(from, to, x)
+        treeNodeCollection!!.moveItem(from, to, placeholder)
     }
 
     fun setNewItemPosition(position: Int) {

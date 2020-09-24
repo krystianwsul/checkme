@@ -36,13 +36,15 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
         var currPosition = position
         check(currPosition >= 0)
-        check(currPosition < displayedSize)
+        check(currPosition < displayedNodes.size)
 
         for (treeNode in treeNodes) {
-            if (currPosition < treeNode.displayedSize)
+            val nodeDisplayedSize = treeNode.displayedNodes.size
+
+            if (currPosition < nodeDisplayedSize)
                 return treeNode.getNode(currPosition)
 
-            currPosition -= treeNode.displayedSize
+            currPosition -= nodeDisplayedSize
         }
 
         throw IndexOutOfBoundsException()
@@ -56,7 +58,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
             val position = currTreeNode.getPosition(treeNode)
             if (position >= 0)
                 return offset + position
-            offset += currTreeNode.displayedSize
+            offset += currTreeNode.displayedNodes.size
         }
 
         return -1
@@ -68,12 +70,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         return treeNode.itemViewType
     }
 
-    override val displayedSize
-        get() = treeNodesRelay.value
-                ?.sumBy { it.displayedSize }
-                ?: throw SetTreeNodesNotCalledException()
-
-    val displayedNodes
+    override val displayedNodes
         get() = treeNodesRelay.value
                 ?.flatMap { it.displayedNodes }
                 ?: throw SetTreeNodesNotCalledException()
@@ -82,7 +79,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
             ?.forEach { it.unselect(x) }
             ?: throw SetTreeNodesNotCalledException()
 
-    override fun add(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
+    override fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
         val treeNodes = treeNodesRelay.value
                 ?.toMutableList()
                 ?: throw SetTreeNodesNotCalledException()
@@ -93,7 +90,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         treeNodesRelay.accept(treeNodes)
     }
 
-    override fun remove(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
+    override fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
         val treeNodes = treeNodesRelay.value
                 ?.toMutableList()
                 ?: throw SetTreeNodesNotCalledException()

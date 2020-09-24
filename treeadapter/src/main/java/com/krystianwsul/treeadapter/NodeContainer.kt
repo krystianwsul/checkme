@@ -12,13 +12,13 @@ interface NodeContainer<T : RecyclerView.ViewHolder> {
 
     val indentation: Int
 
-    val displayedSize: Int
+    val displayedNodes: List<TreeNode<T>>
+
+    val id: Any
 
     fun getPosition(treeNode: TreeNode<T>): Int
 
-    fun remove(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder)
+    fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 
-    fun add(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder)
-
-    val id: Any
+    fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 }

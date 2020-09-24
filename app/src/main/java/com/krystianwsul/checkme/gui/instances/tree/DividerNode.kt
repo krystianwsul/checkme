@@ -29,7 +29,8 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
             nodeContainer: NodeContainer<NodeHolder>,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedInstances: Map<InstanceKey, Boolean>,
-            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
+            selectedInstances: List<InstanceKey>
+    ): TreeNode<NodeHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -44,7 +45,8 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     private fun newChildTreeNode(
             instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, Boolean>,
-            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
+            selectedInstances: List<InstanceKey>
+    ): TreeNode<NodeHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
@@ -67,17 +69,21 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val checkBoxState = CheckBoxState.Invisible
 
-    fun remove(doneInstanceNode: DoneInstanceNode, x: TreeViewAdapter.Placeholder) {
+    fun remove(doneInstanceNode: DoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))
         doneInstanceNodes.remove(doneInstanceNode)
 
-        treeNode.remove(doneInstanceNode.treeNode, x)
+        treeNode.remove(doneInstanceNode.treeNode, placeholder)
     }
 
-    fun add(instanceData: GroupListDataWrapper.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
+    fun add(
+            instanceData: GroupListDataWrapper.InstanceData,
+            placeholder: TreeViewAdapter.Placeholder
+    ) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), placeholder)
 
     override fun compareTo(other: ModelNode<NodeHolder>): Int {
         check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode || other is ImageNode)
+
         return 1
     }
 

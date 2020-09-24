@@ -84,7 +84,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
     private fun canDropOverHelper(recyclerView: RecyclerView, target: RecyclerView.ViewHolder): Boolean {
         val treeNodeCollection = (recyclerView.adapter as TreeViewAdapter<*>).getTreeNodeCollection()
 
-        val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedSize) it - 1 else it }
+        val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedNodes.size) it - 1 else it }
 
         return treeNodeCollection.getNode(position).modelNode is Sortable
     }

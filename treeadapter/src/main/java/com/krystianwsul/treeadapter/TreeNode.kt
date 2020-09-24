@@ -45,10 +45,11 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             if (selected) {
                 check(modelNode.isSelectable)
                 check(modelNode.isVisibleDuringActionMode)
-                selectedTreeNodes.add(this)
+
+                selectedTreeNodes += this
             }
 
-            selectedTreeNodes.addAll(childTreeNodes!!.flatMap { it.selectedNodes })
+            selectedTreeNodes += childTreeNodes!!.flatMap { it.selectedNodes }
 
             return selectedTreeNodes
         }
@@ -110,13 +111,8 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             return nextTreeNode.isExpanded || modelNode.isSeparatorVisibleWhenNotExpanded
         }
 
-    val allChildren: List<TreeNode<T>>
-        get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
-
-            return childTreeNodes!!
-        }
+    val allChildren: List<TreeNode<T>> = childTreeNodes
+            ?: throw SetChildTreeNodesNotCalledException()
 
     init {
         if (selected && !modelNode.isSelectable)
@@ -356,7 +352,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
-        childTreeNodes!!.add(treeNode)
+        childTreeNodes!! += treeNode
         childTreeNodes!!.sort()
     }
 

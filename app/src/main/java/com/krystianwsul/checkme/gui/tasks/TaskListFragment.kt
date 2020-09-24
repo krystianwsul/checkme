@@ -641,12 +641,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     taskListFragment.listener.startCopy(childTaskData.taskKey)
             }
 
-            override val isVisibleWhenEmpty = true
-
-            override val isVisibleDuringActionMode = true
-
-            override val isSeparatorVisibleWhenNotExpanded = false
-
             override val thumbnail = childTaskData.imageState
 
             override fun compareTo(other: ModelNode<NodeHolder>) = if (other is TaskWrapper) {

@@ -369,12 +369,6 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val isSelectable = true
 
-        override val isSeparatorVisibleWhenNotExpanded = false
-
-        override val isVisibleDuringActionMode = true
-
-        override val isVisibleWhenEmpty = true
-
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)

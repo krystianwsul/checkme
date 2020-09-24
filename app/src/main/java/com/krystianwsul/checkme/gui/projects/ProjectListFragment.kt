@@ -287,12 +287,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override fun onClick(holder: NodeHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
-            override val isVisibleWhenEmpty = true
-
-            override val isVisibleDuringActionMode = true
-
-            override val isSeparatorVisibleWhenNotExpanded = false
-
             override fun compareTo(other: ModelNode<NodeHolder>): Int {
                 check(other is ProjectNode)
 

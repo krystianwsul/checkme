@@ -257,14 +257,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val itemViewType = 0
 
-            override val isSelectable = false
-
-            override val isVisibleWhenEmpty = true
-
-            override val isVisibleDuringActionMode = true
-
-            override val isSeparatorVisibleWhenNotExpanded = false
-
             override val colorBackground: Int
                 get() = taskBackground
 

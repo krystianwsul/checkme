@@ -277,13 +277,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val isSelectable = true
 
-        override val isVisibleWhenEmpty = true
-
         override val id = userListData.id
-
-        override val isSeparatorVisibleWhenNotExpanded = false
-
-        override val isVisibleDuringActionMode = true
 
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 

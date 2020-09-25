@@ -86,7 +86,10 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         setContentView(R.layout.activity_show_task)
 
         collapseAppBarLayout.apply {
+            hideShowDeleted()
+
             inflateMenu(R.menu.show_task_menu_top)
+
             setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()

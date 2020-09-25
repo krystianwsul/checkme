@@ -66,6 +66,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
         collapseAppBarLayout.apply {
+            if (parameters.copying) hideShowDeleted()
+
             setText(getString(parameters.title), null, null, true)
 
             inflateMenu(R.menu.show_task_menu_top)

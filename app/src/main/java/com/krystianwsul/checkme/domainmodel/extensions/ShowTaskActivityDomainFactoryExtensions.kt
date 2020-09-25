@@ -45,10 +45,10 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data {
     ).joinToString("\n\n")
 
     return ShowTaskViewModel.Data(
-        task.name,
-        collapseText,
-        TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.current(now)),
-        task.getImage(deviceDbInfo),
-        task.current(now)
+            task.name,
+            collapseText,
+            TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.isVisible(now, false)),
+            task.getImage(deviceDbInfo),
+            task.current(now)
     )
 }

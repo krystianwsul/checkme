@@ -26,10 +26,7 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.UserKey
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeNodeCollection
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import java.util.*
@@ -205,7 +202,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListFab = null
     }
 
-    private inner class FriendListAdapter : GroupHolderAdapter() {
+    private inner class FriendListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
@@ -230,12 +227,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             treeNodeCollection.nodes = userDataWrappers.map { it.initialize(treeNodeCollection) }
         }
-
-        override val hasActionMode get() = selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 

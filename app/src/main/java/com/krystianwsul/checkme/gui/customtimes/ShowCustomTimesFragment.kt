@@ -23,10 +23,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeNodeCollection
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_show_custom_times.*
@@ -215,7 +212,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesFab = null
     }
 
-    private inner class CustomTimesAdapter : GroupHolderAdapter() {
+    private inner class CustomTimesAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
 
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
@@ -241,16 +238,13 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             treeNodeCollection.nodes = customTimeWrappers.map { it.initialize(treeNodeCollection) }
         }
 
-        override val hasActionMode get() = selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+                NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
     }
 
-    private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) : GroupHolderNode(0) {
+    private inner class CustomTimeNode(
+            val customTimeData: ShowCustomTimesViewModel.CustomTimeData
+    ) : GroupHolderNode(0) {
 
         public override lateinit var treeNode: TreeNode<NodeHolder>
             private set

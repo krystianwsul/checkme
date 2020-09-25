@@ -37,6 +37,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.ActionModeCallback
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -827,7 +828,7 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable
-    ) : GroupHolderAdapter(), NodeCollectionParent {
+    ) : GroupHolderAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         companion object {
 
@@ -948,14 +949,6 @@ class GroupListFragment @JvmOverloads constructor(
                 parent: ViewGroup,
                 viewType: Int
         ) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
-
-        override val hasActionMode get() = groupListFragment.selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) =
-                groupListFragment.selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) =
-                groupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
 

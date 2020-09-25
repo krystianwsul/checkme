@@ -20,7 +20,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val padding: Pair<Int, Int>?,
         private val compositeDisposable: CompositeDisposable
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeAdapter by treeModelAdapter {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
     internal var filterCriteria: Any? = null
         private set

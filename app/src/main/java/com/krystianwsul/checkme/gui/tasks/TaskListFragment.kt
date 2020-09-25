@@ -434,7 +434,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         initializeDisposable.clear()
     }
 
-    private inner class TaskAdapter(val taskListFragment: TaskListFragment) : GroupHolderAdapter(), TaskParent {
+    private inner class TaskAdapter(val taskListFragment: TaskListFragment) :
+            GroupHolderAdapter(),
+            TaskParent,
+            ActionModeCallback by taskListFragment.selectionCallback {
 
         override val keyChain = listOf<TaskKey>()
 
@@ -510,12 +513,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
-
-        override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.decrementSelected(x)
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
 

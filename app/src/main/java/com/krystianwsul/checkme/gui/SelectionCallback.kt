@@ -15,11 +15,12 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateItems
+import com.krystianwsul.treeadapter.ActionModeCallback
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlin.properties.Delegates.observable
 
 
-abstract class SelectionCallback : ActionMode.Callback {
+abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
 
     private var selected = 0
 
@@ -185,13 +186,13 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
     }
 
-    fun incrementSelected(x: TreeViewAdapter.Placeholder) {
+    override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) {
         selected++
 
         when (selected) {
             1 -> {
                 check(actionMode == null)
-                onFirstAdded(x)
+                onFirstAdded(placeholder)
             }
             2 -> {
                 checkNotNull(actionMode)
@@ -206,7 +207,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         updateTitle()
     }
 
-    fun decrementSelected(x: TreeViewAdapter.Placeholder) {
+    override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) {
         check(selected > 0)
         checkNotNull(actionMode)
 
@@ -225,7 +226,7 @@ abstract class SelectionCallback : ActionMode.Callback {
                 actionMode!!.finish()
                 removingLast = false
 
-                onLastRemoved(x)
+                onLastRemoved(placeholder)
             }
             else -> {
                 onOtherRemoved()
@@ -240,7 +241,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     open fun getTitleCount() = selected
 
-    val hasActionMode get() = actionMode != null
+    override val hasActionMode get() = actionMode != null
 
     protected abstract fun unselect(x: TreeViewAdapter.Placeholder)
 

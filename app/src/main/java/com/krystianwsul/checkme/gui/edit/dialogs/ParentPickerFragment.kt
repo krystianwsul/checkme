@@ -232,9 +232,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override val hasActionMode = false
 
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
+        override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
+        override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
         private inner class TaskWrapper(
                 indentation: Int,

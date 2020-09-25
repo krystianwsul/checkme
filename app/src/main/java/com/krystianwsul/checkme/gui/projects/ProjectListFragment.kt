@@ -23,10 +23,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeNodeCollection
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_project_list.*
@@ -228,7 +225,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         projectListFab = null
     }
 
-    private inner class ProjectListAdapter : GroupHolderAdapter() {
+    private inner class ProjectListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
@@ -253,12 +250,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
-
-        override val hasActionMode get() = selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 

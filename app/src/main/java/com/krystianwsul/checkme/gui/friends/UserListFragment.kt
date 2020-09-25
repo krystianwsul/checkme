@@ -25,10 +25,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeNodeCollection
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_friend_list.*
@@ -278,7 +275,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun updateSelectAll() = listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
-    inner class FriendListAdapter : GroupHolderAdapter() {
+    inner class FriendListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
 
         lateinit var userNodes: MutableList<UserNode>
             private set
@@ -343,12 +340,6 @@ class UserListFragment : AbstractFragment(), FabUser {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).treeNodeCollection.remove(userDataWrapper.treeNode, x)
             }
         }
-
-        override val hasActionMode get() = selectionCallback.hasActionMode
-
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
-
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
     }
 
     inner class UserNode(

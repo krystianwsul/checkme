@@ -557,23 +557,23 @@ class DomainFactory(
                 val childTask = taskHierarchy.childTask
 
                 TaskListFragment.ChildTaskData(
-                    childTask.name,
-                    childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                    getTaskListChildTaskDatas(
-                        childTask,
-                        now,
+                        childTask.name,
+                        childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                        getTaskListChildTaskDatas(
+                                childTask,
+                                now,
+                                alwaysShow,
+                                hierarchyExactTimeStamp,
+                                groups
+                        ),
+                        childTask.note,
+                        childTask.startExactTimeStamp,
+                        childTask.taskKey,
+                        taskHierarchy.taskHierarchyKey,
+                        childTask.getImage(deviceDbInfo),
+                        childTask.editable(now),
                         alwaysShow,
-                        hierarchyExactTimeStamp,
-                        groups
-                    ),
-                    childTask.note,
-                    childTask.startExactTimeStamp,
-                    childTask.taskKey,
-                    taskHierarchy.taskHierarchyKey,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.current(now),
-                    alwaysShow,
-                    childTask.ordinal
+                        childTask.ordinal
                 )
             }
     }

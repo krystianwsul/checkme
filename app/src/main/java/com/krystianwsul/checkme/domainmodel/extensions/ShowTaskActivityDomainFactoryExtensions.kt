@@ -22,17 +22,17 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data {
             val childTask = taskHierarchy.childTask
 
             TaskListFragment.ChildTaskData(
-                childTask.name,
-                childTask.getScheduleText(ScheduleText, hierarchyTimeStamp),
-                getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
-                childTask.note,
-                childTask.startExactTimeStamp,
-                childTask.taskKey,
-                taskHierarchy.taskHierarchyKey,
-                childTask.getImage(deviceDbInfo),
-                childTask.current(now),
-                true,
-                childTask.ordinal
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText, hierarchyTimeStamp),
+                    getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
+                    childTask.note,
+                    childTask.startExactTimeStamp,
+                    childTask.taskKey,
+                    taskHierarchy.taskHierarchyKey,
+                    childTask.getImage(deviceDbInfo),
+                    childTask.editable(now),
+                    true,
+                    childTask.ordinal
             )
         }
         .sorted()

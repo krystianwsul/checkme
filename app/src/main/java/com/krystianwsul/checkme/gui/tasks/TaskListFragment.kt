@@ -141,7 +141,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
-            val current = datas.all { it.current }
+            val current = datas.all { it.editable }
 
             return listOf(
                     R.id.action_task_edit to (single && current),
@@ -593,7 +593,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
-            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.current }
+            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.editable }
 
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
@@ -702,7 +702,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKey: TaskKey,
             val taskHierarchyKey: TaskHierarchyKey?,
             val imageState: ImageState?,
-            val current: Boolean,
+            val editable: Boolean,
             val alwaysShow: Boolean,
             var ordinal: Double
     ) : Comparable<ChildTaskData> {
@@ -718,7 +718,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         fun matchesSearch(searchData: SearchData): Boolean {
-            if (!searchData.showDeleted && !current)
+            if (!searchData.showDeleted && !editable)
                 return false
 
             val query = searchData.query

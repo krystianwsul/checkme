@@ -874,9 +874,9 @@ class Task<T : ProjectType>(
             current(now) && getRootTask(now).getCurrentSchedules(now)
                     .any { it.schedule is RepeatingSchedule<*> }
 
-    override fun toString(): String {
-        return super.toString() + ", name: $name, taskKey: $taskKey"
-    }
+    override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
+
+    fun editable(now: ExactTimeStamp) = current(now) && isVisible(now, false)
 
     interface ScheduleTextFactory {
 

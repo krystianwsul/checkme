@@ -58,11 +58,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar) }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
+        override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
             val projectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toHashSet()
@@ -83,17 +83,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             return true
         }
 
-        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
             mainActivity.onCreateActionMode(actionMode!!)
 
-            super.onFirstAdded(x)
+            super.onFirstAdded(placeholder)
         }
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
             mainActivity.onDestroyActionMode()

@@ -176,13 +176,13 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
         unselect(placeholder)
     }
 
-    fun setSelected(selected: Int, x: TreeViewAdapter.Placeholder) {
+    fun setSelected(selected: Int, placeholder: TreeViewAdapter.Placeholder) {
         if (selected > this.selected) {
             for (i in this.selected until selected)
-                incrementSelected(x)
+                incrementSelected(placeholder)
         } else if (selected < this.selected) {
             for (i in this.selected downTo selected + 1)
-                decrementSelected(x)
+                decrementSelected(placeholder)
         }
     }
 
@@ -243,12 +243,12 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
 
     override val hasActionMode get() = actionMode != null
 
-    protected abstract fun unselect(x: TreeViewAdapter.Placeholder)
+    protected abstract fun unselect(placeholder: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean
+    protected abstract fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean
 
     @CallSuper
-    protected open fun onFirstAdded(x: TreeViewAdapter.Placeholder) = updateMenu()
+    protected open fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) = updateMenu()
 
     @CallSuper
     protected open fun onSecondAdded() = updateMenu()
@@ -256,7 +256,7 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
     @CallSuper
     protected open fun onOtherAdded() = updateMenu()
 
-    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder)
+    protected abstract fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder)
 
     @CallSuper
     protected open fun onSecondToLastRemoved() = updateMenu()

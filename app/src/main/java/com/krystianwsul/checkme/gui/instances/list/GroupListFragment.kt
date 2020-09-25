@@ -145,11 +145,11 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_groups_bottom, listener::initBottomBar) }
 
-        override fun onMenuClick(@IdRes itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
+        override fun onMenuClick(@IdRes itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
             val treeNodes = treeViewAdapter.selectedNodes
 
             val selectedDatas = nodesToSelectedDatas(treeNodes, true)
@@ -240,7 +240,7 @@ class GroupListFragment @JvmOverloads constructor(
                             if (it is NotDoneGroupNode) {
                                 val nodeCollection = it.nodeCollection
 
-                                nodeCollection.notDoneGroupCollection.remove(it, x)
+                                nodeCollection.notDoneGroupCollection.remove(it, placeholder)
 
                                 if (!it.expanded()) {
                                     it.instanceDatas.forEach {
@@ -248,22 +248,22 @@ class GroupListFragment @JvmOverloads constructor(
 
                                         recursiveExists(it)
 
-                                        nodeCollection.dividerNode.add(it, x)
+                                        nodeCollection.dividerNode.add(it, placeholder)
                                     }
                                 } else {
                                     check(it.treeNode.allChildren.all { it.isSelected })
                                 }
 
-                                decrementSelected(x)
+                                decrementSelected(placeholder)
                             } else {
                                 val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
                                 instanceData.done = done
 
                                 recursiveExists(instanceData)
 
-                                it.removeFromParent(x)
+                                it.removeFromParent(placeholder)
 
-                                it.parentNodeCollection.dividerNode.add(instanceData, x)
+                                it.parentNodeCollection.dividerNode.add(instanceData, placeholder)
                             }
                         }
                     }
@@ -288,12 +288,12 @@ class GroupListFragment @JvmOverloads constructor(
 
                             recursiveExists(instanceData)
 
-                            it.removeFromParent(x)
+                            it.removeFromParent(placeholder)
 
                             it.dividerNode
                                     .nodeCollection
                                     .notDoneGroupCollection
-                                    .add(instanceData, x)
+                                    .add(instanceData, placeholder)
                         }
                     }
 
@@ -328,17 +328,17 @@ class GroupListFragment @JvmOverloads constructor(
             return true
         }
 
-        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups_top, actionMode!!.menu)
 
             listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
-            super.onFirstAdded(x)
+            super.onFirstAdded(placeholder)
         }
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
         private fun showHour(selectedDatas: Collection<GroupListDataWrapper.SelectedData>) = selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now }
 

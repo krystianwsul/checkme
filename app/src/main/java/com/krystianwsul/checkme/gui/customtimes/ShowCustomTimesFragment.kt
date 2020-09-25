@@ -51,11 +51,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_custom_times, listener::initBottomBar) }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
+        override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
             val customTimeIds = selectedIds
             check(customTimeIds.isNotEmpty())
 
@@ -77,17 +77,17 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             return true
         }
 
-        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
             (activity as CustomTimesListListener).onCreateActionMode(actionMode!!)
 
-            super.onFirstAdded(x)
+            super.onFirstAdded(placeholder)
         }
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
             (activity as CustomTimesListListener).onDestroyActionMode()

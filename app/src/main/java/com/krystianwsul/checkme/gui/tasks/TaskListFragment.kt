@@ -92,9 +92,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_tasks, listener::initBottomBar) }
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
+        override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
             val selected = treeViewAdapter.selectedNodes
             check(selected.isNotEmpty())
 
@@ -123,14 +123,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return true
         }
 
-        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility("onFirstAdded")
 
             (activity as Listener).onCreateActionMode(actionMode!!)
 
-            super.onFirstAdded(x)
+            super.onFirstAdded(placeholder)
         }
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
@@ -141,17 +141,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
+            val current = datas.all { it.current }
+
             return listOf(
-                    R.id.action_task_join to !single,
-                    R.id.action_task_edit to single,
-                    R.id.action_task_add to single,
+                    R.id.action_task_edit to (single && current),
+                    R.id.action_task_join to (!single && current),
+                    R.id.action_task_delete to current,
+                    R.id.action_task_add to (single && current),
                     R.id.action_task_show_instances to single,
-                    R.id.actionTaskCopy to datas.all { it.current },
+                    R.id.actionTaskCopy to current,
                     R.id.actionTaskWebSearch to single
             )
         }
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
             updateFabVisibility("onLastRemoved")
 
             (activity as Listener).onDestroyActionMode()

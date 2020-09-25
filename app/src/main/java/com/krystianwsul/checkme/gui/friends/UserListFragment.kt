@@ -56,31 +56,31 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
         override val bottomBarData by lazy {
             Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar)
         }
 
-        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder): Boolean {
+        override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
             check(itemId == R.id.action_friends_delete)
 
-            (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
+            (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(placeholder)
 
             updateSelectAll()
 
             return true
         }
 
-        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
-            super.onFirstAdded(x)
+            super.onFirstAdded(placeholder)
         }
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = updateFabVisibility()
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = updateFabVisibility()
     }
 
     private var friendListFab: FloatingActionButton? = null

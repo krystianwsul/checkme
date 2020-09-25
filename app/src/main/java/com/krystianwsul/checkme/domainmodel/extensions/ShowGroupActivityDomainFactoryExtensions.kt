@@ -24,8 +24,8 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
     val hourMinute = timeStamp.hourMinute
 
     val time =
-        getCurrentRemoteCustomTimes(now).firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-            ?: Time.Normal(hourMinute)
+            getCurrentRemoteCustomTimes(now).firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+                    ?: Time.Normal(hourMinute)
 
     val displayText = DateTime(date, time).getDisplayText()
 
@@ -33,22 +33,22 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
 }
 
 private fun DomainFactory.getGroupListData(
-    timeStamp: TimeStamp,
-    now: ExactTimeStamp
+        timeStamp: TimeStamp,
+        now: ExactTimeStamp
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endTimeStamp = TimeStamp(endCalendar.toDateTimeSoy())
 
     val rootInstances =
-        getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now)
+            getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now)
 
     val currentInstances =
-        rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
+            rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(
-            it.name,
-            it.hourMinutes.toSortedMap()
+                it.name,
+                it.hourMinutes.toSortedMap()
         )
     }
 
@@ -60,23 +60,24 @@ private fun DomainFactory.getGroupListData(
         val children = getChildInstanceDatas(instance, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(
-            instance.done,
-            instance.instanceKey,
-            null,
-            instance.name,
-            instance.instanceDateTime.timeStamp,
-            task.current(now),
-            instance.isRootInstance(now),
-            isRootTask,
-            instance.exists(),
-            instance.getCreateTaskTimePair(ownerKey),
-            task.note,
-            children,
-            null,
-            task.ordinal,
-            instance.getNotificationShown(localFactory),
-            task.getImage(deviceDbInfo),
-            instance.isRepeatingGroupChild(now)
+                instance.done,
+                instance.instanceKey,
+                null,
+                instance.name,
+                instance.instanceDateTime.timeStamp,
+                task.current(now),
+                task.isVisible(now, false),
+                instance.isRootInstance(now),
+                isRootTask,
+                instance.exists(),
+                instance.getCreateTaskTimePair(ownerKey),
+                task.note,
+                children,
+                null,
+                task.ordinal,
+                instance.getNotificationShown(localFactory),
+                task.getImage(deviceDbInfo),
+                instance.isRepeatingGroupChild(now)
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }
@@ -85,7 +86,7 @@ private fun DomainFactory.getGroupListData(
     }
 
     val dataWrapper =
-        GroupListDataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
+            GroupListDataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 

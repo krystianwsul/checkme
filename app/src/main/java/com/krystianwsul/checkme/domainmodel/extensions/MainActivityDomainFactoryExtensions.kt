@@ -144,6 +144,7 @@ fun DomainFactory.getGroupListData(
                 instance.name,
                 instance.instanceDateTime.timeStamp,
                 task.current(now),
+                task.isVisible(now, false),
                 instance.isRootInstance(now),
                 isRootTask,
                 instance.exists(),

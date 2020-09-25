@@ -17,8 +17,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     val now = ExactTimeStamp.now
 
     val instances = instanceKeys.map { getInstance(it) }
-        .filter { it.isRootInstance(now) }
-        .sortedBy { it.instanceDateTime }
+            .filter { it.isRootInstance(now) }
+            .sortedBy { it.instanceDateTime }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -32,23 +32,24 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         val children = getChildInstanceDatas(instance, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(
-            instance.done,
-            instance.instanceKey,
-            instance.getDisplayData(now)?.getDisplayText(),
-            instance.name,
-            instance.instanceDateTime.timeStamp,
-            task.current(now),
-            instance.isRootInstance(now),
-            isRootTask,
-            instance.exists(),
-            instance.getCreateTaskTimePair(ownerKey),
-            task.note,
-            children,
-            null,
-            instance.task.ordinal,
-            instance.getNotificationShown(localFactory),
-            task.getImage(deviceDbInfo),
-            instance.isRepeatingGroupChild(now)
+                instance.done,
+                instance.instanceKey,
+                instance.getDisplayData(now)?.getDisplayText(),
+                instance.name,
+                instance.instanceDateTime.timeStamp,
+                task.current(now),
+                task.isVisible(now, false),
+                instance.isRootInstance(now),
+                isRootTask,
+                instance.exists(),
+                instance.getCreateTaskTimePair(ownerKey),
+                task.note,
+                children,
+                null,
+                instance.task.ordinal,
+                instance.getNotificationShown(localFactory),
+                task.getImage(deviceDbInfo),
+                instance.isRepeatingGroupChild(now)
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }
@@ -57,12 +58,12 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     }
 
     val dataWrapper = GroupListDataWrapper(
-        customTimeDatas,
-        null,
-        listOf(),
-        null,
-        instanceDatas,
-        null
+            customTimeDatas,
+            null,
+            listOf(),
+            null,
+            instanceDatas,
+            null
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

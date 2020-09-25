@@ -12,8 +12,8 @@ import com.soywiz.klock.days
 
 @Synchronized
 fun DomainFactory.getShowTaskInstancesData(
-    taskKey: TaskKey,
-    page: Int
+        taskKey: TaskKey,
+        page: Int
 ): ShowTaskInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
@@ -34,9 +34,9 @@ fun DomainFactory.getShowTaskInstancesData(
     var hasMore = true
     while (hasMore) {
         val (newInstances, newHasMore) = task.getInstances(
-            startExactTimeStamp,
-            endExactTimeStamp,
-            now
+                startExactTimeStamp,
+                endExactTimeStamp,
+                now
         )
 
         if (!newHasMore)
@@ -50,8 +50,8 @@ fun DomainFactory.getShowTaskInstancesData(
         startExactTimeStamp = endExactTimeStamp
 
         endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
-            .plus(1.days)
-            .toExactTimeStamp()
+                .plus(1.days)
+                .toExactTimeStamp()
     }
 
     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
@@ -60,27 +60,28 @@ fun DomainFactory.getShowTaskInstancesData(
         val children = getChildInstanceDatas(it, now)
 
         val taskHierarchyKey = task.getParentTaskHierarchy(hierarchyExactTimeStamp)
-            ?.taskHierarchy
-            ?.taskHierarchyKey
+                ?.taskHierarchy
+                ?.taskHierarchyKey
 
         val instanceData = GroupListDataWrapper.InstanceData(
-            it.done,
-            it.instanceKey,
-            it.instanceDateTime.getDisplayText(),
-            it.name,
-            it.instanceDateTime.timeStamp,
-            task.current(now),
-            it.isRootInstance(now),
-            isRootTask,
-            it.exists(),
-            it.getCreateTaskTimePair(ownerKey),
-            task.note,
-            children,
-            taskHierarchyKey,
-            it.task.ordinal,
-            it.getNotificationShown(localFactory),
-            task.getImage(deviceDbInfo),
-            it.isRepeatingGroupChild(now)
+                it.done,
+                it.instanceKey,
+                it.instanceDateTime.getDisplayText(),
+                it.name,
+                it.instanceDateTime.timeStamp,
+                task.current(now),
+                task.isVisible(now, false),
+                it.isRootInstance(now),
+                isRootTask,
+                it.exists(),
+                it.getCreateTaskTimePair(ownerKey),
+                task.note,
+                children,
+                taskHierarchyKey,
+                it.task.ordinal,
+                it.getNotificationShown(localFactory),
+                task.getImage(deviceDbInfo),
+                it.isRepeatingGroupChild(now)
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }
@@ -89,12 +90,12 @@ fun DomainFactory.getShowTaskInstancesData(
     }
 
     val dataWrapper = GroupListDataWrapper(
-        customTimeDatas,
-        task.current(now),
-        listOf(),
-        null,
-        instanceDatas,
-        null
+            customTimeDatas,
+            task.current(now),
+            listOf(),
+            null,
+            instanceDatas,
+            null
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

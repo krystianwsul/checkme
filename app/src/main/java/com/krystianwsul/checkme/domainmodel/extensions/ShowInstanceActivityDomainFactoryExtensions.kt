@@ -26,31 +26,31 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
     val parentInstance = instance.getParentInstance(now)
 
     val displayText = listOfNotNull(
-        instance.getParentName(now).takeIf { it.isNotEmpty() },
-        instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
+            instance.getParentName(now).takeIf { it.isNotEmpty() },
+            instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
     ).joinToString("\n\n")
 
     return ShowInstanceViewModel.Data(
-        instance.name,
-        instanceDateTime,
-        instance.done != null,
-        task.current(now),
-        parentInstance == null,
-        instance.exists(),
-        getGroupListData(instance, task, now),
-        instance.getNotificationShown(localFactory),
-        displayText,
-        task.taskKey,
-        instance.isRepeatingGroupChild(now)
+            instance.name,
+            instanceDateTime,
+            instance.done != null,
+            task.current(now),
+            parentInstance == null,
+            instance.exists(),
+            getGroupListData(instance, task, now),
+            instance.getNotificationShown(localFactory),
+            displayText,
+            task.taskKey,
+            instance.isRepeatingGroupChild(now)
     )
 }
 
 @Synchronized
 fun DomainFactory.setTaskEndTimeStamps(
-    source: SaveService.Source,
-    taskKeys: Set<TaskKey>,
-    deleteInstances: Boolean,
-    instanceKey: InstanceKey
+        source: SaveService.Source,
+        taskKeys: Set<TaskKey>,
+        deleteInstances: Boolean,
+        instanceKey: InstanceKey
 ): Pair<TaskUndoData, Boolean> {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -64,20 +64,20 @@ fun DomainFactory.setTaskEndTimeStamps(
 
     val instanceExactTimeStamp by lazy {
         instance.instanceDateTime
-            .timeStamp
-            .toExactTimeStamp()
+                .timeStamp
+                .toExactTimeStamp()
     }
 
     val visible =
-        task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
+            task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
 
     return Pair(taskUndoData, visible)
 }
 
 private fun DomainFactory.getGroupListData(
-    instance: Instance<*>,
-    task: Task<*>,
-    now: ExactTimeStamp
+        instance: Instance<*>,
+        task: Task<*>,
+        now: ExactTimeStamp
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -91,23 +91,24 @@ private fun DomainFactory.getGroupListData(
         val children = getChildInstanceDatas(childInstance, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(
-            childInstance.done,
-            childInstance.instanceKey,
-            null,
-            childInstance.name,
-            childInstance.instanceDateTime.timeStamp,
-            childTask.current(now),
-            childInstance.isRootInstance(now),
-            isRootTask,
-            childInstance.exists(),
-            childInstance.getCreateTaskTimePair(ownerKey),
-            childTask.note,
-            children,
-            taskHierarchy.taskHierarchyKey,
-            childTask.ordinal,
-            childInstance.getNotificationShown(localFactory),
-            childTask.getImage(deviceDbInfo),
-            childInstance.isRepeatingGroupChild(now)
+                childInstance.done,
+                childInstance.instanceKey,
+                null,
+                childInstance.name,
+                childInstance.instanceDateTime.timeStamp,
+                childTask.current(now),
+                childTask.isVisible(now, false),
+                childInstance.isRootInstance(now),
+                isRootTask,
+                childInstance.exists(),
+                childInstance.getCreateTaskTimePair(ownerKey),
+                childTask.note,
+                children,
+                taskHierarchy.taskHierarchyKey,
+                childTask.ordinal,
+                childInstance.getNotificationShown(localFactory),
+                childTask.getImage(deviceDbInfo),
+                childInstance.isRepeatingGroupChild(now)
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

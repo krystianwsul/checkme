@@ -31,36 +31,30 @@ data class GroupListDataWrapper(
         }
 
         override val taskCurrent = true
+        override val taskVisible = true
 
         override val childSelectedDatas get() = children
-
-        private val normalizedName by lazy { name.normalized() }
-        private val normalizedNote by lazy { note?.normalized() }
-
-        fun normalize() {
-            normalizedName
-            normalizedNote
-        }
     }
 
     data class InstanceData(
-        var done: ExactTimeStamp?,
-        val instanceKey: InstanceKey,
-        var displayText: String?,
-        override val name: String,
-        var instanceTimeStamp: TimeStamp,
-        override var taskCurrent: Boolean,
-        val isRootInstance: Boolean,
-        var isRootTask: Boolean?,
-        var exists: Boolean,
-        val createTaskTimePair: TimePair,
-        override val note: String?,
-        val children: MutableMap<InstanceKey, InstanceData>,
-        val taskHierarchyKey: TaskHierarchyKey?,
-        var ordinal: Double,
-        var notificationShown: Boolean,
-        val imageState: ImageState?,
-        val isRecurringGroupChild: Boolean
+            var done: ExactTimeStamp?,
+            val instanceKey: InstanceKey,
+            var displayText: String?,
+            override val name: String,
+            var instanceTimeStamp: TimeStamp,
+            override var taskCurrent: Boolean,
+            override val taskVisible: Boolean,
+            val isRootInstance: Boolean,
+            var isRootTask: Boolean?,
+            var exists: Boolean,
+            val createTaskTimePair: TimePair,
+            override val note: String?,
+            val children: MutableMap<InstanceKey, InstanceData>,
+            val taskHierarchyKey: TaskHierarchyKey?,
+            var ordinal: Double,
+            var notificationShown: Boolean,
+            val imageState: ImageState?,
+            val isRecurringGroupChild: Boolean
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
 
         lateinit var instanceDataParent: InstanceDataParent
@@ -108,6 +102,7 @@ data class GroupListDataWrapper(
     interface SelectedData {
 
         val taskCurrent: Boolean
+        val taskVisible: Boolean
         val taskKey: TaskKey
         val name: String
         val note: String?

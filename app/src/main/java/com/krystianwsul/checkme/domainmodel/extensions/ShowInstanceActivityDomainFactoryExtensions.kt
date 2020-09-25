@@ -116,12 +116,12 @@ private fun DomainFactory.getGroupListData(
     }
 
     val dataWrapper = GroupListDataWrapper(
-        customTimeDatas,
-        task.current(now),
-        listOf(),
-        task.note,
-        instanceDatas,
-        task.getImage(deviceDbInfo)
+            customTimeDatas,
+            task.isVisible(now, false),
+            listOf(),
+            task.note,
+            instanceDatas,
+            task.getImage(deviceDbInfo)
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

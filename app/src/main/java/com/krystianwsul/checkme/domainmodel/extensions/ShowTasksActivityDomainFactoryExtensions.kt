@@ -40,7 +40,8 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
                         task.taskKey,
                         null,
                         task.getImage(deviceDbInfo),
-                        task.editable(now),
+                        task.current(now),
+                        task.isVisible(now, false),
                         false,
                         task.ordinal
                 )

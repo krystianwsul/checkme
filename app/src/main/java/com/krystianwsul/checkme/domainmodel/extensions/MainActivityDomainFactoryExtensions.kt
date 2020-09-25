@@ -38,7 +38,8 @@ fun DomainFactory.getMainData(): MainViewModel.Data {
                         task.taskKey,
                         null,
                         task.getImage(deviceDbInfo),
-                        task.editable(now),
+                        task.current(now),
+                        task.isVisible(now, false),
                         false,
                         task.ordinal
                 )

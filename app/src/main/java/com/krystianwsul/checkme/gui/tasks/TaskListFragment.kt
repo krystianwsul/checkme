@@ -141,13 +141,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
-            val current = datas.all { it.editable }
+            val current = datas.all { it.current }
+            val isVisible = datas.all { it.isVisible }
 
             return listOf(
                     R.id.action_task_edit to (single && current),
                     R.id.action_task_join to (!single && current),
                     R.id.action_task_delete to current,
-                    R.id.action_task_add to (single && current),
+                    R.id.action_task_add to (single && isVisible),
                     R.id.action_task_show_instances to single,
                     R.id.actionTaskCopy to current,
                     R.id.actionTaskWebSearch to single
@@ -593,7 +594,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
-            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.editable }
+            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.current }
 
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
@@ -702,7 +703,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKey: TaskKey,
             val taskHierarchyKey: TaskHierarchyKey?,
             val imageState: ImageState?,
-            val editable: Boolean,
+            val current: Boolean,
+            val isVisible: Boolean,
             val alwaysShow: Boolean,
             var ordinal: Double
     ) : Comparable<ChildTaskData> {
@@ -718,7 +720,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         fun matchesSearch(searchData: SearchData): Boolean {
-            if (!searchData.showDeleted && !editable)
+            if (!searchData.showDeleted && !isVisible)
                 return false
 
             val query = searchData.query

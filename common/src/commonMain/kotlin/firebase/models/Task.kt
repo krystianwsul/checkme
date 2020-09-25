@@ -876,8 +876,6 @@ class Task<T : ProjectType>(
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
-    fun editable(now: ExactTimeStamp) = current(now) && isVisible(now, false)
-
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

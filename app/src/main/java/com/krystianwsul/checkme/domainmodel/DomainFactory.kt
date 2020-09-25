@@ -571,7 +571,8 @@ class DomainFactory(
                         childTask.taskKey,
                         taskHierarchy.taskHierarchyKey,
                         childTask.getImage(deviceDbInfo),
-                        childTask.editable(now),
+                        childTask.current(now),
+                        childTask.isVisible(now, false),
                         alwaysShow,
                         childTask.ordinal
                 )

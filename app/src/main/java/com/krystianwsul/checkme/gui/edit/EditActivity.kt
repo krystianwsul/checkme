@@ -192,10 +192,12 @@ class EditActivity : NavBarActivity() {
             checkNotNull(toolbarEditText)
 
             if (!updateError()) {
-                if (delegate.showAllRemindersDialog()) {
+                val showAllRemindersPlural = delegate.showAllRemindersDialog()
+
+                if (showAllRemindersPlural != null) {
                     check(!andOpen)
 
-                    AllRemindersDialogFragment.newInstance(true)
+                    AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
                             .apply { listener = allRemindersListener }
                             .show(supportFragmentManager, TAG_ALL_REMINDERS)
                 } else {

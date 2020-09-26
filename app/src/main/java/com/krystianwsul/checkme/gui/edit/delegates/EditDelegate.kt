@@ -150,19 +150,22 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
         }
     }
 
-    fun showAllRemindersDialog(): Boolean {
+    fun showAllRemindersDialog(): Boolean? { // null = no, true/false = plural
         if (!data.showAllInstancesDialog)
-            return false
+            return null
 
-        val singleSchedule = parentScheduleManager.schedules
+        val schedule = parentScheduleManager.schedules
                 .singleOrNull()
-                ?: return false
+                ?: return null
 
-        return singleSchedule.scheduleDataWrapper.scheduleData is ScheduleData.Single
+        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single)
+            true
+        else
+            null
     }
 
     fun createTask(createParameters: CreateParameters): TaskKey {
-        check(createParameters.allReminders || showAllRemindersDialog())
+        check(createParameters.allReminders || showAllRemindersDialog() != null)
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
 

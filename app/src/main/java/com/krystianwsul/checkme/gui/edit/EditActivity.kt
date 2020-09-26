@@ -195,7 +195,7 @@ class EditActivity : NavBarActivity() {
                 if (delegate.showAllRemindersDialog()) {
                     check(!andOpen)
 
-                    AllRemindersDialogFragment.newInstance()
+                    AllRemindersDialogFragment.newInstance(true)
                             .apply { listener = allRemindersListener }
                             .show(supportFragmentManager, TAG_ALL_REMINDERS)
                 } else {

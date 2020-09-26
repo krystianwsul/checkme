@@ -110,7 +110,8 @@
     <string name="allDays">All days</string>
     <string name="allFutureReminders">All future reminders</string>
     <string name="joinAllFutureReminders">Join all future reminders?</string>
-    <string name="justThese">Just these</string>
+    <string name="justTheseReminders">Just these reminders</string>
+    <string name="justThisReminder">Just this reminder</string>
     <string name="removeFromParent">Remove from parent</string>
     <string name="webSearch">Web search</string>
     <string name="weeksPrefix">every</string>

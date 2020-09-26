@@ -308,7 +308,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val scheduleText: String?,
             val note: String?,
             val sortKey: SortKey,
-            val projectId: ProjectKey.Shared?
+            val projectId: ProjectKey.Shared?,
+            val isRootTaskGroup: Boolean
     ) {
 
         private val normalizedName by lazy { name.normalized() }

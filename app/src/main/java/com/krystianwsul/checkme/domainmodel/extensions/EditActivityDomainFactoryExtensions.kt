@@ -95,9 +95,13 @@ fun DomainFactory.getCreateTaskData(
         it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
     }
 
-    val showAllInstancesDialog = (startParameters as? EditViewModel.StartParameters.Join)?.let {
-        it.joinTaskKeys.any { getTaskForce(it).hasFutureReminders(now) }
-    } ?: false
+    val showAllInstancesDialog = when (startParameters) {
+        is EditViewModel.StartParameters.Join -> startParameters.joinTaskKeys.any {
+            getTaskForce(it).hasFutureReminders(now)
+        }
+        is EditViewModel.StartParameters.Task -> getTaskForce(startParameters.taskKey).hasFutureReminders(now)
+        is EditViewModel.StartParameters.Create -> false
+    }
 
     return EditViewModel.Data(
             taskData,

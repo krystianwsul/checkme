@@ -870,6 +870,7 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
+    // maybe this should also handle multiple single schedules?
     fun hasFutureReminders(now: ExactTimeStamp) =
             current(now) && getRootTask(now).getCurrentSchedules(now)
                     .any { it.schedule is RepeatingSchedule<*> }

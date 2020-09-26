@@ -150,19 +150,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
         }
     }
 
-    fun showAllRemindersDialog(): Boolean? { // null = no, true/false = plural
-        if (!data.showAllInstancesDialog)
-            return null
-
-        val schedule = parentScheduleManager.schedules
-                .singleOrNull()
-                ?: return null
-
-        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single)
-            true
-        else
-            null
-    }
+    open fun showAllRemindersDialog(): Boolean? = null // null = no, true/false = plural
 
     fun createTask(createParameters: CreateParameters): TaskKey {
         check(createParameters.allReminders || showAllRemindersDialog() != null)

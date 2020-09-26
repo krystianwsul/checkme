@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment

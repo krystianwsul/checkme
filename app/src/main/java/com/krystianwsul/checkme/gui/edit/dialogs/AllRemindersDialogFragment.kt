@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.edit
+package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.os.Bundle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder

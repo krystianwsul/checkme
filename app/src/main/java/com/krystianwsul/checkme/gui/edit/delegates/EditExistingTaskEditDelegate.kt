@@ -77,8 +77,6 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey
     ): TaskKey {
-        check(createParameters.allReminders)
-
         return DomainFactory.instance.updateChildTask(
                 ExactTimeStamp.now,
                 data.dataId,
@@ -88,7 +86,8 @@ class EditExistingTaskEditDelegate(
                 parentTaskKey,
                 createParameters.note,
                 imageUrl.value!!.writeImagePath,
-                parameters.removeInstanceKey
+                parameters.removeInstanceKey,
+                createParameters.allReminders
         )
     }
 

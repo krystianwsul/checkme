@@ -322,7 +322,8 @@ fun DomainFactory.updateChildTask(
         parentTaskKey: TaskKey,
         note: String?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
-        removeInstanceKey: InstanceKey?
+        removeInstanceKey: InstanceKey?,
+        allReminders: Boolean
 ): TaskKey {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -338,12 +339,15 @@ fun DomainFactory.updateChildTask(
     task.setName(name, note)
 
     if (task.getParentTask(now) != newParentTask) {
-        task.endAllCurrentTaskHierarchies(now)
+        if (allReminders) task.endAllCurrentTaskHierarchies(now)
+
         newParentTask.addChild(task, now)
     }
 
-    task.endAllCurrentSchedules(now)
-    task.endAllCurrentNoScheduleOrParents(now)
+    if (allReminders) {
+        task.endAllCurrentSchedules(now)
+        task.endAllCurrentNoScheduleOrParents(now)
+    }
 
     val imageUuid = imagePath?.value?.let { newUuid() }
     if (imagePath != null)
@@ -597,14 +601,18 @@ private fun DomainFactory.getParentTreeDatas(
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
+
+                val isGroupTask = it.isGroupTask(now)
+
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, isGroupTask),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                        null
+                        null,
+                        isGroupTask
                 )
 
                 taskParentKey to parentTreeData
@@ -625,7 +633,8 @@ private fun DomainFactory.getParentTreeDatas(
                         users,
                         null,
                         EditViewModel.SortKey.ProjectSortKey(it.projectKey),
-                        it.projectKey
+                        it.projectKey,
+                        false
                 )
 
                 projectParentKey to parentTreeData
@@ -645,14 +654,18 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
+
+                val isGroupTask = it.isGroupTask(now)
+
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, isGroupTask),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                        (it.project as? SharedProject)?.projectKey
+                        (it.project as? SharedProject)?.projectKey,
+                        isGroupTask
                 )
 
                 taskParentKey to parentTreeData
@@ -725,7 +738,8 @@ private fun DomainFactory.joinTasks(
 private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp,
         parentTask: Task<*>,
-        excludedTaskKeys: Set<TaskKey>
+        excludedTaskKeys: Set<TaskKey>,
+        isRootGroupTask: Boolean
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()
@@ -736,12 +750,13 @@ private fun DomainFactory.getTaskListChildTaskDatas(
 
                     val parentTreeData = EditViewModel.ParentTreeData(
                             childTask.name,
-                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
+                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys, isRootGroupTask),
                             EditViewModel.ParentKey.Task(childTask.taskKey),
                             childTask.getScheduleText(ScheduleText, now),
                             childTask.note,
                             EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                            (childTask.project as? SharedProject)?.projectKey
+                            (childTask.project as? SharedProject)?.projectKey,
+                            isRootGroupTask
                     )
 
                     taskParentKey to parentTreeData

@@ -169,12 +169,9 @@ class GroupListFragment @JvmOverloads constructor(
                     check(selectedDatas.isNotEmpty())
 
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-                    check(instanceDatas.isNotEmpty())
                     check(instanceDatas.all { it.isRootInstance })
 
-                    val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
-
-                    EditInstancesFragment.newInstance(instanceKeys)
+                    EditInstancesFragment.newInstance(instanceDatas.map { it.instanceKey })
                             .also { it.listener = this@GroupListFragment::onEditInstances }
                             .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
 
@@ -182,15 +179,19 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {
-                    val instanceData = selectedDatas.single()
+                    val selectedData = selectedDatas.single()
 
-                    activity.startActivity(ShowTaskActivity.newIntent(instanceData.taskKey))
+                    activity.startActivity(ShowTaskActivity.newIntent(selectedData.taskKey))
                 }
                 R.id.action_group_edit_task -> {
-                    val instanceData = selectedDatas.single()
-                    check(instanceData.taskCurrent)
+                    val selectedData = selectedDatas.single()
+                    check(selectedData.taskCurrent)
 
-                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Edit(instanceData.taskKey)))
+                    val editParameters = (selectedData as? GroupListDataWrapper.InstanceData)?.let {
+                        EditParameters.Edit(selectedData.instanceKey)
+                    } ?: EditParameters.Edit(selectedData.taskKey)
+
+                    activity.startActivity(EditActivity.getParametersIntent(editParameters))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = selectedDatas.map { it.taskKey }

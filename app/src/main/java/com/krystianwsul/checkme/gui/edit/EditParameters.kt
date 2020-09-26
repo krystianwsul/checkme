@@ -97,7 +97,9 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Edit(val taskKey: TaskKey) : EditParameters() {
+    class Edit(val taskKey: TaskKey, val removeInstanceKey: InstanceKey? = null) : EditParameters() {
+
+        constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
         override fun startViewModel(viewModel: EditViewModel) = viewModel.start(taskKey)
     }

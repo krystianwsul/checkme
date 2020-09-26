@@ -329,7 +329,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                             showInstanceViewModel.stop()
 
-                            startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(instanceKey.taskKey)), ShowTaskActivity.REQUEST_EDIT_TASK)
+                            startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)), ShowTaskActivity.REQUEST_EDIT_TASK)
                         }
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)

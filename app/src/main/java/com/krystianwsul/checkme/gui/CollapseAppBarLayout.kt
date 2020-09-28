@@ -49,9 +49,7 @@ class CollapseAppBarLayout : AppBarLayout {
         toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
     }
 
-    private val textLayout: StaticLayout by lazy {
-        collapsingTextHelper.getPrivateField("textLayout")
-    }
+    private val textLayout: StaticLayout get() = collapsingTextHelper.getPrivateField("textLayout")
 
     val menu get() = toolbar.menu!!
 

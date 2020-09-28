@@ -200,12 +200,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                     listener.deleteTasks(taskKeys.toSet())
                 }
-                R.id.action_group_add_task -> {
-                    val instanceData = selectedDatas.single()
-                    check(instanceData.taskCurrent)
-
-                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Task(instanceData.taskKey))))
-                }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
@@ -367,7 +361,6 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
-                        R.id.action_group_add_task to instanceData.taskVisible,
                         R.id.actionGroupWebSearch to true
                 )
             } else {
@@ -376,7 +369,6 @@ class GroupListFragment @JvmOverloads constructor(
                 itemVisibilities += listOf(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
-                        R.id.action_group_add_task to false,
                         R.id.actionGroupWebSearch to false
                 )
 
@@ -710,63 +702,41 @@ class GroupListFragment @JvmOverloads constructor(
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun edit(hint: EditActivity.Hint) = activity.startActivity(
-                EditActivity.getParametersIntent(EditParameters.Create(hint))
-        )
+        fun edit(hint: EditActivity.Hint) = FabState.Visible {
+            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
+        }
 
         fun List<GroupListDataWrapper.InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
                 ?: first()).let {
             EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
         }
 
-        return when (val parameters = parameters) {
-            is GroupListParameters.All -> {
-                if (selectionCallback.hasActionMode) {
-                    val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
-                    if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
-                        val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-
-                        if (instanceDatas.asSequence()
-                                        .filter { it.isRootInstance }
-                                        .map { it.instanceTimeStamp }
-                                        .distinct()
-                                        .singleOrNull()
-                                        ?.takeIf { it > TimeStamp.now } != null
-                        ) {
-                            FabState.Visible {
-                                val hint = instanceDatas.getHint()
-
-                                selectionCallback.actionMode!!.finish()
-
-                                edit(hint)
-                            }
-                        } else {
-                            FabState.Hidden
-                        }
-                    } else {
+        return if (selectionCallback.hasActionMode) {
+            nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+                    .singleOrNull()
+                    ?.takeIf { it.taskVisible }
+                    ?.let { edit(EditActivity.Hint.Task(it.taskKey)) }
+                    ?: FabState.Hidden
+        } else {
+            when (val parameters = parameters) {
+                is GroupListParameters.All -> edit(EditActivity.Hint.Schedule(rangePositionToDate(
+                        parameters.timeRange,
+                        parameters.position
+                )))
+                is GroupListParameters.TimeStamp -> {
+                    if (parameters.timeStamp > TimeStamp.now)
+                        edit(parameters.groupListDataWrapper.instanceDatas.getHint())
+                    else
                         FabState.Hidden
-                    }
-                } else {
-                    FabState.Visible {
-                        edit(EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position)))
-                    }
                 }
-            }
-            is GroupListParameters.TimeStamp -> {
-                if ((parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode) {
-                    FabState.Visible { edit(parameters.groupListDataWrapper.instanceDatas.getHint()) }
-                } else {
-                    FabState.Hidden
+                is GroupListParameters.InstanceKey -> {
+                    if (parameters.groupListDataWrapper.taskEditable!!)
+                        edit(EditActivity.Hint.Task(parameters.instanceKey.taskKey))
+                    else
+                        FabState.Hidden
                 }
+                else -> FabState.Hidden
             }
-            is GroupListParameters.InstanceKey -> {
-                if (parameters.groupListDataWrapper.taskEditable!! && !selectionCallback.hasActionMode) {
-                    FabState.Visible { edit(EditActivity.Hint.Task(parameters.instanceKey.taskKey)) }
-                } else {
-                    FabState.Hidden
-                }
-            }
-            else -> FabState.Hidden
         }
     }
 

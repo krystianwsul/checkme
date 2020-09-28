@@ -44,7 +44,7 @@ ext {
     rxAndroidVersion = '2.1.1'
     rxKotlinVersion = '2.4.0'
     rxRelayVersion = '2.1.1'
-    serializationVersion = '1.0.0-RC'
+    serializationVersion = '1.0.0-RC2'
     klockVersion = '1.12.0'
     reaktiveVersion = '1.1.17'
 }

@@ -3,14 +3,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <shortcut
-        android:shortcutId="instances"
+        android:shortcutId="add"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_instances"
-        android:shortcutShortLabel="@string/instances">
+        android:icon="@mipmap/launcher_add"
+        android:shortcutShortLabel="@string/add_task">
 
         <intent
-            android:action="com.krystianwsul.checkme.INSTANCES"
+            android:action="com.krystianwsul.checkme.VIEW"
+            android:targetPackage="com.krystianwsul.checkme"
+            android:targetClass="com.krystianwsul.checkme.gui.edit.EditActivity" />
+
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        tools:ignore="UnusedAttribute"
+        android:icon="@mipmap/launcher_search"
+        android:shortcutShortLabel="@string/search">
+
+        <intent
+            android:action="com.krystianwsul.checkme.SEARCH"
             android:targetPackage="com.krystianwsul.checkme"
             android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
 
@@ -31,30 +45,16 @@
     </shortcut>
 
     <shortcut
-        android:shortcutId="search"
+        android:shortcutId="instances"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_search"
-        android:shortcutShortLabel="@string/search">
+        android:icon="@mipmap/launcher_instances"
+        android:shortcutShortLabel="@string/instances">
 
         <intent
-            android:action="com.krystianwsul.checkme.SEARCH"
+            android:action="com.krystianwsul.checkme.INSTANCES"
             android:targetPackage="com.krystianwsul.checkme"
             android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
-
-    </shortcut>
-
-    <shortcut
-        android:shortcutId="add"
-        android:enabled="true"
-        tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_add"
-        android:shortcutShortLabel="@string/add_task">
-
-        <intent
-            android:action="com.krystianwsul.checkme.VIEW"
-            android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.edit.EditActivity" />
 
     </shortcut>
 

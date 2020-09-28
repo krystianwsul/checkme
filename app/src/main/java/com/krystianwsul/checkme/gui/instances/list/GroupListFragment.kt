@@ -704,71 +704,88 @@ class GroupListFragment @JvmOverloads constructor(
     override fun setFab(floatingActionButton: FloatingActionButton) {
         this.floatingActionButton = floatingActionButton
 
-        floatingActionButton.setOnClickListener {
-            check(showFab())
-
-            fun List<GroupListDataWrapper.InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
-                    ?: first()).let {
-                EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
-            }
-
-            val hint = when (val parameters = parameters) {
-                is GroupListParameters.All -> {
-                    val actionMode = selectionCallback.actionMode
-
-                    if (actionMode != null) {
-                        val hint = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as GroupListDataWrapper.InstanceData }.getHint()
-
-                        actionMode.finish()
-
-                        hint
-                    } else {
-                        EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
-                    }
-                }
-                is GroupListParameters.TimeStamp -> parameters.groupListDataWrapper
-                        .instanceDatas
-                        .getHint()
-                is GroupListParameters.InstanceKey -> EditActivity.Hint.Task(parameters.instanceKey.taskKey)
-                else -> throw IllegalStateException()
-            }
-
-            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
-        }
-
         updateFabVisibility()
     }
 
-    private fun showFab() = when (val parameters = parameters) {
-        is GroupListParameters.All -> {
-            if (selectionCallback.hasActionMode) {
-                val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
-                if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
-                    selectedDatas.asSequence()
-                            .map { it as GroupListDataWrapper.InstanceData }
-                            .filter { it.isRootInstance }
-                            .map { it.instanceTimeStamp }
-                            .distinct()
-                            .singleOrNull()
-                            ?.takeIf { it > TimeStamp.now } != null
-                } else {
-                    false
-                }
-            } else {
-                true
-            }
+    private fun getFabState(): FabState {
+        if (!parametersRelay.hasValue()) return FabState.Hidden
+
+        fun edit(hint: EditActivity.Hint) = activity.startActivity(
+                EditActivity.getParametersIntent(EditParameters.Create(hint))
+        )
+
+        fun List<GroupListDataWrapper.InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
+                ?: first()).let {
+            EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
         }
-        is GroupListParameters.TimeStamp -> (parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode
-        is GroupListParameters.InstanceKey -> parameters.groupListDataWrapper.taskEditable!! && !selectionCallback.hasActionMode
-        else -> false
+
+        return when (val parameters = parameters) {
+            is GroupListParameters.All -> {
+                if (selectionCallback.hasActionMode) {
+                    val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+                    if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
+                        val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+
+                        if (instanceDatas.asSequence()
+                                        .filter { it.isRootInstance }
+                                        .map { it.instanceTimeStamp }
+                                        .distinct()
+                                        .singleOrNull()
+                                        ?.takeIf { it > TimeStamp.now } != null
+                        ) {
+                            FabState.Visible {
+                                val hint = instanceDatas.getHint()
+
+                                selectionCallback.actionMode!!.finish()
+
+                                edit(hint)
+                            }
+                        } else {
+                            FabState.Hidden
+                        }
+                    } else {
+                        FabState.Hidden
+                    }
+                } else {
+                    FabState.Visible {
+                        edit(EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position)))
+                    }
+                }
+            }
+            is GroupListParameters.TimeStamp -> {
+                if ((parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode) {
+                    FabState.Visible { edit(parameters.groupListDataWrapper.instanceDatas.getHint()) }
+                } else {
+                    FabState.Hidden
+                }
+            }
+            is GroupListParameters.InstanceKey -> {
+                if (parameters.groupListDataWrapper.taskEditable!! && !selectionCallback.hasActionMode) {
+                    FabState.Visible { edit(EditActivity.Hint.Task(parameters.instanceKey.taskKey)) }
+                } else {
+                    FabState.Hidden
+                }
+            }
+            else -> FabState.Hidden
+        }
+    }
+
+    private sealed class FabState {
+
+        data class Visible(val listener: () -> Unit) : FabState()
+
+        object Hidden : FabState()
     }
 
     private fun updateFabVisibility() {
         floatingActionButton?.apply {
-            if (parametersRelay.hasValue() && showFab()) {
-                show()
-            } else {
-                hide()
+            when (val fabState = getFabState()) {
+                is FabState.Visible -> {
+                    show()
+
+                    setOnClickListener { fabState.listener() }
+                }
+                FabState.Hidden -> hide()
             }
         }
     }

@@ -40,7 +40,7 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
 
     private var oldNavigationBarColor = -1
 
-    private fun updateMenu() {
+    protected open fun updateMenu() {
         val itemVisibilities = getItemVisibilities()
 
         itemVisibilities.forEach {

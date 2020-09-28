@@ -42,7 +42,6 @@
     <string name="share">Udostępnij</string>
     <string name="sendTo">Prześlij do:</string>
     <string name="nameError">Wprowadź nazwę</string>
-    <string name="add_subtask">Dodaj zadanie podrzędne</string>
     <string name="noReminder">Bez przypomnień</string>
     <string name="addReminder">Dodaj przypomnienie</string>
     <string name="selectAll">Zaznacz wszystko</string>

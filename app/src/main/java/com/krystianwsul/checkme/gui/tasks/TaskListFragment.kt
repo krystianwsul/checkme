@@ -113,7 +113,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             .also { it.listener = deleteInstancesListener }
                             .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
-                R.id.action_task_add -> startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Task(taskKeys.single()))))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(childTaskDatas.single().name))
@@ -126,11 +125,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            updateFabVisibility("onFirstAdded")
-
-            (activity as Listener).onCreateActionMode(actionMode!!)
+            listener.onCreateActionMode(actionMode!!)
 
             super.onFirstAdded(placeholder)
+        }
+
+        override fun updateMenu() {
+            super.updateMenu()
+
+            updateFabVisibility("updateMenu")
         }
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
@@ -142,24 +145,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
             val current = datas.all { it.current }
-            val isVisible = datas.all { it.isVisible }
 
             return listOf(
                     R.id.action_task_edit to (single && current),
                     R.id.action_task_join to (!single && current),
                     R.id.action_task_delete to current,
-                    R.id.action_task_add to (single && isVisible),
                     R.id.action_task_show_instances to single,
                     R.id.actionTaskCopy to current,
                     R.id.actionTaskWebSearch to single
             )
         }
 
-        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
-            updateFabVisibility("onLastRemoved")
-
-            (activity as Listener).onDestroyActionMode()
-        }
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = listener.onDestroyActionMode()
     }
 
     private var taskListFragmentFab: FloatingActionButton? = null
@@ -400,13 +397,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     override fun setFab(floatingActionButton: FloatingActionButton) {
         taskListFragmentFab = floatingActionButton
 
-        taskListFragmentFab!!.setOnClickListener {
-            startActivity(EditActivity.getParametersIntent(EditParameters.Create(
-                    hint(),
-                    showFirstSchedule = data!!.showFirstSchedule
-            )))
-        }
-
         updateFabVisibility("setFab")
     }
 
@@ -415,10 +405,36 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun updateFabVisibility(source: String) {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
         taskListFragmentFab?.run {
-            if (data?.taskData?.showFab == true && !selectionCallback.hasActionMode) {
-                show()
-            } else {
+
+            fun edit(editParameters: EditParameters.Create) = setOnClickListener {
+                startActivity(EditActivity.getParametersIntent(editParameters))
+            }
+
+            if (data == null) {
                 hide()
+            } else if (selectionCallback.hasActionMode) {
+                val selectedNodes = treeViewAdapter.selectedNodes
+                check(selectedNodes.isNotEmpty())
+
+                val childTaskData = selectedNodes.singleOrNull()?.let {
+                    (it.modelNode as TaskAdapter.TaskWrapper).childTaskData
+                }
+
+                if (childTaskData?.isVisible == true) {
+                    show()
+
+                    edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)))
+                } else {
+                    hide()
+                }
+            } else {
+                if (data!!.taskData.showFab) {
+                    show()
+
+                    edit(EditParameters.Create(hint(), showFirstSchedule = data!!.showFirstSchedule))
+                } else {
+                    hide()
+                }
             }
         }
     }

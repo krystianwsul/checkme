@@ -549,8 +549,8 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
             parentTask: Task<*>,
             now: ExactTimeStamp,
-            alwaysShow: Boolean = true,
-            hierarchyExactTimeStamp: ExactTimeStamp = now,
+            alwaysShow: Boolean,
+            hierarchyExactTimeStamp: ExactTimeStamp,
             groups: Boolean = false
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp, groups)

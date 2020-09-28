@@ -739,7 +739,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp,
         parentTask: Task<*>,
         excludedTaskKeys: Set<TaskKey>,
-        isRootGroupTask: Boolean
+        isRootGroupTask: Boolean // this is valid only as long as getChildTaskHierarchies(groups = false)
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()

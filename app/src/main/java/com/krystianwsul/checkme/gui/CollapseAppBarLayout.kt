@@ -171,11 +171,13 @@ class CollapseAppBarLayout : AppBarLayout {
                             .height
                 }
 
-                animateHeight(
-                        hideText,
-                        immediate,
-                        (collapseState as? CollapseState.Collapsed)?.titleHack ?: true
-                )
+                toolbarCollapseLayout.addOneShotGlobalLayoutListener {
+                    animateHeight(
+                            hideText,
+                            immediate,
+                            (collapseState as? CollapseState.Collapsed)?.titleHack ?: true
+                    )
+                }
             }
         }
     }

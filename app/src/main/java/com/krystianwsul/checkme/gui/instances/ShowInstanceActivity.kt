@@ -51,22 +51,22 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         fun getIntent(context: Context, instanceKey: InstanceKey) =
-            Intent(context, ShowInstanceActivity::class.java).apply {
-                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-            }
+                Intent(context, ShowInstanceActivity::class.java).apply {
+                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                }
 
         fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
-            Intent(context, ShowInstanceActivity::class.java).apply {
-                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                putExtra(NOTIFICATION_ID_KEY, notificationId)
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
+                Intent(context, ShowInstanceActivity::class.java).apply {
+                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                    putExtra(NOTIFICATION_ID_KEY, notificationId)
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
 
         fun getForwardIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
-            Intent(context, ShowInstanceActivity::class.java).apply {
-                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                putExtra(NOTIFICATION_ID_KEY, notificationId)
-        }
+                Intent(context, ShowInstanceActivity::class.java).apply {
+                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                    putExtra(NOTIFICATION_ID_KEY, notificationId)
+                }
     }
 
     private lateinit var instanceKey: InstanceKey
@@ -128,33 +128,41 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             check(it.instanceDateTime.timeStamp <= TimeStamp.now)
                             check(it.isRootInstance)
 
-                            if (!it.notificationShown) { // to ignore double taps
-                                DomainFactory.instance.setInstancesNotNotified(0, SaveService.Source.GUI, listOf(instanceKey))
-                            }
+                            // to ignore double taps
+                            if (!it.notificationShown) DomainFactory.instance.setInstancesNotNotified(
+                                    0,
+                                    SaveService.Source.GUI,
+                                    listOf(instanceKey)
+                            )
                         }
                         R.id.instanceMenuHour -> {
                             check(showHour())
 
-                            val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, listOf(instanceKey))
+                            val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(
+                                    0,
+                                    SaveService.Source.GUI,
+                                    listOf(instanceKey)
+                            )
 
                             showSnackbarHour(hourUndoData.instanceDateTimes.size) {
-                                DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
+                                DomainFactory.instance.undoInstancesAddHour(
+                                        0,
+                                        SaveService.Source.GUI,
+                                        hourUndoData
+                                )
                             }
                         }
                         R.id.instanceMenuEditInstance -> {
                             check(!it.done)
                             check(it.isRootInstance)
 
-                            EditInstancesFragment.newInstance(listOf(instanceKey)).show(supportFragmentManager, EDIT_INSTANCES_TAG)
+                            EditInstancesFragment.newInstance(listOf(instanceKey)).show(
+                                    supportFragmentManager,
+                                    EDIT_INSTANCES_TAG
+                            )
                         }
-                        R.id.instanceMenuCheck -> {
-                            if (!it.done)
-                                setDone(true)
-                        }
-                        R.id.instanceMenuUncheck -> {
-                            if (it.done)
-                                setDone(false)
-                        }
+                        R.id.instanceMenuCheck -> if (!it.done) setDone(true)
+                        R.id.instanceMenuUncheck -> if (it.done) setDone(false)
                         R.id.instanceMenuRemoveFromParent -> {
                             check(it.isRecurringGroupChild)
 
@@ -190,7 +198,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         startDate(dateReceiver)
     }
 
-    private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
+    private fun showHour() = data?.run {
+        !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now
+    } == true
 
     private fun updateTopMenu() {
         collapseAppBarLayout.menu.apply {
@@ -218,7 +228,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
-            findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
+            findItem(R.id.instance_menu_add_task).isVisible = data?.run {
+                isRootInstance && instanceDateTime.timeStamp > TimeStamp.now
+            } == true
             findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
             findItem(R.id.instanceMenuWebSearch).isVisible = data != null
         }
@@ -235,7 +247,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
             updateTopMenu()
         } else {
-            startActivity(getForwardIntent(this, instanceKey, intent.getIntExtra(NOTIFICATION_ID_KEY, -1)))
+            startActivity(getForwardIntent(
+                    this,
+                    instanceKey,
+                    intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
+            ))
         }
     }
 
@@ -288,7 +304,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         groupListFragment.setInstanceKey(instanceKey, data.dataId, immediate, data.groupListDataWrapper)
     }
 
-    private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, done)
+    private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
+            0,
+            SaveService.Source.GUI,
+            instanceKey,
+            done
+    )
 
     override fun onCreateGroupActionMode(
             actionMode: ActionMode,
@@ -322,14 +343,20 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_show_task -> {
                             showInstanceViewModel.stop()
 
-                            startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                            startActivityForResult(
+                                    ShowTaskActivity.newIntent(instanceKey.taskKey),
+                                    ShowTaskActivity.REQUEST_EDIT_TASK
+                            )
                         }
                         R.id.instance_menu_edit_task -> {
                             check(it.taskCurrent)
 
                             showInstanceViewModel.stop()
 
-                            startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)), ShowTaskActivity.REQUEST_EDIT_TASK)
+                            startActivityForResult(
+                                    EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)),
+                                    ShowTaskActivity.REQUEST_EDIT_TASK
+                            )
                         }
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
@@ -339,12 +366,14 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_select_all -> groupListFragment.treeViewAdapter.selectAll()
                         R.id.instance_menu_add_task -> {
                             data!!.instanceDateTime.let {
-                                startActivity(EditActivity.getParametersIntent(EditParameters.Create(EditActivity.Hint.Schedule(it.date, it.time.timePair))))
+                                startActivity(EditActivity.getParametersIntent(EditParameters.Create(
+                                        EditActivity.Hint.Schedule(it.date, it.time.timePair)
+                                )))
                             }
                         }
-                        R.id.instanceMenuCopyTask -> {
-                            startActivity(EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey)))
-                        }
+                        R.id.instanceMenuCopyTask -> startActivity(
+                                EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
+                        )
                         R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                         else -> throw UnsupportedOperationException()
                     }

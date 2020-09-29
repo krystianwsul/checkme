@@ -19,6 +19,7 @@ abstract class Project<T : ProjectType> : Current {
 
     abstract val projectRecord: ProjectRecord<T>
 
+    @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
@@ -289,17 +290,12 @@ abstract class Project<T : ProjectType> : Current {
             return
 
         remoteToRemoteConversion.startTasks[startTask.id] = Pair(
-            startTask,
-            startTask.existingInstances
-                .values
-                .toList()
-                .filter {
-                    listOf(it.scheduleDateTime, it.instanceDateTime).max()!!
-                        .toExactTimeStamp() >= now
-                }
+                startTask,
+                startTask.existingInstances
+                        .values
+                        .filter { listOf(it.scheduleDateTime, it.instanceDateTime).maxOrNull()!!.toExactTimeStamp() >= now }
         )
 
-        @Suppress("UNCHECKED_CAST")
         val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
@@ -344,10 +340,10 @@ abstract class Project<T : ProjectType> : Current {
         }
 
         tasks.forEach { task ->
-            for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now).first) {
+            for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now).instances) {
                 val instanceExactTimeStamp = instance.instanceDateTime
-                    .timeStamp
-                    .toExactTimeStamp()
+                        .timeStamp
+                        .toExactTimeStamp()
 
                 if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                     continue

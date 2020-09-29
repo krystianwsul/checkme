@@ -247,7 +247,9 @@ class Task<T : ProjectType>(
             null,
             now.plusOne(),
             now
-    ).first.filter { it.isRootInstance(now) }
+    ).instances.filter { it.isRootInstance(now) }
+
+    data class InstanceResult<T : ProjectType>(val instances: List<Instance<T>>, val hasMore: Boolean)
 
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents
@@ -258,7 +260,7 @@ class Task<T : ProjectType>(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
-    ): Pair<List<Instance<T>>, Boolean> { // boolean = has more
+    ): InstanceResult<T> {
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp
@@ -303,16 +305,16 @@ class Task<T : ProjectType>(
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
         }
 
-        val parentInstances = parentDatas.flatMap { it.first }
+        val parentInstances = parentDatas.flatMap { it.instances }
                 .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
                 .toList()
 
-        val parentsHaveMore = parentDatas.any { it.second }
+        val parentsHaveMore = parentDatas.any { it.hasMore }
 
-        return Pair(
+        return InstanceResult(
                 listOf(
                         existingInstances,
                         scheduleInstances,

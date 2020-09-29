@@ -615,16 +615,6 @@ class MainActivity :
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
 
-        if (tab == Tab.INSTANCES) {
-            showViews += mainDaysLayout
-            hideViews += mainProgress
-        } else {
-            showViews += mainProgress
-            hideViews += mainDaysLayout
-
-            calendarOpen = false
-        }
-
         val currentElevation = mainActivityAppBarLayout.elevation
         val targetElevation = if (tab.elevated) mainToolbarElevation else 0f
         if (targetElevation != currentElevation) {
@@ -637,42 +627,30 @@ class MainActivity :
             }
         }
 
-        if (tab == Tab.TASKS) {
-            showViews.add(mainTaskListFrame)
-        } else {
-            hideViews.add(mainTaskListFrame)
+        fun getTabLayout(tab: Tab) = when (tab) {
+            Tab.INSTANCES -> mainDaysLayout
+            Tab.TASKS -> mainTaskListFrame
+            Tab.PROJECTS -> mainProjectListFrame
+            Tab.CUSTOM_TIMES -> mainCustomTimesFrame
+            Tab.FRIENDS -> mainFriendListFrame
+            Tab.DEBUG -> mainDebugFrame
+            Tab.ABOUT -> mainAboutFrame
         }
 
-        if (tab == Tab.PROJECTS) {
-            showViews.add(mainProjectListFrame)
+        val currentTabLayout = getTabLayout(tab)
+
+        showViews += currentTabLayout
+        hideViews += Tab.values().map(::getTabLayout) - currentTabLayout
+
+        if (tab == Tab.INSTANCES) {
+            hideViews += mainProgress
         } else {
-            hideViews.add(mainProjectListFrame)
+            hideViews += mainDaysLayout
+
+            calendarOpen = false
         }
 
-        if (tab == Tab.CUSTOM_TIMES) {
-            showViews.add(mainCustomTimesFrame)
-        } else {
-            hideViews.add(mainCustomTimesFrame)
-        }
-
-        if (tab == Tab.FRIENDS) {
-            showViews.add(mainFriendListFrame)
-        } else {
-            hideViews.add(mainFriendListFrame)
-        }
-
-        if (tab == Tab.DEBUG) {
-            showViews.add(mainDebugFrame)
-        } else {
-            hideViews.add(mainDebugFrame)
-        }
-
-        if (tab == Tab.ABOUT) {
-            showViews.add(mainAboutFrame)
-            aboutFragment.onShown()
-        } else {
-            hideViews.add(mainAboutFrame)
-        }
+        if (tab == Tab.ABOUT) aboutFragment.onShown()
 
         mainActivityToolbar.title = getString(tabSearchState.title)
 

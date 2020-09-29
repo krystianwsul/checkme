@@ -24,7 +24,9 @@ class MyUserManager(
     override val databasePrefix = DatabaseWrapper.USERS_KEY
 
     override var value = if (!snapshot.exists()) {
-        val userWrapper = UserWrapper(deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) })
+        val userWrapper = UserWrapper(
+                deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
+        )
 
         MyUserRecord(true, userWrapper, snapshot.toKey())
     } else {

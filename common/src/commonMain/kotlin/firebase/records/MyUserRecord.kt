@@ -19,6 +19,7 @@ class MyUserRecord(
         userJson.tokens[deviceDbInfo.uuid] = deviceDbInfo.token
 
         addValue("$key/$USER_DATA/tokens/${deviceDbInfo.uuid}", deviceDbInfo.token)
+        addValue("$key/$USER_DATA/uid", deviceDbInfo.userInfo.uid)
     }
 
     override var photoUrl by Committer(userJson::photoUrl, "$key/$USER_DATA")

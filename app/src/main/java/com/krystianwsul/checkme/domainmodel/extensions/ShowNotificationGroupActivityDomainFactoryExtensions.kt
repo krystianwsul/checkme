@@ -45,7 +45,6 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
                 instance.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,
-                null,
                 instance.task.ordinal,
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),

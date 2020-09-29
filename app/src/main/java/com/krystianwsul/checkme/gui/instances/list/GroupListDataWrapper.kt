@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
@@ -50,7 +49,6 @@ data class GroupListDataWrapper(
             val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
-            val taskHierarchyKey: TaskHierarchyKey?,
             var ordinal: Double,
             var notificationShown: Boolean,
             val imageState: ImageState?,

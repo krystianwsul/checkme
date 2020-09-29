@@ -54,14 +54,8 @@ fun DomainFactory.getShowTaskInstancesData(
                 .toExactTimeStamp()
     }
 
-    val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
-
     val instanceDatas = instances.values.map {
         val children = getChildInstanceDatas(it, now)
-
-        val taskHierarchyKey = task.getParentTaskHierarchy(hierarchyExactTimeStamp)
-                ?.taskHierarchy
-                ?.taskHierarchyKey
 
         val instanceData = GroupListDataWrapper.InstanceData(
                 it.done,
@@ -77,7 +71,6 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,
-                taskHierarchyKey,
                 it.task.ordinal,
                 it.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),

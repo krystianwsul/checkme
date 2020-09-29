@@ -73,7 +73,6 @@ private fun DomainFactory.getGroupListData(
                 instance.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,
-                null,
                 task.ordinal,
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),

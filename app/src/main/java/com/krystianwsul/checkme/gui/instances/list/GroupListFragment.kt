@@ -554,7 +554,7 @@ class GroupListFragment @JvmOverloads constructor(
             it.timeRange != timeRange || it.position != position
         } ?: false
 
-        parametersRelay.accept(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, timeRange, differentPage))
+        setParameters(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, timeRange, differentPage))
     }
 
     fun setTimeStamp(
@@ -562,20 +562,20 @@ class GroupListFragment @JvmOverloads constructor(
             dataId: Int,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper
-    ) = parametersRelay.accept(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
+    ) = setParameters(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
 
     fun setInstanceKey(
             instanceKey: InstanceKey,
             dataId: Int,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper
-    ) = parametersRelay.accept(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
+    ) = setParameters(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
 
     fun setInstanceKeys(
             dataId: Int,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper
-    ) = parametersRelay.accept(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
+    ) = setParameters(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
 
     fun setTaskKey(
             taskKey: TaskKey,
@@ -583,7 +583,9 @@ class GroupListFragment @JvmOverloads constructor(
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
             showLoader: Boolean
-    ) = parametersRelay.accept(GroupListParameters.TaskKey(dataId, immediate, groupListDataWrapper, taskKey, showLoader))
+    ) = setParameters(GroupListParameters.TaskKey(dataId, immediate, groupListDataWrapper, taskKey, showLoader))
+
+    fun setParameters(parameters: GroupListParameters) = parametersRelay.accept(parameters)
 
     private fun useGroups() = parameters is GroupListParameters.All
 

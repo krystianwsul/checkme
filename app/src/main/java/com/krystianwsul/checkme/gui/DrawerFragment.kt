@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.MainActivity.Tab
+import com.krystianwsul.checkme.gui.MainActivity.TabSearchState
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
 import io.reactivex.rxkotlin.addTo
@@ -68,25 +70,25 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
         mainActivityNavigation.apply {
             mainActivity.apply {
-                setCheckedItem(when (visibleTab.value!!) {
-                    MainActivity.Tab.INSTANCES -> R.id.main_drawer_instances
-                    MainActivity.Tab.TASKS -> R.id.main_drawer_tasks
-                    MainActivity.Tab.PROJECTS -> R.id.main_drawer_projects
-                    MainActivity.Tab.CUSTOM_TIMES -> R.id.main_drawer_custom_times
-                    MainActivity.Tab.FRIENDS -> R.id.main_drawer_friends
-                    MainActivity.Tab.DEBUG -> R.id.main_drawer_debug
-                    MainActivity.Tab.ABOUT -> R.id.main_drawer_about
+                setCheckedItem(when (tabSearchStateRelay.value!!.tab) {
+                    Tab.INSTANCES -> R.id.main_drawer_instances
+                    Tab.TASKS -> R.id.main_drawer_tasks
+                    Tab.PROJECTS -> R.id.main_drawer_projects
+                    Tab.CUSTOM_TIMES -> R.id.main_drawer_custom_times
+                    Tab.FRIENDS -> R.id.main_drawer_friends
+                    Tab.DEBUG -> R.id.main_drawer_debug
+                    Tab.ABOUT -> R.id.main_drawer_about
                 })
 
                 setNavigationItemSelectedListener {
                     when (it.itemId) {
-                        R.id.main_drawer_instances -> showTab(MainActivity.Tab.INSTANCES)
-                        R.id.main_drawer_tasks -> showTab(MainActivity.Tab.TASKS)
-                        R.id.main_drawer_projects -> showTab(MainActivity.Tab.PROJECTS)
-                        R.id.main_drawer_custom_times -> showTab(MainActivity.Tab.CUSTOM_TIMES)
-                        R.id.main_drawer_friends -> showTab(MainActivity.Tab.FRIENDS)
-                        R.id.main_drawer_about -> showTab(MainActivity.Tab.ABOUT)
-                        R.id.main_drawer_debug -> showTab(MainActivity.Tab.DEBUG)
+                        R.id.main_drawer_instances -> setTabSearchState(TabSearchState.Instances(false))
+                        R.id.main_drawer_tasks -> setTabSearchState(TabSearchState.Tasks(false))
+                        R.id.main_drawer_projects -> setTabSearchState(TabSearchState.Projects)
+                        R.id.main_drawer_custom_times -> setTabSearchState(TabSearchState.CustomTimes)
+                        R.id.main_drawer_friends -> setTabSearchState(TabSearchState.Friends)
+                        R.id.main_drawer_about -> setTabSearchState(TabSearchState.About)
+                        R.id.main_drawer_debug -> setTabSearchState(TabSearchState.Debug)
                         R.id.main_drawer_settings -> startActivity(SettingsActivity.newIntent())
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_sign_out -> {

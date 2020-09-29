@@ -69,7 +69,7 @@ class MainActivity :
 
     companion object {
 
-        private const val VISIBLE_TAB_KEY = "visibleTab"
+        private const val KEY_TAB_SEARCH_STATE = "tabSearchState"
         private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
@@ -100,7 +100,7 @@ class MainActivity :
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val visibleTab = BehaviorRelay.create<Tab>()
+    val tabSearchStateRelay = BehaviorRelay.create<TabSearchState>()
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -130,7 +130,7 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val restoreInstances = BehaviorRelay.createDefault(NullableWrapper<Boolean>())
+    private val restoreInstances = BehaviorRelay.createDefault(NullableWrapper<Boolean>()) // remove this
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
@@ -185,7 +185,7 @@ class MainActivity :
     fun updateBottomMenu() {
         bottomAppBar.menu
                 .findItem(R.id.action_select_all)
-                ?.isVisible = when (visibleTab.value!!) {
+                ?.isVisible = when (tabSearchStateRelay.value!!.tab) {
             Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
             Tab.TASKS -> taskSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
@@ -201,7 +201,7 @@ class MainActivity :
                 .value
                 ?.let {
                     if (!switchingTab)
-                        check(visibleTab.value!! == Tab.TASKS)
+                        check(tabSearchStateRelay.value!!.tab == Tab.TASKS)
 
                     restoreInstances.accept(NullableWrapper())
 
@@ -214,7 +214,7 @@ class MainActivity :
                     mainSearchText.text = null
 
                     if (it && !switchingTab)
-                        showTab(Tab.INSTANCES, changingSearch = true)
+                        setTabSearchState(TabSearchState.Instances(false), changingSearch = true)
                 }
 
         hideKeyboard()
@@ -228,8 +228,11 @@ class MainActivity :
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         PagerSnapHelper().attachToRecyclerView(mainDaysPager)
 
-        hostEvents = Observables.combineLatest(visibleTab, daysPosition) { tab: Tab, position: Int ->
-            if (tab == Tab.INSTANCES) {
+        hostEvents = Observables.combineLatest(
+                tabSearchStateRelay,
+                daysPosition
+        ) { tabSearchState: TabSearchState, position: Int ->
+            if (tabSearchState.tab == Tab.INSTANCES) {
                 DayFragment.Event.PageVisible(position, bottomFab)
             } else {
                 DayFragment.Event.Invisible
@@ -239,12 +242,12 @@ class MainActivity :
                 .replay(1)
                 .apply { connect() }
 
-        val overrideTab: Tab?
+        val overrideTabSearchState: TabSearchState?
 
         if (savedInstanceState != null) {
             savedInstanceState.run {
-                check(containsKey(VISIBLE_TAB_KEY))
-                overrideTab = getSerializable(VISIBLE_TAB_KEY) as Tab
+                check(containsKey(KEY_TAB_SEARCH_STATE))
+                overrideTabSearchState = getParcelable(KEY_TAB_SEARCH_STATE)!!
 
                 check(containsKey(TIME_RANGE_KEY))
                 timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
@@ -278,22 +281,29 @@ class MainActivity :
             states = mutableMapOf()
 
             when (intent.action) {
-                ACTION_INSTANCES -> overrideTab = Tab.INSTANCES
-                ACTION_TASKS -> overrideTab = Tab.TASKS
+                ACTION_INSTANCES -> overrideTabSearchState = TabSearchState.Instances(false)
+                ACTION_TASKS -> overrideTabSearchState = TabSearchState.Tasks(false)
                 ACTION_SEARCH -> {
                     check(restoreInstances.value!!.value == null)
 
                     restoreInstances.accept(NullableWrapper(Preferences.getTab() == Tab.INSTANCES))
-                    overrideTab = Tab.TASKS
+
+                    overrideTabSearchState = if (Preferences.getTab() == Tab.INSTANCES)
+                        TabSearchState.Instances(true)
+                    else
+                        TabSearchState.Tasks(true)
 
                     mainSearchToolbar.visibility = View.VISIBLE
                     mainSearchText.apply {
                         requestFocus()
 
-                        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
+                                this,
+                                InputMethodManager.SHOW_IMPLICIT
+                        )
                     }
                 }
-                else -> overrideTab = null
+                else -> overrideTabSearchState = null
             }
 
             showDeleted.accept(false)
@@ -319,7 +329,7 @@ class MainActivity :
             setOnMenuItemClickListener { item ->
                 val triple = triples.singleOrNull { it.first == item.itemId }
                 if (triple != null) {
-                    check(visibleTab.value!! == Tab.INSTANCES)
+                    check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
 
                     val newTimeRange = triple.second
 
@@ -350,9 +360,9 @@ class MainActivity :
                         R.id.actionMainSearch -> {
                             check(restoreInstances.value!!.value == null)
 
-                            restoreInstances.accept(NullableWrapper(when (visibleTab.value!!) {
+                            restoreInstances.accept(NullableWrapper(when (tabSearchStateRelay.value!!.tab) {
                                 Tab.INSTANCES -> {
-                                    showTab(Tab.TASKS, changingSearch = true)
+                                    setTabSearchState(TabSearchState.Instances(true), changingSearch = true)
                                     true
                                 }
                                 Tab.TASKS -> false
@@ -438,11 +448,11 @@ class MainActivity :
 
         mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
-        showTab(overrideTab ?: Preferences.getTab(), true)
+        setTabSearchState(overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab()), true)
 
         initBottomBar()
 
-        taskSearch.filter { visibleTab.value == Tab.TASKS }
+        taskSearch.filter { tabSearchStateRelay.value!!.tab == Tab.TASKS }
                 .subscribe {
                     if (it.value != null)
                         bottomFab.show()
@@ -476,9 +486,9 @@ class MainActivity :
                 ))
             }
 
-            if (overrideTab == null) {
+            if (overrideTabSearchState == null) {
                 data.firstOrError()
-                        .subscribeBy { showTab(Tab.values()[it.defaultTab]) }
+                        .subscribeBy { setTabSearchState(TabSearchState.fromTabSetting(Tab.values()[it.defaultTab])) }
                         .addTo(createDisposable)
             }
         }
@@ -542,7 +552,7 @@ class MainActivity :
     override fun onStart() {
         super.onStart()
 
-        if (visibleTab.value == Tab.TASKS)
+        if (tabSearchStateRelay.value!!.tab == Tab.TASKS)
             taskListFragment.checkCreatedTaskKey()
     }
 
@@ -560,7 +570,7 @@ class MainActivity :
                 MyCrashlytics.logMethod(this, "item: " + item.title)
 
                 when (item.itemId) {
-                    R.id.action_select_all -> when (visibleTab.value!!) {
+                    R.id.action_select_all -> when (tabSearchStateRelay.value!!.tab) {
                         Tab.INSTANCES -> selectAllRelay.accept(Unit)
                         Tab.TASKS -> {
                             val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
@@ -589,7 +599,7 @@ class MainActivity :
     }
 
     private fun updateTopMenu() {
-        val itemVisibilities = when (visibleTab.value!!) {
+        val itemVisibilities = when (tabSearchStateRelay.value!!.tab) {
             Tab.INSTANCES -> {
                 listOf(
                         R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
@@ -608,7 +618,7 @@ class MainActivity :
 
         mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
-                menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
+                menu.setGroupVisible(R.id.actionMainFilter, tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
             }
         }
 
@@ -618,7 +628,7 @@ class MainActivity :
         outState.run {
             super.onSaveInstanceState(this)
 
-            putSerializable(VISIBLE_TAB_KEY, visibleTab.value!!)
+            putParcelable(KEY_TAB_SEARCH_STATE, tabSearchStateRelay.value!!)
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
@@ -640,7 +650,9 @@ class MainActivity :
 
     private var elevationValueAnimator: ValueAnimator? = null
 
-    fun showTab(tab: Tab, immediate: Boolean = false, changingSearch: Boolean = false) {
+    fun setTabSearchState(tabSearchState: TabSearchState, immediate: Boolean = false, changingSearch: Boolean = false) {
+        val tab = tabSearchState.tab
+
         elevationValueAnimator?.cancel()
 
         var closeSearch = false
@@ -715,17 +727,7 @@ class MainActivity :
             hideViews.add(mainAboutFrame)
         }
 
-        val searchingFromInstances = (restoreInstances.value?.value ?: false) || changingSearch
-
-        mainActivityToolbar.title = when (tab) {
-            Tab.INSTANCES -> getString(R.string.instances)
-            Tab.TASKS -> getString(if (searchingFromInstances) R.string.instances else R.string.tasks)
-            Tab.PROJECTS -> getString(R.string.projects)
-            Tab.CUSTOM_TIMES -> getString(R.string.times)
-            Tab.FRIENDS -> getString(R.string.friends)
-            Tab.DEBUG -> "Debug"
-            Tab.ABOUT -> getString(R.string.about)
-        }
+        mainActivityToolbar.title = getString(tabSearchState.title)
 
         when (tab) {
             Tab.INSTANCES -> {
@@ -772,7 +774,7 @@ class MainActivity :
             }
         }
 
-        visibleTab.accept(tab)
+        tabSearchStateRelay.accept(tabSearchState)
 
         animateVisibility(showViews, hideViews, immediate, shortAnimTime)
 
@@ -949,6 +951,94 @@ class MainActivity :
     }
 
     private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)
+
+    sealed class TabSearchState : Parcelable {
+
+        companion object {
+
+            fun fromTabSetting(tab: Tab) = when (tab) {
+                Tab.INSTANCES -> Instances(false)
+                Tab.TASKS -> Tasks(false)
+                else -> throw IllegalArgumentException()
+            }
+        }
+
+        abstract val tab: Tab
+
+        open val isSearching = false
+
+        abstract val title: Int
+
+        open fun closeSearch(): TabSearchState = throw UnsupportedOperationException()
+
+        @Parcelize
+        data class Instances(override val isSearching: Boolean) : TabSearchState() {
+
+            override val tab get() = if (isSearching) Tab.TASKS else Tab.INSTANCES
+
+            override val title get() = R.string.instances
+
+            override fun closeSearch(): TabSearchState {
+                check(isSearching)
+
+                return copy(isSearching = false)
+            }
+        }
+
+        @Parcelize
+        data class Tasks(override val isSearching: Boolean) : TabSearchState() {
+
+            override val tab get() = Tab.TASKS
+
+            override val title get() = R.string.tasks
+
+            override fun closeSearch(): TabSearchState {
+                check(isSearching)
+
+                return copy(isSearching = false)
+            }
+        }
+
+        @Parcelize
+        object Projects : TabSearchState() {
+
+            override val tab get() = Tab.PROJECTS
+
+            override val title get() = R.string.projects
+        }
+
+        @Parcelize
+        object CustomTimes : TabSearchState() {
+
+            override val tab get() = Tab.CUSTOM_TIMES
+
+            override val title get() = R.string.times
+        }
+
+        @Parcelize
+        object Friends : TabSearchState() {
+
+            override val tab get() = Tab.FRIENDS
+
+            override val title get() = R.string.friends
+        }
+
+        @Parcelize
+        object Debug : TabSearchState() {
+
+            override val tab get() = Tab.DEBUG
+
+            override val title get() = R.string.debug
+        }
+
+        @Parcelize
+        object About : TabSearchState() {
+
+            override val tab get() = Tab.ABOUT
+
+            override val title get() = R.string.about
+        }
+    }
 
     enum class Tab {
         INSTANCES,

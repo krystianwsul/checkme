@@ -615,23 +615,18 @@ class MainActivity :
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
 
-        val currentElevation = mainActivityAppBarLayout.elevation
-        val targetElevation: Float
-
         if (tab == Tab.INSTANCES) {
             showViews += mainDaysLayout
             hideViews += mainProgress
-
-            targetElevation = 0f
         } else {
             showViews += mainProgress
             hideViews += mainDaysLayout
 
-            targetElevation = mainToolbarElevation
-
             calendarOpen = false
         }
 
+        val currentElevation = mainActivityAppBarLayout.elevation
+        val targetElevation = if (tab.elevated) mainToolbarElevation else 0f
         if (targetElevation != currentElevation) {
             elevationValueAnimator = ValueAnimator.ofFloat(currentElevation, targetElevation).apply {
                 addUpdateListener {
@@ -1008,13 +1003,24 @@ class MainActivity :
     }
 
     enum class Tab {
-        INSTANCES,
+        INSTANCES {
+
+            override val elevated = false
+        },
+
         TASKS,
+
         PROJECTS,
+
         CUSTOM_TIMES,
+
         FRIENDS,
+
         DEBUG,
-        ABOUT
+
+        ABOUT;
+
+        open val elevated = true
     }
 
     enum class TimeRange {

@@ -75,7 +75,6 @@ class MainActivity :
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
-        private const val RESTORE_INSTANCES_KEY = "restoreInstances"
         private const val KEY_SHOW_DELETED = "showDeleted"
         private const val KEY_DATE = "date"
 
@@ -130,15 +129,13 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val restoreInstances = BehaviorRelay.createDefault(NullableWrapper<Boolean>()) // remove this
-
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
     override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
 
     override val taskSearch by lazy {
-        restoreInstances.switchMap {
-            if (it.value != null) {
+        tabSearchStateRelay.switchMap {
+            if (it.isSearching) {
                 Observables.combineLatest(
                         mainSearchText.textChanges(),
                         showDeleted
@@ -197,25 +194,21 @@ class MainActivity :
     }
 
     private fun closeSearch(switchingTab: Boolean) {
-        restoreInstances.value!!
-                .value
-                ?.let {
-                    if (!switchingTab)
-                        check(tabSearchStateRelay.value!!.tab == Tab.TASKS)
+        if (!tabSearchStateRelay.value!!.isSearching) return
 
-                    restoreInstances.accept(NullableWrapper())
+        if (!switchingTab)
+            check(tabSearchStateRelay.value!!.tab == Tab.TASKS)
 
-                    mainSearchToolbar.apply {
-                        check(visibility == View.VISIBLE)
+        mainSearchToolbar.apply {
+            check(visibility == View.VISIBLE)
 
-                        animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
-                    }
+            animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+        }
 
-                    mainSearchText.text = null
+        mainSearchText.text = null
 
-                    if (it && !switchingTab)
-                        setTabSearchState(TabSearchState.Instances(false), changingSearch = true)
-                }
+        if (!switchingTab)
+            setTabSearchState(tabSearchStateRelay.value!!.closeSearch(), changingSearch = true)
 
         hideKeyboard()
     }
@@ -258,10 +251,6 @@ class MainActivity :
                 if (containsKey(SEARCH_KEY)) {
                     mainSearchToolbar.visibility = View.VISIBLE
                     mainSearchText.setText(getString(SEARCH_KEY))
-
-                    restoreInstances.accept(NullableWrapper(getBoolean(RESTORE_INSTANCES_KEY)))
-                } else {
-                    check(!containsKey(RESTORE_INSTANCES_KEY))
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
@@ -284,10 +273,6 @@ class MainActivity :
                 ACTION_INSTANCES -> overrideTabSearchState = TabSearchState.Instances(false)
                 ACTION_TASKS -> overrideTabSearchState = TabSearchState.Tasks(false)
                 ACTION_SEARCH -> {
-                    check(restoreInstances.value!!.value == null)
-
-                    restoreInstances.accept(NullableWrapper(Preferences.getTab() == Tab.INSTANCES))
-
                     overrideTabSearchState = if (Preferences.getTab() == Tab.INSTANCES)
                         TabSearchState.Instances(true)
                     else
@@ -358,16 +343,7 @@ class MainActivity :
                             updateCalendarHeight()
                         }
                         R.id.actionMainSearch -> {
-                            check(restoreInstances.value!!.value == null)
-
-                            restoreInstances.accept(NullableWrapper(when (tabSearchStateRelay.value!!.tab) {
-                                Tab.INSTANCES -> {
-                                    setTabSearchState(TabSearchState.Instances(true), changingSearch = true)
-                                    true
-                                }
-                                Tab.TASKS -> false
-                                else -> throw IllegalArgumentException()
-                            }))
+                            setTabSearchState(tabSearchStateRelay.value!!.startSearch(), changingSearch = true)
 
                             animateVisibility(listOf(mainSearchToolbar), listOf(), duration = MyBottomBar.duration)
 
@@ -632,10 +608,7 @@ class MainActivity :
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
-            if (restoreInstances.value!!.value != null) {
-                putBoolean(RESTORE_INSTANCES_KEY, restoreInstances.value!!.value!!)
-                putString(SEARCH_KEY, mainSearchText.text.toString())
-            }
+            if (tabSearchStateRelay.value!!.isSearching) putString(SEARCH_KEY, mainSearchText.text.toString())
 
             putBoolean(CALENDAR_KEY, calendarOpen)
             mainDaysPager.children.forEach { (it as DayFragment).saveState() }
@@ -969,6 +942,8 @@ class MainActivity :
 
         abstract val title: Int
 
+        open fun startSearch(): TabSearchState = throw UnsupportedOperationException()
+
         open fun closeSearch(): TabSearchState = throw UnsupportedOperationException()
 
         @Parcelize
@@ -977,6 +952,12 @@ class MainActivity :
             override val tab get() = if (isSearching) Tab.TASKS else Tab.INSTANCES
 
             override val title get() = R.string.instances
+
+            override fun startSearch(): TabSearchState {
+                check(!isSearching)
+
+                return copy(isSearching = true)
+            }
 
             override fun closeSearch(): TabSearchState {
                 check(isSearching)
@@ -991,6 +972,12 @@ class MainActivity :
             override val tab get() = Tab.TASKS
 
             override val title get() = R.string.tasks
+
+            override fun startSearch(): TabSearchState {
+                check(!isSearching)
+
+                return copy(isSearching = true)
+            }
 
             override fun closeSearch(): TabSearchState {
                 check(isSearching)

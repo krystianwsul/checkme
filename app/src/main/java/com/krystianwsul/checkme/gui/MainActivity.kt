@@ -193,12 +193,7 @@ class MainActivity :
         }
     }
 
-    private fun closeSearch(switchingTab: Boolean) {
-        if (!tabSearchStateRelay.value!!.isSearching) return
-
-        if (!switchingTab)
-            check(tabSearchStateRelay.value!!.tab == Tab.TASKS)
-
+    private fun closeSearch() {
         mainSearchToolbar.apply {
             check(visibility == View.VISIBLE)
 
@@ -206,9 +201,6 @@ class MainActivity :
         }
 
         mainSearchText.text = null
-
-        if (!switchingTab)
-            setTabSearchState(tabSearchStateRelay.value!!.closeSearch(), changingSearch = true)
 
         hideKeyboard()
     }
@@ -343,7 +335,7 @@ class MainActivity :
                             updateCalendarHeight()
                         }
                         R.id.actionMainSearch -> {
-                            setTabSearchState(tabSearchStateRelay.value!!.startSearch(), changingSearch = true)
+                            setTabSearchState(tabSearchStateRelay.value!!.startSearch())
 
                             animateVisibility(listOf(mainSearchToolbar), listOf(), duration = MyBottomBar.duration)
 
@@ -376,7 +368,7 @@ class MainActivity :
 
             setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
-            setNavigationOnClickListener { closeSearch(false) }
+            setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
 
             createDisposable += showDeleted.subscribe {
                 menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
@@ -575,14 +567,14 @@ class MainActivity :
     }
 
     private fun updateTopMenu() {
-        val itemVisibilities = when (tabSearchStateRelay.value!!.tab) {
-            Tab.INSTANCES -> {
+        val itemVisibilities = when (tabSearchStateRelay.value) {
+            is TabSearchState.Instances -> {
                 listOf(
                         R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
                         R.id.actionMainSearch to true
                 )
             }
-            Tab.TASKS -> listOf(
+            is TabSearchState.Tasks -> listOf(
                     R.id.actionMainCalendar to false,
                     R.id.actionMainSearch to true
             )
@@ -623,12 +615,10 @@ class MainActivity :
 
     private var elevationValueAnimator: ValueAnimator? = null
 
-    fun setTabSearchState(tabSearchState: TabSearchState, immediate: Boolean = false, changingSearch: Boolean = false) {
+    fun setTabSearchState(tabSearchState: TabSearchState, immediate: Boolean = false) {
         val tab = tabSearchState.tab
 
         elevationValueAnimator?.cancel()
-
-        var closeSearch = false
 
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
@@ -664,9 +654,6 @@ class MainActivity :
             showViews.add(mainTaskListFrame)
         } else {
             hideViews.add(mainTaskListFrame)
-
-            if (!changingSearch)
-                closeSearch = true
         }
 
         if (tab == Tab.PROJECTS) {
@@ -747,17 +734,18 @@ class MainActivity :
             }
         }
 
+        val wasSearching = tabSearchStateRelay.value?.isSearching == true
+        val isSearching = tabSearchState.isSearching
+
         tabSearchStateRelay.accept(tabSearchState)
 
         animateVisibility(showViews, hideViews, immediate, shortAnimTime)
 
         updateCalendarHeight()
-        if (!changingSearch) {
-            if (closeSearch)
-                closeSearch(true)
 
-            updateTopMenu()
-        }
+        if (wasSearching && !isSearching) closeSearch()
+
+        updateTopMenu()
     }
 
     override fun onDestroy() {
@@ -885,7 +873,7 @@ class MainActivity :
 
     override fun onBackPressed() {
         if (mainSearchToolbar.visibility == View.VISIBLE)
-            closeSearch(false)
+            setTabSearchState(tabSearchStateRelay.value!!.closeSearch())
         else
             super.onBackPressed()
     }

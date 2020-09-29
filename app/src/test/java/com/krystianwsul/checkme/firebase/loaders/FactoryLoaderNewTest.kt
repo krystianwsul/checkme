@@ -213,7 +213,7 @@ class FactoryLoaderNewTest {
         }
     }
 
-    private val userInfo by lazy { UserInfo("email", "name") }
+    private val userInfo by lazy { UserInfo("email", "name", "uid") }
     private val userInfoWrapper by lazy { NullableWrapper(userInfo) }
 
     private val token = "token"

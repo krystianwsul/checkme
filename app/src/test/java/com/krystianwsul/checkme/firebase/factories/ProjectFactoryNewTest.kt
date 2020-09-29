@@ -101,7 +101,7 @@ class ProjectFactoryNewTest {
 
     class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private> {
 
-        private val userInfo = UserInfo("email", "name")
+        private val userInfo = UserInfo("email", "name", "uid")
 
         override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
 

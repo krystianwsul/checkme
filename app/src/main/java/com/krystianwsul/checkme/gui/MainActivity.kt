@@ -732,7 +732,7 @@ class MainActivity :
 
         if (wasSearching && !isSearching) closeSearch()
 
-        updateTopMenu()
+        if (!isSearching) updateTopMenu()
     }
 
     override fun onDestroy() {

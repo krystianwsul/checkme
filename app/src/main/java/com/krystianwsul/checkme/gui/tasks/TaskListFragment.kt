@@ -406,7 +406,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
         taskListFragmentFab?.run {
 
-            fun edit(editParameters: EditParameters.Create) = setOnClickListener {
+            fun edit(editParameters: EditParameters.Create, closeActionMode: Boolean = false) = setOnClickListener {
+                if (closeActionMode) selectionCallback.actionMode!!.finish()
+
                 startActivity(EditActivity.getParametersIntent(editParameters))
             }
 
@@ -423,7 +425,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 if (childTaskData?.isVisible == true) {
                     show()
 
-                    edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)))
+                    edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
                 } else {
                     hide()
                 }

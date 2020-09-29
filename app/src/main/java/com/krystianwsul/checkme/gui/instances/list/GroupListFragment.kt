@@ -702,7 +702,9 @@ class GroupListFragment @JvmOverloads constructor(
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun edit(hint: EditActivity.Hint) = FabState.Visible {
+        fun edit(hint: EditActivity.Hint, closeActionMode: Boolean = false) = FabState.Visible {
+            if (closeActionMode) selectionCallback.actionMode!!.finish()
+
             activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
         }
 
@@ -712,11 +714,34 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         return if (selectionCallback.hasActionMode) {
-            nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
-                    .singleOrNull()
-                    ?.takeIf { it.taskVisible }
-                    ?.let { edit(EditActivity.Hint.Task(it.taskKey)) }
-                    ?: FabState.Hidden
+            val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+
+            val singleSelectedData = selectedDatas.singleOrNull()
+            if (singleSelectedData != null) {
+                if (singleSelectedData.taskVisible)
+                    edit(EditActivity.Hint.Task(singleSelectedData.taskKey), true)
+                else
+                    FabState.Hidden
+            } else if (
+                    parameters is GroupListParameters.All
+                    && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
+            ) {
+                val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+
+                if (instanceDatas.asSequence()
+                                .filter { it.isRootInstance }
+                                .map { it.instanceTimeStamp }
+                                .distinct()
+                                .singleOrNull()
+                                ?.takeIf { it > TimeStamp.now } != null
+                ) {
+                    edit(instanceDatas.getHint(), true)
+                } else {
+                    FabState.Hidden
+                }
+            } else {
+                FabState.Hidden
+            }
         } else {
             when (val parameters = parameters) {
                 is GroupListParameters.All -> edit(EditActivity.Hint.Schedule(rangePositionToDate(

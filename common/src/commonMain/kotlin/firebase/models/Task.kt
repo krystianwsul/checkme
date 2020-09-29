@@ -220,7 +220,7 @@ class Task<T : ProjectType>(
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp) =
             noScheduleOrParents.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
-    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
+    private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireCurrent(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
@@ -249,7 +249,7 @@ class Task<T : ProjectType>(
             now
     ).instances.filter { it.isRootInstance(now) }
 
-    data class InstanceResult<T : ProjectType>(val instances: List<Instance<T>>, val hasMore: Boolean)
+    data class InstanceResult<out T : ProjectType>(val instances: List<Instance<out T>>, val hasMore: Boolean)
 
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents

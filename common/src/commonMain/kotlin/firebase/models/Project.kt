@@ -317,30 +317,37 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun getRootInstances(
-        startExactTimeStamp: ExactTimeStamp?,
-        endExactTimeStamp: ExactTimeStamp,
-        now: ExactTimeStamp
-    ): List<Instance<T>> {
+            startExactTimeStamp: ExactTimeStamp?,
+            endExactTimeStamp: ExactTimeStamp,
+            now: ExactTimeStamp
+    ): Task.InstanceResult<T> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
-        val allInstances = mutableMapOf<InstanceKey, Instance<T>>()
+        var hasMore = false
+
+        val allInstances = mutableMapOf<InstanceKey, Instance<out T>>()
 
         for (instance in existingInstances) {
             val instanceExactTimeStamp = instance.instanceDateTime
-                .timeStamp
-                .toExactTimeStamp()
+                    .timeStamp
+                    .toExactTimeStamp()
 
             if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                 continue
 
-            if (endExactTimeStamp <= instanceExactTimeStamp)
+            if (endExactTimeStamp <= instanceExactTimeStamp) {
+                hasMore = true
                 continue
+            }
 
             allInstances[instance.instanceKey] = instance
         }
 
         tasks.forEach { task ->
-            for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now).instances) {
+            val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
+            if (taskResults.hasMore) hasMore = true
+
+            for (instance in taskResults.instances) {
                 val instanceExactTimeStamp = instance.instanceDateTime
                         .timeStamp
                         .toExactTimeStamp()
@@ -348,14 +355,19 @@ abstract class Project<T : ProjectType> : Current {
                 if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
                     continue
 
-                if (endExactTimeStamp <= instanceExactTimeStamp)
+                if (endExactTimeStamp <= instanceExactTimeStamp) {
+                    hasMore = true
                     continue
+                }
 
                 allInstances[instance.instanceKey] = instance
             }
         }
 
-        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
+        return Task.InstanceResult(
+                allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) },
+                hasMore
+        )
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :

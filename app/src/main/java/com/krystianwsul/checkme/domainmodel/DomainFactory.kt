@@ -439,9 +439,16 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
-    ) = projectsFactory.projects
-            .values
-            .flatMap { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
+    ): Task.InstanceResult<*> {
+        val projectResults = projectsFactory.projects
+                .values
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
+
+        return Task.InstanceResult(
+                projectResults.flatMap { it.instances },
+                projectResults.any { it.hasMore }
+        )
+    }
 
     fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
             .customTimes
@@ -597,7 +604,7 @@ class DomainFactory(
 
         val instances = projectsFactory.projects
                 .values
-                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }
+                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now).instances }
                 .flatten()
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
@@ -656,26 +663,22 @@ class DomainFactory(
         val notificationInstances = if (clear)
             mapOf()
         else
-            getRootInstances(null, now.plusOne(), now /* 24 hack */).filter {
-                it.done == null
-                        && !it.getNotified(localFactory)
-                        && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now
-                        && !removedTaskKeys.contains(it.taskKey)
-            }.associateBy { it.instanceKey }
+            getRootInstances(null, now.plusOne(), now /* 24 hack */).instances
+                    .filter {
+                        it.done == null
+                                && !it.getNotified(localFactory)
+                                && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now
+                                && !removedTaskKeys.contains(it.taskKey)
+                    }
+                    .associateBy { it.instanceKey }
 
         Preferences.tickLog.logLineHour(
-                "notification instances: " + notificationInstances.values.joinToString(
-                        ", "
-                ) { it.name })
+                "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
+        )
 
         val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }
-                .map {
-                    Pair(
-                            it,
-                            projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId)
-                    )
-                }
+                .map { Pair(it, projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId)) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = Date(

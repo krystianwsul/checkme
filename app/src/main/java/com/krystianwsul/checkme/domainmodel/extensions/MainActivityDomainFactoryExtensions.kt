@@ -103,7 +103,7 @@ fun DomainFactory.getGroupListData(
 
     endExactTimeStamp = ExactTimeStamp(Date(endCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
 
-    val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
+    val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now).instances
 
     if (position == 0 && timeRange == MainActivity.TimeRange.DAY) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->

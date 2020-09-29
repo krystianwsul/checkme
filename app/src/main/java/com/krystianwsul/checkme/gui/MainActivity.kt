@@ -540,22 +540,14 @@ class MainActivity :
                 when (item.itemId) {
                     R.id.action_select_all -> when (tabSearchStateRelay.value!!.tab) {
                         Tab.INSTANCES -> selectAllRelay.accept(Unit)
-                        Tab.TASKS -> {
-                            val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
-                            taskListFragment.treeViewAdapter.selectAll()
-                        }
-                        Tab.CUSTOM_TIMES -> {
-                            val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
-                            showCustomTimesFragment.treeViewAdapter.selectAll()
-                        }
-                        Tab.FRIENDS -> {
-                            val friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
-                            friendListFragment.treeViewAdapter.selectAll()
-                        }
-                        Tab.PROJECTS -> {
-                            val projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
-                            projectListFragment.treeViewAdapter.selectAll()
-                        }
+                        Tab.TASKS ->
+                            forceGetFragment<TaskListFragment>(R.id.mainTaskListFrame).treeViewAdapter.selectAll()
+                        Tab.CUSTOM_TIMES ->
+                            forceGetFragment<ShowCustomTimesFragment>(R.id.mainCustomTimesFrame).treeViewAdapter.selectAll()
+                        Tab.FRIENDS ->
+                            forceGetFragment<FriendListFragment>(R.id.mainFriendListFrame).treeViewAdapter.selectAll()
+                        Tab.PROJECTS ->
+                            forceGetFragment<ProjectListFragment>(R.id.mainProjectListFrame).treeViewAdapter.selectAll()
                         else -> throw UnsupportedOperationException()
                     }
                     else -> throw IllegalArgumentException()

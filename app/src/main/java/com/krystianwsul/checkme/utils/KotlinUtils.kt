@@ -360,3 +360,6 @@ inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         @IdRes id: Int,
         initializer: () -> T
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
+
+inline fun <reified T : Fragment> AbstractActivity.forceGetFragment(@IdRes id: Int) =
+        supportFragmentManager.findFragmentById(id) as T

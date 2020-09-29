@@ -180,17 +180,18 @@ class MainActivity :
     }
 
     fun updateBottomMenu() {
-        bottomAppBar.menu
-                .findItem(R.id.action_select_all)
-                ?.isVisible = when (tabSearchStateRelay.value!!.tab) {
+        val visible = when (tabSearchStateRelay.value!!.tab) {
             Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
             Tab.TASKS -> taskSelectAllVisible
+            Tab.PROJECTS -> projectSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
             Tab.FRIENDS -> userSelectAllVisible
-            Tab.PROJECTS -> projectSelectAllVisible
-            Tab.DEBUG -> false
-            Tab.ABOUT -> false
+            Tab.DEBUG, Tab.ABOUT -> false
         }
+
+        bottomAppBar.menu
+                .findItem(R.id.action_select_all)
+                ?.isVisible = visible
     }
 
     private fun closeSearch() {
@@ -548,7 +549,7 @@ class MainActivity :
                             forceGetFragment<FriendListFragment>(R.id.mainFriendListFrame).treeViewAdapter.selectAll()
                         Tab.PROJECTS ->
                             forceGetFragment<ProjectListFragment>(R.id.mainProjectListFrame).treeViewAdapter.selectAll()
-                        else -> throw UnsupportedOperationException()
+                        Tab.DEBUG, Tab.ABOUT -> throw UnsupportedOperationException()
                     }
                     else -> throw IllegalArgumentException()
                 }

@@ -287,15 +287,15 @@ class EditActivity : NavBarActivity() {
 
                                 val oldId = if (position < delegate.parentScheduleManager.schedules.size) {
                                     delegate.parentScheduleManager
-                                        .schedules[position]
-                                        .id
+                                            .schedules[position]
+                                            .id
                                 } else {
                                     null
                                 }
 
                                 delegate.parentScheduleManager.setSchedule(
-                                    position,
-                                    result.scheduleDialogData.toScheduleEntry(oldId)
+                                        position,
+                                        result.scheduleDialogData.toScheduleEntry(oldId)
                                 )
                             }
                         }
@@ -708,19 +708,17 @@ class EditActivity : NavBarActivity() {
                         setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.customTimeDatas, activity))
 
                         setFixedOnClickListener(
-                            {
-                                val parameters =
-                                    ScheduleDialogParameters(
-                                        adapterPosition,
-                                        scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
-                                            Date.today(),
-                                            activity.delegate.scheduleHint
-                                        ),
-                                        true
+                                {
+                                    val parameters = ScheduleDialogParameters(
+                                            adapterPosition,
+                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
+                                                    activity.delegate.scheduleHint
+                                            ),
+                                            true
                                     )
 
-                                activity.parametersRelay.accept(parameters)
-                            },
+                                    activity.parametersRelay.accept(parameters)
+                                },
                                 { activity.removeSchedule(adapterPosition) }
                         )
                     }
@@ -767,18 +765,14 @@ class EditActivity : NavBarActivity() {
                         text = null
 
                         setFixedOnClickListener {
-                            val parameters =
-                                ScheduleDialogParameters(
+                            val parameters = ScheduleDialogParameters(
                                     null,
                                     activity.delegate
-                                        .firstScheduleEntry
-                                        .scheduleDataWrapper
-                                        .getScheduleDialogData(
-                                            Date.today(),
-                                            activity.delegate.scheduleHint
-                                        ),
+                                            .firstScheduleEntry
+                                            .scheduleDataWrapper
+                                            .getScheduleDialogData(activity.delegate.scheduleHint),
                                     false
-                                )
+                            )
 
                             activity.parametersRelay.accept(parameters)
                         }

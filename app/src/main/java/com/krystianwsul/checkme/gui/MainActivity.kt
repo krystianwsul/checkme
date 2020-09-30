@@ -60,7 +60,6 @@ import java.io.Serializable
 
 class MainActivity :
         AbstractActivity(),
-        GroupListListener,
         ShowCustomTimesFragment.CustomTimesListListener,
         TaskListFragment.Listener,
         DayFragment.Host,
@@ -131,8 +130,6 @@ class MainActivity :
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
-    override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
-
     override val taskSearch by lazy {
         tabSearchStateRelay.switchMap {
             if (it.isSearching) {
@@ -170,6 +167,52 @@ class MainActivity :
 
     private val mainToolbarElevation by lazy { resources.getDimension(R.dimen.mainToolbarElevation) }
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
+
+    val daysGroupListListener = object : GroupListListener {
+
+        override val snackbarParent get() = this@MainActivity.snackbarParent
+
+        override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+
+        override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
+
+        override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) {
+            onCreateActionMode(actionMode)
+
+            check(onPageChangeDisposable == null)
+
+            onPageChangeDisposable = mainDaysPager.pageSelections()
+                    .skip(1)
+                    .subscribe { actionMode.finish() }
+        }
+
+        override fun onDestroyGroupActionMode() {
+            onDestroyActionMode()
+
+            checkNotNull(onPageChangeDisposable)
+
+            onPageChangeDisposable!!.dispose()
+            onPageChangeDisposable = null
+        }
+
+        override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
+            position?.let {
+                groupSelectAllVisible[it] = selectAllVisible
+            }
+
+            updateBottomMenu()
+        }
+
+        override fun getBottomBar() = this@MainActivity.getBottomBar()
+
+        override fun initBottomBar() = this@MainActivity.initBottomBar()
+
+        override fun deleteTasks(taskKeys: Set<TaskKey>) {
+            RemoveInstancesDialogFragment.newInstance(taskKeys)
+                    .also { it.listener = deleteInstancesListener }
+                    .show(supportFragmentManager, TAG_DELETE_INSTANCES)
+        }
+    }
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -730,39 +773,6 @@ class MainActivity :
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = mainActivityAppBarLayout.setExpanded(expanded)
-
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) {
-        onCreateActionMode(actionMode)
-
-        check(onPageChangeDisposable == null)
-
-        onPageChangeDisposable = mainDaysPager.pageSelections()
-                .skip(1)
-                .subscribe { actionMode.finish() }
-    }
-
-    override fun onDestroyGroupActionMode() {
-        onDestroyActionMode()
-
-        checkNotNull(onPageChangeDisposable)
-
-        onPageChangeDisposable!!.dispose()
-        onPageChangeDisposable = null
-    }
-
-    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
-        position?.let {
-            groupSelectAllVisible[it] = selectAllVisible
-        }
-
-        updateBottomMenu()
-    }
-
-    override fun deleteTasks(taskKeys: Set<TaskKey>) {
-        RemoveInstancesDialogFragment.newInstance(taskKeys)
-                .also { it.listener = deleteInstancesListener }
-                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
-    }
 
     override fun onCreateActionMode(actionMode: ActionMode) {
         check(this.actionMode == null)

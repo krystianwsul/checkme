@@ -105,7 +105,7 @@ class DayFragment @JvmOverloads constructor(
         View.inflate(context, R.layout.fragment_day, this)
 
         groupListFragment.apply {
-            listener = context as MainActivity
+            listener = (context as MainActivity).daysGroupListListener
             forceSaveStateListener = { saveState() }
         }
     }

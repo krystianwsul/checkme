@@ -66,6 +66,18 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                             ?: "")
                 } ?: timePair.hourMinute!!.toString()
             }
+
+            private fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1
+
+            private fun dateToDayFromBeginningOrEnd(date: Date): Pair<Int, Boolean> {
+                return if (date.day > ScheduleDialogData.MAX_MONTH_DAY) {
+                    dayFromEndOfMonth(date) to false
+                } else {
+                    date.day to true
+                }
+            }
+
+            private fun dayOfMonthToWeekOfMonth(day: Int) = (day - 1) / 7 + 1
         }
 
         abstract val scheduleData: ScheduleData
@@ -74,10 +86,10 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
 
         abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String
 
-        abstract fun getScheduleDialogData(
-                today: Date,
-                scheduleHint: EditActivity.Hint.Schedule?
-        ): ScheduleDialogData
+        fun getScheduleDialogData(scheduleHint: EditActivity.Hint.Schedule?) =
+                getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
+
+        protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData
 
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
@@ -87,18 +99,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(
-                    today: Date,
-                    scheduleHint: EditActivity.Hint.Schedule?
-            ): ScheduleDialogData {
-                var monthDayNumber = scheduleData.date.day
-                var beginningOfMonth = true
-                if (monthDayNumber > 28) {
-                    monthDayNumber =
-                            Month(scheduleData.date.month).days(scheduleData.date.year) - monthDayNumber + 1
-                    beginningOfMonth = false
-                }
-                val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(scheduleData.date)
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
@@ -106,7 +108,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                         mutableSetOf(scheduleData.date.dayOfWeek),
                         true,
                         monthDayNumber,
-                        monthWeekNumber,
+                        dayOfMonthToWeekOfMonth(monthDayNumber),
                         scheduleData.date.dayOfWeek,
                         beginningOfMonth,
                         TimePairPersist(timePair),
@@ -126,29 +128,18 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(
-                    today: Date,
-                    scheduleHint: EditActivity.Hint.Schedule?
-            ): ScheduleDialogData {
-                val date = scheduleHint?.date ?: today
-
-                var monthDayNumber = date.day
-                var beginningOfMonth = true
-                if (monthDayNumber > 28) {
-                    monthDayNumber = Month(date.month).days(date.year) - monthDayNumber + 1
-                    beginningOfMonth = false
-                }
-                val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(suggestedDate)
 
                 val days = scheduleData.daysOfWeek.toMutableSet()
 
                 return ScheduleDialogData(
-                        date,
+                        suggestedDate,
                         days,
                         true,
                         monthDayNumber,
-                        monthWeekNumber,
-                        date.dayOfWeek,
+                        dayOfMonthToWeekOfMonth(monthDayNumber),
+                        suggestedDate.dayOfWeek,
                         beginningOfMonth,
                         TimePairPersist(timePair),
                         ScheduleType.WEEKLY,
@@ -167,15 +158,10 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(
-                    today: Date,
-                    scheduleHint: EditActivity.Hint.Schedule?
-            ): ScheduleDialogData {
-                var date = scheduleHint?.date ?: today
-
-                date = getDateInMonth(
-                        date.year,
-                        date.month,
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                val date = getDateInMonth(
+                        suggestedDate.year,
+                        suggestedDate.month,
                         scheduleData.dayOfMonth,
                         scheduleData.beginningOfMonth
                 )
@@ -186,7 +172,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                         mutableSetOf(date.dayOfWeek),
                         true,
                         scheduleData.dayOfMonth,
-                        (scheduleData.dayOfMonth - 1) / 7 + 1,
+                        dayOfMonthToWeekOfMonth(scheduleData.dayOfMonth),
                         date.dayOfWeek,
                         scheduleData.beginningOfMonth,
                         TimePairPersist(timePair),
@@ -206,15 +192,10 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(
-                    today: Date,
-                    scheduleHint: EditActivity.Hint.Schedule?
-            ): ScheduleDialogData {
-                var date = scheduleHint?.date ?: today
-
-                date = getDateInMonth(
-                        date.year,
-                        date.month,
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                val date = getDateInMonth(
+                        suggestedDate.year,
+                        suggestedDate.month,
                         scheduleData.dayOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth
@@ -223,7 +204,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 val dayNumber = if (scheduleData.beginningOfMonth)
                     date.day
                 else
-                    Month(date.month).days(date.year) - date.day + 1
+                    dayFromEndOfMonth(date)
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
@@ -251,23 +232,25 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            override fun getScheduleDialogData(
-                    today: Date,
-                    scheduleHint: EditActivity.Hint.Schedule?
-            ): ScheduleDialogData {
-                var date = scheduleHint?.date ?: today
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                val date = getDateInMonth(
+                        suggestedDate.year,
+                        scheduleData.month,
+                        scheduleData.day,
+                        true
+                )
 
-                date = getDateInMonth(date.year, scheduleData.month, scheduleData.day, true)
+                val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(date)
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
                         date,
                         mutableSetOf(date.dayOfWeek),
                         true,
-                        scheduleData.day,
-                        (scheduleData.day - 1) / 7 + 1,
+                        monthDayNumber,
+                        dayOfMonthToWeekOfMonth(monthDayNumber),
                         date.dayOfWeek,
-                        true,
+                        beginningOfMonth,
                         TimePairPersist(timePair),
                         ScheduleType.YEARLY,
                         scheduleData.from,

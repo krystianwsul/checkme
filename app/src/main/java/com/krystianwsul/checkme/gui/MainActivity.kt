@@ -107,6 +107,7 @@ class MainActivity :
     private var timeRange = TimeRange.DAY
 
     private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
+    private var searchSelectAllVisible = false // todo search
     private var taskSelectAllVisible = false
     private var customTimesSelectAllVisible = false
     private var userSelectAllVisible = false
@@ -225,6 +226,7 @@ class MainActivity :
     fun updateBottomMenu() {
         val visible = when (tabSearchStateRelay.value!!.tab) {
             Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
+            // todo Tab.SEARCH -> searchSelectAllVisible
             Tab.TASKS -> taskSelectAllVisible
             Tab.PROJECTS -> projectSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
@@ -253,6 +255,36 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+
+        mainSearchGroupListFragment.listener = object : GroupListListener {
+
+            override val snackbarParent get() = this@MainActivity.snackbarParent
+
+            override val instanceSearch = Observable.just(NullableWrapper<SearchData>()) // todo search
+
+            override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
+
+            override fun onCreateGroupActionMode(
+                    actionMode: ActionMode,
+                    treeViewAdapter: TreeViewAdapter<NodeHolder>
+            ) = onCreateActionMode(actionMode)
+
+            override fun onDestroyGroupActionMode() = onDestroyActionMode()
+
+            override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
+                check(position == null)
+
+                searchSelectAllVisible = selectAllVisible
+
+                updateBottomMenu()
+            }
+
+            override fun getBottomBar() = this@MainActivity.getBottomBar()
+
+            override fun initBottomBar() = this@MainActivity.initBottomBar()
+
+            override fun deleteTasks(taskKeys: Set<TaskKey>) = throw UnsupportedOperationException()
+        }
 
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         PagerSnapHelper().attachToRecyclerView(mainDaysPager)

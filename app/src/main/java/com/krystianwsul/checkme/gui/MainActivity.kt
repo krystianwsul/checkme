@@ -31,16 +31,14 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
+import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.viewmodels.DayViewModel
-import com.krystianwsul.checkme.viewmodels.MainViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -76,6 +74,7 @@ class MainActivity :
         private const val DAY_STATES_KEY = "dayStates"
         private const val KEY_SHOW_DELETED = "showDeleted"
         private const val KEY_DATE = "date"
+        private const val KEY_SEARCH_PAGE = "searchPage"
 
         private const val DRAWER_TAG = "drawer"
 
@@ -120,8 +119,8 @@ class MainActivity :
 
     private lateinit var mainViewModel: MainViewModel
 
-    lateinit var dayViewModel: DayViewModel
-        private set
+    val dayViewModel by lazy { getViewModel<DayViewModel>() }
+    private val searchInstancesViewModel by lazy { getViewModel<SearchInstancesViewModel>() }
 
     private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
 
@@ -131,19 +130,23 @@ class MainActivity :
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
-    override val taskSearch by lazy {
-        tabSearchStateRelay.switchMap {
-            if (it.isSearching) {
-                Observables.combineLatest(
-                        mainSearchText.textChanges(),
-                        showDeleted
-                ).map { NullableWrapper(SearchData(it.first.toString().normalized(), it.second)) }
-            } else {
-                Observable.just(NullableWrapper())
-            }
-        }
+    private val searchDataObservable by lazy {
+        Observables.combineLatest(
+                mainSearchText.textChanges(),
+                showDeleted
+        )
+                .map { NullableWrapper(SearchData(it.first.toString().normalized(), it.second)) }
                 .replay(1)
                 .apply { createDisposable += connect() }!!
+    }
+
+    override val taskSearch by lazy {
+        Observables.combineLatest(tabSearchStateRelay, searchDataObservable) { tabSearchState, searchData ->
+            if ((tabSearchState as? TabSearchState.Tasks)?.isSearching == true)
+                searchData
+            else
+                NullableWrapper()
+        }
     }
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
@@ -215,6 +218,8 @@ class MainActivity :
         }
     }
 
+    private var searchPage = 0
+
     override fun getBottomBar() = bottomAppBar!!
 
     fun getState(pair: Pair<TimeRange, Int>) = states[pair]
@@ -264,7 +269,16 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.just(NullableWrapper<SearchData>()) // todo search
+            override val instanceSearch by lazy {
+                Observables.combineLatest(tabSearchStateRelay, searchDataObservable) { tabSearchState, searchData ->
+                    if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
+                        searchData
+                    } else {
+                        searchPage = 0
+                        NullableWrapper()
+                    }
+                }
+            }
 
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -305,7 +319,7 @@ class MainActivity :
         }
                 .distinctUntilChanged()
                 .replay(1)
-                .apply { connect() }
+                .apply { createDisposable += connect() }
 
         val overrideTabSearchState: TabSearchState?
 
@@ -337,6 +351,8 @@ class MainActivity :
                 showDeleted.accept(getBoolean(KEY_SHOW_DELETED))
 
                 date = getParcelable(KEY_DATE)!!
+
+                searchPage = savedInstanceState.getInt(KEY_SEARCH_PAGE)
             }
         } else {
             states = mutableMapOf()
@@ -541,7 +557,21 @@ class MainActivity :
             }
         }
 
-        dayViewModel = getViewModel()
+        searchInstancesViewModel.apply {
+            data.doOnNext {
+                mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
+                        it.dataId,
+                        it.immediate,
+                        it.groupListDataWrapper,
+                        it.showLoader
+                ))
+            }
+                    .switchMap { mainSearchGroupListFragment.treeViewAdapter.progressShown }
+                    .doOnNext { searchPage += 1 }
+                    .startWith(Unit)
+                    .subscribe { start(searchPage) }
+                    .addTo(createDisposable)
+        }
 
         mainDaysPager.addOneShotGlobalLayoutListener {
             var state: PagerScrollState = PagerScrollState.Settled
@@ -687,6 +717,8 @@ class MainActivity :
             putBoolean(KEY_SHOW_DELETED, showDeleted.value!!)
 
             putParcelable(KEY_DATE, date)
+
+            putInt(KEY_SEARCH_PAGE, searchPage)
         }
     }
 
@@ -923,6 +955,7 @@ class MainActivity :
 
         dayViewModel.refresh()
         mainViewModel.refresh()
+        searchInstancesViewModel.refresh()
     }
 
     private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {

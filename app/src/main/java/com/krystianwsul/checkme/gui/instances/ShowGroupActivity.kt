@@ -71,6 +71,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_group)
 
+        groupListFragment.listener = this
+
         check(intent.hasExtra(TIME_KEY))
 
         val time = intent.getLongExtra(TIME_KEY, -1)

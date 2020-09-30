@@ -118,7 +118,8 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     val activity get() = context as AbstractActivity
-    val listener get() = context as GroupListListener
+
+    lateinit var listener: GroupListListener
 
     lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
@@ -467,8 +468,6 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     init {
-        check(context is GroupListListener)
-
         inflate(context, R.layout.fragment_group_list, this)
 
         groupListRecycler.layoutManager = LinearLayoutManager(context)

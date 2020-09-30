@@ -114,6 +114,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_instance)
 
+        groupListFragment.listener = this
+
         collapseAppBarLayout.apply {
             hideShowDeleted()
 

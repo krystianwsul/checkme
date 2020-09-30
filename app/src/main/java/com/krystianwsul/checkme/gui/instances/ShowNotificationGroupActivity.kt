@@ -72,6 +72,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
 
+        groupListFragment.listener = this
+
         check(intent.hasExtra(INSTANCES_KEY))
 
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!

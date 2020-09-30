@@ -75,6 +75,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
 
+        groupListFragment.listener = this
+
         setSupportActionBar(toolbar)
 
         supportActionBar!!.title = null

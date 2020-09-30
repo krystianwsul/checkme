@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
-import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.InstanceKey
 import com.soywiz.klock.days
 
 @Synchronized
@@ -24,7 +24,7 @@ fun DomainFactory.getSearchInstancesData(page: Int): SearchInstancesViewModel.Da
     var startExactTimeStamp: ExactTimeStamp? = null
     var endExactTimeStamp = now
 
-    val instances = mutableMapOf<ScheduleKey, Instance<*>>()
+    val instances = mutableMapOf<InstanceKey, Instance<*>>()
 
     var hasMore = true
     while (hasMore) {
@@ -37,7 +37,7 @@ fun DomainFactory.getSearchInstancesData(page: Int): SearchInstancesViewModel.Da
         if (!newHasMore)
             hasMore = false
 
-        instances += newInstances.associateBy { it.scheduleKey }
+        instances += newInstances.associateBy { it.instanceKey }
 
         if (instances.size > (page + 1) * 20)
             break

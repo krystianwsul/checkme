@@ -646,7 +646,7 @@ class MainActivity :
         if (tab == Tab.INSTANCES) {
             hideViews += mainProgress
         } else {
-            hideViews += mainDaysLayout
+            showViews += mainProgress
 
             calendarOpen = false
         }

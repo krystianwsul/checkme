@@ -107,7 +107,7 @@ class MainActivity :
     private var timeRange = TimeRange.DAY
 
     private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
-    private var searchSelectAllVisible = false // todo search
+    private var searchSelectAllVisible = false
     private var taskSelectAllVisible = false
     private var customTimesSelectAllVisible = false
     private var userSelectAllVisible = false
@@ -224,14 +224,18 @@ class MainActivity :
     }
 
     fun updateBottomMenu() {
-        val visible = when (tabSearchStateRelay.value!!.tab) {
-            Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
-            // todo Tab.SEARCH -> searchSelectAllVisible
-            Tab.TASKS -> taskSelectAllVisible
-            Tab.PROJECTS -> projectSelectAllVisible
-            Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
-            Tab.FRIENDS -> userSelectAllVisible
-            Tab.DEBUG, Tab.ABOUT -> false
+        val visible = when (val tabSearchState = tabSearchStateRelay.value!!) {
+            is TabSearchState.Instances -> {
+                if (tabSearchState.isSearching)
+                    searchSelectAllVisible
+                else
+                    groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
+            }
+            is TabSearchState.Tasks -> taskSelectAllVisible
+            TabSearchState.Projects -> projectSelectAllVisible
+            TabSearchState.CustomTimes -> customTimesSelectAllVisible
+            TabSearchState.Friends -> userSelectAllVisible
+            TabSearchState.Debug, TabSearchState.About -> false
         }
 
         bottomAppBar.menu
@@ -614,17 +618,22 @@ class MainActivity :
                 MyCrashlytics.logMethod(this, "item: " + item.title)
 
                 when (item.itemId) {
-                    R.id.action_select_all -> when (tabSearchStateRelay.value!!.tab) {
-                        Tab.INSTANCES -> selectAllRelay.accept(Unit)
-                        Tab.TASKS ->
+                    R.id.action_select_all -> when (val tabSearchState = tabSearchStateRelay.value!!) {
+                        is TabSearchState.Instances -> {
+                            if (tabSearchState.isSearching)
+                                mainSearchGroupListFragment.treeViewAdapter.selectAll()
+                            else
+                                selectAllRelay.accept(Unit)
+                        }
+                        is TabSearchState.Tasks ->
                             forceGetFragment<TaskListFragment>(R.id.mainTaskListFrame).treeViewAdapter.selectAll()
-                        Tab.CUSTOM_TIMES ->
+                        TabSearchState.CustomTimes ->
                             forceGetFragment<ShowCustomTimesFragment>(R.id.mainCustomTimesFrame).treeViewAdapter.selectAll()
-                        Tab.FRIENDS ->
+                        TabSearchState.Friends ->
                             forceGetFragment<FriendListFragment>(R.id.mainFriendListFrame).treeViewAdapter.selectAll()
-                        Tab.PROJECTS ->
+                        TabSearchState.Projects ->
                             forceGetFragment<ProjectListFragment>(R.id.mainProjectListFrame).treeViewAdapter.selectAll()
-                        Tab.DEBUG, Tab.ABOUT -> throw UnsupportedOperationException()
+                        TabSearchState.Debug, TabSearchState.About -> throw UnsupportedOperationException()
                     }
                     else -> throw IllegalArgumentException()
                 }
@@ -703,20 +712,29 @@ class MainActivity :
             }
         }
 
-        fun getTabLayout(tab: Tab) = when (tab) {
-            Tab.INSTANCES -> mainDaysLayout
-            Tab.TASKS -> mainTaskListFrame
-            Tab.PROJECTS -> mainProjectListFrame
-            Tab.CUSTOM_TIMES -> mainCustomTimesFrame
-            Tab.FRIENDS -> mainFriendListFrame
-            Tab.DEBUG -> mainDebugFrame
-            Tab.ABOUT -> mainAboutFrame
+        val currentTabLayout = when (tabSearchState) {
+            is TabSearchState.Instances ->
+                if (tabSearchState.isSearching) mainSearchGroupListFragment else mainDaysLayout
+            is TabSearchState.Tasks -> mainTaskListFrame
+            TabSearchState.Projects -> mainProjectListFrame
+            TabSearchState.CustomTimes -> mainCustomTimesFrame
+            TabSearchState.Friends -> mainFriendListFrame
+            TabSearchState.Debug -> mainDebugFrame
+            TabSearchState.About -> mainAboutFrame
         }
 
-        val currentTabLayout = getTabLayout(tab)
-
         showViews += currentTabLayout
-        hideViews += Tab.values().map(::getTabLayout) - currentTabLayout
+
+        hideViews += listOf(
+                mainSearchGroupListFragment,
+                mainDaysLayout,
+                mainTaskListFrame,
+                mainProjectListFrame,
+                mainCustomTimesFrame,
+                mainFriendListFrame,
+                mainDebugFrame,
+                mainAboutFrame
+        ) - currentTabLayout
 
         if (tab == Tab.INSTANCES) {
             hideViews += mainProgress
@@ -730,49 +748,55 @@ class MainActivity :
 
         mainActivityToolbar.title = getString(tabSearchState.title)
 
-        when (tab) {
-            Tab.INSTANCES -> {
-                taskListFragment.clearFab()
-                projectListFragment.clearFab()
-                showCustomTimesFragment.clearFab()
-                friendListFragment.clearFab()
+        fun hideFab() {
+            taskListFragment.clearFab()
+            projectListFragment.clearFab()
+            showCustomTimesFragment.clearFab()
+            friendListFragment.clearFab()
+
+            bottomFab.hide()
+        }
+
+        when (tabSearchState) {
+            is TabSearchState.Instances -> {
+                if (tabSearchState.isSearching) {
+                    hideFab()
+                } else {
+                    taskListFragment.clearFab()
+                    projectListFragment.clearFab()
+                    showCustomTimesFragment.clearFab()
+                    friendListFragment.clearFab()
+                }
             }
-            Tab.TASKS -> {
+            is TabSearchState.Tasks -> {
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 taskListFragment.setFab(bottomFab)
             }
-            Tab.PROJECTS -> {
+            TabSearchState.Projects -> {
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 projectListFragment.setFab(bottomFab)
             }
-            Tab.CUSTOM_TIMES -> {
+            TabSearchState.CustomTimes -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
 
                 showCustomTimesFragment.setFab(bottomFab)
             }
-            Tab.FRIENDS -> {
+            TabSearchState.Friends -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
 
                 friendListFragment.setFab(bottomFab)
             }
-            Tab.DEBUG, Tab.ABOUT -> {
-                taskListFragment.clearFab()
-                projectListFragment.clearFab()
-                showCustomTimesFragment.clearFab()
-                friendListFragment.clearFab()
-
-                bottomFab.hide()
-            }
+            TabSearchState.Debug, TabSearchState.About -> hideFab()
         }
 
         val wasSearching = tabSearchStateRelay.value?.isSearching == true
@@ -945,7 +969,7 @@ class MainActivity :
         @Parcelize
         data class Instances(override val isSearching: Boolean) : TabSearchState() {
 
-            override val tab get() = if (isSearching) Tab.TASKS else Tab.INSTANCES
+            override val tab get() = Tab.INSTANCES
 
             override val title get() = R.string.instances
 
@@ -1028,17 +1052,11 @@ class MainActivity :
 
             override val elevated = false
         },
-
         TASKS,
-
         PROJECTS,
-
         CUSTOM_TIMES,
-
         FRIENDS,
-
         DEBUG,
-
         ABOUT;
 
         open val elevated = true

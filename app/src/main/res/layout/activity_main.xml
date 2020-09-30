@@ -119,13 +119,6 @@
 
             </LinearLayout>
 
-            <com.krystianwsul.checkme.gui.instances.list.GroupListFragment
-                android:id="@+id/mainSearchGroupListFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
             <FrameLayout
                 android:id="@+id/mainTaskListFrame"
                 android:layout_width="match_parent"
@@ -163,6 +156,13 @@
 
             <FrameLayout
                 android:id="@+id/mainAboutFrame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            <com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+                android:id="@+id/mainSearchGroupListFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone"

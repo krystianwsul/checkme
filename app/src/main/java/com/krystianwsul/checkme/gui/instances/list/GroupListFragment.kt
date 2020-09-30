@@ -121,8 +121,17 @@ class GroupListFragment @JvmOverloads constructor(
 
     lateinit var listener: GroupListListener
 
-    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
-        private set
+    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<NodeHolder>>()
+
+    var treeViewAdapter: TreeViewAdapter<NodeHolder>
+        get() = treeViewAdapterRelay.value!!
+        set(value) {
+            treeViewAdapterRelay.accept(value)
+        }
+
+    private val treeViewAdapterInitialized get() = treeViewAdapterRelay.value != null
+
+    val treeViewAdapterSingle = treeViewAdapterRelay.firstOrError()!!
 
     private val parametersRelay = BehaviorRelay.create<GroupListParameters>()
     val parameters get() = parametersRelay.value!!
@@ -592,7 +601,7 @@ class GroupListFragment @JvmOverloads constructor(
         return Bundle().apply {
             putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
-            if (this@GroupListFragment::treeViewAdapter.isInitialized)
+            if (treeViewAdapterInitialized)
                 putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState)
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
@@ -604,7 +613,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
-        if (this::treeViewAdapter.isInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
+        if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
 
             treeViewAdapter.updateDisplayedNodes {
@@ -677,7 +686,7 @@ class GroupListFragment @JvmOverloads constructor(
         listener.apply {
             val position = (parametersRelay.value as? GroupListParameters.All)?.position
 
-            if (this@GroupListFragment::treeViewAdapter.isInitialized)
+            if (treeViewAdapterInitialized)
                 setGroupMenuItemVisibility(
                         position,
                         treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
@@ -797,7 +806,7 @@ class GroupListFragment @JvmOverloads constructor(
     private val GroupListDataWrapper.InstanceData.allTaskKeys get() = getAllInstanceDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
-        if (!this::treeViewAdapter.isInitialized)
+        if (!treeViewAdapterInitialized)
             return null
 
         return treeViewAdapter.displayedNodes

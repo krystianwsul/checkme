@@ -566,7 +566,9 @@ class MainActivity :
                         it.showLoader
                 ))
             }
-                    .switchMap { mainSearchGroupListFragment.treeViewAdapter.progressShown }
+                    .switchMap {
+                        mainSearchGroupListFragment.treeViewAdapterSingle.flatMapObservable { it.progressShown }
+                    }
                     .doOnNext { searchPage += 1 }
                     .startWith(Unit)
                     .subscribe { start(searchPage) }

@@ -535,6 +535,7 @@ class GroupListFragment @JvmOverloads constructor(
                         } else {
                             R.string.empty_disabled
                         }
+                        is GroupListParameters.Search -> R.string.noResults
                         else -> null
                     }
                 }

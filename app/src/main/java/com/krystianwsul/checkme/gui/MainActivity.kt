@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -566,35 +565,27 @@ class MainActivity :
             val searchParameters = Observables.combineLatest(
                     instanceSearch.filterNotNull()
                             .map { it.query }
-                            .distinctUntilChanged()
-                            .doOnNext { Log.e("asdf", "magic query $it") }, // todo search
+                            .distinctUntilChanged(),
                     mainSearchGroupListFragment.treeViewAdapterSingle
                             .flatMapObservable { it.progressShown }
                             .doOnNext { searchPage += 1 }
                             .startWith(Unit)
                             .map { searchPage }
-                            .doOnNext { Log.e("asdf", "magic searchPage $it") } // todo search
             )
                     .replay(1)
                     .apply { createDisposable += connect() }
 
             data.doOnNext {
-                Log.e("asdf", "magic data count: " + it.groupListDataWrapper.instanceDatas.size + ", show loading "
-                        + it.showLoader)
-            } // todo
-                    // search
-                    .doOnNext {
-                        mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
-                                it.dataId,
-                                it.immediate,
-                                it.groupListDataWrapper,
-                                it.showLoader
-                        ))
-                    }
+                mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
+                        it.dataId,
+                        it.immediate,
+                        it.groupListDataWrapper,
+                        it.showLoader
+                ))
+            }
                     .map { Unit }
                     .startWith(Unit)
                     .switchMap { searchParameters }
-                    .doOnNext { Log.e("asdf", "magic searching with $it") } // todo search
                     .subscribe { start(it.first, it.second) }
                     .addTo(createDisposable)
         }

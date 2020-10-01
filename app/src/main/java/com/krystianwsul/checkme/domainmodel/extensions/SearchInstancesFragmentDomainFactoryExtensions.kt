@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -26,7 +24,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
     var startExactTimeStamp: ExactTimeStamp? = null
     var endExactTimeStamp = now
 
-    val instances = mutableMapOf<InstanceKey, Instance<*>>()
+    val instanceKeys = mutableSetOf<InstanceKey>()
+    val instanceDatas = mutableListOf<GroupListDataWrapper.InstanceData>()
 
     var hasMore = true
     while (hasMore) {
@@ -41,9 +40,44 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
 
         if (!queryMatchAccumulator.hasMore) hasMore = false
 
-        instances += newInstances.associateBy { it.instanceKey }
+        val newInstanceDatas = newInstances.filter { it.instanceKey !in instanceKeys }
+                .map {
+                    val task = it.task
 
-        if (instances.size > (page + 1) * 20) break
+                    val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+                    val children = getChildInstanceDatas(it, now, query)
+
+                    val instanceData = GroupListDataWrapper.InstanceData(
+                            it.done,
+                            it.instanceKey,
+                            it.instanceDateTime.getDisplayText(),
+                            it.name,
+                            it.instanceDateTime.timeStamp,
+                            task.current(now),
+                            task.isVisible(now, false),
+                            it.isRootInstance(now),
+                            isRootTask,
+                            it.exists(),
+                            it.getCreateTaskTimePair(ownerKey),
+                            task.note,
+                            children,
+                            it.task.ordinal,
+                            it.getNotificationShown(localFactory),
+                            task.getImage(deviceDbInfo),
+                            it.isRepeatingGroupChild(now)
+                    )
+
+                    children.values.forEach { it.instanceDataParent = instanceData }
+
+                    instanceData
+                }
+                .filter { it.matchesQuery(query) }
+
+        instanceDatas += newInstanceDatas
+        instanceKeys += newInstanceDatas.map { it.instanceKey }
+
+        if (instanceDatas.size > (page + 1) * 20) break
 
         startExactTimeStamp = endExactTimeStamp
 
@@ -51,40 +85,6 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
                 .plus(1.days)
                 .toExactTimeStamp()
     }
-
-    val instanceDatas = instances.values
-            .map {
-                val task = it.task
-
-                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
-                val children = getChildInstanceDatas(it, now, query)
-
-                val instanceData = GroupListDataWrapper.InstanceData(
-                        it.done,
-                        it.instanceKey,
-                        it.instanceDateTime.getDisplayText(),
-                        it.name,
-                        it.instanceDateTime.timeStamp,
-                        task.current(now),
-                        task.isVisible(now, false),
-                        it.isRootInstance(now),
-                        isRootTask,
-                        it.exists(),
-                        it.getCreateTaskTimePair(ownerKey),
-                        task.note,
-                        children,
-                        it.task.ordinal,
-                        it.getNotificationShown(localFactory),
-                        task.getImage(deviceDbInfo),
-                        it.isRepeatingGroupChild(now)
-                )
-
-                children.values.forEach { it.instanceDataParent = instanceData }
-
-                instanceData
-            }
-            .filter { it.matchesQuery(query) }
 
     val dataWrapper = GroupListDataWrapper(
             customTimeDatas,
@@ -96,8 +96,6 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
-
-    Log.e("asdf", "magic finishing search for $query $page")
 
     return SearchInstancesViewModel.Data(dataWrapper, hasMore)
 }

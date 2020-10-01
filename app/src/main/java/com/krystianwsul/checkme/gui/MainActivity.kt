@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -270,16 +271,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch by lazy {
-                Observables.combineLatest(tabSearchStateRelay, searchDataObservable) { tabSearchState, searchData ->
-                    if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
-                        searchData
-                    } else {
-                        searchPage = 0
-                        NullableWrapper()
-                    }
-                }
-            }
+            override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
 
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -559,6 +551,18 @@ class MainActivity :
         }
 
         searchInstancesViewModel.apply {
+            val instanceSearch = Observables.combineLatest(
+                    tabSearchStateRelay,
+                    searchDataObservable
+            ) { tabSearchState, searchData ->
+                if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
+                    searchData
+                } else {
+                    searchPage = 0
+                    NullableWrapper()
+                }
+            }
+
             data.doOnNext {
                 mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
                         it.dataId,
@@ -568,11 +572,20 @@ class MainActivity :
                 ))
             }
                     .switchMap {
-                        mainSearchGroupListFragment.treeViewAdapterSingle.flatMapObservable { it.progressShown }
+                        Observables.combineLatest(
+                                instanceSearch.filterNotNull()
+                                        .map { it.query }
+                                        .distinctUntilChanged()
+                                        .doOnNext { Log.e("asdf", "magic query $it") }, // todo search
+                                mainSearchGroupListFragment.treeViewAdapterSingle
+                                        .flatMapObservable { it.progressShown }
+                                        .doOnNext { searchPage += 1 }
+                                        .startWith(Unit)
+                                        .map { searchPage }
+                                        .doOnNext { Log.e("asdf", "magic searchPage $it") } // todo search
+                        )
                     }
-                    .doOnNext { searchPage += 1 }
-                    .startWith(Unit)
-                    .subscribe { start(searchPage) }
+                    .subscribe { start(it.first, it.second) }
                     .addTo(createDisposable)
         }
 

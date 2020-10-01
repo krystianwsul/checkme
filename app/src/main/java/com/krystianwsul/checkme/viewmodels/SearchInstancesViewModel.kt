@@ -6,16 +6,18 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 
 class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>() {
 
-    private var page: Int = 0
+    private var parameters = Parameters()
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(page)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(parameters.page)
     }
 
-    fun start(page: Int) {
-        if (this.page != page) {
-            this.page = page
+    fun start(query: String, page: Int) {
+        val newParameters = Parameters(query, page)
+
+        if (parameters != newParameters) {
+            parameters = newParameters
 
             refresh()
         } else {
@@ -27,4 +29,6 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
             val groupListDataWrapper: GroupListDataWrapper,
             val showLoader: Boolean
     ) : DomainData()
+
+    private data class Parameters(val query: String = "", val page: Int = 0)
 }

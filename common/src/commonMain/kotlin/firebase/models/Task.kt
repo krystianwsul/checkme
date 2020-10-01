@@ -22,7 +22,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>
-) : Current {
+) : Current, QueryMatch {
 
     companion object {
 
@@ -100,6 +100,9 @@ class Task<T : ProjectType>(
         set(value) {
             taskRecord.ordinal = value
         }
+
+    override val normalizedName by lazy { name.normalized() }
+    override val normalizedNote by lazy { note?.normalized() }
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 

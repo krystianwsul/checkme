@@ -145,5 +145,5 @@ class DoneInstanceNode(
 
     override fun normalize() = instanceData.normalize()
 
-    override fun filter(filterCriteria: Any) = instanceData.matchesSearch((filterCriteria as SearchData).query)
+    override fun filter(filterCriteria: Any) = instanceData.matchesQuery((filterCriteria as SearchData).query)
 }

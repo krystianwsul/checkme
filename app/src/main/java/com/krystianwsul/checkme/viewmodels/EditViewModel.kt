@@ -293,28 +293,17 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
             val isRootTaskGroup: Boolean
-    ) {
+    ) : HierarchicalQueryMatch {
 
-        private val normalizedName by lazy { name.normalized() }
-        private val normalizedNote by lazy { note?.normalized() }
+        override val normalizedName by lazy { name.normalized() }
+        override val normalizedNote by lazy { note?.normalized() }
 
         fun normalize() {
             normalizedName
             normalizedNote
         }
 
-        fun matchesSearch(query: String?): Boolean {
-            if (query.isNullOrEmpty())
-                return true
-
-            if (normalizedName.contains(query))
-                return true
-
-            if (normalizedNote?.contains(query) == true)
-                return true
-
-            return parentTreeDatas.values.any { it.matchesSearch(query) }
-        }
+        override fun matchesChildren(query: String) = parentTreeDatas.values.any { it.matchesQuery(query) }
     }
 
     sealed class ParentKey : Parcelable {

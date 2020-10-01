@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
@@ -725,12 +726,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val isVisible: Boolean,
             val alwaysShow: Boolean,
             var ordinal: Double
-    ) : Comparable<ChildTaskData> {
+    ) : Comparable<ChildTaskData>, QueryMatch {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
-        private val normalizedName by lazy { name.normalized() }
-        private val normalizedNote by lazy { note?.normalized() }
+        override val normalizedName by lazy { name.normalized() }
+        override val normalizedNote by lazy { note?.normalized() }
 
         fun normalize() {
             normalizedName
@@ -738,19 +739,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         fun matchesSearch(searchData: SearchData): Boolean {
-            if (!searchData.showDeleted && !isVisible)
-                return false
+            if (!searchData.showDeleted && !isVisible) return false
 
-            val query = searchData.query
-
-            if (query.isEmpty())
-                return false
-
-            if (normalizedName.contains(query))
-                return true
-
-            if (normalizedNote?.contains(query) == true)
-                return true
+            if (matchesQuery(searchData.query)) return true
 
             return children.any { it.matchesSearch(searchData) }
         }

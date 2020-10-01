@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.utils
+package com.krystianwsul.common.utils
 
 import java.text.Normalizer
 import java.util.*
 
-fun String.normalized(): String {
+actual fun String.normalized(): String {
     if (!normalizedCache.containsKey(this)) {
         normalizedCache[this] = Normalizer.normalize(this, Normalizer.Form.NFKD)
                 .replace(Regex("[\\p{M}]"), "")

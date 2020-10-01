@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.utils.SearchData
-import com.krystianwsul.checkme.utils.normalized
+import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode

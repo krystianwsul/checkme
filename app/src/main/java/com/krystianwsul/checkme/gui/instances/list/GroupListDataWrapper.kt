@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.utils.normalized
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.HierarchicalQueryMatch
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.normalized
 import java.util.*
 
 data class GroupListDataWrapper(

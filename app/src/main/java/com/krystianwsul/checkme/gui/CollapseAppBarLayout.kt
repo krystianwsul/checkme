@@ -20,8 +20,12 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.utils.SearchData
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.dpToPx
+import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable

@@ -41,6 +41,7 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable

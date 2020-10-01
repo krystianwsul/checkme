@@ -319,11 +319,10 @@ abstract class Project<T : ProjectType> : Current {
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp,
-            now: ExactTimeStamp
-    ): Task.InstanceResult<T> {
+            now: ExactTimeStamp,
+            queryMatchAccumulator: QueryMatchAccumulator? = null
+    ): List<Instance<out T>> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
-
-        var hasMore = false
 
         val allInstances = mutableMapOf<InstanceKey, Instance<out T>>()
 
@@ -336,7 +335,8 @@ abstract class Project<T : ProjectType> : Current {
                 continue
 
             if (endExactTimeStamp <= instanceExactTimeStamp) {
-                hasMore = true
+                queryMatchAccumulator?.accumulate(instance.task, true)
+
                 continue
             }
 
@@ -345,7 +345,8 @@ abstract class Project<T : ProjectType> : Current {
 
         tasks.forEach { task ->
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
-            if (taskResults.hasMore) hasMore = true
+
+            if (taskResults.hasMore) queryMatchAccumulator?.accumulate(task, true)
 
             for (instance in taskResults.instances) {
                 val instanceExactTimeStamp = instance.instanceDateTime
@@ -356,7 +357,8 @@ abstract class Project<T : ProjectType> : Current {
                     continue
 
                 if (endExactTimeStamp <= instanceExactTimeStamp) {
-                    hasMore = true
+                    queryMatchAccumulator?.accumulate(task, true)
+
                     continue
                 }
 
@@ -364,10 +366,7 @@ abstract class Project<T : ProjectType> : Current {
             }
         }
 
-        return Task.InstanceResult(
-                allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) },
-                hasMore
-        )
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :

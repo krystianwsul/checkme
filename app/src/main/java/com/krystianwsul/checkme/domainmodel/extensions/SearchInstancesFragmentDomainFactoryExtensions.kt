@@ -9,10 +9,11 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.QueryMatchAccumulator
 import com.soywiz.klock.days
 
 @Synchronized
-fun DomainFactory.getSearchInstancesData(page: Int): SearchInstancesViewModel.Data {
+fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
     val now = ExactTimeStamp.now
@@ -28,19 +29,20 @@ fun DomainFactory.getSearchInstancesData(page: Int): SearchInstancesViewModel.Da
 
     var hasMore = true
     while (hasMore) {
-        val (newInstances, newHasMore) = getRootInstances(
+        val queryMatchAccumulator = QueryMatchAccumulator(query)
+
+        val newInstances = getRootInstances(
                 startExactTimeStamp,
                 endExactTimeStamp,
-                now
+                now,
+                queryMatchAccumulator
         )
 
-        if (!newHasMore)
-            hasMore = false
+        if (!queryMatchAccumulator.hasMore) hasMore = false
 
         instances += newInstances.associateBy { it.instanceKey }
 
-        if (instances.size > (page + 1) * 20)
-            break
+        if (instances.size > (page + 1) * 20) break
 
         startExactTimeStamp = endExactTimeStamp
 
@@ -90,7 +92,7 @@ fun DomainFactory.getSearchInstancesData(page: Int): SearchInstancesViewModel.Da
             null
     )
 
-    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
+    instanceDatas.forEach { it.instanceDataParent = dataWrapper } // todo search filter instances
 
     return SearchInstancesViewModel.Data(dataWrapper, hasMore)
 }

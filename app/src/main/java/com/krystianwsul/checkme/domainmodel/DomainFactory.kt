@@ -438,17 +438,12 @@ class DomainFactory(
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp,
-            now: ExactTimeStamp
-    ): Task.InstanceResult<*> {
-        val projectResults = projectsFactory.projects
-                .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
-
-        return Task.InstanceResult(
-                projectResults.flatMap { it.instances },
-                projectResults.any { it.hasMore }
-        )
-    }
+            now: ExactTimeStamp,
+            queryMatchAccumulator: QueryMatchAccumulator? = null
+    ) = projectsFactory.projects
+            .values
+            .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator) }
+            .flatten()
 
     fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
             .customTimes
@@ -604,7 +599,7 @@ class DomainFactory(
 
         val instances = projectsFactory.projects
                 .values
-                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now).instances }
+                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }
                 .flatten()
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
@@ -663,7 +658,7 @@ class DomainFactory(
         val notificationInstances = if (clear)
             mapOf()
         else
-            getRootInstances(null, now.plusOne(), now /* 24 hack */).instances
+            getRootInstances(null, now.plusOne(), now /* 24 hack */)
                     .filter {
                         it.done == null
                                 && !it.getNotified(localFactory)

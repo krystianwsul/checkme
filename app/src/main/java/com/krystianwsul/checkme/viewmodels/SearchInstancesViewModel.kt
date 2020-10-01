@@ -10,7 +10,10 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(parameters.page)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(
+                parameters.query,
+                parameters.page
+        )
     }
 
     fun start(query: String, page: Int) {

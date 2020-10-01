@@ -451,7 +451,8 @@ class DomainFactory(
 
     fun getChildInstanceDatas(
             instance: Instance<*>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp,
+            query: String? = null
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
                 .associate { (childInstance, _) ->
@@ -459,7 +460,9 @@ class DomainFactory(
 
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-                    val children = getChildInstanceDatas(childInstance, now)
+                    val children = getChildInstanceDatas(childInstance, now, query).filter { (_, instanceData) ->
+                        query?.let { instanceData.matchesQuery(it) } != false
+                    }.toMutableMap()
 
                     val instanceData = GroupListDataWrapper.InstanceData(
                             childInstance.done,

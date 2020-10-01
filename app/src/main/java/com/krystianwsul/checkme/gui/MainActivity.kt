@@ -563,28 +563,38 @@ class MainActivity :
                 }
             }
 
+            val searchParameters = Observables.combineLatest(
+                    instanceSearch.filterNotNull()
+                            .map { it.query }
+                            .distinctUntilChanged()
+                            .doOnNext { Log.e("asdf", "magic query $it") }, // todo search
+                    mainSearchGroupListFragment.treeViewAdapterSingle
+                            .flatMapObservable { it.progressShown }
+                            .doOnNext { searchPage += 1 }
+                            .startWith(Unit)
+                            .map { searchPage }
+                            .doOnNext { Log.e("asdf", "magic searchPage $it") } // todo search
+            )
+                    .replay(1)
+                    .apply { createDisposable += connect() }
+
             data.doOnNext {
-                mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
-                        it.dataId,
-                        it.immediate,
-                        it.groupListDataWrapper,
-                        it.showLoader
-                ))
-            }
-                    .switchMap {
-                        Observables.combineLatest(
-                                instanceSearch.filterNotNull()
-                                        .map { it.query }
-                                        .distinctUntilChanged()
-                                        .doOnNext { Log.e("asdf", "magic query $it") }, // todo search
-                                mainSearchGroupListFragment.treeViewAdapterSingle
-                                        .flatMapObservable { it.progressShown }
-                                        .doOnNext { searchPage += 1 }
-                                        .startWith(Unit)
-                                        .map { searchPage }
-                                        .doOnNext { Log.e("asdf", "magic searchPage $it") } // todo search
-                        )
+                Log.e("asdf", "magic data count: " + it.groupListDataWrapper.instanceDatas.size + ", show loading "
+                        + it.showLoader)
+            } // todo
+                    // search
+                    .doOnNext {
+                        mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
+                                it.dataId,
+                                it.immediate,
+                                it.groupListDataWrapper,
+                                it.showLoader
+                        ))
                     }
+                    .map { Unit }
+                    .startWith(Unit)
+                    .switchMap { searchParameters }
+                    .doOnNext { Log.e("asdf", "magic searching with $it") } // todo search
                     .subscribe { start(it.first, it.second) }
                     .addTo(createDisposable)
         }

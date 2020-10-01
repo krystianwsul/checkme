@@ -187,7 +187,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
             (holder as PaddingHolder).showProgress(showProgress)
 
-            progressShown.accept(Unit)
+            if (showProgress) progressShown.accept(Unit)
         }
     }
 

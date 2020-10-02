@@ -90,7 +90,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             data.doOnNext { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.groupListDataWrapper, it.showLoader) }
-                    .switchMap { groupListFragment.treeViewAdapter.progressShown }
+                    .switchMap { groupListFragment.progressShown }
                     .doOnNext { page += 1 }
                     .startWith(Unit)
                     .subscribe { start(taskKey, page) }

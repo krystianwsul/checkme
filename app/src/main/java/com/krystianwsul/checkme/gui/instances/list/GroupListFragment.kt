@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -121,17 +122,21 @@ class GroupListFragment @JvmOverloads constructor(
 
     lateinit var listener: GroupListListener
 
-    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<NodeHolder>>()
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
 
-    var treeViewAdapter: TreeViewAdapter<NodeHolder>
-        get() = treeViewAdapterRelay.value!!
-        set(value) {
-            treeViewAdapterRelay.accept(value)
-        }
+    private val treeViewAdapterInitialized get() = this::treeViewAdapter.isInitialized
 
-    private val treeViewAdapterInitialized get() = treeViewAdapterRelay.value != null
+    val progressShown by lazy {
+        groupListRecycler.scrollStateChanges()
+                .filter { it == RecyclerView.SCROLL_STATE_IDLE }
+                .filter {
+                    val progressPosition = treeViewAdapter.itemCount - 1
+                    val lastVisiblePosition = (groupListRecycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
 
-    val treeViewAdapterSingle = treeViewAdapterRelay.firstOrError()!!
+                    treeViewAdapter.showProgress && (progressPosition == lastVisiblePosition)
+                }
+                .map { Unit }!!
+    }
 
     private val parametersRelay = BehaviorRelay.create<GroupListParameters>()
     val parameters get() = parametersRelay.value!!

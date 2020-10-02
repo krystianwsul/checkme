@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 
 
 abstract class Record(private var created: Boolean) {
@@ -45,9 +44,6 @@ abstract class Record(private var created: Boolean) {
     val insertCommand: InsertCommand
         get() {
             check(commandTable.isNotEmpty())
-
-            Log.e("asdf", toString() + " created? " + created)
-
             check(!created)
 
             created = true

@@ -22,8 +22,9 @@ interface ListItemAddedScroller {
 
     fun scrollToPosition(target: Int) {
         val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
+        val firstCompletelyVisibleItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition()
 
-        if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == -1)
+        if (firstCompletelyVisibleItemPosition == -1)
             return
 
         fun smoothScroll(position: Int) {
@@ -39,7 +40,7 @@ interface ListItemAddedScroller {
             recyclerView.layoutManager!!.startSmoothScroll(scroller)
         }
 
-        if (target <= linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
+        if (target <= firstCompletelyVisibleItemPosition) {
             listItemAddedListener.setToolbarExpanded(true)
             smoothScroll(target)
         } else {

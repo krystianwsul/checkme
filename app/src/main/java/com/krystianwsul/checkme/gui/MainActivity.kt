@@ -587,7 +587,7 @@ class MainActivity :
                     .map { Unit }
                     .startWith(Unit)
                     .switchMap { searchParameters }
-                    .debounce(100, TimeUnit.MILLISECONDS)
+                    .debounce(200, TimeUnit.MILLISECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { start(it.first, it.second) }
                     .addTo(createDisposable)

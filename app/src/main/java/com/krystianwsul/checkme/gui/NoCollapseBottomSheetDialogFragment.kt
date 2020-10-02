@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui
 
 import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.CallSuper
@@ -56,8 +55,6 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             insetsRelay.accept(windowInsetsCompat)
 
             val insets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            Log.e("asdf", "insets " + insets.left + "-" + insets.top + "-" + insets.right + "-" + insets.bottom)
 
             backgroundView.updateLayoutParams<FrameLayout.LayoutParams> {
                 leftMargin = insets.left

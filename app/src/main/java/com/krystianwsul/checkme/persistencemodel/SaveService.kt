@@ -1,14 +1,11 @@
 package com.krystianwsul.checkme.persistencemodel
 
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
 object SaveService {
 
     private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
-        Log.e("asdf", "SaveService.save")
-
         val sqLiteDatabase = MySQLiteHelper.database
 
         sqLiteDatabase.beginTransaction()

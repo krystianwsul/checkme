@@ -27,6 +27,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
     val instanceKeys = mutableSetOf<InstanceKey>()
     val instanceDatas = mutableListOf<GroupListDataWrapper.InstanceData>()
 
+    var step = 1
+
     var hasMore = true
     while (hasMore) {
         val queryMatchAccumulator = QueryMatchAccumulator(query)
@@ -81,8 +83,10 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
 
         startExactTimeStamp = endExactTimeStamp
 
+        step *= 2
+
         endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
-                .plus(1.days)
+                .plus(step.days)
                 .toExactTimeStamp()
     }
 

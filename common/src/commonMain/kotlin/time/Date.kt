@@ -20,7 +20,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
                 .let { Date(it.yearInt, it.month1, it.dayOfMonth) }
     }
 
-    val dayOfWeek get() = DayOfWeek.fromDate(this)
+    val dayOfWeek by lazy { DayOfWeek.fromDate(this) }
 
     init {
         check(month in (1..12))

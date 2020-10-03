@@ -30,6 +30,10 @@ android {
         }
         debug {
             versionNameSuffix "-debug"
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
         proto {
             initWith debug
@@ -93,6 +97,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:19.2.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 

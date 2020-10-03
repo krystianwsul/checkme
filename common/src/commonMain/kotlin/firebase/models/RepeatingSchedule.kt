@@ -16,7 +16,12 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until
 
-    override val oldestVisible get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+    private val oldestVisibleDate get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+
+    override val oldestVisible
+        get() = oldestVisibleDate?.let {
+            OldestVisible.RepeatingNonNull(it)
+        } ?: OldestVisible.RepeatingNull
 
     override fun getInstances(
             scheduleInterval: ScheduleInterval<T>,
@@ -30,9 +35,9 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toExactTimeStamp(),
                 givenStartExactTimeStamp,
-                oldestVisible?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                oldestVisibleDate?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
                 scheduleInterval.startExactTimeStamp
-        ).max()!!
+        ).maxOrNull()!!
 
         val intrinsicEndExactTimeStamp = listOfNotNull(
                 endExactTimeStamp,
@@ -42,12 +47,12 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                         ?.plus(1.days)
                         ?.let { ExactTimeStamp(it) },
                 scheduleInterval.endExactTimeStamp
-        ).min()
+        ).minOrNull()
 
         val endExactTimeStamp = listOfNotNull(
                 intrinsicEndExactTimeStamp,
                 givenExactEndTimeStamp
-        ).min()
+        ).minOrNull()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) {
             val hasMore = when {
@@ -142,12 +147,15 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                         .map { it.scheduleDate }
                         .toList(),
                 listOf(now.date)
-        ).flatten().min()!!
+        ).flatten().minOrNull()!!
 
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
     }
 
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean {
+    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
+        if (checkOldestVisible && oldestVisibleDate?.let { scheduleDateTime.date < it } == true)
+            return false
+
         if (timePair != scheduleDateTime.time.timePair)
             return false
 

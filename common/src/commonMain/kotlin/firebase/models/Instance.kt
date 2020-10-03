@@ -174,17 +174,21 @@ class Instance<T : ProjectType> private constructor(
         return createInstanceRecord()
     }
 
-    fun getOldestVisible() = task.scheduleIntervals
+    fun getOldestVisibles() = task.scheduleIntervals
             .filter { it.matchesScheduleDateTime(scheduleDateTime, false) }
             .map { it.schedule.oldestVisible }
-            .run { if (contains(null)) null else requireNoNulls().minOrNull() }
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        val oldestVisible = getOldestVisible()
-
-        return if (isRootInstance(now) &&
-                oldestVisible?.let { scheduleDate < it } == true &&
+        return if (
                 !exists()
+                && isRootInstance(now)
+                && getOldestVisibles().map { it.date }.run {
+                    when {
+                        isEmpty() -> false
+                        contains(null) -> false
+                        else -> requireNoNulls().minOrNull()!! > scheduleDate
+                    }
+                }
         ) {
             false
         } else {

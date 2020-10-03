@@ -26,9 +26,9 @@ object Irrelevant {
         val rootInstances = project.getRootInstances(null, now.plusOne(), now)
 
         val instanceRelevances = (existingInstances + rootInstances)
-            .asSequence()
-            .distinct()
-            .associate { it.instanceKey to InstanceRelevance(it) }
+                .asSequence()
+                .distinct()
+                .associate { it.instanceKey to InstanceRelevance(it) }
                 .toMutableMap()
 
         val yesterday = ExactTimeStamp(now.toDateTimeSoy() - 1.days)
@@ -93,7 +93,7 @@ object Irrelevant {
 
         val remoteCustomTimes = project.customTimes
         val remoteCustomTimeRelevances =
-            remoteCustomTimes.associate { it.key to RemoteCustomTimeRelevance(it) }
+                remoteCustomTimes.associate { it.key to RemoteCustomTimeRelevance(it) }
 
         if (project is PrivateProject) {
             project.customTimes
@@ -103,7 +103,7 @@ object Irrelevant {
 
         val remoteProjects = listOf(project)
         val remoteProjectRelevances =
-            remoteProjects.associate { it.projectKey to RemoteProjectRelevance(it) }
+                remoteProjects.associate { it.projectKey to RemoteProjectRelevance(it) }
 
         remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
                 .map { remoteProjectRelevances.getValue(it.projectKey) }
@@ -146,9 +146,9 @@ object Irrelevant {
                 val result = if (schedule is SingleSchedule<*>) {
                     !schedule.getInstance(it).isVisible(now, true)
                 } else {
-                    schedule.oldestVisible?.let {
-                        it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!!
-                    } == true
+                    schedule.oldestVisible
+                            .date
+                            ?.let { it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!! } == true
                 }
 
                 result

@@ -66,14 +66,25 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Task
 
     val scheduleId get() = scheduleRecord.scheduleId
 
-    abstract val oldestVisible: Date?
+    sealed class OldestVisible {
+
+        open val date: Date? = null
+
+        object Single : OldestVisible()
+
+        object RepeatingNull : OldestVisible()
+
+        data class RepeatingNonNull(override val date: Date) : OldestVisible()
+    }
+
+    abstract val oldestVisible: OldestVisible
 
     abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp)
 
     fun matchesScheduleDateTime(
-        scheduleInterval: ScheduleInterval<T>,
-        scheduleDateTime: DateTime,
-        checkOldestVisible: Boolean
+            scheduleInterval: ScheduleInterval<T>,
+            scheduleDateTime: DateTime,
+            checkOldestVisible: Boolean
     ): Boolean {
         val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
 
@@ -89,13 +100,13 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Task
         if (scheduleInterval.endExactTimeStamp?.let { exactTimeStamp >= it } == true)
             return false
 
-        if (checkOldestVisible && oldestVisible?.let { scheduleDateTime.date < it } == true)
-            return false
-
-        return matchesScheduleDateTimeHelper(scheduleDateTime)
+        return matchesScheduleDateTimeHelper(scheduleDateTime, checkOldestVisible)
     }
 
-    protected abstract fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean
+    protected abstract fun matchesScheduleDateTimeHelper(
+            scheduleDateTime: DateTime,
+            checkOldestVisible: Boolean
+    ): Boolean
 
     override fun toString() = super.toString() + ", scheduleId: $scheduleId, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 }

@@ -101,8 +101,8 @@ class Task<T : ProjectType>(
             taskRecord.ordinal = value
         }
 
-    override val normalizedName by lazy { name.normalized() }
-    override val normalizedNote by lazy { note?.normalized() }
+    override val normalizedName by invalidatableLazy { name.normalized() }
+    override val normalizedNote by invalidatableLazy { note?.normalized() }
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
@@ -506,6 +506,9 @@ class Task<T : ProjectType>(
 
         taskRecord.name = name
         taskRecord.note = note
+
+        (this::normalizedName.getDelegate() as InvalidatableLazyImpl<*>).invalidate()
+        (this::normalizedNote.getDelegate() as InvalidatableLazyImpl<*>).invalidate()
     }
 
     private fun addSchedules(

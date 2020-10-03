@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceSequenceData
@@ -21,7 +20,7 @@ class SingleSchedule<T : ProjectType>(
 
     val date get() = scheduleRecord.date
 
-    val dateTime get() = DateTime(date, time)
+    private val dateTime get() = DateTime(date, time)
 
     val originalDateTime get() = DateTime(scheduleRecord.originalDate, scheduleRecord.originalTimePair.toTime())
 
@@ -66,7 +65,7 @@ class SingleSchedule<T : ProjectType>(
         return getInstance(task).isVisible(now, hack24)
     }
 
-    override val oldestVisible: Date? = null
+    override val oldestVisible = OldestVisible.Single
 
     override fun updateOldestVisible(
             scheduleInterval: ScheduleInterval<T>,
@@ -94,7 +93,7 @@ class SingleSchedule<T : ProjectType>(
             }
     }
 
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime): Boolean {
+    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
         if (singleScheduleRecord.originalTimePair != scheduleDateTime.time.timePair)
             return false
 

@@ -7,6 +7,8 @@ class ProjectLocker<T : ProjectType>(private val locker: LockerManager.State.Loc
 
     private val taskLockers = mutableMapOf<TaskKey, TaskLocker<T>>()
 
+    val now get() = locker.now
+
     fun getTaskLocker(taskKey: TaskKey): TaskLocker<T> {
         if (!taskLockers.containsKey(taskKey)) taskLockers[taskKey] = TaskLocker(this)
 

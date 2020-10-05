@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -841,7 +842,17 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun generateInstance(scheduleDateTime: DateTime) = Instance(project, this, scheduleDateTime)
+    fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
+        val taskLocker = LockerManager.getTaskLocker<T>(taskKey)
+
+        val instanceKey by lazy { InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair) }
+
+        return taskLocker?.generatedInstances.let { cache ->
+            cache?.get(instanceKey) ?: Instance(project, this, scheduleDateTime).also {
+                cache?.put(instanceKey, it)
+            }
+        }
+    }
 
     fun getScheduleText(
             scheduleTextFactory: ScheduleTextFactory,

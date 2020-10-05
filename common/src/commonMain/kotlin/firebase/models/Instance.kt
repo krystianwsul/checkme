@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
@@ -113,12 +114,18 @@ class Instance<T : ProjectType> private constructor(
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T>, TaskHierarchy<*>>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T>, TaskHierarchy<T>>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val scheduleDateTime = scheduleDateTime
 
-        return if (task.isGroupTask(now)) {
+        val instanceLocker = LockerManager.getInstanceLocker<T>(instanceKey)?.also {
+            check(it.now == now)
+        }
+
+        instanceLocker?.childInstances?.let { return it }
+
+        val childInstances = if (task.isGroupTask(now)) {
             /*
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
@@ -138,8 +145,11 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .mapNotNull { it.takeIf { it.notDeleted(hierarchyExactTimeStamp) }?.taskHierarchy }
-                    .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
+                    .map { it.taskHierarchy }
+                    .filter {
+                        it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
+                    }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
                         it.first
@@ -151,6 +161,10 @@ class Instance<T : ProjectType> private constructor(
                     .values
                     .toList()
         }
+
+        instanceLocker?.childInstances = childInstances
+
+        return childInstances
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(

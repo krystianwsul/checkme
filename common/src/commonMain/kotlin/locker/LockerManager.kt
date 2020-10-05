@@ -1,13 +1,27 @@
 package com.krystianwsul.common.locker
 
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.TaskKey
 
 object LockerManager {
 
     var state: State = State.None
         private set
+
+    fun <T : ProjectType> getTaskLocker(taskKey: TaskKey): TaskLocker<T>? {
+        val state = state as? State.Locker ?: return null
+
+        @Suppress("UNCHECKED_CAST")
+        return when (taskKey.projectKey) {
+            is ProjectKey.Private -> state.privateProjectLocker
+            is ProjectKey.Shared -> state.getSharedProjectLocker(taskKey.projectKey)
+        }.getTaskLocker(taskKey) as TaskLocker<T>
+    }
+
+    fun <T : ProjectType> getInstanceLocker(instanceKey: InstanceKey) = getTaskLocker<T>(instanceKey.taskKey)?.getInstanceLocker(instanceKey)
 
     sealed class State {
 

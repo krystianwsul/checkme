@@ -217,9 +217,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(
-            now
-    )
+    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp) = instance.getChildInstances(now)
             .asSequence()
             .filter { it.first.done == null }
             .sortedBy { it.second.childTask.ordinal }

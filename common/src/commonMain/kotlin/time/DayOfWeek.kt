@@ -16,5 +16,7 @@ enum class DayOfWeek {
         val set by lazy { values().toSet() }
     }
 
-    override fun toString() = com.soywiz.klock.DayOfWeek[ordinal].localName.capitalize()
+    private val localName by lazy { com.soywiz.klock.DayOfWeek[ordinal].localName.capitalize() }
+
+    override fun toString() = localName
 }

@@ -16,16 +16,6 @@ object TimeLogger { // todo search remove all calls
 
     fun start(key: String) = Tracker(key)
 
-    fun stop(tracker: Tracker) {
-        val oldPair = times[tracker.key] ?: Pair(0, 0L)
-
-
-        times[tracker.key] = Pair(
-                oldPair.first + 1,
-                oldPair.second + (ExactTimeStamp.now.long - tracker.start.long)
-        )
-    }
-
     data class Tracker(val key: String, val id: Int = staticId++) {
 
         companion object {
@@ -33,8 +23,24 @@ object TimeLogger { // todo search remove all calls
             private var staticId = 0
         }
 
-        val start = ExactTimeStamp.now
+        private val start = ExactTimeStamp.now
 
-        fun stop() = stop(this)
+        private var stopped = false
+
+        fun stop(extra: String? = null) {
+            check(!stopped)
+
+            val key = extra?.let { "$key $it" } ?: key
+
+            stopped = true
+
+            val oldPair = times[key] ?: Pair(0, 0L)
+
+
+            times[key] = Pair(
+                    oldPair.first + 1,
+                    oldPair.second + (ExactTimeStamp.now.long - start.long)
+            )
+        }
     }
 }

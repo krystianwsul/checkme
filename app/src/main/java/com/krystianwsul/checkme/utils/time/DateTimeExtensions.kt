@@ -5,20 +5,17 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
+import com.soywiz.klock.DateTimeTz
+import com.soywiz.klock.days
 import java.util.*
 import org.joda.time.DateTime as DateTimeJoda
 
 fun Date.getDisplayText(capitalize: Boolean = true): String {
-    val todayCalendar = Calendar.getInstance()
-    val todayDate = Date(todayCalendar.toDateTimeTz())
+    val now = DateTimeTz.nowLocal()
 
-    val yesterdayCalendar = Calendar.getInstance()
-    yesterdayCalendar.add(Calendar.DATE, -1)
-    val yesterdayDate = Date(yesterdayCalendar.toDateTimeTz())
-
-    val tomorrowCalendar = Calendar.getInstance()
-    tomorrowCalendar.add(Calendar.DATE, 1)
-    val tomorrowDate = Date(tomorrowCalendar.toDateTimeTz())
+    val todayDate = Date(now)
+    val yesterdayDate = Date(now - 1.days)
+    val tomorrowDate = Date(now + 1.days)
 
     fun getString(@StringRes id: Int) = MyApplication.context
             .getString(id)

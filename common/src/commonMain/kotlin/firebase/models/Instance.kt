@@ -379,6 +379,8 @@ class Instance<T : ProjectType> private constructor(
     fun isRepeatingGroupChild(now: ExactTimeStamp) = getParentInstance(now)?.isRepeatingGroup
             ?: false
 
+    fun matchesQuery(now: ExactTimeStamp, query: String): Boolean = task.matchesQuery(query) || getChildInstances(now).any { it.first.matchesQuery(now, query) }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

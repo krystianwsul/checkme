@@ -43,6 +43,7 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
         if (!queryMatchAccumulator.hasMore) hasMore = false
 
         val newInstanceDatas = newInstances.filter { it.instanceKey !in instanceKeys }
+                .filter { it.matchesQuery(now, query) }
                 .map {
                     val task = it.task
 
@@ -74,7 +75,6 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
 
                     instanceData
                 }
-                .filter { it.matchesQuery(query) }
 
         instanceDatas += newInstanceDatas
         instanceKeys += newInstanceDatas.map { it.instanceKey }

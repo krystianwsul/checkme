@@ -10,8 +10,8 @@ object TimeLogger { // todo search remove all calls
 
     fun print() {
         times.entries
-                .sortedBy { it.key }
-                .forEach { log("time for ${it.key}, called ${it.value.first} times: ${it.value.second}") }
+            .sortedBy { it.key }
+            .forEach { log("called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 
     fun start(key: String) = Tracker(key)

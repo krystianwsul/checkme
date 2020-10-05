@@ -27,6 +27,8 @@ class Task<T : ProjectType>(
     companion object {
 
         var USE_ROOT_INSTANCES = false
+
+        val permutations = mutableMapOf<Int, Int>()
     }
 
     private val _existingInstances = taskRecord.instanceRecords
@@ -264,6 +266,11 @@ class Task<T : ProjectType>(
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
     ): InstanceResult<T> {
+        val hash = hashCode() + (givenStartExactTimeStamp?.hashCode() ?: 0) + givenEndExactTimeStamp.hashCode() + now
+                .hashCode()
+
+        permutations[hash] = 1 + (permutations[hash] ?: 0)
+
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp
@@ -292,14 +299,13 @@ class Task<T : ProjectType>(
             listOf<Instance<T>>() to false
         } else {
             val scheduleResults = scheduleIntervals.map {
-                it.getInstances(
-                        this,
-                        startExactTimeStamp,
-                        endExactTimeStamp
-                )
+                it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
             }
 
-            scheduleResults.flatMap { it.instances.toList() } to scheduleResults.any { it.hasMore!! }
+            Pair(
+                    scheduleResults.flatMap { it.dateTimes.map(::getInstance).toList() },
+                    scheduleResults.any { it.hasMore!! }
+            )
         }
 
         val parentDatas = parentHierarchyIntervals.map {
@@ -333,9 +339,10 @@ class Task<T : ProjectType>(
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentSchedules(now).mapNotNull {
-            it.getInstances(this, now, null)
-                    .instances
+            it.getDateTimesInRange(now, null)
+                    .dateTimes
                     .firstOrNull()
+                    ?.let(::getInstance)
         }
 
         return (existingInstances + scheduleNextInstances)
@@ -574,7 +581,7 @@ class Task<T : ProjectType>(
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
 
-        return existingInstance ?: generateInstance(scheduleDateTime)
+        return (existingInstance ?: generateInstance(scheduleDateTime))
     }
 
     fun createSchedules(

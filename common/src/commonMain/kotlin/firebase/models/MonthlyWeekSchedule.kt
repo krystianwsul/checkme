@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.records.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
@@ -25,29 +24,10 @@ class MonthlyWeekSchedule<T : ProjectType>(
 
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
-    override fun <T : ProjectType> getInstanceInDate(
-            task: Task<T>,
-            date: Date,
-            startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?
-    ): Instance<T>? {
+    override fun containsDate(date: Date): Boolean {
         val dateThisMonth = getDate(date.year, date.month)
 
-        if (dateThisMonth != date)
-            return null
-
-        val hourMinute = time.getHourMinute(date.dayOfWeek)
-
-        if (startHourMilli != null && startHourMilli > hourMinute.toHourMilli())
-            return null
-
-        if (endHourMilli != null && endHourMilli <= hourMinute.toHourMilli())
-            return null
-
-        val scheduleDateTime = DateTime(date, time)
-        task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
-
-        return task.getInstance(scheduleDateTime)
+        return dateThisMonth == date
     }
 
     private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)

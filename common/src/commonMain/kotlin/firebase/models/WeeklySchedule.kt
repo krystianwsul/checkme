@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
@@ -22,35 +21,17 @@ class WeeklySchedule<T : ProjectType>(
 
     val interval = repeatingScheduleRecord.interval
 
-    override fun <T : ProjectType> getInstanceInDate(
-            task: Task<T>,
-            date: Date,
-            startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?
-    ): Instance<T>? {
+    override fun containsDate(date: Date): Boolean {
         val day = date.dayOfWeek
 
-        if (dayOfWeek != day)
-            return null
+        if (dayOfWeek != day) return false
 
         if (interval != 1) {
             val timeSpan = date.toDateTimeTz() - from!!.toDateTimeTz()
-            if (timeSpan.weeks.toInt().rem(interval) != 0)
-                return null
+            if (timeSpan.weeks.toInt().rem(interval) != 0) return false
         }
 
-        val hourMinute = time.getHourMinute(day)
-
-        if (startHourMilli != null && startHourMilli > hourMinute.toHourMilli())
-            return null
-
-        if (endHourMilli != null && endHourMilli <= hourMinute.toHourMilli())
-            return null
-
-        val scheduleDateTime = DateTime(date, time)
-        task.requireCurrent(scheduleDateTime.timeStamp.toExactTimeStamp())
-
-        return task.getInstance(scheduleDateTime)
+        return true
     }
 
     override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime) =

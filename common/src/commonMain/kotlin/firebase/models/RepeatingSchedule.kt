@@ -23,12 +23,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             OldestVisible.RepeatingNonNull(it)
         } ?: OldestVisible.RepeatingNull
 
-    override fun getInstances(
+    override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData<T> {
+    ): InstanceSequenceData {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleRecord.from
@@ -64,18 +63,16 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             return InstanceSequenceData(emptySequence(), hasMore)
         }
 
-        val nullableSequence: Sequence<Instance<*>?>
+        val nullableSequence: Sequence<DateTime?>
 
         if (startExactTimeStamp.date == endExactTimeStamp?.date) {
-            nullableSequence = sequenceOf(getInstanceInDate(
-                    task,
+            nullableSequence = sequenceOf(getDateTimeInDate(
                     startExactTimeStamp.date,
                     startExactTimeStamp.hourMilli,
                     endExactTimeStamp.hourMilli
             ))
         } else {
-            val startSequence = sequenceOf(getInstanceInDate(
-                    task,
+            val startSequence = sequenceOf(getDateTimeInDate(
                     startExactTimeStamp.date,
                     startExactTimeStamp.hourMilli,
                     null
@@ -91,10 +88,10 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 val date = Date(loopStartCalendar)
                 loopStartCalendar += 1.days
 
-                NullableWrapper(getInstanceInDate(task, date, null, null))
+                NullableWrapper(getDateTimeInDate(date, null, null))
             }
 
-            val endSequence = listOfNotNull(endExactTimeStamp?.let { getInstanceInDate(task, it.date, null, it.hourMilli) }).asSequence()
+            val endSequence = listOfNotNull(endExactTimeStamp?.let { getDateTimeInDate(it.date, null, it.hourMilli) }).asSequence()
 
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
         }
@@ -108,12 +105,28 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         return InstanceSequenceData(nullableSequence.filterNotNull(), hasMore)
     }
 
-    protected abstract fun <T : ProjectType> getInstanceInDate(
-            task: Task<T>,
+    private fun getDateTimeInDate(
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<T>?
+    ): DateTime? {
+        if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
+
+        return DateTime(date, time)
+    }
+
+    private fun hasInstanceInDate(date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Boolean {
+        if (!containsDate(date)) return false
+
+        val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
+
+        if (startHourMilli != null && startHourMilli > hourMilli) return false
+        if (endHourMilli != null && endHourMilli <= hourMilli) return false
+
+        return true
+    }
+
+    protected abstract fun containsDate(date: Date): Boolean
 
     override fun isVisible(
             scheduleInterval: ScheduleInterval<T>,
@@ -125,22 +138,22 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         requireCurrent(now)
 
         return until?.let {
-            getInstances(
+            getDateTimesInRange(
                     scheduleInterval,
-                    task,
                     null,
                     null
-            ).instances.any { it.isVisible(now, hack24) }
+            ).dateTimes.any { task.getInstance(it).isVisible(now, hack24) }
         } ?: true
     }
 
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp) {
-        val pastRootInstances = getInstances(
+        val pastRootInstances = getDateTimesInRange(
                 scheduleInterval,
-                rootTask,
                 null,
                 now.plusOne()
-        ).instances.filter { it.isRootInstance(now) }
+        ).dateTimes
+                .map(rootTask::getInstance)
+                .filter { it.isRootInstance(now) }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }

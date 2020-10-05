@@ -26,16 +26,18 @@ class SingleSchedule<T : ProjectType>(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun <T : ProjectType> getInstance(task: Task<T>) = singleScheduleRecord.run { // specifically not scheduleRecord
-        task.getInstance(DateTime(date, originalTimePair.toTime()))
-    }
+    private val originalScheduleDateTime
+        get() = singleScheduleRecord.run { // specifically not scheduleRecord
+            DateTime(date, originalTimePair.toTime())
+        }
 
-    override fun getInstances(
+    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)
+
+    override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData<T> {
+    ): InstanceSequenceData {
         val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > singleScheduleExactTimeStamp } == true)
@@ -50,7 +52,7 @@ class SingleSchedule<T : ProjectType>(
         if (scheduleInterval.endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
             return InstanceSequenceData(emptySequence(), false)
 
-        return InstanceSequenceData(sequenceOf(getInstance(task)), false)
+        return InstanceSequenceData(sequenceOf(originalScheduleDateTime), false)
     }
 
     override fun isVisible(

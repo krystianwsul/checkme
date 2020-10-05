@@ -1,5 +1,5 @@
 package com.krystianwsul.common.utils
 
-import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.time.DateTime
 
-class InstanceSequenceData<T : ProjectType>(val instances: Sequence<Instance<T>>, val hasMore: Boolean?)
+class InstanceSequenceData(val dateTimes: Sequence<DateTime>, val hasMore: Boolean?)

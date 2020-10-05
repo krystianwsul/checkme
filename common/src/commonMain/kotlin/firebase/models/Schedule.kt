@@ -45,12 +45,11 @@ abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : Task
         rootTask.invalidateIntervals()
     }
 
-    abstract fun getInstances(
+    abstract fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            task: Task<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData<T> // hasMore required if end not null
+    ): InstanceSequenceData // hasMore required if end not null
 
     abstract fun isVisible(
             scheduleInterval: ScheduleInterval<T>,

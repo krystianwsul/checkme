@@ -119,9 +119,7 @@ class Instance<T : ProjectType> private constructor(
 
         val scheduleDateTime = scheduleDateTime
 
-        val instanceLocker = LockerManager.getInstanceLocker<T>(instanceKey)?.also {
-            check(it.now == now)
-        }
+        val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
         instanceLocker?.childInstances?.let { return it }
 
@@ -192,8 +190,18 @@ class Instance<T : ProjectType> private constructor(
             .filter { it.matchesScheduleDateTime(scheduleDateTime, false) }
             .map { it.schedule.oldestVisible }
 
+    private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
+
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        return if (
+        val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
+
+        instanceLocker?.let {
+            val cachedIsVisible = if (hack24) it.isVisibleHack else it.isVisibleNoHack
+
+            cachedIsVisible?.let { return it } // todo search compare optimizations
+        }
+
+        val isVisible = if (
                 !exists()
                 && isRootInstance(now)
                 && getOldestVisibles().map { it.date }.run {
@@ -208,25 +216,53 @@ class Instance<T : ProjectType> private constructor(
         } else {
             isVisibleHelper(now, hack24)
         }
+
+        instanceLocker?.let {
+            if (hack24)
+                it.isVisibleHack = isVisible
+            else
+                it.isVisibleNoHack = isVisible
+        }
+
+        return isVisible
     }
 
     private fun matchesSchedule() = task.scheduleIntervals.any {
         it.matchesScheduleDateTime(scheduleDateTime, true)
     }
 
+    // todo search benchmark here, try to find something to optimize
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        if (data.hidden)
+        val tracker1 = TimeLogger.start("isVisibleHelper a")
+        if (data.hidden) {
+            tracker1.stop()
             return false
+        }
+        tracker1.stop()
 
-        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null })
+        val tracker2 = TimeLogger.start("isVisibleHelper b")
+        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null }) {
+            tracker2.stop()
             return false
+        }
+        tracker2.stop()
 
+        val tracker3 = TimeLogger.start("isVisibleHelper c")
         val parentInstance = getParentInstance(now)
-        if (parentInstance != null)
-            return parentInstance.instance.isVisible(now, hack24)
+        if (parentInstance != null) {
+            val x = parentInstance.instance.isVisible(now, hack24)
+            tracker3.stop()
 
-        if (!exists() && !matchesSchedule())
+            return x
+        }
+        tracker3.stop()
+
+        val tracker4 = TimeLogger.start("isVisibleHelper d")
+        if (!exists() && !matchesSchedule()) {
+            tracker4.stop()
             return false
+        }
+        tracker4.stop()
 
         val done = done ?: return true
 
@@ -250,6 +286,10 @@ class Instance<T : ProjectType> private constructor(
     )
 
     fun getParentInstance(now: ExactTimeStamp): ParentInstanceData<T>? {
+        val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
+
+        instanceLocker?.parentInstanceWrapper?.let { return it.value }
+
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
@@ -272,14 +312,19 @@ class Instance<T : ProjectType> private constructor(
             Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
         }
 
-        if (parentTask == null)
-            return null
+        val parentInstanceData = if (parentTask == null) {
+            null
+        } else {
+            check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
 
-        check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
+            return parentTask.getInstance(scheduleDateTime)
+                    .takeIf { it.isEligibleParentInstance(now) }
+                    ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+        }
 
-        return parentTask.getInstance(scheduleDateTime)
-                .takeIf { it.isEligibleParentInstance(now) }
-                ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+        instanceLocker?.parentInstanceWrapper = NullableWrapper(parentInstanceData)
+
+        return parentInstanceData
     }
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"

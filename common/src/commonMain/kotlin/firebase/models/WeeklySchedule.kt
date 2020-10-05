@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.WeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
@@ -34,6 +33,5 @@ class WeeklySchedule<T : ProjectType>(
         return true
     }
 
-    override fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime) =
-            scheduleDateTime.date.dayOfWeek == dayOfWeek
+    override fun matchesScheduleDateRepeatingHelper(scheduleDate: Date) = scheduleDate.dayOfWeek == dayOfWeek
 }

@@ -96,10 +96,9 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (singleScheduleRecord.originalTimePair != scheduleDateTime.time.timePair)
-            return false
+        if (scheduleDateTime.date != date) return false
 
-        return scheduleDateTime.date == date
+        return singleScheduleRecord.originalTimePair != scheduleDateTime.time.timePair
     }
 
     val group = singleScheduleRecord.group

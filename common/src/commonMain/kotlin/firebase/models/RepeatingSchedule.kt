@@ -6,6 +6,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.invalidatableLazy
 import com.soywiz.klock.days
 import firebase.models.interval.ScheduleInterval
 
@@ -16,7 +17,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until
 
-    private val oldestVisibleDate get() = repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+    private val oldestVisibleDateProperty = invalidatableLazy {
+        repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+    }
+
+    private val oldestVisibleDate by oldestVisibleDateProperty
 
     override val oldestVisible
         get() = oldestVisibleDate?.let {
@@ -163,23 +168,20 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         ).flatten().minOrNull()!!
 
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
+        oldestVisibleDateProperty.invalidate()
     }
 
     override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (checkOldestVisible && oldestVisibleDate?.let { scheduleDateTime.date < it } == true)
-            return false
+        if (checkOldestVisible && oldestVisibleDate?.let { scheduleDateTime.date < it } == true) return false
 
-        if (timePair != scheduleDateTime.time.timePair)
-            return false
+        if (timePair != scheduleDateTime.time.timePair) return false
 
-        if (from?.let { scheduleDateTime.date < it } == true)
-            return false
+        if (from?.let { scheduleDateTime.date < it } == true) return false
 
-        if (until?.let { scheduleDateTime.date > it } == true)
-            return false
+        if (until?.let { scheduleDateTime.date > it } == true) return false
 
-        return matchesScheduleDateTimeRepeatingHelper(scheduleDateTime)
+        return matchesScheduleDateRepeatingHelper(scheduleDateTime.date)
     }
 
-    protected abstract fun matchesScheduleDateTimeRepeatingHelper(scheduleDateTime: DateTime): Boolean
+    protected abstract fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean
 }

@@ -36,7 +36,6 @@ object TimeLogger { // todo search remove all calls
 
             val oldPair = times[key] ?: Pair(0, 0L)
 
-
             times[key] = Pair(
                     oldPair.first + 1,
                     oldPair.second + (ExactTimeStamp.now.long - start.long)

@@ -343,6 +343,7 @@ abstract class Project<T : ProjectType> : Current {
             allInstances[instance.instanceKey] = instance
         }
 
+        val tracker2 = TimeLogger.start("getInstances")
         tasks.forEach { task ->
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
 
@@ -365,8 +366,12 @@ abstract class Project<T : ProjectType> : Current {
                 allInstances[instance.instanceKey] = instance
             }
         }
+        tracker2.stop()
 
-        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
+        val tracker3 = TimeLogger.start("filter")
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }.also {
+            tracker3.stop()
+        }
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :

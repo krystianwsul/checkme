@@ -34,5 +34,7 @@ object TimeLogger { // todo search remove all calls
         }
 
         val start = ExactTimeStamp.now
+
+        fun stop() = stop(this)
     }
 }

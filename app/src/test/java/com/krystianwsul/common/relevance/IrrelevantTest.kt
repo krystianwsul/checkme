@@ -125,9 +125,9 @@ class IrrelevantTest {
 
         val day1 = Date(2020, 10, 6) // tuesday
         val day2 = Date(2020, 10, 7) // wednesday
-        val hour1 = HourMinute(1, 1).toHourMilli()
-        val hour2 = HourMinute(2, 1).toHourMilli()
-        val hour3 = HourMinute(3, 1).toHourMilli()
+        val hour1 = HourMinute(1, 0).toHourMilli()
+        val hour2 = HourMinute(2, 0).toHourMilli()
+        val hour3 = HourMinute(3, 0).toHourMilli()
 
         val parent = mockk<Project.Parent>()
 

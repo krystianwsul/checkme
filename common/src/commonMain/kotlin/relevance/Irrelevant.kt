@@ -3,6 +3,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.soywiz.klock.days
 
 object Irrelevant {
@@ -131,13 +132,16 @@ object Irrelevant {
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
+        val irrelevantSchedules = mutableListOf<Schedule<*>>()
+        val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent<*>>()
+
         relevantTasks.forEach {
             val scheduleIntervals = it.scheduleIntervals
             val unusedSchedules = it.schedules - scheduleIntervals.map { it.schedule }
 
-            unusedSchedules.forEach { it.delete() }
+            irrelevantSchedules += unusedSchedules
 
-            scheduleIntervals.filter { scheduleInterval ->
+            irrelevantSchedules += scheduleIntervals.filter { scheduleInterval ->
                 val schedule = scheduleInterval.schedule
 
                 if (scheduleInterval.current(now) && schedule.current(now))
@@ -152,23 +156,38 @@ object Irrelevant {
                 }
 
                 result
-            }.forEach { it.schedule.delete() }
+            }.map { it.schedule }
 
             val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
                     .filter { it.current(now) }
                     .map { it.noScheduleOrParent }
-            val unusedNoScheduleOrParents = it.noScheduleOrParents - relevantNoScheduleOrParents
-            unusedNoScheduleOrParents.forEach { it.delete() }
+            irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
         }
 
-        return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })
+        irrelevantSchedules.forEach { it.delete() }
+        irrelevantNoScheduleOrParents.forEach { it.delete() }
+
+        return Result(
+                irrelevantExistingInstances,
+                irrelevantTaskHierarchies,
+                irrelevantSchedules,
+                irrelevantNoScheduleOrParents,
+                irrelevantTasks,
+                irrelevantRemoteCustomTimes,
+                irrelevantRemoteProjects.map { it as SharedProject }
+        )
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
     data class Result(
-            val relevantInstances: Collection<Instance<*>>,
+            val irrelevantExistingInstances: Collection<Instance<*>>,
+            val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
+            val irrelevantSchedules: Collection<Schedule<*>>,
+            val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
+            val irrelevantTasks: Collection<Task<*>>,
+            val irrelevantRemoteCustomTimes: Collection<Time.Custom<*>>,
             val removedSharedProjects: Collection<SharedProject>
     )
 }

@@ -582,7 +582,7 @@ class DomainFactory(
 
     private fun setIrrelevant(now: ExactTimeStamp) {
         if (false) {
-            Irrelevant.setIrrelevant(
+            val results = Irrelevant.setIrrelevant(
                     object : Project.Parent {
 
                         override fun deleteProject(project: Project<*>) {

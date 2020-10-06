@@ -2,7 +2,7 @@ package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.time.ExactTimeStamp
 
-object TimeLogger { // todo search remove all calls
+object TimeLogger {
 
     private val times = mutableMapOf<String, Pair<Int, Long>>()
 
@@ -10,8 +10,8 @@ object TimeLogger { // todo search remove all calls
 
     fun print() {
         times.entries
-            .sortedBy { it.key }
-            .forEach { log("called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
+                .sortedBy { it.key }
+                .forEach { log("called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 
     fun start(key: String) = Tracker(key)

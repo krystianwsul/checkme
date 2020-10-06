@@ -1,28 +1,20 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.QueryMatchAccumulator
-import com.krystianwsul.common.utils.TimeLogger
 import com.soywiz.klock.days
 
 @Synchronized
 fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
-
-    TimeLogger.clear() // todo search
-    Task.permutations.clear() // todo search
-
-    val trackera = TimeLogger.start("getSearchInstancesData")
 
     return LockerManager.setLocker { now ->
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
@@ -50,13 +42,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
 
             if (!queryMatchAccumulator.hasMore) hasMore = false
 
-            val tracker2p5 = TimeLogger.start("filter instances for query")
-            val x = newInstances.filter { it.instanceKey !in instanceKeys }
+            val newInstanceDatas = newInstances.filter { it.instanceKey !in instanceKeys }
                     .filter { it.matchesQuery(now, query) }
-            tracker2p5.stop()
-
-            val tracker3 = TimeLogger.start("make instanceDatas")
-            val newInstanceDatas = x
                     .map {
                         val task = it.task
 
@@ -101,8 +88,6 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
             endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
                     .plus(step.days)
                     .toExactTimeStamp()
-
-            tracker3.stop()
         }
 
         val dataWrapper = GroupListDataWrapper(
@@ -115,13 +100,6 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
         )
 
         instanceDatas.forEach { it.instanceDataParent = dataWrapper }
-
-        trackera.stop()
-
-        TimeLogger.print()
-
-        Log.e("asdf", "magic entries: " + Task.permutations.size)
-        Log.e("asdf", "magic calls: " + Task.permutations.values.sum())
 
         SearchInstancesViewModel.Data(dataWrapper, hasMore)
     }

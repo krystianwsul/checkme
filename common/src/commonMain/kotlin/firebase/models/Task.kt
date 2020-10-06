@@ -24,8 +24,6 @@ class Task<T : ProjectType>(
     companion object {
 
         var USE_ROOT_INSTANCES = false
-
-        val permutations = mutableMapOf<Int, Int>()
     }
 
     private val _existingInstances = taskRecord.instanceRecords
@@ -100,8 +98,11 @@ class Task<T : ProjectType>(
             taskRecord.ordinal = value
         }
 
-    override val normalizedName by invalidatableLazy { name.normalized() }
-    override val normalizedNote by invalidatableLazy { note?.normalized() }
+    private val normalizedNameDelegate = invalidatableLazy { name.normalized() }
+    private val normalizedNoteDelegate = invalidatableLazy { note?.normalized() }
+
+    override val normalizedName by normalizedNameDelegate
+    override val normalizedNote by normalizedNoteDelegate
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
@@ -270,11 +271,6 @@ class Task<T : ProjectType>(
         taskLocker?.instances
                 ?.get(key)
                 ?.let { return it }
-
-        val hash = hashCode() + (givenStartExactTimeStamp?.hashCode() ?: 0) + givenEndExactTimeStamp.hashCode() + now
-                .hashCode()
-
-        permutations[hash] = 1 + (permutations[hash] ?: 0)
 
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
@@ -523,8 +519,8 @@ class Task<T : ProjectType>(
         taskRecord.name = name
         taskRecord.note = note
 
-        (this::normalizedName.getDelegate() as InvalidatableLazyImpl<*>).invalidate()
-        (this::normalizedNote.getDelegate() as InvalidatableLazyImpl<*>).invalidate()
+        normalizedNameDelegate.invalidate()
+        normalizedNoteDelegate.invalidate()
     }
 
     private fun addSchedules(

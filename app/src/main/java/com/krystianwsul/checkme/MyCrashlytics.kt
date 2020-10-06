@@ -6,9 +6,9 @@ import com.krystianwsul.common.ErrorLogger
 
 object MyCrashlytics : ErrorLogger() {
 
-    override val enabled = false /*MyApplication.context todo search
+    override val enabled = MyApplication.context
             .resources
-            .getBoolean(R.bool.crashlytics_enabled)*/
+            .getBoolean(R.bool.crashlytics_enabled)
 
     fun init() {
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(enabled)

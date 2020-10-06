@@ -343,8 +343,6 @@ abstract class Project<T : ProjectType> : Current {
             allInstances[instance.instanceKey] = instance
         }
 
-        val tracker2 = TimeLogger.start("getInstances")
-
         fun Task<T>.filterQuery(query: String): Boolean {
             if (matchesQuery(query)) return true
 
@@ -378,22 +376,8 @@ abstract class Project<T : ProjectType> : Current {
                 allInstances[instance.instanceKey] = instance
             }
         }
-        tracker2.stop()
 
-        val tracker3 = TimeLogger.start("filter")
-        return allInstances.values.filter {
-            val tracker4 = TimeLogger.start("filter root")
-            val root = it.isRootInstance(now)
-            tracker4.stop()
-
-            val tracker5 = TimeLogger.start("filter isVisible")
-            val isVisible = it.isVisible(now, true)
-            tracker5.stop()
-
-            root && isVisible
-        }.also {
-            tracker3.stop()
-        }
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :

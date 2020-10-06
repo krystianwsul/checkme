@@ -1,8 +1,7 @@
-package firebase.managers
+package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.managers.SharedProjectManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 

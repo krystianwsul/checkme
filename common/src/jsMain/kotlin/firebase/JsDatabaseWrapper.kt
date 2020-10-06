@@ -1,7 +1,5 @@
-package firebase
+package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson

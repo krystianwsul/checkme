@@ -115,13 +115,11 @@ class Instance<T : ProjectType> private constructor(
     fun exists() = (data is Data.Real)
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T>, TaskHierarchy<T>>> {
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
-
-        val scheduleDateTime = scheduleDateTime
-
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
-
         instanceLocker?.childInstances?.let { return it }
+
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+        val scheduleDateTime = scheduleDateTime
 
         val childInstances = if (task.isGroupTask(now)) {
             /*

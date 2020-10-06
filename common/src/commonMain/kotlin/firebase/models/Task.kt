@@ -263,6 +263,14 @@ class Task<T : ProjectType>(
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
     ): InstanceResult<T> {
+        val taskLocker = getTaskLocker()?.also { check(it.now == now) }
+
+        val key = Triple(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+
+        taskLocker?.instances
+                ?.get(key)
+                ?.let { return it }
+
         val hash = hashCode() + (givenStartExactTimeStamp?.hashCode() ?: 0) + givenEndExactTimeStamp.hashCode() + now
                 .hashCode()
 
@@ -320,7 +328,7 @@ class Task<T : ProjectType>(
 
         val parentsHaveMore = parentDatas.any { it.hasMore }
 
-        return InstanceResult(
+        val instanceResult = InstanceResult(
                 listOf(
                         existingInstances,
                         scheduleInstances,
@@ -331,6 +339,10 @@ class Task<T : ProjectType>(
                         .toList(),
                 existingHaveMore || schedulesHaveMore || parentsHaveMore
         )
+
+        taskLocker?.instances?.put(key, instanceResult)
+
+        return instanceResult
     }
 
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
@@ -838,8 +850,10 @@ class Task<T : ProjectType>(
         }
     }
 
+    private fun getTaskLocker() = LockerManager.getTaskLocker<T>(taskKey)
+
     fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
-        val taskLocker = LockerManager.getTaskLocker<T>(taskKey)
+        val taskLocker = getTaskLocker()
 
         val instanceKey by lazy { InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair) }
 

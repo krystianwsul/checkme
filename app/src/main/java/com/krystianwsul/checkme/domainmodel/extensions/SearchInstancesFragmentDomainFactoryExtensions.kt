@@ -22,6 +22,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
     TimeLogger.clear() // todo search
     Task.permutations.clear() // todo search
 
+    val trackera = TimeLogger.start("getSearchInstancesData")
+
     return LockerManager.setLocker { now ->
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
             GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -113,6 +115,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): SearchInstan
         )
 
         instanceDatas.forEach { it.instanceDataParent = dataWrapper }
+
+        trackera.stop()
 
         TimeLogger.print()
 

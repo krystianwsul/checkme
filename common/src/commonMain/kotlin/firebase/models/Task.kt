@@ -282,19 +282,22 @@ class Task<T : ProjectType>(
                 givenEndExactTimeStamp
         ).minOrNull()!!
 
+        var existingHaveMore = false
+
         val existingInstances = _existingInstances.values.filter {
             val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
 
-            if (scheduleExactTimeStamp < startExactTimeStamp)
+            if (scheduleExactTimeStamp < startExactTimeStamp) {
                 return@filter false
+            }
 
-            if (scheduleExactTimeStamp >= endExactTimeStamp)
+            if (scheduleExactTimeStamp >= endExactTimeStamp) {
+                existingHaveMore = true
                 return@filter false
+            }
 
             true
         }
-
-        val existingHaveMore = _existingInstances.size > existingInstances.size
 
         val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
@@ -335,6 +338,8 @@ class Task<T : ProjectType>(
                         .toList(),
                 existingHaveMore || schedulesHaveMore || parentsHaveMore
         )
+
+        log("magic existing $existingHaveMore, schedules $schedulesHaveMore, parents: $parentsHaveMore")
 
         taskLocker?.instances?.put(key, instanceResult)
 

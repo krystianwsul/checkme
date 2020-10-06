@@ -6,8 +6,6 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import firebase.models.interval.Interval
-import firebase.models.interval.Type
 
 object IntervalBuilder {
 
@@ -29,15 +27,21 @@ object IntervalBuilder {
         val noScheduleOrParents = task.noScheduleOrParents.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {
-            val nextSchedule = schedules.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Schedule(it) }
-            val nextParentTaskHierarchy = normalParentTaskHierarchies.minBy { it.startExactTimeStamp }?.let { TypeBuilder.Parent(it) }
-            val nextNoScheduleOrParent = noScheduleOrParents.minBy { it.startExactTimeStamp }?.let { TypeBuilder.NoScheduleOrParent(it) }
+            val nextSchedule = schedules.minByOrNull { it.startExactTimeStamp }?.let { TypeBuilder.Schedule(it) }
+
+            val nextParentTaskHierarchy = normalParentTaskHierarchies.minByOrNull {
+                it.startExactTimeStamp
+            }?.let { TypeBuilder.Parent(it) }
+
+            val nextNoScheduleOrParent = noScheduleOrParents.minByOrNull {
+                it.startExactTimeStamp
+            }?.let { TypeBuilder.NoScheduleOrParent(it) }
 
             return listOfNotNull(
                     nextNoScheduleOrParent,
                     nextParentTaskHierarchy,
                     nextSchedule
-            ).minBy { it.startExactTimeStamp }?.also {
+            ).minByOrNull { it.startExactTimeStamp }?.also {
                 when (it) {
                     is TypeBuilder.NoScheduleOrParent -> noScheduleOrParents.remove(it.noScheduleOrParent)
                     is TypeBuilder.Parent -> normalParentTaskHierarchies.remove(it.parentTaskHierarchy)
@@ -59,9 +63,9 @@ object IntervalBuilder {
              */
 
             val type = groupParentTaskHierarchies.filter { it.current(now) }
-                    .maxBy { it.startExactTimeStamp }
+                    .maxByOrNull { it.startExactTimeStamp }
                     ?.let { Type.Child(it) }
-                    ?: Type.NoSchedule<T>()
+                    ?: Type.NoSchedule()
 
             return Interval.Current(type, startExactTimeStamp)
         }
@@ -245,7 +249,7 @@ object IntervalBuilder {
                     if (it.any { it == null })
                         null
                     else
-                        it.requireNoNulls().max()
+                        it.requireNoNulls().maxOrNull()
                 }
 
             override fun toType() = Type.Schedule(schedules)

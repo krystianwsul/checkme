@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.soywiz.klock.days
-import firebase.models.interval.ScheduleInterval
 
 abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 

@@ -1,4 +1,4 @@
-package relevance
+package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -11,7 +11,6 @@ import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every

@@ -1,11 +1,10 @@
-package firebase.models.interval
+package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskHierarchy
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute

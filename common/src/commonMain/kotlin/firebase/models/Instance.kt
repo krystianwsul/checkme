@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
-import firebase.models.interval.Type
 
 class Instance<T : ProjectType> private constructor(
         val project: Project<T>,

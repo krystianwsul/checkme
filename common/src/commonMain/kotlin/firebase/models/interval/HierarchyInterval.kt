@@ -1,4 +1,4 @@
-package firebase.models.interval
+package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp

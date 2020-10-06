@@ -1,9 +1,8 @@
-package firebase.models.interval
+package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.firebase.models.TaskParentEntry
-import com.krystianwsul.common.firebase.models.interval.NoScheduleOrParentInterval
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
@@ -52,7 +51,7 @@ sealed class Type<T : ProjectType> {
         override val taskParentEntries get() = schedules
 
         fun getScheduleIntervals(interval: Interval<T>): List<ScheduleInterval<T>> {
-            val minStartExactTimeStamp = schedules.map { it.startExactTimeStamp }.min()!!
+            val minStartExactTimeStamp = schedules.map { it.startExactTimeStamp }.minOrNull()!!
             check(minStartExactTimeStamp == interval.startExactTimeStamp)
 
             val endExactTimeStamps = schedules.map { it.endExactTimeStamp }
@@ -60,7 +59,7 @@ sealed class Type<T : ProjectType> {
                 val intervalEndExactTimeStamp = interval.endExactTimeStamp
                 checkNotNull(intervalEndExactTimeStamp)
 
-                val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().max()!!
+                val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().maxOrNull()!!
                 check(maxEndExactTimeStamp >= intervalEndExactTimeStamp)
             }
 

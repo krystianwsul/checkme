@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
-import firebase.models.interval.ScheduleInterval
 
 class SingleSchedule<T : ProjectType>(
         rootTask: Task<T>,

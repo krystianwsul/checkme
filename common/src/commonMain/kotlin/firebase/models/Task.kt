@@ -5,7 +5,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
-import com.krystianwsul.common.firebase.models.interval.IntervalBuilder
+import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DateTime
@@ -13,10 +13,6 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.*
-import firebase.models.interval.HierarchyInterval
-import firebase.models.interval.Interval
-import firebase.models.interval.ScheduleInterval
-import firebase.models.interval.Type
 
 class Task<T : ProjectType>(
         val project: Project<T>,

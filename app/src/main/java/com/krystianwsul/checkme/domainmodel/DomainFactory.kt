@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
+import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
@@ -28,6 +29,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
+import com.soywiz.klock.days
 import io.reactivex.Observable
 
 @Suppress("LeakingThis")
@@ -581,7 +583,9 @@ class DomainFactory(
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        if (false) {
+        val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
+
+        if (true) {
             val results = Irrelevant.setIrrelevant(
                     object : Project.Parent {
 
@@ -590,8 +594,12 @@ class DomainFactory(
                         }
                     },
                     projectsFactory.privateProject,
-                    now
+                    tomorrow
             )
+
+            results.irrelevantSchedules.forEach {
+                Log.e("asdf", "irrelevant schedule for ${it.rootTask.name}: $it")
+            }
 
             throw Exception()
         }

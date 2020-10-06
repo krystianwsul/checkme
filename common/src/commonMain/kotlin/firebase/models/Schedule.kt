@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
-abstract class Schedule<T : ProjectType>(protected val rootTask: Task<T>) : TaskParentEntry {
+abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
 

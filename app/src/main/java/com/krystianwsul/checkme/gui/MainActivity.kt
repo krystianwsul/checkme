@@ -44,7 +44,6 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
@@ -57,7 +56,6 @@ import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.io.Serializable
-import java.util.concurrent.TimeUnit
 
 class MainActivity :
         AbstractActivity(),
@@ -587,8 +585,6 @@ class MainActivity :
                     .map { Unit }
                     .startWith(Unit)
                     .switchMap { searchParameters }
-                    .debounce(200, TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { start(it.first, it.second) }
                     .addTo(createDisposable)
         }

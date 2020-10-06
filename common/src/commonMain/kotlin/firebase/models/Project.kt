@@ -344,7 +344,19 @@ abstract class Project<T : ProjectType> : Current {
         }
 
         val tracker2 = TimeLogger.start("getInstances")
-        tasks.forEach { task ->
+
+        fun Task<T>.filterQuery(query: String): Boolean {
+            if (matchesQuery(query)) return true
+
+            return childHierarchyIntervals.any { it.taskHierarchy.childTask.filterQuery(query) }
+        }
+
+        val filteredTasks = queryMatchAccumulator?.let {
+            val query = it.query
+            tasks.filter { it.filterQuery(query) }
+        } ?: tasks
+
+        filteredTasks.forEach { task ->
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
 
             if (taskResults.hasMore) queryMatchAccumulator?.accumulate(task, true)
@@ -358,7 +370,7 @@ abstract class Project<T : ProjectType> : Current {
                     continue
 
                 if (endExactTimeStamp <= instanceExactTimeStamp) {
-                    queryMatchAccumulator?.accumulate(task, true)
+                    queryMatchAccumulator?.accumulate(task, true) // todo search I don't think this is accurate
 
                     continue
                 }
@@ -369,7 +381,17 @@ abstract class Project<T : ProjectType> : Current {
         tracker2.stop()
 
         val tracker3 = TimeLogger.start("filter")
-        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }.also {
+        return allInstances.values.filter {
+            val tracker4 = TimeLogger.start("filter root")
+            val root = it.isRootInstance(now)
+            tracker4.stop()
+
+            val tracker5 = TimeLogger.start("filter isVisible")
+            val isVisible = it.isVisible(now, true)
+            tracker5.stop()
+
+            root && isVisible
+        }.also {
             tracker3.stop()
         }
     }

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.utils
 
-class QueryMatchAccumulator(private val query: String) {
+class QueryMatchAccumulator(val query: String) {
 
     var hasMore = false
         private set

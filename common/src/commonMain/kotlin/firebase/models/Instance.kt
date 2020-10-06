@@ -193,6 +193,7 @@ class Instance<T : ProjectType> private constructor(
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
+        val tracker1 = TimeLogger.start("isVisible outer")
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
         instanceLocker?.let {
@@ -201,21 +202,30 @@ class Instance<T : ProjectType> private constructor(
             cachedIsVisible?.let { return it } // todo search compare optimizations
         }
 
-        val isVisible = if (
-                !exists()
+        val tracker2 = TimeLogger.start("isVisible inner")
+
+        val tracker3 = TimeLogger.start("isVisible condition")
+
+        val condition = !exists()
                 && isRootInstance(now)
                 && getOldestVisibles().map { it.date }.run {
-                    when {
-                        isEmpty() -> false
-                        contains(null) -> false
-                        else -> requireNoNulls().minOrNull()!! > scheduleDate
-                    }
-                }
+            when {
+                isEmpty() -> false
+                contains(null) -> false
+                else -> requireNoNulls().minOrNull()!! > scheduleDate
+            }
+        }
+
+        tracker3.stop()
+
+        val isVisible = if (
+                condition
         ) {
             false
         } else {
             isVisibleHelper(now, hack24)
         }
+        tracker2.stop()
 
         instanceLocker?.let {
             if (hack24)
@@ -224,7 +234,7 @@ class Instance<T : ProjectType> private constructor(
                 it.isVisibleNoHack = isVisible
         }
 
-        return isVisible
+        return isVisible.also { tracker1.stop() }
     }
 
     private fun matchesSchedule() = task.scheduleIntervals.any {
@@ -266,12 +276,15 @@ class Instance<T : ProjectType> private constructor(
 
         val done = done ?: return true
 
+        val tracker5 = TimeLogger.start("isVisibleHelper cutoff")
         val cutoff = if (hack24)
             ExactTimeStamp(now.toDateTimeSoy() - 1.days)
         else
             now
 
-        return done > cutoff
+        return (done > cutoff).also {
+            tracker5.stop()
+        }
     }
 
     private fun isEligibleParentInstance(now: ExactTimeStamp): Boolean =

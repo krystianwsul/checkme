@@ -78,7 +78,7 @@ class ProjectLoaderOldTest {
 
         projectSnapshotRelay = BehaviorRelay.create()
         projectProvider = TestProjectProvider()
-        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name"), projectProvider.database)
+        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"), projectProvider.database)
 
         projectLoader = ProjectLoader.Impl(
                 projectSnapshotRelay,

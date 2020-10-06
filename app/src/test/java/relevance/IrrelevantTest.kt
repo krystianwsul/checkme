@@ -42,7 +42,7 @@ class IrrelevantTest {
 
         val userKey = UserKey("key")
 
-        val userInfo = spyk(UserInfo("email", "name")) {
+        val userInfo = spyk(UserInfo("email", "name", "uid")) {
             every { key } returns userKey
         }
 

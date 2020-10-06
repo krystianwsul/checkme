@@ -66,7 +66,7 @@ class ProjectsFactoryOldTest {
     private var _emissionChecker: EmissionChecker<ChangeType>? = null
     private val emissionChecker get() = _emissionChecker!!
 
-    private val userInfo = UserInfo("email", "name")
+    private val userInfo = UserInfo("email", "name", "uid")
 
     private fun ProjectsFactory.save() = save(mockk(relaxed = true))
 

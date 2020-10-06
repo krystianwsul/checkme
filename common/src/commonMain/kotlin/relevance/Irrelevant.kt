@@ -3,6 +3,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.soywiz.klock.days
 
 object Irrelevant {
@@ -165,14 +166,27 @@ object Irrelevant {
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
-        return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })
+        return Result(
+                irrelevantExistingInstances,
+                irrelevantTaskHierarchies,
+                irrelevantSchedules,
+                irrelevantNoScheduleOrParents,
+                irrelevantTasks,
+                irrelevantRemoteCustomTimes,
+                irrelevantRemoteProjects.map { it as SharedProject }
+        )
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
     data class Result(
-            val relevantInstances: Collection<Instance<*>>,
+            val irrelevantExistingInstances: Collection<Instance<*>>,
+            val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
+            val irrelevantSchedules: Collection<Schedule<*>>,
+            val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
+            val irrelevantTasks: Collection<Task<*>>,
+            val irrelevantRemoteCustomTimes: Collection<Time.Custom<*>>,
             val removedSharedProjects: Collection<SharedProject>
     )
 }

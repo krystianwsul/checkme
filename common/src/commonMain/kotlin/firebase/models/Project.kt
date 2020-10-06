@@ -370,7 +370,7 @@ abstract class Project<T : ProjectType> : Current {
                     continue
 
                 if (endExactTimeStamp <= instanceExactTimeStamp) {
-                    queryMatchAccumulator?.accumulate(task, true) // todo search I don't think this is accurate
+                    queryMatchAccumulator?.accumulate(task, true)
 
                     continue
                 }

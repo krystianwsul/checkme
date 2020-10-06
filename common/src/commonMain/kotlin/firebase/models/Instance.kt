@@ -197,7 +197,7 @@ class Instance<T : ProjectType> private constructor(
         instanceLocker?.let {
             val cachedIsVisible = if (hack24) it.isVisibleHack else it.isVisibleNoHack
 
-            cachedIsVisible?.let { return it } // todo search compare optimizations
+            cachedIsVisible?.let { return it }
         }
 
         val tracker2 = TimeLogger.start("isVisible inner")
@@ -239,7 +239,6 @@ class Instance<T : ProjectType> private constructor(
         it.matchesScheduleDateTime(scheduleDateTime, true)
     }
 
-    // todo search benchmark here, try to find something to optimize
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         val tracker1 = TimeLogger.start("isVisibleHelper a")
         if (data.hidden) {

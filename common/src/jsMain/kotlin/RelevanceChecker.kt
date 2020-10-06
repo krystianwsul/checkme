@@ -8,10 +8,10 @@ import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import firebase.JsDatabaseWrapper
-import firebase.managers.JsPrivateProjectManager
-import firebase.managers.JsRootUserManager
-import firebase.managers.JsSharedProjectManager
+import com.krystianwsul.common.firebase.JsDatabaseWrapper
+import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
+import com.krystianwsul.common.firebase.managers.JsRootUserManager
+import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
 

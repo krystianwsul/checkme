@@ -585,7 +585,7 @@ class DomainFactory(
     private fun setIrrelevant(now: ExactTimeStamp) {
         val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
 
-        if (true) {
+        if (false) {
             val results = Irrelevant.setIrrelevant(
                     object : Project.Parent {
 

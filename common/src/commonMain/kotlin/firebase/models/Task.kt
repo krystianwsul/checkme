@@ -354,8 +354,6 @@ class Task<T : ProjectType>(
                 existingHaveMore || schedulesHaveMore || parentsHaveMore
         )
 
-        log("magic existing $existingHaveMore, schedules $schedulesHaveMore, parents: $parentsHaveMore")
-
         taskLocker?.instances?.put(key, instanceResult)
 
         return instanceResult

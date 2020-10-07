@@ -28,8 +28,9 @@ abstract class DomainListener<D : DomainData> {
                 .filter { (_, dataIds) -> !dataIds.contains(data.value?.dataId) }
                 .observeOn(Schedulers.single())
                 .toFlowable(BackpressureStrategy.LATEST)
-                .map { (domainFactory, _) -> getData(domainFactory) }
+                .map { (domainFactory, _) -> getDataResult(domainFactory) }
                 .observeOn(AndroidSchedulers.mainThread())
+                .map { it.data!! }
                 .filter { data.value != it }
                 .subscribe(data)
     }
@@ -39,5 +40,7 @@ abstract class DomainListener<D : DomainData> {
         disposable = null
     }
 
-    protected abstract fun getData(domainFactory: DomainFactory): D
+    protected open fun getDataResult(domainFactory: DomainFactory): DomainResult<D> = DomainResult.Completed(getData(domainFactory))
+
+    open fun getData(domainFactory: DomainFactory): D = throw NotImplementedError()
 }

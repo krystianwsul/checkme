@@ -79,7 +79,7 @@ class Instance<T : ProjectType> private constructor(
 
     val taskKey by lazy { task.taskKey }
 
-    private val doneProperty = invalidatableLazy { data.done?.let { ExactTimeStamp(it) } }
+    private val doneProperty = invalidatableLazyCallbacks { data.done?.let { ExactTimeStamp(it) } }
     val done by doneProperty
 
     val name get() = task.name
@@ -100,6 +100,20 @@ class Instance<T : ProjectType> private constructor(
     val customTimeKey get() = data.customTimeKey
 
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
+
+    private val hierarchyExactTimeStampProperty = invalidatableLazy {
+        listOfNotNull(
+                task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
+                done?.let { Pair(it.minusOne(), "done") }
+        ).minByOrNull { it.first }
+    }
+
+    private val hierarchyExactTimeStamp by hierarchyExactTimeStampProperty
+
+    init {
+        task.endDataProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+        doneProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+    }
 
     constructor(
             project: Project<T>,
@@ -164,13 +178,8 @@ class Instance<T : ProjectType> private constructor(
         return childInstances
     }
 
-    private fun getHierarchyExactTimeStampWithoutNow() = listOfNotNull(
-            task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
-            done?.let { Pair(it.minusOne(), "done") }
-    ).minByOrNull { it.first }
-
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
-            getHierarchyExactTimeStampWithoutNow(),
+            hierarchyExactTimeStamp,
             Pair(now, "now"),
     ).minByOrNull { it.first }!!
 

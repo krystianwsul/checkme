@@ -500,7 +500,7 @@ class Task<T : ProjectType>(
                 .map { YearlySchedule(this, it) }
     }
 
-    private val endDataProperty = invalidatableLazy {
+    val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
     }
 

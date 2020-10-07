@@ -535,8 +535,8 @@ class DomainFactory(
             }
 
             // I think this might no longer be necessary, since setEndData doesn't recurse on children
-            if (pair.first.getEndData() != null)
-                check(pair.first.getEndData() == endData)
+            if (pair.first.endData != null)
+                check(pair.first.endData == endData)
             else
                 pair.first.setEndData(endData)
         }

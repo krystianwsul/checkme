@@ -60,7 +60,7 @@ class Task<T : ProjectType>(
 
     val imageJson get() = taskRecord.image
 
-    override val endExactTimeStamp get() = getEndData()?.exactTimeStamp
+    override val endExactTimeStamp get() = endData?.exactTimeStamp
 
     private val parentTaskHierarchiesProperty =
             invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
@@ -500,12 +500,18 @@ class Task<T : ProjectType>(
                 .map { YearlySchedule(this, it) }
     }
 
-    fun getEndData() =
-            taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+    private val endDataProperty = invalidatableLazy {
+        taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+    }
+
+    val endData by endDataProperty
 
     private fun setMyEndExactTimeStamp(endData: EndData?) {
-        taskRecord.endData =
-                endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
+        taskRecord.endData = endData?.let {
+            TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances)
+        }
+
+        endDataProperty.invalidate()
     }
 
     fun createChildTask(

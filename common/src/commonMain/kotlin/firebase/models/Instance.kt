@@ -232,7 +232,7 @@ class Instance<T : ProjectType> private constructor(
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (data.hidden) return false
 
-        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null }) return false
+        if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
 
         getParentInstance(now)?.instance
                 ?.isVisible(now, hack24)

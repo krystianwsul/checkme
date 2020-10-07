@@ -164,11 +164,14 @@ class Instance<T : ProjectType> private constructor(
         return childInstances
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
-            Pair(now, "now"),
-            //Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"), this was messing up single instance lists
+    private fun getHierarchyExactTimeStampWithoutNow() = listOfNotNull(
             task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
             done?.let { Pair(it.minusOne(), "done") }
+    ).minByOrNull { it.first }
+
+    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
+            getHierarchyExactTimeStampWithoutNow(),
+            Pair(now, "now"),
     ).minByOrNull { it.first }!!
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null

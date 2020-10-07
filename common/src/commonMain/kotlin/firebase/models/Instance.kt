@@ -65,9 +65,9 @@ class Instance<T : ProjectType> private constructor(
 
     private val shownHolder = ShownHolder()
 
-    val instanceKey get() = InstanceKey(taskKey, scheduleKey)
+    val instanceKey by lazy { InstanceKey(taskKey, scheduleKey) }
 
-    val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute))
+    val scheduleKey by lazy { ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute)) }
 
     val scheduleDate get() = data.scheduleDate
     val scheduleTime get() = data.scheduleTime

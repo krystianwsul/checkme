@@ -569,6 +569,10 @@ class Task<T : ProjectType>(
     }
 
     fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
+        check(generatedInstances.containsKey(instance.instanceKey))
+
+        generatedInstances.remove(instance.instanceKey)
+
         val newRecord = if (USE_ROOT_INSTANCES)
             rootInstanceManager::newRootInstanceRecord
         else
@@ -868,16 +872,15 @@ class Task<T : ProjectType>(
 
     private fun getTaskLocker() = LockerManager.getTaskLocker<T>(taskKey)
 
+    private val generatedInstances = mutableMapOf<InstanceKey, Instance<T>>()
+
     fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
-        val taskLocker = getTaskLocker()
+        val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
-        val instanceKey by lazy { InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair) }
+        if (!generatedInstances.containsKey(instanceKey))
+            generatedInstances[instanceKey] = Instance(project, this, scheduleDateTime)
 
-        return taskLocker?.generatedInstances.let { cache ->
-            cache?.get(instanceKey) ?: Instance(project, this, scheduleDateTime).also {
-                cache?.put(instanceKey, it)
-            }
-        }
+        return generatedInstances.getValue(instanceKey)
     }
 
     fun getScheduleText(

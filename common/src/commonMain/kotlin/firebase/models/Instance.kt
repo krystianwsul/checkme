@@ -79,7 +79,8 @@ class Instance<T : ProjectType> private constructor(
 
     val taskKey by lazy { task.taskKey }
 
-    val done get() = data.done?.let { ExactTimeStamp(it) }
+    private val doneProperty = invalidatableLazy { data.done?.let { ExactTimeStamp(it) } }
+    val done by doneProperty
 
     val name get() = task.name
 
@@ -369,7 +370,11 @@ class Instance<T : ProjectType> private constructor(
     private fun createInstanceRecord() = Data.Real(
             project,
             task.createRemoteInstanceRecord(this)
-    ).also { data = it }
+    ).also {
+        data = it
+
+        doneProperty.invalidate()
+    }
 
     fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
         if (done) {
@@ -379,6 +384,8 @@ class Instance<T : ProjectType> private constructor(
         } else {
             (data as Data.Real<*>).instanceRecord.done = null
         }
+
+        doneProperty.invalidate()
     }
 
     fun delete() {

@@ -612,7 +612,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
-            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.current }
+            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.isVisible }
 
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {

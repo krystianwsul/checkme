@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
+import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
@@ -34,6 +35,8 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
 
             var hasMore = true
             while (hasMore) {
+                throwIfInterrupted()
+
                 val queryMatchAccumulator = QueryMatchAccumulator(query)
 
                 val newInstances = getRootInstances(

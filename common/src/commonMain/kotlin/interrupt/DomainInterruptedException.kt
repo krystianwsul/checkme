@@ -1,3 +1,3 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.common.interrupt
 
 class DomainInterruptedException : Exception()

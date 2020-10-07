@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -264,6 +265,8 @@ class Task<T : ProjectType>(
             givenEndExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
     ): InstanceResult<T> {
+        throwIfInterrupted()
+
         val taskLocker = getTaskLocker()?.also { check(it.now == now) }
 
         val key = Triple(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
@@ -285,6 +288,8 @@ class Task<T : ProjectType>(
         var existingHaveMore = false
 
         val existingInstances = _existingInstances.values.filter {
+            throwIfInterrupted()
+
             val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
 
             if (scheduleExactTimeStamp < startExactTimeStamp) {
@@ -307,7 +312,17 @@ class Task<T : ProjectType>(
             }
 
             Pair(
-                    scheduleResults.flatMap { it.dateTimes.map(::getInstance).toList() },
+                    scheduleResults.flatMap {
+                        throwIfInterrupted()
+
+                        it.dateTimes
+                                .map {
+                                    throwIfInterrupted()
+
+                                    getInstance(it)
+                                }
+                                .toList()
+                    },
                     scheduleResults.any { it.hasMore!! }
             )
         }

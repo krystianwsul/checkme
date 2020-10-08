@@ -27,6 +27,11 @@ class Task<T : ProjectType>(
         var USE_ROOT_INSTANCES = false
     }
 
+    val endDataProperty = invalidatableLazyCallbacks {
+        taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+    }
+    val endData by endDataProperty
+
     private val _existingInstances = taskRecord.instanceRecords
             .values
             .toMutableList<InstanceRecord<T>>()
@@ -499,12 +504,6 @@ class Task<T : ProjectType>(
                 .values
                 .map { YearlySchedule(this, it) }
     }
-
-    val endDataProperty = invalidatableLazyCallbacks {
-        taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
-    }
-
-    val endData by endDataProperty
 
     private fun setMyEndExactTimeStamp(endData: EndData?) {
         taskRecord.endData = endData?.let {

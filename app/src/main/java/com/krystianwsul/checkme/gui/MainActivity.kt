@@ -303,7 +303,7 @@ class MainActivity :
                 tabSearchStateRelay,
                 daysPosition
         ) { tabSearchState: TabSearchState, position: Int ->
-            if (tabSearchState.tab == Tab.INSTANCES) {
+            if ((tabSearchState as? TabSearchState.Instances)?.isSearching == false) {
                 DayFragment.Event.PageVisible(position, bottomFab)
             } else {
                 DayFragment.Event.Invisible

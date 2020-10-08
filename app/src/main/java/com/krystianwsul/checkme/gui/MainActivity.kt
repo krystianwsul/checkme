@@ -773,6 +773,10 @@ class MainActivity :
 
         showViews += currentTabLayout
 
+        mainSearchToolbar.menu
+                .findItem(R.id.actionSearchShowDeleted)
+                .isVisible = tabSearchState.showShowDeleted
+
         hideViews += listOf(
                 mainSearchGroupListFragment,
                 mainDaysLayout,
@@ -1011,6 +1015,8 @@ class MainActivity :
 
         abstract val title: Int
 
+        open val showShowDeleted = false
+
         open fun startSearch(): TabSearchState = throw UnsupportedOperationException()
 
         open fun closeSearch(): TabSearchState = throw UnsupportedOperationException()
@@ -1041,6 +1047,8 @@ class MainActivity :
             override val tab get() = Tab.TASKS
 
             override val title get() = R.string.tasks
+
+            override val showShowDeleted get() = true
 
             override fun startSearch(): TabSearchState {
                 check(!isSearching)

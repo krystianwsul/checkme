@@ -327,27 +327,6 @@ abstract class Project<T : ProjectType> : Current {
 
         throwIfInterrupted()
 
-        val allInstances = mutableMapOf<InstanceKey, Instance<out T>>()
-
-        for (instance in existingInstances) { // todo search this should be handled in task?
-            throwIfInterrupted()
-
-            val instanceExactTimeStamp = instance.instanceDateTime
-                    .timeStamp
-                    .toExactTimeStamp()
-
-            if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
-                continue
-
-            if (endExactTimeStamp <= instanceExactTimeStamp) {
-                queryMatchAccumulator?.accumulate(instance.task, true)
-
-                continue
-            }
-
-            allInstances[instance.instanceKey] = instance
-        }
-
         fun Task<T>.filterQuery(query: String): Boolean {
             throwIfInterrupted()
 
@@ -361,35 +340,36 @@ abstract class Project<T : ProjectType> : Current {
             tasks.filter { it.filterQuery(query) }
         } ?: tasks
 
-        filteredTasks.forEach { task ->
+        return filteredTasks.flatMap { task ->
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
 
             if (taskResults.hasMore) queryMatchAccumulator?.accumulate(task, true)
 
-            for (instance in taskResults.instances) {
+            taskResults.instances.filter { instance ->
                 throwIfInterrupted()
 
-                val instanceExactTimeStamp = instance.instanceDateTime
+                val instanceExactTimeStamp = instance.instanceDateTime // todo search shouldn't this also be
+                        // filtered in task?
                         .timeStamp
                         .toExactTimeStamp()
 
-                if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
-                    continue
+                if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp) return@filter false
 
                 if (endExactTimeStamp <= instanceExactTimeStamp) {
                     queryMatchAccumulator?.accumulate(task, true)
 
-                    continue
+                    return@filter false
                 }
 
-                allInstances[instance.instanceKey] = instance
+                if (!instance.isRootInstance(now)) return@filter false // todo schedule not sure if this should
+                // accumulate
+                throwIfInterrupted()
+
+                if (!instance.isVisible(now, true)) return@filter false
+                throwIfInterrupted()
+
+                true
             }
-        }
-
-        return allInstances.values.filter {
-            throwIfInterrupted()
-
-            it.isRootInstance(now) && it.isVisible(now, true)
         }
     }
 

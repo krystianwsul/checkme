@@ -255,7 +255,8 @@ class Task<T : ProjectType>(
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
             null,
             now.plusOne(),
-            now
+            now,
+            true
     ).instances.filter { it.isRootInstance(now) }
 
     data class InstanceResult<out T : ProjectType>(val instances: List<Instance<out T>>, val hasMore: Boolean)
@@ -268,7 +269,8 @@ class Task<T : ProjectType>(
     fun getInstances(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,
-            now: ExactTimeStamp
+            now: ExactTimeStamp,
+            bySchedule: Boolean = false
     ): InstanceResult<T> {
         throwIfInterrupted()
 
@@ -295,14 +297,13 @@ class Task<T : ProjectType>(
         val existingInstances = _existingInstances.values.filter {
             throwIfInterrupted()
 
-            // todo search does it really make sense to use scheduleDateTime here?
-            val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
+            val instanceExactTimeStamp = it.run {
+                if (bySchedule) scheduleDateTime else instanceDateTime
+            }.toExactTimeStamp()
 
-            if (scheduleExactTimeStamp < startExactTimeStamp) {
-                return@filter false
-            }
+            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
 
-            if (scheduleExactTimeStamp >= endExactTimeStamp) {
+            if (instanceExactTimeStamp >= endExactTimeStamp) {
                 existingHaveMore = true
                 return@filter false
             }
@@ -336,7 +337,7 @@ class Task<T : ProjectType>(
         val parentDatas = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
-                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
         }
 
         val parentInstances = parentDatas.flatMap { it.instances }

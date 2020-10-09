@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
@@ -26,7 +27,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
     val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-    val instances = task.existingInstances.toMutableMap()
+    val instances = mutableListOf<Instance<*>>()
 
     var startExactTimeStamp: ExactTimeStamp? = null
     var endExactTimeStamp = now
@@ -42,7 +43,7 @@ fun DomainFactory.getShowTaskInstancesData(
         if (!newHasMore)
             hasMore = false
 
-        instances += newInstances.associateBy { it.scheduleKey }
+        instances += newInstances
 
         if (instances.size > (page + 1) * 20)
             break
@@ -54,7 +55,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 .toExactTimeStamp()
     }
 
-    val instanceDatas = instances.values.map {
+    val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(

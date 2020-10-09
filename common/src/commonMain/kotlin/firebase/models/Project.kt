@@ -327,20 +327,23 @@ abstract class Project<T : ProjectType> : Current {
 
         throwIfInterrupted()
 
-        fun Task<T>.filterQuery(query: String): Boolean {
-            throwIfInterrupted()
+        val filteredTasks = queryMatchAccumulator?.query
+                ?.let { query ->
+                    fun filterQuery(task: Task<T>): Boolean {
+                        throwIfInterrupted()
 
-            if (matchesQuery(query)) return true
+                        if (task.matchesQuery(query)) return true
 
-            return childHierarchyIntervals.any { it.taskHierarchy.childTask.filterQuery(query) }
-        }
+                        return task.childHierarchyIntervals.any { filterQuery(it.taskHierarchy.childTask) }
+                    }
 
-        val filteredTasks = queryMatchAccumulator?.let {
-            val query = it.query
-            tasks.filter { it.filterQuery(query) }
-        } ?: tasks
+                    tasks.filter(::filterQuery)
+                }
+                ?: tasks
 
         return filteredTasks.flatMap { task ->
+            throwIfInterrupted()
+
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
 
             if (taskResults.hasMore) queryMatchAccumulator?.accumulate(task, true)
@@ -348,25 +351,10 @@ abstract class Project<T : ProjectType> : Current {
             taskResults.instances.filter { instance ->
                 throwIfInterrupted()
 
-                val instanceExactTimeStamp = instance.instanceDateTime // todo search shouldn't this also be
-                        // filtered in task?
-                        .timeStamp
-                        .toExactTimeStamp()
-
-                if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp) return@filter false
-
-                if (endExactTimeStamp <= instanceExactTimeStamp) {
-                    queryMatchAccumulator?.accumulate(task, true)
-
-                    return@filter false
-                }
-
-                if (!instance.isRootInstance(now)) return@filter false // todo search not sure if this should
-                // accumulate
+                if (!instance.isRootInstance(now)) return@filter false
                 throwIfInterrupted()
 
                 if (!instance.isVisible(now, true)) return@filter false
-                throwIfInterrupted()
 
                 true
             }

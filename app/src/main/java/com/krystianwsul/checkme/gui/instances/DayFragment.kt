@@ -124,7 +124,7 @@ class DayFragment @JvmOverloads constructor(
             groupListFragment.onRestoreInstanceState(it)
         }
 
-        floatingActionButton?.let { groupListFragment.setFab(it) }
+        floatingActionButton?.let(groupListFragment::setFab)
 
         entry = dayViewModel.getEntry(timeRange, position).apply { start() }
     }
@@ -174,7 +174,7 @@ class DayFragment @JvmOverloads constructor(
 
         this.floatingActionButton = floatingActionButton
 
-        groupListFragment?.setFab(floatingActionButton)
+        groupListFragment.setFab(floatingActionButton)
     }
 
     private fun clearFab() {

@@ -122,9 +122,15 @@ class GroupListFragment @JvmOverloads constructor(
 
     lateinit var listener: GroupListListener
 
-    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
+    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<NodeHolder>>()
 
-    private val treeViewAdapterInitialized get() = this::treeViewAdapter.isInitialized
+    var treeViewAdapter
+        get() = treeViewAdapterRelay.value!!
+        set(value) {
+            treeViewAdapterRelay.accept(value)
+        }
+
+    private val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()
 
     val progressShown by lazy {
         groupListRecycler.scrollStateChanges()
@@ -545,6 +551,14 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
         )
+
+        treeViewAdapterRelay.firstOrError()
+                .flatMapObservable { it.updates }
+                .subscribe {
+                    setGroupMenuItemVisibility()
+                    updateFabVisibility()
+                }
+                .addTo(attachedToWindowDisposable)
     }
 
     override fun onDetachedFromWindow() {
@@ -660,13 +674,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             groupListRecycler.adapter = treeViewAdapter
             groupListRecycler.itemAnimator = CustomItemAnimator()
-
-            treeViewAdapter.updates
-                    .subscribe {
-                        setGroupMenuItemVisibility()
-                        updateFabVisibility()
-                    }
-                    .addTo(attachedToWindowDisposable)
 
             dragHelper.attachToRecyclerView(groupListRecycler)
 

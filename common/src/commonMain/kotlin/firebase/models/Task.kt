@@ -292,24 +292,7 @@ class Task<T : ProjectType>(
                 givenEndExactTimeStamp
         ).minOrNull()!!
 
-        var existingHaveMore = false
-
-        val existingInstances = _existingInstances.values.filter {
-            throwIfInterrupted()
-
-            val instanceExactTimeStamp = it.run {
-                if (bySchedule) scheduleDateTime else instanceDateTime
-            }.toExactTimeStamp()
-
-            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
-
-            if (instanceExactTimeStamp >= endExactTimeStamp) {
-                existingHaveMore = true
-                return@filter false
-            }
-
-            true
-        }
+        val existingInstances = _existingInstances.values
 
         val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
             listOf<Instance<T>>() to false
@@ -347,18 +330,29 @@ class Task<T : ProjectType>(
                 .filter { it.taskKey == taskKey }
                 .toList()
 
+        var filteredHaveMore = false
+        val allInstances = (existingInstances + scheduleInstances + parentInstances).toSet().filter {
+            throwIfInterrupted()
+
+            val instanceExactTimeStamp = it.run {
+                if (bySchedule) scheduleDateTime else instanceDateTime
+            }.toExactTimeStamp()
+
+            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
+
+            if (instanceExactTimeStamp >= endExactTimeStamp) {
+                filteredHaveMore = true
+                return@filter false
+            }
+
+            true
+        }
+
         val parentsHaveMore = parentDatas.any { it.hasMore }
 
         val instanceResult = InstanceResult(
-                listOf(
-                        existingInstances,
-                        scheduleInstances,
-                        parentInstances
-                ).flatten()
-                        .associateBy { it.scheduleKey }
-                        .values
-                        .toList(),
-                existingHaveMore || schedulesHaveMore || parentsHaveMore
+                allInstances,
+                filteredHaveMore || schedulesHaveMore || parentsHaveMore
         )
 
         taskLocker?.instances?.put(key, instanceResult)

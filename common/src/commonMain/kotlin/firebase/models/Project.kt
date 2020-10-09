@@ -329,7 +329,7 @@ abstract class Project<T : ProjectType> : Current {
 
         val allInstances = mutableMapOf<InstanceKey, Instance<out T>>()
 
-        for (instance in existingInstances) {
+        for (instance in existingInstances) { // todo search this should be handled in task?
             throwIfInterrupted()
 
             val instanceExactTimeStamp = instance.instanceDateTime

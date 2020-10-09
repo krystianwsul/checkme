@@ -295,6 +295,7 @@ class Task<T : ProjectType>(
         val existingInstances = _existingInstances.values.filter {
             throwIfInterrupted()
 
+            // todo search does it really make sense to use scheduleDateTime here?
             val scheduleExactTimeStamp = it.scheduleDateTime.toExactTimeStamp()
 
             if (scheduleExactTimeStamp < startExactTimeStamp) {

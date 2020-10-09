@@ -361,7 +361,7 @@ abstract class Project<T : ProjectType> : Current {
                     return@filter false
                 }
 
-                if (!instance.isRootInstance(now)) return@filter false // todo schedule not sure if this should
+                if (!instance.isRootInstance(now)) return@filter false // todo search not sure if this should
                 // accumulate
                 throwIfInterrupted()
 

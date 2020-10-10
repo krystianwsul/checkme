@@ -408,6 +408,8 @@ class Task<T : ProjectType>(
         return instanceResult
     }
 
+    private fun Instance<out T>.getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
+
     private fun Iterable<Instance<out T>>.filterInstancesByDate(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp,
@@ -418,8 +420,7 @@ class Task<T : ProjectType>(
         val filtered = filter {
             throwIfInterrupted()
 
-            val filterDate = if (bySchedule) it.scheduleDateTime else it.instanceDateTime
-            val instanceExactTimeStamp = filterDate.toExactTimeStamp()
+            val instanceExactTimeStamp = it.getSequenceDate(bySchedule).toExactTimeStamp()
 
             if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
 

@@ -259,7 +259,10 @@ class Task<T : ProjectType>(
             true
     ).instances.filter { it.isRootInstance(now) }
 
-    data class InstanceResult<out T : ProjectType>(val instances: List<Instance<out T>>, val hasMore: Boolean)
+    data class InstanceResult<out T : ProjectType>(
+            val instances: List<Instance<out T>> = listOf(),
+            val hasMore: Boolean = false
+    )
 
     /*
      todo to actually return a sequence from this, then the individual sequences from both parents
@@ -292,30 +295,34 @@ class Task<T : ProjectType>(
                 givenEndExactTimeStamp
         ).minOrNull()!!
 
-        val existingInstances = _existingInstances.values
+        if (startExactTimeStamp > endExactTimeStamp) return InstanceResult()
 
-        val (scheduleInstances, schedulesHaveMore) = if (startExactTimeStamp >= endExactTimeStamp) {
-            listOf<Instance<T>>() to false
-        } else {
-            val scheduleResults = scheduleIntervals.map {
-                it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
-            }
+        val existingInstanceResult = _existingInstances.values.filterInstancesByDate(
+                startExactTimeStamp,
+                endExactTimeStamp,
+                bySchedule
+        )
 
-            Pair(
-                    scheduleResults.flatMap {
+        val scheduleResults = scheduleIntervals.map {
+            it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
+        }
+
+        val scheduleInstances = scheduleResults.flatMap {
+            throwIfInterrupted()
+
+            it.dateTimes
+                    .map {
                         throwIfInterrupted()
 
-                        it.dateTimes
-                                .map {
-                                    throwIfInterrupted()
+                        getInstance(it)
+                    }
+                    .toList()
+        }.filterInstancesByDate(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
-                                    getInstance(it)
-                                }
-                                .toList()
-                    },
-                    scheduleResults.any { it.hasMore!! }
-            )
-        }
+        val scheduleInstanceResult = InstanceResult(
+                scheduleInstances.instances,
+                scheduleInstances.hasMore || scheduleResults.any { it.hasMore!! }
+        )
 
         val parentDatas = parentHierarchyIntervals.map {
             it.taskHierarchy
@@ -330,34 +337,65 @@ class Task<T : ProjectType>(
                 .filter { it.taskKey == taskKey }
                 .toList()
 
-        var filteredHaveMore = false
-        val allInstances = (existingInstances + scheduleInstances + parentInstances).toSet().filter {
+        /* todo sequence
+            2. move all three results into separate functions, because fuck Dubsmash and now I like smaller functions
+             too
+            3. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
+            4. loosen restrictions on start/end params
+            5. start using sequences downstream
+         */
+
+        val parentInstancesFiltered = parentInstances.filterInstancesByDate(
+                startExactTimeStamp,
+                endExactTimeStamp,
+                bySchedule
+        )
+
+        val parentInstanceResult = InstanceResult(
+                parentInstancesFiltered.instances,
+                parentInstancesFiltered.hasMore || parentDatas.any { it.hasMore }
+        )
+
+        val instanceResults = listOf(
+                existingInstanceResult,
+                scheduleInstanceResult,
+                parentInstanceResult
+        )
+
+        val instanceResult = InstanceResult(
+                instanceResults.flatMap { it.instances }.distinct(),
+                instanceResults.any { it.hasMore }
+        )
+
+        taskLocker?.instances?.put(key, instanceResult)
+
+        return instanceResult
+    }
+
+    private fun Iterable<Instance<out T>>.filterInstancesByDate(
+            startExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp,
+            bySchedule: Boolean
+    ): InstanceResult<T> {
+        var hasMore = false
+
+        val filtered = filter {
             throwIfInterrupted()
 
-            val instanceExactTimeStamp = it.run {
-                if (bySchedule) scheduleDateTime else instanceDateTime
-            }.toExactTimeStamp()
+            val filterDate = if (bySchedule) it.scheduleDateTime else it.instanceDateTime
+            val instanceExactTimeStamp = filterDate.toExactTimeStamp()
 
             if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
 
             if (instanceExactTimeStamp >= endExactTimeStamp) {
-                filteredHaveMore = true
+                hasMore = true
                 return@filter false
             }
 
             true
         }
 
-        val parentsHaveMore = parentDatas.any { it.hasMore }
-
-        val instanceResult = InstanceResult(
-                allInstances,
-                filteredHaveMore || schedulesHaveMore || parentsHaveMore
-        )
-
-        taskLocker?.instances?.put(key, instanceResult)
-
-        return instanceResult
+        return InstanceResult(filtered, hasMore)
     }
 
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

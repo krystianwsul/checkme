@@ -269,11 +269,13 @@ class Task<T : ProjectType>(
             endExactTimeStamp: ExactTimeStamp,
             bySchedule: Boolean
     ): InstanceResult<T> {
-        return _existingInstances.values.filterInstancesByDate(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                bySchedule
-        )
+        return _existingInstances.values
+                .filterInstancesByDate(
+                        startExactTimeStamp,
+                        endExactTimeStamp,
+                        bySchedule
+                )
+                .let { it.copy(it.instances.sortedBy { it.getSequenceDate(bySchedule) }) }
     }
 
     private fun getScheduleInstanceResult(

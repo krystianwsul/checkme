@@ -15,9 +15,13 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.QueryMatchAccumulator
 import com.soywiz.klock.days
 
+private const val PAGE_SIZE = 20
+
 @Synchronized
 fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult<SearchInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
+
+    val allPagesSize = (page + 1) * PAGE_SIZE
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
@@ -85,27 +89,29 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
                 instanceDatas += newInstanceDatas
                 instanceKeys += newInstanceDatas.map { it.instanceKey }
 
-                if (instanceDatas.size > (page + 1) * 20) break
+                if (instanceDatas.size > allPagesSize) break
 
                 startExactTimeStamp = endExactTimeStamp
 
-                step *= 2
+                if (newInstanceDatas.size < PAGE_SIZE) step *= 2
 
                 endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
                         .plus(step.days)
                         .toExactTimeStamp()
             }
 
+            val cappedInstanceDatas = instanceDatas.sorted().take(allPagesSize)
+
             val dataWrapper = GroupListDataWrapper(
                     customTimeDatas,
                     null,
                     listOf(),
                     null,
-                    instanceDatas,
+                    cappedInstanceDatas,
                     null
             )
 
-            instanceDatas.forEach { it.instanceDataParent = dataWrapper }
+            cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
             SearchInstancesViewModel.Data(dataWrapper, hasMore)
         }

@@ -66,8 +66,6 @@ data class GroupListDataWrapper(
         }
 
         override fun compareTo(other: InstanceData): Int {
-            check(this::instanceDataParent.isInitialized) // sanity check
-
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
             if (timeStampComparison != 0)
                 return timeStampComparison

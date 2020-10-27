@@ -273,7 +273,7 @@ fun DomainFactory.updateScheduleTask(
 
     val imageUuid = imagePath?.value?.let { newUuid() }
 
-    val task = getTaskForce(taskKey).also {
+    val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
         it.updateProject(this, now, projectId ?: defaultProjectId)
     }.apply {

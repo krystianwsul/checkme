@@ -507,6 +507,8 @@ class Task<T : ProjectType>(
         }
 
         endDataProperty.invalidate()
+
+        (existingInstances + generatedInstances).values.forEach { it.onTaskEndChanged() }
     }
 
     fun createChildTask(

@@ -435,6 +435,10 @@ class Instance<T : ProjectType> private constructor(
 
     fun matchesQuery(now: ExactTimeStamp, query: String): Boolean = task.matchesQuery(query) || getChildInstances(now).any { it.first.matchesQuery(now, query) }
 
+    fun onTaskEndChanged() {
+        hierarchyExactTimeStampProperty.invalidate()
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

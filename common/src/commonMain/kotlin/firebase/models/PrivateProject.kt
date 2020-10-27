@@ -33,7 +33,11 @@ class PrivateProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map { Task(this, it, rootInstanceManagers.getValue(it.taskKey)) }
+                .map {
+                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
+
+                    Task(this, it, rootInstanceManager)
+                }
                 .associateBy { it.id }
                 .toMutableMap()
 

@@ -27,8 +27,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     private val projectManager = initialProjectEvent.projectManager
 
-    protected var rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>>
-        private set
+    protected val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>>
 
     var project: Project<T>
         private set

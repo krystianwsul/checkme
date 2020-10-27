@@ -297,7 +297,9 @@ class Task<T : ProjectType>(
                         getInstance(it)
                     }
                     .toList()
-        }.filterInstancesByDate(startExactTimeStamp, endExactTimeStamp, bySchedule)
+        }
+                .filter { !it.exists() }
+                .filterInstancesByDate(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         return InstanceResult(
                 scheduleInstances.instances,
@@ -324,6 +326,7 @@ class Task<T : ProjectType>(
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
+                .filter { !it.exists() }
                 .toList()
 
         val parentInstancesFiltered = parentInstances.filterInstancesByDate(
@@ -380,14 +383,13 @@ class Task<T : ProjectType>(
         val scheduleInstanceResult = getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         /* todo sequence
-            1. Filter existing instances out of schedule and parent sequences.  This will guarantee that those sequences
-            are ordered by date (well technically the parent one will be ordered anyway, but still, it's simpler this
-             way), and existing instances will include those.  Already ordered.
-            2. De-duplicate dates in sequences.  Then, de-duplicate generated instances in schedule vs. parent seq.
+            1. De-duplicate dates in sequences.  Then, de-duplicate generated instances in schedule vs. parent seq.
+            existingInstances is guaranteed to be unique vs. schedules and parents.
+            schedules and parents are guaranteed to contain the same generated instance for a specific scheduleKey.
 
-            3. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
-            4. loosen restrictions on start/end params
-            5. start using sequences downstream
+            2. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
+            3. loosen restrictions on start/end params
+            4. start using sequences downstream
          */
 
         val parentInstanceResult = getParentInstanceResult(

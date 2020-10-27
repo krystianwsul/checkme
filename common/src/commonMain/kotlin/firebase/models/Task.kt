@@ -282,7 +282,7 @@ class Task<T : ProjectType>(
     private fun getScheduleInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp,
-            bySchedule: Boolean = false
+            bySchedule: Boolean
     ): InstanceResult<T> {
         val scheduleResults = scheduleIntervals.map {
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
@@ -385,13 +385,9 @@ class Task<T : ProjectType>(
         val scheduleInstanceResult = getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         /* todo sequence
-            1. De-duplicate dates in sequences.  Then, de-duplicate generated instances in schedule vs. parent seq.
-            existingInstances is guaranteed to be unique vs. schedules and parents.
-            schedules and parents are guaranteed to be unique as well.
-
-            2. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
-            3. loosen restrictions on start/end params
-            4. start using sequences downstream
+            1. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
+            2. loosen restrictions on start/end params
+            3. start using sequences downstream
          */
 
         val parentInstanceResult = getParentInstanceResult(

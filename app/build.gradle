@@ -70,7 +70,7 @@ androidExtensions {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.1'
     testImplementation "org.powermock:powermock-module-junit4:$powermockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powermockVersion"
     testImplementation "org.powermock:powermock-api-mockito2:$powermockVersion"
@@ -80,9 +80,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
-    implementation 'androidx.preference:preference:1.1.1'
+    implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.sharetarget:sharetarget:1.0.0'
-    implementation 'androidx.core:core:1.5.0-alpha04'
     implementation 'androidx.core:core-ktx:1.5.0-alpha04'
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
@@ -90,14 +89,14 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
 
-    implementation 'com.google.firebase:firebase-core:17.5.1'
-    implementation 'com.google.firebase:firebase-auth:19.4.0'
-    implementation 'com.google.firebase:firebase-database:19.5.0'
-    implementation 'com.google.firebase:firebase-messaging:20.3.0'
-    implementation 'com.google.firebase:firebase-config:19.2.0'
+    implementation 'com.google.firebase:firebase-core:18.0.0'
+    implementation 'com.google.firebase:firebase-auth:20.0.0'
+    implementation 'com.google.firebase:firebase-database:19.5.1'
+    implementation 'com.google.firebase:firebase-messaging:21.0.0'
+    implementation 'com.google.firebase:firebase-config:20.0.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:17.2.2'
-    implementation 'com.google.firebase:firebase-analytics:17.6.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 
@@ -145,7 +144,7 @@ dependencies {
 
     implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 
-    implementation("com.uber.rxdogtag:rxdogtag:1.0.0")
+    implementation('com.uber.rxdogtag:rxdogtag:1.0.1')
 
     implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
     implementation "com.badoo.reaktive:rxjava2-interop:$reaktiveVersion"

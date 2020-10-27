@@ -2,23 +2,14 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Check.me.iml" filepath="$PROJECT_DIR$/Check.me.iml" group="Check.me" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me-app.iml" group="Check.me/app" />
-      <module fileurl="file://$PROJECT_DIR$/common/Check.me-common.iml" filepath="$PROJECT_DIR$/common/Check.me-common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me-common_commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me-common_commonMain.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me-common_commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me-common_commonTest.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me-common_jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me-common_jsMain.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me-common_jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me-common_jsTest.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me-treeadapter.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me-treeadapter.iml" group="Check.me/treeadapter" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StudioProjects-Check.me.iml" filepath="$PROJECT_DIR$/.idea/modules/StudioProjects-Check.me.iml" group="Check.me" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects-Check.me-common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects-Check.me-common.iml" group="Check.me/common" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Check.me/app" />
-      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" group="Check.me/common" />
-      <module fileurl="file://$PROJECT_DIR$/common/common_commonMain.iml" filepath="$PROJECT_DIR$/common/common_commonMain.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/common/common_commonTest.iml" filepath="$PROJECT_DIR$/common/common_commonTest.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/common/common_jsMain.iml" filepath="$PROJECT_DIR$/common/common_jsMain.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/common/common_jsTest.iml" filepath="$PROJECT_DIR$/common/common_jsTest.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/treeadapter/treeadapter.iml" filepath="$PROJECT_DIR$/treeadapter/treeadapter.iml" group="Check.me/treeadapter" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.commonMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.commonTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StudioProjects.Check.me.iml" filepath="$PROJECT_DIR$/.idea/modules/StudioProjects.Check.me.iml" />
     </modules>
   </component>
 </project>

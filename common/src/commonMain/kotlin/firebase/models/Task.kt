@@ -278,6 +278,7 @@ class Task<T : ProjectType>(
                 .let { it.copy(it.instances.sortedBy { it.getSequenceDate(bySchedule) }) }
     }
 
+    // contains only generated instances
     private fun getScheduleInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp,
@@ -307,6 +308,7 @@ class Task<T : ProjectType>(
         )
     }
 
+    // contains only generated instances
     private fun getParentInstanceResult(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,

@@ -387,7 +387,7 @@ class Task<T : ProjectType>(
         /* todo sequence
             1. De-duplicate dates in sequences.  Then, de-duplicate generated instances in schedule vs. parent seq.
             existingInstances is guaranteed to be unique vs. schedules and parents.
-            schedules and parents are guaranteed to contain the same generated instance for a specific scheduleKey.
+            schedules and parents are guaranteed to be unique as well.
 
             2. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
             3. loosen restrictions on start/end params

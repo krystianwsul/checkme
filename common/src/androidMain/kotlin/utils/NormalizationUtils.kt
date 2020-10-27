@@ -10,7 +10,9 @@ actual fun String.normalized(): String {
                 .toLowerCase(Locale.getDefault())
     }
 
-    return normalizedCache.getValue(this)
+    return normalizedCache[this] ?: throw StrangeNormalizationException(this)
 }
+
+private class StrangeNormalizationException(str: String) : Exception("strange normalization for $str")
 
 private val normalizedCache = mutableMapOf<String, String>()

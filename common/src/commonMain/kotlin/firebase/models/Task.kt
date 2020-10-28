@@ -288,19 +288,29 @@ class Task<T : ProjectType>(
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
 
-        val scheduleInstances = scheduleResults.flatMap {
+        val scheduleInstanceSequences = scheduleResults.map {
             throwIfInterrupted()
 
-            it.dateTimes
-                    .map {
-                        throwIfInterrupted()
+            it.dateTimes.mapNotNull {
+                throwIfInterrupted()
 
-                        getInstance(it)
-                    }
-                    .toList()
+                getInstance(it).takeIf { !it.exists() }
+            }
         }
-                .filter { !it.exists() }
-                .filterInstancesByDate(startExactTimeStamp, endExactTimeStamp, bySchedule)
+
+        val combinedSequence = combineSequences(scheduleInstanceSequences) {
+            val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
+                    .filter { it.first != null }
+                    .minByOrNull { it.first!! }!!
+
+            finalPair.second
+        }
+
+        val scheduleInstances = combinedSequence.toList().filterInstancesByDate(
+                startExactTimeStamp,
+                endExactTimeStamp,
+                bySchedule
+        )
 
         return InstanceResult(
                 scheduleInstances.instances,

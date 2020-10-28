@@ -313,16 +313,9 @@ class Task<T : ProjectType>(
 
         val combinedSequence = combineInstanceSequences(scheduleInstanceSequences, bySchedule)
 
-        // todo sequence I don't think filtering is needed anymore, since these instances have schedule==instance
-        val scheduleInstances = combinedSequence.toList().filterInstancesByDate(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                bySchedule
-        )
-
         return InstanceResult(
-                scheduleInstances.instances,
-                scheduleInstances.hasMore || scheduleResults.any { it.hasMore!! }
+                combinedSequence.toList(),
+                scheduleResults.any { it.hasMore!! }
         )
     }
 

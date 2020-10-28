@@ -260,34 +260,9 @@ class Task<T : ProjectType>(
     ).instances.filter { it.isRootInstance(now) }
 
     data class InstanceResult<out T : ProjectType>(
-            val instances: List<Instance<out T>> = listOf(),
+            val instances: Sequence<Instance<out T>> = sequenceOf(),
             val hasMore: Boolean = false
     )
-
-    private fun Iterable<Instance<out T>>.filterInstancesByDate(
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp,
-            bySchedule: Boolean
-    ): InstanceResult<T> {
-        var hasMore = false
-
-        val filtered = filter {
-            throwIfInterrupted()
-
-            val instanceExactTimeStamp = it.getSequenceDate(bySchedule).toExactTimeStamp()
-
-            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
-
-            if (instanceExactTimeStamp >= endExactTimeStamp) {
-                hasMore = true
-                return@filter false
-            }
-
-            true
-        }
-
-        return InstanceResult(filtered, hasMore)
-    }
 
     private fun getExistingInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
@@ -313,7 +288,6 @@ class Task<T : ProjectType>(
 
                     true
                 }
-                .toList()
                 .sortedBy { it.second }
                 .map { it.first }
 
@@ -355,10 +329,7 @@ class Task<T : ProjectType>(
 
         val combinedSequence = combineInstanceSequences(scheduleInstanceSequences, bySchedule)
 
-        return InstanceResult(
-                combinedSequence.toList(),
-                scheduleResults.any { it.hasMore!! }
-        )
+        return InstanceResult(combinedSequence, scheduleResults.any { it.hasMore!! })
     }
 
     // contains only generated instances
@@ -387,10 +358,7 @@ class Task<T : ProjectType>(
 
         val finalSequence = combineInstanceSequences(instanceSequences, bySchedule)
 
-        return InstanceResult(
-                finalSequence.toList(),
-                parentDatas.any { it.hasMore }
-        )
+        return InstanceResult(finalSequence, parentDatas.any { it.hasMore })
     }
 
     /*
@@ -458,10 +426,7 @@ class Task<T : ProjectType>(
                 bySchedule
         )
 
-        val instanceResult = InstanceResult(
-                combinedSequence.toList(),
-                instanceResults.any { it.hasMore }
-        )
+        val instanceResult = InstanceResult(combinedSequence, instanceResults.any { it.hasMore })
 
         taskLocker?.instances?.put(key, instanceResult)
 

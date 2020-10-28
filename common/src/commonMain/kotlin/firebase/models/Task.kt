@@ -278,6 +278,19 @@ class Task<T : ProjectType>(
                 .let { it.copy(it.instances.sortedBy { it.getSequenceDate(bySchedule) }) }
     }
 
+    private fun combineInstanceSequences(
+            instanceSequences: List<Sequence<Instance<T>>>,
+            bySchedule: Boolean
+    ): Sequence<Instance<T>> {
+        return combineSequences(instanceSequences) {
+            val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
+                    .filter { it.first != null }
+                    .minByOrNull { it.first!! }!!
+
+            finalPair.second
+        }
+    }
+
     // contains only generated instances
     private fun getScheduleInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
@@ -298,14 +311,9 @@ class Task<T : ProjectType>(
             }
         }
 
-        val combinedSequence = combineSequences(scheduleInstanceSequences) {
-            val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
-                    .filter { it.first != null }
-                    .minByOrNull { it.first!! }!!
+        val combinedSequence = combineInstanceSequences(scheduleInstanceSequences, bySchedule)
 
-            finalPair.second
-        }
-
+        // todo sequence I don't think filtering is needed anymore, since these instances have schedule==instance
         val scheduleInstances = combinedSequence.toList().filterInstancesByDate(
                 startExactTimeStamp,
                 endExactTimeStamp,
@@ -396,6 +404,8 @@ class Task<T : ProjectType>(
 
         /* todo sequence
             1. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
+            1a. I think hasMore will need to be attached to individual sequence elements
+            1b. Then again, I think that concept is built into the design of a sequence's iterator
             2. loosen restrictions on start/end params
             3. start using sequences downstream
          */

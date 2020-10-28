@@ -411,8 +411,13 @@ class Task<T : ProjectType>(
                 parentInstanceResult
         )
 
+        val combinedSequence = combineInstanceSequences(
+                instanceResults.map { it.instances.asSequence() },
+                bySchedule
+        )
+
         val instanceResult = InstanceResult(
-                instanceResults.flatMap { it.instances }.distinct(),
+                combinedSequence.toList(),
                 instanceResults.any { it.hasMore }
         )
 

@@ -264,18 +264,60 @@ class Task<T : ProjectType>(
             val hasMore: Boolean = false
     )
 
+    private fun Iterable<Instance<out T>>.filterInstancesByDate(
+            startExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp,
+            bySchedule: Boolean
+    ): InstanceResult<T> {
+        var hasMore = false
+
+        val filtered = filter {
+            throwIfInterrupted()
+
+            val instanceExactTimeStamp = it.getSequenceDate(bySchedule).toExactTimeStamp()
+
+            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
+
+            if (instanceExactTimeStamp >= endExactTimeStamp) {
+                hasMore = true
+                return@filter false
+            }
+
+            true
+        }
+
+        return InstanceResult(filtered, hasMore)
+    }
+
     private fun getExistingInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp,
             bySchedule: Boolean
     ): InstanceResult<T> {
-        return _existingInstances.values
-                .filterInstancesByDate(
-                        startExactTimeStamp,
-                        endExactTimeStamp,
-                        bySchedule
-                )
-                .let { it.copy(it.instances.sortedBy { it.getSequenceDate(bySchedule) }) }
+        var hasMore = false
+
+        val instances = _existingInstances.values
+                .asSequence()
+                .map { it to it.getSequenceDate(bySchedule) }
+                .filter { (_, dateTime) ->
+                    throwIfInterrupted()
+
+                    val instanceExactTimeStamp = dateTime.toExactTimeStamp()
+
+                    if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
+
+                    if (instanceExactTimeStamp >= endExactTimeStamp) {
+                        hasMore = true
+                        return@filter false
+                    }
+
+                    true
+                }
+                .toList()
+                .sortedBy { it.second }
+                .map { it.first }
+
+        return InstanceResult(instances, hasMore)
     }
 
     private fun combineInstanceSequences(
@@ -427,31 +469,6 @@ class Task<T : ProjectType>(
     }
 
     private fun Instance<out T>.getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
-
-    private fun Iterable<Instance<out T>>.filterInstancesByDate(
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp,
-            bySchedule: Boolean
-    ): InstanceResult<T> {
-        var hasMore = false
-
-        val filtered = filter {
-            throwIfInterrupted()
-
-            val instanceExactTimeStamp = it.getSequenceDate(bySchedule).toExactTimeStamp()
-
-            if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
-
-            if (instanceExactTimeStamp >= endExactTimeStamp) {
-                hasMore = true
-                return@filter false
-            }
-
-            true
-        }
-
-        return InstanceResult(filtered, hasMore)
-    }
 
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
         val existingInstances = existingInstances.values

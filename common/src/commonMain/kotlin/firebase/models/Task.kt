@@ -279,9 +279,9 @@ class Task<T : ProjectType>(
     }
 
     private fun combineInstanceSequences(
-            instanceSequences: List<Sequence<Instance<T>>>,
+            instanceSequences: List<Sequence<Instance<out T>>>,
             bySchedule: Boolean
-    ): Sequence<Instance<T>> {
+    ): Sequence<Instance<out T>> {
         return combineSequences(instanceSequences) {
             val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
                     .filter { it.first != null }
@@ -323,8 +323,6 @@ class Task<T : ProjectType>(
     private fun getParentInstanceResult(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp,
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp,
             bySchedule: Boolean
     ): InstanceResult<T> {
@@ -334,23 +332,22 @@ class Task<T : ProjectType>(
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
         }
 
-        val parentInstances = parentDatas.flatMap { it.instances }
-                .flatMap { it.getChildInstances(now) }
-                .asSequence()
-                .map { it.first }
-                .filter { it.taskKey == taskKey }
-                .filter { !it.exists() }
-                .toList()
+        val instanceSequences = parentDatas.map {
+            it.instances
+                    .asSequence() // this is a list, but will be a sequence. we can assume this will be ordered
+                    .mapNotNull {
+                        it.getChildInstances(now)
+                                .map { it.first }
+                                .singleOrNull { it.taskKey == taskKey }
+                                ?.takeIf { !it.exists() }
+                    }
+        }
 
-        val parentInstancesFiltered = parentInstances.filterInstancesByDate(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                bySchedule
-        )
+        val finalSequence = combineInstanceSequences(instanceSequences, bySchedule)
 
         return InstanceResult(
-                parentInstancesFiltered.instances,
-                parentInstancesFiltered.hasMore || parentDatas.any { it.hasMore }
+                finalSequence.toList(),
+                parentDatas.any { it.hasMore }
         )
     }
 
@@ -406,8 +403,6 @@ class Task<T : ProjectType>(
         val parentInstanceResult = getParentInstanceResult(
                 givenStartExactTimeStamp,
                 givenEndExactTimeStamp,
-                startExactTimeStamp,
-                endExactTimeStamp,
                 now,
                 bySchedule
         )

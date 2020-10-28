@@ -374,14 +374,6 @@ class Task<T : ProjectType>(
     ): InstanceResult<T> {
         throwIfInterrupted()
 
-        val taskLocker = getTaskLocker()?.also { check(it.now == now) }
-
-        val key = Triple(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
-
-        taskLocker?.instances
-                ?.get(key)
-                ?.let { return it }
-
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp
@@ -426,11 +418,7 @@ class Task<T : ProjectType>(
                 bySchedule
         )
 
-        val instanceResult = InstanceResult(combinedSequence, instanceResults.any { it.hasMore })
-
-        taskLocker?.instances?.put(key, instanceResult)
-
-        return instanceResult
+        return InstanceResult(combinedSequence, instanceResults.any { it.hasMore })
     }
 
     private fun Instance<out T>.getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime

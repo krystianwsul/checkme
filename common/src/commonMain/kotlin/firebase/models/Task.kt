@@ -393,9 +393,7 @@ class Task<T : ProjectType>(
         val scheduleInstanceResult = getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         /* todo sequence
-            1. start working on migrating each to sequence (hint, step 1. sort by instance/schedule date)
-            1a. I think hasMore will need to be attached to individual sequence elements
-            1b. Then again, I think that concept is built into the design of a sequence's iterator
+            1. Change return type to sequence
             2. loosen restrictions on start/end params
             3. start using sequences downstream
          */

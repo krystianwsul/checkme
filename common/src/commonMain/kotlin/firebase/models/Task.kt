@@ -266,7 +266,7 @@ class Task<T : ProjectType>(
 
     private fun getExistingInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             bySchedule: Boolean
     ): InstanceResult<T> {
         var hasMore = false
@@ -281,7 +281,7 @@ class Task<T : ProjectType>(
 
                     if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
 
-                    if (instanceExactTimeStamp >= endExactTimeStamp) {
+                    if (endExactTimeStamp?.let { instanceExactTimeStamp >= it } == true) {
                         hasMore = true
                         return@filter false
                     }
@@ -310,7 +310,7 @@ class Task<T : ProjectType>(
     // contains only generated instances
     private fun getScheduleInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             bySchedule: Boolean
     ): InstanceResult<T> {
         val scheduleResults = scheduleIntervals.map {
@@ -335,7 +335,7 @@ class Task<T : ProjectType>(
     // contains only generated instances
     private fun getParentInstanceResult(
             givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp,
+            givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean
     ): InstanceResult<T> {
@@ -361,14 +361,9 @@ class Task<T : ProjectType>(
         return InstanceResult(finalSequence, parentDatas.any { it.hasMore })
     }
 
-    /*
-     todo to actually return a sequence from this, then the individual sequences from both parents
-      and schedules would need to go through a mechanism that would somehow grab the next element
-      from each one and yield them in order
-     */
     fun getInstances(
             givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp,
+            givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean = false
     ): InstanceResult<T> {
@@ -380,11 +375,11 @@ class Task<T : ProjectType>(
         ).maxOrNull()!!
 
         val endExactTimeStamp = listOfNotNull(
-                endExactTimeStamp,
-                givenEndExactTimeStamp
-        ).minOrNull()!!
+                givenEndExactTimeStamp,
+                endExactTimeStamp
+        ).minOrNull()
 
-        if (startExactTimeStamp > endExactTimeStamp) return InstanceResult()
+        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return InstanceResult()
 
         val existingInstanceResult = getExistingInstanceResult(
                 startExactTimeStamp,
@@ -393,12 +388,6 @@ class Task<T : ProjectType>(
         )
 
         val scheduleInstanceResult = getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
-
-        /* todo sequence
-            1. Change return type to sequence
-            2. loosen restrictions on start/end params
-            3. start using sequences downstream
-         */
 
         val parentInstanceResult = getParentInstanceResult(
                 givenStartExactTimeStamp,

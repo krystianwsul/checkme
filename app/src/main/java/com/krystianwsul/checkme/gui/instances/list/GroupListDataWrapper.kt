@@ -82,7 +82,7 @@ data class GroupListDataWrapper(
             normalizedNote
         }
 
-        override fun matchesChildren(query: String) = children.values.any { it.matchesQuery(query) }
+        override fun matchesChildren(query: String?) = children.values.any { it.matchesQuery(query) }
     }
 
     interface SelectedData {

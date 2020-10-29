@@ -286,17 +286,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         }
 
     fun canBeShown(): Boolean {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
 
-        if (!modelNode.isVisibleDuringActionMode && hasActionMode())
-            return false
+        if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
-        if (treeViewAdapter.filterCriteria?.let { modelNode.filter(it) } == false)
-            return false
+        if (!modelNode.filter(treeViewAdapter.filterCriteria)) return false
 
-        if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.none { it.canBeShown() })
-            return false
+        if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.none { it.canBeShown() }) return false
 
         return true
     }

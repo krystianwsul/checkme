@@ -302,7 +302,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             normalizedNote
         }
 
-        override fun matchesChildren(query: String) = parentTreeDatas.values.any { it.matchesQuery(query) }
+        override fun matchesChildren(query: String?) = parentTreeDatas.values.any { it.matchesQuery(query) }
     }
 
     sealed class ParentKey : Parcelable {

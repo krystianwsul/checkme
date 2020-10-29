@@ -6,7 +6,7 @@ import kotlin.reflect.KProperty
 private object UNINITIALIZED_VALUE
 
 @Suppress("UNCHECKED_CAST")
-actual class InvalidatableLazyImpl<T> actual constructor(
+actual open class InvalidatableLazyImpl<T> actual constructor(
         private val initializer: () -> T,
         lock: Any?
 ) : Lazy<T>, Serializable {
@@ -15,7 +15,7 @@ actual class InvalidatableLazyImpl<T> actual constructor(
     private var _value: Any? = UNINITIALIZED_VALUE
     private val lock = lock ?: this
 
-    actual fun invalidate() {
+    actual open fun invalidate() {
         _value = UNINITIALIZED_VALUE
     }
 

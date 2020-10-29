@@ -261,7 +261,7 @@ class Task<T : ProjectType>(
 
     data class InstanceResult<out T : ProjectType>(
             val instances: Sequence<Instance<out T>> = sequenceOf(),
-            val hasMore: Boolean = false
+            val hasMore: Boolean? = false
     )
 
     private fun getExistingInstanceResult(
@@ -329,8 +329,10 @@ class Task<T : ProjectType>(
 
         val combinedSequence = combineInstanceSequences(scheduleInstanceSequences, bySchedule)
 
-        return InstanceResult(combinedSequence, scheduleResults.any { it.hasMore!! })
+        return InstanceResult(combinedSequence, scheduleResults.map { it.hasMore }.combine())
     }
+
+    private fun List<Boolean?>.combine() = if (contains(null)) null else any { it!! }
 
     // contains only generated instances
     private fun getParentInstanceResult(
@@ -358,7 +360,7 @@ class Task<T : ProjectType>(
 
         val finalSequence = combineInstanceSequences(instanceSequences, bySchedule)
 
-        return InstanceResult(finalSequence, parentDatas.any { it.hasMore })
+        return InstanceResult(finalSequence, parentDatas.map { it.hasMore }.combine())
     }
 
     fun getInstances(
@@ -407,7 +409,7 @@ class Task<T : ProjectType>(
                 bySchedule
         )
 
-        return InstanceResult(combinedSequence, instanceResults.any { it.hasMore })
+        return InstanceResult(combinedSequence, instanceResults.map { it.hasMore }.combine())
     }
 
     private fun Instance<out T>.getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime

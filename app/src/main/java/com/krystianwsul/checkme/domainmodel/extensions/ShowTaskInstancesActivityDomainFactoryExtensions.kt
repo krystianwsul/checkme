@@ -5,11 +5,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.toExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
-import com.soywiz.klock.days
 
 @Synchronized
 fun DomainFactory.getShowTaskInstancesData(
@@ -27,33 +24,16 @@ fun DomainFactory.getShowTaskInstancesData(
 
     val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-    val instances = mutableListOf<Instance<*>>()
+    val desiredCount = (page + 1) * 20
 
-    var startExactTimeStamp: ExactTimeStamp? = null
-    var endExactTimeStamp = now
+    val instancesPlusExtra = task.getInstances(null, null, now)
+            .instances
+            .take(desiredCount + 1)
+            .toList()
 
-    var hasMore = true
-    while (hasMore) {
-        val (newInstances, newHasMore) = task.getInstances(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                now
-        )
+    val instances = instancesPlusExtra.take(desiredCount)
 
-        if (!newHasMore)
-            hasMore = false
-
-        instances += newInstances
-
-        if (instances.size > (page + 1) * 20)
-            break
-
-        startExactTimeStamp = endExactTimeStamp
-
-        endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
-                .plus(1.days)
-                .toExactTimeStamp()
-    }
+    val hasMore = instances.size < instancesPlusExtra.size
 
     val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)

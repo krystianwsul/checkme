@@ -344,19 +344,14 @@ abstract class Project<T : ProjectType> : Current {
         return filteredTasks.flatMap { task ->
             throwIfInterrupted()
 
-            val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now)
+            val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
 
             if (taskResults.hasMore!!) queryMatchAccumulator?.accumulate(task, true)
 
             taskResults.instances.filter { instance ->
                 throwIfInterrupted()
 
-                if (!instance.isRootInstance(now)) return@filter false
-                throwIfInterrupted()
-
-                if (!instance.isVisible(now, true)) return@filter false
-
-                true
+                instance.isVisible(now, true)
             }
         }
     }

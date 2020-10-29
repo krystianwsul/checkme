@@ -267,12 +267,15 @@ class Task<T : ProjectType>(
     private fun getExistingInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp?,
-            bySchedule: Boolean
+            now: ExactTimeStamp,
+            bySchedule: Boolean,
+            onlyRoot: Boolean
     ): InstanceResult<T> {
         var hasMore = false
 
         val instances = _existingInstances.values
                 .asSequence()
+                .run { if (onlyRoot) filter { it.isRootInstance(now) } else this }
                 .map { it to it.getSequenceDate(bySchedule) }
                 .filter { (_, dateTime) ->
                     throwIfInterrupted()
@@ -367,7 +370,8 @@ class Task<T : ProjectType>(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
-            bySchedule: Boolean = false
+            bySchedule: Boolean = false,
+            onlyRoot: Boolean = false
     ): InstanceResult<T> {
         throwIfInterrupted()
 
@@ -383,26 +387,20 @@ class Task<T : ProjectType>(
 
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return InstanceResult()
 
-        val existingInstanceResult = getExistingInstanceResult(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                bySchedule
-        )
+        val instanceResults = mutableListOf<InstanceResult<T>>()
 
-        val scheduleInstanceResult = getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
+        instanceResults += getExistingInstanceResult(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
 
-        val parentInstanceResult = getParentInstanceResult(
-                givenStartExactTimeStamp,
-                givenEndExactTimeStamp,
-                now,
-                bySchedule
-        )
+        instanceResults += getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
-        val instanceResults = listOf(
-                existingInstanceResult,
-                scheduleInstanceResult,
-                parentInstanceResult
-        )
+        if (!onlyRoot) {
+            instanceResults += getParentInstanceResult(
+                    givenStartExactTimeStamp,
+                    givenEndExactTimeStamp,
+                    now,
+                    bySchedule
+            )
+        }
 
         val combinedSequence = combineInstanceSequences(
                 instanceResults.map { it.instances.asSequence() },

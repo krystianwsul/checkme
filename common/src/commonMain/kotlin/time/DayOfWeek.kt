@@ -11,7 +11,13 @@ enum class DayOfWeek {
 
     companion object {
 
-        fun fromDate(date: Date) = values()[date.toDateTimeTz().dayOfWeekInt]
+        private val dateCache = mutableMapOf<Date, DayOfWeek>() // because I can't hold this on a parcelable date
+
+        fun fromDate(date: Date): DayOfWeek {
+            if (!dateCache.containsKey(date)) dateCache[date] = values()[date.toDateTimeTz().dayOfWeekInt]
+
+            return dateCache.getValue(date)
+        }
 
         val set by lazy { values().toSet() }
     }

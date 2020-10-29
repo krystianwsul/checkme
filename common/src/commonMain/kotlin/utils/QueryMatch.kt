@@ -5,8 +5,8 @@ interface QueryMatch {
     val normalizedName: String
     val normalizedNote: String?
 
-    fun matchesQuery(query: String): Boolean {
-        if (query.isEmpty()) return true
+    fun matchesQuery(query: String?): Boolean {
+        if (query.isNullOrEmpty()) return true
 
         if (normalizedName.contains(query)) return true
 

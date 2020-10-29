@@ -89,5 +89,5 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val isVisibleWhenEmpty = false
 
-    override fun filter(filterCriteria: Any) = true
+    override fun filter(filterCriteria: Any?) = true
 }

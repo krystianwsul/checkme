@@ -348,7 +348,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun filter(filterCriteria: Any) = parentTreeData.matchesQuery(filterCriteria as String)
+            override fun filter(filterCriteria: Any?) = parentTreeData.matchesQuery(filterCriteria as? String)
         }
     }
 

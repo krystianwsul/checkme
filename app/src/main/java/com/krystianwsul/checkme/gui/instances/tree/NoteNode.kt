@@ -48,11 +48,12 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
         normalizedNote
     }
 
-    override fun filter(filterCriteria: Any): Boolean {
+    override fun filter(filterCriteria: Any?): Boolean {
+        if (filterCriteria == null) return true
+
         val query = (filterCriteria as SearchData).query
 
-        if (query.isEmpty())
-            return false
+        if (query.isEmpty()) return true
 
         return normalizedNote.contains(query)
     }

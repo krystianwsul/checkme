@@ -256,8 +256,9 @@ class Task<T : ProjectType>(
             null,
             now.plusOne(),
             now,
+            true,
             true
-    ).instances.filter { it.isRootInstance(now) }
+    ).instances
 
     data class InstanceResult<out T : ProjectType>(
             val instances: Sequence<Instance<out T>> = sequenceOf(),

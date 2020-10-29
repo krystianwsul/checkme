@@ -213,6 +213,6 @@ class IrrelevantTest {
         Irrelevant.setIrrelevant(parent, project, now)
 
         assertTrue(task.getCurrentSchedules(now).size == 1)
-        assertTrue(task.getPastRootInstances(now).isEmpty())
+        assertTrue(task.getPastRootInstances(now).toList().isEmpty())
     }
 }

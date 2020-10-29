@@ -342,9 +342,9 @@ abstract class Project<T : ProjectType> : Current {
         val instanceSequences = filteredTasks.map { task ->
             throwIfInterrupted()
 
-            val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
+            val instances = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
 
-            taskResults.instances.filter { instance ->
+            instances.filter { instance ->
                 throwIfInterrupted()
 
                 instance.isVisible(now, true)

@@ -27,9 +27,11 @@ fun DomainFactory.getShowTaskInstancesData(
 
     val desiredCount = (page + 1) * PAGE_SIZE
 
-    val (instances, hasMore) = task.getInstances(null, null, now)
-            .instances
-            .takeAndHasMore(desiredCount)
+    val (instances, hasMore) = task.getInstances(
+            null,
+            null,
+            now
+    ).takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)

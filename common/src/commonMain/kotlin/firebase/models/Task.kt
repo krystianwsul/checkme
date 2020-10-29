@@ -258,23 +258,16 @@ class Task<T : ProjectType>(
             now,
             true,
             true
-    ).instances
-
-    data class InstanceResult<out T : ProjectType>(
-            val instances: Sequence<Instance<out T>> = sequenceOf(),
-            val hasMore: Boolean? = false
     )
 
-    private fun getExistingInstanceResult(
+    private fun getExistingInstances(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean,
             onlyRoot: Boolean
-    ): InstanceResult<T> {
-        var hasMore = false
-
-        val instances = _existingInstances.values
+    ): Sequence<Instance<T>> {
+        return _existingInstances.values
                 .asSequence()
                 .run { if (onlyRoot) filter { it.isRootInstance(now) } else this }
                 .map { it to it.getSequenceDate(bySchedule) }
@@ -285,25 +278,20 @@ class Task<T : ProjectType>(
 
                     if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
 
-                    if (endExactTimeStamp?.let { instanceExactTimeStamp >= it } == true) {
-                        hasMore = true
-                        return@filter false
-                    }
+                    if (endExactTimeStamp?.let { instanceExactTimeStamp >= it } == true) return@filter false
 
                     true
                 }
                 .sortedBy { it.second }
                 .map { it.first }
-
-        return InstanceResult(instances, hasMore)
     }
 
     // contains only generated instances
-    private fun getScheduleInstanceResult(
+    private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp?,
             bySchedule: Boolean
-    ): InstanceResult<T> {
+    ): Sequence<Instance<out T>> {
         val scheduleResults = scheduleIntervals.map {
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
@@ -318,40 +306,32 @@ class Task<T : ProjectType>(
             }
         }
 
-        val combinedSequence = combineInstanceSequences(scheduleInstanceSequences, bySchedule)
-
-        return InstanceResult(combinedSequence, scheduleResults.map { it.hasMore }.combine())
+        return combineInstanceSequences(scheduleInstanceSequences, bySchedule)
     }
 
-    private fun List<Boolean?>.combine() = if (contains(null)) null else any { it!! }
-
     // contains only generated instances
-    private fun getParentInstanceResult(
+    private fun getParentInstances(
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean
-    ): InstanceResult<T> {
-        val parentDatas = parentHierarchyIntervals.map {
+    ): Sequence<Instance<out T>> {
+        val parentInstances = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
         }
 
-        val instanceSequences = parentDatas.map {
-            it.instances
-                    .asSequence() // this is a list, but will be a sequence. we can assume this will be ordered
-                    .mapNotNull {
-                        it.getChildInstances(now)
-                                .map { it.first }
-                                .singleOrNull { it.taskKey == taskKey }
-                                ?.takeIf { !it.exists() }
-                    }
+        val instanceSequences = parentInstances.map { // todo sequence combine with above
+            it.asSequence().mapNotNull {
+                it.getChildInstances(now)
+                        .map { it.first }
+                        .singleOrNull { it.taskKey == taskKey }
+                        ?.takeIf { !it.exists() }
+            }
         }
 
-        val finalSequence = combineInstanceSequences(instanceSequences, bySchedule)
-
-        return InstanceResult(finalSequence, parentDatas.map { it.hasMore }.combine())
+        return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
     fun getInstances(
@@ -360,7 +340,7 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp,
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false
-    ): InstanceResult<T> {
+    ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
         val startExactTimeStamp = listOfNotNull(
@@ -373,16 +353,16 @@ class Task<T : ProjectType>(
                 endExactTimeStamp
         ).minOrNull()
 
-        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return InstanceResult()
+        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
-        val instanceResults = mutableListOf<InstanceResult<T>>()
+        val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
-        instanceResults += getExistingInstanceResult(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
+        instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
 
-        instanceResults += getScheduleInstanceResult(startExactTimeStamp, endExactTimeStamp, bySchedule)
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         if (!onlyRoot) {
-            instanceResults += getParentInstanceResult(
+            instanceSequences += getParentInstances(
                     givenStartExactTimeStamp,
                     givenEndExactTimeStamp,
                     now,
@@ -390,12 +370,7 @@ class Task<T : ProjectType>(
             )
         }
 
-        val combinedSequence = combineInstanceSequences(
-                instanceResults.map { it.instances.asSequence() },
-                bySchedule
-        )
-
-        return InstanceResult(combinedSequence, instanceResults.map { it.hasMore }.combine())
+        return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

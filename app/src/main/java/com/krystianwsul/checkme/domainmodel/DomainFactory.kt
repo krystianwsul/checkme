@@ -442,10 +442,13 @@ class DomainFactory(
             endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp,
             queryMatchAccumulator: QueryMatchAccumulator? = null
-    ) = projectsFactory.projects
-            .values
-            .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator).toList() }
-            .flatten()
+    ): Sequence<Instance<*>> {
+        val instanceSequences = projectsFactory.projects
+                .values
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator) }
+
+        return combineInstanceSequences(instanceSequences)
+    }
 
     fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
             .customTimes

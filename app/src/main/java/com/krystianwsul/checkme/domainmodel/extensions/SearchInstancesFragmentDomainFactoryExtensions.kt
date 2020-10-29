@@ -48,7 +48,7 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
                         endExactTimeStamp,
                         now,
                         queryMatchAccumulator
-                )
+                ).toList()
 
                 if (!queryMatchAccumulator.hasMore) hasMore = false
 

@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
@@ -37,22 +36,20 @@ class SingleSchedule<T : ProjectType>(
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData {
-        val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
+    ): Sequence<DateTime> {
+        val scheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
-        if (givenStartExactTimeStamp?.let { it > singleScheduleExactTimeStamp } == true)
-            return InstanceSequenceData(emptySequence(), false)
+        if (givenStartExactTimeStamp?.let { it > scheduleExactTimeStamp } == true) return emptySequence()
 
-        if (givenExactEndTimeStamp?.let { it <= singleScheduleExactTimeStamp } == true)
-            return InstanceSequenceData(emptySequence(), true)
+        if (givenExactEndTimeStamp?.let { it <= scheduleExactTimeStamp } == true) return emptySequence()
 
-        if (endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
-            return InstanceSequenceData(emptySequence(), false)
+        // timezone hack
+        if (endExactTimeStamp?.let { scheduleExactTimeStamp >= it } == true) return emptySequence()
 
-        if (scheduleInterval.endExactTimeStamp?.let { singleScheduleExactTimeStamp >= it } == true)// timezone hack
-            return InstanceSequenceData(emptySequence(), false)
+        // timezone hack
+        if (scheduleInterval.endExactTimeStamp?.let { scheduleExactTimeStamp >= it } == true) return emptySequence()
 
-        return InstanceSequenceData(sequenceOf(originalScheduleDateTime), false)
+        return sequenceOf(originalScheduleDateTime)
     }
 
     override fun isVisible(

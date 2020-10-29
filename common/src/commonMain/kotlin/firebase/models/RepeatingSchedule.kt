@@ -4,7 +4,6 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.invalidatableLazy
@@ -32,7 +31,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData {
+    ): Sequence<DateTime> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleRecord.from
@@ -58,15 +57,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 givenExactEndTimeStamp
         ).minOrNull()
 
-        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) {
-            val hasMore = when {
-                givenExactEndTimeStamp != null && intrinsicEndExactTimeStamp != null -> intrinsicEndExactTimeStamp > givenExactEndTimeStamp
-                givenExactEndTimeStamp != null -> true
-                else -> false // intrinsicEndExactTimeStamp != null
-            }
-
-            return InstanceSequenceData(emptySequence(), hasMore)
-        }
+        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
         val nullableSequence: Sequence<DateTime?>
 
@@ -101,13 +92,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
         }
 
-        val hasMore = if (givenExactEndTimeStamp != null) {
-            intrinsicEndExactTimeStamp?.let { it > givenExactEndTimeStamp } != false
-        } else {
-            null // meaningless for open sequence
-        }
-
-        return InstanceSequenceData(nullableSequence.filterNotNull(), hasMore)
+        return nullableSequence.filterNotNull()
     }
 
     private fun getDateTimeInDate(
@@ -147,7 +132,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                     scheduleInterval,
                     null,
                     null
-            ).dateTimes.any { task.getInstance(it).isVisible(now, hack24) }
+            ).any { task.getInstance(it).isVisible(now, hack24) }
         } ?: true
     }
 
@@ -156,9 +141,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 scheduleInterval,
                 null,
                 now.plusOne()
-        ).dateTimes
-                .map(rootTask::getInstance)
-                .filter { it.isRootInstance(now) }
+        ).map(rootTask::getInstance).filter { it.isRootInstance(now) }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }

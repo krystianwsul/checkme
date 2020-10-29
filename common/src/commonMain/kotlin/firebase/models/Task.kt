@@ -299,7 +299,7 @@ class Task<T : ProjectType>(
         val scheduleInstanceSequences = scheduleResults.map {
             throwIfInterrupted()
 
-            it.dateTimes.mapNotNull {
+            it.mapNotNull {
                 throwIfInterrupted()
 
                 getInstance(it).takeIf { !it.exists() }
@@ -377,7 +377,6 @@ class Task<T : ProjectType>(
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentSchedules(now).mapNotNull {
             it.getDateTimesInRange(now, null)
-                    .dateTimes
                     .firstOrNull()
                     ?.let(::getInstance)
         }

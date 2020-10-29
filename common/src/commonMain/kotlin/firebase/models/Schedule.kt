@@ -4,7 +4,6 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.ScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceSequenceData
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
@@ -49,7 +48,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): InstanceSequenceData // hasMore required if end not null
+    ): Sequence<DateTime>
 
     abstract fun isVisible(
             scheduleInterval: ScheduleInterval<T>,

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
@@ -27,16 +28,12 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
             // todo sequence I don't think I need this whole object anymore
             val queryMatchAccumulator = QueryMatchAccumulator(query)
 
-            val instancesPlusExtra = getRootInstances(
+            val (instances, hasMore) = getRootInstances(
                     null,
                     null,
                     now,
                     queryMatchAccumulator
-            ).take(desiredCount + 1).toList()
-
-            val instances = instancesPlusExtra.take(desiredCount)
-
-            val hasMore = instances.size < instancesPlusExtra.size
+            ).takeAndHasMore(desiredCount)
 
             val instanceDatas = instances.map {
                 val task = it.task

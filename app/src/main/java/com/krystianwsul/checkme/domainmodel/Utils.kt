@@ -21,3 +21,13 @@ fun <T : DomainData> getDomainResultInterrupting(action: () -> T): DomainResult<
         DomainResult.Interrupted()
     }
 }
+
+fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
+    val elementsPlusOne = take(n + 1).toList()
+
+    val elements = elementsPlusOne.take(n)
+
+    val hasMore = elements.size < elementsPlusOne.size
+
+    return Pair(elements, hasMore)
+}

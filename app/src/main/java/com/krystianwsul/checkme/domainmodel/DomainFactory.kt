@@ -439,7 +439,7 @@ class DomainFactory(
 
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp?,
-            endExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             queryMatchAccumulator: QueryMatchAccumulator? = null
     ): Sequence<Instance<*>> {

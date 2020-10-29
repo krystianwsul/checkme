@@ -319,11 +319,11 @@ abstract class Project<T : ProjectType> : Current {
 
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp?,
-            endExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             queryMatchAccumulator: QueryMatchAccumulator? = null
     ): Sequence<Instance<out T>> {
-        check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
+        check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         throwIfInterrupted()
 

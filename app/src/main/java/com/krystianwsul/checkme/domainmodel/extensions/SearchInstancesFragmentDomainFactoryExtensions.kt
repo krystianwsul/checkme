@@ -7,11 +7,11 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.toExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.QueryMatchAccumulator
 import com.soywiz.klock.days
 
@@ -32,8 +32,7 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
             var startExactTimeStamp: ExactTimeStamp? = null
             var endExactTimeStamp = now
 
-            val instanceKeys = mutableSetOf<InstanceKey>()
-            val instanceDatas = mutableListOf<GroupListDataWrapper.InstanceData>()
+            val instances = mutableListOf<Instance<*>>()
 
             var step = 1
 
@@ -50,54 +49,51 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
                         queryMatchAccumulator
                 ).toList()
 
+                instances += newInstances
+
                 if (!queryMatchAccumulator.hasMore) hasMore = false
 
-                val newInstanceDatas = newInstances.filter { it.instanceKey !in instanceKeys }
-                        .filter { it.matchesQuery(now, query) }
-                        .map {
-                            val task = it.task
-
-                            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
-                            val children = getChildInstanceDatas(it, now, query)
-
-                            val instanceData = GroupListDataWrapper.InstanceData(
-                                    it.done,
-                                    it.instanceKey,
-                                    it.instanceDateTime.getDisplayText(),
-                                    it.name,
-                                    it.instanceDateTime.timeStamp,
-                                    task.current(now),
-                                    task.isVisible(now, false),
-                                    it.isRootInstance(now),
-                                    isRootTask,
-                                    it.exists(),
-                                    it.getCreateTaskTimePair(ownerKey),
-                                    task.note,
-                                    children,
-                                    it.task.ordinal,
-                                    it.getNotificationShown(localFactory),
-                                    task.getImage(deviceDbInfo),
-                                    it.isRepeatingGroupChild(now)
-                            )
-
-                            children.values.forEach { it.instanceDataParent = instanceData }
-
-                            instanceData
-                        }
-
-                instanceDatas += newInstanceDatas
-                instanceKeys += newInstanceDatas.map { it.instanceKey }
-
-                if (instanceDatas.size > allPagesSize) break
+                if (instances.size > allPagesSize) break
 
                 startExactTimeStamp = endExactTimeStamp
 
-                if (newInstanceDatas.size < PAGE_SIZE) step *= 2
+                if (newInstances.size < PAGE_SIZE) step *= 2
 
                 endExactTimeStamp = endExactTimeStamp.toDateTimeSoy()
                         .plus(step.days)
                         .toExactTimeStamp()
+            }
+
+            val instanceDatas = instances.map {
+                val task = it.task
+
+                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+                val children = getChildInstanceDatas(it, now, query)
+
+                val instanceData = GroupListDataWrapper.InstanceData(
+                        it.done,
+                        it.instanceKey,
+                        it.instanceDateTime.getDisplayText(),
+                        it.name,
+                        it.instanceDateTime.timeStamp,
+                        task.current(now),
+                        task.isVisible(now, false),
+                        it.isRootInstance(now),
+                        isRootTask,
+                        it.exists(),
+                        it.getCreateTaskTimePair(ownerKey),
+                        task.note,
+                        children,
+                        it.task.ordinal,
+                        it.getNotificationShown(localFactory),
+                        task.getImage(deviceDbInfo),
+                        it.isRepeatingGroupChild(now)
+                )
+
+                children.values.forEach { it.instanceDataParent = instanceData }
+
+                instanceData
             }
 
             val cappedInstanceDatas = instanceDatas.sorted().take(allPagesSize)

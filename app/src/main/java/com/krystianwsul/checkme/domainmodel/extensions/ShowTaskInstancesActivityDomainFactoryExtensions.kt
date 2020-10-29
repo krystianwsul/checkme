@@ -24,7 +24,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
     val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-    val desiredCount = (page + 1) * 20
+    val desiredCount = (page + 1) * PAGE_SIZE
 
     val instancesPlusExtra = task.getInstances(null, null, now)
             .instances

@@ -346,7 +346,7 @@ abstract class Project<T : ProjectType> : Current {
 
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
 
-            if (taskResults.hasMore!!) queryMatchAccumulator?.accumulate(task, true)
+            if (taskResults.hasMore == true) queryMatchAccumulator?.accumulate(task, true)
 
             taskResults.instances.filter { instance ->
                 throwIfInterrupted()

@@ -1,5 +1,7 @@
 package com.krystianwsul.common.utils
 
+import com.krystianwsul.common.firebase.models.Instance
+
 fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>) -> Int): Sequence<T> {
     val sequenceHolders = sequences.map(::SequenceHolder)
 
@@ -17,6 +19,19 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
         selectedSequenceHolder.getNext()
 
         nextValue
+    }
+}
+
+fun <T : ProjectType> combineInstanceSequences(
+        instanceSequences: List<Sequence<Instance<out T>>>,
+        bySchedule: Boolean
+): Sequence<Instance<out T>> {
+    return combineSequences(instanceSequences) {
+        val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
+                .filter { it.first != null }
+                .minByOrNull { it.first!! }!!
+
+        finalPair.second
     }
 }
 

@@ -298,19 +298,6 @@ class Task<T : ProjectType>(
         return InstanceResult(instances, hasMore)
     }
 
-    private fun combineInstanceSequences(
-            instanceSequences: List<Sequence<Instance<out T>>>,
-            bySchedule: Boolean
-    ): Sequence<Instance<out T>> {
-        return combineSequences(instanceSequences) {
-            val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
-                    .filter { it.first != null }
-                    .minByOrNull { it.first!! }!!
-
-            finalPair.second
-        }
-    }
-
     // contains only generated instances
     private fun getScheduleInstanceResult(
             startExactTimeStamp: ExactTimeStamp,
@@ -410,8 +397,6 @@ class Task<T : ProjectType>(
 
         return InstanceResult(combinedSequence, instanceResults.map { it.hasMore }.combine())
     }
-
-    private fun Instance<out T>.getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
 
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
         val existingInstances = existingInstances.values

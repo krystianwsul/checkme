@@ -439,6 +439,8 @@ class Instance<T : ProjectType> private constructor(
         hierarchyExactTimeStampProperty.invalidate()
     }
 
+    fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

@@ -316,19 +316,16 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
-        val parentInstances = parentHierarchyIntervals.map {
+        val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
-        }
-
-        val instanceSequences = parentInstances.map { // todo sequence combine with above
-            it.asSequence().mapNotNull {
-                it.getChildInstances(now)
-                        .map { it.first }
-                        .singleOrNull { it.taskKey == taskKey }
-                        ?.takeIf { !it.exists() }
-            }
+                    .mapNotNull {
+                        it.getChildInstances(now)
+                                .map { it.first }
+                                .singleOrNull { it.taskKey == taskKey }
+                                ?.takeIf { !it.exists() }
+                    }
         }
 
         return combineInstanceSequences(instanceSequences, bySchedule)

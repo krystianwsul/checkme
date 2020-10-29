@@ -24,7 +24,7 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
 
 fun <T : ProjectType> combineInstanceSequences(
         instanceSequences: List<Sequence<Instance<out T>>>,
-        bySchedule: Boolean
+        bySchedule: Boolean = false
 ): Sequence<Instance<out T>> {
     return combineSequences(instanceSequences) {
         val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }

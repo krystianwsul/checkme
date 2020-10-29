@@ -322,7 +322,7 @@ abstract class Project<T : ProjectType> : Current {
             endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp,
             queryMatchAccumulator: QueryMatchAccumulator? = null
-    ): List<Instance<out T>> {
+    ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         throwIfInterrupted()
@@ -341,7 +341,7 @@ abstract class Project<T : ProjectType> : Current {
                 }
                 ?: tasks
 
-        return filteredTasks.flatMap { task ->
+        val instanceSequences = filteredTasks.map { task ->
             throwIfInterrupted()
 
             val taskResults = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
@@ -354,6 +354,8 @@ abstract class Project<T : ProjectType> : Current {
                 instance.isVisible(now, true)
             }
         }
+
+        return combineInstanceSequences(instanceSequences)
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :

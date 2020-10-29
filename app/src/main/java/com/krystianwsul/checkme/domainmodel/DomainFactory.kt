@@ -444,7 +444,7 @@ class DomainFactory(
             queryMatchAccumulator: QueryMatchAccumulator? = null
     ) = projectsFactory.projects
             .values
-            .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator) }
+            .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator).toList() }
             .flatten()
 
     fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject

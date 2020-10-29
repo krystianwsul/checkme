@@ -441,11 +441,11 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
-            queryMatchAccumulator: QueryMatchAccumulator? = null
+            query: String? = null
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryMatchAccumulator) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query) }
 
         return combineInstanceSequences(instanceSequences)
     }

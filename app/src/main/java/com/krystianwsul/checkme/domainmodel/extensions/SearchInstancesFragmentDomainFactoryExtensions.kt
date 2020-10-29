@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.locker.LockerManager
-import com.krystianwsul.common.utils.QueryMatchAccumulator
 
 const val PAGE_SIZE = 20
 
@@ -25,14 +24,11 @@ fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            // todo sequence I don't think I need this whole object anymore
-            val queryMatchAccumulator = QueryMatchAccumulator(query)
-
             val (instances, hasMore) = getRootInstances(
                     null,
                     null,
                     now,
-                    queryMatchAccumulator
+                    query
             ).takeAndHasMore(desiredCount)
 
             val instanceDatas = instances.map {

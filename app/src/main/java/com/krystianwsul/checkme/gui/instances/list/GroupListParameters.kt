@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.gui.MainActivity
+import com.krystianwsul.checkme.gui.main.MainActivity
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
 

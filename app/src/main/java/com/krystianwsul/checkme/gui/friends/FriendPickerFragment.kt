@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractDialogFragment
+import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.utils.UserKey
@@ -71,7 +71,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
     }
 
     private fun initialize() {
-        checkNotNull(activity)
+        check(activity != null)
         checkNotNull(data)
 
         animateVisibility(friendPickerRecycler, friendPickerProgress, data!!.immediate)

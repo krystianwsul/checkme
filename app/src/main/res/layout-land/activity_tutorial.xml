@@ -5,7 +5,7 @@
     android:id="@+id/tutorialCoordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.TutorialActivity">
+    tools:context=".gui.main.TutorialActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

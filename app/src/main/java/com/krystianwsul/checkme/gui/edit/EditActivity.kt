@@ -23,8 +23,8 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.ConfirmDialogFragment
-import com.krystianwsul.checkme.gui.NavBarActivity
+import com.krystianwsul.checkme.gui.base.NavBarActivity
+import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment

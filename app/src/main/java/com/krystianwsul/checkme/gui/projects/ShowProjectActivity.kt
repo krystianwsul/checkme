@@ -11,8 +11,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
-import com.krystianwsul.checkme.gui.ConfirmDialogFragment
+import com.krystianwsul.checkme.gui.base.AbstractActivity
+import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel

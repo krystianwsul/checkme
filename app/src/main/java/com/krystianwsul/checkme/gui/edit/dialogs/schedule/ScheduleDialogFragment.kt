@@ -23,8 +23,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
+import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditViewModel

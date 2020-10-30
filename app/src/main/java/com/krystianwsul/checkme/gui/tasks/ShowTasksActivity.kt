@@ -9,8 +9,8 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
-import com.krystianwsul.checkme.gui.ConfirmDialogFragment
+import com.krystianwsul.checkme.gui.base.AbstractActivity
+import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.utils.getOrInitializeFragment

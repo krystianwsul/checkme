@@ -34,7 +34,7 @@
                 style="@style/OldTextInput"
                 android:textColorHint="@color/textDisabledWhite">
 
-                <com.krystianwsul.checkme.gui.NoNewlineTextInputEditText
+                <com.krystianwsul.checkme.gui.widgets.NoNewlineTextInputEditText
                     android:id="@+id/toolbarEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -48,13 +48,13 @@
 
                     <requestFocus />
 
-                </com.krystianwsul.checkme.gui.NoNewlineTextInputEditText>
+                </com.krystianwsul.checkme.gui.widgets.NoNewlineTextInputEditText>
 
             </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.appcompat.widget.Toolbar>
 
-        <com.krystianwsul.checkme.gui.ToolbarProgress
+        <com.krystianwsul.checkme.gui.widgets.ToolbarProgress
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"

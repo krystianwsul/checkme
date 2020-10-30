@@ -33,8 +33,8 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
-import com.krystianwsul.checkme.gui.AbstractActivity
-import com.krystianwsul.checkme.gui.MyBottomBar
+import com.krystianwsul.checkme.gui.base.AbstractActivity
+import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek

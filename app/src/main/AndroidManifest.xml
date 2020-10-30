@@ -24,10 +24,10 @@
         tools:targetApi="q">
 
         <activity
-            android:name=".gui.SettingsActivity"
+            android:name=".gui.main.SettingsActivity"
             android:label="@string/settings"
             android:theme="@style/AppTheme" />
-        <activity android:name=".gui.TutorialActivity">
+        <activity android:name=".gui.main.TutorialActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,7 +39,7 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name=".gui.MainActivity"
+            android:name=".gui.main.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing" />

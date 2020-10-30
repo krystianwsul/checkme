@@ -51,7 +51,7 @@
 
             </androidx.appcompat.widget.Toolbar>
 
-            <com.krystianwsul.checkme.gui.ToolbarProgress
+            <com.krystianwsul.checkme.gui.widgets.ToolbarProgress
                 android:id="@+id/mainProgress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
                         app:tabRippleColor="@color/textPrimaryWhite"
                         app:tabIndicatorColor="@color/secondaryColor" />
 
-                    <com.krystianwsul.checkme.gui.ToolbarProgress
+                    <com.krystianwsul.checkme.gui.widgets.ToolbarProgress
                         android:id="@+id/mainDaysProgress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

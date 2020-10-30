@@ -1,8 +1,7 @@
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".gui.MainActivity">
+    tools:context=".gui.main.MainActivity">
 
     <item
         android:id="@+id/task_menu_share"

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.edit.dialogs
 import android.os.Bundle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractDialogFragment
+import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import kotlin.properties.Delegates.notNull
 
 class AllRemindersDialogFragment : AbstractDialogFragment() {

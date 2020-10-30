@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.krystianwsul.checkme.gui.BottomAnchor
+    <com.krystianwsul.checkme.gui.widgets.BottomAnchor
         android:id="@+id/bottomAnchor"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -18,7 +18,7 @@
         android:visibility="invisible"
         app:layout_anchor="@id/bottomAppBar" />
 
-    <com.krystianwsul.checkme.gui.MyBottomBar
+    <com.krystianwsul.checkme.gui.widgets.MyBottomBar
         android:id="@+id/bottomAppBar"
         style="@style/Widget.MaterialComponents.BottomAppBar"
         android:layout_width="match_parent"

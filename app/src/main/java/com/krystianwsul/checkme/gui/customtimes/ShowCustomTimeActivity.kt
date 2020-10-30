@@ -16,9 +16,9 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
-import com.krystianwsul.checkme.gui.ConfirmDialogFragment
-import com.krystianwsul.checkme.gui.NavBarActivity
-import com.krystianwsul.checkme.gui.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.base.NavBarActivity
+import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
+import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.setFixedOnClickListener

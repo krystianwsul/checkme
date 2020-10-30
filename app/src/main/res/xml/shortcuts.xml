@@ -26,7 +26,7 @@
         <intent
             android:action="com.krystianwsul.checkme.SEARCH"
             android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
 
     </shortcut>
 
@@ -40,7 +40,7 @@
         <intent
             android:action="com.krystianwsul.checkme.TASKS"
             android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
 
     </shortcut>
 
@@ -54,7 +54,7 @@
         <intent
             android:action="com.krystianwsul.checkme.INSTANCES"
             android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
 
     </shortcut>
 

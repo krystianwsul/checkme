@@ -18,9 +18,9 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
+import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.notifications.NotificationAction
 import com.krystianwsul.checkme.notifications.NotificationActionService
 import com.krystianwsul.checkme.ticks.AlarmReceiver

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
+import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo

@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -772,10 +773,24 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.position
                 )))
                 is GroupListParameters.TimeStamp -> {
-                    if (parameters.timeStamp > TimeStamp.now)
-                        edit(parameters.groupListDataWrapper.instanceDatas.getHint())
-                    else
+                    if (parameters.timeStamp > TimeStamp.now) {
+                        val hint = parameters.groupListDataWrapper
+                                .instanceDatas
+                                .let {
+                                    if (it.isNotEmpty()) {
+                                        it.getHint()
+                                    } else {
+                                        EditActivity.Hint.Schedule(
+                                                parameters.timeStamp.date,
+                                                TimePair(parameters.timeStamp.hourMinute)
+                                        )
+                                    }
+                                }
+
+                        edit(hint)
+                    } else {
                         FabState.Hidden
+                    }
                 }
                 is GroupListParameters.InstanceKey -> {
                     if (parameters.groupListDataWrapper.taskEditable!!)

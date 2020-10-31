@@ -87,8 +87,6 @@ class EditActivity : NavBarActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        private const val NOTE_OFFSET = 330
-
         fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, editParameters)
         }
@@ -179,6 +177,8 @@ class EditActivity : NavBarActivity() {
     override val rootView get() = editRoot!!
 
     private val noteChanges = PublishRelay.create<Unit>()
+
+    private val imageHeightRelay = BehaviorRelay.create<Int>()
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -312,17 +312,22 @@ class EditActivity : NavBarActivity() {
 
         startTicks(timeReceiver)
 
-        Observables.combineLatest(keyboardInsetRelay, noteHasFocusRelay, noteChanges)
-                .subscribe { (keyboardInset, noteHasFocus, _) ->
-                    if (noteHasFocus) {
-                        val padding = (keyboardInset - NOTE_OFFSET).coerceAtLeast(0)
+        Observables.combineLatest(
+                keyboardInsetRelay,
+                noteHasFocusRelay,
+                noteChanges,
+                imageHeightRelay
+        ) { keyboardInset, noteHasFocus, _, imageHeight ->
+            if (noteHasFocus) {
+                val padding = (keyboardInset - imageHeight).coerceAtLeast(0)
 
-                        editRecycler.updatePadding(bottom = padding)
-                        editRecycler.smoothScrollBy(0, padding)
-                    } else {
-                        editRecycler.updatePadding(bottom = 0)
-                    }
-                }
+                editRecycler.updatePadding(bottom = padding)
+                editRecycler.smoothScrollBy(0, padding)
+            } else {
+                editRecycler.updatePadding(bottom = 0)
+            }
+        }
+                .subscribe()
                 .addTo(createDisposable)
     }
 
@@ -814,21 +819,8 @@ class EditActivity : NavBarActivity() {
                 }
             }
 
-            private val layoutChangeListener = object : View.OnLayoutChangeListener {
-
-                override fun onLayoutChange(
-                        view: View,
-                        left: Int,
-                        top: Int,
-                        right: Int,
-                        bottom: Int,
-                        oldLeft: Int,
-                        oldTop: Int,
-                        oldRight: Int,
-                        oldBottom: Int
-                ) {
-                    activity?.noteChanges?.accept(Unit)
-                }
+            private val layoutChangeListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                activity?.noteChanges?.accept(Unit)
             }
 
             override val holderType = HolderType.NOTE
@@ -861,9 +853,17 @@ class EditActivity : NavBarActivity() {
 
         object Image : Item() {
 
+            private var activity: EditActivity? = null
+
+            private val layoutChangeListener = View.OnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
+                activity?.imageHeightRelay?.accept(bottom - top)
+            }
+
             override val holderType = HolderType.IMAGE
 
             override fun bind(activity: EditActivity, holder: Holder) {
+                this.activity = activity
+
                 (holder as ImageHolder).apply {
                     fun listener() = CameraGalleryFragment.newInstance(
                             activity.delegate
@@ -875,6 +875,9 @@ class EditActivity : NavBarActivity() {
                     imageImage.setOnClickListener { listener() }
                     imageEdit.setOnClickListener { listener() }
                     imageLayoutText.setFixedOnClickListener(::listener)
+
+                    itemView.removeOnLayoutChangeListener(layoutChangeListener)
+                    itemView.addOnLayoutChangeListener(layoutChangeListener)
 
                     itemView.updatePadding(bottom = activity.bottomInset)
                 }

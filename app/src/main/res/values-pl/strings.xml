@@ -120,4 +120,5 @@
     <string name="copyingTasksTitle">Kopiowanie zadań</string>
     <string name="stopCopyingMessage">Czy chcesz przerwać kopiowanie tych zadań?</string>
     <string name="stopCopyingYes">Przerwij</string>
+    <string name="showNotifications">Pokazuj powiadomienia</string>
 </resources>

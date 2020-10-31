@@ -24,6 +24,10 @@
             app:summaryOn="@string/defaultReminderSummaryOn"
             app:summaryOff="@string/defaultReminderSummaryOff" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/showNotifications"
+            app:title="@string/showNotifications" />
+
     </PreferenceCategory>
 
     <!--

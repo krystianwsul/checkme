@@ -51,6 +51,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
@@ -85,6 +86,8 @@ class EditActivity : NavBarActivity() {
         private const val TAG_ALL_REMINDERS = "allReminders"
 
         private const val REQUEST_CREATE_PARENT = 982
+
+        private const val NOTE_OFFSET = 330
 
         fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, editParameters)
@@ -141,7 +144,7 @@ class EditActivity : NavBarActivity() {
 
     private var note: String? = null
 
-    private var noteHasFocus = false // keyboard hack
+    private val noteHasFocusRelay = BehaviorRelay.createDefault(false) // keyboard hack
 
     private val onChildAttachStateChangeListener = object : RecyclerView.OnChildAttachStateChangeListener { // keyboard hack
 
@@ -174,6 +177,8 @@ class EditActivity : NavBarActivity() {
     }
 
     override val rootView get() = editRoot!!
+
+    private val noteChanges = PublishRelay.create<Unit>()
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -244,7 +249,7 @@ class EditActivity : NavBarActivity() {
             find<AllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
         }
 
-        if (!noteHasFocus)// keyboard hack
+        if (!noteHasFocusRelay.value!!)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         editViewModel = getViewModel<EditViewModel>().apply {
@@ -306,6 +311,19 @@ class EditActivity : NavBarActivity() {
                 .addTo(createDisposable)
 
         startTicks(timeReceiver)
+
+        Observables.combineLatest(keyboardInsetRelay, noteHasFocusRelay, noteChanges)
+                .subscribe { (keyboardInset, noteHasFocus, _) ->
+                    if (noteHasFocus) {
+                        val padding = (keyboardInset - NOTE_OFFSET).coerceAtLeast(0)
+
+                        editRecycler.updatePadding(bottom = padding)
+                        editRecycler.smoothScrollBy(0, padding)
+                    } else {
+                        editRecycler.updatePadding(bottom = 0)
+                    }
+                }
+                .addTo(createDisposable)
     }
 
     private fun removeSchedule(position: Int) {
@@ -335,7 +353,7 @@ class EditActivity : NavBarActivity() {
                 delegate.saveState(this)
 
                 putString(NOTE_KEY, note)
-                putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
+                putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocusRelay.value!!)
             }
         }
     }
@@ -389,7 +407,7 @@ class EditActivity : NavBarActivity() {
                 check(containsKey(NOTE_KEY))
 
                 note = getString(NOTE_KEY)
-                noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
+                noteHasFocusRelay.accept(getBoolean(NOTE_HAS_FOCUS_KEY))
             }
         } else {
             note = delegate.initialNote
@@ -405,7 +423,7 @@ class EditActivity : NavBarActivity() {
         editRecycler.adapter = createTaskAdapter
         editRecycler.itemAnimator = CustomItemAnimator()
 
-        if (noteHasFocus) { // keyboard hack
+        if (noteHasFocusRelay.value!!) { // keyboard hack
             editRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
             (editRecycler.layoutManager as LinearLayoutManager).scrollToPosition(createTaskAdapter.notePosition)
@@ -783,29 +801,55 @@ class EditActivity : NavBarActivity() {
 
         object Note : Item() {
 
+            private var activity: EditActivity? = null
+
+            private val textListener = object : TextWatcher {
+
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+
+                override fun afterTextChanged(s: Editable) {
+                    activity?.note = s.toString()
+                }
+            }
+
+            private val layoutChangeListener = object : View.OnLayoutChangeListener {
+
+                override fun onLayoutChange(
+                        view: View,
+                        left: Int,
+                        top: Int,
+                        right: Int,
+                        bottom: Int,
+                        oldLeft: Int,
+                        oldTop: Int,
+                        oldRight: Int,
+                        oldBottom: Int
+                ) {
+                    activity?.noteChanges?.accept(Unit)
+                }
+            }
+
             override val holderType = HolderType.NOTE
 
             override fun bind(activity: EditActivity, holder: Holder) {
+                this.activity = activity
+
                 (holder as NoteHolder).apply {
                     noteLayout.isHintAnimationEnabled = true
 
-                    val nameListener = object : TextWatcher {
-
-                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
-
-                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
-
-                        override fun afterTextChanged(s: Editable) {
-                            activity.note = s.toString()
-                        }
-                    }
-
                     noteText.run {
                         setText(activity.note)
-                        removeTextChangedListener(nameListener)
-                        addTextChangedListener(nameListener)
+
+                        removeTextChangedListener(textListener)
+                        addTextChangedListener(textListener)
+
+                        removeOnLayoutChangeListener(layoutChangeListener)
+                        addOnLayoutChangeListener(layoutChangeListener)
+
                         setOnFocusChangeListener { _, hasFocus ->
-                            activity.noteHasFocus = hasFocus
+                            activity.noteHasFocusRelay.accept(hasFocus)
 
                             if (hasFocus)
                                 activity.editToolbarAppBar.setExpanded(false)

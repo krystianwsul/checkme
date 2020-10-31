@@ -17,6 +17,8 @@ abstract class NavBarActivity : AbstractActivity() {
     protected var bottomInset = 0
         private set
 
+    protected val keyboardInsetRelay = BehaviorRelay.create<Int>()
+
     override fun setContentView(layoutResID: Int) {
         super.setContentView(layoutResID)
 
@@ -26,6 +28,11 @@ abstract class NavBarActivity : AbstractActivity() {
             insetsRelay.accept(windowInsetsCompat)
 
             val insets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            if (!resources.isLandscape) {
+                val keyboardInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.ime())
+                keyboardInsetRelay.accept(keyboardInsets.bottom)
+            }
 
             bottomInset = insets.bottom
 

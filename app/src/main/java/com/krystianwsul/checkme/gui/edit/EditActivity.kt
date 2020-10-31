@@ -319,6 +319,8 @@ class EditActivity : NavBarActivity() {
                 imageHeightRelay
         ) { keyboardInset, noteHasFocus, _, imageHeight ->
             if (noteHasFocus) {
+                editToolbarAppBar.setExpanded(false)
+
                 val padding = (keyboardInset - imageHeight).coerceAtLeast(0)
 
                 editRecycler.updatePadding(bottom = padding)
@@ -840,12 +842,7 @@ class EditActivity : NavBarActivity() {
                         removeOnLayoutChangeListener(layoutChangeListener)
                         addOnLayoutChangeListener(layoutChangeListener)
 
-                        setOnFocusChangeListener { _, hasFocus ->
-                            activity.noteHasFocusRelay.accept(hasFocus)
-
-                            if (hasFocus)
-                                activity.editToolbarAppBar.setExpanded(false)
-                        }
+                        setOnFocusChangeListener { _, hasFocus -> activity.noteHasFocusRelay.accept(hasFocus) }
                     }
                 }
             }

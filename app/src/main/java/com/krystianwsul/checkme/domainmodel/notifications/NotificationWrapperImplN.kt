@@ -21,7 +21,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     override fun cleanGroup(lastNotificationId: Int?) {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
 
-        val statusBarNotifications = notificationManager.activeNotifications!!
+        val statusBarNotifications = notificationManager.activeNotifications!!.filter { it.tag == null }
 
         if (lastNotificationId != null) {
             when (statusBarNotifications.size) {
@@ -34,8 +34,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
                     cancelNotification(lastNotificationId)
                 }
                 2 -> {
-                    check(statusBarNotifications.size == 2)
-
                     if (statusBarNotifications.none { it.id == 0 })
                         throw NotificationException(lastNotificationId, statusBarNotifications)
 
@@ -100,6 +98,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
     private class NotificationException(
             lastNotificationId: Int,
-            statusBarNotifications: Array<StatusBarNotification>
+            statusBarNotifications: Iterable<StatusBarNotification>
     ) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
 }

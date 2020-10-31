@@ -18,7 +18,7 @@ abstract class NotificationWrapper {
         }
     }
 
-    abstract fun cancelNotification(id: Int)
+    abstract fun cancelNotification(id: Int, tag: String? = null)
 
     abstract fun notifyInstance(
             deviceDbInfo: DeviceDbInfo,

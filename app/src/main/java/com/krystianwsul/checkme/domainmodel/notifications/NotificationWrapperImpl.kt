@@ -48,6 +48,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         private const val NOTIFICATION_ID_GROUP = 0
 
+        private const val TAG_TEMPORARY = "temporary"
+
         val showTemporary by lazy {
             !MyApplication.instance
                     .resources
@@ -68,9 +70,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .subscribe()
     }
 
-    override fun cancelNotification(id: Int) {
-        Preferences.tickLog.logLineHour("NotificationManager.cancel $id")
-        notificationManager.cancel(id)
+    override fun cancelNotification(id: Int, tag: String?) {
+        Preferences.tickLog.logLineHour("NotificationManager.cancel id: $id, tag: $tag")
+        notificationManager.cancel(tag, id)
     }
 
     final override fun notifyInstance(
@@ -178,7 +180,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 timeStampLong,
                 styleHash,
                 sortKey,
-                largeIcon?.let { instanceData.uuid!! }
+                largeIcon?.let { instanceData.uuid!! },
+                null
         )
 
         notify(
@@ -195,7 +198,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = false,
                 sortKey = sortKey,
                 largeIcon = largeIcon,
-                notificationHash = notificationHash
+                notificationHash = notificationHash,
+                tag = null
         )
     }
 
@@ -317,7 +321,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash
+            notificationHash: NotificationHash,
+            tag: String?
     ) {
         val unchanged = notificationManager.activeNotifications
                 ?.singleOrNull { it.id == notificationHash.id }
@@ -350,7 +355,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
         MyCrashlytics.log("NotificationManager.notify $notificationId silent? $silent")
-        notificationManager.notify(notificationId, notification)
+        notificationManager.notify(tag, notificationId, notification)
     }
 
     override fun notifyGroup(
@@ -404,6 +409,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 null,
                 styleHash,
                 "0",
+                null,
                 null
         )
 
@@ -421,7 +427,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = true,
                 sortKey = "0",
                 largeIcon = null,
-                notificationHash = notificationHash
+                notificationHash = notificationHash,
+                tag = null
         )
     }
 
@@ -429,7 +436,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         check(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
         if (lastNotificationId != null)
-            cancelNotification(lastNotificationId)
+            cancelNotification(lastNotificationId, null)
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
@@ -474,15 +481,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         null,
                         null,
                         "1",
-                        null
-                )
+                        null,
+                        TAG_TEMPORARY
+                ),
+                TAG_TEMPORARY
         )
     }
 
     override fun hideTemporary(notificationId: Int, source: String) {
         Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
 
-        cancelNotification(notificationId)
+        cancelNotification(notificationId, TAG_TEMPORARY)
     }
 
     protected data class NotificationHash(
@@ -492,7 +501,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val timeStamp: Long?,
             val style: Style?,
             val sortKey: String,
-            val uuid: String?
+            val uuid: String?,
+            val tag: String?
     ) {
 
         interface Style {

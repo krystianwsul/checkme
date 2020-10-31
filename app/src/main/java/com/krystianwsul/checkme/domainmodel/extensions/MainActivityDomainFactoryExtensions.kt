@@ -17,8 +17,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
 import java.util.*
 
-@Synchronized
-fun DomainFactory.getMainData(): MainViewModel.Data {
+fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getMainData")
 
     val now = ExactTimeStamp.now
@@ -47,18 +46,17 @@ fun DomainFactory.getMainData(): MainViewModel.Data {
             .sortedDescending()
             .toMutableList()
 
-    return MainViewModel.Data(
+    MainViewModel.Data(
             TaskListFragment.TaskData(childTaskDatas, null, true),
             myUserFactory.user.defaultTab
     )
 }
 
-@Synchronized
 fun DomainFactory.getGroupListData(
         now: ExactTimeStamp,
         position: Int,
         timeRange: MainActivity.TimeRange
-): DayViewModel.DayData {
+): DayViewModel.DayData = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
     check(position >= 0)
@@ -173,7 +171,7 @@ fun DomainFactory.getGroupListData(
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-    return DayViewModel.DayData(dataWrapper)
+    DayViewModel.DayData(dataWrapper)
 }
 
 private fun DomainFactory.getGroupListChildTaskDatas(

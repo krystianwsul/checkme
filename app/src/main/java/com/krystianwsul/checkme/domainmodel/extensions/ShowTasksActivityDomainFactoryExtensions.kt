@@ -8,8 +8,7 @@ import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-@Synchronized
-fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel.Data {
+fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel.Data = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
     val now = ExactTimeStamp.now
@@ -49,5 +48,5 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
             .sorted()
             .toList()
 
-    return ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, !copying))
+    ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, !copying))
 }

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -12,13 +13,15 @@ import com.krystianwsul.common.locker.LockerManager
 
 const val PAGE_SIZE = 20
 
-@Synchronized
-fun DomainFactory.getSearchInstancesData(query: String, page: Int): DomainResult<SearchInstancesViewModel.Data> {
+fun DomainFactory.getSearchInstancesData(
+        query: String,
+        page: Int
+): DomainResult<SearchInstancesViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
     val desiredCount = (page + 1) * PAGE_SIZE
 
-    return LockerManager.setLocker { now ->
+    LockerManager.setLocker { now ->
         getDomainResultInterrupting {
             val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())

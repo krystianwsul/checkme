@@ -2,14 +2,14 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 
-@Synchronized
-fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
+fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
 
     check(instanceKeys.isNotEmpty())
@@ -28,9 +28,9 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         check(instance.done == null)
 
         instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(
-            instance.instanceDateTime,
-            instance.name,
-            instance.done != null
+                instance.instanceDateTime,
+                instance.name,
+                instance.done != null
         )
 
         (instance.instanceTime as? Time.Custom<*>)?.let {
@@ -41,9 +41,9 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
     val customTimeDatas = currentCustomTimes.mapValues {
         it.value.let {
             EditInstancesViewModel.CustomTimeData(
-                it.key,
-                it.name,
-                it.hourMinutes.toSortedMap()
+                    it.key,
+                    it.name,
+                    it.hourMinutes.toSortedMap()
             )
         }
     }
@@ -52,17 +52,16 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         it.instanceDateTime.timeStamp.toExactTimeStamp() < now
     }
 
-    return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
+    EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
 }
 
-@Synchronized
 fun DomainFactory.setInstancesDateTime(
-    dataId: Int,
-    source: SaveService.Source,
-    instanceKeys: Set<InstanceKey>,
-    instanceDate: Date,
-    instanceTimePair: TimePair
-) : DomainFactory.EditInstancesUndoData {
+        dataId: Int,
+        source: SaveService.Source,
+        instanceKeys: Set<InstanceKey>,
+        instanceDate: Date,
+        instanceTimePair: TimePair
+): DomainFactory.EditInstancesUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -78,10 +77,10 @@ fun DomainFactory.setInstancesDateTime(
 
     instances.forEach {
         it.setInstanceDateTime(
-            localFactory,
-            ownerKey,
-            DateTime(instanceDate, getTime(instanceTimePair)),
-            now
+                localFactory,
+                ownerKey,
+                DateTime(instanceDate, getTime(instanceTimePair)),
+                now
         )
     }
 
@@ -93,5 +92,5 @@ fun DomainFactory.setInstancesDateTime(
 
     notifyCloud(projects)
 
-    return editInstancesUndoData
+    editInstancesUndoData
 }

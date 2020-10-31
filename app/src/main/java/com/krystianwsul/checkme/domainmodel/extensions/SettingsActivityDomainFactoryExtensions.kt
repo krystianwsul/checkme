@@ -2,18 +2,17 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 
-@Synchronized
-fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
+fun DomainFactory.getSettingsData(): SettingsViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getSettingsData")
 
-    return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
+    SettingsViewModel.Data(myUserFactory.user.defaultReminder)
 }
 
-@Synchronized
-fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) {
+fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultTab")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 
@@ -22,12 +21,11 @@ fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) 
     save(0, source)
 }
 
-@Synchronized
 fun DomainFactory.updateDefaultReminder(
-    dataId: Int,
-    source: SaveService.Source,
-    defaultReminder: Boolean
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        defaultReminder: Boolean
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultReminder")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 

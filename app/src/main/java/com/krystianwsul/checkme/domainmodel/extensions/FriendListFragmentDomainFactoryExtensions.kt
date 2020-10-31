@@ -2,32 +2,31 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 
-@Synchronized
-fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
+fun DomainFactory.getFriendListData(): FriendListViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getFriendListData")
 
     val friends = friendsFactory.friends
 
     val userListDatas = friends.map {
         FriendListViewModel.UserListData(
-            it.name,
-            it.email,
-            it.userKey,
-            it.photoUrl,
-            it.userWrapper
+                it.name,
+                it.email,
+                it.userKey,
+                it.photoUrl,
+                it.userWrapper
         )
     }.toMutableSet()
 
-    return FriendListViewModel.Data(userListDatas)
+    FriendListViewModel.Data(userListDatas)
 }
 
-@Synchronized
-fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) {
+fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.removeFriends")
     check(!friendsFactory.isSaved)
 
@@ -36,8 +35,7 @@ fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) 
     save(0, source)
 }
 
-@Synchronized
-fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) {
+fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.addFriends")
     check(!myUserFactory.isSaved)
 

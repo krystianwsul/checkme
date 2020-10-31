@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -13,8 +14,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 
-@Synchronized
-fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
+fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
     val task = getTaskForce(instanceKey.taskKey)
@@ -30,7 +30,7 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
             instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
     ).joinToString("\n\n")
 
-    return ShowInstanceViewModel.Data(
+    ShowInstanceViewModel.Data(
             instance.name,
             instanceDateTime,
             instance.done != null,
@@ -45,13 +45,12 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
     )
 }
 
-@Synchronized
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey
-): Pair<TaskUndoData, Boolean> {
+): Pair<TaskUndoData, Boolean> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -71,7 +70,7 @@ fun DomainFactory.setTaskEndTimeStamps(
     val visible =
             task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
 
-    return Pair(taskUndoData, visible)
+    Pair(taskUndoData, visible)
 }
 
 private fun DomainFactory.getGroupListData(

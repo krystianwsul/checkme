@@ -62,8 +62,8 @@ class DomainFactory(
                 .replay(1)!!
                 .apply { connect() }
 
-        @Synchronized // still running?
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
+        // still running?
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = syncOnDomain {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
@@ -86,8 +86,8 @@ class DomainFactory(
             }
         }
 
-        @Synchronized
-        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) { // todo route all external calls through here
+        // todo route all external calls through here
+        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
             val domainFactory = nullableInstance
             if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
                 domainFactory.checkSave()
@@ -97,8 +97,7 @@ class DomainFactory(
             }
         }
 
-        @Synchronized
-        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
+        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
             val domainFactory = nullableInstance
             if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
                 Preferences.tickLog.logLineHour("running firebaseListener $source")
@@ -122,6 +121,12 @@ class DomainFactory(
                 ChangeType.LOCAL -> RunType.LOCAL
                 ChangeType.REMOTE -> RunType.REMOTE
             }
+
+        private val lock = Any()
+
+        fun <T> syncOnDomain(action: () -> T): T {
+            return synchronized(lock, action)
+        }
     }
 
     var remoteReadTimes: ReadTimes
@@ -245,11 +250,9 @@ class DomainFactory(
 
     // firebase
 
-    @Synchronized
-    override fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
+    override fun clearUserInfo() = syncOnDomain { updateNotifications(ExactTimeStamp.now, true) }
 
-    @Synchronized
-    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
+    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
         updateShortcuts(now)
@@ -257,8 +260,7 @@ class DomainFactory(
         tryNotifyListeners(now, "DomainFactory.onChangeTypeEvent", changeType.runType)
     }
 
-    @Synchronized
-    override fun updateUserRecord(snapshot: Snapshot) {
+    override fun updateUserRecord(snapshot: Snapshot) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
@@ -319,8 +321,7 @@ class DomainFactory(
         APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
-    @Synchronized
-    fun checkSave() {
+    fun checkSave() = syncOnDomain {
         if (projectsFactory.isSaved) throw SavedFactoryException()
     }
 
@@ -379,8 +380,7 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    @Synchronized
-    fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) {
+    fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -399,8 +399,7 @@ class DomainFactory(
         projectsFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
     }
 
-    @Synchronized
-    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
+    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
         if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 

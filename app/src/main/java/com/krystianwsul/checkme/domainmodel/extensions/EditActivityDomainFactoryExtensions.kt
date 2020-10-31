@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import android.net.Uri
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
@@ -19,11 +20,10 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-@Synchronized
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
         parentTaskKeyHint: TaskKey?
-): EditViewModel.Data {
+): EditViewModel.Data = syncOnDomain {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
     val now = ExactTimeStamp.now
@@ -103,7 +103,7 @@ fun DomainFactory.getCreateTaskData(
         is EditViewModel.StartParameters.Create -> false
     }
 
-    return EditViewModel.Data(
+    EditViewModel.Data(
             taskData,
             parentTreeDatas,
             customTimeDatas,
@@ -112,7 +112,6 @@ fun DomainFactory.getCreateTaskData(
     )
 }
 
-@Synchronized
 fun DomainFactory.createScheduleRootTask(
         dataId: Int,
         source: SaveService.Source,
@@ -122,7 +121,7 @@ fun DomainFactory.createScheduleRootTask(
         projectId: ProjectKey<*>?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -157,10 +156,9 @@ fun DomainFactory.createScheduleRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    return task.taskKey
+    task.taskKey
 }
 
-@Synchronized
 fun DomainFactory.createChildTask(
         dataId: Int,
         source: SaveService.Source,
@@ -169,7 +167,7 @@ fun DomainFactory.createChildTask(
         note: String?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -201,10 +199,9 @@ fun DomainFactory.createChildTask(
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    return childTask.taskKey
+    childTask.taskKey
 }
 
-@Synchronized
 fun DomainFactory.createRootTask(
         dataId: Int,
         source: SaveService.Source,
@@ -213,7 +210,7 @@ fun DomainFactory.createRootTask(
         projectId: ProjectKey<*>?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -246,10 +243,9 @@ fun DomainFactory.createRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    return task.taskKey
+    task.taskKey
 }
 
-@Synchronized
 fun DomainFactory.updateScheduleTask(
         dataId: Int,
         source: SaveService.Source,
@@ -259,7 +255,7 @@ fun DomainFactory.updateScheduleTask(
         note: String?,
         projectId: ProjectKey<*>?,
         imagePath: NullableWrapper<Pair<String, Uri>>?
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -309,10 +305,9 @@ fun DomainFactory.updateScheduleTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    return task.taskKey
+    task.taskKey
 }
 
-@Synchronized
 fun DomainFactory.updateChildTask(
         now: ExactTimeStamp,
         dataId: Int,
@@ -324,7 +319,7 @@ fun DomainFactory.updateChildTask(
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         removeInstanceKey: InstanceKey?,
         allReminders: Boolean
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -375,10 +370,9 @@ fun DomainFactory.updateChildTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    return task.taskKey
+    task.taskKey
 }
 
-@Synchronized
 fun DomainFactory.updateRootTask(
         dataId: Int,
         source: SaveService.Source,
@@ -387,7 +381,7 @@ fun DomainFactory.updateRootTask(
         note: String?,
         projectId: ProjectKey<*>?,
         imagePath: NullableWrapper<Pair<String, Uri>>?
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -422,10 +416,9 @@ fun DomainFactory.updateRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    return task.taskKey
+    task.taskKey
 }
 
-@Synchronized
 fun DomainFactory.createScheduleJoinRootTask(
         now: ExactTimeStamp,
         dataId: Int,
@@ -438,7 +431,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -478,10 +471,9 @@ fun DomainFactory.createScheduleJoinRootTask(
         Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
     }
 
-    return newParentTask.taskKey
+    newParentTask.taskKey
 }
 
-@Synchronized
 fun DomainFactory.createJoinChildTask(
         dataId: Int,
         source: SaveService.Source,
@@ -491,7 +483,7 @@ fun DomainFactory.createJoinChildTask(
         note: String?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createJoinChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -531,10 +523,9 @@ fun DomainFactory.createJoinChildTask(
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    return childTask.taskKey
+    childTask.taskKey
 }
 
-@Synchronized
 fun DomainFactory.createJoinRootTask(
         dataId: Int,
         source: SaveService.Source,
@@ -544,7 +535,7 @@ fun DomainFactory.createJoinRootTask(
         projectId: ProjectKey<*>?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>
-): TaskKey {
+): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -585,7 +576,7 @@ fun DomainFactory.createJoinRootTask(
         Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
     }
 
-    return newParentTask.taskKey
+    newParentTask.taskKey
 }
 
 private fun DomainFactory.getParentTreeDatas(

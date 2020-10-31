@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -13,8 +14,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
 import java.util.*
 
-@Synchronized
-fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
+fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
 
     val now = ExactTimeStamp.now
@@ -29,7 +29,7 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
 
     val displayText = DateTime(date, time).getDisplayText()
 
-    return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
+    ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
 }
 
 private fun DomainFactory.getGroupListData(

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -13,20 +14,18 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
-@Synchronized
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean
-): TaskUndoData {
+): TaskUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    return setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
+    setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
 }
 
-@Synchronized
-fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) {
+fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -45,8 +44,7 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     notifyCloud(remoteProjects)
 }
 
-@Synchronized
-fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) {
+fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -63,12 +61,11 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) {
     notifyCloud(task.project)
 }
 
-@Synchronized
 fun DomainFactory.setInstancesNotNotified(
-    dataId: Int,
-    source: SaveService.Source,
-    instanceKeys: List<InstanceKey>
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        instanceKeys: List<InstanceKey>
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -90,8 +87,7 @@ fun DomainFactory.setInstancesNotNotified(
     save(dataId, source)
 }
 
-@Synchronized
-fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
+fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: List<InstanceKey>) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -100,7 +96,7 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
     instanceKeys.forEach {
         getInstance(it).getParentInstance(now)!!
                 .taskHierarchy!!
-            .setEndExactTimeStamp(now)
+                .setEndExactTimeStamp(now)
     }
 
     updateNotifications(now)
@@ -108,12 +104,11 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
     save(0, source)
 }
 
-@Synchronized
 fun DomainFactory.setInstancesAddHourActivity(
-    dataId: Int,
-    source: SaveService.Source,
-    instanceKeys: Collection<InstanceKey>
-): DomainFactory.HourUndoData {
+        dataId: Int,
+        source: SaveService.Source,
+        instanceKeys: Collection<InstanceKey>
+): DomainFactory.HourUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -144,15 +139,14 @@ fun DomainFactory.setInstancesAddHourActivity(
 
     notifyCloud(remoteProjects)
 
-    return DomainFactory.HourUndoData(instanceDateTimes)
+    DomainFactory.HourUndoData(instanceDateTimes)
 }
 
-@Synchronized
 fun DomainFactory.undoInstancesAddHour(
-    dataId: Int,
-    source: SaveService.Source,
-    hourUndoData: DomainFactory.HourUndoData
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        hourUndoData: DomainFactory.HourUndoData
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -160,7 +154,7 @@ fun DomainFactory.undoInstancesAddHour(
 
     val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
         Pair(
-            getInstance(instanceKey), instanceDateTime
+                getInstance(instanceKey), instanceDateTime
         )
     }
 
@@ -177,13 +171,12 @@ fun DomainFactory.undoInstancesAddHour(
     notifyCloud(remoteProjects)
 }
 
-@Synchronized
 fun DomainFactory.setInstanceDone(
-    dataId: Int,
-    source: SaveService.Source,
-    instanceKey: InstanceKey,
-    done: Boolean
-): ExactTimeStamp? {
+        dataId: Int,
+        source: SaveService.Source,
+        instanceKey: InstanceKey,
+        done: Boolean
+): ExactTimeStamp? = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -199,15 +192,14 @@ fun DomainFactory.setInstanceDone(
 
     notifyCloud(instance.project)
 
-    return instance.done
+    instance.done
 }
 
-@Synchronized
 fun DomainFactory.setInstanceNotified(
-    dataId: Int,
-    source: SaveService.Source,
-    instanceKey: InstanceKey
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        instanceKey: InstanceKey
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -219,8 +211,7 @@ fun DomainFactory.setInstanceNotified(
     save(dataId, source)
 }
 
-@Synchronized
-fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
+fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
     if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 

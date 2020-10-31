@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.models.Project
@@ -10,13 +11,12 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-@Synchronized
-fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
+fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowProjectData")
 
     val friendDatas = friendsFactory.friends
-        .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
-        .associateBy { it.id }
+            .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
+            .associateBy { it.id }
 
     val name: String?
     val userListDatas: Set<ShowProjectViewModel.UserListData>
@@ -26,24 +26,23 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
         name = remoteProject.name
 
         userListDatas = remoteProject.users
-            .filterNot { it.id == deviceDbInfo.key }
-            .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
-            .toSet()
+                .filterNot { it.id == deviceDbInfo.key }
+                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
+                .toSet()
     } else {
         name = null
         userListDatas = setOf()
     }
 
-    return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
+    ShowProjectViewModel.Data(name, userListDatas, friendDatas)
 }
 
-@Synchronized
 fun DomainFactory.createProject(
-    dataId: Int,
-    source: SaveService.Source,
-    name: String,
-    friends: Set<UserKey>
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        name: String,
+        friends: Set<UserKey>
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -73,15 +72,14 @@ fun DomainFactory.createProject(
     notifyCloud(remoteProject)
 }
 
-@Synchronized
 fun DomainFactory.updateProject(
-    dataId: Int,
-    source: SaveService.Source,
-    projectId: ProjectKey.Shared,
-    name: String,
-    addedFriends: Set<UserKey>,
-    removedFriends: Set<UserKey>
-) {
+        dataId: Int,
+        source: SaveService.Source,
+        projectId: ProjectKey.Shared,
+        name: String,
+        addedFriends: Set<UserKey>,
+        removedFriends: Set<UserKey>
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())
@@ -92,8 +90,8 @@ fun DomainFactory.updateProject(
 
     remoteProject.name = name
     remoteProject.updateUsers(
-        addedFriends.map { friendsFactory.getFriend(it) }.toSet(),
-        removedFriends
+            addedFriends.map { friendsFactory.getFriend(it) }.toSet(),
+            removedFriends
     )
 
     friendsFactory.updateProjects(projectId, addedFriends, removedFriends)

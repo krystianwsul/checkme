@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -13,8 +14,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
-@Synchronized
-fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
+fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -28,10 +28,10 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
     val hourMinute = HourMinute(calendar.toDateTimeTz())
 
     instance.setInstanceDateTime(
-        localFactory,
-        ownerKey,
-        DateTime(date, Time.Normal(hourMinute)),
-        now
+            localFactory,
+            ownerKey,
+            DateTime(date, Time.Normal(hourMinute)),
+            now
     )
     instance.setNotificationShown(localFactory, false)
 
@@ -42,11 +42,10 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
     notifyCloud(instance.project)
 }
 
-@Synchronized
 fun DomainFactory.setInstanceNotificationDone(
-    source: SaveService.Source,
-    instanceKey: InstanceKey
-) {
+        source: SaveService.Source,
+        instanceKey: InstanceKey
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -65,11 +64,10 @@ fun DomainFactory.setInstanceNotificationDone(
     notifyCloud(instance.project)
 }
 
-@Synchronized
 fun DomainFactory.setInstancesNotified(
-    source: SaveService.Source,
-    instanceKeys: List<InstanceKey>
-) {
+        source: SaveService.Source,
+        instanceKeys: List<InstanceKey>
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -81,19 +79,17 @@ fun DomainFactory.setInstancesNotified(
     save(0, source)
 }
 
-@Synchronized
 fun DomainFactory.setTaskImageUploaded(
-    source: SaveService.Source,
-    taskKey: TaskKey,
-    imageUuid: String
-) {
+        source: SaveService.Source,
+        taskKey: TaskKey,
+        imageUuid: String
+) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val task = getTaskIfPresent(taskKey) ?: return
+    val task = getTaskIfPresent(taskKey) ?: return@syncOnDomain
 
-    if (task.getImage(deviceDbInfo) != ImageState.Local(imageUuid))
-        return
+    if (task.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) return@syncOnDomain
 
     task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 

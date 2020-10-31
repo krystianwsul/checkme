@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -9,11 +10,10 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-@Synchronized
 fun DomainFactory.getShowTaskInstancesData(
         taskKey: TaskKey,
         page: Int
-): ShowTaskInstancesViewModel.Data {
+): ShowTaskInstancesViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
     val task = getTaskForce(taskKey)
@@ -72,5 +72,5 @@ fun DomainFactory.getShowTaskInstancesData(
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-    return ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
+    ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
 }

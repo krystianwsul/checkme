@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme
 
+import androidx.core.content.edit
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.deserialize
@@ -24,6 +25,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_MAIN_TABS_LOG = "mainTabsLog"
     private const val TOKEN_KEY = "token"
     private const val KEY_SAVE_LOG = "saveLog"
+    private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -76,6 +78,10 @@ object Preferences : FactoryProvider.Preferences {
         set(value) {
             tokenRelay.accept(NullableWrapper(value))
         }
+
+    var showNotifications by observable(sharedPreferences.getBoolean(KEY_SHOW_NOTIFICATIONS, true)) { _, _, newValue ->
+        sharedPreferences.edit { putBoolean(KEY_SHOW_NOTIFICATIONS, newValue) }
+    }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

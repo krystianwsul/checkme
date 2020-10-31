@@ -143,9 +143,9 @@ class SettingsActivity : NavBarActivity() {
 
                             setOnPreferenceChangeListener { _, newValue ->
                                 DomainFactory.instance.updateDefaultReminder(
-                                    it.dataId,
-                                    SaveService.Source.GUI,
-                                    newValue as Boolean
+                                        it.dataId,
+                                        SaveService.Source.GUI,
+                                        newValue as Boolean
                                 )
 
                                 true
@@ -153,6 +153,16 @@ class SettingsActivity : NavBarActivity() {
                         }
                     }
                     .addTo(createDisposable)
+
+            val showNotificationsPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.showNotifications))!!
+
+            showNotificationsPreference.isChecked = Preferences.showNotifications
+
+            showNotificationsPreference.setOnPreferenceChangeListener { preference, newValue ->
+                Preferences.showNotifications = newValue as Boolean
+
+                true
+            }
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

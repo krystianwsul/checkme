@@ -658,6 +658,8 @@ class DomainFactory(
             removedTaskKeys: List<TaskKey> = listOf(),
             sourceName: String = "other"
     ) {
+        if (!Preferences.showNotifications) return
+
         val skipSave = aggregateData != null
 
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")

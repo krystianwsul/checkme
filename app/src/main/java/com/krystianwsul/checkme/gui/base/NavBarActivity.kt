@@ -29,10 +29,8 @@ abstract class NavBarActivity : AbstractActivity() {
 
             val insets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            if (!resources.isLandscape) {
-                val keyboardInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.ime())
-                keyboardInsetRelay.accept(keyboardInsets.bottom)
-            }
+            val keyboardInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.ime())
+            keyboardInsetRelay.accept(keyboardInsets.bottom)
 
             bottomInset = insets.bottom
 

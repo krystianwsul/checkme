@@ -74,14 +74,18 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                     null
             ))
 
-            var loopStartCalendar = startExactTimeStamp.date.toDateTimeTz() + 1.days
-            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeTz()
+            fun Date.toDateTimeSoy() = DateTimeSoy(year, month, day)
+            fun DateTimeSoy.toDate() = Date(yearInt, month1, dayOfMonth)
+
+            var loopStartCalendar = startExactTimeStamp.date.toDateTimeSoy() + 1.days
+
+            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeSoy()
 
             val calendarSequence = generateSequence {
                 if (loopEndCalendar?.let { it <= loopStartCalendar } == true)
                     return@generateSequence null
 
-                val date = Date(loopStartCalendar)
+                val date = loopStartCalendar.toDate()
                 loopStartCalendar += 1.days
 
                 NullableWrapper(getDateTimeInDate(date, null, null))

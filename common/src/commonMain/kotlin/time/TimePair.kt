@@ -16,16 +16,6 @@ data class TimePair(
         check((customTimeKey == null) != (hourMinute == null))
     }
 
-    override fun toString(): String {
-        return if (customTimeKey != null) {
-            check(hourMinute == null)
-
-            super.toString() + ": " + customTimeKey
-        } else {
-            super.toString() + ": " + hourMinute!!
-        }
-    }
-
     fun destructureRemote(): Triple<CustomTimeId<*>?, Int?, Int?> {
         val customTimeId: CustomTimeId<*>?
         val hour: Int?

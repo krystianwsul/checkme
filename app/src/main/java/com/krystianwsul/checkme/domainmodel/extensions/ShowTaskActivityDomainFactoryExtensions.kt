@@ -38,11 +38,16 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
             }
             .sorted()
 
-    val collapseText = listOfNotNull(
+    var collapseText = listOfNotNull(
             task.getParentName(hierarchyTimeStamp).takeIf { it.isNotEmpty() },
             task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp)
                     .takeIf { it.isNotEmpty() }
     ).joinToString("\n\n")
+
+    if (debugMode) {
+        collapseText += "\n\nproject key: " + taskKey.projectKey
+        collapseText += "\ntask id: " + taskKey.taskId
+    }
 
     ShowTaskViewModel.Data(
             task.name,

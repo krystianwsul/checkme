@@ -25,10 +25,18 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
     val instanceDateTime = instance.instanceDateTime
     val parentInstance = instance.getParentInstance(now)
 
-    val displayText = listOfNotNull(
+    var displayText = listOfNotNull(
             instance.getParentName(now).takeIf { it.isNotEmpty() },
             instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
     ).joinToString("\n\n")
+
+    if (debugMode) {
+        displayText += "\n\nproject key: " + instanceKey.taskKey.projectKey
+        displayText += "\ntask id: " + instanceKey.taskKey.taskId
+        displayText += "\ndate: " + instanceKey.scheduleKey.scheduleDate
+        displayText += "\ncustom time: " + instanceKey.scheduleKey.scheduleTimePair.customTimeKey
+        displayText += "\nnormal time: " + instanceKey.scheduleKey.scheduleTimePair.hourMinute
+    }
 
     ShowInstanceViewModel.Data(
             instance.name,

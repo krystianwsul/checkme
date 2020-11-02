@@ -321,7 +321,8 @@ abstract class Project<T : ProjectType> : Current {
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
-            query: String? = null
+            query: String? = null,
+            filterVisible: Boolean = true
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
@@ -344,10 +345,14 @@ abstract class Project<T : ProjectType> : Current {
 
             val instances = task.getInstances(startExactTimeStamp, endExactTimeStamp, now, onlyRoot = true)
 
-            instances.filter { instance ->
-                throwIfInterrupted()
+            if (filterVisible) {
+                instances.filter { instance ->
+                    throwIfInterrupted()
 
-                instance.isVisible(now, true)
+                    instance.isVisible(now, true)
+                }
+            } else {
+                instances
             }
         }
 

@@ -31,7 +31,8 @@ fun DomainFactory.getSearchInstancesData(
                     null,
                     null,
                     now,
-                    query
+                    query,
+                    filterVisible = !debugMode
             ).takeAndHasMore(desiredCount)
 
             val instanceDatas = instances.map {

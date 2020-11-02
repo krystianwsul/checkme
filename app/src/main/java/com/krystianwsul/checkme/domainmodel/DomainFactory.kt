@@ -445,11 +445,12 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
-            query: String? = null
+            query: String? = null,
+            filterVisible: Boolean = true
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query, filterVisible) }
 
         return combineInstanceSequences(instanceSequences)
     }

@@ -212,6 +212,7 @@ abstract class Project<T : ProjectType> : Current {
                 parentTaskId,
                 childTaskId,
                 now.long,
+                now.offset,
                 endTime
         )
 

@@ -111,6 +111,7 @@ abstract class Project<T : ProjectType> : Current {
         val taskJson = TaskJson(
                 oldTask.name,
                 now.long,
+                now.offset,
                 endTime,
                 oldTask.note,
                 instanceJsons,

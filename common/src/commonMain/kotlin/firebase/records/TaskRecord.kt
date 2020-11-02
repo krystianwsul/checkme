@@ -73,11 +73,12 @@ class TaskRecord<T : ProjectType> private constructor(
     var name by Committer(taskJson::name)
 
     val startTime get() = taskJson.startTime
+    var startTimeOffset by Committer(taskJson::startTimeOffset)
 
     val taskKey by lazy { projectRecord.getTaskKey(id) }
 
     var endData
-        get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, false) }
+        get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, null, false) }
         set(value) {
             if (value == taskJson.endData)
                 return

@@ -22,37 +22,37 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.merge
 
 class ProjectsFactory(
-    localFactory: FactoryProvider.Local,
-    private val privateProjectLoader: ProjectLoader<ProjectType.Private>,
-    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
-    private val sharedProjectsLoader: SharedProjectsLoader,
-    sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
-    now: ExactTimeStamp,
-    private val factoryProvider: FactoryProvider,
-    private val domainDisposable: CompositeDisposable,
-    deviceDbInfo: () -> DeviceDbInfo
+        localFactory: FactoryProvider.Local,
+        private val privateProjectLoader: ProjectLoader<ProjectType.Private>,
+        privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
+        private val sharedProjectsLoader: SharedProjectsLoader,
+        sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
+        now: ExactTimeStamp,
+        private val factoryProvider: FactoryProvider,
+        private val domainDisposable: CompositeDisposable,
+        deviceDbInfo: () -> DeviceDbInfo
 ) {
 
     private val privateProjectFactory = PrivateProjectFactory(
-        privateProjectLoader,
-        privateInitialProjectEvent,
-        factoryProvider,
-        domainDisposable,
-        deviceDbInfo
+            privateProjectLoader,
+            privateInitialProjectEvent,
+            factoryProvider,
+            domainDisposable,
+            deviceDbInfo
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(
-        sharedInitialProjectsEvent.pairs
-            .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
-                sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
-                    sharedProjectLoader,
-                    sharedInitialProjectEvent,
-                    factoryProvider,
-                    domainDisposable,
-                    deviceDbInfo
-                )
-            }
-            .toMutableMap()
+            sharedInitialProjectsEvent.pairs
+                    .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
+                        sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
+                                sharedProjectLoader,
+                                sharedInitialProjectEvent,
+                                factoryProvider,
+                                domainDisposable,
+                                deviceDbInfo
+                        )
+                    }
+                    .toMutableMap()
     )
 
     private var sharedProjectFactories by sharedProjectFactoriesProperty
@@ -76,62 +76,62 @@ class ProjectsFactory(
         privateProject.fixNotificationShown(localFactory, now)
 
         val addProjectChangeTypes =
-            sharedProjectsLoader.addProjectEvents.map { (changeType, addProjectEvent) ->
-                val projectKey = addProjectEvent.initialProjectEvent
-                    .projectRecord
-                    .projectKey
+                sharedProjectsLoader.addProjectEvents.map { (changeType, addProjectEvent) ->
+                    val projectKey = addProjectEvent.initialProjectEvent
+                            .projectRecord
+                            .projectKey
 
-                check(!sharedProjectFactories.containsKey(projectKey))
+                    check(!sharedProjectFactories.containsKey(projectKey))
 
-                val sharedProjectFactory = SharedProjectFactory(
-                    addProjectEvent.projectLoader,
-                    addProjectEvent.initialProjectEvent,
-                    factoryProvider,
-                    domainDisposable,
-                    deviceDbInfo
-                )
+                    val sharedProjectFactory = SharedProjectFactory(
+                            addProjectEvent.projectLoader,
+                            addProjectEvent.initialProjectEvent,
+                            factoryProvider,
+                            domainDisposable,
+                            deviceDbInfo
+                    )
 
-                sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
+                    sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
-                if (addedSharedProjects.containsKey(projectKey)) {
-                    check(changeType == ChangeType.LOCAL)
+                    if (addedSharedProjects.containsKey(projectKey)) {
+                        check(changeType == ChangeType.LOCAL)
 
-                    val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
-                    val newRecord = sharedProjectFactory.project.projectRecord
+                        val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
+                        val newRecord = sharedProjectFactory.project.projectRecord
 
-                    check(oldRecord == newRecord)
+                        check(oldRecord == newRecord)
 
-                    addedSharedProjects.remove(projectKey)
+                        addedSharedProjects.remove(projectKey)
+                    }
+
+                    changeType
                 }
-
-                changeType
-            }
 
         val removeProjectChangeTypes =
-            sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->
-                check(changeType == ChangeType.REMOTE)
+                sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->
+                    check(changeType == ChangeType.REMOTE)
 
-                removeProjectEvent.projectKeys.forEach {
-                    check(!addedSharedProjects.containsKey(it))
-                    check(sharedProjectFactories.containsKey(it))
+                    removeProjectEvent.projectKeys.forEach {
+                        check(!addedSharedProjects.containsKey(it))
+                        check(sharedProjectFactories.containsKey(it))
 
-                    sharedProjectFactoriesProperty.remove(it)
+                        sharedProjectFactoriesProperty.remove(it)
+                    }
+
+                    changeType
                 }
-
-                changeType
-            }
 
         val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
             it.values
-                .map { it.changeTypes }
-                .merge()
+                    .map { it.changeTypes }
+                    .merge()
         }
 
         changeTypes = listOf(
-            privateProjectFactory.changeTypes,
-            sharedProjectFactoryChangeTypes,
-            addProjectChangeTypes,
-            removeProjectChangeTypes
+                privateProjectFactory.changeTypes,
+                sharedProjectFactoryChangeTypes,
+                addProjectChangeTypes,
+                removeProjectChangeTypes
         ).merge().publishImmediate(domainDisposable)
     }
 
@@ -149,97 +149,98 @@ class ProjectsFactory(
 
     val instanceCount
         get() = projects.values
-            .flatMap { it.tasks }
-            .asSequence()
-            .map { it.existingInstances.size }
-            .sum()
+                .flatMap { it.tasks }
+                .asSequence()
+                .map { it.existingInstances.size }
+                .sum()
 
     val taskKeys
         get() = projects.values
-            .flatMap {
-                val projectId = it.projectKey
+                .flatMap {
+                    val projectId = it.projectKey
 
-                it.taskIds.map { TaskKey(projectId, it) }
-            }
-            .toSet()
+                    it.taskIds.map { TaskKey(projectId, it) }
+                }
+                .toSet()
 
     val taskCount: Int
         get() = projects.values
-            .map { it.tasks.size }
-            .sum()
+                .map { it.tasks.size }
+                .sum()
 
     val savedList get() = privateProjectFactory.savedList + sharedProjectFactories.values.flatMap { it.savedList }
 
     fun createScheduleRootTask(
-        now: ExactTimeStamp,
-        name: String,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
-        note: String?,
-        projectId: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        allReminders: Boolean = true,
-        ordinal: Double? = null
+            now: ExactTimeStamp,
+            name: String,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            note: String?,
+            projectId: ProjectKey<*>,
+            imageUuid: String?,
+            deviceDbInfo: DeviceDbInfo,
+            allReminders: Boolean = true,
+            ordinal: Double? = null
     ): Task<*> {
         return createTaskHelper(
-            now,
-            name,
-            note,
-            projectId,
-            imageUuid,
-            deviceDbInfo,
-            ordinal
+                now,
+                name,
+                note,
+                projectId,
+                imageUuid,
+                deviceDbInfo,
+                ordinal
         ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, allReminders) }
     }
 
     fun createNoScheduleOrParentTask(
-        now: ExactTimeStamp,
-        name: String,
-        note: String?,
-        projectKey: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        ordinal: Double? = null
+            now: ExactTimeStamp,
+            name: String,
+            note: String?,
+            projectKey: ProjectKey<*>,
+            imageUuid: String?,
+            deviceDbInfo: DeviceDbInfo,
+            ordinal: Double? = null
     ) = createTaskHelper(
-        now,
-        name,
-        note,
-        projectKey,
-        imageUuid,
-        deviceDbInfo,
-        ordinal
+            now,
+            name,
+            note,
+            projectKey,
+            imageUuid,
+            deviceDbInfo,
+            ordinal
     ).apply { setNoScheduleOrParent(now) }
 
     private fun createTaskHelper(
-        now: ExactTimeStamp,
-        name: String,
-        note: String?,
-        projectId: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        ordinal: Double? = null
+            now: ExactTimeStamp,
+            name: String,
+            note: String?,
+            projectId: ProjectKey<*>,
+            imageUuid: String?,
+            deviceDbInfo: DeviceDbInfo,
+            ordinal: Double? = null
     ): Task<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
 
         val taskJson = TaskJson(
-            name,
-            now.long,
-            null,
-            note,
-            image = image,
-            ordinal = ordinal
+                name,
+                now.long,
+                now.offset,
+                null,
+                note,
+                image = image,
+                ordinal = ordinal
         )
 
         return getProjectForce(projectId).newTask(taskJson)
     }
 
     fun createProject(
-        name: String,
-        now: ExactTimeStamp,
-        recordOf: Set<UserKey>,
-        rootUser: RootUser,
-        userInfo: UserInfo,
-        friendsFactory: FriendsFactory
+            name: String,
+            now: ExactTimeStamp,
+            recordOf: Set<UserKey>,
+            rootUser: RootUser,
+            userInfo: UserInfo,
+            friendsFactory: FriendsFactory
     ): SharedProject {
         check(name.isNotEmpty())
 
@@ -250,17 +251,17 @@ class ProjectsFactory(
         userJsons[userInfo.key] = rootUser.userJson
 
         val sharedProjectJson = SharedProjectJson(
-            name,
-            now.long,
-            users = userJsons.mapKeys { it.key.key }.toMutableMap()
+                name,
+                now.long,
+                users = userJsons.mapKeys { it.key.key }.toMutableMap()
         )
 
         val sharedProjectRecord =
-            sharedProjectsLoader.projectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
+                sharedProjectsLoader.projectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
 
         val sharedProject = SharedProject(
-            sharedProjectRecord,
-            mapOf()
+                sharedProjectRecord,
+                mapOf()
         ) { AndroidRootInstanceManager(it, null, factoryProvider) }
 
         check(!projects.containsKey(sharedProject.projectKey))
@@ -279,13 +280,13 @@ class ProjectsFactory(
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) =
-        projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
+            projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*>? {
         val taskKey = instanceKey.taskKey
 
         return getProjectForce(taskKey).getTaskIfPresent(taskKey.taskId)
-            ?.getExistingInstanceIfPresent(instanceKey.scheduleKey)
+                ?.getExistingInstanceIfPresent(instanceKey.scheduleKey)
     }
 
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
@@ -295,7 +296,7 @@ class ProjectsFactory(
     fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce(taskKey.taskId)
 
     fun getTaskIfPresent(taskKey: TaskKey) =
-        getProjectIfPresent(taskKey)?.getTaskIfPresent(taskKey.taskId)
+            getProjectIfPresent(taskKey)?.getTaskIfPresent(taskKey.taskId)
 
     fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) = sharedProjects.values.forEach {
         it.updateDeviceDbInfo(deviceDbInfo)
@@ -307,18 +308,18 @@ class ProjectsFactory(
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ProjectType> getProjectForce(projectId: ProjectKey<T>) =
-        projects.getValue(projectId) as Project<T>
+            projects.getValue(projectId) as Project<T>
 
     fun getProjectIfPresent(projectId: String) = projects.entries
-        .singleOrNull { it.key.key == projectId }
-        ?.value
+            .singleOrNull { it.key.key == projectId }
+            ?.value
 
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) =
-        projects.getValue(taskHierarchyKey.projectId)
-            .getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+            projects.getValue(taskHierarchyKey.projectId)
+                    .getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
 
     fun getSchedule(scheduleId: ScheduleId) = projects.getValue(scheduleId.projectId)
-        .getTaskForce(scheduleId.taskId)
-        .schedules
-        .single { it.scheduleId == scheduleId }
+            .getTaskForce(scheduleId.taskId)
+            .schedules
+            .single { it.scheduleId == scheduleId }
 }

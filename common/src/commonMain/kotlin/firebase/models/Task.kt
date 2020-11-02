@@ -27,7 +27,7 @@ class Task<T : ProjectType>(
     }
 
     val endDataProperty = invalidatableLazyCallbacks {
-        taskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+        taskRecord.endData?.let { EndData(ExactTimeStamp.fromOffset(it.time, it.offset), it.deleteInstances) }
     }
     val endData by endDataProperty
 
@@ -52,7 +52,7 @@ class Task<T : ProjectType>(
 
     val schedules: List<Schedule<T>> get() = _schedules
 
-    override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
+    override val startExactTimeStamp = ExactTimeStamp.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset)
 
     val note get() = taskRecord.note
 
@@ -511,7 +511,7 @@ class Task<T : ProjectType>(
 
     private fun setMyEndExactTimeStamp(endData: EndData?) {
         taskRecord.endData = endData?.let {
-            TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances)
+            TaskJson.EndData(it.exactTimeStamp.long, it.exactTimeStamp.offset, it.deleteInstances)
         }
 
         endDataProperty.invalidate()
@@ -526,7 +526,15 @@ class Task<T : ProjectType>(
             image: TaskJson.Image?,
             ordinal: Double? = null
     ): Task<T> {
-        val taskJson = TaskJson(name, now.long, null, note, image = image, ordinal = ordinal)
+        val taskJson = TaskJson(
+                name,
+                now.long,
+                now.offset,
+                null,
+                note,
+                image = image,
+                ordinal = ordinal
+        )
 
         val childTask = project.newTask(taskJson)
 
@@ -960,6 +968,12 @@ class Task<T : ProjectType>(
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
     fun fixOffsets() {
+        if (taskRecord.startTimeOffset == null) taskRecord.startTimeOffset = startExactTimeStamp.offset
+
+        endData?.let {
+            if (taskRecord.endData!!.offset == null) setMyEndExactTimeStamp(it)
+        }
+
         scheduleIntervals.forEach { it.schedule.fixOffsets() } // todo dst
         // todo dst task, instance, task hierarchy
     }

@@ -359,6 +359,8 @@ abstract class Project<T : ProjectType> : Current {
         return combineInstanceSequences(instanceSequences)
     }
 
+    fun fixOffsets() = _tasks.values.forEach { it.fixOffsets() }
+
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
 

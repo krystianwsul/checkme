@@ -595,9 +595,9 @@ class DomainFactory(
     }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
-
         if (false) {
+            val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
+
             val results = Irrelevant.setIrrelevant(
                     object : Project.Parent {
 
@@ -609,12 +609,16 @@ class DomainFactory(
                     tomorrow
             )
 
-            results.irrelevantSchedules.forEach {
-                Log.e("asdf", "irrelevant schedule for ${it.rootTask.name}: $it")
-            }
+            results.irrelevantExistingInstances
+                    .sortedBy { it.scheduleDateTime }
+                    .forEach { Log.e("asdf", "irrelevant instance: $it") }
 
             throw Exception()
         }
+
+        projectsFactory.projects
+                .values
+                .forEach { it.fixOffsets() }
 
         val instances = projectsFactory.projects
                 .values

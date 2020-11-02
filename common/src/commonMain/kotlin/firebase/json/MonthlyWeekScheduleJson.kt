@@ -6,7 +6,9 @@ import kotlin.jvm.JvmOverloads
 @Serializable
 data class MonthlyWeekScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
+        override var startTimeOffset: Double? = null,
         override var endTime: Long? = null,
+        override var endTimeOffset: Double? = null,
         val dayOfMonth: Int = 0,
         val dayOfWeek: Int = 0,
         val beginningOfMonth: Boolean = false,

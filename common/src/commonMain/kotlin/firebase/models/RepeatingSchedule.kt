@@ -141,11 +141,13 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     }
 
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp) {
-        val pastRootInstances = getDateTimesInRange(
+        val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
                 now.plusOne()
-        ).map(rootTask::getInstance).filter { it.isRootInstance(now) }
+        ).toList()
+
+        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance(now) } // this filtering shouldn't be necessary
 
         val oldestVisible = listOf(
                 pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }

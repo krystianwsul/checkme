@@ -6,7 +6,9 @@ import kotlin.jvm.JvmOverloads
 @Serializable
 data class SingleScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
+        override var startTimeOffset: Double? = null,
         override var endTime: Long? = null,
+        override var endTimeOffset: Double? = null,
         val year: Int = 0,
         val month: Int = 0,
         val day: Int = 0,

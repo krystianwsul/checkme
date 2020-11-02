@@ -9,7 +9,6 @@ import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.throwIfInterrupted
-import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -642,6 +641,8 @@ class Task<T : ProjectType>(
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
                             SingleScheduleJson(
                                     now.long,
+                                    now.offset,
+                                    null,
                                     null,
                                     date.year,
                                     date.month,
@@ -660,6 +661,8 @@ class Task<T : ProjectType>(
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                                 WeeklyScheduleJson(
                                         now.long,
+                                        now.offset,
+                                        null,
                                         null,
                                         dayOfWeek.ordinal,
                                         customTimeId?.value,
@@ -680,6 +683,8 @@ class Task<T : ProjectType>(
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             MonthlyDayScheduleJson(
                                     now.long,
+                                    now.offset,
+                                    null,
                                     null,
                                     dayOfMonth,
                                     beginningOfMonth,
@@ -699,6 +704,8 @@ class Task<T : ProjectType>(
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             MonthlyWeekScheduleJson(
                                     now.long,
+                                    now.offset,
+                                    null,
                                     null,
                                     dayOfMonth,
                                     dayOfWeek.ordinal,
@@ -717,6 +724,8 @@ class Task<T : ProjectType>(
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
                             YearlyScheduleJson(
                                     now.long,
+                                    now.offset,
+                                    null,
                                     null,
                                     scheduleData.month,
                                     scheduleData.day,
@@ -758,7 +767,9 @@ class Task<T : ProjectType>(
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
                             SingleScheduleJson(
                                     now.long,
+                                    now.offset,
                                     schedule.endTime,
+                                    schedule.endExactTimeStamp?.offset,
                                     date.year,
                                     date.month,
                                     date.day,
@@ -775,7 +786,9 @@ class Task<T : ProjectType>(
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                             WeeklyScheduleJson(
                                     now.long,
+                                    now.offset,
                                     schedule.endTime,
+                                    schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfWeek.ordinal,
                                     customTimeId?.value,
                                     hour,
@@ -792,7 +805,9 @@ class Task<T : ProjectType>(
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             MonthlyDayScheduleJson(
                                     now.long,
+                                    now.offset,
                                     schedule.endTime,
+                                    schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.beginningOfMonth,
                                     customTimeId?.value,
@@ -809,7 +824,9 @@ class Task<T : ProjectType>(
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             MonthlyWeekScheduleJson(
                                     now.long,
+                                    now.offset,
                                     schedule.endTime,
+                                    schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.dayOfWeek.ordinal,
                                     schedule.beginningOfMonth,
@@ -827,7 +844,9 @@ class Task<T : ProjectType>(
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
                             YearlyScheduleJson(
                                     now.long,
+                                    now.offset,
                                     schedule.endTime,
+                                    schedule.endExactTimeStamp?.offset,
                                     schedule.month,
                                     schedule.day,
                                     customTimeId?.value,
@@ -879,8 +898,6 @@ class Task<T : ProjectType>(
             scheduleTextFactory.getScheduleText(it, project)
         }
     }
-
-    private fun getTaskLocker() = LockerManager.getTaskLocker<T>(taskKey)
 
     private val generatedInstances = mutableMapOf<InstanceKey, Instance<T>>()
 
@@ -941,6 +958,10 @@ class Task<T : ProjectType>(
                     .any { it.schedule is RepeatingSchedule<*> }
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
+
+    fun fixOffsets() {
+        scheduleIntervals.forEach { it.schedule.fixOffsets() } // todo dst
+    }
 
     interface ScheduleTextFactory {
 

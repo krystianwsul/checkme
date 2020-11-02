@@ -11,8 +11,14 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
-    override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
+    override val startExactTimeStamp by lazy {
+        ExactTimeStamp.fromOffset(scheduleRecord.startTime, scheduleRecord.startTimeOffset)
+    }
+
+    override val endExactTimeStamp
+        get() = scheduleRecord.endTime?.let {
+            ExactTimeStamp.fromOffset(it, scheduleRecord.endTimeOffset)
+        }
 
     val endTime get() = scheduleRecord.endTime
 
@@ -33,6 +39,10 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
         scheduleRecord.endTime = endExactTimeStamp.long
 
+        scheduleRecord.endTimeOffset = endExactTimeStamp.toDateTimeTz()
+                .offset
+                .totalMilliseconds
+
         rootTask.invalidateIntervals()
     }
 
@@ -40,6 +50,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
         requireNotCurrent(now)
 
         scheduleRecord.endTime = null
+        scheduleRecord.endTimeOffset = null
 
         rootTask.invalidateIntervals()
     }
@@ -107,4 +118,12 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     ): Boolean
 
     override fun toString() = super.toString() + ", scheduleId: $scheduleId, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
+
+    fun fixOffsets() {
+        if (scheduleRecord.startTimeOffset == null) scheduleRecord.startTimeOffset = startExactTimeStamp.offset
+
+        endExactTimeStamp?.let {
+            if (scheduleRecord.endTimeOffset == null) scheduleRecord.endTimeOffset = it.offset
+        }
+    }
 }

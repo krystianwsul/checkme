@@ -6,7 +6,9 @@ import kotlin.jvm.JvmOverloads
 @Serializable
 data class WeeklyScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
+        override var startTimeOffset: Double? = null,
         override var endTime: Long? = null,
+        override var endTimeOffset: Double? = null,
         val dayOfWeek: Int = 0,
         override val customTimeId: String? = null,
         override val hour: Int? = null,

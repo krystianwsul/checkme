@@ -85,10 +85,22 @@ class SingleSchedule<T : ProjectType>(
 
         override val originalDate get() = singleScheduleRecord.date
 
+        override var startTimeOffset: Double?
+            get() = singleScheduleRecord.startTimeOffset
+            set(value) {
+                singleScheduleRecord.startTimeOffset = value
+            }
+
         override var endTime
             get() = singleScheduleRecord.endTime
             set(value) {
                 singleScheduleRecord.endTime = value
+            }
+
+        override var endTimeOffset
+            get() = singleScheduleRecord.endTimeOffset
+            set(value) {
+                singleScheduleRecord.endTimeOffset = value
             }
     }
 

@@ -1,15 +1,34 @@
 package com.krystianwsul.common.time
 
+import com.soywiz.klock.DateTime
+import com.soywiz.klock.DateTimeTz
+import com.soywiz.klock.TimezoneOffset
+
 data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     companion object {
 
         val now get() = ExactTimeStamp(DateTimeSoy.nowUnixLong())
+
+        fun fromOffset(long: Long, offset: Double?): ExactTimeStamp {
+            return if (offset == null) {
+                ExactTimeStamp(long)
+            } else {
+                val dateTimeSoy = DateTime(long)
+                val dateTimeTz = DateTimeTz.utc(dateTimeSoy, TimezoneOffset(offset))
+
+                val dateTimeTzAdjusted = DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
+
+                ExactTimeStamp(dateTimeTzAdjusted.utc)
+            }
+        }
     }
 
     fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
 
     fun toDateTimeTz() = toDateTimeSoy().local
+
+    val offset by lazy { toDateTimeTz().offset.totalMilliseconds }
 
     val date get() = Date(toDateTimeTz())
 

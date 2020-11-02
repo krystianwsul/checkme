@@ -974,8 +974,9 @@ class Task<T : ProjectType>(
             if (taskRecord.endData!!.offset == null) setMyEndExactTimeStamp(it)
         }
 
-        scheduleIntervals.forEach { it.schedule.fixOffsets() } // todo dst
-        // todo dst task, instance, task hierarchy
+        scheduleIntervals.forEach { it.schedule.fixOffsets() }
+
+        parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
     }
 
     interface ScheduleTextFactory {

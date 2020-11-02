@@ -18,6 +18,10 @@ class TaskHierarchyRecord(
     override val key get() = projectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
 
     val startTime get() = createObject.startTime
+    var startTimeOffset by Committer(createObject::startTimeOffset)
+
+    var endTime by Committer(createObject::endTime)
+    var endTimeOffset by Committer(createObject::endTimeOffset)
 
     val parentTaskId get() = createObject.parentTaskId
 
@@ -38,8 +42,6 @@ class TaskHierarchyRecord(
             projectRecord,
             taskHierarchyJson
     )
-
-    var endTime by Committer(createObject::endTime)
 
     override fun deleteFromParent() = check(projectRecord.taskHierarchyRecords.remove(id) == this)
 }

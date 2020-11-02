@@ -8,5 +8,7 @@ class TaskHierarchyJson @JvmOverloads constructor(
         val parentTaskId: String = "",
         val childTaskId: String = "",
         val startTime: Long = 0,
-        var endTime: Long? = null
+        var startTimeOffset: Double? = null,
+        var endTime: Long? = null,
+        var endTimeOffset: Double? = null
 )

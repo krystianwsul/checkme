@@ -961,6 +961,7 @@ class Task<T : ProjectType>(
 
     fun fixOffsets() {
         scheduleIntervals.forEach { it.schedule.fixOffsets() } // todo dst
+        // todo dst task, instance, task hierarchy
     }
 
     interface ScheduleTextFactory {

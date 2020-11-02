@@ -52,8 +52,10 @@ abstract class ProjectRecord<T : ProjectType>(
     var name by Committer(projectJson::name, "$key/$PROJECT_JSON")
 
     val startTime get() = projectJson.startTime
+    var startTimeOffset by Committer(projectJson::startTimeOffset, "$key/$PROJECT_JSON")
 
     var endTime by Committer(projectJson::endTime, "$key/$PROJECT_JSON")
+    var endTimeOffset by Committer(projectJson::endTimeOffset, "$key/$PROJECT_JSON")
 
     override val children
         get() = taskRecords.values +

@@ -35,8 +35,14 @@ abstract class Project<T : ProjectType> : Current {
             projectRecord.name = name
         }
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
-    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
+    override val startExactTimeStamp by lazy {
+        ExactTimeStamp.fromOffset(projectRecord.startTime, projectRecord.startTimeOffset)
+    }
+
+    override val endExactTimeStamp
+        get() = projectRecord.endTime?.let {
+            ExactTimeStamp.fromOffset(it, projectRecord.endTimeOffset)
+        }
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys
@@ -359,7 +365,15 @@ abstract class Project<T : ProjectType> : Current {
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun fixOffsets() = _tasks.values.forEach { it.fixOffsets() }
+    fun fixOffsets() {
+        if (projectRecord.startTimeOffset == null) projectRecord.startTimeOffset = startExactTimeStamp.offset
+
+        endExactTimeStamp?.let {
+            if (projectRecord.endTimeOffset == null) projectRecord.endTimeOffset = it.offset
+        }
+
+        _tasks.values.forEach { it.fixOffsets() }
+    }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")

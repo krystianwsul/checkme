@@ -31,12 +31,17 @@ class AndroidPrivateProjectManager(
             val record = if (first) {
                 first = false // for new users, the project may not exist yet
 
+                val now = ExactTimeStamp.now
+
                 snapshot.takeIf { it.exists() }
                         ?.toRecord()
                         ?: PrivateProjectRecord(
                                 databaseWrapper,
                                 userInfo,
-                                PrivateProjectJson(startTime = ExactTimeStamp.now.long)
+                                PrivateProjectJson(
+                                        startTime = now.long,
+                                        startTimeOffset = now.offset
+                                )
                         )
             } else {
                 snapshot.toRecord()

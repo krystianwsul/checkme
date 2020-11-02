@@ -36,6 +36,7 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
         displayText += "\ndate: " + instanceKey.scheduleKey.scheduleDate
         displayText += "\ncustom time: " + instanceKey.scheduleKey.scheduleTimePair.customTimeKey
         displayText += "\nnormal time: " + instanceKey.scheduleKey.scheduleTimePair.hourMinute
+        displayText += "\nexists? " + instance.exists()
     }
 
     ShowInstanceViewModel.Data(

@@ -31,6 +31,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 import io.reactivex.Observable
+import kotlin.properties.Delegates.observable
 
 @Suppress("LeakingThis")
 class DomainFactory(
@@ -173,6 +174,10 @@ class DomainFactory(
     val instanceShownCount get() = localFactory.instanceShownRecords.size
 
     val uuid get() = localFactory.uuid
+
+    var debugMode by observable(false) { _, _, _ ->
+        domainChanged.accept(setOf())
+    }
 
     private fun updateIsSaved() {
         val oldSaved = isSaved.value!!

@@ -14,12 +14,19 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/debugViewSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Debug mode"
+            tools:ignore="HardcodedText" />
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="tick"
             android:id="@+id/debugTick"
-            tools:ignore="HardcodedText"/>
+            tools:ignore="HardcodedText" />
 
         <Button
             android:layout_width="match_parent"

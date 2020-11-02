@@ -13,7 +13,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.ticks.TickJobIntentService
+import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_debug.*
 
 class DebugFragment : AbstractFragment() {
@@ -23,11 +25,28 @@ class DebugFragment : AbstractFragment() {
         fun newInstance() = DebugFragment()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_debug, container, false)!!
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) = inflater.inflate(R.layout.fragment_debug, container, false)!!
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        DomainFactory.instanceRelay
+                .filterNotNull()
+                .subscribe {
+                    debugViewSwitch.apply {
+                        isChecked = it.debugMode
+
+                        setOnCheckedChangeListener { _, isChecked ->
+                            it.debugMode = isChecked
+                        }
+                    }
+                }
+                .addTo(viewCreatedDisposable)
 
         debugTick.setOnClickListener { TickJobIntentService.startServiceNormal(requireContext(), "DebugFragment") }
 
@@ -87,5 +106,9 @@ class DebugFragment : AbstractFragment() {
                 append(tickLog)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
     }
 }

@@ -10,10 +10,16 @@ class ExactTimeStampTest {
         private const val long = 1589803853323
     }
 
-    private fun getExactTimeStamp(offsetHours: Int): String {
-        val exactTimeStamp = ExactTimeStamp.fromOffset(long, (60 * 60 * 1000 * offsetHours).toDouble())
+    private fun getExactTimeStamp(offsetHours: Int?): String {
+        val offset = offsetHours?.let { (60 * 60 * 1000 * it).toDouble() }
+        val exactTimeStamp = ExactTimeStamp.fromOffset(long, offset)
 
         return exactTimeStamp.toString().substring(8, 13)
+    }
+
+    @Test
+    fun testNoOffset() {
+        assertEquals("14:10", getExactTimeStamp(null))
     }
 
     @Test

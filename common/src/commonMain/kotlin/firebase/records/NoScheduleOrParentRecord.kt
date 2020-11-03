@@ -19,8 +19,10 @@ class NoScheduleOrParentRecord<T : ProjectType>(
     override val key = "${taskRecord.key}/$NO_SCHEDULE_OR_PARENT/$id"
 
     val startTime = createObject.startTime
+    var startTimeOffset by Committer(createObject::startTimeOffset)
 
     var endTime by Committer(createObject::endTime)
+    var endTimeOffset by Committer(createObject::endTimeOffset)
 
     override fun deleteFromParent() = check(taskRecord.noScheduleOrParentRecords.remove(id) == this)
 }

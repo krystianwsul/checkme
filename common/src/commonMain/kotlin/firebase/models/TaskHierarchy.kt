@@ -39,7 +39,7 @@ class TaskHierarchy<T : ProjectType>(
 
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
-    fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now.toDateTime())
+    fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now)
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)

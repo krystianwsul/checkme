@@ -27,10 +27,9 @@ class TaskRelevance(val task: Task<*>) {
         (task.parentHierarchyIntervals + task.childHierarchyIntervals)
                 .asSequence()
                 .filter {
-                    val hierarchyDateTime = task.getHierarchyDateTime(now.toDateTime())
+                    val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-                    it.notDeleted(hierarchyDateTime.toExactTimeStamp()) &&
-                            it.taskHierarchy.notDeletedDateTime(hierarchyDateTime)
+                    it.notDeleted(hierarchyExactTimeStamp) && it.taskHierarchy.notDeleted(hierarchyExactTimeStamp)
                 }
                 .forEach {
                     taskHierarchyRelevances.getValue(it.taskHierarchy.taskHierarchyKey).setRelevant(

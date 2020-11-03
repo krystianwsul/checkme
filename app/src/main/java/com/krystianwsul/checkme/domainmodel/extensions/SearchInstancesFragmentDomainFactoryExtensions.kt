@@ -38,7 +38,7 @@ fun DomainFactory.getSearchInstancesData(
             val instanceDatas = instances.map {
                 val task = it.task
 
-                val isRootTask = if (task.current(now)) task.isRootTask(now.toDateTime()) else null
+                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
                 val children = getChildInstanceDatas(it, now, query)
 

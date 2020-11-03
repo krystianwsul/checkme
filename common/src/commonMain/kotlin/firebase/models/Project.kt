@@ -133,7 +133,7 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks[newTask.id] = newTask
 
-        val currentScheduleIntervals = oldTask.getCurrentScheduleIntervals(now.toDateTime()).map { it.schedule }
+        val currentScheduleIntervals = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
         val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
         if (currentScheduleIntervals.isNotEmpty()) {
@@ -302,7 +302,7 @@ abstract class Project<T : ProjectType> : Current {
                         .filter { listOf(it.scheduleDateTime, it.instanceDateTime).maxOrNull()!!.toExactTimeStamp() >= now }
         )
 
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now.toDateTime())
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

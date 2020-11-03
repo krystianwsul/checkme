@@ -101,18 +101,18 @@ class Instance<T : ProjectType> private constructor(
 
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
-    private val hierarchyDateTimeProperty = invalidatableLazy {
+    private val hierarchyExactTimeStampProperty = invalidatableLazy {
         listOfNotNull(
-                task.endDateTime?.let { Pair(it.minusOneMinute(), "task end") },
-                done?.toDateTime()?.let { Pair(it.minusOneMinute(), "done") }
+                task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
+                done?.let { Pair(it.minusOne(), "done") }
         ).minByOrNull { it.first }
     }
 
-    private val hierarchyDateTime by hierarchyDateTimeProperty
+    private val hierarchyExactTimeStamp by hierarchyExactTimeStampProperty
 
     init {
-        task.endDataProperty.addCallback(hierarchyDateTimeProperty::invalidate)
-        doneProperty.addCallback(hierarchyDateTimeProperty::invalidate)
+        task.endDataProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+        doneProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
     }
 
     constructor(
@@ -133,10 +133,10 @@ class Instance<T : ProjectType> private constructor(
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
         instanceLocker?.childInstances?.let { return it }
 
-        val hierarchyDateTime = getHierarchyDateTime(now).first
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
         val scheduleDateTime = scheduleDateTime
 
-        val childInstances = if (task.isGroupTask(now.toDateTime())) {
+        val childInstances = if (task.isGroupTask(now)) {
             /*
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
@@ -144,8 +144,8 @@ class Instance<T : ProjectType> private constructor(
             project.getTaskHierarchiesByParentTaskKey(taskKey)
                     .asSequence()
                     .filter { it.isParentGroupTask(now) }
-                    .filter { it.notDeletedDateTime(hierarchyDateTime) }
-                    .filter { it.childTask.notDeletedDateTime(hierarchyDateTime) }
+                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.childTask.notDeleted(hierarchyExactTimeStamp) }
                     .toList()
                     .map {
                         val childInstance = it.childTask.getInstance(scheduleDateTime)
@@ -156,10 +156,10 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeleted(hierarchyDateTime.toExactTimeStamp()) }
+                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
                     .map { it.taskHierarchy }
                     .filter {
-                        it.notDeletedDateTime(hierarchyDateTime) && it.childTask.notDeletedDateTime(hierarchyDateTime)
+                        it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
                     }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
@@ -178,9 +178,9 @@ class Instance<T : ProjectType> private constructor(
         return childInstances
     }
 
-    private fun getHierarchyDateTime(now: ExactTimeStamp) = listOfNotNull(
-            hierarchyDateTime,
-            Pair(now.toDateTime(), "now"),
+    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
+            hierarchyExactTimeStamp,
+            Pair(now, "now"),
     ).minByOrNull { it.first }!!
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
@@ -277,18 +277,18 @@ class Instance<T : ProjectType> private constructor(
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
-        val hierarchyDateTime = getHierarchyDateTime(now)
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
                 .asSequence()
-                .filter { it.parentTask.getGroupScheduleDateTime(now.toDateTime()) == scheduleDateTime }
-                .filter { it.currentDateTime(hierarchyDateTime.first) }
+                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
+                .filter { it.current(hierarchyExactTimeStamp.first) }
                 .toList()
 
         val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
             val groupMatch = groupMatches.single()
             val parentTask = groupMatch.parentTask
-            val intervalType = task.getInterval(hierarchyDateTime.first.toExactTimeStamp()).type
+            val intervalType = task.getInterval(hierarchyExactTimeStamp.first).type
 
             Triple(
                     parentTask,
@@ -296,13 +296,13 @@ class Instance<T : ProjectType> private constructor(
                     groupMatch
             )
         } else {
-            Triple(task.getParentTask(hierarchyDateTime.first), false, null)
+            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
         }
 
         val parentInstanceData = if (parentTask == null) {
             null
         } else {
-            check(parentTask.notDeletedDateTime(hierarchyDateTime.first))
+            check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
 
             return parentTask.getInstance(scheduleDateTime)
                     .takeIf { it.isEligibleParentInstance(now) }
@@ -433,7 +433,7 @@ class Instance<T : ProjectType> private constructor(
     fun matchesQuery(now: ExactTimeStamp, query: String): Boolean = task.matchesQuery(query) || getChildInstances(now).any { it.first.matchesQuery(now, query) }
 
     fun onTaskEndChanged() {
-        hierarchyDateTimeProperty.invalidate()
+        hierarchyExactTimeStampProperty.invalidate()
     }
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime

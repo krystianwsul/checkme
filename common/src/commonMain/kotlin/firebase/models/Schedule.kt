@@ -19,8 +19,6 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     val endDateTime get() = scheduleRecord.endTime?.let { DateTime.fromOffset(it, scheduleRecord.endTimeOffset) }
     // todo dst
 
-    val endTime get() = scheduleRecord.endTime // todo dst
-
     val customTimeKey get() = scheduleRecord.customTimeKey
 
     abstract val scheduleType: ScheduleType

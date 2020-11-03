@@ -15,8 +15,8 @@ class TaskHierarchy<T : ProjectType>(
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
 
-    val startDateTime by lazy {
-        DateTime.fromOffset(taskHierarchyRecord.startTime, taskHierarchyRecord.startTimeOffset) // todo dst
+    val startDateTime by lazy { // todo dst
+        DateTime.fromOffset(taskHierarchyRecord.startTime, taskHierarchyRecord.startTimeOffset)
     }
 
     override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }

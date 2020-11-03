@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class NoScheduleOrParentJson @JvmOverloads constructor( // todo dst
+class NoScheduleOrParentJson @JvmOverloads constructor(
         val startTime: Long = 0,
         var endTime: Long? = null
 )

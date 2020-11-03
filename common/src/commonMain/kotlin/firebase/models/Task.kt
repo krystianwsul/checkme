@@ -784,7 +784,7 @@ class Task<T : ProjectType>(
                             SingleScheduleJson(
                                     now.long,
                                     now.offset,
-                                    schedule.endTime,
+                                    schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     date.year,
                                     date.month,
@@ -803,7 +803,7 @@ class Task<T : ProjectType>(
                             WeeklyScheduleJson(
                                     now.long,
                                     now.offset,
-                                    schedule.endTime,
+                                    schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfWeek.ordinal,
                                     customTimeId?.value,
@@ -822,7 +822,7 @@ class Task<T : ProjectType>(
                             MonthlyDayScheduleJson(
                                     now.long,
                                     now.offset,
-                                    schedule.endTime,
+                                    schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.beginningOfMonth,
@@ -841,7 +841,7 @@ class Task<T : ProjectType>(
                             MonthlyWeekScheduleJson(
                                     now.long,
                                     now.offset,
-                                    schedule.endTime,
+                                    schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.dayOfWeek.ordinal,
@@ -861,7 +861,7 @@ class Task<T : ProjectType>(
                             YearlyScheduleJson(
                                     now.long,
                                     now.offset,
-                                    schedule.endTime,
+                                    schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.month,
                                     schedule.day,

@@ -13,11 +13,9 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
     val startDateTime by lazy { DateTime.fromOffset(scheduleRecord.startTime, scheduleRecord.startTimeOffset) }
-    // todo dst
 
     override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
     val endDateTime get() = scheduleRecord.endTime?.let { DateTime.fromOffset(it, scheduleRecord.endTimeOffset) }
-    // todo dst
 
     val customTimeKey get() = scheduleRecord.customTimeKey
 
@@ -92,15 +90,15 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             scheduleDateTime: DateTime,
             checkOldestVisible: Boolean
     ): Boolean {
-        val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
-
-        if (exactTimeStamp < startExactTimeStamp)
+        if (scheduleDateTime < startDateTime)
             return false
+
+        val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
 
         if (exactTimeStamp < scheduleInterval.startExactTimeStamp)
             return false
 
-        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true)
+        if (endDateTime?.let { scheduleDateTime >= it } == true)
             return false
 
         if (scheduleInterval.endExactTimeStamp?.let { exactTimeStamp >= it } == true)

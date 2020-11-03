@@ -15,16 +15,16 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
     val now = ExactTimeStamp.now
 
     val task = getTaskForce(taskKey)
-    val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
+    val hierarchyDateTime = task.getHierarchyDateTime(now.toDateTime())
 
-    val childTaskDatas = task.getChildTaskHierarchies(hierarchyTimeStamp, true)
+    val childTaskDatas = task.getChildTaskHierarchies(hierarchyDateTime, true)
             .map { taskHierarchy ->
                 val childTask = taskHierarchy.childTask
 
                 TaskListFragment.ChildTaskData(
                         childTask.name,
-                        childTask.getScheduleText(ScheduleText, hierarchyTimeStamp),
-                        getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
+                        childTask.getScheduleText(ScheduleText, hierarchyDateTime),
+                        getTaskListChildTaskDatas(childTask, now, true, hierarchyDateTime),
                         childTask.note,
                         childTask.taskKey,
                         taskHierarchy.taskHierarchyKey,
@@ -38,8 +38,8 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
             .sorted()
 
     var collapseText = listOfNotNull(
-            task.getParentName(hierarchyTimeStamp).takeIf { it.isNotEmpty() },
-            task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp)
+            task.getParentName(hierarchyDateTime).takeIf { it.isNotEmpty() },
+            task.getScheduleTextMultiline(ScheduleText, hierarchyDateTime)
                     .takeIf { it.isNotEmpty() }
     ).joinToString("\n\n")
 

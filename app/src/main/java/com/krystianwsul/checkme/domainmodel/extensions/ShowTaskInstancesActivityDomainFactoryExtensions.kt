@@ -23,7 +23,7 @@ fun DomainFactory.getShowTaskInstancesData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+    val isRootTask = if (task.current(now)) task.isRootTask(now.toDateTime()) else null
 
     val desiredCount = (page + 1) * PAGE_SIZE
 

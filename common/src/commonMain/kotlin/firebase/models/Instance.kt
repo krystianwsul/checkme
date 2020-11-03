@@ -101,18 +101,18 @@ class Instance<T : ProjectType> private constructor(
 
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
-    private val hierarchyExactTimeStampProperty = invalidatableLazy {
+    private val hierarchyDateTimeProperty = invalidatableLazy {
         listOfNotNull(
-                task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
-                done?.let { Pair(it.minusOne(), "done") }
+                task.endDateTime?.let { Pair(it.minusOneMinute(), "task end") },
+                done?.toDateTime()?.let { Pair(it.minusOneMinute(), "done") }
         ).minByOrNull { it.first }
     }
 
-    private val hierarchyExactTimeStamp by hierarchyExactTimeStampProperty
+    private val hierarchyDateTime by hierarchyDateTimeProperty
 
     init {
-        task.endDataProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
-        doneProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+        task.endDataProperty.addCallback(hierarchyDateTimeProperty::invalidate)
+        doneProperty.addCallback(hierarchyDateTimeProperty::invalidate)
     }
 
     constructor(
@@ -133,10 +133,10 @@ class Instance<T : ProjectType> private constructor(
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
         instanceLocker?.childInstances?.let { return it }
 
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+        val hierarchyDateTime = getHierarchyDateTime(now).first
         val scheduleDateTime = scheduleDateTime
 
-        val childInstances = if (task.isGroupTask(now)) {
+        val childInstances = if (task.isGroupTask(now.toDateTime())) {
             /*
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
@@ -144,8 +144,8 @@ class Instance<T : ProjectType> private constructor(
             project.getTaskHierarchiesByParentTaskKey(taskKey)
                     .asSequence()
                     .filter { it.isParentGroupTask(now) }
-                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
-                    .filter { it.childTask.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.notDeletedDateTime(hierarchyDateTime) }
+                    .filter { it.childTask.notDeletedDateTime(hierarchyDateTime) }
                     .toList()
                     .map {
                         val childInstance = it.childTask.getInstance(scheduleDateTime)
@@ -156,10 +156,10 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.notDeleted(hierarchyDateTime.toExactTimeStamp()) }
                     .map { it.taskHierarchy }
                     .filter {
-                        it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)
+                        it.notDeletedDateTime(hierarchyDateTime) && it.childTask.notDeletedDateTime(hierarchyDateTime)
                     }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
@@ -178,9 +178,9 @@ class Instance<T : ProjectType> private constructor(
         return childInstances
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
-            hierarchyExactTimeStamp,
-            Pair(now, "now"),
+    private fun getHierarchyDateTime(now: ExactTimeStamp) = listOfNotNull(
+            hierarchyDateTime,
+            Pair(now.toDateTime(), "now"),
     ).minByOrNull { it.first }!!
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
@@ -188,9 +188,7 @@ class Instance<T : ProjectType> private constructor(
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
     private fun createInstanceHierarchy(now: ExactTimeStamp): Data.Real<*> {
-        (data as? Data.Real)?.let {
-            return it
-        }
+        (data as? Data.Real)?.let { return it }
 
         getParentInstance(now)?.instance?.createInstanceHierarchy(now)
 
@@ -279,18 +277,18 @@ class Instance<T : ProjectType> private constructor(
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
+        val hierarchyDateTime = getHierarchyDateTime(now)
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
                 .asSequence()
-                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
-                .filter { it.current(hierarchyExactTimeStamp.first) }
+                .filter { it.parentTask.getGroupScheduleDateTime(now.toDateTime()) == scheduleDateTime }
+                .filter { it.currentDateTime(hierarchyDateTime.first) }
                 .toList()
 
         val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
             val groupMatch = groupMatches.single()
             val parentTask = groupMatch.parentTask
-            val intervalType = task.getInterval(hierarchyExactTimeStamp.first).type
+            val intervalType = task.getInterval(hierarchyDateTime.first.toExactTimeStamp()).type
 
             Triple(
                     parentTask,
@@ -298,13 +296,13 @@ class Instance<T : ProjectType> private constructor(
                     groupMatch
             )
         } else {
-            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
+            Triple(task.getParentTask(hierarchyDateTime.first), false, null)
         }
 
         val parentInstanceData = if (parentTask == null) {
             null
         } else {
-            check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
+            check(parentTask.notDeletedDateTime(hierarchyDateTime.first))
 
             return parentTask.getInstance(scheduleDateTime)
                     .takeIf { it.isEligibleParentInstance(now) }
@@ -430,13 +428,12 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
-    fun isRepeatingGroupChild(now: ExactTimeStamp) = getParentInstance(now)?.isRepeatingGroup
-            ?: false
+    fun isRepeatingGroupChild(now: ExactTimeStamp) = getParentInstance(now)?.isRepeatingGroup ?: false
 
     fun matchesQuery(now: ExactTimeStamp, query: String): Boolean = task.matchesQuery(query) || getChildInstances(now).any { it.first.matchesQuery(now, query) }
 
     fun onTaskEndChanged() {
-        hierarchyExactTimeStampProperty.invalidate()
+        hierarchyDateTimeProperty.invalidate()
     }
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime

@@ -303,7 +303,7 @@ abstract class Project<T : ProjectType> : Current {
                         .filter { listOf(it.scheduleDateTime, it.instanceDateTime).maxOrNull()!!.toExactTimeStamp() >= now }
         )
 
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now.toDateTime())
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

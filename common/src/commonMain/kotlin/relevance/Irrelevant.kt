@@ -43,7 +43,9 @@ object Irrelevant {
                 .filter {
                     val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
 
-                    it.current(exactTimeStamp) && it.isRootTask(exactTimeStamp) && it.isVisible(exactTimeStamp, true)
+                    it.current(exactTimeStamp)
+                            && it.isRootTask(exactTimeStamp.toDateTime())
+                            && it.isVisible(exactTimeStamp, true)
                 }
                 .map { taskRelevances.getValue(it.taskKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }

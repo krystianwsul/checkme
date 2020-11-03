@@ -24,8 +24,8 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
     val now = ExactTimeStamp.now
 
     val childTaskDatas = getTasks().map {
-        val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
-        Pair(it, hierarchyExactTimeStamp)
+        val hierarchyDateTime = it.getHierarchyDateTime(now.toDateTime())
+        Pair(it, hierarchyDateTime)
     }
             .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
             .map { (task, hierarchyExactTimeStamp) ->
@@ -131,7 +131,7 @@ fun DomainFactory.getGroupListData(
     val instanceDatas = currentInstances.map { instance ->
         val task = instance.task
 
-        val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+        val isRootTask = if (task.current(now)) task.isRootTask(now.toDateTime()) else null
 
         val children = getChildInstanceDatas(instance, now)
 
@@ -177,7 +177,7 @@ fun DomainFactory.getGroupListData(
 private fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task<*>,
         now: ExactTimeStamp
-): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
+): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now.toDateTime()).map {
     val childTask = it.childTask
 
     GroupListDataWrapper.TaskData(

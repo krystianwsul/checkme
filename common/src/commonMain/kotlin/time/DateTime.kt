@@ -48,4 +48,6 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
     fun toDateTimeSoy() = timeStamp.toDateTimeSoy()
 
     fun plusOneMinute() = DateTime(toDateTimeSoy().local + 1.minutes)
+
+    fun minusOneMinute() = DateTime(toDateTimeSoy().local - 1.minutes)
 }

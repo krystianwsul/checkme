@@ -224,6 +224,6 @@ fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) =
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
     it.current(now)
             && it.isVisible(now, true)
-            && it.isRootTask(now)
+            && it.isRootTask(now.toDateTime())
             && it.getCurrentSchedules(now).isEmpty()
 }

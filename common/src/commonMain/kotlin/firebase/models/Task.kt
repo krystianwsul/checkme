@@ -19,7 +19,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>
-) : Current, QueryMatch {
+) : Current, CurrentDateTime, QueryMatch {
 
     companion object {
 
@@ -59,10 +59,10 @@ class Task<T : ProjectType>(
     val schedules: List<Schedule<T>> get() = _schedules
 
     override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
-    val startDateTime by lazy { DateTime.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) } // todo dst
+    override val startDateTime by lazy { DateTime.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) }
 
     override val endExactTimeStamp get() = endData?.exactTimeStamp
-    val endDateTime get() = endData?.dateTime // todo dst
+    override val endDateTime get() = endData?.dateTime // todo dst
 
     val note get() = taskRecord.note
 
@@ -117,13 +117,13 @@ class Task<T : ProjectType>(
     override val normalizedName by normalizedNameDelegate
     override val normalizedNote by normalizedNoteDelegate
 
-    fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
+    fun getParentName(dateTime: DateTime) = getParentTask(dateTime)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (!current(now))
             return false
 
-        val rootTask = getRootTask(now)
+        val rootTask = getRootTask(now.toDateTime())
         val schedules = rootTask.getCurrentSchedules(now)
 
         if (schedules.isEmpty())
@@ -135,11 +135,9 @@ class Task<T : ProjectType>(
         return false
     }// bo inheritance i testy
 
-    private fun getRootTask(
-            exactTimeStamp: ExactTimeStamp
-    ): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
+    private fun getRootTask(dateTime: DateTime): Task<T> = getParentTask(dateTime)?.getRootTask(dateTime) ?: this
 
-    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> { // todo dst
         requireCurrent(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let {
@@ -157,10 +155,10 @@ class Task<T : ProjectType>(
                 check(it.noScheduleOrParent.current(exactTimeStamp))
             }
 
-    fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
-        requireCurrent(exactTimeStamp)
+    fun isRootTask(dateTime: DateTime): Boolean {
+        requireCurrentDateTime(dateTime)
 
-        return getParentTask(exactTimeStamp) == null
+        return getParentTask(dateTime) == null
     }
 
     fun setEndData( // this is not recursive on children.  Get the whole tree beforehand.
@@ -174,7 +172,7 @@ class Task<T : ProjectType>(
 
         taskUndoData?.taskKeys?.add(taskKey)
 
-        val group = isGroupTask(now)
+        val group = isGroupTask(endData.dateTime)
 
         getCurrentSchedules(now).forEach {
             it.requireCurrent(now)
@@ -185,8 +183,9 @@ class Task<T : ProjectType>(
         }
 
         if (group) {
-            val remainingTaskHierarchies =
-                    project.getTaskHierarchiesByParentTaskKey(taskKey).filter { it.notDeleted(now) }
+            val remainingTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter {
+                it.notDeleted(now)
+            }
 
             taskUndoData?.taskHierarchyKeys?.addAll(remainingTaskHierarchies.map { it.taskHierarchyKey })
 
@@ -194,7 +193,7 @@ class Task<T : ProjectType>(
         }
 
         if (!recursive) {
-            getParentTaskHierarchy(now)?.let {
+            getParentTaskHierarchy(now.toDateTime())?.let {
                 it.requireCurrent(now)
                 it.taskHierarchy.requireCurrent(now)
 
@@ -207,10 +206,10 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(endData)
     }
 
-    fun getGroupScheduleDateTime(exactTimeStamp: ExactTimeStamp): DateTime? {
-        val hierarchyTimeStamp = getHierarchyExactTimeStamp(exactTimeStamp)
+    fun getGroupScheduleDateTime(dateTime: DateTime): DateTime? {
+        val hierarchyDateTime = getHierarchyDateTime(dateTime)
 
-        val groupSingleSchedules = getCurrentSchedules(hierarchyTimeStamp)
+        val groupSingleSchedules = getCurrentSchedules(hierarchyDateTime.toExactTimeStamp()) // todo dst?
                 .asSequence()
                 .map { it.schedule }
                 .filterIsInstance<SingleSchedule<*>>()
@@ -224,8 +223,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun isGroupTask(exactTimeStamp: ExactTimeStamp) =
-            getGroupScheduleDateTime(exactTimeStamp) != null
+    fun isGroupTask(dateTime: DateTime) = getGroupScheduleDateTime(dateTime) != null
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp) =
             parentTaskHierarchies.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
@@ -236,10 +234,10 @@ class Task<T : ProjectType>(
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp) =
             noScheduleOrParents.filter { it.current(now) }.forEach { it.setEndExactTimeStamp(now) }
 
-    private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
-        requireCurrent(exactTimeStamp)
+    private fun getParentTaskHierarchy(dateTime: DateTime): HierarchyInterval<T>? {
+        requireCurrentDateTime(dateTime)
 
-        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+        return getInterval(dateTime.toExactTimeStamp()).let { (it.type as? Type.Child)?.getHierarchyInterval(it) } // todo dst
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
@@ -248,14 +246,14 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(null)
     }
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T>? {
-        requireNotDeleted(exactTimeStamp)
+    fun getParentTask(dateTime: DateTime): Task<T>? {
+        requireNotDeletedDateTime(dateTime)
 
-        return getParentTaskHierarchy(exactTimeStamp)?.run {
-            requireNotDeleted(exactTimeStamp)
-            taskHierarchy.requireNotDeleted(exactTimeStamp)
+        return getParentTaskHierarchy(dateTime)?.run {
+            requireNotDeleted(dateTime.toExactTimeStamp())
+            taskHierarchy.requireNotDeletedDateTime(dateTime)
 
-            taskHierarchy.parentTask.apply { requireNotDeleted(exactTimeStamp) }
+            taskHierarchy.parentTask.apply { requireNotDeletedDateTime(dateTime) }
         }
     }
 
@@ -263,8 +261,8 @@ class Task<T : ProjectType>(
             null,
             DateTime(now).plusOneMinute(),
             now,
-            true,
-            true
+            bySchedule = true,
+            onlyRoot = true
     )
 
     private fun getExistingInstances(
@@ -442,24 +440,23 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getHierarchyExactTimeStamp(now: ExactTimeStamp) =
-            listOfNotNull(now, endExactTimeStamp?.minusOne()).minOrNull()!!
+    fun getHierarchyDateTime(dateTime: DateTime) = listOfNotNull(dateTime, endDateTime?.minusOneMinute()).minOrNull()!!
 
     fun getChildTaskHierarchies(
-            exactTimeStamp: ExactTimeStamp,
+            dateTime: DateTime,
             groups: Boolean = false
     ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
-            it.current(exactTimeStamp) &&
-                    it.taskHierarchy.current(exactTimeStamp) &&
-                    it.taskHierarchy.childTask.current(exactTimeStamp)
+            it.current(dateTime.toExactTimeStamp()) &&
+                    it.taskHierarchy.currentDateTime(dateTime) &&
+                    it.taskHierarchy.childTask.currentDateTime(dateTime)
         }
                 .map { it.taskHierarchy }
                 .toMutableSet()
 
-        if (groups && isGroupTask(exactTimeStamp))
+        if (groups && isGroupTask(dateTime))
             taskHierarchies += project.getTaskHierarchiesByParentTaskKey(taskKey)
-                    .filter { it.current(exactTimeStamp) }
+                    .filter { it.currentDateTime(dateTime) }
 
         return taskHierarchies.sortedBy { it.childTask.ordinal }
     }
@@ -894,12 +891,12 @@ class Task<T : ProjectType>(
 
     fun getScheduleTextMultiline(
             scheduleTextFactory: ScheduleTextFactory,
-            exactTimeStamp: ExactTimeStamp
+            dateTime: DateTime
     ): String {
-        requireCurrent(exactTimeStamp)
+        requireCurrentDateTime(dateTime)
 
-        val currentSchedules = getCurrentSchedules(exactTimeStamp)
-        currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
+        val currentSchedules = getCurrentSchedules(dateTime.toExactTimeStamp())
+        currentSchedules.forEach { it.requireCurrent(dateTime.toExactTimeStamp()) }
 
         return ScheduleGroup.getGroups(currentSchedules.map { it.schedule }).joinToString("\n") {
             scheduleTextFactory.getScheduleText(it, project)
@@ -919,16 +916,16 @@ class Task<T : ProjectType>(
 
     fun getScheduleText(
             scheduleTextFactory: ScheduleTextFactory,
-            exactTimeStamp: ExactTimeStamp,
+            dateTime: DateTime,
             showParent: Boolean = false
     ): String? {
-        requireCurrent(exactTimeStamp)
+        requireCurrentDateTime(dateTime)
 
-        val currentSchedules = getCurrentSchedules(exactTimeStamp)
-        val parentTask = getParentTask(exactTimeStamp)
+        val currentSchedules = getCurrentSchedules(dateTime.toExactTimeStamp())
+        val parentTask = getParentTask(dateTime)
 
         return if (parentTask == null) {
-            currentSchedules.forEach { it.requireCurrent(exactTimeStamp) }
+            currentSchedules.forEach { it.requireCurrent(dateTime.toExactTimeStamp()) }
 
             ScheduleGroup.getGroups(currentSchedules.map { it.schedule }).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, project)
@@ -940,7 +937,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
+    fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single { // todo dst
         it.containsExactTimeStamp(exactTimeStamp)
     }
 
@@ -960,9 +957,8 @@ class Task<T : ProjectType>(
             .forEach { it.correctEndExactTimeStamps() }
 
     // maybe this should also handle multiple single schedules?
-    fun hasFutureReminders(now: ExactTimeStamp) =
-            current(now) && getRootTask(now).getCurrentSchedules(now)
-                    .any { it.schedule is RepeatingSchedule<*> }
+    fun hasFutureReminders(now: ExactTimeStamp) = current(now)
+            && getRootTask(now.toDateTime()).getCurrentSchedules(now).any { it.schedule is RepeatingSchedule<*> }
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

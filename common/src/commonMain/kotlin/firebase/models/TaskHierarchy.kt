@@ -15,13 +15,13 @@ class TaskHierarchy<T : ProjectType>(
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
 
-    val startDateTime by lazy {
+    override val startDateTime by lazy {
         DateTime.fromOffset(taskHierarchyRecord.startTime, taskHierarchyRecord.startTimeOffset)
     }
 
     override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 
-    val endDateTime
+    override val endDateTime
         get() = taskHierarchyRecord.endTime?.let {
             DateTime.fromOffset(it, taskHierarchyRecord.endTimeOffset)
         }
@@ -39,7 +39,7 @@ class TaskHierarchy<T : ProjectType>(
 
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
-    fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now)
+    fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now.toDateTime())
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrent(endExactTimeStamp)

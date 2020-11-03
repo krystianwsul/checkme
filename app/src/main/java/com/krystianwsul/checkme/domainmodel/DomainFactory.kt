@@ -340,7 +340,7 @@ class DomainFactory(
     ): TaskUndoData {
         check(taskKeys.isNotEmpty())
 
-        fun Task<*>.getAllChildren(): List<Task<*>> = listOf(this) + getChildTaskHierarchies(now).map {
+        fun Task<*>.getAllChildren(): List<Task<*>> = listOf(this) + getChildTaskHierarchies(now.toDateTime()).map {
             it.childTask.getAllChildren()
         }.flatten()
 
@@ -468,7 +468,7 @@ class DomainFactory(
                 .associate { (childInstance, _) ->
                     val childTask = childInstance.task
 
-                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now.toDateTime()) else null
 
                     val children = getChildInstanceDatas(childInstance, now, query).filter { (_, instanceData) ->
                         query?.let { instanceData.matchesQuery(it) } != false
@@ -564,21 +564,21 @@ class DomainFactory(
             parentTask: Task<*>,
             now: ExactTimeStamp,
             alwaysShow: Boolean,
-            hierarchyExactTimeStamp: ExactTimeStamp,
+            hierarchyDateTime: DateTime,
             groups: Boolean = false
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp, groups)
+        return parentTask.getChildTaskHierarchies(hierarchyDateTime, groups)
                 .map { taskHierarchy ->
                     val childTask = taskHierarchy.childTask
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                            childTask.getScheduleText(ScheduleText, hierarchyDateTime),
                             getTaskListChildTaskDatas(
                                     childTask,
                                     now,
                                     alwaysShow,
-                                    hierarchyExactTimeStamp,
+                                    hierarchyDateTime,
                                     groups
                             ),
                             childTask.note,
@@ -865,7 +865,7 @@ class DomainFactory(
         if (!silent)
             Preferences.lastTick = now.long
 
-        val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
+        val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now.toDateTime()) }
                 .mapNotNull { it.getNextAlarm(now) }
                 .minOrNull()
                 .takeUnless { clear }

@@ -12,10 +12,14 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     protected abstract val scheduleRecord: ScheduleRecord<T>
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
-    val startDateTime by lazy { DateTime.fromOffset(scheduleRecord.startTime, scheduleRecord.startTimeOffset) }
+    override val startDateTime by lazy { DateTime.fromOffset(scheduleRecord.startTime, scheduleRecord.startTimeOffset) }
 
     override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
-    val endDateTime get() = scheduleRecord.endTime?.let { DateTime.fromOffset(it, scheduleRecord.endTimeOffset) }
+
+    override val endDateTime
+        get() = scheduleRecord.endTime?.let {
+            DateTime.fromOffset(it, scheduleRecord.endTimeOffset)
+        }
 
     val customTimeKey get() = scheduleRecord.customTimeKey
 

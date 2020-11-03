@@ -35,7 +35,6 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
                                 true
                         ),
                         task.note,
-                        task.startExactTimeStamp,
                         task.taskKey,
                         null,
                         task.getImage(deviceDbInfo),

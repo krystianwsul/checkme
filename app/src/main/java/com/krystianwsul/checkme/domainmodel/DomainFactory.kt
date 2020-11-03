@@ -582,7 +582,6 @@ class DomainFactory(
                                     groups
                             ),
                             childTask.note,
-                            childTask.startExactTimeStamp,
                             childTask.taskKey,
                             taskHierarchy.taskHierarchyKey,
                             childTask.getImage(deviceDbInfo),

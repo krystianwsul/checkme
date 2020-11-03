@@ -26,7 +26,6 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                         childTask.getScheduleText(ScheduleText, hierarchyTimeStamp),
                         getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
                         childTask.note,
-                        childTask.startExactTimeStamp,
                         childTask.taskKey,
                         taskHierarchy.taskHierarchyKey,
                         childTask.getImage(deviceDbInfo),

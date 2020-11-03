@@ -33,7 +33,6 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
                         task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
                         getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
                         task.note,
-                        task.startExactTimeStamp,
                         task.taskKey,
                         null,
                         task.getImage(deviceDbInfo),

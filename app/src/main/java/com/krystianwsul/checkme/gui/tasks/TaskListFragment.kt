@@ -34,7 +34,6 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
@@ -723,7 +722,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val scheduleText: String?,
             val children: List<ChildTaskData>,
             val note: String?,
-            private val startExactTimeStamp: ExactTimeStamp,
             val taskKey: TaskKey,
             val taskHierarchyKey: TaskHierarchyKey?,
             val imageState: ImageState?,

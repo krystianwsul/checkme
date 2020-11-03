@@ -29,56 +29,55 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartDateTime: DateTime?,
-            givenEndDateTime: DateTime? // todo dst revert to exactTimeStampOffsets?
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp?
     ): Sequence<DateTime> {
-        val startDateTime = listOfNotNull(
-                startDateTime,
-                repeatingScheduleRecord.from?.let { DateTime(it, HourMinute(0, 0)) },
-                givenStartDateTime,
-                oldestVisibleDate?.let { DateTime(it, HourMinute(0, 0)) },
-                scheduleInterval.startExactTimeStampOffset.toDateTime()
+        val startExactTimeStamp = listOfNotNull(
+                startExactTimeStampOffset,
+                repeatingScheduleRecord.from?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                givenStartExactTimeStamp,
+                oldestVisibleDate?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                scheduleInterval.startExactTimeStampOffset
         ).maxOrNull()!!
 
-        val intrinsicEndDateTime = listOfNotNull(
-                endDateTime,
+        val intrinsicEndExactTimeStamp = listOfNotNull(
+                endExactTimeStamp,
                 repeatingScheduleRecord.until
                         ?.let { DateTime(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.local
-                        ?.let { DateTime(it) },
-                scheduleInterval.endExactTimeStampOffset?.toDateTime()
+                        ?.let(::ExactTimeStamp),
+                scheduleInterval.endExactTimeStampOffset
         ).minOrNull()
 
-        val endDateTime = listOfNotNull(
-                intrinsicEndDateTime,
-                givenEndDateTime
+        val endExactTimeStamp = listOfNotNull(
+                intrinsicEndExactTimeStamp,
+                givenEndExactTimeStamp
         ).minOrNull()
 
-        if (endDateTime?.let { it <= startDateTime } == true) return emptySequence()
+        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
         val nullableSequence: Sequence<DateTime?>
 
-        if (startDateTime.date == endDateTime?.date) {
+        if (startExactTimeStamp.date == endExactTimeStamp?.date) {
             nullableSequence = sequenceOf(getDateTimeInDate(
-                    startDateTime.date,
-                    startDateTime.hourMinute,
-                    endDateTime.hourMinute
+                    startExactTimeStamp.date,
+                    startExactTimeStamp.hourMilli,
+                    endExactTimeStamp.hourMilli
             ))
         } else {
             val startSequence = sequenceOf(getDateTimeInDate(
-                    startDateTime.date,
-                    startDateTime.hourMinute,
+                    startExactTimeStamp.date,
+                    startExactTimeStamp.hourMilli,
                     null
             ))
 
             fun Date.toDateTimeSoy() = DateTimeSoy(year, month, day)
             fun DateTimeSoy.toDate() = Date(yearInt, month1, dayOfMonth)
 
-            var loopStartCalendar = startDateTime.date.toDateTimeSoy() + 1.days
+            var loopStartCalendar = startExactTimeStamp.date.toDateTimeSoy() + 1.days
 
-            val loopEndCalendar = endDateTime?.date?.toDateTimeSoy()
+            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeSoy()
 
             val calendarSequence = generateSequence {
                 if (loopEndCalendar?.let { it <= loopStartCalendar } == true)
@@ -91,7 +90,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             }
 
             val endSequence = listOfNotNull(
-                    endDateTime?.let { getDateTimeInDate(it.date, null, it.hourMinute) }
+                    endExactTimeStamp?.let { getDateTimeInDate(it.date, null, it.hourMilli) }
             ).asSequence()
 
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
@@ -102,21 +101,21 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     private fun getDateTimeInDate(
             date: Date,
-            startHourMinute: HourMinute?,
-            endHourMinute: HourMinute?
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
     ): DateTime? {
-        if (!hasInstanceInDate(date, startHourMinute, endHourMinute)) return null
+        if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
 
         return DateTime(date, time)
     }
 
-    private fun hasInstanceInDate(date: Date, startHourMinute: HourMinute?, endHourMinute: HourMinute?): Boolean {
+    private fun hasInstanceInDate(date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Boolean {
         if (!containsDate(date)) return false
 
-        val hourMinute by lazy { time.getHourMinute(date.dayOfWeek) }
+        val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
 
-        if (startHourMinute != null && startHourMinute > hourMinute) return false
-        if (endHourMinute != null && endHourMinute <= hourMinute) return false
+        if (startHourMilli != null && startHourMilli > hourMilli) return false
+        if (endHourMilli != null && endHourMilli <= hourMilli) return false
 
         return true
     }
@@ -145,7 +144,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
-                now.toDateTime().plusOneMinute()
+                now.plusOne()
         ).toList()
 
         // this filtering shouldn't be necessary

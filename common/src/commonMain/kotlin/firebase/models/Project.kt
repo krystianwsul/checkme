@@ -323,13 +323,13 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun getRootInstances(
-            startDateTime: DateTime?,
-            endDateTime: DateTime?,
+            startExactTimeStamp: ExactTimeStamp?,
+            endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             query: String? = null,
             filterVisible: Boolean = true
     ): Sequence<Instance<out T>> {
-        check(startDateTime == null || endDateTime == null || startDateTime < endDateTime)
+        check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         throwIfInterrupted()
 
@@ -349,8 +349,8 @@ abstract class Project<T : ProjectType> : Current {
             throwIfInterrupted()
 
             val instances = task.getInstances(
-                    startDateTime,
-                    endDateTime,
+                    startExactTimeStamp,
+                    endExactTimeStamp,
                     now,
                     onlyRoot = true
             )

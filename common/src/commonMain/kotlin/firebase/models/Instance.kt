@@ -296,7 +296,7 @@ class Instance<T : ProjectType> private constructor(
                     groupMatch
             )
         } else {
-            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
+            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null) // todo dst done offset
         }
 
         val parentInstanceData = if (parentTask == null) {

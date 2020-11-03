@@ -34,16 +34,16 @@ class SingleSchedule<T : ProjectType>(
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartDateTime: DateTime?,
-            givenEndDateTime: DateTime?
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp?
     ): Sequence<DateTime> {
-        if (givenStartDateTime?.let { it > dateTime } == true) return emptySequence()
+        val scheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
-        if (givenEndDateTime?.let { it <= dateTime } == true) return emptySequence()
+        if (givenStartExactTimeStamp?.let { it > scheduleExactTimeStamp } == true) return emptySequence()
+
+        if (givenEndExactTimeStamp?.let { it <= scheduleExactTimeStamp } == true) return emptySequence()
 
         if (endDateTime?.let { dateTime >= it } == true) return emptySequence()
-
-        val scheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (scheduleInterval.endExactTimeStampOffset?.let { scheduleExactTimeStamp >= it } == true)
             return emptySequence()

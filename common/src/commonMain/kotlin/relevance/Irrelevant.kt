@@ -24,7 +24,7 @@ object Irrelevant {
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances
-        val rootInstances = project.getRootInstances(null, now.toDateTime().plusOneMinute(), now).toList()
+        val rootInstances = project.getRootInstances(null, now.plusOne(), now).toList()
 
         val instanceRelevances = (existingInstances + rootInstances)
                 .asSequence()

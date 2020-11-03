@@ -265,15 +265,15 @@ class Task<T : ProjectType>(
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
             null,
-            DateTime(now).plusOneMinute(),
+            now.plusOne(),
             now,
             bySchedule = true,
             onlyRoot = true
     )
 
     private fun getExistingInstances(
-            startDateTime: DateTime,
-            endDateTime: DateTime?,
+            startExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean,
             onlyRoot: Boolean
@@ -285,9 +285,11 @@ class Task<T : ProjectType>(
                 .filter { (_, dateTime) ->
                     throwIfInterrupted()
 
-                    if (dateTime < startDateTime) return@filter false
+                    val exactTimeStamp = dateTime.toExactTimeStamp()
 
-                    if (endDateTime?.let { dateTime >= it } == true) return@filter false
+                    if (exactTimeStamp < startExactTimeStamp) return@filter false
+
+                    if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
 
                     true
                 }
@@ -297,12 +299,12 @@ class Task<T : ProjectType>(
 
     // contains only generated instances
     private fun getScheduleInstances(
-            startDateTime: DateTime,
-            endDateTime: DateTime?,
+            startExactTimeStamp: ExactTimeStamp,
+            endExactTimeStamp: ExactTimeStamp?,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
         val scheduleResults = scheduleIntervals.map {
-            it.getDateTimesInRange(startDateTime, endDateTime)
+            it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
 
         val scheduleInstanceSequences = scheduleResults.map {
@@ -320,15 +322,15 @@ class Task<T : ProjectType>(
 
     // contains only generated instances
     private fun getParentInstances(
-            givenStartDateTime: DateTime?,
-            givenEndDateTime: DateTime?,
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
         val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
-                    .getInstances(givenStartDateTime, givenEndDateTime, now, bySchedule)
+                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
                     .mapNotNull {
                         it.getChildInstances(now)
                                 .map { it.first }
@@ -341,29 +343,29 @@ class Task<T : ProjectType>(
     }
 
     fun getInstances(
-            givenStartDateTime: DateTime?,
-            givenEndDateTime: DateTime?,
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        val startDateTime = listOfNotNull(givenStartDateTime, startDateTime).maxOrNull()!!
-        val endDateTime = listOfNotNull(givenEndDateTime, endDateTime).minOrNull()
+        val startExactTimeStamp = listOfNotNull(givenStartExactTimeStamp, startExactTimeStampOffset).maxOrNull()!!
+        val endExactTimeStamp = listOfNotNull(givenEndExactTimeStamp, endExactTimeStampOffset).minOrNull()
 
-        if (endDateTime?.let { startDateTime > it } == true) return sequenceOf()
+        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
-        instanceSequences += getExistingInstances(startDateTime, endDateTime, now, bySchedule, onlyRoot)
+        instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
 
-        instanceSequences += getScheduleInstances(startDateTime, endDateTime, bySchedule)
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, bySchedule)
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(
-                    givenStartDateTime,
-                    givenEndDateTime,
+                    givenStartExactTimeStamp,
+                    givenEndExactTimeStamp,
                     now,
                     bySchedule
             )
@@ -375,7 +377,7 @@ class Task<T : ProjectType>(
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentScheduleIntervals(now).mapNotNull {
-            it.getDateTimesInRange(DateTime.now, null)
+            it.getDateTimesInRange(now, null)
                     .firstOrNull()
                     ?.let(::getInstance)
         }

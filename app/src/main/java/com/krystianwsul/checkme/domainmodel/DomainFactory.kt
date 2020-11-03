@@ -442,15 +442,15 @@ class DomainFactory(
     }
 
     fun getRootInstances(
-            startDateTime: DateTime?,
-            endDateTime: DateTime?,
+            startExactTimeStamp: ExactTimeStamp?,
+            endExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             query: String? = null,
             filterVisible: Boolean = true
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startDateTime, endDateTime, now, query, filterVisible) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query, filterVisible) }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -625,7 +625,7 @@ class DomainFactory(
 
         val instances = projectsFactory.projects
                 .values
-                .map { it.existingInstances + it.getRootInstances(null, now.toDateTime().plusOneMinute(), now) }
+                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }
                 .flatten()
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
@@ -686,7 +686,7 @@ class DomainFactory(
         val notificationInstances = if (clear)
             mapOf()
         else
-            getRootInstances(null, now.toDateTime().plusOneMinute(), now /* 24 hack */)
+            getRootInstances(null, now.plusOne(), now /* 24 hack */)
                     .filter {
                         it.done == null
                                 && !it.getNotified(localFactory)

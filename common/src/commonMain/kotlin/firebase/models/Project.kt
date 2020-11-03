@@ -270,7 +270,7 @@ abstract class Project<T : ProjectType> : Current {
         _tasks.values
                 .filter { it.current(now) }
                 .forEach {
-                    it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
+                    it.setEndData(Task.EndData(now, now, removeInstances), projectUndoData.taskUndoData)
                 }
 
         projectUndoData.projectIds.add(projectKey)

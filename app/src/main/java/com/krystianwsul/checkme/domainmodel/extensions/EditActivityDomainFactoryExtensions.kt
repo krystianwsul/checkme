@@ -54,7 +54,7 @@ fun DomainFactory.getCreateTaskData(
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
 
         if (task.isRootTask(now.toDateTime())) {
-            val schedules = task.getCurrentSchedules(now)
+            val schedules = task.getCurrentScheduleIntervals(now.toDateTime())
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
                 it to task.project.getCustomTime(it.customTimeId)

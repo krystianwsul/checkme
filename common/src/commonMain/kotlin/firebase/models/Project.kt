@@ -133,14 +133,13 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks[newTask.id] = newTask
 
-        val currentSchedules = oldTask.getCurrentSchedules(now).map { it.schedule }
-        val currentNoScheduleOrParent =
-                oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
+        val currentScheduleIntervals = oldTask.getCurrentScheduleIntervals(now.toDateTime()).map { it.schedule }
+        val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
-        if (currentSchedules.isNotEmpty()) {
+        if (currentScheduleIntervals.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
 
-            newTask.copySchedules(deviceDbInfo, now, currentSchedules)
+            newTask.copySchedules(deviceDbInfo, now, currentScheduleIntervals)
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }

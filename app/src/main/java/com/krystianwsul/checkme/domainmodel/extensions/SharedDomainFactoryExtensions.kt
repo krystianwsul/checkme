@@ -225,5 +225,5 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
     it.current(now)
             && it.isVisible(now, true)
             && it.isRootTask(now.toDateTime())
-            && it.getCurrentSchedules(now).isEmpty()
+            && it.getCurrentScheduleIntervals(now.toDateTime()).isEmpty()
 }

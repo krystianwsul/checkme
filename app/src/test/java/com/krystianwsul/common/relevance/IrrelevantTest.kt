@@ -106,7 +106,10 @@ class IrrelevantTest {
 
         instance.setDone(shownFactory, true, now)
 
-        fun Task<*>.isReminderless() = current(now) && isVisible(now, true) && isRootTask(now) && getCurrentSchedules(now).isEmpty()
+        fun Task<*>.isReminderless() = current(now)
+                && isVisible(now, true)
+                && isRootTask(now.toDateTime())
+                && getCurrentScheduleIntervals(now.toDateTime()).isEmpty()
 
         assertTrue(task.isReminderless())
 
@@ -190,7 +193,7 @@ class IrrelevantTest {
 
         // 2. Mark single instance done
 
-        assertTrue(task.getCurrentSchedules(now).size == 2)
+        assertTrue(task.getCurrentScheduleIntervals(now.toDateTime()).size == 2)
 
         now = ExactTimeStamp(day1, hour2)
 
@@ -208,11 +211,11 @@ class IrrelevantTest {
         now = ExactTimeStamp(day2, hour3)
 
         assertFalse(task.getPastRootInstances(now).single().isVisible(now, true))
-        assertTrue(task.getCurrentSchedules(now).size == 2)
+        assertTrue(task.getCurrentScheduleIntervals(now.toDateTime()).size == 2)
 
         Irrelevant.setIrrelevant(parent, project, now)
 
-        assertTrue(task.getCurrentSchedules(now).size == 1)
+        assertTrue(task.getCurrentScheduleIntervals(now.toDateTime()).size == 1)
         assertTrue(task.getPastRootInstances(now).toList().isEmpty())
     }
 }

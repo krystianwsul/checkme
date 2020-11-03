@@ -1,42 +1,43 @@
 package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.CurrentOffset
 import com.krystianwsul.common.utils.ProjectType
 
-sealed class Interval<T : ProjectType> {
+sealed class Interval<T : ProjectType> : CurrentOffset {
 
     abstract val type: Type<T>
 
-    abstract val startExactTimeStamp: ExactTimeStamp
-    abstract val endExactTimeStamp: ExactTimeStamp?
+    abstract override val startExactTimeStampOffset: ExactTimeStamp
+    abstract override val endExactTimeStampOffset: ExactTimeStamp?
 
-    open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
+    open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStampOffset <= exactTimeStamp
 
     data class Current<T : ProjectType>(
             override val type: Type<T>,
-            override val startExactTimeStamp: ExactTimeStamp
+            override val startExactTimeStampOffset: ExactTimeStamp
     ) : Interval<T>() {
 
-        override val endExactTimeStamp: ExactTimeStamp? = null
+        override val endExactTimeStampOffset: ExactTimeStamp? = null
     }
 
     data class Ended<T : ProjectType>(
             override val type: Type<T>,
-            override val startExactTimeStamp: ExactTimeStamp,
-            override val endExactTimeStamp: ExactTimeStamp
+            override val startExactTimeStampOffset: ExactTimeStamp,
+            override val endExactTimeStampOffset: ExactTimeStamp
     ) : Interval<T>() {
 
         override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
             if (!super.containsExactTimeStamp(exactTimeStamp))
                 return false
 
-            return endExactTimeStamp > exactTimeStamp
+            return endExactTimeStampOffset > exactTimeStamp
         }
 
         fun correctEndExactTimeStamps() {
             type.taskParentEntries.forEach {
-                if (it.endExactTimeStamp?.let { it > endExactTimeStamp } != false)
-                    it.setEndExactTimeStamp(endExactTimeStamp)
+                if (it.endExactTimeStampOffset?.let { it > endExactTimeStampOffset } != false)
+                    it.setEndExactTimeStamp(endExactTimeStampOffset)
             }
         }
     }

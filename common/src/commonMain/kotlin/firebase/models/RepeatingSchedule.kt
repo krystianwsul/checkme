@@ -30,14 +30,14 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
             givenStartDateTime: DateTime?,
-            givenEndDateTime: DateTime?
+            givenEndDateTime: DateTime? // todo dst revert to exactTimeStampOffsets?
     ): Sequence<DateTime> {
         val startDateTime = listOfNotNull(
                 startDateTime,
                 repeatingScheduleRecord.from?.let { DateTime(it, HourMinute(0, 0)) },
                 givenStartDateTime,
                 oldestVisibleDate?.let { DateTime(it, HourMinute(0, 0)) },
-                scheduleInterval.startExactTimeStamp.toDateTime()
+                scheduleInterval.startExactTimeStampOffset.toDateTime()
         ).maxOrNull()!!
 
         val intrinsicEndDateTime = listOfNotNull(
@@ -48,7 +48,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                         ?.plus(1.days)
                         ?.local
                         ?.let { DateTime(it) },
-                scheduleInterval.endExactTimeStamp?.toDateTime()
+                scheduleInterval.endExactTimeStampOffset?.toDateTime()
         ).minOrNull()
 
         val endDateTime = listOfNotNull(
@@ -129,7 +129,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             now: ExactTimeStamp,
             hack24: Boolean
     ): Boolean {
-        scheduleInterval.requireCurrent(now)
+        scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
 
         return until?.let {

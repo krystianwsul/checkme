@@ -25,20 +25,20 @@ sealed class Type<T : ProjectType> {
                 for tasks that are children of a group task.
                  */
                 check(interval is Interval.Current)
-                check(parentTaskHierarchy.startExactTimeStamp >= interval.startExactTimeStamp)
+                check(parentTaskHierarchy.startExactTimeStampOffset >= interval.startExactTimeStampOffset)
             } else {
-                check(parentTaskHierarchy.startExactTimeStamp == interval.startExactTimeStamp)
+                check(parentTaskHierarchy.startExactTimeStampOffset == interval.startExactTimeStampOffset)
             }
 
-            parentTaskHierarchy.endExactTimeStamp?.let {
-                val intervalEndExactTimeStamp = interval.endExactTimeStamp
+            parentTaskHierarchy.endExactTimeStampOffset?.let {
+                val intervalEndExactTimeStamp = interval.endExactTimeStampOffset
                 checkNotNull(intervalEndExactTimeStamp)
                 check(it >= intervalEndExactTimeStamp)
             }
 
             return HierarchyInterval(
-                    interval.startExactTimeStamp,
-                    interval.endExactTimeStamp,
+                    interval.startExactTimeStampOffset,
+                    interval.endExactTimeStampOffset,
                     parentTaskHierarchy
             )
         }
@@ -51,12 +51,12 @@ sealed class Type<T : ProjectType> {
         override val taskParentEntries get() = schedules
 
         fun getScheduleIntervals(interval: Interval<T>): List<ScheduleInterval<T>> {
-            val minStartExactTimeStamp = schedules.map { it.startExactTimeStamp }.minOrNull()!!
-            check(minStartExactTimeStamp == interval.startExactTimeStamp)
+            val minStartExactTimeStamp = schedules.map { it.startExactTimeStampOffset }.minOrNull()!!
+            check(minStartExactTimeStamp == interval.startExactTimeStampOffset)
 
-            val endExactTimeStamps = schedules.map { it.endExactTimeStamp }
+            val endExactTimeStamps = schedules.map { it.endExactTimeStampOffset }
             if (endExactTimeStamps.all { it != null }) {
-                val intervalEndExactTimeStamp = interval.endExactTimeStamp
+                val intervalEndExactTimeStamp = interval.endExactTimeStampOffset
                 checkNotNull(intervalEndExactTimeStamp)
 
                 val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().maxOrNull()!!
@@ -65,8 +65,8 @@ sealed class Type<T : ProjectType> {
 
             return schedules.map {
                 ScheduleInterval(
-                        interval.startExactTimeStamp,
-                        interval.endExactTimeStamp,
+                        interval.startExactTimeStampOffset,
+                        interval.endExactTimeStampOffset,
                         it
                 )
             }
@@ -79,8 +79,8 @@ sealed class Type<T : ProjectType> {
 
         fun getNoScheduleOrParentInterval(interval: Interval<T>) = noScheduleOrParent?.let {
             NoScheduleOrParentInterval(
-                    interval.startExactTimeStamp,
-                    interval.endExactTimeStamp,
+                    interval.startExactTimeStampOffset,
+                    interval.endExactTimeStampOffset,
                     it
             )
         }

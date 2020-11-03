@@ -103,19 +103,15 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             scheduleDateTime: DateTime,
             checkOldestVisible: Boolean
     ): Boolean {
-        if (scheduleDateTime < startDateTime)
-            return false
-
         val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
 
-        if (exactTimeStamp < scheduleInterval.startExactTimeStamp)
-            return false
+        if (exactTimeStamp < startExactTimeStampOffset) return false
 
-        if (endDateTime?.let { scheduleDateTime >= it } == true)
-            return false
+        if (exactTimeStamp < scheduleInterval.startExactTimeStampOffset) return false
 
-        if (scheduleInterval.endExactTimeStamp?.let { exactTimeStamp >= it } == true)
-            return false
+        if (endExactTimeStampOffset?.let { exactTimeStamp >= it } == true) return false
+
+        if (scheduleInterval.endExactTimeStampOffset?.let { exactTimeStamp >= it } == true) return false
 
         return matchesScheduleDateTimeHelper(scheduleDateTime, checkOldestVisible)
     }

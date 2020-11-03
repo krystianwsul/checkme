@@ -105,7 +105,7 @@ object Irrelevant {
                 val result = if (schedule is SingleSchedule<*>) {
                     !schedule.getInstance(it).isVisible(now, true)
                 } else {
-                    if (scheduleInterval.current(now) && schedule.current(now)) {
+                    if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false
                     } else {
                         schedule.oldestVisible
@@ -118,7 +118,7 @@ object Irrelevant {
             }.map { it.schedule }
 
             val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
-                    .filter { it.current(now) }
+                    .filter { it.currentOffset(now) }
                     .map { it.noScheduleOrParent }
 
             irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents

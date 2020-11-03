@@ -158,7 +158,7 @@ class Task<T : ProjectType>(
             getInterval(now).let {
                 (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
             }?.also {
-                check(it.current(now))
+                check(it.currentOffset(now))
                 check(it.noScheduleOrParent.current(now))
             }
 
@@ -182,7 +182,7 @@ class Task<T : ProjectType>(
         val group = isGroupTask(now)
 
         getCurrentScheduleIntervals(now).forEach {
-            it.requireCurrent(now)
+            it.requireCurrentOffset(now)
 
             taskUndoData?.scheduleIds?.add(it.schedule.scheduleId)
 
@@ -201,7 +201,7 @@ class Task<T : ProjectType>(
 
         if (!recursive) {
             getParentTaskHierarchy(now)?.let {
-                it.requireCurrent(now)
+                it.requireCurrentOffset(now)
                 it.taskHierarchy.requireCurrent(now)
 
                 taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchy.taskHierarchyKey)
@@ -453,7 +453,7 @@ class Task<T : ProjectType>(
             groups: Boolean = false
     ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
-            it.current(exactTimeStamp) &&
+            it.currentOffset(exactTimeStamp) &&
                     it.taskHierarchy.current(exactTimeStamp) &&
                     it.taskHierarchy.childTask.current(exactTimeStamp)
         }
@@ -901,7 +901,7 @@ class Task<T : ProjectType>(
         requireCurrent(exactTimeStamp)
 
         val currentScheduleIntervals = getCurrentScheduleIntervals(exactTimeStamp)
-        currentScheduleIntervals.forEach { it.requireCurrent(exactTimeStamp) }
+        currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
 
         return ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString("\n") {
             scheduleTextFactory.getScheduleText(it, project)
@@ -930,7 +930,7 @@ class Task<T : ProjectType>(
         val parentTask = getParentTask(exactTimeStamp)
 
         return if (parentTask == null) {
-            currentScheduleIntervals.forEach { it.requireCurrent(exactTimeStamp) }
+            currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
 
             ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, project)

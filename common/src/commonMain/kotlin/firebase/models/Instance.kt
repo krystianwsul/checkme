@@ -156,7 +156,7 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeleted(hierarchyExactTimeStamp) }
+                    .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
                     .map { it.taskHierarchy }
                     .filter {
                         it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp)

@@ -45,7 +45,8 @@ class SingleSchedule<T : ProjectType>(
 
         val scheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
-        if (scheduleInterval.endExactTimeStamp?.let { scheduleExactTimeStamp >= it } == true) return emptySequence()
+        if (scheduleInterval.endExactTimeStampOffset?.let { scheduleExactTimeStamp >= it } == true)
+            return emptySequence()
 
         return sequenceOf(originalScheduleDateTime)
     }
@@ -56,7 +57,7 @@ class SingleSchedule<T : ProjectType>(
             now: ExactTimeStamp,
             hack24: Boolean
     ): Boolean {
-        scheduleInterval.requireCurrent(now)
+        scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
 
         return getInstance(task).isVisible(now, hack24)

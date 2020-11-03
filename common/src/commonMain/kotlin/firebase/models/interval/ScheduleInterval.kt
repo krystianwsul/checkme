@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.Current
 import com.krystianwsul.common.utils.ProjectType
 
 class ScheduleInterval<T : ProjectType>(
-        override val startExactTimeStamp: ExactTimeStamp,
+        override val startExactTimeStamp: ExactTimeStamp, // todo dst needs dateTime
         override val endExactTimeStamp: ExactTimeStamp?,
         val schedule: Schedule<T>
 ) : Current {

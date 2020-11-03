@@ -16,11 +16,20 @@ class NoScheduleOrParent<T : ProjectType>(
         DateTime.fromOffset(noScheduleOrParentRecord.startTime, noScheduleOrParentRecord.startTimeOffset)
     }
 
+    override val startExactTimeStampOffset by lazy {
+        ExactTimeStamp.fromOffset(noScheduleOrParentRecord.startTime, noScheduleOrParentRecord.startTimeOffset)
+    }
+
     override val endExactTimeStamp get() = noScheduleOrParentRecord.endTime?.let(::ExactTimeStamp)
 
     override val endDateTime
         get() = noScheduleOrParentRecord.endTime?.let {
             DateTime.fromOffset(it, noScheduleOrParentRecord.endTimeOffset)
+        }
+
+    override val endExactTimeStampOffset
+        get() = noScheduleOrParentRecord.endTime?.let {
+            ExactTimeStamp.fromOffset(it, noScheduleOrParentRecord.endTimeOffset)
         }
 
     val id = noScheduleOrParentRecord.id

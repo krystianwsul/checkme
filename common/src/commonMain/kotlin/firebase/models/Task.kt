@@ -19,7 +19,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>
-) : Current, CurrentDateTime, QueryMatch {
+) : Current, CurrentDateTime, CurrentOffset, QueryMatch {
 
     companion object {
 
@@ -32,6 +32,7 @@ class Task<T : ProjectType>(
                     ExactTimeStamp(it.time),
                     it.deleteInstances,
                     DateTime.fromOffset(it.time, it.offset),
+                    ExactTimeStamp.fromOffset(it.time, it.offset)
             )
         }
     }
@@ -61,8 +62,13 @@ class Task<T : ProjectType>(
     override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
     override val startDateTime by lazy { DateTime.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) }
 
+    override val startExactTimeStampOffset by lazy {
+        ExactTimeStamp.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset)
+    }
+
     override val endExactTimeStamp get() = endData?.exactTimeStamp
     override val endDateTime get() = endData?.dateTime
+    override val endExactTimeStampOffset get() = endData?.exactTimeStampOffset
 
     val note get() = taskRecord.note
 
@@ -997,5 +1003,6 @@ class Task<T : ProjectType>(
             val exactTimeStamp: ExactTimeStamp,
             val deleteInstances: Boolean,
             val dateTime: DateTime = DateTime(exactTimeStamp),
+            val exactTimeStampOffset: ExactTimeStamp = exactTimeStamp
     )
 }

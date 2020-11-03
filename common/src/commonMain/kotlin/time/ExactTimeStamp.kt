@@ -31,9 +31,7 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
 
-    fun plusOne() = ExactTimeStamp(long + 1) // todo dst
-
-    fun minusOne() = ExactTimeStamp(long - 1) // todo dst
+    fun minusOne() = ExactTimeStamp(long - 1)
 
     fun toTimeStamp() = TimeStamp.fromMillis(long)
 

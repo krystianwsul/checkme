@@ -145,7 +145,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
-                now.plusOne().toDateTime()
+                now.toDateTime().plusOneMinute()
         ).toList()
 
         // this filtering shouldn't be necessary

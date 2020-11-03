@@ -62,7 +62,7 @@ class Task<T : ProjectType>(
     override val startDateTime by lazy { DateTime.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) }
 
     override val endExactTimeStamp get() = endData?.exactTimeStamp
-    override val endDateTime get() = endData?.dateTime // todo dst
+    override val endDateTime get() = endData?.dateTime
 
     val note get() = taskRecord.note
 

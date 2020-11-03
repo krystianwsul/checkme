@@ -352,7 +352,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(Task.EndData(now, now, deleteInstances), taskUndoData) }
+        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -534,7 +534,7 @@ class DomainFactory(
             remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)
         }
 
-        val endData = Task.EndData(now, now, true)
+        val endData = Task.EndData(now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
             pair.second.forEach {

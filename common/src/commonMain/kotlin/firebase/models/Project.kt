@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.throwIfInterrupted
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -35,14 +36,13 @@ abstract class Project<T : ProjectType> : Current {
             projectRecord.name = name
         }
 
-    override val startExactTimeStamp by lazy {
-        ExactTimeStamp.fromOffset(projectRecord.startTime, projectRecord.startTimeOffset)
-    }
+    override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
+    val startDateTime by lazy { DateTime.fromOffset(projectRecord.startTime, projectRecord.startTimeOffset) }
+    // todo dst
 
-    override val endExactTimeStamp
-        get() = projectRecord.endTime?.let {
-            ExactTimeStamp.fromOffset(it, projectRecord.endTimeOffset)
-        }
+    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
+    val endDateTime get() = projectRecord.endTime?.let { DateTime.fromOffset(it, projectRecord.endTimeOffset) }
+    // todo dst
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys
@@ -270,7 +270,7 @@ abstract class Project<T : ProjectType> : Current {
         _tasks.values
                 .filter { it.current(now) }
                 .forEach {
-                    it.setEndData(Task.EndData(now, now, removeInstances), projectUndoData.taskUndoData)
+                    it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
                 }
 
         projectUndoData.projectIds.add(projectKey)

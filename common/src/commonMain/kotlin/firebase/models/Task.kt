@@ -30,8 +30,8 @@ class Task<T : ProjectType>(
         taskRecord.endData?.let {
             EndData(
                     ExactTimeStamp(it.time),
-                    ExactTimeStamp.fromOffset(it.time, it.offset),
-                    it.deleteInstances
+                    it.deleteInstances,
+                    DateTime.fromOffset(it.time, it.offset),
             )
         }
     }
@@ -59,8 +59,10 @@ class Task<T : ProjectType>(
     val schedules: List<Schedule<T>> get() = _schedules
 
     override val startExactTimeStamp = ExactTimeStamp(taskRecord.startTime)
-    val startExactTimeStampOffset = ExactTimeStamp.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) //
-    // todo dst
+    val startDateTime by lazy { DateTime.fromOffset(taskRecord.startTime, taskRecord.startTimeOffset) } // todo dst
+
+    override val endExactTimeStamp get() = endData?.exactTimeStamp
+    val endDateTime get() = endData?.dateTime // todo dst
 
     val note get() = taskRecord.note
 
@@ -71,9 +73,6 @@ class Task<T : ProjectType>(
     val existingInstances: Map<ScheduleKey, Instance<T>> get() = _existingInstances
 
     val imageJson get() = taskRecord.image
-
-    override val endExactTimeStamp get() = endData?.exactTimeStamp
-    val endExactTimeStampOffset get() = endData?.exactTimeStampOffset // todo dst
 
     private val parentTaskHierarchiesProperty =
             invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
@@ -1004,7 +1003,7 @@ class Task<T : ProjectType>(
 
     data class EndData(
             val exactTimeStamp: ExactTimeStamp,
-            val exactTimeStampOffset: ExactTimeStamp,
-            val deleteInstances: Boolean
+            val deleteInstances: Boolean,
+            val dateTime: DateTime = DateTime(exactTimeStamp),
     )
 }

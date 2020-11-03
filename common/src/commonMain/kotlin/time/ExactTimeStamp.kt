@@ -10,7 +10,7 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
         val now get() = ExactTimeStamp(DateTimeSoy.nowUnixLong())
 
-        fun fromOffset(long: Long, offset: Double?): ExactTimeStamp {
+        fun fromOffset(long: Long, offset: Double?): ExactTimeStamp { // todo dst
             return if (offset == null) {
                 ExactTimeStamp(long)
             } else {

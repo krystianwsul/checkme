@@ -17,9 +17,13 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
                 DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
             }
 
-            return DateTime(Date(dateTimeTz), Time.Normal(HourMinute(dateTimeTz)))
+            return DateTime(dateTimeTz)
         }
     }
+
+    constructor(dateTimeTz: DateTimeTz) : this(Date(dateTimeTz), Time.Normal(HourMinute(dateTimeTz)))
+
+    constructor(exactTimeStamp: ExactTimeStamp) : this(exactTimeStamp.toDateTimeTz())
 
     private val hourMinute get() = time.getHourMinute(date.dayOfWeek)
 

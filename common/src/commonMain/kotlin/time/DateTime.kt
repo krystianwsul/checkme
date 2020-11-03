@@ -2,6 +2,7 @@ package com.krystianwsul.common.time
 
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.TimezoneOffset
+import com.soywiz.klock.minutes
 
 data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
@@ -44,9 +45,7 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
     fun toExactTimeStamp() = timeStamp.toExactTimeStamp()
 
-    fun toDateTimeSoy(): DateTimeSoy {
-        val hourMinute = hourMinute
+    fun toDateTimeSoy() = timeStamp.toDateTimeSoy()
 
-        return DateTimeSoy(date.year, date.month, date.day, hourMinute.hour, hourMinute.minute)
-    }
+    fun plusOneMinute() = DateTime(toDateTimeSoy().local + 1.minutes)
 }

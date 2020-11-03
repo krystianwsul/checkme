@@ -46,4 +46,24 @@ class DateTimeTest {
     fun test4() {
         assertEquals("4:10 ", getDateTime(4))
     }
+
+    @Test
+    fun testPlusOneMinute() {
+        val dateTime = DateTime(Date(2020, 11, 3), HourMinute(1, 1))
+
+        assertEquals(
+                DateTime(Date(2020, 11, 3), HourMinute(1, 2)),
+                dateTime.plusOneMinute()
+        )
+    }
+
+    @Test
+    fun testPlusOneMinuteMidnight() {
+        val dateTime = DateTime(Date(2020, 11, 3), HourMinute(23, 59))
+
+        assertEquals(
+                DateTime(Date(2020, 11, 4), HourMinute(0, 0)),
+                dateTime.plusOneMinute()
+        )
+    }
 }

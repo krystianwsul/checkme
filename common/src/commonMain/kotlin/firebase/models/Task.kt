@@ -261,7 +261,7 @@ class Task<T : ProjectType>(
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
             null,
-            now.plusOne(),
+            DateTime.now.plusOneMinute(),
             now,
             true,
             true
@@ -316,15 +316,15 @@ class Task<T : ProjectType>(
 
     // contains only generated instances
     private fun getParentInstances(
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp?,
+            givenStartDateTime: DateTime?,
+            givenEndDateTime: DateTime?,
             now: ExactTimeStamp,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
         val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
                     .parentTask
-                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
+                    .getInstances(givenStartDateTime, givenEndDateTime, now, bySchedule)
                     .mapNotNull {
                         it.getChildInstances(now)
                                 .map { it.first }
@@ -337,23 +337,16 @@ class Task<T : ProjectType>(
     }
 
     fun getInstances(
-            givenStartExactTimeStamp: ExactTimeStamp?, // todo dst
-            givenEndExactTimeStamp: ExactTimeStamp?,
+            givenStartDateTime: DateTime?,
+            givenEndDateTime: DateTime?,
             now: ExactTimeStamp,
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        val startDateTime = listOfNotNull(
-                givenStartExactTimeStamp?.let(::DateTime),
-                startDateTime
-        ).maxOrNull()!!
-
-        val endDateTime = listOfNotNull(
-                givenEndExactTimeStamp?.let(::DateTime),
-                endDateTime
-        ).minOrNull()
+        val startDateTime = listOfNotNull(givenStartDateTime, startDateTime).maxOrNull()!!
+        val endDateTime = listOfNotNull(givenEndDateTime, endDateTime).minOrNull()
 
         if (endDateTime?.let { startDateTime > it } == true) return sequenceOf()
 
@@ -365,8 +358,8 @@ class Task<T : ProjectType>(
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(
-                    givenStartExactTimeStamp,
-                    givenEndExactTimeStamp,
+                    givenStartDateTime,
+                    givenEndDateTime,
                     now,
                     bySchedule
             )

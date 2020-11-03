@@ -13,8 +13,9 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.time.HourMinute
 import java.util.*
 
 fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain {
@@ -60,11 +61,11 @@ fun DomainFactory.getGroupListData(
 
     check(position >= 0)
 
-    val startExactTimeStamp: ExactTimeStamp?
-    val endExactTimeStamp: ExactTimeStamp
+    val startDateTime: DateTime?
+    val endDateTime: DateTime
 
     if (position == 0) {
-        startExactTimeStamp = null
+        startDateTime = null
     } else {
         val startCalendar = now.calendar
 
@@ -80,8 +81,8 @@ fun DomainFactory.getGroupListData(
             }
         }
 
-        startExactTimeStamp =
-                ExactTimeStamp(Date(startCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
+        startDateTime =
+                DateTime(Date(startCalendar.toDateTimeTz()), HourMinute(0, 0))
     }
 
     val endCalendar = now.calendar
@@ -98,9 +99,9 @@ fun DomainFactory.getGroupListData(
         }
     }
 
-    endExactTimeStamp = ExactTimeStamp(Date(endCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
+    endDateTime = DateTime(Date(endCalendar.toDateTimeTz()), HourMinute(0, 0))
 
-    val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now).toList()
+    val currentInstances = getRootInstances(startDateTime, endDateTime, now).toList()
 
     if (position == 0 && timeRange == MainActivity.TimeRange.DAY) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->

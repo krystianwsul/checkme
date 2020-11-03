@@ -37,9 +37,9 @@ private fun DomainFactory.getGroupListData(
         now: ExactTimeStamp
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
-    val endTimeStamp = TimeStamp(endCalendar.toDateTimeSoy())
+    val endDateTime = DateTime(endCalendar.toDateTimeSoy().local)
 
-    val rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now).toList()
+    val rootInstances = getRootInstances(timeStamp.toExactTimeStamp().toDateTime(), endDateTime, now).toList()
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 

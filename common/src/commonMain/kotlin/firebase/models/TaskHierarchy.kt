@@ -12,13 +12,17 @@ class TaskHierarchy<T : ProjectType>(
         private val taskHierarchyRecord: TaskHierarchyRecord
 ) : TaskParentEntry {
 
-    override val startExactTimeStamp by lazy {
-        ExactTimeStamp.fromOffset(taskHierarchyRecord.startTime, taskHierarchyRecord.startTimeOffset)
+    override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
+
+    val startExactTimeStampOffset by lazy {
+        ExactTimeStamp.fromOffset(taskHierarchyRecord.startTime, taskHierarchyRecord.startTimeOffset) // todo dst
     }
 
-    override val endExactTimeStamp
+    override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
+
+    val endExactTimeStampOffset
         get() = taskHierarchyRecord.endTime?.let {
-            ExactTimeStamp.fromOffset(it, taskHierarchyRecord.endTimeOffset)
+            ExactTimeStamp.fromOffset(it, taskHierarchyRecord.endTimeOffset) // todo dst
         }
 
     val parentTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.parentTaskId) }

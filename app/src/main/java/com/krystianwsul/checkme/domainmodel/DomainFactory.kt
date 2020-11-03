@@ -352,7 +352,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
+        tasks.forEach { it.setEndData(Task.EndData(now, now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -534,7 +534,7 @@ class DomainFactory(
             remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)
         }
 
-        val endData = Task.EndData(now, true)
+        val endData = Task.EndData(now, now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
             pair.second.forEach {
@@ -598,20 +598,24 @@ class DomainFactory(
         if (false) {
             val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
 
-            val results = Irrelevant.setIrrelevant(
-                    object : Project.Parent {
+            projectsFactory.projects
+                    .values
+                    .forEach {
+                        val results = Irrelevant.setIrrelevant(
+                                object : Project.Parent {
 
-                        override fun deleteProject(project: Project<*>) {
-                            TODO("Not yet implemented")
-                        }
-                    },
-                    projectsFactory.privateProject,
-                    tomorrow
-            )
+                                    override fun deleteProject(project: Project<*>) {
+                                        TODO("Not yet implemented")
+                                    }
+                                },
+                                projectsFactory.privateProject,
+                                tomorrow
+                        )
 
-            results.irrelevantExistingInstances
-                    .sortedBy { it.scheduleDateTime }
-                    .forEach { Log.e("asdf", "irrelevant instance: $it") }
+                        results.irrelevantExistingInstances
+                                .sortedBy { it.scheduleDateTime }
+                                .forEach { Log.e("asdf", "irrelevant instance: $it") }
+                    }
 
             throw Exception()
         }

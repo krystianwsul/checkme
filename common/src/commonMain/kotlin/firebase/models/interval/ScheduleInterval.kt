@@ -20,9 +20,9 @@ class ScheduleInterval<T : ProjectType>(
     ) = schedule.isVisible(this, task, now, hack24)
 
     fun getDateTimesInRange(
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp?
-    ) = schedule.getDateTimesInRange(this, givenStartExactTimeStamp, givenExactEndTimeStamp)
+            givenStartDateTime: DateTime?,
+            givenExactDateTime: DateTime?
+    ) = schedule.getDateTimesInRange(this, givenStartDateTime, givenExactDateTime)
 
     fun matchesScheduleDateTime(scheduleDateTime: DateTime, checkOldestVisible: Boolean) =
         schedule.matchesScheduleDateTime(this, scheduleDateTime, checkOldestVisible)

@@ -29,57 +29,56 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp?
+            givenStartDateTime: DateTime?,
+            givenEndDateTime: DateTime?
     ): Sequence<DateTime> {
-        val startExactTimeStamp = listOfNotNull(
-                startExactTimeStamp,
-                repeatingScheduleRecord.from
-                        ?.let { TimeStamp(it, HourMinute(0, 0)) }
-                        ?.toExactTimeStamp(),
-                givenStartExactTimeStamp,
-                oldestVisibleDate?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
-                scheduleInterval.startExactTimeStamp
+        val startDateTime = listOfNotNull(
+                startDateTime,
+                repeatingScheduleRecord.from?.let { DateTime(it, HourMinute(0, 0)) },
+                givenStartDateTime,
+                oldestVisibleDate?.let { DateTime(it, HourMinute(0, 0)) },
+                scheduleInterval.startExactTimeStamp.toDateTime()
         ).maxOrNull()!!
 
-        val intrinsicEndExactTimeStamp = listOfNotNull(
-                endExactTimeStamp,
+        val intrinsicEndDateTime = listOfNotNull(
+                endDateTime,
                 repeatingScheduleRecord.until
-                        ?.let { TimeStamp(it, HourMinute(0, 0)) }
+                        ?.let { DateTime(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.let { ExactTimeStamp(it) },
-                scheduleInterval.endExactTimeStamp
+                        ?.local
+                        ?.let { DateTime(it) },
+                scheduleInterval.endExactTimeStamp?.toDateTime()
         ).minOrNull()
 
-        val endExactTimeStamp = listOfNotNull(
-                intrinsicEndExactTimeStamp,
-                givenExactEndTimeStamp
+        val endDateTime = listOfNotNull(
+                intrinsicEndDateTime,
+                givenEndDateTime
         ).minOrNull()
 
-        if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
+        if (endDateTime?.let { it <= startDateTime } == true) return emptySequence()
 
         val nullableSequence: Sequence<DateTime?>
 
-        if (startExactTimeStamp.date == endExactTimeStamp?.date) {
+        if (startDateTime.date == endDateTime?.date) {
             nullableSequence = sequenceOf(getDateTimeInDate(
-                    startExactTimeStamp.date,
-                    startExactTimeStamp.hourMilli,
-                    endExactTimeStamp.hourMilli
+                    startDateTime.date,
+                    startDateTime.hourMinute,
+                    endDateTime.hourMinute
             ))
         } else {
             val startSequence = sequenceOf(getDateTimeInDate(
-                    startExactTimeStamp.date,
-                    startExactTimeStamp.hourMilli,
+                    startDateTime.date,
+                    startDateTime.hourMinute,
                     null
             ))
 
             fun Date.toDateTimeSoy() = DateTimeSoy(year, month, day)
             fun DateTimeSoy.toDate() = Date(yearInt, month1, dayOfMonth)
 
-            var loopStartCalendar = startExactTimeStamp.date.toDateTimeSoy() + 1.days
+            var loopStartCalendar = startDateTime.date.toDateTimeSoy() + 1.days
 
-            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeSoy()
+            val loopEndCalendar = endDateTime?.date?.toDateTimeSoy()
 
             val calendarSequence = generateSequence {
                 if (loopEndCalendar?.let { it <= loopStartCalendar } == true)
@@ -91,7 +90,9 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 NullableWrapper(getDateTimeInDate(date, null, null))
             }
 
-            val endSequence = listOfNotNull(endExactTimeStamp?.let { getDateTimeInDate(it.date, null, it.hourMilli) }).asSequence()
+            val endSequence = listOfNotNull(
+                    endDateTime?.let { getDateTimeInDate(it.date, null, it.hourMinute) }
+            ).asSequence()
 
             nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
         }
@@ -101,21 +102,21 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     private fun getDateTimeInDate(
             date: Date,
-            startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?
+            startHourMinute: HourMinute?,
+            endHourMinute: HourMinute?
     ): DateTime? {
-        if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
+        if (!hasInstanceInDate(date, startHourMinute, endHourMinute)) return null
 
         return DateTime(date, time)
     }
 
-    private fun hasInstanceInDate(date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Boolean {
+    private fun hasInstanceInDate(date: Date, startHourMinute: HourMinute?, endHourMinute: HourMinute?): Boolean {
         if (!containsDate(date)) return false
 
-        val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
+        val hourMinute by lazy { time.getHourMinute(date.dayOfWeek) }
 
-        if (startHourMilli != null && startHourMilli > hourMilli) return false
-        if (endHourMilli != null && endHourMilli <= hourMilli) return false
+        if (startHourMinute != null && startHourMinute > hourMinute) return false
+        if (endHourMinute != null && endHourMinute <= hourMinute) return false
 
         return true
     }
@@ -144,10 +145,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
-                now.plusOne()
+                now.plusOne().toDateTime()
         ).toList()
 
-        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance(now) } // this filtering shouldn't be necessary
+        // this filtering shouldn't be necessary
+        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance(now) }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter { it.isVisible(now, true) && !it.exists() }

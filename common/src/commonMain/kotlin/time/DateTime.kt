@@ -7,6 +7,8 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
     companion object {
 
+        val now get() = DateTime(Date.today(), HourMinute.now)
+
         fun fromOffset(long: Long, offset: Double?): DateTime {
             val dateTimeTz = if (offset == null) {
                 DateTimeSoy.fromUnix(long).local
@@ -25,7 +27,9 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
     constructor(exactTimeStamp: ExactTimeStamp) : this(exactTimeStamp.toDateTimeTz())
 
-    private val hourMinute get() = time.getHourMinute(date.dayOfWeek)
+    constructor(date: Date, hourMinute: HourMinute) : this(date, Time.Normal(hourMinute))
+
+    val hourMinute get() = time.getHourMinute(date.dayOfWeek)
 
     val timeStamp get() = TimeStamp(date, hourMinute)
 
@@ -39,4 +43,10 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
     override fun toString() = "$date $time"
 
     fun toExactTimeStamp() = timeStamp.toExactTimeStamp()
+
+    fun toDateTimeSoy(): DateTimeSoy {
+        val hourMinute = hourMinute
+
+        return DateTimeSoy(date.year, date.month, date.day, hourMinute.hour, hourMinute.minute)
+    }
 }

@@ -268,8 +268,8 @@ class Task<T : ProjectType>(
     )
 
     private fun getExistingInstances(
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp?,
+            startDateTime: DateTime,
+            endDateTime: DateTime?,
             now: ExactTimeStamp,
             bySchedule: Boolean,
             onlyRoot: Boolean
@@ -281,11 +281,9 @@ class Task<T : ProjectType>(
                 .filter { (_, dateTime) ->
                     throwIfInterrupted()
 
-                    val instanceExactTimeStamp = dateTime.toExactTimeStamp()
+                    if (dateTime < startDateTime) return@filter false
 
-                    if (instanceExactTimeStamp < startExactTimeStamp) return@filter false
-
-                    if (endExactTimeStamp?.let { instanceExactTimeStamp >= it } == true) return@filter false
+                    if (endDateTime?.let { dateTime >= it } == true) return@filter false
 
                     true
                 }
@@ -295,12 +293,12 @@ class Task<T : ProjectType>(
 
     // contains only generated instances
     private fun getScheduleInstances(
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp?,
+            startDateTime: DateTime,
+            endDateTime: DateTime?,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
         val scheduleResults = scheduleIntervals.map {
-            it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
+            it.getDateTimesInRange(startDateTime, endDateTime)
         }
 
         val scheduleInstanceSequences = scheduleResults.map {
@@ -339,7 +337,7 @@ class Task<T : ProjectType>(
     }
 
     fun getInstances(
-            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenStartExactTimeStamp: ExactTimeStamp?, // todo dst
             givenEndExactTimeStamp: ExactTimeStamp?,
             now: ExactTimeStamp,
             bySchedule: Boolean = false,
@@ -347,23 +345,23 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        val startExactTimeStamp = listOfNotNull(
-                givenStartExactTimeStamp,
-                startExactTimeStamp
+        val startDateTime = listOfNotNull(
+                givenStartExactTimeStamp?.let(::DateTime),
+                startDateTime
         ).maxOrNull()!!
 
-        val endExactTimeStamp = listOfNotNull(
-                givenEndExactTimeStamp,
-                endExactTimeStamp
+        val endDateTime = listOfNotNull(
+                givenEndExactTimeStamp?.let(::DateTime),
+                endDateTime
         ).minOrNull()
 
-        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
+        if (endDateTime?.let { startDateTime > it } == true) return sequenceOf()
 
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
-        instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
+        instanceSequences += getExistingInstances(startDateTime, endDateTime, now, bySchedule, onlyRoot)
 
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, bySchedule)
+        instanceSequences += getScheduleInstances(startDateTime, endDateTime, bySchedule)
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(
@@ -380,7 +378,7 @@ class Task<T : ProjectType>(
     fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentSchedules(now).mapNotNull {
-            it.getDateTimesInRange(now, null)
+            it.getDateTimesInRange(DateTime.now, null)
                     .firstOrNull()
                     ?.let(::getInstance)
         }

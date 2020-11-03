@@ -54,8 +54,8 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     abstract fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp?
+            givenStartDateTime: DateTime?,
+            givenEndDateTime: DateTime?
     ): Sequence<DateTime>
 
     abstract fun isVisible(

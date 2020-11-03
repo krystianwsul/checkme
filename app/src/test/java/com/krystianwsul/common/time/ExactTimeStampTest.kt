@@ -1,8 +1,5 @@
 package com.krystianwsul.common.time
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.TimezoneOffset
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -14,16 +11,7 @@ class ExactTimeStampTest {
     }
 
     private fun getExactTimeStamp(offsetHours: Int): String {
-
-        val dateTimeSoy = DateTime(long)
-        val dateTimeTz = DateTimeTz.utc(dateTimeSoy, TimezoneOffset((60 * 60 * 1000 * offsetHours).toDouble()))
-
-        val dateTimeTzAdjusted = DateTimeTz.local(
-                dateTimeTz.local,
-                dateTimeSoy.local.offset
-        )
-
-        val exactTimeStamp = ExactTimeStamp(dateTimeTzAdjusted.utc)
+        val exactTimeStamp = ExactTimeStamp.fromOffset(long, (60 * 60 * 1000 * offsetHours).toDouble())
 
         return exactTimeStamp.toString().substring(8, 13)
     }

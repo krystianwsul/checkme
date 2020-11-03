@@ -19,7 +19,7 @@ class SingleSchedule<T : ProjectType>(
 
     val date get() = scheduleRecord.date
 
-    private val dateTime get() = DateTime(date, time)
+    val dateTime get() = DateTime(date, time)
 
     val originalDateTime get() = DateTime(scheduleRecord.originalDate, scheduleRecord.originalTimePair.toTime())
 

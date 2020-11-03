@@ -261,7 +261,7 @@ class Task<T : ProjectType>(
 
     fun getPastRootInstances(now: ExactTimeStamp) = getInstances(
             null,
-            DateTime.now.plusOneMinute(),
+            DateTime(now).plusOneMinute(),
             now,
             true,
             true

@@ -147,7 +147,7 @@ class IrrelevantTest {
         val weeklyScheduleWrapper = ScheduleWrapper(
                 weeklyScheduleJson = WeeklyScheduleJson(
                         startTime = now.long,
-                        dayOfWeek = 1, // sunday
+                        dayOfWeek = 1, // monday
                         hour = hour1.hour,
                         minute = hour1.minute
                 )

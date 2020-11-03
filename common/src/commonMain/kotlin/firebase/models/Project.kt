@@ -38,11 +38,9 @@ abstract class Project<T : ProjectType> : Current {
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
     val startDateTime by lazy { DateTime.fromOffset(projectRecord.startTime, projectRecord.startTimeOffset) }
-    // todo dst
 
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
     val endDateTime get() = projectRecord.endTime?.let { DateTime.fromOffset(it, projectRecord.endTimeOffset) }
-    // todo dst
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys

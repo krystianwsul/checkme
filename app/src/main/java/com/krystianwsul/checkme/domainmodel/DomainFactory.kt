@@ -449,8 +449,11 @@ class DomainFactory(
             filterVisible: Boolean = true
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
-                .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query, filterVisible) }
+                .values // todo dst
+                .map {
+                    it.getRootInstances(startExactTimeStamp?.toDateTime(), endExactTimeStamp?.toDateTime(), now, query,
+                            filterVisible)
+                }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -625,7 +628,7 @@ class DomainFactory(
 
         val instances = projectsFactory.projects
                 .values
-                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }
+                .map { it.existingInstances + it.getRootInstances(null, now.toDateTime().plusOneMinute(), now) }
                 .flatten()
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords

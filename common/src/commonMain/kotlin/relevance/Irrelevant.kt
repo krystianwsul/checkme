@@ -24,7 +24,7 @@ object Irrelevant {
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances
-        val rootInstances = project.getRootInstances(null, now.plusOne(), now).toList()
+        val rootInstances = project.getRootInstances(null, now.toDateTime().plusOneMinute(), now).toList()
 
         val instanceRelevances = (existingInstances + rootInstances)
                 .asSequence()
@@ -34,7 +34,8 @@ object Irrelevant {
 
         val yesterday = ExactTimeStamp(now.toDateTimeSoy() - 1.days)
 
-        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday } // delay deleting removed tasks by a day
+        // delay deleting removed tasks by a day
+        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday }
                 ?.minusOne()
                 ?: now
 

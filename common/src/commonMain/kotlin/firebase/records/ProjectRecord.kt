@@ -9,7 +9,8 @@ import com.krystianwsul.common.utils.*
 abstract class ProjectRecord<T : ProjectType>(
         create: Boolean,
         private val projectJson: ProjectJson,
-        private val _id: ProjectKey<T> // bo musi być dostępne w konstruktorze, a abstract nie jest jeszcze zinicjalizowane
+        private val _id: ProjectKey<T>,
+        committerKey: String
 ) : RemoteRecord(create) {
 
     companion object {
@@ -52,10 +53,10 @@ abstract class ProjectRecord<T : ProjectType>(
     var name by Committer(projectJson::name, "$key/$PROJECT_JSON")
 
     val startTime get() = projectJson.startTime
-    var startTimeOffset by Committer(projectJson::startTimeOffset, "$key/$PROJECT_JSON")
+    var startTimeOffset by Committer(projectJson::startTimeOffset, committerKey)
 
-    var endTime by Committer(projectJson::endTime, "$key/$PROJECT_JSON")
-    var endTimeOffset by Committer(projectJson::endTimeOffset, "$key/$PROJECT_JSON")
+    var endTime by Committer(projectJson::endTime, committerKey)
+    var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
 
     override val children
         get() = taskRecords.values +

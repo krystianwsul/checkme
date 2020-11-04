@@ -7,15 +7,16 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.*
 
 class SharedProjectRecord(
-    private val databaseWrapper: DatabaseWrapper,
-    private val parent: Parent,
-    create: Boolean,
-    override val projectKey: ProjectKey.Shared,
-    private val jsonWrapper: JsonWrapper
+        private val databaseWrapper: DatabaseWrapper,
+        private val parent: Parent,
+        create: Boolean,
+        override val projectKey: ProjectKey.Shared,
+        private val jsonWrapper: JsonWrapper
 ) : ProjectRecord<ProjectType.Shared>(
-    create,
-    jsonWrapper.projectJson,
-    projectKey
+        create,
+        jsonWrapper.projectJson,
+        projectKey,
+        "${projectKey.key}/$PROJECT_JSON"
 ) {
 
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
@@ -32,53 +33,53 @@ class SharedProjectRecord(
         super.initChildRecords(create)
 
         customTimeRecords = jsonWrapper.projectJson
-            .customTimes
-            .entries
-            .associate { (id, customTimeJson) ->
-                check(id.isNotEmpty())
+                .customTimes
+                .entries
+                .associate { (id, customTimeJson) ->
+                    check(id.isNotEmpty())
 
-                val customTimeId = CustomTimeId.Shared(id)
+                    val customTimeId = CustomTimeId.Shared(id)
 
-                customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
-            }
-            .toMutableMap()
+                    customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
+                }
+                .toMutableMap()
 
         userRecords = jsonWrapper.projectJson
-            .users
-            .entries
-            .associate { (id, userJson) ->
-                check(id.isNotEmpty())
+                .users
+                .entries
+                .associate { (id, userJson) ->
+                    check(id.isNotEmpty())
 
-                UserKey(id) to ProjectUserRecord(create, this, userJson)
-            }
-            .toMutableMap()
+                    UserKey(id) to ProjectUserRecord(create, this, userJson)
+                }
+                .toMutableMap()
     }
 
     override val children get() = super.children + userRecords.values
 
     constructor(
-        databaseWrapper: DatabaseWrapper,
-        parent: Parent,
-        id: ProjectKey.Shared,
-        jsonWrapper: JsonWrapper
+            databaseWrapper: DatabaseWrapper,
+            parent: Parent,
+            id: ProjectKey.Shared,
+            jsonWrapper: JsonWrapper
     ) : this(
-        databaseWrapper,
-        parent,
-        false,
-        id,
-        jsonWrapper
+            databaseWrapper,
+            parent,
+            false,
+            id,
+            jsonWrapper
     )
 
     constructor(
-        databaseWrapper: DatabaseWrapper,
-        parent: Parent,
-        jsonWrapper: JsonWrapper
+            databaseWrapper: DatabaseWrapper,
+            parent: Parent,
+            jsonWrapper: JsonWrapper
     ) : this(
-        databaseWrapper,
-        parent,
-        true,
-        databaseWrapper.newSharedProjectRecordId(),
-        jsonWrapper
+            databaseWrapper,
+            parent,
+            true,
+            databaseWrapper.newSharedProjectRecordId(),
+            jsonWrapper
     )
 
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): SharedCustomTimeRecord {
@@ -100,20 +101,20 @@ class SharedProjectRecord(
     private val createProjectJson
         get() = jsonWrapper.projectJson.apply {
             tasks = taskRecords.values
-                .associateBy({ it.id }, { it.createObject })
-                .toMutableMap()
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
             taskHierarchies = taskHierarchyRecords.values
-                .associateBy({ it.id }, { it.createObject })
-                .toMutableMap()
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
             customTimes = customTimeRecords.values
-                .associateBy({ it.id.value }, { it.createObject })
-                .toMutableMap()
+                    .associateBy({ it.id.value }, { it.createObject })
+                    .toMutableMap()
 
             users = userRecords.values
-                .associateBy({ it.id.key }, { it.createObject })
-                .toMutableMap()
+                    .associateBy({ it.id.key }, { it.createObject })
+                    .toMutableMap()
         }
 
     override val createObject get() = jsonWrapper.apply { projectJson = createProjectJson }
@@ -123,26 +124,26 @@ class SharedProjectRecord(
     override fun deleteFromParent() = parent.remove(projectKey)
 
     fun getCustomTimeRecordId() =
-        CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
+            CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey)
 
     override fun getScheduleRecordId(taskId: String) =
-        databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
+            databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 
     override fun getTaskHierarchyRecordId() =
-        databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
+            databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
 
     override fun getCustomTimeRecord(id: String) =
-        customTimeRecords.getValue(CustomTimeId.Shared(id))
+            customTimeRecords.getValue(CustomTimeId.Shared(id))
 
     override fun getCustomTimeId(id: String) = CustomTimeId.Shared(id)
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) =
-        CustomTimeKey.Shared(projectKey, customTimeId)
+            CustomTimeKey.Shared(projectKey, customTimeId)
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
-        databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
+            databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
 
     interface Parent {
 

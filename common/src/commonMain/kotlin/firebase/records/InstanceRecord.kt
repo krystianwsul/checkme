@@ -85,6 +85,7 @@ abstract class InstanceRecord<T : ProjectType>(
     }
 
     var done by Committer(createObject::done)
+    var doneOffset by Committer(createObject::doneOffset)
 
     val scheduleYear by lazy { scheduleKey.scheduleDate.year }
     val scheduleMonth by lazy { scheduleKey.scheduleDate.month }

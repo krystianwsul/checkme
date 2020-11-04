@@ -690,7 +690,7 @@ class DomainFactory(
                     .filter {
                         it.done == null
                                 && !it.getNotified(localFactory)
-                                && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now
+                                && it.instanceDateTime.toExactTimeStamp() <= now
                                 && !removedTaskKeys.contains(it.taskKey)
                     }
                     .associateBy { it.instanceKey }

@@ -166,7 +166,7 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     private fun getInstanceJson(ownerKey: UserKey, instance: Instance<*>): InstanceJson {
-        val done = instance.done?.long
+        val done = instance.doneOffset ?: instance.done
 
         val instanceDate = instance.instanceDate
 
@@ -184,11 +184,7 @@ abstract class Project<T : ProjectType> : Current {
             is Time.Normal -> newInstanceTime.hourMinute.toJson()
         }
 
-        return InstanceJson(
-                done,
-                instanceDate.toJson(),
-                instanceTimeString
-        )
+        return InstanceJson(done?.long, done?.offset, instanceDate.toJson(), instanceTimeString)
     }
 
     fun <V : TaskHierarchy<*>> copyTaskHierarchy(

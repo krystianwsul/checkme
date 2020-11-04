@@ -82,6 +82,11 @@ class Instance<T : ProjectType> private constructor(
     private val doneProperty = invalidatableLazyCallbacks { data.done?.let { ExactTimeStamp(it) } }
     val done by doneProperty
 
+    private val doneOffsetProperty = invalidatableLazyCallbacks {
+        data.done?.let { ExactTimeStamp.fromOffset(it, data.doneOffset) }
+    }
+    val doneOffset by doneOffsetProperty
+
     val name get() = task.name
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
@@ -104,7 +109,7 @@ class Instance<T : ProjectType> private constructor(
     private val hierarchyExactTimeStampProperty = invalidatableLazy {
         listOfNotNull(
                 task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
-                done?.let { Pair(it.minusOne(), "done") }
+                (doneOffset ?: done)?.let { Pair(it.minusOne(), "done") }
         ).minByOrNull { it.first }
     }
 
@@ -113,6 +118,7 @@ class Instance<T : ProjectType> private constructor(
     init {
         task.endDataProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
         doneProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+        doneOffsetProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
     }
 
     constructor(
@@ -296,7 +302,7 @@ class Instance<T : ProjectType> private constructor(
                     groupMatch
             )
         } else {
-            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null) // todo dst done offset
+            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
         }
 
         val parentInstanceData = if (parentTask == null) {
@@ -384,18 +390,26 @@ class Instance<T : ProjectType> private constructor(
         data = it
 
         doneProperty.invalidate()
+        doneOffsetProperty.invalidate()
     }
 
     fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
         if (done) {
-            createInstanceHierarchy(now).instanceRecord.done = now.long
+            createInstanceHierarchy(now).instanceRecord.let {
+                it.done = now.long
+                it.doneOffset = now.offset
+            }
 
             getShown(shownFactory)?.notified = false
         } else {
-            (data as Data.Real<*>).instanceRecord.done = null
+            (data as Data.Real<*>).instanceRecord.let {
+                it.done = null
+                it.doneOffset = null
+            }
         }
 
         doneProperty.invalidate()
+        doneOffsetProperty.invalidate()
     }
 
     fun delete() {
@@ -438,6 +452,16 @@ class Instance<T : ProjectType> private constructor(
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
 
+    fun fixOffsets() {
+        done?.let {
+            if (doneOffset == null) {
+                (data as Data.Real<*>).instanceRecord.doneOffset = it.offset
+
+                doneOffsetProperty.invalidate()
+            }
+        }
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date
@@ -447,6 +471,7 @@ class Instance<T : ProjectType> private constructor(
         abstract val instanceTime: Time
 
         abstract val done: Long?
+        abstract val doneOffset: Double?
 
         abstract val hidden: Boolean
 
@@ -484,6 +509,7 @@ class Instance<T : ProjectType> private constructor(
                         ?: scheduleTime
 
             override val done get() = instanceRecord.done
+            override val doneOffset get() = instanceRecord.doneOffset
 
             override val hidden get() = instanceRecord.hidden
 
@@ -510,6 +536,7 @@ class Instance<T : ProjectType> private constructor(
             override val instanceTime = scheduleTime
 
             override val done: Long? = null
+            override val doneOffset: Double? = null
 
             override val hidden = false
 

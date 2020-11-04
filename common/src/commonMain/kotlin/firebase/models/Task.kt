@@ -982,6 +982,8 @@ class Task<T : ProjectType>(
         parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
 
         noScheduleOrParentIntervals.forEach { it.noScheduleOrParent.fixOffsets() }
+
+        existingInstances.values.forEach { it.fixOffsets() }
     }
 
     interface ScheduleTextFactory {

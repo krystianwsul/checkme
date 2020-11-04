@@ -73,8 +73,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         object : DragHelper() {
 
             override fun getTreeViewAdapter() = treeViewAdapter
-
-            override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
         }
     }
 

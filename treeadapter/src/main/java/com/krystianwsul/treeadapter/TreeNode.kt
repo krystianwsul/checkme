@@ -140,11 +140,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 
     private fun toggleSelected(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
 
-        if (!modelNode.isSelectable)
-            return
+        if (!modelNode.isSelectable) return
 
         selected = !selected
 
@@ -172,14 +170,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
-        if (!modelNode.isSelectable)
-            return
+        if (!modelNode.isSelectable) return
 
-        selected = !selected
+        if (!startingDrag) selected = !selected
 
         modelNode.onBindViewHolder(viewHolder, startingDrag)
 
-        treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
+        if (!startingDrag) treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode
@@ -362,11 +359,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     override val indentation by lazy { parent.indentation + 1 }
 
     fun select(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (selected)
-            throw SelectCalledTwiceException()
+        if (selected) throw SelectCalledTwiceException()
 
-        if (!modelNode.isSelectable)
-            throw NotSelectableSelectedException()
+        if (!modelNode.isSelectable) throw NotSelectableSelectedException()
 
         toggleSelected(placeholder, recursive)
     }

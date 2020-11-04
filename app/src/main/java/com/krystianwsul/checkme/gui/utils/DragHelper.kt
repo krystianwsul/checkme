@@ -63,23 +63,21 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
     private fun clearViewHelper(viewHolder: RecyclerView.ViewHolder) {
         MyCrashlytics.logMethod(this, "endPosition: $endPosition")
 
-        endPosition?.let {
+        if (endPosition != null) {
             checkNotNull(startPosition)
 
-            if (startPosition != endPosition) {
-                getTreeViewAdapter().setNewItemPosition(it)
-                onSetNewItemPosition()
-            }
-        }
+            if (startPosition != endPosition) getTreeViewAdapter().setNewItemPosition(endPosition!!)
 
-        getTreeViewAdapter().notifyItemChanged(viewHolder.adapterPosition)
+            getTreeViewAdapter().notifyItemChanged(viewHolder.adapterPosition)
+        } else {
+            startPosition?.let { getTreeViewAdapter().selectNode(it) }
+        }
 
         startPosition = null
         endPosition = null
     }
 
     abstract fun getTreeViewAdapter(): TreeViewAdapter<NodeHolder>
-    abstract fun onSetNewItemPosition()
 
     private fun canDropOverHelper(recyclerView: RecyclerView, target: RecyclerView.ViewHolder): Boolean {
         val treeNodeCollection = (recyclerView.adapter as TreeViewAdapter<*>).getTreeNodeCollection()

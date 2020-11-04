@@ -219,6 +219,9 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     fun setNewItemPosition(position: Int) = treeNodeCollection?.setNewItemPosition(position)
             ?: throw SetTreeNodeCollectionNotCalledException()
 
+    fun selectNode(position: Int) = treeNodeCollection?.selectNode(position)
+            ?: throw SetTreeNodeCollectionNotCalledException()
+
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
     fun setFilterCriteria(filterCriteria: Any?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {

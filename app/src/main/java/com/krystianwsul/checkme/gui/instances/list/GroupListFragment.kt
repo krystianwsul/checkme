@@ -58,7 +58,10 @@ class GroupListFragment @JvmOverloads constructor(
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
         defStyleRes: Int = 0
-) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser, ListItemAddedScroller {
+) :
+        RelativeLayout(context, attrs, defStyleAttr, defStyleRes),
+        FabUser,
+        ListItemAddedScroller {
 
     companion object {
 
@@ -155,8 +158,6 @@ class GroupListFragment @JvmOverloads constructor(
         object : DragHelper() {
 
             override fun getTreeViewAdapter() = treeViewAdapter
-
-            override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
         }
     }
 

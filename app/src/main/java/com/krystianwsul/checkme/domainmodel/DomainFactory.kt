@@ -253,7 +253,7 @@ class DomainFactory(
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
-            check(dataIds.single() == 0)
+            check(dataIds.isEmpty() || dataIds.single() == 0)
 
             return
         }

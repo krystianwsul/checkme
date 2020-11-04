@@ -127,7 +127,8 @@ class FactoryLoader(
                             friendsFactory,
                             getDeviceDbInfo(),
                             startTime,
-                            ExactTimeStamp.now
+                            ExactTimeStamp.now,
+                            domainDisposable
                     )
                 }.cacheImmediate()
 

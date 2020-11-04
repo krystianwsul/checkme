@@ -454,8 +454,10 @@ class Instance<T : ProjectType> private constructor(
 
     fun fixOffsets() {
         done?.let {
-            if (doneOffset == null) {
-                (data as Data.Real<*>).instanceRecord.doneOffset = it.offset
+            val instanceRecord = (data as Data.Real<*>).instanceRecord
+
+            if (instanceRecord.doneOffset == null) {
+                instanceRecord.doneOffset = it.offset
 
                 doneOffsetProperty.invalidate()
             }

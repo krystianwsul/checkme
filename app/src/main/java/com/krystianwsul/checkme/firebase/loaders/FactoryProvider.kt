@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 
 interface FactoryProvider {
 
@@ -47,7 +48,8 @@ interface FactoryProvider {
             friendsFactory: FriendsFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp,
-            readTime: ExactTimeStamp
+            readTime: ExactTimeStamp,
+            domainDisposable: CompositeDisposable
     ): Domain
 
     interface Domain {
@@ -99,7 +101,8 @@ interface FactoryProvider {
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp
+                readTime: ExactTimeStamp,
+                domainDisposable: CompositeDisposable
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 myUserFactory,
@@ -107,7 +110,8 @@ interface FactoryProvider {
                 friendsFactory,
                 deviceDbInfo,
                 startTime,
-                readTime
+                readTime,
+                domainDisposable
         )
     }
 }

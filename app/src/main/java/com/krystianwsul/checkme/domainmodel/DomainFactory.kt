@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -31,6 +32,12 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
 
 @Suppress("LeakingThis")
@@ -41,7 +48,8 @@ class DomainFactory(
         val friendsFactory: FriendsFactory,
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
-        readTime: ExactTimeStamp
+        readTime: ExactTimeStamp,
+        domainDisposable: CompositeDisposable
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -142,6 +150,8 @@ class DomainFactory(
 
     val isSaved = BehaviorRelay.createDefault(false)
 
+    private val changeTypeRelay = PublishRelay.create<ChangeType>()
+
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
@@ -158,6 +168,31 @@ class DomainFactory(
         firstRun = false
 
         updateShortcuts(now)
+
+        listOf(
+                changeTypeRelay.filter { it == ChangeType.REMOTE }
+                        .firstOrError()
+                        .map { "remote change" },
+                Single.just(Unit)
+                        .delay(1, TimeUnit.MINUTES)
+                        .observeOn(Schedulers.single())
+                        .map { "timeout" }
+        ).map { it.toObservable() }
+                .merge()
+                .firstOrError()
+                .subscribe(::fixOffsets)
+                .addTo(domainDisposable)
+    }
+
+    private fun fixOffsets(source: String) = syncOnDomain {
+        MyCrashlytics.log("triggering fixing offsets from $source")
+        if (projectsFactory.isSaved) throw SavedFactoryException()
+
+        projectsFactory.projects
+                .values
+                .forEach { it.fixOffsets() }
+
+        save(setOf(), SaveService.Source.SERVICE)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -263,6 +298,8 @@ class DomainFactory(
         updateShortcuts(now)
 
         tryNotifyListeners(now, "DomainFactory.onChangeTypeEvent", changeType.runType)
+
+        changeTypeRelay.accept(changeType)
     }
 
     override fun updateUserRecord(snapshot: Snapshot) = syncOnDomain {
@@ -276,8 +313,7 @@ class DomainFactory(
     private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
-        if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved)
-            return
+        if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
 
         updateIsSaved()
 
@@ -607,7 +643,7 @@ class DomainFactory(
                                         TODO("Not yet implemented")
                                     }
                                 },
-                                projectsFactory.privateProject,
+                                it,
                                 tomorrow
                         )
 
@@ -618,10 +654,6 @@ class DomainFactory(
 
             throw Exception()
         }
-
-        projectsFactory.projects
-                .values
-                .forEach { it.fixOffsets() }
 
         val instances = projectsFactory.projects
                 .values

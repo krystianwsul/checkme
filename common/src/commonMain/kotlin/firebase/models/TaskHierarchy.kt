@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.TaskHierarchyRecord
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
@@ -14,18 +13,12 @@ class TaskHierarchy<T : ProjectType>(
 ) : TaskParentEntry {
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
-    override val startDateTime by lazy { taskHierarchyRecord.run { DateTime.fromOffset(startTime, startTimeOffset) } }
 
     override val startExactTimeStampOffset by lazy {
         taskHierarchyRecord.run { ExactTimeStamp.fromOffset(startTime, startTimeOffset) }
     }
 
     override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
-
-    override val endDateTime
-        get() = taskHierarchyRecord.endTime?.let {
-            DateTime.fromOffset(it, taskHierarchyRecord.endTimeOffset)
-        }
 
     override val endExactTimeStampOffset
         get() = taskHierarchyRecord.endTime?.let {

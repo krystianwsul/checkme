@@ -54,6 +54,4 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
     fun toTimeStamp() = TimeStamp.fromMillis(long)
 
     override fun toString() = "$date $hourMilli"
-
-    fun toDateTime() = DateTime(this)
 }

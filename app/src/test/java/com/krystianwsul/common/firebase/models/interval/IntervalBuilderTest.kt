@@ -31,7 +31,11 @@ class IntervalBuilderTest {
     ): Task<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
+            every { startExactTimeStampOffset } returns start
+
             every { endExactTimeStamp } returns end
+            every { endExactTimeStampOffset } returns end
+
             every { parentTaskHierarchies } returns taskHierarchies.toSet()
             every { schedules } returns scheduleList
             every { noScheduleOrParents } returns noScheduleOrParentList
@@ -44,7 +48,10 @@ class IntervalBuilderTest {
     ): TaskHierarchy<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
+            every { startExactTimeStampOffset } returns start
+
             every { endExactTimeStamp } returns end
+            every { endExactTimeStampOffset } returns end
         }
     }
 
@@ -54,7 +61,10 @@ class IntervalBuilderTest {
     ): Schedule<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
+            every { startExactTimeStampOffset } returns start
+
             every { endExactTimeStamp } returns end
+            every { endExactTimeStampOffset } returns end
         }
     }
 
@@ -64,7 +74,10 @@ class IntervalBuilderTest {
     ): NoScheduleOrParent<ProjectType.Private> {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
+            every { startExactTimeStampOffset } returns start
+
             every { endExactTimeStamp } returns end
+            every { endExactTimeStampOffset } returns end
         }
     }
 

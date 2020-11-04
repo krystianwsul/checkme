@@ -43,7 +43,7 @@ class SingleSchedule<T : ProjectType>(
 
         if (givenEndExactTimeStamp?.let { it <= scheduleExactTimeStamp } == true) return emptySequence()
 
-        if (endDateTime?.let { dateTime >= it } == true) return emptySequence()
+        if (endExactTimeStampOffset?.let { scheduleExactTimeStamp >= it } == true) return emptySequence()
 
         if (scheduleInterval.endExactTimeStampOffset?.let { scheduleExactTimeStamp >= it } == true)
             return emptySequence()

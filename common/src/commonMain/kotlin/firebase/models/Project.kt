@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.throwIfInterrupted
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -37,10 +36,8 @@ abstract class Project<T : ProjectType> : Current {
         }
 
     override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
-    val startDateTime by lazy { DateTime.fromOffset(projectRecord.startTime, projectRecord.startTimeOffset) }
 
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
-    val endDateTime get() = projectRecord.endTime?.let { DateTime.fromOffset(it, projectRecord.endTimeOffset) }
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys

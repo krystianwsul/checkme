@@ -171,7 +171,8 @@ class FactoryLoaderOldTest {
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp
+                readTime: ExactTimeStamp,
+                domainDisposable: CompositeDisposable
         ) = domain
     }
 

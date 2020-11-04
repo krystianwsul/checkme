@@ -205,7 +205,8 @@ class FactoryLoaderNewTest {
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
                 startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp
+                readTime: ExactTimeStamp,
+                domainDisposable: CompositeDisposable
         ): FactoryProvider.Domain {
             this.friendsFactory = friendsFactory
 

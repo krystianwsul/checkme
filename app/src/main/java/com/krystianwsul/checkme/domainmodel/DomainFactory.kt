@@ -36,6 +36,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
@@ -184,7 +185,9 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .subscribe(::fixOffsets)
+                .subscribeBy { source ->
+                    addFirebaseListener { it.fixOffsets(source) }
+                }
                 .addTo(domainDisposable)
     }
 

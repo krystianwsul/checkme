@@ -98,7 +98,11 @@ class DomainFactory(
         // todo route all external calls through here
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
             val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
+            if (
+                    domainFactory?.projectsFactory?.isSaved == false
+                    && !domainFactory.friendsFactory.isSaved
+                    && !domainFactory.myUserFactory.isSaved
+            ) {
                 domainFactory.checkSave()
                 firebaseListener(domainFactory)
             } else {

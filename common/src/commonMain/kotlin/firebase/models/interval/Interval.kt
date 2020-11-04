@@ -36,8 +36,13 @@ sealed class Interval<T : ProjectType> : CurrentOffset {
 
         fun correctEndExactTimeStamps() {
             type.taskParentEntries.forEach {
-                if (it.endExactTimeStampOffset?.let { it > endExactTimeStampOffset } != false)
-                    it.setEndExactTimeStamp(endExactTimeStampOffset)
+                if (it.endExactTimeStampOffset?.let { it > endExactTimeStampOffset } != false) {
+                    try {
+                        it.setEndExactTimeStamp(endExactTimeStampOffset)
+                    } catch (exception: Exception) {
+                        throw Exception("error setting endExactTimeStamp for $it", exception)
+                    }
+                }
             }
         }
     }

@@ -943,9 +943,23 @@ class Task<T : ProjectType>(
 
     // todo dst apparently this needs to be an exactTimestamp all the way up.  If that fails after changing timezone,
     // I'll need to bring back ExactTimeStamp.fromOffset
-    fun getInterval(exactTimeStamp: ExactTimeStamp) = intervals.single {
-        it.containsExactTimeStamp(exactTimeStamp)
+    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+        try {
+            return intervals.single {
+                it.containsExactTimeStamp(exactTimeStamp)
+            }
+        } catch (throwable: Throwable) {
+            throw IntervalException(
+                    "error getting interval for task $name. exactTimeStamp: $exactTimeStamp, intervals:\n"
+                            + intervals.joinToString("\n") {
+                        "${it.startExactTimeStampOffset} - ${it.endExactTimeStampOffset}"
+                    },
+                    throwable
+            )
+        }
     }
+
+    private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
     fun setNoScheduleOrParent(now: ExactTimeStamp) {
         val noScheduleOrParentRecord =

@@ -109,7 +109,7 @@ class Instance<T : ProjectType> private constructor(
     private val hierarchyExactTimeStampProperty = invalidatableLazy {
         listOfNotNull(
                 task.endExactTimeStamp?.let { Pair(it.minusOne(), "task end") },
-                (doneOffset ?: done)?.let { Pair(it.minusOne(), "done") }
+                doneOffset?.let { Pair(it.minusOne(), "done") }
         ).minByOrNull { it.first }
     }
 

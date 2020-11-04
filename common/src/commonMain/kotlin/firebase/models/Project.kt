@@ -166,7 +166,7 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     private fun getInstanceJson(ownerKey: UserKey, instance: Instance<*>): InstanceJson {
-        val done = instance.doneOffset ?: instance.done
+        val done = instance.doneOffset
 
         val instanceDate = instance.instanceDate
 

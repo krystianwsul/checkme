@@ -283,18 +283,18 @@ class Instance<T : ProjectType> private constructor(
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
                 .asSequence()
                 .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
-                .filter { it.current(hierarchyExactTimeStamp.first) }
+                .filter { it.current(hierarchyExactTimeStamp) }
                 .toList()
 
         val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
             val groupMatch = groupMatches.single()
             val parentTask = groupMatch.parentTask
-            val intervalType = task.getInterval(hierarchyExactTimeStamp.first).type
+            val intervalType = task.getInterval(hierarchyExactTimeStamp).type
 
             Triple(
                     parentTask,
@@ -302,13 +302,13 @@ class Instance<T : ProjectType> private constructor(
                     groupMatch
             )
         } else {
-            Triple(task.getParentTask(hierarchyExactTimeStamp.first), false, null)
+            Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
         }
 
         val parentInstanceData = if (parentTask == null) {
             null
         } else {
-            check(parentTask.notDeleted(hierarchyExactTimeStamp.first))
+            check(parentTask.notDeleted(hierarchyExactTimeStamp))
 
             return parentTask.getInstance(scheduleDateTime)
                     .takeIf { it.isEligibleParentInstance(now) }

@@ -298,6 +298,7 @@ class Task<T : ProjectType>(
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp?,
+            now: ExactTimeStamp,
             bySchedule: Boolean
     ): Sequence<Instance<out T>> {
         val scheduleResults = scheduleIntervals.map {
@@ -310,7 +311,7 @@ class Task<T : ProjectType>(
             it.mapNotNull {
                 throwIfInterrupted()
 
-                getInstance(it).takeIf { !it.exists() }
+                getInstance(it).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
             }
         }
 
@@ -357,7 +358,7 @@ class Task<T : ProjectType>(
 
         instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
 
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, bySchedule)
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule)
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(

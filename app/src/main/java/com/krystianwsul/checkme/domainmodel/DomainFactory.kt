@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.ticks.TickJobIntentService
+import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -720,7 +720,7 @@ class DomainFactory(
             return
         }
 
-        NotificationWrapper.instance.hideTemporary(TickJobIntentService.TICK_NOTIFICATION_ID, sourceName)
+        NotificationWrapper.instance.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
 
         val notificationInstances = if (clear)
             mapOf()

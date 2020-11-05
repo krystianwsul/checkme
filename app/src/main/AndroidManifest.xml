@@ -116,14 +116,6 @@
             android:name=".ticks.AlarmReceiver"
             android:enabled="true" />
 
-        <service
-            android:name=".ticks.TickJobIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:name=".notifications.NotificationActionService"
-            android:exported="false" />
-
         <receiver
             android:name=".notifications.NotificationActionReceiver"
             android:enabled="true"

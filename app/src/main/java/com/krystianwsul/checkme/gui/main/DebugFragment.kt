@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.base.AbstractFragment
-import com.krystianwsul.checkme.ticks.TickJobIntentService
+import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxkotlin.addTo
@@ -48,7 +48,7 @@ class DebugFragment : AbstractFragment() {
                 }
                 .addTo(viewCreatedDisposable)
 
-        debugTick.setOnClickListener { TickJobIntentService.startServiceNormal(requireContext(), "DebugFragment") }
+        debugTick.setOnClickListener { Ticker.tick("DebugFragment") }
 
         debugLoad.setOnClickListener {
             debugData.text = StringBuilder().apply {
@@ -106,9 +106,5 @@ class DebugFragment : AbstractFragment() {
                 append(tickLog)
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 }

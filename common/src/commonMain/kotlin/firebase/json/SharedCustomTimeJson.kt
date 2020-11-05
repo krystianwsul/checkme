@@ -20,6 +20,6 @@ class SharedCustomTimeJson @JvmOverloads constructor(
         override var fridayMinute: Int = 0,
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
-        var ownerKey: String? = null,
-        var privateKey: String? = null
+        val ownerKey: String? = null,
+        val privateKey: String? = null
 ) : CustomTimeJson

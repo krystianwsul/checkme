@@ -6,7 +6,6 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
-import kotlin.properties.Delegates.observable
 
 
 class SharedCustomTimeRecord(
@@ -35,17 +34,11 @@ class SharedCustomTimeRecord(
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 
-    var ownerKey by observable(customTimeJson.ownerKey?.let { UserKey(it) }) { _, _, newValue ->
-        customTimeJson.ownerKey = newValue?.key
-    }
+    val ownerKey by lazy { customTimeJson.ownerKey?.let(::UserKey) }
 
-    var privateKey: CustomTimeId.Private?
-        get() = customTimeJson.privateKey
+    val privateKey by lazy {
+        customTimeJson.privateKey
                 .takeUnless { it.isNullOrEmpty() }
                 ?.let { CustomTimeId.Private(it) }
-        set(value) {
-            checkNotNull(value)
-
-            setProperty(customTimeJson::privateKey, value.value)
-        }
+    }
 }

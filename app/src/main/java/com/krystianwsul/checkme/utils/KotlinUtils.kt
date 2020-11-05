@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.Task
+import com.google.android.material.internal.CheckableImageButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.MyApplication
@@ -243,11 +244,30 @@ fun newUuid() = UUID.randomUUID().toString()
 
 fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixedOnClickListener(listener, listener)
 
-@SuppressLint("ClickableViewAccessibility")
 fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit, iconListener: () -> Unit) {
-    setOnClickListener { listener() }
+    var manualToggles = 0
 
-    (parent.parent as TextInputLayout).setEndIconOnClickListener { iconListener() }
+    fun getTextInputLayout() = parent.parent as TextInputLayout
+
+    fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
+
+    setOnClickListener {
+        listener()
+
+        if (manualToggles % 2 == 1) post { getTextInputLayout().getEndIconView().toggle() }
+
+        manualToggles = 0
+    }
+
+    getTextInputLayout().let { textInputLayout ->
+        textInputLayout.setEndIconOnClickListener {
+            iconListener()
+
+            textInputLayout.getEndIconView().toggle()
+
+            manualToggles++
+        }
+    }
 }
 
 fun <T : Serializable> serialize(obj: T): String {

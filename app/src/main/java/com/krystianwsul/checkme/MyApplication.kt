@@ -10,7 +10,7 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
-import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
@@ -101,9 +101,9 @@ class MyApplication : Application() {
         }
 
         if (Preferences.token == null)
-            FirebaseInstanceId.getInstance()
-                    .instanceId
-                    .addOnSuccessListener { Preferences.token = it.token }
+            FirebaseMessaging.getInstance()
+                    .token
+                    .addOnSuccessListener { Preferences.token = it }
 
         //writeHashes()
 
@@ -113,18 +113,18 @@ class MyApplication : Application() {
                     .start()
 
         userInfoRelay.switchMapMaybe {
-            it.value?.let {
-                googleSignInClient.silentSignIn()
-                        .toSingle()
-                        .toMaybe()
-            } ?: Maybe.empty()
+            it.value
+                    ?.let {
+                        googleSignInClient.silentSignIn()
+                                .toSingle()
+                                .toMaybe()
+                    }
+                    ?: Maybe.empty()
         }.subscribe {
             it.value
                     ?.photoUrl
                     ?.let { url ->
-                        DomainFactory.addFirebaseListener {
-                            it.updatePhotoUrl(SaveService.Source.GUI, url.toString())
-                        }
+                        DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
                     }
         }
 

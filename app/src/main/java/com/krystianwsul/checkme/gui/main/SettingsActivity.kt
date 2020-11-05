@@ -158,7 +158,7 @@ class SettingsActivity : NavBarActivity() {
 
             showNotificationsPreference.isChecked = Preferences.showNotifications
 
-            showNotificationsPreference.setOnPreferenceChangeListener { preference, newValue ->
+            showNotificationsPreference.setOnPreferenceChangeListener { _, newValue ->
                 Preferences.showNotifications = newValue as Boolean
 
                 true

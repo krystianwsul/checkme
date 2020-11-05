@@ -941,8 +941,6 @@ class Task<T : ProjectType>(
         }
     }
 
-    // todo dst apparently this needs to be an exactTimestamp all the way up.  If that fails after changing timezone,
-    // I'll need to bring back ExactTimeStamp.fromOffset
     fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         try {
             return intervals.single {

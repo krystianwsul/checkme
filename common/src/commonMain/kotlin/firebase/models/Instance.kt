@@ -287,8 +287,8 @@ class Instance<T : ProjectType> private constructor(
 
         val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
                 .asSequence()
-                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
                 .filter { it.current(hierarchyExactTimeStamp) }
+                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
                 .toList()
 
         val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {

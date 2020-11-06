@@ -120,7 +120,7 @@ class SettingsActivity : NavBarActivity() {
                 })
 
                 setOnPreferenceChangeListener { _, newValue ->
-                    val newTab = when (newValue) {
+                    val newTab = when (newValue as String) {
                         getString(R.string.instances) -> MainActivity.Tab.INSTANCES
                         getString(R.string.tasks) -> MainActivity.Tab.TASKS
                         else -> throw IllegalArgumentException()
@@ -154,15 +154,33 @@ class SettingsActivity : NavBarActivity() {
                     }
                     .addTo(createDisposable)
 
-            val showNotificationsPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.showNotifications))!!
+            findPreference<ListPreference>(getString(R.string.notifications))!!.apply {
+                value = getString(when (Preferences.notificationLevel) {
+                    Preferences.NotificationLevel.HIGH -> R.string.highPriorityNotifications
+                    Preferences.NotificationLevel.MEDIUM -> R.string.mediumPriorityNotifications
+                    Preferences.NotificationLevel.NONE -> R.string.noNotifications
+                })
 
+                setOnPreferenceChangeListener { _, newValue ->
+                    Preferences.notificationLevel = when (newValue as String) {
+                        getString(R.string.highPriorityNotifications) -> Preferences.NotificationLevel.HIGH
+                        getString(R.string.mediumPriorityNotifications) -> Preferences.NotificationLevel.MEDIUM
+                        getString(R.string.noNotifications) -> Preferences.NotificationLevel.NONE
+                        else -> throw IllegalArgumentException()
+                    }
+
+                    true
+                }
+            }
+
+            /*
             showNotificationsPreference.isChecked = Preferences.showNotifications
 
             showNotificationsPreference.setOnPreferenceChangeListener { _, newValue ->
                 Preferences.showNotifications = newValue as Boolean
 
                 true
-            }
+            }*/
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

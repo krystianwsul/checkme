@@ -26,6 +26,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val TOKEN_KEY = "token"
     private const val KEY_SAVE_LOG = "saveLog"
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
+    private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -79,13 +80,32 @@ object Preferences : FactoryProvider.Preferences {
             tokenRelay.accept(NullableWrapper(value))
         }
 
-    var showNotifications by observable(sharedPreferences.getBoolean(KEY_SHOW_NOTIFICATIONS, true)) { _, _, newValue ->
+    var showNotifications by observable(sharedPreferences.getBoolean(
+            KEY_SHOW_NOTIFICATIONS,
+            true
+    )) { _, _, newValue ->
         sharedPreferences.edit { putBoolean(KEY_SHOW_NOTIFICATIONS, newValue) }
+    }
+
+    init {
+        if (!sharedPreferences.contains(KEY_NOTIFICATION_LEVEL) && sharedPreferences.contains(KEY_SHOW_NOTIFICATIONS))
+            putNotificationLevel(if (showNotifications) NotificationLevel.MEDIUM else NotificationLevel.NONE)
+    }
+
+    var notificationLevel by observable(
+            sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
+    ) { _, _, newValue -> putNotificationLevel(newValue) }
+
+    private fun putNotificationLevel(notificationLevel: NotificationLevel) {
+        sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
     }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 
-        final override fun getValue(thisRef: Any, property: KProperty<*>): String = sharedPreferences.getString(key, "")!!
+        final override fun getValue(
+                thisRef: Any,
+                property: KProperty<*>
+        ) = sharedPreferences.getString(key, "")!!
     }
 
     private class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
@@ -123,5 +143,10 @@ object Preferences : FactoryProvider.Preferences {
                     .apply { add(0, line) }
                     .joinToString("\n")
         }
+    }
+
+    enum class NotificationLevel {
+
+        NONE, MEDIUM, HIGH
     }
 }

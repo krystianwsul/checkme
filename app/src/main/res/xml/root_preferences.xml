@@ -24,9 +24,12 @@
             app:summaryOn="@string/defaultReminderSummaryOn"
             app:summaryOff="@string/defaultReminderSummaryOff" />
 
-        <SwitchPreferenceCompat
-            app:key="@string/showNotifications"
-            app:title="@string/showNotifications" />
+        <ListPreference
+            app:entries="@array/notification_entries"
+            app:entryValues="@array/notification_values"
+            app:key="@string/notifications"
+            app:title="@string/notifications"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 

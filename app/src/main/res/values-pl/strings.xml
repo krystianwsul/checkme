@@ -121,4 +121,8 @@
     <string name="stopCopyingMessage">Czy chcesz przerwać kopiowanie tych zadań?</string>
     <string name="stopCopyingYes">Przerwij</string>
     <string name="showNotifications">Pokazuj powiadomienia</string>
+    <string name="highPriorityNotifications">Pokaż na ekranie</string>
+    <string name="mediumPriorityNotifications">Pokaż na pasku stanu</string>
+    <string name="noNotifications">Nie pokazuj</string>
+    <string name="notifications">Powiadomienia</string>
 </resources>

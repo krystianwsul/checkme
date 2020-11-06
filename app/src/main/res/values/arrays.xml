@@ -9,4 +9,16 @@
         <item>@string/instances</item>
         <item>@string/tasks</item>
     </string-array>
+
+    <string-array name="notification_entries">
+        <item>@string/highPriorityNotifications</item>
+        <item>@string/mediumPriorityNotifications</item>
+        <item>@string/noNotifications</item>
+    </string-array>
+
+    <string-array name="notification_values">
+        <item>@string/highPriorityNotifications</item>
+        <item>@string/mediumPriorityNotifications</item>
+        <item>@string/noNotifications</item>
+    </string-array>
 </resources>

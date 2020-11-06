@@ -17,16 +17,32 @@ fun TextInputLayout.setChecked() {
 }
 
 fun AutoCompleteTextView.setFixedOnClickListenerAndFixIcon(listener: () -> Unit) {
+    fun setIsChecked(isChecked: Boolean) {
+        getTextInputLayout().apply {
+            fun setChecked() {
+                getEndIconView().isChecked = isChecked
+            }
 
-    //val isChecked = getTextInputLayout().getEndIconView().isChecked
+            setChecked()
+            postDelayed(::setChecked, 500)
+        }
+    }
 
-    setOnClickListener { listener() }
+    var isChecked = getTextInputLayout().getEndIconView().isChecked
+
+    setOnClickListener {
+        listener()
+
+        isChecked = !isChecked
+        setIsChecked(isChecked)
+    }
 
     getTextInputLayout().let { textInputLayout ->
         textInputLayout.setEndIconOnClickListener {
             listener()
 
-            //textInputLayout.getEndIconView().toggle()
+            isChecked = !isChecked
+            setIsChecked(isChecked)
         }
     }
 }

@@ -220,6 +220,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
             }
         } else {
             check(intent.hasExtra(NEW_KEY))
+
+            setUpAllDaysToggle()
         }
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
@@ -295,7 +297,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
             timeView.setText(hourMinute.toString())
         }
+    }
 
+    private fun setUpAllDaysToggle() {
         if (allDaysExpanded) timeAllDaysTextLayout.setChecked()
 
         timeAllDaysText.setFixedOnClickListenerAndFixIcon {
@@ -328,6 +332,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     .size > 1
 
             updateGui()
+
+            setUpAllDaysToggle()
         }
 
         invalidateOptionsMenu()

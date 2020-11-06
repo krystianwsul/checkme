@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
-import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.annotation.IdRes
@@ -26,9 +25,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.Task
-import com.google.android.material.internal.CheckableImageButton
 import com.google.android.material.tabs.TabLayout
-import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -241,34 +238,6 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .into(this)
 
 fun newUuid() = UUID.randomUUID().toString()
-
-fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixedOnClickListener(listener, listener)
-
-fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit, iconListener: () -> Unit) {
-    var manualToggles = 0
-
-    fun getTextInputLayout() = parent.parent as TextInputLayout
-
-    fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
-
-    setOnClickListener {
-        listener()
-
-        if (manualToggles % 2 == 1) post { getTextInputLayout().getEndIconView().toggle() }
-
-        manualToggles = 0
-    }
-
-    getTextInputLayout().let { textInputLayout ->
-        textInputLayout.setEndIconOnClickListener {
-            iconListener()
-
-            textInputLayout.getEndIconView().toggle()
-
-            manualToggles++
-        }
-    }
-}
 
 fun <T : Serializable> serialize(obj: T): String {
     return ByteArrayOutputStream().let {

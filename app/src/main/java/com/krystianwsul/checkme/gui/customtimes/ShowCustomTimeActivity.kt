@@ -19,9 +19,10 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
+import com.krystianwsul.checkme.gui.utils.setFixedOnClickListenerAndFixIcon
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
-import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek
@@ -222,7 +223,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
 
-        timeAllDaysText.setFixedOnClickListener {
+        // todo toggle set initial checked if needed
+
+        timeAllDaysText.setFixedOnClickListenerAndFixIcon {
             allDaysExpanded = !allDaysExpanded
 
             if (!allDaysExpanded) {

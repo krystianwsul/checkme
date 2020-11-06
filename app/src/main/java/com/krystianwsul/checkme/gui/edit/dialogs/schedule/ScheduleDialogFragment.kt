@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
+import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditViewModel

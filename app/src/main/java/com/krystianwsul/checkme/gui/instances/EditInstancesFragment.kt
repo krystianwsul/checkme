@@ -19,9 +19,9 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.utils.SnackbarData
+import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
-import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel

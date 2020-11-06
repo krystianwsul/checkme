@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.utils.setChecked
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListenerAndFixIcon
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -223,22 +224,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
 
-        // todo toggle set initial checked if needed
-
-        timeAllDaysText.setFixedOnClickListenerAndFixIcon {
-            allDaysExpanded = !allDaysExpanded
-
-            if (!allDaysExpanded) {
-                val hourMinute = hourMinutes.getValue(DayOfWeek.SUNDAY)
-
-                hourMinutes = DayOfWeek.values()
-                        .associate { it to hourMinute }
-                        .toMutableMap()
-            }
-
-            updateGui()
-        }
-
         timeAllDaysTime.setFixedOnClickListener {
             TimePickerDialogFragment.newInstance(allDaysHourMinute, SerializableUnit).apply {
                 listener = allDaysListener
@@ -309,6 +294,22 @@ class ShowCustomTimeActivity : NavBarActivity() {
             val hourMinute = hourMinutes.getValue(dayOfWeek)
 
             timeView.setText(hourMinute.toString())
+        }
+
+        if (allDaysExpanded) timeAllDaysTextLayout.setChecked()
+
+        timeAllDaysText.setFixedOnClickListenerAndFixIcon {
+            allDaysExpanded = !allDaysExpanded
+
+            if (!allDaysExpanded) {
+                val hourMinute = hourMinutes.getValue(DayOfWeek.SUNDAY)
+
+                hourMinutes = DayOfWeek.values()
+                        .associate { it to hourMinute }
+                        .toMutableMap()
+            }
+
+            updateGui()
         }
     }
 

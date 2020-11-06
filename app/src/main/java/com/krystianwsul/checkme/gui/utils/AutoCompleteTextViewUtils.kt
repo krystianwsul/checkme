@@ -10,7 +10,11 @@ fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixe
 
 private fun AutoCompleteTextView.getTextInputLayout() = parent.parent as TextInputLayout
 
-private fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
+fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
+
+fun TextInputLayout.setChecked() {
+    getEndIconView().isChecked = true
+}
 
 fun AutoCompleteTextView.setFixedOnClickListenerAndFixIcon(listener: () -> Unit) {
 

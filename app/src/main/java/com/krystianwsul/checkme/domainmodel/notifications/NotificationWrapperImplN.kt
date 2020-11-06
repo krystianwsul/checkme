@@ -72,7 +72,8 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash
+            notificationHash: NotificationHash,
+            highPriority: Boolean
     ) = super.getNotificationBuilder(
             title,
             text,
@@ -86,7 +87,8 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             summary,
             sortKey,
             largeIcon,
-            notificationHash
+            notificationHash,
+            highPriority
     ).apply {
         setGroup(GROUP_KEY)
 

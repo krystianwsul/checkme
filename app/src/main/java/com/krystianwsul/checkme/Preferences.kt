@@ -80,16 +80,12 @@ object Preferences : FactoryProvider.Preferences {
             tokenRelay.accept(NullableWrapper(value))
         }
 
-    var showNotifications by observable(sharedPreferences.getBoolean(
-            KEY_SHOW_NOTIFICATIONS,
-            true
-    )) { _, _, newValue ->
-        sharedPreferences.edit { putBoolean(KEY_SHOW_NOTIFICATIONS, newValue) }
-    }
-
     init {
-        if (!sharedPreferences.contains(KEY_NOTIFICATION_LEVEL) && sharedPreferences.contains(KEY_SHOW_NOTIFICATIONS))
+        if (!sharedPreferences.contains(KEY_NOTIFICATION_LEVEL) && sharedPreferences.contains(KEY_SHOW_NOTIFICATIONS)) {
+            val showNotifications = sharedPreferences.getBoolean(KEY_SHOW_NOTIFICATIONS, true)
+
             putNotificationLevel(if (showNotifications) NotificationLevel.MEDIUM else NotificationLevel.NONE)
+        }
     }
 
     var notificationLevel by observable(

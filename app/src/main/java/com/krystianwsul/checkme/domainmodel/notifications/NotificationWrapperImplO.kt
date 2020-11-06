@@ -12,15 +12,15 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
 
     companion object {
 
-        private const val CHANNEL_ID = "channel"
+        private const val HIGH_CHANNEL_ID = "channel"
 
-        private val CHANNEL = NotificationChannel(
-                CHANNEL_ID,
+        private val HIGH_CHANNEL = NotificationChannel(
+                HIGH_CHANNEL_ID,
                 "Heads-up reminders",
                 NotificationManager.IMPORTANCE_HIGH
         )
 
-        private const val MEDIUM_CHANNEL_ID = "channel"
+        private const val MEDIUM_CHANNEL_ID = "mediumChannel"
 
         private val MEDIUM_CHANNEL = NotificationChannel(
                 MEDIUM_CHANNEL_ID,
@@ -38,10 +38,18 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
     }
 
     init {
-        CHANNEL.enableVibration(true)
+        HIGH_CHANNEL.enableVibration(true)
+        MEDIUM_CHANNEL.enableVibration(true)
 
-        notificationManager.createNotificationChannels(listOf(CHANNEL, MEDIUM_CHANNEL, SILENT_CHANNEL))
+        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL, SILENT_CHANNEL))
     }
 
-    override fun newBuilder(silent: Boolean) = NotificationCompat.Builder(MyApplication.instance, if (silent) SILENT_CHANNEL_ID else CHANNEL_ID)
+    override fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(
+            MyApplication.instance,
+            when {
+                silent -> SILENT_CHANNEL_ID
+                highPriority -> HIGH_CHANNEL_ID
+                else -> MEDIUM_CHANNEL_ID
+            }
+    )
 }

@@ -10,6 +10,7 @@ class NotificationWrapperImplOMr1 : NotificationWrapperImplO() {
             deviceDbInfo: DeviceDbInfo,
             instance: Instance<*>,
             silent: Boolean,
-            now: ExactTimeStamp
-    ) = InstanceData(deviceDbInfo, instance, now, silent)
+            now: ExactTimeStamp,
+            highPriority: Boolean
+    ) = InstanceData(deviceDbInfo, instance, now, silent, highPriority)
 }

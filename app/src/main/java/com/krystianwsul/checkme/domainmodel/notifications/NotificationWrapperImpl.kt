@@ -75,13 +75,21 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(tag, id)
     }
 
+    private fun getHighPriority(): Boolean? = when (Preferences.notificationLevel) {
+        Preferences.NotificationLevel.HIGH -> true
+        Preferences.NotificationLevel.MEDIUM -> false
+        Preferences.NotificationLevel.NONE -> null
+    }
+
     final override fun notifyInstance(
             deviceDbInfo: DeviceDbInfo,
             instance: Instance<*>,
             silent: Boolean,
             now: ExactTimeStamp
-    ) { // consider queueing all notifications and group in a batch
-        val instanceData = getInstanceData(deviceDbInfo, instance, silent, now)
+    ) {
+        val highPriority = getHighPriority() ?: return
+
+        val instanceData = getInstanceData(deviceDbInfo, instance, silent, now, highPriority)
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
@@ -89,7 +97,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             deviceDbInfo: DeviceDbInfo,
             instance: Instance<*>,
             silent: Boolean,
-            now: ExactTimeStamp
+            now: ExactTimeStamp,
+            highPriority: Boolean
     ): InstanceData {
         val reallySilent = if (silent) {
             true
@@ -103,7 +112,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (!reallySilent)
             lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
 
-        return InstanceData(deviceDbInfo, instance, now, reallySilent)
+        return InstanceData(deviceDbInfo, instance, now, reallySilent, highPriority)
     }
 
     private fun notifyInstanceHelper(instanceData: InstanceData) {
@@ -214,7 +223,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 sortKey = sortKey,
                 largeIcon = largeIcon,
                 notificationHash = notificationHash,
-                tag = null
+                tag = null,
+                highPriority = instanceData.highPriority
         )
     }
 
@@ -266,7 +276,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     @Suppress("DEPRECATION")
-    protected open fun newBuilder(silent: Boolean) = NotificationCompat.Builder(MyApplication.instance)
+    protected open fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(MyApplication.instance)
 
     protected open fun getNotificationBuilder(
             title: String,
@@ -281,16 +291,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
-            notificationHash: NotificationHash
+            notificationHash: NotificationHash,
+            highPriority: Boolean
     ): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
-        val builder = newBuilder(silent)
+        val priority = if (highPriority) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
+
+        val builder = newBuilder(silent, highPriority)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setContentIntent(contentIntent)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(priority)
                 .setSortKey(sortKey)
                 .setOnlyAlertOnce(true)
                 .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
@@ -337,7 +350,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash,
-            tag: String?
+            tag: String?,
+            highPriority: Boolean
     ) {
         val unchanged = notificationManager.activeNotifications
                 ?.singleOrNull { it.id == notificationHash.id }
@@ -362,7 +376,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary,
                 sortKey,
                 largeIcon,
-                notificationHash
+                notificationHash,
+                highPriority
         ).build()
 
         @Suppress("Deprecation")
@@ -377,12 +392,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             instances: Collection<Instance<*>>,
             silent: Boolean, // not needed >= 24
             now: ExactTimeStamp
-    ) = notificationRelay.accept { notifyGroupHelper(GroupData(instances, now, silent)) }
+    ) {
+        val highPriority = getHighPriority() ?: return
+
+        notificationRelay.accept { notifyGroupHelper(GroupData(instances, now, silent, highPriority)) }
+    }
 
     private inner class GroupData(
             instances: Collection<com.krystianwsul.common.firebase.models.Instance<*>>,
             private val now: ExactTimeStamp,
-            val silent: Boolean
+            val silent: Boolean,
+            val highPriority: Boolean
     ) {
 
         val instances = instances.map(::Instance)
@@ -445,7 +465,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 sortKey = "0",
                 largeIcon = null,
                 notificationHash = notificationHash,
-                tag = null
+                tag = null,
+                highPriority = groupData.highPriority
         )
     }
 
@@ -467,8 +488,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun notifyTemporary(notificationId: Int, source: String) {
         Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
 
-        if (!showTemporary)
-            return
+        if (!showTemporary) return
+
+        val highPriority = getHighPriority() ?: return
 
         val pendingContentIntent = PendingIntent.getActivity(
                 MyApplication.context,
@@ -501,7 +523,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         null,
                         TAG_TEMPORARY
                 ),
-                TAG_TEMPORARY
+                TAG_TEMPORARY,
+                highPriority
         )
     }
 
@@ -534,7 +557,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             deviceDbInfo: DeviceDbInfo,
             instance: Instance<*>,
             now: ExactTimeStamp,
-            val silent: Boolean
+            val silent: Boolean,
+            val highPriority: Boolean
     ) {
 
         val notificationId = instance.notificationId

@@ -4,10 +4,12 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
@@ -226,4 +228,20 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
             && it.isVisible(now, true)
             && it.isRootTask(now)
             && it.getCurrentScheduleIntervals(now).isEmpty()
+}
+
+fun DomainFactory.getGroupListChildTaskDatas(
+        parentTask: Task<*>,
+        now: ExactTimeStamp
+): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
+    val childTask = it.childTask
+
+    GroupListDataWrapper.TaskData(
+            childTask.taskKey,
+            childTask.name,
+            getGroupListChildTaskDatas(childTask, now),
+            childTask.startExactTimeStamp,
+            childTask.note,
+            childTask.getImage(deviceDbInfo)
+    )
 }

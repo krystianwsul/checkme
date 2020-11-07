@@ -69,10 +69,21 @@ fun DomainFactory.getSearchInstancesData(
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
+            val taskDatas = getUnscheduledTasks(now).map { // todo unscheduled filter
+                GroupListDataWrapper.TaskData(
+                        it.taskKey,
+                        it.name,
+                        getGroupListChildTaskDatas(it, now),
+                        it.startExactTimeStamp,
+                        it.note,
+                        it.getImage(deviceDbInfo)
+                )
+            }.toList()
+
             val dataWrapper = GroupListDataWrapper(
                     customTimeDatas,
                     null,
-                    listOf(),
+                    taskDatas,
                     null,
                     cappedInstanceDatas,
                     null

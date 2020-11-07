@@ -508,39 +508,46 @@ class DomainFactory(
             query: String? = null
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
-                .associate { (childInstance, _) ->
+                .mapNotNull { (childInstance, _) ->
                     val childTask = childInstance.task
 
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-                    val children = getChildInstanceDatas(childInstance, now, query).filter { (_, instanceData) ->
-                        query?.let { instanceData.matchesQuery(it) } != false
-                    }.toMutableMap()
+                    val childTaskMatches = childTask.matchesQuery(query)
 
-                    val instanceData = GroupListDataWrapper.InstanceData(
-                            childInstance.done,
-                            childInstance.instanceKey,
-                            null,
-                            childInstance.name,
-                            childInstance.instanceDateTime.timeStamp,
-                            childInstance.instanceDateTime,
-                            childTask.current(now),
-                            childTask.isVisible(now, false),
-                            childInstance.isRootInstance(now),
-                            isRootTask,
-                            childInstance.exists(),
-                            childInstance.getCreateTaskTimePair(ownerKey),
-                            childTask.note,
-                            children,
-                            childTask.ordinal,
-                            childInstance.getNotificationShown(localFactory),
-                            childTask.getImage(deviceDbInfo),
-                            childInstance.isRepeatingGroupChild(now)
-                    )
+                    val childrenQuery = if (childTaskMatches) null else query
 
-                    children.values.forEach { it.instanceDataParent = instanceData }
-                    childInstance.instanceKey to instanceData
+                    val children = getChildInstanceDatas(childInstance, now, childrenQuery)
+
+                    if (childTaskMatches || children.isNotEmpty()) {
+                        val instanceData = GroupListDataWrapper.InstanceData(
+                                childInstance.done,
+                                childInstance.instanceKey,
+                                null,
+                                childInstance.name,
+                                childInstance.instanceDateTime.timeStamp,
+                                childInstance.instanceDateTime,
+                                childTask.current(now),
+                                childTask.isVisible(now, false),
+                                childInstance.isRootInstance(now),
+                                isRootTask,
+                                childInstance.exists(),
+                                childInstance.getCreateTaskTimePair(ownerKey),
+                                childTask.note,
+                                children,
+                                childTask.ordinal,
+                                childInstance.getNotificationShown(localFactory),
+                                childTask.getImage(deviceDbInfo),
+                                childInstance.isRepeatingGroupChild(now)
+                        )
+
+                        children.values.forEach { it.instanceDataParent = instanceData }
+                        childInstance.instanceKey to instanceData
+                    } else {
+                        null
+                    }
                 }
+                .toMap()
                 .toMutableMap()
     }
 

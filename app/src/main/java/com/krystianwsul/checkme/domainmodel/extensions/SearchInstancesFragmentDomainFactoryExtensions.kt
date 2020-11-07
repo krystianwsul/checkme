@@ -42,7 +42,9 @@ fun DomainFactory.getSearchInstancesData(
 
                 val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-                val children = getChildInstanceDatas(it, now, query)
+                val childrenQuery = if (task.matchesQuery(query)) null else query
+
+                val children = getChildInstanceDatas(it, now, childrenQuery)
 
                 val instanceData = GroupListDataWrapper.InstanceData(
                         it.done,
@@ -72,7 +74,7 @@ fun DomainFactory.getSearchInstancesData(
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
-            val taskDatas = getUnscheduledTasks(now)
+            val taskDatas = getUnscheduledTasks(now) // todo filter for list filtering, hide children from desc.
                     .filterQuery(query)
                     .map { (task, filterResult) ->
                         val childQuery = if (filterResult == FilterResult.MATCHES) null else query

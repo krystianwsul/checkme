@@ -454,6 +454,8 @@ class GroupListFragment @JvmOverloads constructor(
 
     private var searchData: SearchData? = null
 
+    val searchResults by lazy { parameters is GroupListParameters.Search }
+
     private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 

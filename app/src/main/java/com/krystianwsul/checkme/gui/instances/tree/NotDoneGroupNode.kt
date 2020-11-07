@@ -22,7 +22,8 @@ import java.util.*
 class NotDoneGroupNode(
         indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
-        val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>
+        val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
+        private val searchResults: Boolean
 ) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
@@ -331,18 +332,19 @@ class NotDoneGroupNode(
                 singleInstanceData.compareTo(other.singleInstanceData)
             }
         }
-        is UnscheduledNode, is DividerNode -> -1
+        is UnscheduledNode -> if (searchResults) 1 else -1
+        is DividerNode -> -1
         else -> throw IllegalArgumentException()
     }
 
-    fun addInstanceData(instanceData: GroupListDataWrapper.InstanceData, x: TreeViewAdapter.Placeholder) {
+    fun addInstanceData(instanceData: GroupListDataWrapper.InstanceData, placeholder: TreeViewAdapter.Placeholder) {
         check(instanceData.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
         check(instanceDatas.isNotEmpty())
         if (instanceDatas.size == 1) {
             check(notDoneInstanceNodes.isEmpty())
 
-            treeNode.removeAll(x)
+            treeNode.removeAll(placeholder)
             singleInstanceNodeCollection = null
 
             val instanceData1 = instanceDatas.single()
@@ -350,12 +352,12 @@ class NotDoneGroupNode(
             val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData1, this@NotDoneGroupNode)
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
-            treeNode.add(notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode), x)
+            treeNode.add(notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode), placeholder)
         }
 
         instanceDatas.add(instanceData)
 
-        treeNode.add(newChildTreeNode(instanceData, mapOf(), false, listOf(), listOf()), x)
+        treeNode.add(newChildTreeNode(instanceData, mapOf(), false, listOf(), listOf()), placeholder)
     }
 
     private fun newChildTreeNode(

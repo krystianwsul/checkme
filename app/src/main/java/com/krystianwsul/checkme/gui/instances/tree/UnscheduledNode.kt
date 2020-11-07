@@ -8,7 +8,10 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), TaskParent {
+class UnscheduledNode(
+        private val nodeCollection: NodeCollection,
+        private val searchResults: Boolean
+) : GroupHolderNode(0), TaskParent {
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
@@ -58,12 +61,14 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is DividerNode) {
-        -1
-    } else {
-        check(other is NotDoneGroupNode)
+    override fun compareTo(other: ModelNode<NodeHolder>) = when {
+        searchResults -> -1
+        other is DividerNode -> -1
+        else -> {
+            check(other is NotDoneGroupNode)
 
-        1
+            1
+        }
     }
 
     override val name get() = NameData(groupListFragment.activity.getString(R.string.noReminder))

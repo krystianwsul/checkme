@@ -78,7 +78,12 @@ class NotDoneGroupCollection(
     ): TreeNode<NodeHolder> {
         check(instanceDatas.isNotEmpty())
 
-        val notDoneGroupNode = NotDoneGroupNode(indentation, notDoneGroupCollection, instanceDatas)
+        val notDoneGroupNode = NotDoneGroupNode(
+                indentation,
+                notDoneGroupCollection,
+                instanceDatas,
+                nodeCollection.searchResults
+        )
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(
                 expandedGroups,

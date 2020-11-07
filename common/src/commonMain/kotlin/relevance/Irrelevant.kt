@@ -8,7 +8,12 @@ import com.soywiz.klock.days
 
 object Irrelevant {
 
-    fun setIrrelevant(parent: Project.Parent, project: Project<*>, now: ExactTimeStamp): Result {
+    fun setIrrelevant(
+            parent: Project.Parent,
+            project: Project<*>,
+            now: ExactTimeStamp,
+            delete: Boolean = true
+    ): Result {
         val tasks = project.tasks
 
         tasks.forEach {
@@ -124,11 +129,13 @@ object Irrelevant {
             irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
         }
 
-        irrelevantExistingInstances.forEach { it.delete() }
-        irrelevantSchedules.forEach { it.delete() }
-        irrelevantNoScheduleOrParents.forEach { it.delete() }
-        irrelevantTaskHierarchies.forEach { it.delete() }
-        irrelevantTasks.forEach { it.delete() }
+        if (delete) {
+            irrelevantExistingInstances.forEach { it.delete() }
+            irrelevantSchedules.forEach { it.delete() }
+            irrelevantNoScheduleOrParents.forEach { it.delete() }
+            irrelevantTaskHierarchies.forEach { it.delete() }
+            irrelevantTasks.forEach { it.delete() }
+        }
 
         val remoteCustomTimes = project.customTimes
         val remoteCustomTimeRelevances =
@@ -160,14 +167,16 @@ object Irrelevant {
                 .map { it.customTime }
 
         val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
-        irrelevantRemoteCustomTimes.forEach { it.delete() }
+
+        if (delete) irrelevantRemoteCustomTimes.forEach { it.delete() }
 
         val relevantRemoteProjects = remoteProjectRelevances.values
                 .filter { it.relevant }
                 .map { it.project }
 
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
-        irrelevantRemoteProjects.forEach { it.delete(parent) }
+
+        if (delete) irrelevantRemoteProjects.forEach { it.delete(parent) }
 
         return Result(
                 irrelevantExistingInstances,

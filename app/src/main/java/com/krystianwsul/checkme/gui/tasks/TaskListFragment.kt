@@ -622,19 +622,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.isVisible }
 
-            override val children
-                get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
-                    null
-                } else {
-                    val text = if (childTaskData.children.isNotEmpty() && !treeNode.isExpanded) {
-                        childTaskData.children.joinToString(", ") { it.name }
-                    } else {
-                        check(!childTaskData.note.isNullOrEmpty())
+            override val children: Pair<String, Int>?
+                get() {
+                    val matchingTaskWrappers = treeNode.takeIf { !it.isExpanded }
+                            ?.allChildren
+                            ?.filter { it.modelNode is TaskWrapper && it.canBeShown() }
+                            ?.map { it.modelNode as TaskWrapper }
+                            ?.takeIf { it.isNotEmpty() }
 
-                        childTaskData.note
-                    }
+                    val text = matchingTaskWrappers?.joinToString(", ") { it.childTaskData.name }
+                            ?: treeNode.allChildren.singleOrNull { it.modelNode is NoteNode }
+                                    ?.let { it.modelNode as NoteNode }
+                                    ?.note
 
-                    Pair(text, disabledOverride ?: colorSecondary)
+                    return text?.let { Pair(it, disabledOverride ?: colorSecondary) }
                 }
 
             override val details

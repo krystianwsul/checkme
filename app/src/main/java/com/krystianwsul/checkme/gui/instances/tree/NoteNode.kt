@@ -7,7 +7,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class NoteNode(
-        private val note: String,
+        val note: String,
         instance: Boolean,
         override val parentNode: ModelNode<NodeHolder>?
 ) : GroupHolderNode(0) {

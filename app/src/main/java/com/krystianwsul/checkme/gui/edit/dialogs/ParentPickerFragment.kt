@@ -15,10 +15,7 @@ import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -317,20 +314,19 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 }
 
             override val children: Pair<String, Int>?
-                get() = if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && parentTreeData.note.isNullOrEmpty()) {
-                    null
-                } else {
-                    val text = if (parentTreeData.parentTreeDatas.isNotEmpty() && !treeNode.isExpanded) {
-                        parentTreeData.parentTreeDatas
-                                .values
-                                .joinToString(", ") { it.name }
-                    } else {
-                        check(!parentTreeData.note.isNullOrEmpty())
+                get() {
+                    val matchingTaskWrappers = treeNode.takeIf { !it.isExpanded }
+                            ?.allChildren
+                            ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
+                            ?.map { it.modelNode as TaskAdapter.TaskWrapper }
+                            ?.takeIf { it.isNotEmpty() }
 
-                        parentTreeData.note
-                    }
+                    val text = matchingTaskWrappers?.joinToString(", ") { it.parentTreeData.name }
+                            ?: treeNode.allChildren.singleOrNull { it.modelNode is NoteNode }
+                                    ?.let { it.modelNode as NoteNode }
+                                    ?.note
 
-                    Pair(text, colorSecondary)
+                    return text?.let { Pair(it, colorSecondary) }
                 }
 
             override fun onClick(holder: NodeHolder) {

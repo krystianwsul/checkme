@@ -40,7 +40,7 @@ class TaskRelevance(val task: Task<*>) {
                     )
                 }
 
-        fun Instance<*>.filterOldestVisible(now: ExactTimeStamp): Boolean {
+        fun Instance<*>.filterOldestVisible(now: ExactTimeStamp, ignoreHidden: Boolean = false): Boolean {
             val oldestVisibles = getOldestVisibles()
 
             return if (oldestVisibles.isEmpty()) {
@@ -48,7 +48,7 @@ class TaskRelevance(val task: Task<*>) {
             } else {
                 oldestVisibles.map {
                     when (it) {
-                        Schedule.OldestVisible.Single -> isVisible(now, true)
+                        Schedule.OldestVisible.Single -> isVisible(now, true, ignoreHidden = ignoreHidden)
                         Schedule.OldestVisible.RepeatingNull -> true
                         is Schedule.OldestVisible.RepeatingNonNull -> scheduleDate >= it.date
                     }
@@ -73,7 +73,7 @@ class TaskRelevance(val task: Task<*>) {
 
         task.existingInstances
                 .values
-                .filter { it.filterOldestVisible(now) || it.hidden }
+                .filter { it.filterOldestVisible(now, true) }
                 .map { instanceRelevances[it.instanceKey]!! }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }

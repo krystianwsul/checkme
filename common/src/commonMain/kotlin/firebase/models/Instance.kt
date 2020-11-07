@@ -207,7 +207,7 @@ class Instance<T : ProjectType> private constructor(
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
-    fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
+    fun isVisible(now: ExactTimeStamp, hack24: Boolean, ignoreHidden: Boolean = false): Boolean {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
         instanceLocker?.let {
@@ -229,7 +229,7 @@ class Instance<T : ProjectType> private constructor(
         ) {
             false
         } else {
-            isVisibleHelper(now, hack24)
+            isVisibleHelper(now, hack24, ignoreHidden)
         }
 
         instanceLocker?.let {
@@ -246,8 +246,8 @@ class Instance<T : ProjectType> private constructor(
         it.matchesScheduleDateTime(scheduleDateTime, true)
     }
 
-    private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        if (data.hidden) return false
+    private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean, ignoreHidden: Boolean): Boolean {
+        if (!ignoreHidden && data.hidden) return false
 
         if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
 

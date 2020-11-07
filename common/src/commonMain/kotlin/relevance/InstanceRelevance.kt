@@ -17,8 +17,7 @@ class InstanceRelevance(val instance: Instance<*>) {
             instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
             now: ExactTimeStamp
     ) {
-        if (relevant)
-            return
+        if (relevant) return
 
         relevant = true
 

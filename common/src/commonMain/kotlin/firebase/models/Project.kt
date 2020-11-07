@@ -326,17 +326,9 @@ abstract class Project<T : ProjectType> : Current {
 
         throwIfInterrupted()
 
-        val filteredTasks = query?.let {
-            fun filterQuery(task: Task<T>): Boolean {
-                throwIfInterrupted()
-
-                if (task.matchesQuery(it)) return true
-
-                return task.childHierarchyIntervals.any { filterQuery(it.taskHierarchy.childTask) }
-            }
-
-            tasks.filter(::filterQuery)
-        } ?: tasks
+        val filteredTasks = tasks.asSequence()
+                .filterQuery(query)
+                .toList()
 
         val instanceSequences = filteredTasks.map { task ->
             throwIfInterrupted()

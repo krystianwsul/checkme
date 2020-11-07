@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
+import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
 
 const val PAGE_SIZE = 20
@@ -69,16 +70,19 @@ fun DomainFactory.getSearchInstancesData(
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
-            val taskDatas = getUnscheduledTasks(now).map { // todo unscheduled filter
-                GroupListDataWrapper.TaskData(
-                        it.taskKey,
-                        it.name,
-                        getGroupListChildTaskDatas(it, now),
-                        it.startExactTimeStamp,
-                        it.note,
-                        it.getImage(deviceDbInfo)
-                )
-            }.toList()
+            val taskDatas = getUnscheduledTasks(now)
+                    .filterQuery(query)
+                    .map {
+                        GroupListDataWrapper.TaskData(
+                                it.taskKey,
+                                it.name,
+                                getGroupListChildTaskDatas(it, now),
+                                it.startExactTimeStamp,
+                                it.note,
+                                it.getImage(deviceDbInfo)
+                        )
+                    }
+                    .toList()
 
             val dataWrapper = GroupListDataWrapper(
                     customTimeDatas,

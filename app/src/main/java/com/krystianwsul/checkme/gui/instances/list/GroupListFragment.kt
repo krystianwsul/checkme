@@ -207,6 +207,15 @@ class GroupListFragment @JvmOverloads constructor(
 
                     activity.startActivity(ShowTaskActivity.newIntent(selectedData.taskKey))
                 }
+                R.id.actionGroupAddTask -> {
+                    val instanceData = selectedDatas.single() as GroupListDataWrapper.InstanceData
+
+                    instanceData.instanceDateTime.let {
+                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(
+                                EditActivity.Hint.Schedule(it.date, it.time.timePair)
+                        )))
+                    }
+                }
                 R.id.action_group_edit_task -> {
                     val selectedData = selectedDatas.single()
                     check(selectedData.taskCurrent)
@@ -378,13 +387,16 @@ class GroupListFragment @JvmOverloads constructor(
             )
 
             if (selectedDatas.size == 1) {
-                val instanceData = selectedDatas.single()
+                val selectedData = selectedDatas.single()
+                val instanceData = selectedData as? GroupListDataWrapper.InstanceData
+                val showAddTask = instanceData?.isRootInstance == true && instanceData.instanceTimeStamp > TimeStamp.now
 
                 itemVisibilities += listOf(
                         R.id.action_group_show_task to true,
-                        R.id.action_group_edit_task to instanceData.taskCurrent,
+                        R.id.actionGroupAddTask to showAddTask,
+                        R.id.action_group_edit_task to selectedData.taskCurrent,
                         R.id.action_group_join to false,
-                        R.id.action_group_delete_task to instanceData.taskCurrent,
+                        R.id.action_group_delete_task to selectedData.taskCurrent,
                         R.id.actionGroupWebSearch to true
                 )
             } else {
@@ -392,8 +404,9 @@ class GroupListFragment @JvmOverloads constructor(
 
                 itemVisibilities += listOf(
                         R.id.action_group_show_task to false,
+                        R.id.actionGroupAddTask to false,
                         R.id.action_group_edit_task to false,
-                        R.id.actionGroupWebSearch to false
+                        R.id.actionGroupWebSearch to false,
                 )
 
                 val allCurrent = selectedDatas.all { it.taskCurrent }

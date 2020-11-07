@@ -49,6 +49,7 @@ fun DomainFactory.getSearchInstancesData(
                         it.instanceDateTime.getDisplayText(),
                         it.name,
                         it.instanceDateTime.timeStamp,
+                        it.instanceDateTime,
                         task.current(now),
                         task.isVisible(now, false),
                         it.isRootInstance(now),

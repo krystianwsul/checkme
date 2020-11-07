@@ -63,6 +63,7 @@ private fun DomainFactory.getGroupListData(
                 null,
                 instance.name,
                 instance.instanceDateTime.timeStamp,
+                instance.instanceDateTime,
                 task.current(now),
                 task.isVisible(now, false),
                 instance.isRootInstance(now),

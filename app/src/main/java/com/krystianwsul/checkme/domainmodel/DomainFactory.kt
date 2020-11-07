@@ -523,6 +523,7 @@ class DomainFactory(
                             null,
                             childInstance.name,
                             childInstance.instanceDateTime.timeStamp,
+                            childInstance.instanceDateTime,
                             childTask.current(now),
                             childTask.isVisible(now, false),
                             childInstance.isRootInstance(now),

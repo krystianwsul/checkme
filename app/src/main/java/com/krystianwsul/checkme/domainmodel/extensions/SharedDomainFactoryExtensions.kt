@@ -9,7 +9,9 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
@@ -40,8 +42,8 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     save(0, source)
 
     val remoteProjects = taskUndoData.taskKeys
-        .map { getTaskForce(it).project }
-        .toSet()
+            .map { getTaskForce(it).project }
+            .toSet()
 
     notifyCloud(remoteProjects)
 }
@@ -126,10 +128,10 @@ fun DomainFactory.setInstancesAddHourActivity(
 
     instances.forEach {
         it.setInstanceDateTime(
-            localFactory,
-            ownerKey,
-            DateTime(date, Time.Normal(hourMinute)),
-            now
+                localFactory,
+                ownerKey,
+                DateTime(date, Time.Normal(hourMinute)),
+                now
         )
     }
 
@@ -232,16 +234,22 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
 
 fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task<*>,
-        now: ExactTimeStamp
-): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now).map {
-    val childTask = it.childTask
+        now: ExactTimeStamp,
+        query: String? = null
+): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
+        .asSequence()
+        .map { it.childTask }
+        .filterQuery(query)
+        .map { (childTask, filterResult) ->
+            val childQuery = if (filterResult == FilterResult.MATCHES) null else query
 
-    GroupListDataWrapper.TaskData(
-            childTask.taskKey,
-            childTask.name,
-            getGroupListChildTaskDatas(childTask, now),
-            childTask.startExactTimeStamp,
-            childTask.note,
-            childTask.getImage(deviceDbInfo)
-    )
-}
+            GroupListDataWrapper.TaskData(
+                    childTask.taskKey,
+                    childTask.name,
+                    getGroupListChildTaskDatas(childTask, now, childQuery),
+                    childTask.startExactTimeStamp,
+                    childTask.note,
+                    childTask.getImage(deviceDbInfo)
+            )
+        }
+        .toList()

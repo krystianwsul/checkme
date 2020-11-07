@@ -330,7 +330,7 @@ abstract class Project<T : ProjectType> : Current {
                 .filterQuery(query)
                 .toList()
 
-        val instanceSequences = filteredTasks.map { task ->
+        val instanceSequences = filteredTasks.map { (task, _) ->
             throwIfInterrupted()
 
             val instances = task.getInstances(

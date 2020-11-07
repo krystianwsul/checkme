@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
 
@@ -73,14 +74,16 @@ fun DomainFactory.getSearchInstancesData(
 
             val taskDatas = getUnscheduledTasks(now)
                     .filterQuery(query)
-                    .map {
+                    .map { (task, filterResult) ->
+                        val childQuery = if (filterResult == FilterResult.MATCHES) null else query
+
                         GroupListDataWrapper.TaskData(
-                                it.taskKey,
-                                it.name,
-                                getGroupListChildTaskDatas(it, now),
-                                it.startExactTimeStamp,
-                                it.note,
-                                it.getImage(deviceDbInfo)
+                                task.taskKey,
+                                task.name,
+                                getGroupListChildTaskDatas(task, now, childQuery),
+                                task.startExactTimeStamp,
+                                task.note,
+                                task.getImage(deviceDbInfo)
                         )
                     }
                     .toList()

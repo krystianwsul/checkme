@@ -271,6 +271,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val isSelectable = true
 
+        override val parentNode: ModelNode<NodeHolder>? = null
+
         override fun onClick(holder: NodeHolder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
         override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)

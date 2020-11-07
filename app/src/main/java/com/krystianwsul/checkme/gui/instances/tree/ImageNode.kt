@@ -8,7 +8,10 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 import java.util.*
 
-class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
+class ImageNode(
+        override val imageData: ImageData,
+        override val parentNode: ModelNode<NodeHolder>?
+) : GroupHolderNode(0) {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set

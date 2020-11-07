@@ -11,7 +11,8 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 class NotDoneGroupCollection(
         private val indentation: Int,
         val nodeCollection: NodeCollection,
-        private val nodeContainer: NodeContainer<NodeHolder>) {
+        private val nodeContainer: NodeContainer<NodeHolder>
+) {
 
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
@@ -82,7 +83,8 @@ class NotDoneGroupCollection(
                 indentation,
                 notDoneGroupCollection,
                 instanceDatas,
-                nodeCollection.searchResults
+                nodeCollection.searchResults,
+                nodeCollection.parentNode
         )
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(

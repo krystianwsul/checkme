@@ -6,7 +6,11 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0) {
+class NoteNode(
+        private val note: String,
+        instance: Boolean,
+        override val parentNode: ModelNode<NodeHolder>?
+) : GroupHolderNode(0) {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set

@@ -278,6 +278,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 
+        override val parentNode: ModelNode<NodeHolder>? = null
+
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
 
         fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {

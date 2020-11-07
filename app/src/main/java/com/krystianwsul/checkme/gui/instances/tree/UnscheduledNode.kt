@@ -28,6 +28,8 @@ class UnscheduledNode(
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
+    override val parentNode: ModelNode<NodeHolder>? = null
+
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<NodeHolder>,
@@ -49,7 +51,7 @@ class UnscheduledNode(
             taskData: GroupListDataWrapper.TaskData,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>
-    ) = TaskNode(0, taskData, this).let {
+    ) = TaskNode(0, taskData, this, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)

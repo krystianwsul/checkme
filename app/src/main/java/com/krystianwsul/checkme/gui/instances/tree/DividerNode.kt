@@ -9,7 +9,11 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
-class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation) {
+class DividerNode(
+        indentation: Int,
+        val nodeCollection: NodeCollection,
+        override val parentNode: ModelNode<NodeHolder>?
+) : GroupHolderNode(indentation) {
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 

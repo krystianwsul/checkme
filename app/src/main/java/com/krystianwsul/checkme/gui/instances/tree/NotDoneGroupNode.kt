@@ -23,7 +23,8 @@ class NotDoneGroupNode(
         indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
         val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-        private val searchResults: Boolean
+        private val searchResults: Boolean,
+        override val parentNode: ModelNode<NodeHolder>?
 ) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
@@ -81,7 +82,14 @@ class NotDoneGroupNode(
         treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
         if (instanceData != null) {
-            singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(
+                    indentation + 1,
+                    groupAdapter,
+                    false,
+                    treeNode,
+                    null,
+                    this
+            )
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
                     instanceData.children.values,
@@ -267,7 +275,7 @@ class NotDoneGroupNode(
 
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.customTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
-    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: TreeViewAdapter.Placeholder) {
+    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
@@ -278,9 +286,9 @@ class NotDoneGroupNode(
         val selected = childTreeNode.isSelected
 
         if (selected)
-            childTreeNode.deselect(x, false)
+            childTreeNode.deselect(placeholder, false)
 
-        treeNode.remove(childTreeNode, x)
+        treeNode.remove(childTreeNode, placeholder)
 
         check(instanceDatas.isNotEmpty())
         if (instanceDatas.size == 1) {
@@ -292,14 +300,21 @@ class NotDoneGroupNode(
 
             if (selected1) {
                 if (!treeNode.isSelected)
-                    treeNode.select(x, false)
+                    treeNode.select(placeholder, false)
 
-                childTreeNode1.deselect(x, false)
+                childTreeNode1.deselect(placeholder, false)
             }
 
-            treeNode.remove(childTreeNode1, x)
+            treeNode.remove(childTreeNode1, placeholder)
 
-            singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(
+                    indentation + 1,
+                    groupAdapter,
+                    false,
+                    treeNode,
+                    null,
+                    this
+            )
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
                     instanceDatas[0].children.values,
@@ -315,7 +330,7 @@ class NotDoneGroupNode(
                     null
             )
 
-            childTreeNodes.forEach { treeNode.add(it, x) }
+            childTreeNodes.forEach { treeNode.add(it, placeholder) }
         }
     }
 
@@ -473,6 +488,8 @@ class NotDoneGroupNode(
 
         private val groupListFragment get() = groupAdapter.groupListFragment
 
+        override val parentNode = parentNotDoneGroupNode
+
         fun initialize(
                 expandedInstances: Map<InstanceKey, Boolean>,
                 selected: Boolean,
@@ -488,7 +505,15 @@ class NotDoneGroupNode(
 
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
-            nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
+            nodeCollection = NodeCollection(
+                    indentation + 1,
+                    groupAdapter,
+                    false,
+                    treeNode,
+                    null,
+                    this
+            )
+
             treeNode.setChildTreeNodes(nodeCollection.initialize(
                     instanceData.children.values,
                     listOf(),

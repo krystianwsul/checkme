@@ -30,6 +30,8 @@ class DoneInstanceNode(
 
     override val thumbnail = instanceData.imageState
 
+    override val parentNode = dividerNode
+
     fun initialize(
             dividerTreeNode: TreeNode<NodeHolder>,
             expandedInstances: Map<InstanceKey, Boolean>,
@@ -48,7 +50,15 @@ class DoneInstanceNode(
 
         treeNode = TreeNode(this, dividerTreeNode, expanded, selected)
 
-        nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
+        nodeCollection = NodeCollection(
+                indentation + 1,
+                groupAdapter,
+                false,
+                treeNode,
+                null,
+                this
+        )
+
         treeNode.setChildTreeNodes(nodeCollection.initialize(
                 instanceData.children.values,
                 listOf(),

@@ -976,6 +976,7 @@ class GroupListFragment @JvmOverloads constructor(
                     useGroups,
                     treeNodeCollection,
                     note,
+                    null,
                     useDoneNode
             )
 

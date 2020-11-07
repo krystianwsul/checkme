@@ -9,7 +9,8 @@ import com.krystianwsul.treeadapter.TreeNode
 class TaskNode(
         indentation: Int,
         val taskData: GroupListDataWrapper.TaskData,
-        private val taskParent: TaskParent
+        private val taskParent: TaskParent,
+        override val parentNode: ModelNode<NodeHolder>?
 ) : GroupHolderNode(indentation), TaskParent {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
@@ -51,7 +52,11 @@ class TaskNode(
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListDataWrapper.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
+    private fun newChildTreeNode(
+            taskData: GroupListDataWrapper.TaskData,
+            expandedTaskKeys: List<TaskKey>,
+            selectedTaskKeys: List<TaskKey>
+    ) = TaskNode(indentation + 1, taskData, this, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)

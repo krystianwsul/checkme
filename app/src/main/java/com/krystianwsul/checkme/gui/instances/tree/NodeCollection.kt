@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
@@ -14,6 +15,7 @@ class NodeCollection(
         val useGroups: Boolean,
         val nodeContainer: NodeContainer<NodeHolder>,
         private val note: String?,
+        val parentNode: ModelNode<NodeHolder>?,
         val useDoneNode: Boolean = true
 ) {
 
@@ -56,13 +58,13 @@ class NodeCollection(
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 
-                add(NoteNode(note, true).initialize(nodeContainer))
+                add(NoteNode(note, true, parentNode).initialize(nodeContainer))
             }
 
             imageData?.let {
                 check(indentation == 0)
 
-                add(ImageNode(it).initialize(nodeContainer))
+                add(ImageNode(it, parentNode).initialize(nodeContainer))
             }
 
             notDoneGroupCollection = NotDoneGroupCollection(
@@ -92,7 +94,7 @@ class NodeCollection(
                 ))
             }
 
-            dividerNode = DividerNode(indentation, this@NodeCollection)
+            dividerNode = DividerNode(indentation, this@NodeCollection, parentNode)
 
             add(dividerNode.initialize(
                     doneExpanded && doneInstanceDatas.isNotEmpty(),

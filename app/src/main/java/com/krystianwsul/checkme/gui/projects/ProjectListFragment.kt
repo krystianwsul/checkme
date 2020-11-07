@@ -283,6 +283,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
+            override val parentNode: ModelNode<NodeHolder>? = null
+
             override fun onClick(holder: NodeHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override fun compareTo(other: ModelNode<NodeHolder>): Int {

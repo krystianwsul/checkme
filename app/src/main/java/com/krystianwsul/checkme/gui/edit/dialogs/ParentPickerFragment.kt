@@ -211,7 +211,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             val treeNodes = ArrayList<TreeNode<NodeHolder>>()
 
             for (parentTreeData in taskDatas.values) {
-                val taskWrapper = TaskWrapper(0, this, parentTreeData)
+                val taskWrapper = TaskWrapper(0, this, parentTreeData, null)
 
                 treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedParentKeys))
 
@@ -239,7 +239,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
         private inner class TaskWrapper(
                 indentation: Int,
                 private val taskParent: TaskParent,
-                val parentTreeData: EditViewModel.ParentTreeData
+                val parentTreeData: EditViewModel.ParentTreeData,
+                override val parentNode: ModelNode<NodeHolder>?
         ) : GroupHolderNode(indentation), TaskParent {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
@@ -292,7 +293,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 val treeNodes = ArrayList<TreeNode<NodeHolder>>()
 
                 for (parentTreeData in parentTreeData.parentTreeDatas.values) {
-                    val taskWrapper = TaskWrapper(indentation + 1, this, parentTreeData)
+                    val taskWrapper = TaskWrapper(indentation + 1, this, parentTreeData, this)
 
                     treeNodes.add(taskWrapper.initialize(treeNode, expandedParentKeys))
 

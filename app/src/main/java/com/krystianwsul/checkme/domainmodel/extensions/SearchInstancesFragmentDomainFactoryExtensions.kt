@@ -74,7 +74,7 @@ fun DomainFactory.getSearchInstancesData(
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
-            val taskDatas = getUnscheduledTasks(now) // todo filter for list filtering, hide children from desc.
+            val taskDatas = getUnscheduledTasks(now)
                     .filterQuery(query)
                     .map { (task, filterResult) ->
                         val childQuery = if (filterResult == FilterResult.MATCHES) null else query

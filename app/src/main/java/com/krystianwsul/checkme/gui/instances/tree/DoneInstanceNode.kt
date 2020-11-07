@@ -96,7 +96,7 @@ class DoneInstanceNode(
                 .takeUnless { it.isNullOrEmpty() }
                 ?.let { Pair(it, if (!instanceData.taskCurrent) colorDisabled else colorSecondary) }
 
-    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
+    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenText(treeNode, instanceData)
 
     override val checkBoxState
         get() = if (groupListFragment.selectionCallback.hasActionMode) {

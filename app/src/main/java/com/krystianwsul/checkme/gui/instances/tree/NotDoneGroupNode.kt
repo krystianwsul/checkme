@@ -179,11 +179,7 @@ class NotDoneGroupNode(
         }
 
     override val children
-        get() = if (singleInstance()) {
-            NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData)
-        } else {
-            null
-        }
+        get() = if (singleInstance()) NotDoneInstanceNode.getChildrenText(treeNode, singleInstanceData) else null
 
     override val checkBoxState
         get() = if (singleInstance()) {
@@ -456,25 +452,23 @@ class NotDoneGroupNode(
 
         companion object {
 
-            fun getChildrenNew(
+            fun getChildrenText(
                     treeNode: TreeNode<NodeHolder>,
                     instanceData: GroupListDataWrapper.InstanceData
-            ) = instanceData.children
-                    .values
-                    .filter { it.done == null }
-                    .let {
-                        fun color() = if (!instanceData.taskCurrent) colorDisabled else colorSecondary
+            ): Pair<String, Int>? {
+                val text = treeNode.takeIf { !it.isExpanded }
+                        ?.allChildren
+                        ?.filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
+                        ?.map { it.modelNode as NotDoneGroupNode }
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.sorted()
+                        ?.joinToString(", ") { it.singleInstanceData.name }
+                        ?: instanceData.note
 
-                        if (it.isNotEmpty() && !treeNode.isExpanded) {
-                            val children = it.sorted().joinToString(", ") { it.name }
-
-                            Pair(children, color())
-                        } else if (!instanceData.note.isNullOrEmpty()) {
-                            Pair(instanceData.note, color())
-                        } else {
-                            null
-                        }
-                    }
+                return text?.let {
+                    Pair(it, if (!instanceData.taskCurrent) colorDisabled else colorSecondary)
+                }
+            }
         }
 
         override val ripple = true
@@ -549,7 +543,7 @@ class NotDoneGroupNode(
 
         override val name get() = NameData(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary)
 
-        override val children get() = getChildrenNew(treeNode, instanceData)
+        override val children get() = getChildrenText(treeNode, instanceData)
 
         override val checkBoxState
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

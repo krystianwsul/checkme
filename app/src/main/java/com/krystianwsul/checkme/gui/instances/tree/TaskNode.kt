@@ -76,23 +76,17 @@ class TaskNode(
 
     override val name get() = NameData(taskData.name)
 
-    override val children
-        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.note.isNullOrEmpty()) {
-            null
-        } else {
-            val text = if (!expanded() && taskData.children.isNotEmpty()) {
-                taskData.children
-                        .sortedBy { it.startExactTimeStamp }
-                        .joinToString(", ") { it.name }
-            } else {
-                check(!taskData.note.isNullOrEmpty())
+    override val children: Pair<String, Int>?
+        get() {
+            val text = treeNode.takeIf { !it.isExpanded }
+                    ?.allChildren
+                    ?.filter { it.modelNode is TaskNode && it.canBeShown() }
+                    ?.map { it.modelNode as TaskNode }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.joinToString(", ") { it.taskData.name }
+                    ?: taskData.note
 
-                taskData.note
-            }
-
-            val color = colorSecondary
-
-            Pair(text, color)
+            return text?.let { Pair(it, colorSecondary) }
         }
 
     override fun onClick(holder: NodeHolder) {

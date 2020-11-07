@@ -185,7 +185,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
         treeViewAdapter!!.setFilterCriteria(query.takeIf { it.isNotEmpty() }, placeholder)
     }
 
-    private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : GroupHolderAdapter(), TaskParent {
+    private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :
+            GroupHolderAdapter(),
+            TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
@@ -349,7 +351,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun filter(filterCriteria: Any?) = parentTreeData.matchesQuery(filterCriteria as? String)
+            override fun matches(filterCriteria: Any?) = parentTreeData.matchesQuery(filterCriteria as? String)
+
+            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
         }
     }
 

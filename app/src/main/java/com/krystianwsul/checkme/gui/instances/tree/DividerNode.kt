@@ -93,5 +93,7 @@ class DividerNode(
 
     override val isVisibleWhenEmpty = false
 
-    override fun filter(filterCriteria: Any?) = true
+    override fun matches(filterCriteria: Any?) = false
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
 }

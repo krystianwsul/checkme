@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.HierarchicalQueryMatch
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import java.util.*
@@ -55,7 +55,7 @@ data class GroupListDataWrapper(
             var notificationShown: Boolean,
             val imageState: ImageState?,
             val isRecurringGroupChild: Boolean
-    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, HierarchicalQueryMatch {
+    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
 
         lateinit var instanceDataParent: InstanceDataParent
 
@@ -82,8 +82,6 @@ data class GroupListDataWrapper(
             normalizedName
             normalizedNote
         }
-
-        override fun matchesChildren(query: String?) = children.values.any { it.matchesQuery(query) }
     }
 
     interface SelectedData {

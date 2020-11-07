@@ -104,4 +104,8 @@ class TaskNode(
     override val isSelectable = true
 
     override val thumbnail = taskData.imageState
+
+    override fun matches(filterCriteria: Any?) = false
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
 }

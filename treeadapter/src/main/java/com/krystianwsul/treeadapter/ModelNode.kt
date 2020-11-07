@@ -30,7 +30,17 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun normalize() = Unit
 
-    fun filter(filterCriteria: Any?) = true
+    // does this node match the filter criteria (false if filtering not implemented, set canBeShown to true)
+    fun matches(filterCriteria: Any?): Boolean
+
+    // can the node be shown when filtering, if it doesn't match (like an ImageNode)
+    // true = show
+    // false = don't show
+    // null = let children decide
+    fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean?
+
+    // does this node or one of its parents match the filter criteria
+    fun parentHierarchyMatches(filterCriteria: Any?): Boolean = matches(filterCriteria) || parentNode?.parentHierarchyMatches(filterCriteria) == true
 
     fun ordinalDesc(): String? = null
 }

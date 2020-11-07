@@ -694,7 +694,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun normalize() = childTaskData.normalize()
 
-            override fun filter(filterCriteria: Any?) = childTaskData.matchesSearch(filterCriteria as? SearchData)
+            override fun matches(filterCriteria: Any?) = childTaskData.matchesSearch(filterCriteria as? SearchData)
+
+            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
         }
     }
 
@@ -751,7 +753,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             if (matchesQuery(searchData.query)) return true
 
-            return children.any { it.matchesSearch(searchData) }
+            return false
         }
     }
 

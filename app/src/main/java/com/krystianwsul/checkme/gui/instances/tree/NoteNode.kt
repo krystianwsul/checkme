@@ -52,7 +52,7 @@ class NoteNode(
         normalizedNote
     }
 
-    override fun filter(filterCriteria: Any?): Boolean {
+    override fun matches(filterCriteria: Any?): Boolean {
         if (filterCriteria == null) return true
 
         val query = (filterCriteria as SearchData).query
@@ -61,4 +61,6 @@ class NoteNode(
 
         return normalizedNote.contains(query)
     }
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 }

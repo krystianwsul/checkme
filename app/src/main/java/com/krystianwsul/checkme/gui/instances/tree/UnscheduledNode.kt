@@ -78,4 +78,8 @@ class UnscheduledNode(
     override val isVisibleWhenEmpty = false
 
     override val checkBoxState = CheckBoxState.Invisible
+
+    override fun matches(filterCriteria: Any?) = false
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
 }

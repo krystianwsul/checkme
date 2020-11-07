@@ -40,7 +40,9 @@ class ImageNode(
 
     override fun onClick(holder: NodeHolder) = showImage(holder.rowBigImage!!, imageData)
 
-    override fun filter(filterCriteria: Any?) = filterCriteria == null
+    override fun matches(filterCriteria: Any?) = false
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
 
     class ImageData(
             val imageState: ImageState,

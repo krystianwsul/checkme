@@ -287,12 +287,21 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
-        if (!modelNode.filter(treeViewAdapter.filterCriteria)) return false
+        val matches = modelNode.parentHierarchyMatches(treeViewAdapter.filterCriteria)
+                || hasMatchingChild(treeViewAdapter.filterCriteria)
+
+        if (!matches && modelNode.canBeShownWithFilterCriteria(treeViewAdapter.filterCriteria) == false) return false
 
         if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.none { it.canBeShown() }) return false
 
         return true
     }
+
+    private fun matches(filterCriteria: Any?) = modelNode.matches(filterCriteria)
+
+    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes?.any {
+        it.matches(filterCriteria) || it.hasMatchingChild(filterCriteria)
+    } == true
 
     private fun visible(): Boolean {
         if (childTreeNodes == null)

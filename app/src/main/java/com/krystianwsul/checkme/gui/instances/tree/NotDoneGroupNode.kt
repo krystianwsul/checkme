@@ -425,7 +425,11 @@ class NotDoneGroupNode(
 
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
-    override fun filter(filterCriteria: Any?) = instanceDatas.any { it.matchesQuery((filterCriteria as? SearchData)?.query) }
+    override fun matches(filterCriteria: Any?) = instanceDatas.any {
+        it.matchesQuery((filterCriteria as? SearchData)?.query)
+    }
+
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
     data class SingleId(val instanceKey: InstanceKey)
 
@@ -595,7 +599,9 @@ class NotDoneGroupNode(
 
         override fun normalize() = instanceData.normalize()
 
-        override fun filter(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
+        override fun matches(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
+
+        override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
         data class Id(val instanceKey: InstanceKey)
     }

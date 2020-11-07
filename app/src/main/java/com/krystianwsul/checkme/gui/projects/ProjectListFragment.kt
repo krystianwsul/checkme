@@ -256,7 +256,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             treeNodeCollection.nodes = projectNodes.map { it.initialize(treeNodeCollection) }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+        override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+        ) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
@@ -292,6 +295,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                 return projectData.id.compareTo(other.projectData.id)
             }
+
+            override fun matches(filterCriteria: Any?) = false
+
+            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
         }
     }
 

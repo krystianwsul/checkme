@@ -10,16 +10,15 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
         val now get() = ExactTimeStamp(DateTimeSoy.nowUnixLong())
 
         fun fromOffset(long: Long, offset: Double?): ExactTimeStamp {
-            return if (offset == null) {
-                ExactTimeStamp(long)
-            } else {
-                val dateTimeSoy = DateTimeSoy(long)
-                val dateTimeTz = DateTimeTz.utc(dateTimeSoy, TimezoneOffset(offset))
+            val dateTimeSoy = DateTimeSoy.fromUnix(long)
 
-                val dateTimeTzAdjusted = DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
+            val timezoneOffset = offset?.let { TimezoneOffset(it) } ?: dateTimeSoy.localOffset
 
-                ExactTimeStamp(dateTimeTzAdjusted.utc)
-            }
+            val dateTimeTz = DateTimeTz.utc(dateTimeSoy, timezoneOffset)
+
+            val dateTimeTzAdjusted = DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
+
+            return ExactTimeStamp(dateTimeTzAdjusted.utc)
         }
     }
 

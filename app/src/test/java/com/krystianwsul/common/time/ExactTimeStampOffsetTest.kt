@@ -60,6 +60,7 @@ class ExactTimeStampOffsetTest {
 
         val dateTimeTz = exactTimeStamp.toDateTimeTz()
         assertEquals("2:10 PM", dateTimeTz.formatTime())
+        assertEquals(hoursToOffset(2), dateTimeTz.offset.totalMilliseconds, 0.1)
     }
 
     @Test
@@ -78,5 +79,6 @@ class ExactTimeStampOffsetTest {
 
         val dateTimeTz = exactTimeStamp.toDateTimeTz()
         assertEquals("4:10 PM", dateTimeTz.formatTime())
+        assertEquals(hoursToOffset(4), dateTimeTz.offset.totalMilliseconds, 0.1)
     }
 }

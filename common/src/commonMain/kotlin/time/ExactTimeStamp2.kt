@@ -17,6 +17,10 @@ sealed class ExactTimeStamp2 {
 
         override val offset by lazy { toDateTimeSoy().localOffset.totalMilliseconds }
 
+        override val date get() = Date(toDateTimeTzLocal())
+
+        override val hourMilli get() = HourMilli(toDateTimeTzLocal())
+
         constructor(dateTimeSoy: DateTimeSoy) : this(dateTimeSoy.unixMillisLong)
 
         constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy(
@@ -28,6 +32,8 @@ sealed class ExactTimeStamp2 {
                 hourMilli.second,
                 hourMilli.milli
         ).let { it - it.localOffset.time })
+
+        private fun toDateTimeTzLocal() = toDateTimeSoy().local
 
         fun toTimeStamp() = TimeStamp.fromMillis(long)
 
@@ -55,11 +61,15 @@ sealed class ExactTimeStamp2 {
 
                 val dateTimeTz = DateTimeTz.utc(dateTimeSoy, timezoneOffset)
 
-                val dateTimeTzAdjusted = DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
-
-                return Offset(dateTimeTzAdjusted.utc.unixMillisLong, timezoneOffset.totalMilliseconds)
+                return Offset(dateTimeTz)
             }
         }
+
+        override val date get() = Date(toDateTimeTz())
+
+        override val hourMilli get() = HourMilli(toDateTimeTz())
+
+        constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.utc.unixMillisLong, dateTimeTz.offset.totalMilliseconds)
 
         fun plusOne() = Local(long + 1)
 
@@ -74,11 +84,9 @@ sealed class ExactTimeStamp2 {
 
     fun toDateTimeTz() = toDateTimeSoy().toOffset(TimezoneOffset(offset))
 
-    private fun toDateTimeTzLocal() = toDateTimeSoy().local
+    abstract val date: Date
 
-    val date get() = Date(toDateTimeTzLocal())
-
-    val hourMilli get() = HourMilli(toDateTimeTzLocal())
+    abstract val hourMilli: HourMilli
 
     override fun toString() = "$date $hourMilli"
 }

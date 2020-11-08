@@ -17,7 +17,7 @@ class TaskRelevance(val task: Task<*>) {
             taskRelevances: Map<TaskKey, TaskRelevance>,
             taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
             instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ) {
         if (relevant)
             return
@@ -29,7 +29,8 @@ class TaskRelevance(val task: Task<*>) {
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-                    it.notDeletedOffset(hierarchyExactTimeStamp) && it.taskHierarchy.notDeleted(hierarchyExactTimeStamp)
+                    it.notDeletedOffset(hierarchyExactTimeStamp)
+                            && it.taskHierarchy.notDeletedOffset(hierarchyExactTimeStamp)
                 }
                 .forEach {
                     taskHierarchyRelevances.getValue(it.taskHierarchy.taskHierarchyKey).setRelevant(
@@ -40,7 +41,7 @@ class TaskRelevance(val task: Task<*>) {
                     )
                 }
 
-        fun Instance<*>.filterOldestVisible(now: ExactTimeStamp, ignoreHidden: Boolean = false): Boolean {
+        fun Instance<*>.filterOldestVisible(now: ExactTimeStamp.Local, ignoreHidden: Boolean = false): Boolean {
             val oldestVisibles = getOldestVisibles()
 
             return if (oldestVisibles.isEmpty()) {

@@ -11,12 +11,12 @@ fun DomainFactory.setInstancesDone(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
-        done: Boolean
-): ExactTimeStamp = syncOnDomain {
+        done: Boolean,
+): ExactTimeStamp.Local = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map(this::getInstance)
 
@@ -43,7 +43,7 @@ fun DomainFactory.undoSetInstancesDateTime(
 
     check(editInstancesUndoData.data.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instances = editInstancesUndoData.data.map { (instanceKey, dateTime) ->
         getInstance(instanceKey).apply {

@@ -1,4 +1,8 @@
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.JsDatabaseWrapper
+import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
+import com.krystianwsul.common.firebase.managers.JsRootUserManager
+import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
@@ -8,10 +12,6 @@ import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.firebase.JsDatabaseWrapper
-import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
-import com.krystianwsul.common.firebase.managers.JsRootUserManager
-import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
 
@@ -143,7 +143,7 @@ object RelevanceChecker {
                                     override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
                                 },
                                 privateProject,
-                                ExactTimeStamp.now
+                                ExactTimeStamp.Local.now
                         )
 
                         check(privateRootInstanceManagers.containsKey(privateProject.projectKey))
@@ -186,7 +186,7 @@ object RelevanceChecker {
                                             override fun deleteProject(project: Project<*>) = Unit
                                         },
                                         sharedProject,
-                                        ExactTimeStamp.now
+                                        ExactTimeStamp.Local.now
                                 ).removedSharedProjects
                                 check(removedSharedProjects.size < 2)
 

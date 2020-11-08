@@ -76,7 +76,7 @@ class FactoryLoaderNewTest {
 
         override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = Unit
 
-        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
             TODO("Not yet implemented")
         }
 
@@ -107,7 +107,7 @@ class FactoryLoaderNewTest {
             changeListenerWrapper = null
         }
 
-        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) {
+        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
             assertNotNull(changeListenerWrapper)
             assertNull(changeListenerWrapper!!.result)
 
@@ -204,9 +204,9 @@ class FactoryLoaderNewTest {
                 projectsFactory: ProjectsFactory,
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp,
-                domainDisposable: CompositeDisposable
+                startTime: ExactTimeStamp.Local,
+                readTime: ExactTimeStamp.Local,
+                domainDisposable: CompositeDisposable,
         ): FactoryProvider.Domain {
             this.friendsFactory = friendsFactory
 

@@ -49,9 +49,9 @@ class DomainFactory(
         val projectsFactory: ProjectsFactory,
         val friendsFactory: FriendsFactory,
         _deviceDbInfo: DeviceDbInfo,
-        startTime: ExactTimeStamp,
-        readTime: ExactTimeStamp,
-        domainDisposable: CompositeDisposable
+        startTime: ExactTimeStamp.Local,
+        readTime: ExactTimeStamp.Local,
+        domainDisposable: CompositeDisposable,
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -161,7 +161,7 @@ class DomainFactory(
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.Local.now
 
         remoteReadTimes = ReadTimes(startTime, readTime, now)
 
@@ -276,7 +276,7 @@ class DomainFactory(
             updateIsSaved()
     }
 
-    private fun updateShortcuts(now: ExactTimeStamp) {
+    private fun updateShortcuts(now: ExactTimeStamp.Local) {
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
                 .filter { it.second?.isVisible(now, false) == true }
@@ -298,9 +298,9 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() = syncOnDomain { updateNotifications(ExactTimeStamp.now, true) }
+    override fun clearUserInfo() = syncOnDomain { updateNotifications(ExactTimeStamp.Local.now, true) }
 
-    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp) = syncOnDomain {
+    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
         updateShortcuts(now)
@@ -315,10 +315,10 @@ class DomainFactory(
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
+        tryNotifyListeners(ExactTimeStamp.Local.now, "DomainFactory.updateUserRecord", runType)
     }
 
-    private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
+    private fun tryNotifyListeners(now: ExactTimeStamp.Local, source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
         if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
@@ -380,7 +380,7 @@ class DomainFactory(
             source: SaveService.Source,
             taskKeys: Set<TaskKey>,
             deleteInstances: Boolean,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ): TaskUndoData {
         check(taskKeys.isNotEmpty())
 
@@ -409,7 +409,7 @@ class DomainFactory(
         return taskUndoData
     }
 
-    fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp) {
+    fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
         taskUndoData.taskKeys
                 .map { getTaskForce(it) }
                 .forEach {
@@ -433,14 +433,14 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
-        val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.Local.now
 
         updateNotificationsTick(now, silent, sourceName)
 
         save(0, source)
     }
 
-    private fun updateNotificationsTick(now: ExactTimeStamp, silent: Boolean, sourceName: String) {
+    private fun updateNotificationsTick(now: ExactTimeStamp.Local, silent: Boolean, sourceName: String) {
         updateNotifications(now, silent = silent, sourceName = sourceName)
 
         setIrrelevant(now)
@@ -486,11 +486,11 @@ class DomainFactory(
     }
 
     fun getRootInstances(
-            startExactTimeStamp: ExactTimeStamp?,
-            endExactTimeStamp: ExactTimeStamp?,
-            now: ExactTimeStamp,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
             query: String? = null,
-            filterVisible: Boolean = true
+            filterVisible: Boolean = true,
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
                 .values
@@ -499,14 +499,14 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = projectsFactory.privateProject
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject
             .customTimes
             .filter { it.current(now) }
 
     fun getChildInstanceDatas(
             instance: Instance<*>,
-            now: ExactTimeStamp,
-            query: String? = null
+            now: ExactTimeStamp.Local,
+            query: String? = null,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
                 .mapNotNull { (childInstance, _) ->
@@ -555,9 +555,9 @@ class DomainFactory(
     val ownerKey get() = myUserFactory.user.userKey
 
     override fun <T : ProjectType> convert(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             startingTask: Task<T>,
-            projectId: ProjectKey<*>
+            projectId: ProjectKey<*>,
     ): Task<*> {
         val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
         val startProject = startingTask.project
@@ -614,10 +614,10 @@ class DomainFactory(
 
     fun getTaskListChildTaskDatas(
             parentTask: Task<*>,
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             alwaysShow: Boolean,
             hierarchyExactTimeStamp: ExactTimeStamp,
-            groups: Boolean = false
+            groups: Boolean = false,
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp, groups)
                 .map { taskHierarchy ->
@@ -645,11 +645,11 @@ class DomainFactory(
                 }
     }
 
-    private fun setIrrelevant(now: ExactTimeStamp) {
+    private fun setIrrelevant(now: ExactTimeStamp.Local) {
         if (false) {
             val tomorrow = (DateTimeSoy.now() + 1.days).date
             val dateTimeSoy = DateTimeSoy(tomorrow, com.soywiz.klock.Time(2.hours))
-            val exactTimeStamp = ExactTimeStamp(dateTimeSoy)
+            val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
 
             projectsFactory.projects
                     .values
@@ -676,7 +676,7 @@ class DomainFactory(
 
         val instances = projectsFactory.projects
                 .values
-                .map { it.existingInstances + it.getRootInstances(null, now.plusOne(), now) }
+                .map { it.existingInstances + it.getRootInstances(null, now.toOffset().plusOne(), now) }
                 .flatten()
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
@@ -715,11 +715,11 @@ class DomainFactory(
     }
 
     fun updateNotifications(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             clear: Boolean = false,
             silent: Boolean = true,
             removedTaskKeys: List<TaskKey> = listOf(),
-            sourceName: String = "other"
+            sourceName: String = "other",
     ) {
         val skipSave = aggregateData != null
 
@@ -735,11 +735,11 @@ class DomainFactory(
         val notificationInstances = if (clear)
             mapOf()
         else
-            getRootInstances(null, now.plusOne(), now /* 24 hack */)
+            getRootInstances(null, now.toOffset().plusOne(), now /* 24 hack */)
                     .filter {
                         it.done == null
                                 && !it.getNotified(localFactory)
-                                && it.instanceDateTime.toExactTimeStamp() <= now
+                                && it.instanceDateTime.toLocalExactTimeStamp() <= now
                                 && !removedTaskKeys.contains(it.taskKey)
                     }
                     .associateBy { it.instanceKey }
@@ -925,10 +925,10 @@ class DomainFactory(
             Preferences.tickLog.logLineHour("next tick: $nextAlarm")
     }
 
-    private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp) =
+    private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp.Local) =
             NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)
 
-    private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp) =
+    private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp.Local) =
             NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
 
     fun setInstanceNotified(instanceKey: InstanceKey) {
@@ -946,7 +946,7 @@ class DomainFactory(
 
     class EditInstancesUndoData(val data: List<Pair<InstanceKey, DateTime>>)
 
-    class ReadTimes(start: ExactTimeStamp, read: ExactTimeStamp, stop: ExactTimeStamp) {
+    class ReadTimes(start: ExactTimeStamp.Local, read: ExactTimeStamp.Local, stop: ExactTimeStamp.Local) {
 
         val readMillis = read.long - start.long
         val instantiateMillis = stop.long - read.long

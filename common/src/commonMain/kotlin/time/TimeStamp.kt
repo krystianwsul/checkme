@@ -39,7 +39,7 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     override fun toString() = "$date $hourMinute"
 
-    fun toExactTimeStamp() = ExactTimeStamp(long)
+    fun toLocalExactTimeStamp() = ExactTimeStamp.Local(long)
 
     fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
 

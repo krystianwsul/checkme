@@ -23,7 +23,7 @@ object TimeLogger {
             private var staticId = 0
         }
 
-        private val start = ExactTimeStamp.now
+        private val start = ExactTimeStamp.Local.now
 
         private var stopped = false
 
@@ -38,7 +38,7 @@ object TimeLogger {
 
             times[key] = Pair(
                     oldPair.first + 1,
-                    oldPair.second + (ExactTimeStamp.now.long - start.long)
+                    oldPair.second + (ExactTimeStamp.Local.now.long - start.long)
             )
         }
     }

@@ -37,5 +37,5 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     fun toDateTimeTz() = TimeStamp(this, HourMinute.now).toDateTimeTz()
 
-    fun toMidnightExactTimeStamp() = ExactTimeStamp(this, HourMilli(0, 0, 0, 0))
+    fun toMidnightExactTimeStamp() = ExactTimeStamp.Local(this, HourMilli(0, 0, 0, 0))
 }

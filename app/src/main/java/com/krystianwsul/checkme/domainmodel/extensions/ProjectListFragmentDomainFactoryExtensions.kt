@@ -14,7 +14,7 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data = syncOnDomain
 
     val remoteProjects = projectsFactory.sharedProjects
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val projectDatas = remoteProjects.values
             .filter { it.current(now) }
@@ -38,7 +38,7 @@ fun DomainFactory.setProjectEndTimeStamps(
 
     check(projectIds.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val projectUndoData = ProjectUndoData()
 
@@ -65,7 +65,7 @@ fun DomainFactory.clearProjectEndTimeStamps(
 ) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val remoteProjects = projectUndoData.projectIds
             .map { projectsFactory.getProjectForce(it) }

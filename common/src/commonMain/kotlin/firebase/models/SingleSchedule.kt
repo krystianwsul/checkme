@@ -34,10 +34,10 @@ class SingleSchedule<T : ProjectType>(
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp?
+            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
     ): Sequence<DateTime> {
-        val scheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
+        val scheduleExactTimeStamp = dateTime.timeStamp.toLocalExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > scheduleExactTimeStamp } == true) return emptySequence()
 
@@ -54,8 +54,8 @@ class SingleSchedule<T : ProjectType>(
     override fun isVisible(
             scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
-            now: ExactTimeStamp,
-            hack24: Boolean
+            now: ExactTimeStamp.Local,
+            hack24: Boolean,
     ): Boolean {
         scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
@@ -67,7 +67,7 @@ class SingleSchedule<T : ProjectType>(
 
     override fun updateOldestVisible(
             scheduleInterval: ScheduleInterval<T>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ) = Unit
 
     private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord<T>(

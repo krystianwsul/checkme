@@ -22,7 +22,7 @@ class PrivateCustomTime(
             .toMutableList<CustomTimeRecord<*>>()
             .apply { add(customTimeRecord) }
 
-    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
+    fun current(exactTimeStamp: ExactTimeStamp.Local): Boolean {
         val current = customTimeRecord.current
         val endExactTimeStamp = endExactTimeStamp
 
@@ -32,7 +32,7 @@ class PrivateCustomTime(
     }
 
     var endExactTimeStamp
-        get() = customTimeRecord.endTime?.let { ExactTimeStamp(it) }
+        get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }
         set(value) {
             check((value == null) != (customTimeRecord.endTime == null))
 

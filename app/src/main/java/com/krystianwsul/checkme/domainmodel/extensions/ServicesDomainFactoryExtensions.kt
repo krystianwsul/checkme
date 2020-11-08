@@ -21,7 +21,7 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
     val instance = getInstance(instanceKey)
     Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
     val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
     val date = Date(calendar.toDateTimeTz())
@@ -52,7 +52,7 @@ fun DomainFactory.setInstanceNotificationDone(
     val instance = getInstance(instanceKey)
     Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     instance.setDone(localFactory, true, now)
     instance.setNotificationShown(localFactory, false)

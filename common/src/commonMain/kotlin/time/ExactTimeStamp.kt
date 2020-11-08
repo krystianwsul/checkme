@@ -3,54 +3,107 @@ package com.krystianwsul.common.time
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.TimezoneOffset
 
-data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
+sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
-    companion object {
+    abstract val long: Long
+    abstract val offset: Double
 
-        val now get() = ExactTimeStamp(DateTimeSoy.nowUnixLong())
+    data class Local(override val long: Long) : ExactTimeStamp() {
 
-        fun fromOffset(long: Long, offset: Double?): ExactTimeStamp {
-            val dateTimeSoy = DateTimeSoy.fromUnix(long)
+        companion object {
 
-            val timezoneOffset = offset?.let { TimezoneOffset(it) } ?: dateTimeSoy.localOffset
+            val now get() = Local(DateTimeSoy.nowUnixLong())
+        }
 
-            val dateTimeTz = DateTimeTz.utc(dateTimeSoy, timezoneOffset)
+        override val offset by lazy { toDateTimeSoy().localOffset.totalMilliseconds }
 
-            val dateTimeTzAdjusted = DateTimeTz.local(dateTimeTz.local, dateTimeSoy.local.offset)
+        override val date get() = Date(toDateTimeTzLocal())
 
-            return ExactTimeStamp(dateTimeTzAdjusted.utc)
+        override val hourMilli get() = HourMilli(toDateTimeTzLocal())
+
+        constructor(dateTimeSoy: DateTimeSoy) : this(dateTimeSoy.unixMillisLong)
+
+        constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy(
+                date.year,
+                date.month,
+                date.day,
+                hourMilli.hour,
+                hourMilli.minute,
+                hourMilli.second,
+                hourMilli.milli
+        ).let { it - it.localOffset.time })
+
+        private fun toDateTimeTzLocal() = toDateTimeSoy().local
+
+        fun toTimeStamp() = TimeStamp.fromMillis(long)
+
+        fun plusOne() = Local(long + 1)
+
+        fun minusOne() = Local(long - 1)
+
+        override fun toString() = "$date $hourMilli"
+
+        override fun compareTo(other: ExactTimeStamp) = when (other) {
+            is Local -> long.compareTo(other.long)
+            is Offset -> Offset.compare(toOffset(other), other)
+        }
+
+        private val offsetExactTimeStamp by lazy { Offset.fromOffset(long, null) }
+
+        fun toOffset(offset: Double? = null) = offset?.let { Offset.fromOffset(long, offset) } ?: offsetExactTimeStamp
+
+        fun toOffset(referenceOffset: Offset) = Offset.fromOffset(long, referenceOffset.offset)
+    }
+
+    data class Offset(
+            override val long: Long,
+            override val offset: Double,
+    ) : ExactTimeStamp() {
+
+        companion object {
+
+            fun fromOffset(long: Long, offset: Double?): Offset {
+                val dateTimeSoy = DateTimeSoy.fromUnix(long)
+
+                val timezoneOffset = offset?.let { TimezoneOffset(it) } ?: dateTimeSoy.localOffset
+
+                val dateTimeTz = DateTimeTz.utc(dateTimeSoy, timezoneOffset)
+
+                return Offset(dateTimeTz)
+            }
+
+            fun compare(a: Offset, b: Offset) = compareValuesBy(a, b, { it.date }, { it.hourMilli })
+        }
+
+        override val date get() = Date(toDateTimeTz())
+
+        override val hourMilli get() = HourMilli(toDateTimeTz())
+
+        constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.utc.unixMillisLong, dateTimeTz.offset.totalMilliseconds)
+
+        fun plusOne() = Offset(long + 1, offset)
+
+        fun minusOne() = Offset(long - 1, offset)
+
+        override fun toString() = "$date $hourMilli"
+
+        override fun compareTo(other: ExactTimeStamp): Int {
+            val otherOffset = when (other) {
+                is Local -> other.toOffset(this)
+                is Offset -> other
+            }
+
+            return compare(this, otherOffset)
         }
     }
 
     fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
 
-    fun toDateTimeTz() = toDateTimeSoy().local
+    fun toDateTimeTz() = toDateTimeSoy().toOffset(TimezoneOffset(offset))
 
-    val offset by lazy { toDateTimeTz().offset.totalMilliseconds }
+    abstract val date: Date
 
-    val date get() = Date(toDateTimeTz())
-
-    val hourMilli get() = HourMilli(toDateTimeTz())
-
-    constructor(dateTimeSoy: DateTimeSoy) : this(dateTimeSoy.unixMillisLong)
-
-    constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy(
-            date.year,
-            date.month,
-            date.day,
-            hourMilli.hour,
-            hourMilli.minute,
-            hourMilli.second,
-            hourMilli.milli
-    ).let { it - it.localOffset.time })
-
-    override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
-
-    fun plusOne() = ExactTimeStamp(long + 1)
-
-    fun minusOne() = ExactTimeStamp(long - 1)
-
-    fun toTimeStamp() = TimeStamp.fromMillis(long)
+    abstract val hourMilli: HourMilli
 
     override fun toString() = "$date $hourMilli"
 }

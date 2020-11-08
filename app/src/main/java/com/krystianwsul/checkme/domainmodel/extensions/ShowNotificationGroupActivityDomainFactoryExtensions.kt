@@ -14,7 +14,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
 
     check(instanceKeys.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map { getInstance(it) }
             .filter { it.isRootInstance(now) }

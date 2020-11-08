@@ -126,7 +126,7 @@ class ProjectsFactoryOldTest {
                 initialProjectEvent!!,
                 sharedProjectsLoader,
                 initialProjectsEvent!!,
-                ExactTimeStamp.now,
+                ExactTimeStamp.Local.now,
                 factoryProvider,
                 compositeDisposable
         ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
@@ -354,7 +354,7 @@ class ProjectsFactoryOldTest {
                 .single()
                 .getInstance(DateTime(date, Time.Normal(hourMinute)))
 
-        val done = ExactTimeStamp.now
+        val done = ExactTimeStamp.Local.now
 
         instance.setDone(mockk(relaxed = true), true, done)
         projectsFactory.save()
@@ -409,7 +409,7 @@ class ProjectsFactoryOldTest {
 
         val sharedProject = projectsFactory.createProject(
                 "sharedProject",
-                ExactTimeStamp.now,
+                ExactTimeStamp.Local.now,
                 setOf(),
                 mockk(relaxed = true) {
                     every { userJson } returns UserJson()

@@ -326,7 +326,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             }
         }
 
-        data class TaskSortKey(private val startExactTimeStamp: ExactTimeStamp) : SortKey() {
+        data class TaskSortKey(private val startExactTimeStamp: ExactTimeStamp.Local) : SortKey() {
 
             override fun compareTo(other: SortKey): Int {
                 if (other is ProjectSortKey)

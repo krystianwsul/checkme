@@ -27,9 +27,9 @@ object LockerManager {
 
         object None : State()
 
-        class Now(val now: ExactTimeStamp) : State()
+        class Now(val now: ExactTimeStamp.Local) : State()
 
-        class Locker(val now: ExactTimeStamp) : State() {
+        class Locker(val now: ExactTimeStamp.Local) : State() {
 
             val privateProjectLocker by lazy { ProjectLocker<ProjectType.Private>(this) }
 
@@ -44,10 +44,10 @@ object LockerManager {
         }
     }
 
-    fun <T : Any> setLocker(action: (ExactTimeStamp) -> T): T {
+    fun <T : Any> setLocker(action: (ExactTimeStamp.Local) -> T): T {
         check(state == State.None)
 
-        val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.Local.now
 
         state = State.Locker(now)
         val ret = action(now)

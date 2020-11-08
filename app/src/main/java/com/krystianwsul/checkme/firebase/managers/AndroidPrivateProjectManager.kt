@@ -31,7 +31,7 @@ class AndroidPrivateProjectManager(
             val record = if (first) {
                 first = false // for new users, the project may not exist yet
 
-                val now = ExactTimeStamp.now
+                val now = ExactTimeStamp.Local.now
 
                 snapshot.takeIf { it.exists() }
                         ?.toRecord()

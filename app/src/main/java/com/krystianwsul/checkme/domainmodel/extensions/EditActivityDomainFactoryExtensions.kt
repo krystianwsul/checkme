@@ -26,7 +26,7 @@ fun DomainFactory.getCreateTaskData(
 ): EditViewModel.Data = syncOnDomain {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
@@ -125,7 +125,7 @@ fun DomainFactory.createScheduleRootTask(
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -171,7 +171,7 @@ fun DomainFactory.createChildTask(
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
 
@@ -216,7 +216,7 @@ fun DomainFactory.createRootTask(
 
     check(name.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val finalProjectId = projectId ?: defaultProjectId
 
@@ -262,7 +262,7 @@ fun DomainFactory.updateScheduleTask(
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -309,7 +309,7 @@ fun DomainFactory.updateScheduleTask(
 }
 
 fun DomainFactory.updateChildTask(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
@@ -318,7 +318,7 @@ fun DomainFactory.updateChildTask(
         note: String?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         removeInstanceKey: InstanceKey?,
-        allReminders: Boolean
+        allReminders: Boolean,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -387,7 +387,7 @@ fun DomainFactory.updateRootTask(
 
     check(name.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
@@ -420,7 +420,7 @@ fun DomainFactory.updateRootTask(
 }
 
 fun DomainFactory.createScheduleJoinRootTask(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         dataId: Int,
         source: SaveService.Source,
         name: String,
@@ -430,7 +430,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         projectId: ProjectKey<*>?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-        allReminders: Boolean
+        allReminders: Boolean,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -490,7 +490,7 @@ fun DomainFactory.createJoinChildTask(
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val parentTask = getTaskForce(parentTaskKey)
     parentTask.requireCurrent(now)
@@ -542,7 +542,7 @@ fun DomainFactory.createJoinRootTask(
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
             .distinct()
@@ -580,9 +580,9 @@ fun DomainFactory.createJoinRootTask(
 }
 
 private fun DomainFactory.getParentTreeDatas(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>
+        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     val parentTreeDatas = mutableMapOf<EditViewModel.ParentKey, EditViewModel.ParentTreeData>()
 
@@ -635,10 +635,10 @@ private fun DomainFactory.getParentTreeDatas(
 }
 
 private fun DomainFactory.getProjectTaskTreeDatas(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         project: Project<*>,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>
+        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     return project.tasks
             .asSequence()
@@ -664,9 +664,9 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 }
 
 private fun Task<*>.showAsParent(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>
+        includedTaskKeys: Set<TaskKey>,
 ): Boolean {
     check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
 
@@ -676,11 +676,9 @@ private fun Task<*>.showAsParent(
         return false
     }
 
-    if (!isRootTask(now))
-        return false
+    if (!isRootTask(now)) return false
 
-    if (excludedTaskKeys.contains(taskKey))
-        return false
+    if (excludedTaskKeys.contains(taskKey)) return false
 
     if (includedTaskKeys.contains(taskKey)) { // todo this doesn't account for a parent that isn't a root instance
         check(isVisible(now, true))
@@ -688,8 +686,7 @@ private fun Task<*>.showAsParent(
         return true
     }
 
-    if (!isVisible(now, false))
-        return false
+    if (!isVisible(now, false)) return false
 
     return true
 }
@@ -697,9 +694,9 @@ private fun Task<*>.showAsParent(
 private fun DomainFactory.joinTasks(
         newParentTask: Task<*>,
         joinTasks: List<Task<*>>,
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         removeInstanceKeys: List<InstanceKey>,
-        allReminders: Boolean = true
+        allReminders: Boolean = true,
 ) {
     newParentTask.requireCurrent(now)
     check(joinTasks.size > 1)
@@ -727,10 +724,10 @@ private fun DomainFactory.joinTasks(
 }
 
 private fun DomainFactory.getTaskListChildTaskDatas(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         parentTask: Task<*>,
         excludedTaskKeys: Set<TaskKey>,
-        isRootGroupTask: Boolean // this is valid only as long as getChildTaskHierarchies(groups = false)
+        isRootGroupTask: Boolean, // this is valid only as long as getChildTaskHierarchies(groups = false)
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()
@@ -753,7 +750,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                     taskParentKey to parentTreeData
                 }
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp, task: Task<*>, copyTaskKey: TaskKey) {
+private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task<*>, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
     copiedTask.getChildTaskHierarchies(now).forEach {
@@ -772,12 +769,12 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp, task: Task<*>, copyTaskK
 }
 
 private fun <T : ProjectType> DomainFactory.createChildTask(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         parentTask: Task<T>,
         name: String,
         note: String?,
         imageJson: TaskJson.Image?,
-        copyTaskKey: TaskKey? = null
+        copyTaskKey: TaskKey? = null,
 ): Task<T> {
     check(name.isNotEmpty())
     parentTask.requireCurrent(now)

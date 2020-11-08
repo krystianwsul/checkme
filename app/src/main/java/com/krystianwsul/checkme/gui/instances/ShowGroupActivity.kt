@@ -36,7 +36,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        fun getIntent(exactTimeStamp: ExactTimeStamp, context: Context) = Intent(context, ShowGroupActivity::class.java).apply {
+        fun getIntent(exactTimeStamp: ExactTimeStamp.Local, context: Context) = Intent(context, ShowGroupActivity::class
+                .java).apply {
             putExtra(TIME_KEY, exactTimeStamp.long)
         }
     }

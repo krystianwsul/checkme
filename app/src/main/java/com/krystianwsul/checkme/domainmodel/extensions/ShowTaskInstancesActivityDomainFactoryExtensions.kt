@@ -17,7 +17,7 @@ fun DomainFactory.getShowTaskInstancesData(
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
     val task = getTaskForce(taskKey)
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())

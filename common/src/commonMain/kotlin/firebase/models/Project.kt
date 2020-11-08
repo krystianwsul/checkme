@@ -35,9 +35,9 @@ abstract class Project<T : ProjectType> : Current {
             projectRecord.name = name
         }
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(projectRecord.startTime) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(projectRecord.startTime) }
 
-    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp(it) }
+    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys
@@ -68,7 +68,7 @@ abstract class Project<T : ProjectType> : Current {
     fun createTaskHierarchy(
             parentTask: Task<T>,
             childTask: Task<T>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ) {
         val taskHierarchyJson = TaskHierarchyJson(
                 parentTask.id,
@@ -89,7 +89,7 @@ abstract class Project<T : ProjectType> : Current {
             deviceDbInfo: DeviceDbInfo,
             oldTask: Task<*>,
             instances: Collection<Instance<*>>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ): Task<T> {
         val endTime = oldTask.endExactTimeStamp?.long
 
@@ -188,10 +188,10 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun <V : TaskHierarchy<*>> copyTaskHierarchy(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
-            childTaskId: String
+            childTaskId: String,
     ): TaskHierarchy<T> {
         check(parentTaskId.isNotEmpty())
         check(childTaskId.isNotEmpty())
@@ -251,9 +251,9 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun setEndExactTimeStamp(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             projectUndoData: ProjectUndoData,
-            removeInstances: Boolean
+            removeInstances: Boolean,
     ) {
         requireCurrent(now)
 
@@ -268,7 +268,7 @@ abstract class Project<T : ProjectType> : Current {
         projectRecord.endTime = now.long
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         projectRecord.endTime = null
@@ -281,9 +281,9 @@ abstract class Project<T : ProjectType> : Current {
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
 
     fun convertRemoteToRemoteHelper(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             remoteToRemoteConversion: RemoteToRemoteConversion<T>,
-            startTask: Task<T>
+            startTask: Task<T>,
     ) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
@@ -292,7 +292,12 @@ abstract class Project<T : ProjectType> : Current {
                 startTask,
                 startTask.existingInstances
                         .values
-                        .filter { listOf(it.scheduleDateTime, it.instanceDateTime).maxOrNull()!!.toExactTimeStamp() >= now }
+                        .filter {
+                            listOf(
+                                    it.scheduleDateTime,
+                                    it.instanceDateTime
+                            ).maxOrNull()!!.toLocalExactTimeStamp() >= now
+                        }
         )
 
         val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
@@ -308,7 +313,7 @@ abstract class Project<T : ProjectType> : Current {
 
     fun fixNotificationShown(
             shownFactory: Instance.ShownFactory,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ) = tasks.forEach {
         it.existingInstances
                 .values
@@ -316,11 +321,11 @@ abstract class Project<T : ProjectType> : Current {
     }
 
     fun getRootInstances(
-            startExactTimeStamp: ExactTimeStamp?,
-            endExactTimeStamp: ExactTimeStamp?,
-            now: ExactTimeStamp,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
             query: String? = null,
-            filterVisible: Boolean = true
+            filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 

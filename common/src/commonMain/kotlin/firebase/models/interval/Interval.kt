@@ -8,28 +8,27 @@ sealed class Interval<T : ProjectType> : CurrentOffset {
 
     abstract val type: Type<T>
 
-    abstract override val startExactTimeStampOffset: ExactTimeStamp
-    abstract override val endExactTimeStampOffset: ExactTimeStamp?
+    abstract override val startExactTimeStampOffset: ExactTimeStamp.Offset
+    abstract override val endExactTimeStampOffset: ExactTimeStamp.Offset?
 
     open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStampOffset <= exactTimeStamp
 
     data class Current<T : ProjectType>(
             override val type: Type<T>,
-            override val startExactTimeStampOffset: ExactTimeStamp
+            override val startExactTimeStampOffset: ExactTimeStamp.Offset,
     ) : Interval<T>() {
 
-        override val endExactTimeStampOffset: ExactTimeStamp? = null
+        override val endExactTimeStampOffset: ExactTimeStamp.Offset? = null
     }
 
     data class Ended<T : ProjectType>(
             override val type: Type<T>,
-            override val startExactTimeStampOffset: ExactTimeStamp,
-            override val endExactTimeStampOffset: ExactTimeStamp
+            override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+            override val endExactTimeStampOffset: ExactTimeStamp.Offset,
     ) : Interval<T>() {
 
         override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
-            if (!super.containsExactTimeStamp(exactTimeStamp))
-                return false
+            if (!super.containsExactTimeStamp(exactTimeStamp)) return false
 
             return endExactTimeStampOffset > exactTimeStamp
         }

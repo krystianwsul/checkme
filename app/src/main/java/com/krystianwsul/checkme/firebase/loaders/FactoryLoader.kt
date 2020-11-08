@@ -71,7 +71,7 @@ class FactoryLoader(
                         privateProjectManager
                 )
 
-                val startTime = ExactTimeStamp.now
+                val startTime = ExactTimeStamp.Local.now
 
                 val userFactorySingle = userDatabaseRx.first
                         .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider) }
@@ -98,7 +98,7 @@ class FactoryLoader(
                             initialPrivateProjectEvent,
                             sharedProjectsLoader,
                             initialSharedProjectsEvent,
-                            ExactTimeStamp.now,
+                            ExactTimeStamp.Local.now,
                             factoryProvider,
                             domainDisposable,
                             ::getDeviceDbInfo
@@ -127,7 +127,7 @@ class FactoryLoader(
                             friendsFactory,
                             getDeviceDbInfo(),
                             startTime,
-                            ExactTimeStamp.now,
+                            ExactTimeStamp.Local.now,
                             domainDisposable
                     )
                 }.cacheImmediate()
@@ -138,7 +138,7 @@ class FactoryLoader(
                 ).merge()
 
                 domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { Pair(domainFactory, it) } }
-                        .subscribe { (domainFactory, changeType) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.now) }
+                        .subscribe { (domainFactory, changeType) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now) }
                         .addTo(domainDisposable)
 
                 userDatabaseRx.changes

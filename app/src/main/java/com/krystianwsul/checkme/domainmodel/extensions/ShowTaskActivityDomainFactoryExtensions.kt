@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.TaskKey
 fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowTaskData")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)

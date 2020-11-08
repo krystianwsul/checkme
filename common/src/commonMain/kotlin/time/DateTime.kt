@@ -28,7 +28,7 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
     override fun toString() = "$date $time"
 
-    fun toExactTimeStamp() = timeStamp.toExactTimeStamp()
+    fun toLocalExactTimeStamp() = timeStamp.toLocalExactTimeStamp()
 
     fun toDateTimeSoy() = timeStamp.toDateTimeSoy()
 }

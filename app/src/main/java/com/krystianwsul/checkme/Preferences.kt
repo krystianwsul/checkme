@@ -119,7 +119,7 @@ object Preferences : FactoryProvider.Preferences {
 
         fun logLineDate(line: String) {
             logLine("")
-            logLine(ExactTimeStamp.now.date.toString())
+            logLine(ExactTimeStamp.Local.now.date.toString())
             logLineHour(line)
         }
 
@@ -127,7 +127,7 @@ object Preferences : FactoryProvider.Preferences {
             if (separator)
                 logLine("")
 
-            logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+            logLine(ExactTimeStamp.Local.now.hourMilli.toString() + " " + line)
         }
 
         private fun logLine(line: String) {

@@ -11,17 +11,17 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     protected abstract val scheduleRecord: ScheduleRecord<T>
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(scheduleRecord.startTime) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 
     override val startExactTimeStampOffset by lazy {
-        scheduleRecord.run { ExactTimeStamp.fromOffset(startTime, startTimeOffset) }
+        scheduleRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
     }
 
-    override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp(it) }
+    override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     override val endExactTimeStampOffset
         get() = scheduleRecord.endTime?.let {
-            ExactTimeStamp.fromOffset(it, scheduleRecord.endTimeOffset)
+            ExactTimeStamp.Offset.fromOffset(it, scheduleRecord.endTimeOffset)
         }
 
     val customTimeKey get() = scheduleRecord.customTimeKey
@@ -37,18 +37,15 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             ?: Time.Normal(hourMinute!!)
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        requireCurrent(endExactTimeStamp)
+        requireCurrentOffset(endExactTimeStamp)
 
         scheduleRecord.endTime = endExactTimeStamp.long
-
-        scheduleRecord.endTimeOffset = endExactTimeStamp.toDateTimeTz()
-                .offset
-                .totalMilliseconds
+        scheduleRecord.endTimeOffset = endExactTimeStamp.offset
 
         rootTask.invalidateIntervals()
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         scheduleRecord.endTime = null
@@ -59,15 +56,15 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     abstract fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp?
+            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
     ): Sequence<DateTime>
 
     abstract fun isVisible(
             scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
-            now: ExactTimeStamp,
-            hack24: Boolean
+            now: ExactTimeStamp.Local,
+            hack24: Boolean,
     ): Boolean
 
     fun delete() {
@@ -90,14 +87,14 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     abstract val oldestVisible: OldestVisible
 
-    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp)
+    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local)
 
     fun matchesScheduleDateTime(
             scheduleInterval: ScheduleInterval<T>,
             scheduleDateTime: DateTime,
             checkOldestVisible: Boolean
     ): Boolean {
-        val exactTimeStamp = scheduleDateTime.toExactTimeStamp()
+        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp()
 
         if (exactTimeStamp < startExactTimeStampOffset) return false
 

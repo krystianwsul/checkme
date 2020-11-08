@@ -12,7 +12,7 @@ import org.joda.time.LocalDateTime
 
 private fun Date.toMaterialDatePickerLong() = LocalDateTime(toMidnightExactTimeStamp().long).toDateTime(DateTimeZone.UTC).millis
 
-fun Long.toMaterialDatePickerDate() = ExactTimeStamp(DateTime(this, DateTimeZone.UTC).millis).date
+fun Long.toMaterialDatePickerDate() = ExactTimeStamp.Local(DateTime(this, DateTimeZone.UTC).millis).date
 
 fun newMaterialDatePicker(date: Date, min: Date? = null): MaterialDatePicker<Long> {
     val startDate = min ?: Date.today()

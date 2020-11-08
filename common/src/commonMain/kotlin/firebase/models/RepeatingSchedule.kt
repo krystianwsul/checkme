@@ -29,24 +29,24 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
-            givenStartExactTimeStamp: ExactTimeStamp?,
-            givenEndExactTimeStamp: ExactTimeStamp?
+            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
     ): Sequence<DateTime> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStampOffset,
-                repeatingScheduleRecord.from?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                repeatingScheduleRecord.from?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
                 givenStartExactTimeStamp,
-                oldestVisibleDate?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) },
+                oldestVisibleDate?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
                 scheduleInterval.startExactTimeStampOffset
         ).maxOrNull()!!
 
         val intrinsicEndExactTimeStamp = listOfNotNull(
-                endExactTimeStamp,
+                endExactTimeStampOffset,
                 repeatingScheduleRecord.until
                         ?.let { DateTime(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.let(::ExactTimeStamp),
+                        ?.let { ExactTimeStamp.Local(it).toOffset() },
                 scheduleInterval.endExactTimeStampOffset
         ).minOrNull()
 
@@ -125,8 +125,8 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override fun isVisible(
             scheduleInterval: ScheduleInterval<T>,
             task: Task<T>,
-            now: ExactTimeStamp,
-            hack24: Boolean
+            now: ExactTimeStamp.Local,
+            hack24: Boolean,
     ): Boolean {
         scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
@@ -140,11 +140,11 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         } ?: true
     }
 
-    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp) {
+    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local) {
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
-                now.plusOne()
+                now.toOffset().plusOne()
         ).toList()
 
         val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance(now) }

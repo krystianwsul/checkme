@@ -78,7 +78,7 @@ class EditExistingTaskEditDelegate(
             parentTaskKey: TaskKey
     ): TaskKey {
         return DomainFactory.instance.updateChildTask(
-                ExactTimeStamp.now,
+                ExactTimeStamp.Local.now,
                 data.dataId,
                 SaveService.Source.GUI,
                 parameters.taskKey,

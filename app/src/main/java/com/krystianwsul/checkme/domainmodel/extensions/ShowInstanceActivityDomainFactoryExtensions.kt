@@ -19,7 +19,7 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
 
     val task = getTaskForce(instanceKey.taskKey)
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instance = getInstance(instanceKey)
     val instanceDateTime = instance.instanceDateTime
@@ -63,7 +63,7 @@ fun DomainFactory.setTaskEndTimeStamps(
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val taskUndoData = setTaskEndTimeStamps(source, taskKeys, deleteInstances, now)
 
@@ -73,7 +73,7 @@ fun DomainFactory.setTaskEndTimeStamps(
     val instanceExactTimeStamp by lazy {
         instance.instanceDateTime
                 .timeStamp
-                .toExactTimeStamp()
+                .toLocalExactTimeStamp()
     }
 
     val visible =
@@ -85,7 +85,7 @@ fun DomainFactory.setTaskEndTimeStamps(
 private fun DomainFactory.getGroupListData(
         instance: Instance<*>,
         task: Task<*>,
-        now: ExactTimeStamp
+        now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())

@@ -90,9 +90,9 @@ class ProjectFactoryOldTest {
                 projectsFactory: ProjectsFactory,
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp,
-                domainDisposable: CompositeDisposable
+                startTime: ExactTimeStamp.Local,
+                readTime: ExactTimeStamp.Local,
+                domainDisposable: CompositeDisposable,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }

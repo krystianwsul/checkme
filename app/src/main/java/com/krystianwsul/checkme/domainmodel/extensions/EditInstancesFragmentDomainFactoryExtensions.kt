@@ -14,7 +14,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     check(instanceKeys.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
@@ -49,7 +49,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
     }
 
     val showHour = instanceDatas.values.all {
-        it.instanceDateTime.timeStamp.toExactTimeStamp() < now
+        it.instanceDateTime.timeStamp.toLocalExactTimeStamp() < now
     }
 
     EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
@@ -67,7 +67,7 @@ fun DomainFactory.setInstancesDateTime(
 
     check(instanceKeys.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map(this::getInstance)
 

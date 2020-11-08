@@ -15,7 +15,7 @@ class InstanceRelevance(val instance: Instance<*>) {
             taskRelevances: Map<TaskKey, TaskRelevance>,
             taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
             instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
-            now: ExactTimeStamp
+            now: ExactTimeStamp.Local,
     ) {
         if (relevant) return
 

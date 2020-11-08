@@ -26,14 +26,14 @@ fun DomainFactory.setTaskEndTimeStamps(
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
+    setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
 }
 
 fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     processTaskUndoData(taskUndoData, now)
 
@@ -52,7 +52,7 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = s
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
 
@@ -73,12 +73,12 @@ fun DomainFactory.setInstancesNotNotified(
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     instanceKeys.forEach {
         val instance = getInstance(it)
         check(instance.done == null)
-        check(instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
+        check(instance.instanceDateTime.timeStamp.toLocalExactTimeStamp() <= now)
         check(!instance.getNotificationShown(localFactory))
         check(instance.isRootInstance(now))
 
@@ -95,7 +95,7 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     instanceKeys.forEach {
         getInstance(it).getParentInstance(now)!!
@@ -116,7 +116,7 @@ fun DomainFactory.setInstancesAddHourActivity(
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
     val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
     val date = Date(calendar.toDateTimeTz())
@@ -154,7 +154,7 @@ fun DomainFactory.undoInstancesAddHour(
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
         Pair(
@@ -179,12 +179,12 @@ fun DomainFactory.setInstanceDone(
         dataId: Int,
         source: SaveService.Source,
         instanceKey: InstanceKey,
-        done: Boolean
-): ExactTimeStamp? = syncOnDomain {
+        done: Boolean,
+): ExactTimeStamp.Local? = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val instance = getInstance(instanceKey)
 
@@ -225,7 +225,7 @@ fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) =
     save(0, source)
 }
 
-fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
+fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) = getTasks().filter {
     it.current(now)
             && it.isVisible(now, true)
             && it.isRootTask(now)
@@ -234,8 +234,8 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp) = getTasks().filter {
 
 fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task<*>,
-        now: ExactTimeStamp,
-        query: String? = null
+        now: ExactTimeStamp.Local,
+        query: String? = null,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
         .asSequence()
         .map { it.childTask }

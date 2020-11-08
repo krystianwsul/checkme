@@ -4,31 +4,31 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 interface Current {
 
-    val startExactTimeStamp: ExactTimeStamp
-    val endExactTimeStamp: ExactTimeStamp?
+    val startExactTimeStamp: ExactTimeStamp.Local
+    val endExactTimeStamp: ExactTimeStamp.Local?
 
-    fun notDeleted(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp } != false
+    fun notDeleted(exactTimeStamp: ExactTimeStamp.Local) = endExactTimeStamp?.let { it > exactTimeStamp } != false
 
-    fun afterStart(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp
+    fun afterStart(exactTimeStamp: ExactTimeStamp.Local) = startExactTimeStamp <= exactTimeStamp
 
-    fun current(exactTimeStamp: ExactTimeStamp) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
+    fun current(exactTimeStamp: ExactTimeStamp.Local) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
 
-    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp) {
+    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp.Local) {
         if (!notDeleted(exactTimeStamp))
             throwTime(exactTimeStamp)
     }
 
-    fun requireCurrent(exactTimeStamp: ExactTimeStamp) {
+    fun requireCurrent(exactTimeStamp: ExactTimeStamp.Local) {
         if (!current(exactTimeStamp))
             throwTime(exactTimeStamp)
     }
 
-    fun requireNotCurrent(exactTimeStamp: ExactTimeStamp) {
+    fun requireNotCurrent(exactTimeStamp: ExactTimeStamp.Local) {
         if (current(exactTimeStamp))
             throwTime(exactTimeStamp)
     }
 
-    private fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw TimeException(
+    private fun throwTime(exactTimeStamp: ExactTimeStamp.Local): Nothing = throw TimeException(
             "$this exactTimeStamps start: $startExactTimeStamp, end: $endExactTimeStamp, time: $exactTimeStamp"
     )
 

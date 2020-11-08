@@ -47,14 +47,14 @@ interface FactoryProvider {
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
             deviceDbInfo: DeviceDbInfo,
-            startTime: ExactTimeStamp,
-            readTime: ExactTimeStamp,
-            domainDisposable: CompositeDisposable
+            startTime: ExactTimeStamp.Local,
+            readTime: ExactTimeStamp.Local,
+            domainDisposable: CompositeDisposable,
     ): Domain
 
     interface Domain {
 
-        fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp)
+        fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local)
 
         fun updateUserRecord(snapshot: Snapshot)
 
@@ -100,9 +100,9 @@ interface FactoryProvider {
                 projectsFactory: ProjectsFactory,
                 friendsFactory: FriendsFactory,
                 deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp,
-                readTime: ExactTimeStamp,
-                domainDisposable: CompositeDisposable
+                startTime: ExactTimeStamp.Local,
+                readTime: ExactTimeStamp.Local,
+                domainDisposable: CompositeDisposable,
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 myUserFactory,

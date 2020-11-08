@@ -21,9 +21,9 @@ data class GroupListDataWrapper(
             override val taskKey: TaskKey,
             override val name: String,
             val children: List<TaskData>,
-            val startExactTimeStamp: ExactTimeStamp,
+            val startExactTimeStamp: ExactTimeStamp.Local,
             override val note: String?,
-            val imageState: ImageState?
+            val imageState: ImageState?,
     ) : SelectedData {
 
         init {
@@ -37,7 +37,7 @@ data class GroupListDataWrapper(
     }
 
     data class InstanceData(
-            var done: ExactTimeStamp?,
+            var done: ExactTimeStamp.Local?,
             val instanceKey: InstanceKey,
             var displayText: String?,
             override val name: String,
@@ -54,7 +54,7 @@ data class GroupListDataWrapper(
             var ordinal: Double,
             var notificationShown: Boolean,
             val imageState: ImageState?,
-            val isRecurringGroupChild: Boolean
+            val isRecurringGroupChild: Boolean,
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
 
         lateinit var instanceDataParent: InstanceDataParent

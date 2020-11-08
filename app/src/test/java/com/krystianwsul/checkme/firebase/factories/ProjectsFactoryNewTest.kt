@@ -125,7 +125,7 @@ class ProjectsFactoryNewTest {
                 initialProjectEvent!!,
                 sharedProjectsLoader,
                 initialProjectsEvent!!,
-                ExactTimeStamp.now,
+                ExactTimeStamp.Local.now,
                 factoryProvider,
                 compositeDisposable
         ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
@@ -225,7 +225,7 @@ class ProjectsFactoryNewTest {
 
         val date = Date.today()
         val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.now
+        val done = ExactTimeStamp.Local.now
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
 
         emissionChecker.checkRemote {
@@ -383,7 +383,7 @@ class ProjectsFactoryNewTest {
                 .single()
                 .getInstance(DateTime(date, Time.Normal(hourMinute)))
 
-        val done = ExactTimeStamp.now
+        val done = ExactTimeStamp.Local.now
 
         instance.setDone(mockk(relaxed = true), true, done)
         projectsFactory.save()
@@ -425,7 +425,7 @@ class ProjectsFactoryNewTest {
 
         val date = Date.today()
         val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.now
+        val done = ExactTimeStamp.Local.now
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
 
         emissionChecker.checkRemote {
@@ -477,7 +477,7 @@ class ProjectsFactoryNewTest {
 
         val sharedProject = projectsFactory.createProject(
                 "sharedProject",
-                ExactTimeStamp.now,
+                ExactTimeStamp.Local.now,
                 setOf(),
                 mockk(relaxed = true) {
                     every { userJson } returns UserJson()
@@ -605,7 +605,7 @@ class ProjectsFactoryNewTest {
 
         val date = Date.today()
         val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.now
+        val done = ExactTimeStamp.Local.now
         val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
 
         emissionChecker.checkRemote {

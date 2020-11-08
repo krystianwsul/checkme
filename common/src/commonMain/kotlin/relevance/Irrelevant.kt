@@ -11,8 +11,8 @@ object Irrelevant {
     fun setIrrelevant(
             parent: Project.Parent,
             project: Project<*>,
-            now: ExactTimeStamp,
-            delete: Boolean = true
+            now: ExactTimeStamp.Local,
+            delete: Boolean = true,
     ): Result {
         val tasks = project.tasks
 
@@ -29,7 +29,7 @@ object Irrelevant {
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances
-        val rootInstances = project.getRootInstances(null, now.plusOne(), now).toList()
+        val rootInstances = project.getRootInstances(null, now.toOffset().plusOne(), now).toList()
 
         val instanceRelevances = (existingInstances + rootInstances)
                 .asSequence()
@@ -37,10 +37,10 @@ object Irrelevant {
                 .associate { it.instanceKey to InstanceRelevance(it) }
                 .toMutableMap()
 
-        val yesterday = ExactTimeStamp(now.toDateTimeSoy() - 1.days)
+        val yesterday = ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
 
         // delay deleting removed tasks by a day
-        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday }
+        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp.Local?) = endExactTimeStamp?.takeIf { it > yesterday }
                 ?.minusOne()
                 ?: now
 
@@ -90,9 +90,9 @@ object Irrelevant {
                         ", name: " +
                         it.name +
                         ", parent: " +
-                        it.getParentName(ExactTimeStamp.now) +
+                        it.getParentName(ExactTimeStamp.Local.now) +
                         ", parent exists: " +
-                        it.getParentInstance(ExactTimeStamp.now)?.instance?.exists()
+                        it.getParentInstance(ExactTimeStamp.Local.now)?.instance?.exists()
             })
         }
 

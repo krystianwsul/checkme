@@ -12,17 +12,17 @@ class TaskHierarchy<T : ProjectType>(
         private val taskHierarchyRecord: TaskHierarchyRecord
 ) : TaskParentEntry {
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp(taskHierarchyRecord.startTime) }
+    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
 
     override val startExactTimeStampOffset by lazy {
-        taskHierarchyRecord.run { ExactTimeStamp.fromOffset(startTime, startTimeOffset) }
+        taskHierarchyRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
     }
 
-    override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
+    override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     override val endExactTimeStampOffset
         get() = taskHierarchyRecord.endTime?.let {
-            ExactTimeStamp.fromOffset(it, taskHierarchyRecord.endTimeOffset)
+            ExactTimeStamp.Offset.fromOffset(it, taskHierarchyRecord.endTimeOffset)
         }
 
     val parentTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.parentTaskId) }
@@ -38,10 +38,10 @@ class TaskHierarchy<T : ProjectType>(
 
     val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
 
-    fun isParentGroupTask(now: ExactTimeStamp) = parentTask.isGroupTask(now)
+    fun isParentGroupTask(now: ExactTimeStamp.Local) = parentTask.isGroupTask(now)
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        requireCurrent(endExactTimeStamp)
+        requireCurrentOffset(endExactTimeStamp)
 
         taskHierarchyRecord.endTime = endExactTimeStamp.long
         taskHierarchyRecord.endTimeOffset = endExactTimeStamp.offset
@@ -49,7 +49,7 @@ class TaskHierarchy<T : ProjectType>(
         invalidateTasks()
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         taskHierarchyRecord.endTime = null

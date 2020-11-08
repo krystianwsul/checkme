@@ -158,7 +158,7 @@ fun <T> Observable<NullableWrapper<T>>.filterNotNull() =
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
-        ExactTimeStamp.now,
+        ExactTimeStamp.Local.now,
         projectsFactory.privateProject.taskIds
 )
 

@@ -9,25 +9,26 @@ class NoScheduleOrParent<T : ProjectType>(
         private val noScheduleOrParentRecord: NoScheduleOrParentRecord<T>
 ) : TaskParentEntry {
 
-    override val startExactTimeStamp = ExactTimeStamp(noScheduleOrParentRecord.startTime)
+    override val startExactTimeStamp = ExactTimeStamp.Local(noScheduleOrParentRecord.startTime)
 
     override val startExactTimeStampOffset by lazy {
-        noScheduleOrParentRecord.run { ExactTimeStamp.fromOffset(startTime, startTimeOffset) }
+        noScheduleOrParentRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
     }
 
-    override val endExactTimeStamp get() = noScheduleOrParentRecord.endTime?.let(::ExactTimeStamp)
+    override val endExactTimeStamp get() = noScheduleOrParentRecord.endTime?.let(ExactTimeStamp::Local)
 
     override val endExactTimeStampOffset
         get() = noScheduleOrParentRecord.endTime?.let {
-            ExactTimeStamp.fromOffset(it, noScheduleOrParentRecord.endTimeOffset)
+            ExactTimeStamp.Offset.fromOffset(it, noScheduleOrParentRecord.endTimeOffset)
         }
 
     val id = noScheduleOrParentRecord.id
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        requireCurrent(endExactTimeStamp)
+        requireCurrentOffset(endExactTimeStamp)
 
         noScheduleOrParentRecord.endTime = endExactTimeStamp.long
+        noScheduleOrParentRecord.endTimeOffset = endExactTimeStamp.offset
 
         task.invalidateIntervals()
     }

@@ -28,7 +28,7 @@ class SharedProjectFactory(
             projectRecord as SharedProjectRecord,
             rootInstanceManagers
     ) { newRootInstanceManager(it, null) }.apply {
-        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
+        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
         updateDeviceDbInfo(deviceDbInfo())
     }
 }

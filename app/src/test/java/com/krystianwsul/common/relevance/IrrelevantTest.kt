@@ -48,7 +48,7 @@ class IrrelevantTest {
 
         val parent = mockk<Project.Parent>()
 
-        var now = ExactTimeStamp(day1, hour1)
+        var now = ExactTimeStamp.Local(day1, hour1)
 
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
@@ -59,7 +59,7 @@ class IrrelevantTest {
             }
         }
 
-        now = ExactTimeStamp(day1, hour2)
+        now = ExactTimeStamp.Local(day1, hour2)
 
         val scheduleWrapper = ScheduleWrapper(
                 singleScheduleJson = SingleScheduleJson(
@@ -82,7 +82,7 @@ class IrrelevantTest {
 
         // 2: once reminded, add one hour
 
-        now = ExactTimeStamp(day1, hour3)
+        now = ExactTimeStamp.Local(day1, hour3)
 
         val instance = task.getPastRootInstances(now).single()
 
@@ -94,7 +94,7 @@ class IrrelevantTest {
 
         // 3: after second reminder, remove schedule, then set reminder done
 
-        now = ExactTimeStamp(day1, hour4.toHourMilli())
+        now = ExactTimeStamp.Local(day1, hour4.toHourMilli())
 
         task.apply {
             endAllCurrentTaskHierarchies(now)
@@ -115,7 +115,7 @@ class IrrelevantTest {
 
         // 4: next day, task should still be reminderless, instead of ending up with expired schedule again
 
-        now = ExactTimeStamp(day2, hour1)
+        now = ExactTimeStamp.Local(day2, hour1)
 
         Irrelevant.setIrrelevant(parent, project, now)
 
@@ -134,7 +134,7 @@ class IrrelevantTest {
 
         val parent = mockk<Project.Parent>()
 
-        var now = ExactTimeStamp(day1, hour1)
+        var now = ExactTimeStamp.Local(day1, hour1)
 
         val singleScheduleWrapper = ScheduleWrapper(
                 singleScheduleJson = SingleScheduleJson(
@@ -195,7 +195,7 @@ class IrrelevantTest {
 
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
 
-        now = ExactTimeStamp(day1, hour2)
+        now = ExactTimeStamp.Local(day1, hour2)
 
         val instance = task.getPastRootInstances(now).single()
 
@@ -208,7 +208,7 @@ class IrrelevantTest {
 
         // 3. Check both instance and schedule removed next day
 
-        now = ExactTimeStamp(day2, hour3)
+        now = ExactTimeStamp.Local(day2, hour3)
 
         assertFalse(task.getPastRootInstances(now).single().isVisible(now, true))
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)

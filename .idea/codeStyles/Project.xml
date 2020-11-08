@@ -17,6 +17,7 @@
           <package name="" alias="true" withSubpackages="true" />
         </value>
       </option>
+      <option name="ALLOW_TRAILING_COMMA" value="true" />
     </JetCodeStyleSettings>
     <codeStyleSettings language="XML">
       <indentOptions>

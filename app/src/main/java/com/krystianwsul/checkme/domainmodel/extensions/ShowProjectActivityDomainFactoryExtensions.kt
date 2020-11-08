@@ -47,7 +47,7 @@ fun DomainFactory.createProject(
 
     check(name.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val recordOf = friends.toMutableSet()
 
@@ -84,7 +84,7 @@ fun DomainFactory.updateProject(
 
     check(name.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
 

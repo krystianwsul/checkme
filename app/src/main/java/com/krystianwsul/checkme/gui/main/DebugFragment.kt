@@ -55,7 +55,7 @@ class DebugFragment : AbstractFragment() {
                 val lastTick = Preferences.lastTick
                 val tickLog = Preferences.tickLog.log
 
-                val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
+                val lastTickExactTimeStamp = ExactTimeStamp.Local(lastTick)
 
                 val domainFactory = DomainFactory.instance
 
@@ -86,9 +86,9 @@ class DebugFragment : AbstractFragment() {
                 append("\n\n")
                 append(Preferences.saveLog.log)
 
-                val t1 = ExactTimeStamp.now
-                DomainFactory.instance.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
-                val t2 = ExactTimeStamp.now
+                val t1 = ExactTimeStamp.Local.now
+                DomainFactory.instance.getGroupListData(ExactTimeStamp.Local.now, 0, MainActivity.TimeRange.DAY)
+                val t2 = ExactTimeStamp.Local.now
 
                 append("\n\ntoday: ")
                 append(t2.long - t1.long)

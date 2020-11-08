@@ -28,6 +28,6 @@ class PrivateProjectFactory(
             projectRecord as PrivateProjectRecord,
             rootInstanceManagers
     ) { newRootInstanceManager(it, null) }.apply {
-        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.now)
+        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
     }
 }

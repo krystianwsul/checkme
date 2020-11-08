@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.CurrentOffset
 import com.krystianwsul.common.utils.ProjectType
 
 class NoScheduleOrParentInterval<T : ProjectType>(
-        override val startExactTimeStampOffset: ExactTimeStamp,
-        override val endExactTimeStampOffset: ExactTimeStamp?,
-        val noScheduleOrParent: NoScheduleOrParent<T>
+        override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+        override val endExactTimeStampOffset: ExactTimeStamp.Offset?,
+        val noScheduleOrParent: NoScheduleOrParent<T>,
 ) : CurrentOffset

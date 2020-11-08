@@ -18,7 +18,7 @@ import java.util.*
 fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getMainData")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val childTaskDatas = getTasks().map {
         val hierarchyDateTime = it.getHierarchyExactTimeStamp(now)
@@ -50,16 +50,16 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
 }
 
 fun DomainFactory.getGroupListData(
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         position: Int,
-        timeRange: MainActivity.TimeRange
+        timeRange: MainActivity.TimeRange,
 ): DayViewModel.DayData = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
     check(position >= 0)
 
-    val startExactTimeStamp: ExactTimeStamp?
-    val endExactTimeStamp: ExactTimeStamp
+    val startExactTimeStamp: ExactTimeStamp.Offset?
+    val endExactTimeStamp: ExactTimeStamp.Offset
 
     if (position == 0) {
         startExactTimeStamp = null
@@ -78,7 +78,7 @@ fun DomainFactory.getGroupListData(
             }
         }
 
-        startExactTimeStamp = Date(startCalendar.toDateTimeTz()).toMidnightExactTimeStamp()
+        startExactTimeStamp = Date(startCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
     }
 
     val endCalendar = now.calendar
@@ -95,7 +95,7 @@ fun DomainFactory.getGroupListData(
         }
     }
 
-    endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp()
+    endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
 
     val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now).toList()
 

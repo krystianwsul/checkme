@@ -40,7 +40,7 @@ fun Calendar.toDateTimeTz() = toDateTimeSoy().local
 
 val ExactTimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 
-fun DateTimeJoda.toExactTimeStamp() = ExactTimeStamp(millis)
+fun DateTimeJoda.toExactTimeStamp() = ExactTimeStamp.Local(millis)
 
 val TimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 

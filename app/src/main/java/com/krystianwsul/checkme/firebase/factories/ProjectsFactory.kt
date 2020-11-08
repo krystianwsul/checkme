@@ -27,10 +27,10 @@ class ProjectsFactory(
         privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
         private val sharedProjectsLoader: SharedProjectsLoader,
         sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
-        now: ExactTimeStamp,
+        now: ExactTimeStamp.Local,
         private val factoryProvider: FactoryProvider,
         private val domainDisposable: CompositeDisposable,
-        deviceDbInfo: () -> DeviceDbInfo
+        deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
     private val privateProjectFactory = PrivateProjectFactory(
@@ -171,7 +171,7 @@ class ProjectsFactory(
     val savedList get() = privateProjectFactory.savedList + sharedProjectFactories.values.flatMap { it.savedList }
 
     fun createScheduleRootTask(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             note: String?,
@@ -179,7 +179,7 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             allReminders: Boolean = true,
-            ordinal: Double? = null
+            ordinal: Double? = null,
     ): Task<*> {
         return createTaskHelper(
                 now,
@@ -193,13 +193,13 @@ class ProjectsFactory(
     }
 
     fun createNoScheduleOrParentTask(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             projectKey: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
-            ordinal: Double? = null
+            ordinal: Double? = null,
     ) = createTaskHelper(
             now,
             name,
@@ -211,13 +211,13 @@ class ProjectsFactory(
     ).apply { setNoScheduleOrParent(now) }
 
     private fun createTaskHelper(
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             projectId: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
-            ordinal: Double? = null
+            ordinal: Double? = null,
     ): Task<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
 
@@ -236,11 +236,11 @@ class ProjectsFactory(
 
     fun createProject(
             name: String,
-            now: ExactTimeStamp,
+            now: ExactTimeStamp.Local,
             recordOf: Set<UserKey>,
             rootUser: RootUser,
             userInfo: UserInfo,
-            friendsFactory: FriendsFactory
+            friendsFactory: FriendsFactory,
     ): SharedProject {
         check(name.isNotEmpty())
 

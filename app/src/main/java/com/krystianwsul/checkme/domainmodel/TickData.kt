@@ -37,9 +37,9 @@ sealed class TickData {
 
     class Lock(
             override val source: String,
-            val expires: ExactTimeStamp = DateTime.now()
+            val expires: ExactTimeStamp.Local = DateTime.now()
                     .plusMillis(DURATION)
-                    .toExactTimeStamp()
+                    .toExactTimeStamp(),
     ) : TickData() {
 
         override val silent = false
@@ -52,10 +52,10 @@ sealed class TickData {
         }
 
         private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
-            acquire(expires.long - ExactTimeStamp.now.long)
+            acquire(expires.long - ExactTimeStamp.Local.now.long)
         }
 
-        override val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
+        override val shouldClear get() = expires < ExactTimeStamp.Local.now || !wakelock.isHeld
 
         override val waiting = true
 

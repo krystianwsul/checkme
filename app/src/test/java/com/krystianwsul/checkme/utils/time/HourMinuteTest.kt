@@ -14,7 +14,7 @@ class HourMinuteTest {
     fun testGetNextHourNormal() {
         val date = Date(2016, 1, 1)
 
-        val now = ExactTimeStamp(Date(2015, 1, 1), HourMilli(1, 5, 0, 0))
+        val now = ExactTimeStamp.Local(Date(2015, 1, 1), HourMilli(1, 5, 0, 0))
 
         val (first, second) = HourMinute.getNextHour(date, now)
 
@@ -26,7 +26,7 @@ class HourMinuteTest {
     fun testGetNextHourAfter23() {
         val date = Date(2016, 1, 1)
 
-        val now = ExactTimeStamp(Date(2015, 1, 1), HourMilli(23, 5, 0, 0))
+        val now = ExactTimeStamp.Local(Date(2015, 1, 1), HourMilli(23, 5, 0, 0))
 
         val (first, second) = HourMinute.getNextHour(date, now)
 

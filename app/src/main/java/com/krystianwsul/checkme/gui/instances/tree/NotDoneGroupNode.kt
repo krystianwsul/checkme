@@ -36,7 +36,7 @@ class NotDoneGroupNode(
 
     private var singleInstanceNodeCollection: NodeCollection? = null
 
-    val exactTimeStamp: ExactTimeStamp
+    val exactTimeStamp: ExactTimeStamp.Local
 
     val singleInstanceData get() = instanceDatas.single()
 
@@ -52,9 +52,9 @@ class NotDoneGroupNode(
         exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
                 .distinct()
                 .single()
-                .toExactTimeStamp()
+                .toLocalExactTimeStamp()
 
-        check(instanceDatas.all { it.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
+        check(instanceDatas.all { it.instanceTimeStamp.toLocalExactTimeStamp() == exactTimeStamp })
     }
 
     fun initialize(
@@ -349,7 +349,7 @@ class NotDoneGroupNode(
     }
 
     fun addInstanceData(instanceData: GroupListDataWrapper.InstanceData, placeholder: TreeViewAdapter.Placeholder) {
-        check(instanceData.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
+        check(instanceData.instanceTimeStamp.toLocalExactTimeStamp() == exactTimeStamp)
 
         check(instanceDatas.isNotEmpty())
         if (instanceDatas.size == 1) {
@@ -429,7 +429,7 @@ class NotDoneGroupNode(
 
     data class SingleId(val instanceKey: InstanceKey)
 
-    class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp) {
+    class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp.Local) {
 
         override fun hashCode() = 1
 

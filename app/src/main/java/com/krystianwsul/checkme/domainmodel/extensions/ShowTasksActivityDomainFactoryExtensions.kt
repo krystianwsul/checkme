@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.TaskKey
 fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel.Data = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val copying = taskKeys != null
 

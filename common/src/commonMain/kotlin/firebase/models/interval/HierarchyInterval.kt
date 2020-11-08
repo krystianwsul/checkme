@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.CurrentOffset
 import com.krystianwsul.common.utils.ProjectType
 
 class HierarchyInterval<T : ProjectType>(
-        override val startExactTimeStampOffset: ExactTimeStamp,
-        override val endExactTimeStampOffset: ExactTimeStamp?,
-        val taskHierarchy: TaskHierarchy<T>
+        override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+        override val endExactTimeStampOffset: ExactTimeStamp.Offset?,
+        val taskHierarchy: TaskHierarchy<T>,
 ) : CurrentOffset

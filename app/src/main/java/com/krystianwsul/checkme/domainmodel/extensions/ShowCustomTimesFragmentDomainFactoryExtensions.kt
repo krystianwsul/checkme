@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ProjectType
 fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val entries = getCurrentRemoteCustomTimes(now).map {
         val days = it.hourMinutes
@@ -49,7 +49,7 @@ fun DomainFactory.setCustomTimesCurrent(
 
     check(customTimeIds.isNotEmpty())
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
     val endExactTimeStamp = now.takeUnless { current }
 
     for (customTimeId in customTimeIds) {

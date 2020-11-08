@@ -73,7 +73,7 @@ class JoinTasksEditDelegate(
     ): TaskKey {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
-                        ExactTimeStamp.now,
+                        ExactTimeStamp.Local.now,
                         data.dataId,
                         SaveService.Source.GUI,
                         createParameters.name,

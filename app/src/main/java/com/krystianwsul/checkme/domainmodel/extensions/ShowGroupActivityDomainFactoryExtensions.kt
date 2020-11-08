@@ -17,7 +17,7 @@ import java.util.*
 fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
 
-    val now = ExactTimeStamp.now
+    val now = ExactTimeStamp.Local.now
 
     val date = timeStamp.date
     val dayOfWeek = date.dayOfWeek
@@ -34,12 +34,12 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
 
 private fun DomainFactory.getGroupListData(
         timeStamp: TimeStamp,
-        now: ExactTimeStamp
+        now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
-    val endExactTimeStamp = ExactTimeStamp(endCalendar.toDateTimeSoy())
+    val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 
-    val rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endExactTimeStamp, now).toList()
+    val rootInstances = getRootInstances(timeStamp.toLocalExactTimeStamp().toOffset(), endExactTimeStamp, now).toList()
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 

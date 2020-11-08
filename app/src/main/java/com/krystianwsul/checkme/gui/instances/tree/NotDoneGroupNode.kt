@@ -463,7 +463,7 @@ class NotDoneGroupNode(
                         ?.takeIf { it.isNotEmpty() }
                         ?.sorted()
                         ?.joinToString(", ") { it.singleInstanceData.name }
-                        ?: instanceData.note
+                        ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
 
                 return text?.let {
                     Pair(it, if (!instanceData.taskCurrent) colorDisabled else colorSecondary)

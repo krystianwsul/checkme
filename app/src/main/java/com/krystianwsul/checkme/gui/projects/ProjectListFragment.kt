@@ -280,8 +280,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val details get() = Pair(projectData.users, colorSecondary)
 
-            override val children: Pair<String, Int>? = null
-
             override val itemViewType = 0
 
             override val isSelectable = true

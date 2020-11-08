@@ -324,7 +324,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                             ?.map { it.modelNode as TaskAdapter.TaskWrapper }
                             ?.takeIf { it.isNotEmpty() }
                             ?.joinToString(", ") { it.parentTreeData.name }
-                            ?: parentTreeData.note
+                            ?: parentTreeData.note.takeIf { !it.isNullOrEmpty() }
 
                     return text?.let { Pair(it, colorSecondary) }
                 }

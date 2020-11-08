@@ -84,7 +84,7 @@ class TaskNode(
                     ?.map { it.modelNode as TaskNode }
                     ?.takeIf { it.isNotEmpty() }
                     ?.joinToString(", ") { it.taskData.name }
-                    ?: taskData.note
+                    ?: taskData.note.takeIf { !it.isNullOrEmpty() }
 
             return text?.let { Pair(it, colorSecondary) }
         }

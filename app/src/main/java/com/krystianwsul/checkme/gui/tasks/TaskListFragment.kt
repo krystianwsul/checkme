@@ -630,7 +630,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             ?.map { it.modelNode as TaskWrapper }
                             ?.takeIf { it.isNotEmpty() }
                             ?.joinToString(", ") { it.childTaskData.name }
-                            ?: childTaskData.note
+                            ?: childTaskData.note.takeIf { !it.isNullOrEmpty() }
 
                     return text?.let { Pair(it, disabledOverride ?: colorSecondary) }
                 }

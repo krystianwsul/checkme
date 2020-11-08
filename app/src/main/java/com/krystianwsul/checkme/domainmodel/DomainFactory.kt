@@ -31,6 +31,7 @@ import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
+import com.soywiz.klock.hours
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -646,7 +647,9 @@ class DomainFactory(
 
     private fun setIrrelevant(now: ExactTimeStamp) {
         if (false) {
-            val tomorrow = ExactTimeStamp(now.toDateTimeSoy() + 1.days)
+            val tomorrow = (DateTimeSoy.now() + 1.days).date
+            val dateTimeSoy = DateTimeSoy(tomorrow, com.soywiz.klock.Time(2.hours))
+            val exactTimeStamp = ExactTimeStamp(dateTimeSoy)
 
             projectsFactory.projects
                     .values
@@ -659,7 +662,7 @@ class DomainFactory(
                                     }
                                 },
                                 it,
-                                tomorrow,
+                                exactTimeStamp,
                                 false
                         )
 

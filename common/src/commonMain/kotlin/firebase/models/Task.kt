@@ -77,8 +77,7 @@ class Task<T : ProjectType>(
 
     val imageJson get() = taskRecord.image
 
-    private val parentTaskHierarchiesProperty =
-            invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
+    private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
     private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }

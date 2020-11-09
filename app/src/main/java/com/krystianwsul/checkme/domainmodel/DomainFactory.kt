@@ -671,7 +671,7 @@ class DomainFactory(
                                 .forEach { Log.e("asdf", "irrelevant instance: $it") }
                     }
 
-            throw Exception()
+            throw Exception("Irrelevant.setIrrelevant write prevented")
         }
 
         val instances = projectsFactory.projects

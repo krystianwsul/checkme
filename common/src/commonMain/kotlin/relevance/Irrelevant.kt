@@ -90,9 +90,9 @@ object Irrelevant {
                         ", name: " +
                         it.name +
                         ", parent: " +
-                        it.getParentName(ExactTimeStamp.Local.now) +
+                        it.getParentName(now) +
                         ", parent exists: " +
-                        it.getParentInstance(ExactTimeStamp.Local.now)?.instance?.exists()
+                        it.getParentInstance(now)?.instance?.exists()
             })
         }
 

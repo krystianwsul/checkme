@@ -266,12 +266,14 @@ abstract class Project<T : ProjectType> : Current {
         projectUndoData.projectIds.add(projectKey)
 
         projectRecord.endTime = now.long
+        projectRecord.endTimeOffset = now.offset
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         projectRecord.endTime = null
+        projectRecord.endTimeOffset = null
     }
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)

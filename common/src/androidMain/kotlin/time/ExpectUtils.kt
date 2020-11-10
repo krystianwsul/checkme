@@ -10,3 +10,4 @@ private val timeFormat = DateTimeFormat.forStyle("-S")
 
 actual fun DateTimeTz.formatDate() = dateFormat.print(LocalDate(yearInt, month1, dayOfMonth))!!
 actual fun DateTimeTz.formatTime() = timeFormat.print(LocalTime(hours, minutes))!!
+actual fun TimeSoy.formatTime() = timeFormat.print(LocalTime(hour, minute))!!

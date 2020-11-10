@@ -3,10 +3,7 @@ package com.krystianwsul.common.time
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.Serializable
-import com.soywiz.klock.DateFormat
-import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.hours
-import com.soywiz.klock.parse
+import com.soywiz.klock.*
 
 @Parcelize
 data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, Parcelable, Serializable {
@@ -14,7 +11,8 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
     companion object {
 
         private const val PATTERN = "HH:mm"
-        private val format = DateFormat(PATTERN)
+        private val dateFormat = DateFormat(PATTERN)
+        private val timeFormat = TimeFormat(PATTERN)
 
         val now get() = TimeStamp.now.hourMinute
 
@@ -27,18 +25,18 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
                 .plus(1.hours)
                 .let { Pair(Date(it), HourMinute(it)) }
 
-        fun fromJson(json: String) = format.parse(json).let { HourMinute(it.hours, it.minutes) }
+        fun fromJson(json: String) = dateFormat.parse(json).let { HourMinute(it.hours, it.minutes) }
     }
 
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.hours, dateTimeTz.minutes)
 
     override fun compareTo(other: HourMinute) = compareValuesBy(this, other, { it.hour }, { it.minute })
 
-    override fun toString() = toDateTimeTz().formatTime()
+    override fun toString() = toTimeSoy().formatTime()
 
     fun toHourMilli() = HourMilli(hour, minute, 0, 0)
 
-    fun toJson() = toDateTimeTz().format(format)
+    fun toJson() = toTimeSoy().format(timeFormat)
 
-    fun toDateTimeTz() = TimeStamp(Date.today(), this).toDateTimeTz()
+    private fun toTimeSoy() = TimeSoy(hour, minute)
 }

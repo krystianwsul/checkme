@@ -1,11 +1,7 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMilli
-import com.krystianwsul.common.time.HourMinute
 import org.junit.Assert
-
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HourMinuteTest {
@@ -32,5 +28,15 @@ class HourMinuteTest {
 
         Assert.assertTrue(first == Date(2016, 1, 2))
         Assert.assertTrue(second == HourMinute(0, 0))
+    }
+
+    @Test
+    fun testToJson() {
+        assertEquals("01:05", HourMinute(1, 5).toJson())
+    }
+
+    @Test
+    fun testToString() {
+        assertEquals("1:05 AM", HourMinute(1, 5).toString())
     }
 }

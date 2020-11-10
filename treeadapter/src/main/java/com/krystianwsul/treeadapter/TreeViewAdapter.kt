@@ -22,7 +22,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         private val compositeDisposable: CompositeDisposable
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
-    internal var filterCriteria: Any? = null
+    internal var filterCriteria: FilterCriteria? = null
         private set
 
     companion object {
@@ -94,7 +94,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         if (newFilterCriteria?.let { it != oldFilterCriteria } == true) {
             treeNodeCollection!!.apply {
                 collapseAll()
-                expandMatching(newFilterCriteria)
+
+                if (newFilterCriteria.hasQuery) expandMatching(newFilterCriteria)
             }
         }
 
@@ -236,7 +237,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
-    fun setFilterCriteria(filterCriteria: Any?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
+    fun setFilterCriteria(filterCriteria: FilterCriteria?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 
         if (normalizedObservable.getCurrentValue()) {
@@ -268,5 +269,10 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
             val instance = Placeholder()
         }
+    }
+
+    interface FilterCriteria {
+
+        val hasQuery: Boolean
     }
 }

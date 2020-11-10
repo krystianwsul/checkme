@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -182,7 +183,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private fun search(query: String, placeholder: TreeViewAdapter.Placeholder) {
         this.query = query
-        treeViewAdapter!!.setFilterCriteria(query.takeIf { it.isNotEmpty() }, placeholder)
+
+        treeViewAdapter!!.setFilterCriteria(
+                query.takeIf { it.isNotEmpty() }?.let { SearchData(it, false) },
+                placeholder
+        )
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :

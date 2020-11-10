@@ -297,9 +297,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     private fun matches(filterCriteria: Any?) = modelNode.matches(filterCriteria)
 
-    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes?.any {
+    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes!!.any {
         it.matches(filterCriteria) || it.hasMatchingChild(filterCriteria)
-    } == true
+    }
 
     private fun visible(): Boolean {
         if (childTreeNodes == null)

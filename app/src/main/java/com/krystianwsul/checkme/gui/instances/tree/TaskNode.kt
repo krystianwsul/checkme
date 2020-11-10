@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
@@ -99,7 +100,7 @@ class TaskNode(
 
     override val thumbnail = taskData.imageState
 
-    override fun matches(filterCriteria: Any?) = false
+    override fun matches(filterCriteria: Any?) = taskData.matchesQuery((filterCriteria as? SearchData)?.query)
 
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 }

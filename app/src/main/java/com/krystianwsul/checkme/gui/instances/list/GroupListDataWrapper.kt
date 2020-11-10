@@ -24,11 +24,14 @@ data class GroupListDataWrapper(
             val startExactTimeStamp: ExactTimeStamp.Local,
             override val note: String?,
             val imageState: ImageState?,
-    ) : SelectedData {
+    ) : SelectedData, QueryMatch {
 
         init {
             check(name.isNotEmpty())
         }
+
+        override val normalizedName by lazy { name.normalized() }
+        override val normalizedNote by lazy { note?.normalized() }
 
         override val taskCurrent = true
         override val taskVisible = true

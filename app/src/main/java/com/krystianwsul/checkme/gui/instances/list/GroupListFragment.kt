@@ -650,7 +650,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    private var previousQuery: String? = null
+    private lateinit var previousQuery: String
 
     private fun initialize() {
         if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
@@ -675,7 +675,7 @@ class GroupListFragment @JvmOverloads constructor(
                 search(searchData, placeholder)
 
                 (parameters as? GroupListParameters.Search)?.let {
-                    if (previousQuery != null && previousQuery != it.query)
+                    if (previousQuery != it.query)
                         treeViewAdapter.updateSearchExpansion(SearchData(it.query, false), placeholder)
 
                     previousQuery = it.query
@@ -707,6 +707,8 @@ class GroupListFragment @JvmOverloads constructor(
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
+
+            (parameters as? GroupListParameters.Search)?.let { previousQuery = it.query }
         }
 
         setGroupMenuItemVisibility()

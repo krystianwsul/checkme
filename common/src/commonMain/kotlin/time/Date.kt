@@ -31,11 +31,11 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 
-    override fun toString() = toDateTimeTz().formatDate()
+    override fun toString() = toDateSoy().formatDate()
 
-    fun toJson() = toDateTimeTz().format(ISO8601.DATE_CALENDAR_COMPLETE)
+    fun toJson() = toDateSoy().format(ISO8601.DATE_CALENDAR_COMPLETE)
 
-    fun toDateTimeTz() = TimeStamp(this, HourMinute.now).toDateTimeTz()
+    fun toDateSoy() = DateSoy(year, month, day)
 
     fun toMidnightExactTimeStamp() = ExactTimeStamp.Local(this, HourMilli(0, 0, 0, 0))
 }

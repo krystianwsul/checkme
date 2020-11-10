@@ -26,7 +26,7 @@ class WeeklySchedule<T : ProjectType>(
         if (dayOfWeek != day) return false
 
         if (interval != 1) {
-            val timeSpan = date.toDateTimeTz() - from!!.toDateTimeTz()
+            val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
             if (timeSpan.weeks.toInt().rem(interval) != 0) return false
         }
 

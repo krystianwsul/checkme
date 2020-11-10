@@ -577,7 +577,8 @@ class MainActivity :
                         it.dataId,
                         it.immediate,
                         it.groupListDataWrapper,
-                        it.showLoader
+                        it.showLoader,
+                        it.query
                 ))
             }
                     .map { Unit }

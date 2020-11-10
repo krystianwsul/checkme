@@ -30,7 +30,8 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
 
     data class Data(
             val groupListDataWrapper: GroupListDataWrapper,
-            val showLoader: Boolean
+            val showLoader: Boolean,
+            val query: String,
     ) : DomainData()
 
     private data class Parameters(val query: String = "", val page: Int = 0)

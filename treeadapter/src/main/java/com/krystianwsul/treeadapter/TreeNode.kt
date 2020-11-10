@@ -399,10 +399,10 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (expanded) expanded = false
     }
 
-    fun expandMatching(filterCriteria: Any) {
+    fun expandMatching(filterCriteria: Any, placeholder: TreeViewAdapter.Placeholder) {
         if (hasMatchingChild(filterCriteria) && childTreeNodes!!.isNotEmpty()) expanded = true
 
-        childTreeNodes!!.forEach { it.expandMatching(filterCriteria) }
+        childTreeNodes!!.forEach { it.expandMatching(filterCriteria, placeholder) }
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

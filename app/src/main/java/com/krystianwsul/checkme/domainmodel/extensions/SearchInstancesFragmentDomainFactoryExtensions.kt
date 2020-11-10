@@ -101,7 +101,7 @@ fun DomainFactory.getSearchInstancesData(
 
             cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-            SearchInstancesViewModel.Data(dataWrapper, hasMore)
+            SearchInstancesViewModel.Data(dataWrapper, hasMore, query)
         }
     }
 }

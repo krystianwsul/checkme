@@ -33,8 +33,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     private var treeNodeCollection: TreeNodeCollection<T>? = null
 
     val displayedNodes
-        get() = treeNodeCollection?.displayedNodes
-                ?: throw SetTreeNodeCollectionNotCalledException()
+        get() = treeNodeCollection?.displayedNodes ?: throw SetTreeNodeCollectionNotCalledException()
 
     val selectedNodes
         get() = treeNodeCollection?.selectedNodes ?: throw SetTreeNodeCollectionNotCalledException()
@@ -91,13 +90,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
         val newFilterCriteria = filterCriteria
 
-        if (newFilterCriteria?.let { it != oldFilterCriteria } == true) {
-            treeNodeCollection!!.apply {
-                collapseAll()
-
-                if (newFilterCriteria.hasQuery) expandMatching(newFilterCriteria)
-            }
-        }
+        if (newFilterCriteria?.let { it != oldFilterCriteria } == true)
+            updateSearchExpansion(newFilterCriteria, Placeholder.instance)
 
         updating = false
 
@@ -165,6 +159,14 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         })
 
         updates.accept(Unit)
+    }
+
+    fun updateSearchExpansion(filterCriteria: FilterCriteria, placeholder: Placeholder) {
+        treeNodeCollection!!.apply {
+            collapseAll()
+
+            if (filterCriteria.hasQuery) expandMatching(filterCriteria, placeholder)
+        }
     }
 
     fun unselect(placeholder: Placeholder) = treeNodeCollection?.unselect(placeholder)

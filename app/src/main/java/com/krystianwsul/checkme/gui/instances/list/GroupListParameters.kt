@@ -55,7 +55,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val dataId: Int,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
-            override val showProgress: Boolean
+            override val showProgress: Boolean,
+            val query: String,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false

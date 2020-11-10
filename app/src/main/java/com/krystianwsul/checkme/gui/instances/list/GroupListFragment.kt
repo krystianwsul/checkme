@@ -650,11 +650,13 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
+    private var previousQuery: String? = null
+
     private fun initialize() {
         if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes { placeholder ->
                 (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(
                         parameters.dataId,
                         parameters.groupListDataWrapper.customTimeDatas,
@@ -668,9 +670,16 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.useDoneNode
                 )
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder)
 
-                search(searchData, it)
+                search(searchData, placeholder)
+
+                (parameters as? GroupListParameters.Search)?.let {
+                    if (previousQuery != null && previousQuery != it.query)
+                        treeViewAdapter.updateSearchExpansion(SearchData(it.query, false), placeholder)
+
+                    previousQuery = it.query
+                }
             }
         } else {
             val groupAdapter = GroupAdapter(this, attachedToWindowDisposable)

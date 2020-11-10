@@ -4,11 +4,6 @@ import com.soywiz.klock.DateTimeTz
 
 data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
-    companion object {
-
-        val now get() = DateTime(Date.today(), HourMinute.now)
-    }
-
     constructor(dateTimeTz: DateTimeTz) : this(Date(dateTimeTz), Time.Normal(HourMinute(dateTimeTz)))
 
     constructor(exactTimeStamp: ExactTimeStamp) : this(exactTimeStamp.toDateTimeTz())

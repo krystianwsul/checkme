@@ -81,11 +81,23 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
         val oldStates = displayedNodes.map { it.state }
         val oldShowProgress = showProgress
+        val oldFilterCriteria = filterCriteria
 
         val showPadding = padding != null
 
         updating = true
+
         action(Placeholder.instance)
+
+        val newFilterCriteria = filterCriteria
+
+        if (newFilterCriteria?.let { it != oldFilterCriteria } == true) {
+            treeNodeCollection!!.apply {
+                collapseAll()
+                expandMatching(newFilterCriteria)
+            }
+        }
+
         updating = false
 
         val newStates = displayedNodes.map { it.state }

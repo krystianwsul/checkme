@@ -73,11 +73,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     // hiding
     // showing
     fun onExpandClick() {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
 
-        if (childTreeNodes!!.isEmpty())
-            throw EmptyExpandedException()
+        if (childTreeNodes!!.isEmpty()) throw EmptyExpandedException()
 
         treeViewAdapter.updateDisplayedNodes { placeholder ->
             expanded = if (expanded) { // collapsing
@@ -393,6 +391,18 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         modelNode.normalize()
 
         childTreeNodes!!.forEach { it.normalize() }
+    }
+
+    fun collapseAll() {
+        childTreeNodes!!.forEach { it.collapseAll() }
+
+        if (expanded) expanded = false
+    }
+
+    fun expandMatching(filterCriteria: Any) {
+        if (hasMatchingChild(filterCriteria) && childTreeNodes!!.isNotEmpty()) expanded = true
+
+        childTreeNodes!!.forEach { it.expandMatching(filterCriteria) }
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

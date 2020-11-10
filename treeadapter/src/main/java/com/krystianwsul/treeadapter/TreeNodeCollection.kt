@@ -173,6 +173,14 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
             ?.forEach { it.normalize() }
             ?: throw SetTreeNodesNotCalledException()
 
+    fun collapseAll() {
+        treeNodesRelay.value!!.forEach { it.collapseAll() }
+    }
+
+    fun expandMatching(filterCriteria: Any) {
+        treeNodesRelay.value!!.forEach { it.expandMatching(filterCriteria) }
+    }
+
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")
 
     class SetTreeNodesCalledTwiceException : InitializationException("TreeNodeCollection.setTreeNodes() has already been called.")

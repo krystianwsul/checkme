@@ -215,11 +215,7 @@ class MainActivity :
 
         override fun initBottomBar() = this@MainActivity.initBottomBar()
 
-        override fun deleteTasks(taskKeys: Set<TaskKey>) {
-            RemoveInstancesDialogFragment.newInstance(taskKeys)
-                    .also { it.listener = deleteInstancesListener }
-                    .show(supportFragmentManager, TAG_DELETE_INSTANCES)
-        }
+        override fun deleteTasks(taskKeys: Set<TaskKey>) = this@MainActivity.deleteTasks(taskKeys)
     }
 
     private var searchPage = 0
@@ -296,7 +292,7 @@ class MainActivity :
 
             override fun initBottomBar() = this@MainActivity.initBottomBar()
 
-            override fun deleteTasks(taskKeys: Set<TaskKey>) = throw UnsupportedOperationException()
+            override fun deleteTasks(taskKeys: Set<TaskKey>) = this@MainActivity.deleteTasks(taskKeys)
         }
 
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -636,6 +632,12 @@ class MainActivity :
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
         startDate(dateReceiver)
+    }
+
+    private fun deleteTasks(taskKeys: Set<TaskKey>) {
+        RemoveInstancesDialogFragment.newInstance(taskKeys)
+                .also { it.listener = deleteInstancesListener }
+                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     private sealed class PagerScrollState {

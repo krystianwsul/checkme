@@ -18,8 +18,8 @@ sealed class Type<T : ProjectType> {
 
         override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
 
-        fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
-            if (parentTaskHierarchy.isParentGroupTask(ExactTimeStamp.Local.now)) {
+        fun getHierarchyInterval(interval: Interval<T>, exactTimeStamp: ExactTimeStamp): HierarchyInterval<T> {
+            if (parentTaskHierarchy.isParentGroupTask(exactTimeStamp)) {
                 /*
                 I'm allowing this inconsistency because the only place this should be relevant is
                 for tasks that are children of a group task.

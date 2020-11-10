@@ -90,7 +90,7 @@ class Task<T : ProjectType>(
 
     val parentHierarchyIntervals
         get() = intervals.mapNotNull {
-            (it.type as? Type.Child)?.getHierarchyInterval(it)
+            (it.type as? Type.Child)?.getHierarchyInterval(it, ExactTimeStamp.Local.now)
         }
 
     val noScheduleOrParentIntervals
@@ -239,7 +239,7 @@ class Task<T : ProjectType>(
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireCurrentOffset(exactTimeStamp)
 
-        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it, exactTimeStamp) }
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {

@@ -830,14 +830,12 @@ class MainActivity :
 
         when (tabSearchState) {
             is TabSearchState.Instances -> {
-                if (tabSearchState.isSearching) {
-                    hideFab()
-                } else {
-                    taskListFragment.clearFab()
-                    projectListFragment.clearFab()
-                    showCustomTimesFragment.clearFab()
-                    friendListFragment.clearFab()
-                }
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+
+                if (tabSearchState.isSearching) mainSearchGroupListFragment.setFab(bottomFab)
             }
             is TabSearchState.Tasks -> {
                 projectListFragment.clearFab()

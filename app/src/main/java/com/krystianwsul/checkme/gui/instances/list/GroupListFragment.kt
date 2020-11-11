@@ -793,29 +793,35 @@ class GroupListFragment @JvmOverloads constructor(
         }.getHint()
 
         return if (selectionCallback.hasActionMode) {
-            if (parameters is GroupListParameters.All) {
+            if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
                 val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
                 val singleSelectedData = selectedDatas.singleOrNull()
 
                 if (singleSelectedData != null) {
                     val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData
 
-                    val canAddToTime = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+                    val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.taskVisible
+
+                    val canAddToTime = parameters.fabActionMode.showTime && instanceData?.run {
+                        isRootInstance && instanceTimeStamp > TimeStamp.now
+                    } == true
 
                     when {
-                        canAddToTime && singleSelectedData.taskVisible -> FabState.Visible {
+                        canAddToTime && canAddSubtask -> FabState.Visible {
                             listener.showSubtaskDialog(instanceData!!.run {
                                 SubtaskDialogFragment.ResultData(taskKey, instanceDateTime.date, createTaskTimePair)
                             })
                         }
-                        singleSelectedData.taskVisible -> getStartEditActivityFabState(
+                        canAddSubtask -> getStartEditActivityFabState(
                                 EditActivity.Hint.Task(singleSelectedData.taskKey),
                                 true
                         )
                         canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
                         else -> FabState.Hidden
                     }
-                } else if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
+                } else if (parameters.fabActionMode.showTime
+                        && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
+                ) {
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
                     if (instanceDatas.asSequence()

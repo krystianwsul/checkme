@@ -10,6 +10,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
     open val showProgress: Boolean = false
     open val useDoneNode = true
+    open val fabActionMode = FabActionMode.SUBTASK
 
     data class All(
             override val dataId: Int,
@@ -17,8 +18,11 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val groupListDataWrapper: GroupListDataWrapper,
             val position: Int,
             val timeRange: MainActivity.TimeRange,
-            val differentPage: Boolean
-    ) : GroupListParameters(false)
+            val differentPage: Boolean,
+    ) : GroupListParameters(false) {
+
+        override val fabActionMode = FabActionMode.BOTH
+    }
 
     data class TimeStamp(
             override val dataId: Int,
@@ -60,5 +64,14 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false
+
+        override val fabActionMode = if (query.isEmpty()) FabActionMode.BOTH else FabActionMode.NONE
+    }
+
+    enum class FabActionMode(val showSubtask: Boolean, val showTime: Boolean) {
+
+        NONE(false, false),
+        SUBTASK(true, false),
+        BOTH(true, true)
     }
 }

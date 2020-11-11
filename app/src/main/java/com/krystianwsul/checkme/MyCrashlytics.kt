@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme
 
 import android.util.Log
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.perf.FirebasePerformance
 import com.krystianwsul.common.ErrorLogger
 
 object MyCrashlytics : ErrorLogger() {
@@ -12,6 +14,8 @@ object MyCrashlytics : ErrorLogger() {
 
     fun init() {
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(enabled)
+        FirebaseAnalytics.getInstance(MyApplication.context).setAnalyticsCollectionEnabled(enabled)
+        FirebasePerformance.getInstance().isPerformanceCollectionEnabled = enabled
 
         instance = this
     }

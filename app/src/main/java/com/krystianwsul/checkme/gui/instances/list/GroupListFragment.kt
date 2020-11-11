@@ -793,41 +793,42 @@ class GroupListFragment @JvmOverloads constructor(
         }.getHint()
 
         return if (selectionCallback.hasActionMode) {
-            val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+            if (parameters is GroupListParameters.All) {
+                val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+                val singleSelectedData = selectedDatas.singleOrNull()
 
-            val singleSelectedData = selectedDatas.singleOrNull()
-            if (singleSelectedData != null && parameters is GroupListParameters.All) { // todo fab merge with below
-                val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData // todo fab allow adding to search results
+                if (singleSelectedData != null) {
+                    val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData // todo fab allow adding to search results
 
-                val canAddToTime = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+                    val canAddToTime = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
 
-                when {
-                    canAddToTime && singleSelectedData.taskVisible -> FabState.Visible {
-                        listener.showSubtaskDialog(instanceData!!.run {
-                            SubtaskDialogFragment.ResultData(taskKey, instanceDateTime.date, createTaskTimePair)
-                        })
+                    when {
+                        canAddToTime && singleSelectedData.taskVisible -> FabState.Visible {
+                            listener.showSubtaskDialog(instanceData!!.run {
+                                SubtaskDialogFragment.ResultData(taskKey, instanceDateTime.date, createTaskTimePair)
+                            })
+                        }
+                        singleSelectedData.taskVisible -> getStartEditActivityFabState(
+                                EditActivity.Hint.Task(singleSelectedData.taskKey),
+                                true
+                        )
+                        canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
+                        else -> FabState.Hidden
                     }
-                    singleSelectedData.taskVisible -> getStartEditActivityFabState(
-                            EditActivity.Hint.Task(singleSelectedData.taskKey),
-                            true
-                    )
-                    canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
-                    else -> FabState.Hidden
-                }
-            } else if (
-                    parameters is GroupListParameters.All
-                    && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
-            ) {
-                val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+                } else if (selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
+                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
-                if (instanceDatas.asSequence()
-                                .filter { it.isRootInstance }
-                                .map { it.instanceTimeStamp }
-                                .distinct()
-                                .singleOrNull()
-                                ?.takeIf { it > TimeStamp.now } != null
-                ) {
-                    getStartEditActivityFabState(instanceDatas.getHint(), true)
+                    if (instanceDatas.asSequence()
+                                    .filter { it.isRootInstance }
+                                    .map { it.instanceTimeStamp }
+                                    .distinct()
+                                    .singleOrNull()
+                                    ?.takeIf { it > TimeStamp.now } != null
+                    ) {
+                        getStartEditActivityFabState(instanceDatas.getHint(), true)
+                    } else {
+                        FabState.Hidden
+                    }
                 } else {
                     FabState.Hidden
                 }

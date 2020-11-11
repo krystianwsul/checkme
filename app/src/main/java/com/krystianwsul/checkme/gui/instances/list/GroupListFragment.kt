@@ -798,7 +798,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val singleSelectedData = selectedDatas.singleOrNull()
 
                 if (singleSelectedData != null) {
-                    val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData // todo fab allow adding to search results
+                    val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData
 
                     val canAddToTime = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
 

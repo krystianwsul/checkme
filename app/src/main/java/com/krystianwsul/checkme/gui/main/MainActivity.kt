@@ -292,7 +292,11 @@ class MainActivity :
             override fun onCreateGroupActionMode(
                     actionMode: ActionMode,
                     treeViewAdapter: TreeViewAdapter<NodeHolder>,
-            ) = onCreateActionMode(actionMode)
+            ) {
+                onCreateActionMode(actionMode)
+
+                hideKeyboard()
+            }
 
             override fun onDestroyGroupActionMode() = onDestroyActionMode()
 

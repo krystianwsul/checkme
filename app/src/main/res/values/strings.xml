@@ -72,7 +72,7 @@
     <string name="tutorial">Tutorial</string>
     <string name="snackbarRemoved">%1$s removed</string>
     <string name="undo">undo</string>
-    <string name="add_task_this_time">Add task at this time</string>
+    <string name="add_task_this_time">Add new task</string>
     <string name="notify">Show notification</string>
     <string name="filterDay">Day</string>
     <string name="filterWeek">Week</string>
@@ -126,5 +126,6 @@
     <string name="mediumPriorityNotifications">Show in notification drawer</string>
     <string name="noNotifications">Don\'t show</string>
     <string name="notifications">Notifications</string>
-    <string name="addTaskList">Add task to list</string>
+    <string name="addTaskList">Add to list</string>
+    <string name="subtaskDialogMessage">Add a new task at this time?</string>
 </resources>

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -26,6 +27,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
+import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
@@ -39,6 +41,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ActionModeCallback
 import com.krystianwsul.treeadapter.TreeNode
@@ -57,7 +60,7 @@ class GroupListFragment @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        defStyleRes: Int = 0
+        defStyleRes: Int = 0,
 ) :
         RelativeLayout(context, attrs, defStyleAttr, defStyleRes),
         FabUser,
@@ -206,15 +209,6 @@ class GroupListFragment @JvmOverloads constructor(
                     val selectedData = selectedDatas.single()
 
                     activity.startActivity(ShowTaskActivity.newIntent(selectedData.taskKey))
-                }
-                R.id.actionGroupAddTask -> {
-                    val instanceData = selectedDatas.single() as GroupListDataWrapper.InstanceData
-
-                    instanceData.instanceDateTime.let {
-                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(
-                                EditActivity.Hint.Schedule(it.date, it.time.timePair)
-                        )))
-                    }
                 }
                 R.id.action_group_edit_task -> {
                     val selectedData = selectedDatas.single()
@@ -388,12 +382,9 @@ class GroupListFragment @JvmOverloads constructor(
 
             if (selectedDatas.size == 1) {
                 val selectedData = selectedDatas.single()
-                val instanceData = selectedData as? GroupListDataWrapper.InstanceData
-                val showAddTask = instanceData?.isRootInstance == true && instanceData.instanceTimeStamp > TimeStamp.now
 
                 itemVisibilities += listOf(
                         R.id.action_group_show_task to true,
-                        R.id.actionGroupAddTask to showAddTask,
                         R.id.action_group_edit_task to selectedData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to selectedData.taskCurrent,
@@ -404,7 +395,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                 itemVisibilities += listOf(
                         R.id.action_group_show_task to false,
-                        R.id.actionGroupAddTask to false,
                         R.id.action_group_edit_task to false,
                         R.id.actionGroupWebSearch to false,
                 )
@@ -429,7 +419,13 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    private var floatingActionButton: FloatingActionButton? = null
+    private val floatingActionButtonRelay = BehaviorRelay.createDefault(NullableWrapper<FloatingActionButton>())
+
+    private var floatingActionButton: FloatingActionButton?
+        get() = floatingActionButtonRelay.value!!.value
+        set(value) {
+            floatingActionButtonRelay.accept(NullableWrapper(value))
+        }
 
     val shareData: String?
         get() {
@@ -577,6 +573,26 @@ class GroupListFragment @JvmOverloads constructor(
                     updateFabVisibility()
                 }
                 .addTo(attachedToWindowDisposable)
+
+        floatingActionButtonRelay
+                .doOnNext { Log.e("asdf", "magic FAB onNext, params: ${parametersRelay.value}") }
+                .filter { it.value != null }
+                .doOnNext { Log.e("asdf", "magic filter onNext, params: ${parametersRelay.value}") }
+                .switchMap { listener.subtaskDialogResult }
+                .doOnNext {
+                    Log.e("asdf", "magic result onNext, params: ${parametersRelay.value}")
+                }
+                .subscribe {
+                    val hint = when (it) {
+                        is SubtaskDialogFragment.Result.SameTime -> it.resultData.run {
+                            listOf(instanceDate to createTaskTimePair)
+                        }.getHint()
+                        is SubtaskDialogFragment.Result.Subtask -> EditActivity.Hint.Task(it.resultData.taskKey)
+                    }
+
+                    startEditActivity(hint, true)
+                }
+                .addTo(attachedToWindowDisposable)
     }
 
     override fun onDetachedFromWindow() {
@@ -592,7 +608,7 @@ class GroupListFragment @JvmOverloads constructor(
             position: Int,
             dataId: Int,
             immediate: Boolean,
-            groupListDataWrapper: GroupListDataWrapper
+            groupListDataWrapper: GroupListDataWrapper,
     ) {
         check(position >= 0)
 
@@ -607,20 +623,20 @@ class GroupListFragment @JvmOverloads constructor(
             timeStamp: TimeStamp,
             dataId: Int,
             immediate: Boolean,
-            groupListDataWrapper: GroupListDataWrapper
+            groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
 
     fun setInstanceKey(
             instanceKey: InstanceKey,
             dataId: Int,
             immediate: Boolean,
-            groupListDataWrapper: GroupListDataWrapper
+            groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
 
     fun setInstanceKeys(
             dataId: Int,
             immediate: Boolean,
-            groupListDataWrapper: GroupListDataWrapper
+            groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
 
     fun setTaskKey(
@@ -628,7 +644,7 @@ class GroupListFragment @JvmOverloads constructor(
             dataId: Int,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
-            showLoader: Boolean
+            showLoader: Boolean,
     ) = setParameters(GroupListParameters.TaskKey(dataId, immediate, groupListDataWrapper, taskKey, showLoader))
 
     fun setParameters(parameters: GroupListParameters) = parametersRelay.accept(parameters)
@@ -751,29 +767,53 @@ class GroupListFragment @JvmOverloads constructor(
         updateFabVisibility()
     }
 
+    private fun getStartEditActivityFabState(
+            hint: EditActivity.Hint,
+            closeActionMode: Boolean = false,
+    ) = FabState.Visible {
+        startEditActivity(hint, closeActionMode)
+    }
+
+    private fun startEditActivity(hint: EditActivity.Hint, closeActionMode: Boolean) {
+        if (closeActionMode) selectionCallback.actionMode!!.finish()
+
+        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
+    }
+
+    private fun List<Pair<Date, TimePair>>.getHint() = (firstOrNull { it.second.customTimeKey != null }
+            ?: first()).let {
+        EditActivity.Hint.Schedule(it.first, it.second)
+    }
+
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun edit(hint: EditActivity.Hint, closeActionMode: Boolean = false) = FabState.Visible {
-            if (closeActionMode) selectionCallback.actionMode!!.finish()
-
-            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
-        }
-
-        fun List<GroupListDataWrapper.InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
-                ?: first()).let {
-            EditActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
-        }
+        fun List<GroupListDataWrapper.InstanceData>.getHint() = map {
+            it.instanceDateTime.date to it.createTaskTimePair
+        }.getHint()
 
         return if (selectionCallback.hasActionMode) {
             val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
 
             val singleSelectedData = selectedDatas.singleOrNull()
-            if (singleSelectedData != null) {
-                if (singleSelectedData.taskVisible)
-                    edit(EditActivity.Hint.Task(singleSelectedData.taskKey), true)
-                else
-                    FabState.Hidden
+            if (singleSelectedData != null && parameters is GroupListParameters.All) { // todo fab merge with below
+                val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData // todo fab allow adding to search results
+
+                val canAddToTime = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+
+                when {
+                    canAddToTime && singleSelectedData.taskVisible -> FabState.Visible {
+                        listener.showSubtaskDialog(instanceData!!.run {
+                            SubtaskDialogFragment.ResultData(taskKey, instanceDateTime.date, createTaskTimePair)
+                        })
+                    }
+                    singleSelectedData.taskVisible -> getStartEditActivityFabState(
+                            EditActivity.Hint.Task(singleSelectedData.taskKey),
+                            true
+                    )
+                    canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
+                    else -> FabState.Hidden
+                }
             } else if (
                     parameters is GroupListParameters.All
                     && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
@@ -787,7 +827,7 @@ class GroupListFragment @JvmOverloads constructor(
                                 .singleOrNull()
                                 ?.takeIf { it > TimeStamp.now } != null
                 ) {
-                    edit(instanceDatas.getHint(), true)
+                    getStartEditActivityFabState(instanceDatas.getHint(), true)
                 } else {
                     FabState.Hidden
                 }
@@ -796,7 +836,7 @@ class GroupListFragment @JvmOverloads constructor(
             }
         } else {
             when (val parameters = parameters) {
-                is GroupListParameters.All -> edit(EditActivity.Hint.Schedule(rangePositionToDate(
+                is GroupListParameters.All -> getStartEditActivityFabState(EditActivity.Hint.Schedule(rangePositionToDate(
                         parameters.timeRange,
                         parameters.position
                 )))
@@ -815,14 +855,14 @@ class GroupListFragment @JvmOverloads constructor(
                                     }
                                 }
 
-                        edit(hint)
+                        getStartEditActivityFabState(hint)
                     } else {
                         FabState.Hidden
                     }
                 }
                 is GroupListParameters.InstanceKey -> {
                     if (parameters.groupListDataWrapper.taskEditable!!)
-                        edit(EditActivity.Hint.Task(parameters.instanceKey.taskKey))
+                        getStartEditActivityFabState(EditActivity.Hint.Task(parameters.instanceKey.taskKey))
                     else
                         FabState.Hidden
                 }
@@ -906,7 +946,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
-            compositeDisposable: CompositeDisposable
+            compositeDisposable: CompositeDisposable,
     ) : GroupHolderAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         companion object {
@@ -974,7 +1014,7 @@ class GroupListFragment @JvmOverloads constructor(
                 note: String?,
                 imageState: ImageState?,
                 showProgress: Boolean,
-                useDoneNode: Boolean
+                useDoneNode: Boolean,
         ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
@@ -1027,7 +1067,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onCreateViewHolder(
                 parent: ViewGroup,
-                viewType: Int
+                viewType: Int,
         ) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
 
         override val groupAdapter = this

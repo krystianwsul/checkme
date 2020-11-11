@@ -43,13 +43,6 @@
         android:visible="false" />
 
     <item
-        android:id="@+id/actionGroupAddTask"
-        android:title="@string/add_task_this_time"
-        android:orderInCategory="550"
-        android:icon="@drawable/ic_add_white_24dp"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/actionGroupCopyTask"
         android:title="@string/copyTask"
         android:orderInCategory="600"

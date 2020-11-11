@@ -70,7 +70,7 @@
     <string name="tutorial">Przewodnik</string>
     <string name="snackbarRemoved">Usunięto %1$s</string>
     <string name="undo">cofnij</string>
-    <string name="add_task_this_time">Dodaj zadanie z tym samym czasem</string>
+    <string name="add_task_this_time">Dodaj nowe zadanie</string>
     <string name="notify">Pokaż powiadomienie</string>
     <string name="filterDay">Dzień</string>
     <string name="filterWeek">Tydzień</string>
@@ -125,5 +125,6 @@
     <string name="mediumPriorityNotifications">Pokaż na pasku stanu</string>
     <string name="noNotifications">Nie pokazuj</string>
     <string name="notifications">Powiadomienia</string>
-    <string name="addTaskList">Dodaj zadanie do listy</string>
+    <string name="addTaskList">Dodaj do listy</string>
+    <string name="subtaskDialogMessage">Dodać nowe zadanie o tym samym czasie?</string>
 </resources>

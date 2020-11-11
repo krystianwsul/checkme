@@ -342,13 +342,16 @@ fun hideSoftKeyboard(view: View) {
 
 inline fun <reified T : Fragment> FragmentManager.getOrInitializeFragment(
         @IdRes id: Int,
-        initializer: () -> T
+        initializer: () -> T,
 ) = (findFragmentById(id) as? T) ?: initializer().also { beginTransaction().add(id, it).commit() }
 
 inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         @IdRes id: Int,
-        initializer: () -> T
+        initializer: () -> T,
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
 
 inline fun <reified T : Fragment> AbstractActivity.forceGetFragment(@IdRes id: Int) =
         supportFragmentManager.findFragmentById(id) as T
+
+inline fun <reified T : Fragment> AbstractActivity.tryGetFragment(tag: String) =
+        supportFragmentManager.findFragmentByTag(tag) as? T

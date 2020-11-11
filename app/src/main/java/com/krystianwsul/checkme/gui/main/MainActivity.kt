@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
+import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -87,6 +88,7 @@ class MainActivity :
         private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
+        private const val TAG_SUBTASK = "subtask"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
 
@@ -176,11 +178,15 @@ class MainActivity :
     private val mainToolbarElevation by lazy { resources.getDimension(R.dimen.mainToolbarElevation) }
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
 
+    private val subtaskDialogResultDays = PublishRelay.create<SubtaskDialogFragment.Result>()
+
     val daysGroupListListener = object : GroupListListener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
         override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+
+        override val subtaskDialogResult = subtaskDialogResultDays
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -216,6 +222,12 @@ class MainActivity :
         override fun initBottomBar() = this@MainActivity.initBottomBar()
 
         override fun deleteTasks(taskKeys: Set<TaskKey>) = this@MainActivity.deleteTasks(taskKeys)
+
+        override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
+            SubtaskDialogFragment.newInstance(resultData)
+                    .apply { listener = subtaskDialogResult::accept }
+                    .show(supportFragmentManager, TAG_SUBTASK)
+        }
     }
 
     private var searchPage = 0
@@ -630,9 +642,11 @@ class MainActivity :
                 onDateSwitch()
         }
 
-        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+        tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(dateReceiver)
+
+        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK)?.listener = subtaskDialogResultDays::accept
     }
 
     private fun deleteTasks(taskKeys: Set<TaskKey>) {

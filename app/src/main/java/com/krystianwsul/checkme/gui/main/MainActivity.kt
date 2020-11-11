@@ -88,7 +88,8 @@ class MainActivity :
         private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
-        private const val TAG_SUBTASK = "subtask"
+        private const val TAG_SUBTASK_DAYS = "subtaskDays"
+        private const val TAG_SUBTASK_SEARCH = "subtaskSearch"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
 
@@ -179,6 +180,7 @@ class MainActivity :
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
 
     private val subtaskDialogResultDays = PublishRelay.create<SubtaskDialogFragment.Result>()
+    private val subtaskDialogResultSearch = PublishRelay.create<SubtaskDialogFragment.Result>()
 
     val daysGroupListListener = object : GroupListListener {
 
@@ -226,7 +228,7 @@ class MainActivity :
         override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
             SubtaskDialogFragment.newInstance(resultData)
                     .apply { listener = subtaskDialogResult::accept }
-                    .show(supportFragmentManager, TAG_SUBTASK)
+                    .show(supportFragmentManager, TAG_SUBTASK_DAYS)
         }
     }
 
@@ -283,11 +285,13 @@ class MainActivity :
 
             override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
 
+            override val subtaskDialogResult = subtaskDialogResultSearch
+
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
             override fun onCreateGroupActionMode(
                     actionMode: ActionMode,
-                    treeViewAdapter: TreeViewAdapter<NodeHolder>
+                    treeViewAdapter: TreeViewAdapter<NodeHolder>,
             ) = onCreateActionMode(actionMode)
 
             override fun onDestroyGroupActionMode() = onDestroyActionMode()
@@ -305,6 +309,12 @@ class MainActivity :
             override fun initBottomBar() = this@MainActivity.initBottomBar()
 
             override fun deleteTasks(taskKeys: Set<TaskKey>) = this@MainActivity.deleteTasks(taskKeys)
+
+            override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
+                SubtaskDialogFragment.newInstance(resultData)
+                        .apply { listener = subtaskDialogResultSearch::accept }
+                        .show(supportFragmentManager, TAG_SUBTASK_SEARCH)
+            }
         }
 
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -646,7 +656,8 @@ class MainActivity :
 
         startDate(dateReceiver)
 
-        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK)?.listener = subtaskDialogResultDays::accept
+        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_DAYS)?.listener = subtaskDialogResultDays::accept
+        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_SEARCH)?.listener = subtaskDialogResultSearch::accept
     }
 
     private fun deleteTasks(taskKeys: Set<TaskKey>) {

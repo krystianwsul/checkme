@@ -126,4 +126,5 @@
     <string name="mediumPriorityNotifications">Show in notification drawer</string>
     <string name="noNotifications">Don\'t show</string>
     <string name="notifications">Notifications</string>
+    <string name="addTaskList">Add task to list</string>
 </resources>

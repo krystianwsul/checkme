@@ -125,4 +125,5 @@
     <string name="mediumPriorityNotifications">Pokaż na pasku stanu</string>
     <string name="noNotifications">Nie pokazuj</string>
     <string name="notifications">Powiadomienia</string>
+    <string name="addTaskList">Dodaj zadanie do listy</string>
 </resources>

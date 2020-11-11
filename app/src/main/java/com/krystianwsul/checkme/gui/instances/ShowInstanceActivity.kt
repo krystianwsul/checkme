@@ -230,9 +230,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
-            findItem(R.id.instance_menu_add_task).isVisible = data?.run {
-                isRootInstance && instanceDateTime.timeStamp > TimeStamp.now
-            } == true
             findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
             findItem(R.id.instanceMenuWebSearch).isVisible = data != null
         }
@@ -366,13 +363,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             deleteTasks(setOf(instanceKey.taskKey))
                         }
                         R.id.instance_menu_select_all -> groupListFragment.treeViewAdapter.selectAll()
-                        R.id.instance_menu_add_task -> {
-                            data!!.instanceDateTime.let {
-                                startActivity(EditActivity.getParametersIntent(EditParameters.Create(
-                                        EditActivity.Hint.Schedule(it.date, it.time.timePair)
-                                )))
-                            }
-                        }
                         R.id.instanceMenuCopyTask -> startActivity(
                                 EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
                         )

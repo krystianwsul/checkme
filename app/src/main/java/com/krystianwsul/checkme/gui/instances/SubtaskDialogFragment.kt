@@ -33,7 +33,7 @@ class SubtaskDialogFragment : AbstractDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.subtaskDialogMessage)
             .setPositiveButton(R.string.add_task_this_time) { _, _ -> listener(Result.SameTime(resultData)) }
-            .setNegativeButton(R.string.addTaskList) { _, _ -> listener(Result.Subtask(resultData)) } // todo fab check where used
+            .setNegativeButton(R.string.addTaskList) { _, _ -> listener(Result.Subtask(resultData)) }
             .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
             .create()
 

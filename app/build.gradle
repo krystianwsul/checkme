@@ -6,6 +6,7 @@ apply plugin: 'kotlinx-serialization'
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 repositories {
     mavenCentral()
@@ -98,6 +99,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-perf-ktx'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 

@@ -16,13 +16,16 @@ sealed class TickData {
 
     abstract val waiting: Boolean
 
+    abstract val domainChanged: Boolean
+
     abstract fun release()
 
     override fun toString() = super.toString() + " silent: $silent, source: $source"
 
     class Normal(
             override val silent: Boolean,
-            override val source: String
+            override val source: String,
+            override val domainChanged: Boolean = false,
     ) : TickData() {
 
         override var shouldClear = false
@@ -37,6 +40,7 @@ sealed class TickData {
 
     class Lock(
             override val source: String,
+            override val domainChanged: Boolean = false,
             val expires: ExactTimeStamp.Local = DateTime.now()
                     .plusMillis(DURATION)
                     .toExactTimeStamp(),

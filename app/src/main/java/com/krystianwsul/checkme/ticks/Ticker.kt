@@ -12,7 +12,7 @@ object Ticker {
 
     const val TICK_NOTIFICATION_ID = 1
 
-    fun tick(source: String) {
+    fun tick(source: String, domainChanged: Boolean = false) {
         NotificationWrapper.instance.notifyTemporary(TICK_NOTIFICATION_ID, "Ticker.start $source")
 
         Preferences.tickLog.logLineDate("Ticker.tick from $source")
@@ -23,7 +23,7 @@ object Ticker {
 
             NotificationWrapper.instance.hideTemporary(TICK_NOTIFICATION_ID, "Ticker.tick skipping")
         } else {
-            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(source))
+            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(source, domainChanged))
         }
     }
 }

@@ -11,11 +11,15 @@ object TickHolder {
         val silent = oldTickData.silent && newTickData.silent
         val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
+        val domainChanged = oldTickData.domainChanged || newTickData.domainChanged
+
         val expires = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
                 .map { it.expires }
                 .maxOrNull()
 
-        return expires?.let { TickData.Lock(source, it) } ?: TickData.Normal(silent, source)
+        return expires?.let {
+            TickData.Lock(source, domainChanged, it)
+        } ?: TickData.Normal(silent, source, domainChanged)
     }
 
     private fun tryClearTickData() {

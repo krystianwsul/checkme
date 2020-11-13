@@ -85,7 +85,9 @@ class DomainFactory(
                 val tickData = TickHolder.getTickData()
 
                 val silent = (tickData?.silent ?: true) && newTickData.silent
+                val notifyListeners = (tickData?.domainChanged ?: false) || newTickData.domainChanged
 
+                if (notifyListeners) domainFactory.domainChanged.accept(setOf())
                 domainFactory.updateNotificationsTick(source, silent, newTickData.source)
 
                 if (tickData?.waiting == true) {
@@ -429,19 +431,29 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) = syncOnDomain {
+    fun updateNotificationsTick(
+            source: SaveService.Source,
+            silent: Boolean,
+            sourceName: String,
+            domainChanged: Boolean = false,
+    ) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.Local.now
 
-        updateNotificationsTick(now, silent, sourceName)
+        updateNotificationsTick(now, silent, sourceName, domainChanged)
 
         save(0, source)
     }
 
-    private fun updateNotificationsTick(now: ExactTimeStamp.Local, silent: Boolean, sourceName: String) {
-        updateNotifications(now, silent = silent, sourceName = sourceName)
+    private fun updateNotificationsTick(
+            now: ExactTimeStamp.Local,
+            silent: Boolean,
+            sourceName: String,
+            domainChanged: Boolean = false,
+    ) {
+        updateNotifications(now, silent = silent, sourceName = sourceName, domainChanged = domainChanged)
 
         setIrrelevant(now)
 
@@ -720,13 +732,14 @@ class DomainFactory(
             silent: Boolean = true,
             removedTaskKeys: List<TaskKey> = listOf(),
             sourceName: String = "other",
+            domainChanged: Boolean = false,
     ) {
         val skipSave = aggregateData != null
 
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(silent, sourceName))
+            TickHolder.addTickData(TickData.Normal(silent, sourceName, domainChanged))
             return
         }
 

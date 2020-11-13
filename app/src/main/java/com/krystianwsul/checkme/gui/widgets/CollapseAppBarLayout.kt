@@ -44,7 +44,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var valueAnimator: ValueAnimator? = null
 
-    private var initialHeight: Int? = null
+    private var initialTextHeight: Int? = null
 
     private var title: String? = null
     private var paddingLayout: View? = null
@@ -145,6 +145,8 @@ class CollapseAppBarLayout : AppBarLayout {
         (screenWidth - collapseTextStartMargin - collapseTextEndMargin).roundToInt()
     }
 
+    private val bottomMargin by lazy { dpToPx(35).toInt() }
+
     fun setText(title: String, text: String?, paddingLayout: View?, immediate: Boolean) {
         this.title = title
         this.paddingLayout = paddingLayout
@@ -154,8 +156,7 @@ class CollapseAppBarLayout : AppBarLayout {
         attachedToWindowDisposable += globalLayoutPerformed.subscribe {
             val hide = searchingRelay.value!! || collapseState is CollapseState.Collapsed
 
-            if (!hide)
-                toolbarCollapseLayout.title = title
+            if (!hide) toolbarCollapseLayout.title = title
 
             toolbarCollapseText.also {
                 val hideText = text.isNullOrEmpty() || hide
@@ -164,7 +165,7 @@ class CollapseAppBarLayout : AppBarLayout {
                 it.text = text
 
                 if (!text.isNullOrEmpty()) {
-                    initialHeight = StaticLayout.Builder
+                    initialTextHeight = StaticLayout.Builder
                             .obtain(text, 0, text.length, it.paint, textWidth)
                             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                             .setLineSpacing(it.lineSpacingExtra, it.lineSpacingMultiplier)
@@ -194,9 +195,10 @@ class CollapseAppBarLayout : AppBarLayout {
         }
 
         val newHeight = if (hideText) {
-            toolbar.height + if (titleHack) 1 else 0 // stupid hack because otherwise title doesn't show
+            // stupid hack because otherwise title doesn't show
+            (bottomMargin + textLayout.height).coerceAtLeast(toolbar.height) + if (titleHack) 1 else 0
         } else {
-            initialHeight!! + context.dpToPx(35).toInt() + textLayout.height
+            initialTextHeight!! + bottomMargin + textLayout.height
         }
 
         if (immediate || abs(newHeight - height) <= 1) { // same stupid hack

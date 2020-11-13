@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -575,13 +574,8 @@ class GroupListFragment @JvmOverloads constructor(
                 .addTo(attachedToWindowDisposable)
 
         floatingActionButtonRelay
-                .doOnNext { Log.e("asdf", "magic FAB onNext, params: ${parametersRelay.value}") }
                 .filter { it.value != null }
-                .doOnNext { Log.e("asdf", "magic filter onNext, params: ${parametersRelay.value}") }
                 .switchMap { listener.subtaskDialogResult }
-                .doOnNext {
-                    Log.e("asdf", "magic result onNext, params: ${parametersRelay.value}")
-                }
                 .subscribe {
                     val hint = when (it) {
                         is SubtaskDialogFragment.Result.SameTime -> it.resultData.run {

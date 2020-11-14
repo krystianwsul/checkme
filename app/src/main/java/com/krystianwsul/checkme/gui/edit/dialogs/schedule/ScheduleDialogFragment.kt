@@ -53,14 +53,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TIME_PICKER_TAG = "timePicker"
 
-        fun newInstance(parameters: ScheduleDialogParameters) = ScheduleDialogFragment()
-                .apply {
-                    arguments = Bundle().apply {
-                        parameters.position?.let { putInt(KEY_POSITION, it) }
-                        putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
-                        putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
-                    }
-                }
+        fun newInstance(parameters: ScheduleDialogParameters) = ScheduleDialogFragment().apply {
+            arguments = Bundle().apply {
+                parameters.position?.let { putInt(KEY_POSITION, it) }
+                putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
+                putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
+            }
+        }
     }
 
     override val backgroundView get() = scheduleDialogRoot!!
@@ -178,7 +177,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?
+            savedInstanceState: Bundle?,
     ) = inflater.inflate(R.layout.fragment_schedule_dialog, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -318,17 +317,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
 
-                override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) {
-                    scheduleDialogData.daysOfWeek = selectedDays.map(weekdaysMap::getValue).toSet()
-
-                    checkValid()
-                }
+                override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) = delegate.onDaysOfWeekChanged(selectedDays.map(weekdaysMap::getValue).toSet())
             }
         }
 
         val textPrimary = ContextCompat.getColor(requireContext(), R.color.textPrimary)
-        val textDisabledSpinner =
-                ContextCompat.getColor(requireContext(), R.color.textDisabledSpinner)
+        val textDisabledSpinner = ContextCompat.getColor(requireContext(), R.color.textDisabledSpinner)
 
         scheduleDialogMonthDayRadio.run {
             setOnCheckedChangeListener { _, isChecked ->
@@ -428,8 +422,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        if (customTimeDatas != null)
-            initialize()
+        if (customTimeDatas != null) initialize()
 
         scheduleDialogEveryXWeeks.addTextChangedListener(object : TextWatcher {
 
@@ -555,7 +548,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             val layout: TextInputLayout,
             val property: KMutableProperty0<Date?>,
             val tag: String,
-            val min: (() -> Date)? = null
+            val min: (() -> Date)? = null,
     ) {
 
         val listener = { date: Date ->
@@ -586,6 +579,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         )
 
         open fun onDateChanged(date: Date): Unit = throw UnsupportedOperationException()
+
+        open fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = Unit
     }
 
     private inner class SingleDelegate : Delegate() {
@@ -682,7 +677,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun updateFields(
                 customTimeData: EditViewModel.CustomTimeData?,
-                hourMinuteString: String
+                hourMinuteString: String,
         ) {
             scheduleDialogDate.setText(scheduleDialogData.date.run {
                 ScheduleText.Yearly.getDateText(
@@ -757,6 +752,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return getString(R.string.dateCannotBeEmpty)
         }
+
+        override fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) {
+            scheduleDialogData.daysOfWeek = daysOfWeek
+
+            checkValid()
+        }
     }
 
     private abstract inner class Monthly : Repeating() {
@@ -797,7 +798,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             val time: String? = null,
             val from: String? = null,
             val until: String? = null,
-            val noDaysChosen: Boolean = false
+            val noDaysChosen: Boolean = false,
     ) {
 
         fun isValid() = listOf(date, time, from, until).all { it.isNullOrEmpty() } && !noDaysChosen
@@ -808,6 +809,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             val day: Boolean = false,
             val month: Boolean = false,
             val from: Boolean = false,
-            val until: Boolean = false
+            val until: Boolean = false,
     )
 }

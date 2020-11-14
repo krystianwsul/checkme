@@ -383,11 +383,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(scheduleDialogData.monthWeekNumber - 1)
 
-            addListener {
-                check(it in (0..3))
-
-                scheduleDialogData.monthWeekNumber = it + 1
-            }
+            addListener { delegate.onMonthWeekNumberChanged(it) }
         }
 
         scheduleDialogMonthWeekDay.run {
@@ -567,16 +563,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         open fun getDatePicker(): MaterialDatePicker<Long> = throw IllegalStateException()
 
-        abstract fun updateFields(
-                customTimeData: EditViewModel.CustomTimeData?,
-                hourMinuteString: String,
-        )
+        abstract fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String)
 
         open fun onDateChanged(date: Date): Unit = throw UnsupportedOperationException()
 
         open fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = Unit
 
         open fun onMonthDayNumberChanged(selection: Int) = Unit
+
+        open fun onMonthWeekNumberChanged(selection: Int) = Unit
     }
 
     private inner class SingleDelegate : Delegate() {
@@ -769,7 +764,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onMonthDayNumberChanged(selection: Int) {
             val monthDayNumber = selection + 1
-            check(monthDayNumber in (0 until 28))
+            check(monthDayNumber in 1..28)
 
             scheduleDialogData.monthDayNumber = monthDayNumber
         }
@@ -777,6 +772,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class MonthlyWeekDelegate : Monthly() {
 
+        override fun onMonthWeekNumberChanged(selection: Int) {
+            val monthWeekNumber = selection + 1
+            check(monthWeekNumber in 1..4)
+
+            scheduleDialogData.monthWeekNumber = monthWeekNumber
+        }
     }
 
     private inner class YearlyDelegate : Repeating() {

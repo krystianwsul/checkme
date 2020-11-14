@@ -467,11 +467,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private fun updateDelegate() {
         delegate = when (scheduleDialogData.scheduleType) {
-            ScheduleType.SINGLE -> singleDelegate
-            ScheduleType.WEEKLY -> weeklyDelegate
-            ScheduleType.MONTHLY_DAY -> monthlyDayDelegate
-            ScheduleType.MONTHLY_WEEK -> monthlyWeekDelegate
-            ScheduleType.YEARLY -> yearlyDelegate
+            ScheduleType.SINGLE -> SingleDelegate()
+            ScheduleType.WEEKLY -> WeeklyDelegate()
+            ScheduleType.MONTHLY_DAY -> MonthlyDayDelegate()
+            ScheduleType.MONTHLY_WEEK -> MonthlyWeekDelegate()
+            ScheduleType.YEARLY -> YearlyDelegate()
         }
     }
 
@@ -599,7 +599,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         )
     }
 
-    private val singleDelegate = object : Delegate() {
+    private inner class SingleDelegate : Delegate() {
 
         override val selection = 0
 
@@ -744,7 +744,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private val weeklyDelegate = object : Repeating() {
+    private inner class WeeklyDelegate : Repeating() {
 
         override val selection = 1
 
@@ -778,15 +778,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val visibilities = repeatingVisibilities.copy(month = true)
     }
 
-    private val monthlyDayDelegate = object : Monthly() {
+    private inner class MonthlyDayDelegate : Monthly() {
 
     }
 
-    private val monthlyWeekDelegate = object : Monthly() {
+    private inner class MonthlyWeekDelegate : Monthly() {
 
     }
 
-    private val yearlyDelegate = object : Repeating() {
+    private inner class YearlyDelegate : Repeating() {
 
         override val selection = 3
 

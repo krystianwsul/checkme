@@ -118,12 +118,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
     }
 
-    private val datePickerDialogFragmentListener = { date: Date ->
-        check(delegate.hasDate)
-
-        scheduleDialogData.date = delegate.fixDate(date)
-        updateFields()
-    }
+    private val datePickerDialogFragmentListener = { date: Date -> delegate.onDateChanged(date) }
 
     private lateinit var delegate: Delegate
 
@@ -286,8 +281,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         scheduleDialogDate.setFixedOnClickListener {
-            check(delegate.hasDate)
-
             delegate.getDatePicker().let {
                 it.addListener(datePickerDialogFragmentListener)
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
@@ -295,8 +288,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.run {
-            check(delegate.hasDate)
-
             addListener(datePickerDialogFragmentListener)
         }
 
@@ -579,13 +570,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         abstract val selection: Int
 
-        open val hasDate = false
-
         open val isMonthly = false
 
         abstract val visibilities: Visibilities
-
-        open fun fixDate(date: Date): Date = throw IllegalStateException()
 
         abstract fun isValid(): ErrorData
 
@@ -595,19 +582,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         abstract fun updateFields(
                 customTimeData: EditViewModel.CustomTimeData?,
-                hourMinuteString: String
+                hourMinuteString: String,
         )
+
+        open fun onDateChanged(date: Date): Unit = throw UnsupportedOperationException()
     }
 
     private inner class SingleDelegate : Delegate() {
 
         override val selection = 0
 
-        override val hasDate = true
-
         override val visibilities = Visibilities(date = true)
-
-        override fun fixDate(date: Date) = date
 
         override fun isValid(): ErrorData {
             val today = Date.today()
@@ -647,13 +632,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun updateFields(
                 customTimeData: EditViewModel.CustomTimeData?,
-                hourMinuteString: String
+                hourMinuteString: String,
         ) {
             scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
             scheduleDialogTime.setText(customTimeData?.let {
                 it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
             } ?: hourMinuteString)
+        }
+
+        override fun onDateChanged(date: Date) {
+            scheduleDialogData.date = date
+            updateFields()
         }
     }
 
@@ -790,18 +780,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val selection = 3
 
-        override val hasDate = true
-
         override val visibilities = repeatingVisibilities.copy(date = true)
 
-        override fun fixDate(date: Date): Date {
-            return if (date.month == 2 && date.day == 29)
-                Date(date.year, 2, 28)
-            else
-                date
-        }
-
         override fun getDatePicker() = newYearMaterialDatePicker(scheduleDialogData.date)
+
+        override fun onDateChanged(date: Date) {
+            val fixedDate = if (date.month == 2 && date.day == 29) Date(date.year, 2, 28) else date
+
+            scheduleDialogData.date = fixedDate
+            updateFields()
+        }
     }
 
     private data class ErrorData(

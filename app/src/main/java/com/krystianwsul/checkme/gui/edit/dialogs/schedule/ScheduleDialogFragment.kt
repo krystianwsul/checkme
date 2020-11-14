@@ -352,7 +352,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(scheduleDialogData.monthDayNumber - 1)
 
-            addListener { delegate.onMonthDayNumberChanged(it) }
+            addListener { delegate.onMonthDayNumberChanged(it + 1) }
         }
 
         scheduleDialogMonthWeekRadio.run {
@@ -383,7 +383,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(scheduleDialogData.monthWeekNumber - 1)
 
-            addListener { delegate.onMonthWeekNumberChanged(it) }
+            addListener { delegate.onMonthWeekNumberChanged(it + 1) }
         }
 
         scheduleDialogMonthWeekDay.run {
@@ -391,13 +391,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(scheduleDialogData.monthWeekDay.ordinal)
 
-            addListener {
-                val dayOfWeek = DayOfWeek.values()[it]
-
-                scheduleDialogData.monthWeekDay = dayOfWeek
-
-                updateFields()
-            }
+            addListener { delegate.onMonthWeekDayChanged(DayOfWeek.values()[it]) }
         }
 
         scheduleDialogMonthEnd.run {
@@ -408,7 +402,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             addListener {
                 check(it in (0..1))
 
-                scheduleDialogData.beginningOfMonth = it == 0
+                delegate.onBeginningOfMonthChanged(it == 0)
             }
         }
 
@@ -569,9 +563,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         open fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = Unit
 
-        open fun onMonthDayNumberChanged(selection: Int) = Unit
+        open fun onMonthDayNumberChanged(monthDayNumber: Int) = Unit
 
-        open fun onMonthWeekNumberChanged(selection: Int) = Unit
+        open fun onMonthWeekNumberChanged(monthWeekNumber: Int) = Unit
+
+        open fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) = Unit
+
+        open fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) = Unit
     }
 
     private inner class SingleDelegate : Delegate() {
@@ -758,12 +756,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val isMonthly = true
 
         override val visibilities = repeatingVisibilities.copy(month = true)
+
+        override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) {
+            scheduleDialogData.beginningOfMonth = beginningOfMonth
+        }
     }
 
     private inner class MonthlyDayDelegate : Monthly() {
 
-        override fun onMonthDayNumberChanged(selection: Int) {
-            val monthDayNumber = selection + 1
+        override fun onMonthDayNumberChanged(monthDayNumber: Int) {
             check(monthDayNumber in 1..28)
 
             scheduleDialogData.monthDayNumber = monthDayNumber
@@ -772,11 +773,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class MonthlyWeekDelegate : Monthly() {
 
-        override fun onMonthWeekNumberChanged(selection: Int) {
-            val monthWeekNumber = selection + 1
+        override fun onMonthWeekNumberChanged(monthWeekNumber: Int) {
             check(monthWeekNumber in 1..4)
 
             scheduleDialogData.monthWeekNumber = monthWeekNumber
+        }
+
+        override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) {
+            scheduleDialogData.monthWeekDay = dayOfWeek
+
+            updateFields()
         }
     }
 

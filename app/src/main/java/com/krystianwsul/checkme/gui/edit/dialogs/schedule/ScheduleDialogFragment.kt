@@ -53,6 +53,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TIME_PICKER_TAG = "timePicker"
 
+        private val daysOfWeekMap = mapOf(
+                DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
+                DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
+                DayOfWeek.TUESDAY to MaterialDayPicker.Weekday.TUESDAY,
+                DayOfWeek.WEDNESDAY to MaterialDayPicker.Weekday.WEDNESDAY,
+                DayOfWeek.THURSDAY to MaterialDayPicker.Weekday.THURSDAY,
+                DayOfWeek.FRIDAY to MaterialDayPicker.Weekday.FRIDAY,
+                DayOfWeek.SATURDAY to MaterialDayPicker.Weekday.SATURDAY
+        )
+
         fun newInstance(parameters: ScheduleDialogParameters) = ScheduleDialogFragment().apply {
             arguments = Bundle().apply {
                 parameters.position?.let { putInt(KEY_POSITION, it) }
@@ -298,27 +308,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        val daysOfWeekMap = mapOf(
-                DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
-                DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
-                DayOfWeek.TUESDAY to MaterialDayPicker.Weekday.TUESDAY,
-                DayOfWeek.WEDNESDAY to MaterialDayPicker.Weekday.WEDNESDAY,
-                DayOfWeek.THURSDAY to MaterialDayPicker.Weekday.THURSDAY,
-                DayOfWeek.FRIDAY to MaterialDayPicker.Weekday.FRIDAY,
-                DayOfWeek.SATURDAY to MaterialDayPicker.Weekday.SATURDAY
-        )
-
         val weekdaysMap = daysOfWeekMap.entries
                 .map { it.value to it.key }
                 .toMap()
 
-        scheduleDialogDayPicker.apply {
-            setSelectedDays(scheduleDialogData.daysOfWeek.map(daysOfWeekMap::getValue))
+        scheduleDialogDayPicker.daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
 
-            daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
-
-                override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) = delegate.onDaysOfWeekChanged(selectedDays.map(weekdaysMap::getValue).toSet())
-            }
+            override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) = delegate.onDaysOfWeekChanged(selectedDays.map(weekdaysMap::getValue).toSet())
         }
 
         val textPrimary = ContextCompat.getColor(requireContext(), R.color.textPrimary)
@@ -350,8 +346,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         scheduleDialogMonthDayNumber.apply {
             setItems((1..28).map { Utils.ordinal(it) })
 
-            setSelection(scheduleDialogData.monthDayNumber - 1)
-
             addListener { delegate.onMonthDayNumberChanged(it + 1) }
         }
 
@@ -381,23 +375,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         scheduleDialogMonthWeekNumber.run {
             setItems(listOf(1, 2, 3, 4).map { Utils.ordinal(it) })
 
-            setSelection(scheduleDialogData.monthWeekNumber - 1)
-
             addListener { delegate.onMonthWeekNumberChanged(it + 1) }
         }
 
         scheduleDialogMonthWeekDay.run {
             setItems(DayOfWeek.values().toList())
 
-            setSelection(scheduleDialogData.monthWeekDay.ordinal)
-
             addListener { delegate.onMonthWeekDayChanged(DayOfWeek.values()[it]) }
         }
 
         scheduleDialogMonthEnd.run {
             setItems(resources.getStringArray(R.array.month).toList())
-
-            setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1)
 
             addListener {
                 check(it in (0..1))
@@ -448,8 +436,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         requireActivity().startTicks(broadcastReceiver)
 
-        if (customTimeDatas != null)
-            updateFields()
+        if (customTimeDatas != null) updateFields()
     }
 
     fun initialize(customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>) {
@@ -517,6 +504,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         delegate.updateFields(customTimeData, hourMinuteString)
+
+        scheduleDialogDayPicker.setSelectedDays(scheduleDialogData.daysOfWeek.map(daysOfWeekMap::getValue))
+
+        scheduleDialogMonthDayNumber.setSelection(scheduleDialogData.monthDayNumber - 1)
+
+        scheduleDialogMonthWeekNumber.setSelection(scheduleDialogData.monthWeekNumber - 1)
+
+        scheduleDialogMonthWeekDay.setSelection(scheduleDialogData.monthWeekDay.ordinal)
+
+        scheduleDialogMonthEnd.setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1)
 
         checkValid()
     }
@@ -662,10 +659,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 hourMinuteString: String,
         ) {
             scheduleDialogDate.setText(scheduleDialogData.date.run {
-                ScheduleText.Yearly.getDateText(
-                        month,
-                        day
-                )
+                ScheduleText.Yearly.getDateText(month, day)
             })
 
             scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)

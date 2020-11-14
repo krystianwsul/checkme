@@ -128,7 +128,7 @@ sealed class ScheduleText {
                     timePairCallback: (TimePair) -> String
             ): String {
                 return MyApplication.instance.run {
-                    Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+                    Utils.ordinal(scheduleData.weekOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
                 } + ": " + timePairCallback(scheduleData.timePair) + fromUntil(scheduleData.from, scheduleData.until)
             }
         }

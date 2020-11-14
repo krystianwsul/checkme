@@ -713,7 +713,7 @@ class Task<T : ProjectType>(
                     _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
                 is ScheduleData.MonthlyWeek -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
+                    val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             MonthlyWeekScheduleJson(
@@ -721,7 +721,7 @@ class Task<T : ProjectType>(
                                     now.offset,
                                     null,
                                     null,
-                                    dayOfMonth,
+                                    weekOfMonth,
                                     dayOfWeek.ordinal,
                                     beginningOfMonth,
                                     customTimeId?.value,
@@ -841,7 +841,7 @@ class Task<T : ProjectType>(
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
-                                    schedule.dayOfMonth,
+                                    schedule.weekOfMonth,
                                     schedule.dayOfWeek.ordinal,
                                     schedule.beginningOfMonth,
                                     customTimeId?.value,

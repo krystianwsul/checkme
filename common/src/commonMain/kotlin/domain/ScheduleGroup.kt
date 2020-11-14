@@ -76,7 +76,7 @@ sealed class ScheduleGroup<T : ProjectType> {
             val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule<T>>()
                     .sortedWith(compareBy(
                             { !it.beginningOfMonth },
-                            { it.dayOfMonth },
+                            { it.weekOfMonth },
                             { it.dayOfWeek },
                             { it.time.getTimeFloat() }))
                     .map { MonthlyWeek(it) }
@@ -171,7 +171,7 @@ sealed class ScheduleGroup<T : ProjectType> {
 
         override val scheduleData
             get() = ScheduleData.MonthlyWeek(
-                    monthlyWeekSchedule.dayOfMonth,
+                    monthlyWeekSchedule.weekOfMonth,
                     monthlyWeekSchedule.dayOfWeek,
                     monthlyWeekSchedule.beginningOfMonth,
                     monthlyWeekSchedule.timePair,

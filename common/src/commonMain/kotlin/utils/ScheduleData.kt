@@ -30,12 +30,12 @@ sealed class ScheduleData : Serializable {
     ) : ScheduleData()
 
     data class MonthlyWeek(
-            val dayOfMonth: Int,
+            val weekOfMonth: Int,
             val dayOfWeek: DayOfWeek,
             val beginningOfMonth: Boolean,
             override val timePair: TimePair,
             val from: Date?,
-            val until: Date?
+            val until: Date?,
     ) : ScheduleData()
 
     data class Yearly(

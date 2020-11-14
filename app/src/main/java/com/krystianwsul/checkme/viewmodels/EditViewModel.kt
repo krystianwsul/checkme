@@ -66,7 +66,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 } ?: timePair.hourMinute!!.toString()
             }
 
-            private fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1
+            fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1
 
             fun dateToDayFromBeginningOrEnd(date: Date): Pair<Int, Boolean> {
                 return if (date.day > ScheduleDialogData.MAX_MONTH_DAY) {
@@ -195,7 +195,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 val date = getDateInMonth(
                         suggestedDate.year,
                         suggestedDate.month,
-                        scheduleData.dayOfMonth,
+                        scheduleData.weekOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth
                 )
@@ -211,7 +211,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                         mutableSetOf(scheduleData.dayOfWeek),
                         false,
                         listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).minOrNull()!!,
-                        scheduleData.dayOfMonth,
+                        scheduleData.weekOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth,
                         TimePairPersist(timePair),

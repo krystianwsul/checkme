@@ -11,14 +11,14 @@ fun getDateInMonth(
         beginningOfMonth: Boolean
 ) = Date(year, month, if (beginningOfMonth) dayOfMonth else Month(month).days(year) - dayOfMonth + 1)
 
-fun getDateInMonth(year: Int, month: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean): Date {
+fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean): Date {
     if (beginningOfMonth) {
         val first = Date(year, month, 1)
 
         val day = if (dayOfWeek.ordinal >= first.dayOfWeek.ordinal) {
-            (dayOfMonth - 1) * 7 + (dayOfWeek.ordinal - first.dayOfWeek.ordinal) + 1
+            (weekOfMonth - 1) * 7 + (dayOfWeek.ordinal - first.dayOfWeek.ordinal) + 1
         } else {
-            dayOfMonth * 7 + (dayOfWeek.ordinal - first.dayOfWeek.ordinal) + 1
+            weekOfMonth * 7 + (dayOfWeek.ordinal - first.dayOfWeek.ordinal) + 1
         }
 
         return Date(year, month, day)
@@ -28,9 +28,9 @@ fun getDateInMonth(year: Int, month: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek,
         val last = Date(year, month, daysInMonth)
 
         val day = if (dayOfWeek.ordinal <= last.dayOfWeek.ordinal) {
-            (dayOfMonth - 1) * 7 + (last.dayOfWeek.ordinal - dayOfWeek.ordinal) + 1
+            (weekOfMonth - 1) * 7 + (last.dayOfWeek.ordinal - dayOfWeek.ordinal) + 1
         } else {
-            dayOfMonth * 7 + (last.dayOfWeek.ordinal - dayOfWeek.ordinal) + 1
+            weekOfMonth * 7 + (last.dayOfWeek.ordinal - dayOfWeek.ordinal) + 1
         }
 
         return Date(year, month, daysInMonth - day + 1)

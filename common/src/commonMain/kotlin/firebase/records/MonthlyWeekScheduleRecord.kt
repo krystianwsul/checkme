@@ -19,7 +19,7 @@ class MonthlyWeekScheduleRecord<T : ProjectType>(
 
     private val monthlyWeekScheduleJson by lazy { createObject.monthlyWeekScheduleJson!! }
 
-    val dayOfMonth by lazy { monthlyWeekScheduleJson.dayOfMonth }
+    val weekOfMonth by lazy { monthlyWeekScheduleJson.dayOfMonth }
 
     val dayOfWeek by lazy { monthlyWeekScheduleJson.dayOfWeek }
 

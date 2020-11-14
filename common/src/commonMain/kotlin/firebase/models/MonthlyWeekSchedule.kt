@@ -15,7 +15,7 @@ class MonthlyWeekSchedule<T : ProjectType>(
 
     override val scheduleRecord get() = repeatingScheduleRecord
 
-    val dayOfMonth get() = repeatingScheduleRecord.dayOfMonth
+    val weekOfMonth get() = repeatingScheduleRecord.weekOfMonth
 
     val dayOfWeek get() = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]
 
@@ -29,7 +29,7 @@ class MonthlyWeekSchedule<T : ProjectType>(
         return dateThisMonth == date
     }
 
-    private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.dayOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)
+    private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.weekOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)
 
     override fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean {
         val date = scheduleDate.run { getDateInMonth(year, month) }

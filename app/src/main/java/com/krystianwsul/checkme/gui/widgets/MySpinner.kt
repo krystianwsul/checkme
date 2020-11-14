@@ -28,10 +28,10 @@ class MySpinner @JvmOverloads constructor(
 
     private lateinit var items: List<*>
 
-    fun setSelection(position: Int) {
-        addOneShotGlobalLayoutListener {
-            text.setText(text.adapter.getItem(position).toString())
-        }
+    fun setSelection(position: Int, immediate: Boolean = false) {
+        fun update() = text.setText(text.adapter.getItem(position).toString())
+
+        if (immediate) update() else addOneShotGlobalLayoutListener { update() }
     }
 
     fun setItems(items: List<*>) {

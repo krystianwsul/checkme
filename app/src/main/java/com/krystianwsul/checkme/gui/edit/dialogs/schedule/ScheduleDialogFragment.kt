@@ -35,6 +35,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ScheduleType
+import com.krystianwsul.common.utils.getDateInMonth
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.*
 import java.util.*
 import kotlin.reflect.KMutableProperty0
@@ -259,8 +260,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
                 updateDelegate()
 
-                if (activity != null && customTimeDatas != null)
-                    updateScheduleTypeFields(true)
+                if (activity != null && customTimeDatas != null) updateScheduleTypeFields(true)
             }
         }
 
@@ -507,13 +507,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         scheduleDialogDayPicker.setSelectedDays(scheduleDialogData.daysOfWeek.map(daysOfWeekMap::getValue))
 
-        scheduleDialogMonthDayNumber.setSelection(scheduleDialogData.monthDayNumber - 1)
+        scheduleDialogMonthDayNumber.setSelection(scheduleDialogData.monthDayNumber - 1, true)
 
-        scheduleDialogMonthWeekNumber.setSelection(scheduleDialogData.monthWeekNumber - 1)
+        scheduleDialogMonthWeekNumber.setSelection(scheduleDialogData.monthWeekNumber - 1, true)
 
-        scheduleDialogMonthWeekDay.setSelection(scheduleDialogData.monthWeekDay.ordinal)
+        scheduleDialogMonthWeekDay.setSelection(scheduleDialogData.monthWeekDay.ordinal, true)
 
-        scheduleDialogMonthEnd.setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1)
+        scheduleDialogMonthEnd.setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1, true)
 
         checkValid()
     }
@@ -534,6 +534,25 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             updateFields()
         }
+    }
+
+    private fun recalculateMonthlyWeekFields() {
+        val date = getDateInMonth(
+                scheduleDialogData.date.year,
+                scheduleDialogData.date.month,
+                scheduleDialogData.monthWeekNumber,
+                scheduleDialogData.monthWeekDay,
+                scheduleDialogData.beginningOfMonth
+        )
+
+        val dayNumber = if (scheduleDialogData.beginningOfMonth)
+            date.day
+        else
+            EditViewModel.ScheduleDataWrapper.dayFromEndOfMonth(date)
+
+        scheduleDialogData.date = date
+        scheduleDialogData.daysOfWeek = setOf(date.dayOfWeek)
+        scheduleDialogData.monthDayNumber = dayNumber
     }
 
     private inner class DateFieldData(
@@ -743,7 +762,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = diffScheduleDialogData(
                 { scheduleDialogData.daysOfWeek = daysOfWeek },
-                { }
+                {
+                    daysOfWeek.singleOrNull()?.let {
+                        scheduleDialogData.monthWeekDay = it
+                        recalculateMonthlyWeekFields()
+                    }
+                }
         )
     }
 
@@ -757,8 +781,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) = diffScheduleDialogData(
                 { scheduleDialogData.beginningOfMonth = beginningOfMonth },
-                { }
+                ::recalculateFields
         )
+
+        protected abstract fun recalculateFields()
     }
 
     private inner class MonthlyDayDelegate : Monthly() {
@@ -769,8 +795,23 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                     scheduleDialogData.monthDayNumber = monthDayNumber
                 },
-                { }
+                ::recalculateFields
         )
+
+        override fun recalculateFields() {
+            val date = getDateInMonth(
+                    scheduleDialogData.date.year,
+                    scheduleDialogData.date.month,
+                    scheduleDialogData.monthDayNumber,
+                    scheduleDialogData.beginningOfMonth
+            )
+
+            scheduleDialogData.date = date
+            scheduleDialogData.daysOfWeek = setOf(date.dayOfWeek)
+            scheduleDialogData.monthWeekNumber =
+                    EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(scheduleDialogData.monthDayNumber)
+            scheduleDialogData.monthWeekDay = date.dayOfWeek
+        }
     }
 
     private inner class MonthlyWeekDelegate : Monthly() {
@@ -781,13 +822,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                     scheduleDialogData.monthWeekNumber = monthWeekNumber
                 },
-                { }
+                ::recalculateFields
         )
 
         override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) = diffScheduleDialogData(
                 { scheduleDialogData.monthWeekDay = dayOfWeek },
-                { }
+                ::recalculateFields
         )
+
+        override fun recalculateFields() = recalculateMonthlyWeekFields()
     }
 
     private inner class YearlyDelegate : Repeating(), DateListener by DateDelegate({

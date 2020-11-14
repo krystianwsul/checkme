@@ -326,8 +326,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         scheduleDialogMonthDayRadio.run {
             setOnCheckedChangeListener { _, isChecked ->
-                if (!isChecked)
-                    return@setOnCheckedChangeListener
+                if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
@@ -353,17 +352,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             setSelection(scheduleDialogData.monthDayNumber - 1)
 
-            addListener {
-                check(it in (0 until 28))
-
-                scheduleDialogData.monthDayNumber = it + 1
-            }
+            addListener { delegate.onMonthDayNumberChanged(it) }
         }
 
         scheduleDialogMonthWeekRadio.run {
             setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-                if (!isChecked)
-                    return@setOnCheckedChangeListener
+                if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
                     scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
@@ -581,6 +575,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         open fun onDateChanged(date: Date): Unit = throw UnsupportedOperationException()
 
         open fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = Unit
+
+        open fun onMonthDayNumberChanged(selection: Int) = Unit
     }
 
     private inner class SingleDelegate : Delegate() {
@@ -771,6 +767,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class MonthlyDayDelegate : Monthly() {
 
+        override fun onMonthDayNumberChanged(selection: Int) {
+            val monthDayNumber = selection + 1
+            check(monthDayNumber in (0 until 28))
+
+            scheduleDialogData.monthDayNumber = monthDayNumber
+        }
     }
 
     private inner class MonthlyWeekDelegate : Monthly() {

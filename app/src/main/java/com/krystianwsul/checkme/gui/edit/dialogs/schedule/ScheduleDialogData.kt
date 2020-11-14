@@ -12,7 +12,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlin.random.Random
 
 @Parcelize
-class ScheduleDialogData(
+data class ScheduleDialogData(
         var date: Date,
         var daysOfWeek: Set<DayOfWeek>,
         var monthlyDay: Boolean,
@@ -24,7 +24,7 @@ class ScheduleDialogData(
         var scheduleType: ScheduleType,
         var from: Date?,
         var until: Date?,
-        var interval: Int
+        var interval: Int,
 ) : Parcelable {
 
     companion object {

@@ -68,7 +68,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
 
             private fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1
 
-            private fun dateToDayFromBeginningOrEnd(date: Date): Pair<Int, Boolean> {
+            fun dateToDayFromBeginningOrEnd(date: Date): Pair<Int, Boolean> {
                 return if (date.day > ScheduleDialogData.MAX_MONTH_DAY) {
                     dayFromEndOfMonth(date) to false
                 } else {
@@ -76,7 +76,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 }
             }
 
-            private fun dayOfMonthToWeekOfMonth(day: Int) = (day - 1) / 7 + 1
+            fun dayOfMonthToWeekOfMonth(day: Int) = (day - 1) / 7 + 1
         }
 
         abstract val scheduleData: ScheduleData

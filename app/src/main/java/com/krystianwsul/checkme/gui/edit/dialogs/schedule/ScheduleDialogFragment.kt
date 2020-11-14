@@ -524,6 +524,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         result.accept(ScheduleDialogResult.Cancel)
     }
 
+    private fun diffScheduleDialogData(applyChange: () -> Unit, updateOtherScheduleDialogDataFields: () -> Unit) {
+        val oldScheduleDialogData = scheduleDialogData.copy()
+        applyChange()
+        val newScheduleDialogData = scheduleDialogData.copy()
+
+        if (oldScheduleDialogData != newScheduleDialogData) {
+            updateOtherScheduleDialogDataFields()
+
+            updateFields()
+        }
+    }
+
     private inner class DateFieldData(
             val field: AutoCompleteTextView,
             val layout: TextInputLayout,
@@ -729,11 +741,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return getString(R.string.dateCannotBeEmpty)
         }
 
-        override fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) {
-            scheduleDialogData.daysOfWeek = daysOfWeek
-
-            checkValid()
-        }
+        override fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = diffScheduleDialogData(
+                { scheduleDialogData.daysOfWeek = daysOfWeek },
+                { }
+        )
     }
 
     private abstract inner class Monthly : Repeating() {
@@ -744,33 +755,39 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val visibilities = repeatingVisibilities.copy(month = true)
 
-        override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) {
-            scheduleDialogData.beginningOfMonth = beginningOfMonth
-        }
+        override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) = diffScheduleDialogData(
+                { scheduleDialogData.beginningOfMonth = beginningOfMonth },
+                { }
+        )
     }
 
     private inner class MonthlyDayDelegate : Monthly() {
 
-        override fun onMonthDayNumberChanged(monthDayNumber: Int) {
-            check(monthDayNumber in 1..28)
+        override fun onMonthDayNumberChanged(monthDayNumber: Int) = diffScheduleDialogData(
+                {
+                    check(monthDayNumber in 1..28)
 
-            scheduleDialogData.monthDayNumber = monthDayNumber
-        }
+                    scheduleDialogData.monthDayNumber = monthDayNumber
+                },
+                { }
+        )
     }
 
     private inner class MonthlyWeekDelegate : Monthly() {
 
-        override fun onMonthWeekNumberChanged(monthWeekNumber: Int) {
-            check(monthWeekNumber in 1..4)
+        override fun onMonthWeekNumberChanged(monthWeekNumber: Int) = diffScheduleDialogData(
+                {
+                    check(monthWeekNumber in 1..4)
 
-            scheduleDialogData.monthWeekNumber = monthWeekNumber
-        }
+                    scheduleDialogData.monthWeekNumber = monthWeekNumber
+                },
+                { }
+        )
 
-        override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) {
-            scheduleDialogData.monthWeekDay = dayOfWeek
-
-            updateFields()
-        }
+        override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) = diffScheduleDialogData(
+                { scheduleDialogData.monthWeekDay = dayOfWeek },
+                { }
+        )
     }
 
     private inner class YearlyDelegate : Repeating(), DateListener by DateDelegate({
@@ -813,10 +830,21 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onDateChanged(date: Date) {
             val fixedDate = fixDate(date)
 
-            if (fixedDate != scheduleDialogData.date) {
-                scheduleDialogData.date = fixedDate
-                updateFields()
-            }
+            diffScheduleDialogData(
+                    { scheduleDialogData.date = fixedDate },
+                    {
+                        val (monthDayNumber, beginningOfMonth)
+                                = EditViewModel.ScheduleDataWrapper.dateToDayFromBeginningOrEnd(fixedDate)
+
+                        val monthWeekNumber = EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(monthDayNumber)
+
+                        scheduleDialogData.daysOfWeek = setOf(fixedDate.dayOfWeek)
+                        scheduleDialogData.monthDayNumber = monthDayNumber
+                        scheduleDialogData.monthWeekNumber = monthWeekNumber
+                        scheduleDialogData.monthWeekDay = fixedDate.dayOfWeek
+                        scheduleDialogData.beginningOfMonth = beginningOfMonth
+                    }
+            )
         }
     }
 }

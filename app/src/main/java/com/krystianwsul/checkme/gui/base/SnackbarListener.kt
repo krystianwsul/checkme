@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.base
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -11,7 +12,10 @@ interface SnackbarListener {
 
     val snackbarParent: CoordinatorLayout
 
-    val anchor get() = snackbarParent.findViewById<View>(R.id.bottomAnchor)!!
+    val anchor
+        get() = snackbarParent.run {
+            findViewById<View>(R.id.bottomFab)!!.takeIf { it.isVisible } ?: findViewById(R.id.bottomAppBar)!!
+        }
 
     /*
     SHORT = 1500

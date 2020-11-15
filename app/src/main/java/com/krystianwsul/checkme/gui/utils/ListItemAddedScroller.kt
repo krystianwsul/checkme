@@ -31,9 +31,7 @@ interface ListItemAddedScroller {
         fun smoothScroll(position: Int) {
             val scroller = object : LinearSmoothScroller(recyclerView.context) {
 
-                override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
-                    return 100f / displayMetrics.densityDpi
-                }
+                override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics) = 100f / displayMetrics.densityDpi
             }
 
             scroller.targetPosition = position
@@ -59,16 +57,14 @@ interface ListItemAddedScroller {
 
                 val targetBottom = targetView.getAbsoluteTop() + targetView.height
 
-                if (targetBottom > anchorTop)
-                    scrollToBottom()
+                if (targetBottom > anchorTop) scrollToBottom()
             }
         }
     }
 
     fun tryScroll() {
         delay {
-            if (scrollToTaskKey == null)
-                return@delay
+            if (scrollToTaskKey == null) return@delay
 
             val target = findItem() ?: return@delay
 
@@ -87,13 +83,10 @@ interface ListItemAddedScroller {
         tryScroll()
     }
 
-    private fun View.getAbsoluteTop(): Int {
-        val arr = IntArray(2)
-        getLocationOnScreen(arr)
-        return arr[1]
+    private fun View.getAbsoluteTop() = IntArray(2).let {
+        getLocationOnScreen(it)
+        it[1]
     }
 
-    fun scrollToTop() {
-        delay { scrollToPosition(0) }
-    }
+    fun scrollToTop() = delay { scrollToPosition(0) }
 }

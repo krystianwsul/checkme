@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.common.domain.TaskUndoData
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -50,7 +51,10 @@ abstract class AbstractActivity : AppCompatActivity() {
     override fun setContentView(layoutResID: Int) {
         super.setContentView(layoutResID)
 
-        findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundColor(ContextCompat.getColor(this, R.color.materialBackground))
+        findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundColor(ContextCompat.getColor(
+                this,
+                R.color.materialBackground
+        ))
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -69,7 +73,10 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     private fun tick(source: String) = Single.just(Unit)
             .observeOn(Schedulers.single())
-            .subscribeBy { DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source)) }
+            .subscribeBy {
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source))
+            }
+            .addTo(createDisposable)
 
     protected open val tickOnResume = true
 
@@ -80,15 +87,12 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         snackbarData?.let {
             (this as? SnackbarListener)?.apply {
-                anchor.addOneShotGlobalLayoutListener {
-                    it.show(this)
-                }
+                anchor.addOneShotGlobalLayoutListener { it.show(this) }
             }
         }
         snackbarData = null
 
-        if (tickOnResume)
-            resumeDisposable += tick("AbstractActivity.onResume")
+        if (tickOnResume) resumeDisposable += tick("AbstractActivity.onResume")
     }
 
     override fun onPause() {

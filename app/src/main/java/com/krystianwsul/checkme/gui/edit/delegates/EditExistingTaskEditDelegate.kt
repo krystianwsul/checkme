@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
@@ -57,7 +56,7 @@ class EditExistingTaskEditDelegate(
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -68,7 +67,7 @@ class EditExistingTaskEditDelegate(
                 createParameters.name,
                 scheduleDatas,
                 createParameters.note,
-                projectKey,
+                sharedProjectParameters,
                 imageUrl.value!!.writeImagePath
         )
     }
@@ -93,7 +92,7 @@ class EditExistingTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -103,7 +102,7 @@ class EditExistingTaskEditDelegate(
                 parameters.taskKey,
                 createParameters.name,
                 createParameters.note,
-                projectKey,
+                sharedProjectParameters,
                 imageUrl.value!!.writeImagePath
         )
     }

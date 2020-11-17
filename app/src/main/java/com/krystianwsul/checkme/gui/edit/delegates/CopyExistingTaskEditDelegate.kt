@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
@@ -24,7 +23,7 @@ class CopyExistingTaskEditDelegate(
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -35,7 +34,7 @@ class CopyExistingTaskEditDelegate(
                         createParameters.name,
                         scheduleDatas,
                         createParameters.note,
-                        projectKey,
+                        sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
@@ -67,7 +66,7 @@ class CopyExistingTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -77,7 +76,7 @@ class CopyExistingTaskEditDelegate(
                         SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,
-                        projectKey,
+                        sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,

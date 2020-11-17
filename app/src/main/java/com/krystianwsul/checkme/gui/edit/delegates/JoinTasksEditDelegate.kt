@@ -70,7 +70,7 @@ class JoinTasksEditDelegate(
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
@@ -81,7 +81,7 @@ class JoinTasksEditDelegate(
                         scheduleDatas,
                         parameters.taskKeys,
                         createParameters.note,
-                        projectKey,
+                        sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
@@ -115,7 +115,7 @@ class JoinTasksEditDelegate(
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            projectKey: ProjectKey.Shared?
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -126,7 +126,7 @@ class JoinTasksEditDelegate(
                         createParameters.name,
                         parameters.taskKeys,
                         createParameters.note,
-                        projectKey,
+                        sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,

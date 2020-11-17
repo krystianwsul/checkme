@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
@@ -116,9 +117,9 @@ fun DomainFactory.createScheduleRootTask(
         name: String,
         scheduleDatas: List<ScheduleData>,
         note: String?,
-        projectId: ProjectKey<*>?,
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
         imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+        copyTaskKey: TaskKey? = null,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -128,7 +129,7 @@ fun DomainFactory.createScheduleRootTask(
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val finalProjectId = projectId ?: defaultProjectId
+    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -205,9 +206,9 @@ fun DomainFactory.createRootTask(
         source: SaveService.Source,
         name: String,
         note: String?,
-        projectId: ProjectKey<*>?,
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
         imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+        copyTaskKey: TaskKey? = null,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -216,7 +217,7 @@ fun DomainFactory.createRootTask(
 
     val now = ExactTimeStamp.Local.now
 
-    val finalProjectId = projectId ?: defaultProjectId
+    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -251,8 +252,8 @@ fun DomainFactory.updateScheduleTask(
         name: String,
         scheduleDatas: List<ScheduleData>,
         note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: NullableWrapper<Pair<String, Uri>>?
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -269,7 +270,7 @@ fun DomainFactory.updateScheduleTask(
 
     val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
-        it.updateProject(this, now, projectId ?: defaultProjectId)
+        it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -377,8 +378,8 @@ fun DomainFactory.updateRootTask(
         taskKey: TaskKey,
         name: String,
         note: String?,
-        projectId: ProjectKey<*>?,
-        imagePath: NullableWrapper<Pair<String, Uri>>?
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -389,7 +390,7 @@ fun DomainFactory.updateRootTask(
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
-        it.updateProject(this, now, projectId ?: defaultProjectId)
+        it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -425,7 +426,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         scheduleDatas: List<ScheduleData>,
         joinTaskKeys: List<TaskKey>,
         note: String?,
-        projectId: ProjectKey<*>?,
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean,
@@ -437,7 +438,7 @@ fun DomainFactory.createScheduleJoinRootTask(
     check(scheduleDatas.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val finalProjectId = projectId ?: defaultProjectId
+    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
@@ -530,9 +531,9 @@ fun DomainFactory.createJoinRootTask(
         name: String,
         joinTaskKeys: List<TaskKey>,
         note: String?,
-        projectId: ProjectKey<*>?,
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
         imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>
+        removeInstanceKeys: List<InstanceKey>,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -542,7 +543,7 @@ fun DomainFactory.createJoinRootTask(
 
     val now = ExactTimeStamp.Local.now
 
-    val finalProjectId = projectId ?: joinTaskKeys.map { it.projectKey }
+    val finalProjectId = sharedProjectParameters?.key ?: joinTaskKeys.map { it.projectKey }
             .distinct()
             .single()
 

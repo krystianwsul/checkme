@@ -12,6 +12,7 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxkotlin.Observables
 
 abstract class EditDelegate(savedEditImageState: EditImageState?) {
@@ -167,28 +168,37 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
         check(createParameters.allReminders || showAllRemindersDialog() != null)
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
+        val assignedTo = parentScheduleManager.assignedTo
+
+        val sharedProjectParameters = if (projectId == null) {
+            check(assignedTo.isEmpty())
+
+            null
+        } else {
+            SharedProjectParameters(projectId, assignedTo)
+        }
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                    projectId
+                    sharedProjectParameters
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
-                check(projectId == null)
+                check(sharedProjectParameters == null)
 
                 val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
 
                 createTaskWithParent(createParameters, parentTaskKey)
             }
-            else -> createTaskWithoutReminder(createParameters, projectId)
+            else -> createTaskWithoutReminder(createParameters, sharedProjectParameters)
         }
     }
 
     abstract fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
-            projectKey: ProjectKey.Shared?,
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey
 
     abstract fun createTaskWithParent(
@@ -198,7 +208,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            projectKey: ProjectKey.Shared?,
+            sharedProjectParameters: SharedProjectParameters?,
     ): TaskKey
 
     fun saveState(outState: Bundle) {
@@ -212,4 +222,6 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
         DATE(R.string.error_date), TIME(R.string.error_time)
     }
+
+    class SharedProjectParameters(val key: ProjectKey.Shared, val assignedTo: Set<UserKey>)
 }

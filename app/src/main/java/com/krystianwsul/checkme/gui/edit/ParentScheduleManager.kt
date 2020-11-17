@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.UserKey
 import io.reactivex.Observable
 
 interface ParentScheduleManager {
@@ -13,6 +14,11 @@ interface ParentScheduleManager {
 
     val schedules: List<ScheduleEntry>
     val scheduleObservable: Observable<List<ScheduleEntry>>
+
+    var assignedTo: Set<UserKey>
+    val assignedToObservable: Observable<Set<UserKey>>
+
+    val assignedToUsers: List<EditViewModel.UserData>
 
     val changed: Boolean
 

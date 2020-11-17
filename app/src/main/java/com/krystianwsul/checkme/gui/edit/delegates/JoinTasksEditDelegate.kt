@@ -42,7 +42,8 @@ class JoinTasksEditDelegate(
 
         return ParentScheduleState(
                 initialParentKey,
-                listOfNotNull(schedule)
+                listOfNotNull(schedule),
+                setOf()
         )
     }
 

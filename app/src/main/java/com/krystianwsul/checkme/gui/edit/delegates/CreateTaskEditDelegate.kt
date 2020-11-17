@@ -42,7 +42,8 @@ class CreateTaskEditDelegate(
                                                 && data.defaultReminder
                                                 && parameters.showFirstSchedule
                                     }
-                            )
+                            ),
+                            setOf()
                     )
                 }
             }
@@ -54,7 +55,10 @@ class CreateTaskEditDelegate(
                 initialStateGetter = {
                     ParentScheduleState(
                             initialParentKey,
-                            listOfNotNull(firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder })
+                            listOfNotNull(
+                                    firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder }
+                            ),
+                            setOf()
                     )
                 }
             }
@@ -64,7 +68,7 @@ class CreateTaskEditDelegate(
 
                 val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
                 initialStateGetter = {
-                    ParentScheduleState.create(initialParentKey)
+                    ParentScheduleState.create(initialParentKey, setOf())
                 }
             }
             EditParameters.None -> {
@@ -74,7 +78,8 @@ class CreateTaskEditDelegate(
                 initialStateGetter = {
                     ParentScheduleState(
                             null,
-                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder })
+                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder }),
+                            setOf()
                     )
                 }
             }

@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
@@ -37,6 +38,7 @@ import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.hideKeyboardOnClickOutside
 import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
@@ -44,6 +46,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.getCurrentValue
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
@@ -84,6 +87,7 @@ class EditActivity : NavBarActivity() {
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
         private const val TAG_ALL_REMINDERS = "allReminders"
+        private const val TAG_ASSIGN_TO = "assignTo"
 
         private const val REQUEST_CREATE_PARENT = 982
 
@@ -131,7 +135,8 @@ class EditActivity : NavBarActivity() {
                         delegate.parentScheduleManager.run {
                             ParentScheduleState(
                                     parent?.parentKey,
-                                    schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList()
+                                    schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList(),
+                                    assignedTo
                             )
                         },
                         nameHint
@@ -331,6 +336,8 @@ class EditActivity : NavBarActivity() {
         }
                 .subscribe()
                 .addTo(createDisposable)
+
+        tryGetFragment<AssignToDialogFragment>(TAG_ASSIGN_TO)?.listener = ::assignTo
     }
 
     private fun removeSchedule(position: Int) {
@@ -511,6 +518,10 @@ class EditActivity : NavBarActivity() {
         finish()
     }
 
+    private fun assignTo(userKeys: Set<UserKey>) {
+        delegate.parentScheduleManager.assignedTo = userKeys
+    }
+
     sealed class Hint : Parcelable {
 
         @Parcelize
@@ -518,7 +529,7 @@ class EditActivity : NavBarActivity() {
 
             constructor(
                     date: Date,
-                    pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date)
+                    pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
             ) : this(pair.first, TimePair(pair.second))
         }
 
@@ -603,6 +614,11 @@ class EditActivity : NavBarActivity() {
                     .subscribe { getItem()?.onNewParent(this@EditActivity, holder) }
                     .addTo(holder.compositeDisposable)
 
+            delegate.parentScheduleManager
+                    .assignedToObservable
+                    .subscribe { getItem()?.onNewAssignedTo(this@EditActivity, holder) }
+                    .addTo(holder.compositeDisposable)
+
             holder.compositeDisposable += timeRelay.subscribe { getItem()?.onTimeChanged(this@EditActivity, holder) }
         }
 
@@ -655,6 +671,8 @@ class EditActivity : NavBarActivity() {
         open fun onNewParent(activity: EditActivity, holder: Holder) = Unit
 
         open fun onTimeChanged(activity: EditActivity, holder: Holder) = Unit
+
+        open fun onNewAssignedTo(activity: EditActivity, holder: Holder) = Unit
 
         open fun same(other: Item) = other == this
 
@@ -910,18 +928,42 @@ class EditActivity : NavBarActivity() {
                     scheduleLayout.apply {
                         hint = activity.getString(R.string.assignTask)
                         error = null
-                        isHintAnimationEnabled = true
                         endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
-                    }
 
-                    scheduleText.apply {
-                        text = null // todo assign
-
-                        setFixedOnClickListener {
-                            // todo assign
+                        isHintAnimationEnabled = false
+                        addOneShotGlobalLayoutListener {
+                            isHintAnimationEnabled = true
                         }
                     }
+
+                    scheduleText.setFixedOnClickListener {
+                        AssignToDialogFragment.newInstance(
+                                activity.delegate
+                                        .parentScheduleManager
+                                        .parent!!
+                                        .projectUsers
+                                        .values
+                                        .toList(),
+                                activity.delegate
+                                        .parentScheduleManager
+                                        .assignedTo
+                                        .toList()
+                        )
+                                .apply { listener = activity::assignTo }
+                                .show(activity.supportFragmentManager, TAG_ASSIGN_TO)
+                    }
                 }
+
+                onNewAssignedTo(activity, holder)
+            }
+
+            override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
+                (holder as ScheduleHolder).scheduleText.setText(
+                        activity.delegate
+                                .parentScheduleManager
+                                .assignedToUsers
+                                .joinToString("\n") { it.name }
+                )
             }
         }
     }

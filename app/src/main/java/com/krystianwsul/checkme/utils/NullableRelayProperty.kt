@@ -15,6 +15,8 @@ open class NullableRelayProperty<T : Any>(initialValue: T?, private val beforeSe
     var value
         get() = relay.value!!.value
         set(value) {
+            if (value == relay.value!!) return
+
             beforeSet?.invoke(value)
             relay.accept(NullableWrapper(value))
         }

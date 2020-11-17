@@ -361,5 +361,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
         }
     }
 
-    data class UserData(val name: String)
+    @Parcelize
+    data class UserData(val key: UserKey, val name: String) : Parcelable
 }

@@ -788,4 +788,4 @@ private fun <T : ProjectType> DomainFactory.createChildTask(
     return childTask
 }
 
-private fun Collection<ProjectUser>.toUserDatas() = associate { it.id to EditViewModel.UserData(it.name) }
+private fun Collection<ProjectUser>.toUserDatas() = associate { it.id to EditViewModel.UserData(it.id, it.name) }

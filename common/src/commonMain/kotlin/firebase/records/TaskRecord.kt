@@ -5,11 +5,11 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
-class TaskRecord<T : ProjectType> private constructor(
+abstract class TaskRecord<T : ProjectType> protected constructor(
         create: Boolean,
         val id: String,
         val projectRecord: ProjectRecord<T>,
-        private val taskJson: PrivateTaskJson,
+        private val taskJson: TaskJson,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -33,38 +33,7 @@ class TaskRecord<T : ProjectType> private constructor(
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
             .toMutableMap()
 
-    override val createObject: PrivateTaskJson // because of duplicate functionality when converting local task
-        get() {
-            if (update != null)
-                taskJson.instances = instanceRecords.entries
-                        .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
-                        .toMutableMap()
-
-            val scheduleWrappers = HashMap<String, ScheduleWrapper>()
-
-            for (singleScheduleRecord in singleScheduleRecords.values)
-                scheduleWrappers[singleScheduleRecord.id] = singleScheduleRecord.createObject
-
-            for (weeklyScheduleRecord in weeklyScheduleRecords.values)
-                scheduleWrappers[weeklyScheduleRecord.id] = weeklyScheduleRecord.createObject
-
-            for (monthlyDayScheduleRecord in monthlyDayScheduleRecords.values)
-                scheduleWrappers[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord.createObject
-
-            for (monthlyWeekScheduleRecord in monthlyWeekScheduleRecords.values)
-                scheduleWrappers[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord.createObject
-
-            for (yearlyScheduleRecord in yearlyScheduleRecords.values)
-                scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject
-
-            taskJson.schedules = scheduleWrappers
-
-            taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
-
-            return taskJson
-        }
-
-    override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
+    final override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
 
     val rootInstanceKey by lazy { "${projectRecord.projectKey.key}-$id" }
 
@@ -93,27 +62,6 @@ class TaskRecord<T : ProjectType> private constructor(
 
     var ordinal by Committer(taskJson::ordinal)
 
-    constructor(
-            id: String,
-            projectRecord: ProjectRecord<T>,
-            taskJson: PrivateTaskJson,
-    ) : this(
-        false,
-        id,
-        projectRecord,
-        taskJson
-    )
-
-    constructor(
-            projectRecord: ProjectRecord<T>,
-            taskJson: PrivateTaskJson,
-    ) : this(
-            true,
-            projectRecord.getTaskRecordId(),
-            projectRecord,
-            taskJson
-    )
-
     init {
         if (name.isEmpty())
             throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
@@ -129,7 +77,8 @@ class TaskRecord<T : ProjectType> private constructor(
                     instanceJson,
                     scheduleKey,
                     key,
-                    customTimeId)
+                    customTimeId
+            )
 
             instanceRecords[scheduleKey] = remoteInstanceRecord
         }
@@ -173,7 +122,7 @@ class TaskRecord<T : ProjectType> private constructor(
         }
     }
 
-    override val children
+    final override val children
         get() = instanceRecords.values +
                 singleScheduleRecords.values +
                 weeklyScheduleRecords.values +
@@ -271,8 +220,6 @@ class TaskRecord<T : ProjectType> private constructor(
         noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
         return noScheduleOrParentRecord
     }
-
-    override fun deleteFromParent() = check(projectRecord.taskRecords.remove(id) == this)
 
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
 

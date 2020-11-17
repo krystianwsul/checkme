@@ -93,7 +93,11 @@ class RootInstanceRecord<T : ProjectType>(
             dateString: String,
             timeString: String,
             parent: Parent,
-            schedulePair: Pair<ScheduleKey, CustomTimeId<T>?> = dateTimeStringsToSchedulePair(taskRecord.projectRecord, dateString, timeString)
+            schedulePair: Pair<ScheduleKey, CustomTimeId<T>?> = dateTimeStringsToSchedulePair(
+                    taskRecord.projectRecord,
+                    dateString,
+                    timeString
+            ),
     ) : this(
             false,
             taskRecord,

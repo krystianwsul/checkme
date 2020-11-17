@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -21,15 +22,22 @@ class PrivateProjectRecord(
         projectKey.key
 ) {
 
+    override lateinit var taskRecords: MutableMap<String, PrivateTaskRecord>
+        private set
+
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
         private set
 
     init {
-        initChildRecords(create)
-    }
+        taskRecords = projectJson.tasks
+                .mapValues { (id, taskJson) ->
+                    check(id.isNotEmpty())
 
-    override fun initChildRecords(create: Boolean) {
-        super.initChildRecords(create)
+                    PrivateTaskRecord(id, this, taskJson)
+                }
+                .toMutableMap()
+
+        initTaskHierarchyRecords()
 
         customTimeRecords = projectJson.customTimes
                 .entries
@@ -105,4 +113,12 @@ class PrivateProjectRecord(
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) =
             CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Private)
+
+    fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord {
+        val remoteTaskRecord = PrivateTaskRecord(this, taskJson)
+        check(!taskRecords.containsKey(remoteTaskRecord.id))
+
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
+        return remoteTaskRecord
+    }
 }

@@ -11,7 +11,6 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
@@ -219,21 +218,13 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             ordinal: Double? = null,
-    ): Task<*> {
-        val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
-
-        val taskJson = PrivateTaskJson(
-                name,
-                now.long,
-                now.offset,
-                null,
-                note,
-                image = image,
-                ordinal = ordinal
-        )
-
-        return getProjectForce(projectId).newTask(taskJson)
-    }
+    ) = getProjectForce(projectId).createTask(
+            now,
+            imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
+            name,
+            note,
+            ordinal
+    )
 
     fun createProject(
             name: String,

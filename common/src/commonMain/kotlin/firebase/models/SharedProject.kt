@@ -3,11 +3,15 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.json.SharedTaskJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
@@ -170,4 +174,72 @@ class SharedProject(
     }
 
     override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Shared>) = _newRootInstanceManager(taskRecord)
+
+    override fun createChildTask(
+            parentTask: Task<ProjectType.Shared>,
+            now: ExactTimeStamp.Local,
+            name: String,
+            note: String?,
+            image: TaskJson.Image?,
+            ordinal: Double?,
+    ): Task<ProjectType.Shared> {
+        val taskJson = SharedTaskJson(
+                name,
+                now.long,
+                now.offset,
+                null,
+                note,
+                image = image,
+                ordinal = ordinal
+        )
+
+        val childTask = newTask(taskJson)
+
+        createTaskHierarchy(parentTask, childTask, now)
+
+        return childTask
+    }
+
+    override fun copyTaskRecord(
+            oldTask: Task<*>,
+            now: ExactTimeStamp.Local,
+            instanceJsons: MutableMap<String, InstanceJson>,
+    ) = projectRecord.newTaskRecord(SharedTaskJson(
+            oldTask.name,
+            now.long,
+            now.offset,
+            oldTask.endExactTimeStamp?.long,
+            oldTask.note,
+            instanceJsons,
+            ordinal = oldTask.ordinal
+    ))
+
+    private fun newTask(taskJson: SharedTaskJson): Task<ProjectType.Shared> {
+        val taskRecord = projectRecord.newTaskRecord(taskJson)
+
+        val task = Task(
+                this,
+                taskRecord,
+                newRootInstanceManager(taskRecord)
+        )
+        check(!_tasks.containsKey(task.id))
+        _tasks[task.id] = task
+
+        return task
+    }
+
+    override fun createTask(
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
+    ) = newTask(SharedTaskJson(
+            name,
+            now.long,
+            now.offset,
+            note = note,
+            image = image,
+            ordinal = ordinal
+    ))
 }

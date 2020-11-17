@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.utils.*
@@ -22,21 +21,12 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
 
-    lateinit var taskRecords: MutableMap<String, TaskRecord<T>>
-        private set
+    abstract val taskRecords: Map<String, TaskRecord<T>>
 
     lateinit var taskHierarchyRecords: MutableMap<String, TaskHierarchyRecord>
         private set
 
-    protected open fun initChildRecords(create: Boolean) {
-        taskRecords = projectJson.tasks
-                .mapValues { (id, taskJson) ->
-                    check(id.isNotEmpty())
-
-                    TaskRecord(id, this, taskJson)
-                }
-                .toMutableMap()
-
+    protected fun initTaskHierarchyRecords() {
         taskHierarchyRecords = projectJson.taskHierarchies
                 .mapValues { (id, taskHierarchyJson) ->
                     check(id.isNotEmpty())
@@ -62,14 +52,6 @@ abstract class ProjectRecord<T : ProjectType>(
         get() = taskRecords.values +
                 taskHierarchyRecords.values +
                 customTimeRecords.values
-
-    fun newTaskRecord(taskJson: PrivateTaskJson): TaskRecord<T> {
-        val remoteTaskRecord = TaskRecord(this, taskJson)
-        check(!taskRecords.containsKey(remoteTaskRecord.id))
-
-        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
-        return remoteTaskRecord
-    }
 
     fun newTaskHierarchyRecord(taskHierarchyJson: TaskHierarchyJson): TaskHierarchyRecord {
         val taskHierarchyRecord = TaskHierarchyRecord(this, taskHierarchyJson)

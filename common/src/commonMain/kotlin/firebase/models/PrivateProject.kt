@@ -1,18 +1,22 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
-        private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>
+        private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
 ) : Project<ProjectType.Private>() {
 
     override val projectKey = projectRecord.projectKey
@@ -105,4 +109,72 @@ class PrivateProject(
     }
 
     override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Private>) = _newRootInstanceManager(taskRecord)
+
+    override fun createChildTask(
+            parentTask: Task<ProjectType.Private>,
+            now: ExactTimeStamp.Local,
+            name: String,
+            note: String?,
+            image: TaskJson.Image?,
+            ordinal: Double?,
+    ): Task<ProjectType.Private> {
+        val taskJson = PrivateTaskJson(
+                name,
+                now.long,
+                now.offset,
+                null,
+                note,
+                image = image,
+                ordinal = ordinal
+        )
+
+        val childTask = newTask(taskJson)
+
+        createTaskHierarchy(parentTask, childTask, now)
+
+        return childTask
+    }
+
+    override fun copyTaskRecord(
+            oldTask: Task<*>,
+            now: ExactTimeStamp.Local,
+            instanceJsons: MutableMap<String, InstanceJson>,
+    ) = projectRecord.newTaskRecord(PrivateTaskJson(
+            oldTask.name,
+            now.long,
+            now.offset,
+            oldTask.endExactTimeStamp?.long,
+            oldTask.note,
+            instanceJsons,
+            ordinal = oldTask.ordinal
+    ))
+
+    private fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
+        val taskRecord = projectRecord.newTaskRecord(taskJson)
+
+        val task = Task(
+                this,
+                taskRecord,
+                newRootInstanceManager(taskRecord)
+        )
+        check(!_tasks.containsKey(task.id))
+        _tasks[task.id] = task
+
+        return task
+    }
+
+    override fun createTask(
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
+    ) = newTask(PrivateTaskJson(
+            name,
+            now.long,
+            now.offset,
+            note = note,
+            image = image,
+            ordinal = ordinal
+    ))
 }

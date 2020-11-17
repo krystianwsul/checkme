@@ -5,8 +5,8 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -51,19 +51,14 @@ abstract class Project<T : ProjectType> : Current {
 
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
-    fun newTask(taskJson: PrivateTaskJson): Task<T> {
-        val taskRecord = projectRecord.newTaskRecord(taskJson)
-
-        val task = Task(
-                this,
-                taskRecord,
-                newRootInstanceManager(taskRecord)
-        )
-        check(!_tasks.containsKey(task.id))
-        _tasks[task.id] = task
-
-        return task
-    }
+    abstract fun createChildTask(
+            parentTask: Task<T>,
+            now: ExactTimeStamp.Local,
+            name: String,
+            note: String?,
+            image: TaskJson.Image?,
+            ordinal: Double?,
+    ): Task<T>
 
     fun createTaskHierarchy(
             parentTask: Task<T>,
@@ -84,6 +79,12 @@ abstract class Project<T : ProjectType> : Current {
         taskHierarchy.invalidateTasks()
     }
 
+    protected abstract fun copyTaskRecord(
+            oldTask: Task<*>,
+            now: ExactTimeStamp.Local,
+            instanceJsons: MutableMap<String, InstanceJson>,
+    ): TaskRecord<T>
+
     @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
@@ -91,8 +92,6 @@ abstract class Project<T : ProjectType> : Current {
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp.Local,
     ): Task<T> {
-        val endTime = oldTask.endExactTimeStamp?.long
-
         val instanceDatas = instances.map { it to getInstanceJson(deviceDbInfo.key, it) }
 
         val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
@@ -103,17 +102,7 @@ abstract class Project<T : ProjectType> : Current {
             }.toMutableMap()
         }
 
-        val taskJson = PrivateTaskJson(
-                oldTask.name,
-                now.long,
-                now.offset,
-                endTime,
-                oldTask.note,
-                instanceJsons,
-                ordinal = oldTask.ordinal
-        )
-
-        val taskRecord = projectRecord.newTaskRecord(taskJson)
+        val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
 
         val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
         check(!_tasks.containsKey(newTask.id))
@@ -370,6 +359,14 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks.values.forEach { it.fixOffsets() }
     }
+
+    abstract fun createTask(
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
+    ): Task<T>
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")

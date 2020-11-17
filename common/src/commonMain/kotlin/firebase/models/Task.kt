@@ -531,23 +531,7 @@ class Task<T : ProjectType>(
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double? = null,
-    ): Task<T> {
-        val taskJson = PrivateTaskJson(
-                name,
-                now.long,
-                now.offset,
-                null,
-                note,
-                image = image,
-                ordinal = ordinal
-        )
-
-        val childTask = project.newTask(taskJson)
-
-        project.createTaskHierarchy(this, childTask, now)
-
-        return childTask
-    }
+    ) = project.createChildTask(this, now, name, note, image, ordinal)
 
     fun delete() {
         schedules.toMutableList().forEach { it.delete() }

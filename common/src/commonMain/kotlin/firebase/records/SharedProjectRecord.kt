@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.json.SharedTaskJson
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.*
 
@@ -19,18 +20,27 @@ class SharedProjectRecord(
         "${projectKey.key}/$PROJECT_JSON"
 ) {
 
+    override lateinit var taskRecords: MutableMap<String, SharedTaskRecord>
+        private set
+
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
         private set
 
-    lateinit var userRecords: MutableMap<UserKey, ProjectUserRecord>
+    var userRecords: MutableMap<UserKey, ProjectUserRecord>
         private set
 
-    init {
-        initChildRecords(create)
-    }
+    private val projectJson get() = jsonWrapper.projectJson
 
-    override fun initChildRecords(create: Boolean) {
-        super.initChildRecords(create)
+    init {
+        taskRecords = projectJson.tasks
+                .mapValues { (id, taskJson) ->
+                    check(id.isNotEmpty())
+
+                    SharedTaskRecord(id, this, taskJson)
+                }
+                .toMutableMap()
+
+        initTaskHierarchyRecords()
 
         customTimeRecords = jsonWrapper.projectJson
                 .customTimes
@@ -144,6 +154,14 @@ class SharedProjectRecord(
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
             databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
+
+    fun newTaskRecord(taskJson: SharedTaskJson): SharedTaskRecord {
+        val remoteTaskRecord = SharedTaskRecord(this, taskJson)
+        check(!taskRecords.containsKey(remoteTaskRecord.id))
+
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
+        return remoteTaskRecord
+    }
 
     interface Parent {
 

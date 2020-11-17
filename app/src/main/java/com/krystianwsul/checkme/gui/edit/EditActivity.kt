@@ -721,7 +721,7 @@ class EditActivity : NavBarActivity() {
 
             override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
-                    scheduleMargin.visibility = View.GONE
+                    scheduleMargin.isVisible = false
 
                     scheduleLayout.run {
                         hint = null
@@ -777,7 +777,7 @@ class EditActivity : NavBarActivity() {
 
             override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
-                    scheduleMargin.visibility = View.GONE
+                    scheduleMargin.isVisible = false
 
                     scheduleLayout.run {
                         hint = activity.getString(R.string.addReminder)
@@ -894,6 +894,32 @@ class EditActivity : NavBarActivity() {
                         imageImage.visibility = View.GONE
                         imageLayout.visibility = View.VISIBLE
                         imageEdit.visibility = View.GONE
+                    }
+                }
+            }
+        }
+
+        object AssignTo : Item() {
+
+            override val holderType = HolderType.SCHEDULE
+
+            override fun bind(activity: EditActivity, holder: Holder) {
+                (holder as ScheduleHolder).apply {
+                    scheduleMargin.isVisible = false
+
+                    scheduleLayout.apply {
+                        hint = activity.getString(R.string.assignTask)
+                        error = null
+                        isHintAnimationEnabled = true
+                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
+                    }
+
+                    scheduleText.apply {
+                        text = null // todo assign
+
+                        setFixedOnClickListener {
+                            // todo assign
+                        }
                     }
                 }
             }

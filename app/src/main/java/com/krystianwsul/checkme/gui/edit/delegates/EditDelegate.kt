@@ -12,6 +12,7 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxkotlin.Observables
 
 abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
@@ -22,7 +23,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
         fun fromParameters(
                 parameters: EditParameters,
                 data: EditViewModel.Data,
-                savedInstanceState: Bundle?
+                savedInstanceState: Bundle?,
         ): EditDelegate {
             val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
@@ -33,7 +34,8 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
                 is EditParameters.Create,
                 is EditParameters.Share,
                 is EditParameters.Shortcut,
-                EditParameters.None -> CreateTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
+                EditParameters.None,
+                -> CreateTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
             }
         }
     }
@@ -70,14 +72,23 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
     protected val parentLookup by lazy { ParentLookup() }
 
-    val adapterItemObservable
-        get() = parentScheduleManager.scheduleObservable.map {
+    val adapterItemObservable by lazy {
+        parentScheduleManager.let {
+            Observables.combineLatest(it.parentObservable, it.scheduleObservable)
+        }.map { (parent, schedules) ->
             listOf(EditActivity.Item.Parent) +
-                    it.map { EditActivity.Item.Schedule(it) } +
+                    schedules.map { EditActivity.Item.Schedule(it) } +
                     EditActivity.Item.NewSchedule +
                     EditActivity.Item.Note +
+                    listOfNotNull(
+                            parent.value
+                                    ?.projectUsers
+                                    ?.takeIf { it.isNotEmpty() }
+                                    ?.let { EditActivity.Item.AssignTo }
+                    ) +
                     EditActivity.Item.Image
         }!!
+    }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
         if (parentScheduleManager.changed) return true
@@ -94,7 +105,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
     protected fun checkNameNoteChanged(
             taskData: EditViewModel.TaskData,
             name: String,
-            note: String?
+            note: String?,
     ) = name != taskData.name || note != taskData.note
 
     fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
@@ -136,7 +147,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
         fun findTaskData(parentKey: EditViewModel.ParentKey): EditViewModel.ParentTreeData {
             fun helper(
                     taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-                    parentKey: EditViewModel.ParentKey
+                    parentKey: EditViewModel.ParentKey,
             ): EditViewModel.ParentTreeData? {
                 if (taskDatas.containsKey(parentKey))
                     return taskDatas.getValue(parentKey)
@@ -177,17 +188,17 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
     abstract fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
-            projectKey: ProjectKey.Shared?
+            projectKey: ProjectKey.Shared?,
     ): TaskKey
 
     abstract fun createTaskWithParent(
             createParameters: CreateParameters,
-            parentTaskKey: TaskKey
+            parentTaskKey: TaskKey,
     ): TaskKey
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            projectKey: ProjectKey.Shared?
+            projectKey: ProjectKey.Shared?,
     ): TaskKey
 
     fun saveState(outState: Bundle) {

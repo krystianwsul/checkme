@@ -12,10 +12,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.firebase.models.Project
-import com.krystianwsul.common.firebase.models.SharedProject
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -83,7 +80,8 @@ fun DomainFactory.getCreateTaskData(
                 scheduleDataWrappers,
                 task.note,
                 task.project.name,
-                task.getImage(deviceDbInfo)
+                task.getImage(deviceDbInfo),
+                task.getAssignedTo().keys
         )
     }
 
@@ -603,7 +601,8 @@ private fun DomainFactory.getParentTreeDatas(
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         null,
-                        isGroupTask
+                        isGroupTask,
+                        mapOf()
                 )
 
                 taskParentKey to parentTreeData
@@ -625,7 +624,8 @@ private fun DomainFactory.getParentTreeDatas(
                         null,
                         EditViewModel.SortKey.ProjectSortKey(it.projectKey),
                         it.projectKey,
-                        false
+                        false,
+                        it.users.toUserDatas()
                 )
 
                 projectParentKey to parentTreeData
@@ -656,7 +656,8 @@ private fun DomainFactory.getProjectTaskTreeDatas(
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         (it.project as? SharedProject)?.projectKey,
-                        isGroupTask
+                        isGroupTask,
+                        mapOf()
                 )
 
                 taskParentKey to parentTreeData
@@ -744,7 +745,8 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                             childTask.note,
                             EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
                             (childTask.project as? SharedProject)?.projectKey,
-                            isRootGroupTask
+                            isRootGroupTask,
+                            mapOf()
                     )
 
                     taskParentKey to parentTreeData
@@ -785,3 +787,5 @@ private fun <T : ProjectType> DomainFactory.createChildTask(
 
     return childTask
 }
+
+private fun Collection<ProjectUser>.toUserDatas() = associate { it.id to EditViewModel.UserData(it.name) }

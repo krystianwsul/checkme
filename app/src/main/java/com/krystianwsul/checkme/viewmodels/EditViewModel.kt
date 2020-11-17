@@ -280,7 +280,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val scheduleDataWrappers: List<ScheduleDataWrapper>?,
             val note: String?,
             val projectName: String?,
-            val imageState: ImageState?
+            val imageState: ImageState?,
+            val assignedTo: Set<UserKey>,
     )
 
     data class ParentTreeData(
@@ -291,7 +292,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val note: String?,
             val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
-            val isRootTaskGroup: Boolean
+            val isRootTaskGroup: Boolean,
+            val projectUsers: Map<UserKey, UserData>,
     ) : QueryMatch {
 
         override val normalizedName by lazy { name.normalized() }
@@ -358,4 +360,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             override val excludedTaskKeys = joinTaskKeys.toSet()
         }
     }
+
+    data class UserData(val name: String)
 }

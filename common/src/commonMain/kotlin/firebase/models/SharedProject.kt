@@ -242,4 +242,6 @@ class SharedProject(
             image = image,
             ordinal = ordinal
     ))
+
+    override fun getAssignedTo(userKeys: List<UserKey>) = remoteUsers.filterKeys { it in userKeys }
 }

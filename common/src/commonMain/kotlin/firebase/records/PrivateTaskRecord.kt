@@ -42,7 +42,8 @@ class PrivateTaskRecord private constructor(
             return taskJson
         }
 
-    override val assignedTo = setOf<String>()
+    override var assignedTo = setOf<String>()
+        set(@Suppress("UNUSED_PARAMETER") value) = throw UnsupportedOperationException()
 
     constructor(id: String, projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
             false,

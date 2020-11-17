@@ -177,4 +177,6 @@ class PrivateProject(
             image = image,
             ordinal = ordinal
     ))
+
+    override fun getAssignedTo(userKeys: List<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

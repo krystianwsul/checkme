@@ -368,6 +368,8 @@ abstract class Project<T : ProjectType> : Current {
             ordinal: Double?,
     ): Task<T>
 
+    abstract fun getAssignedTo(userKeys: List<UserKey>): Map<UserKey, ProjectUser>
+
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
 

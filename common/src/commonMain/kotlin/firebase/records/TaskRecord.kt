@@ -62,7 +62,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
     var ordinal by Committer(taskJson::ordinal)
 
-    abstract val assignedTo: Set<String>
+    abstract var assignedTo: Set<String>
 
     final override val children
         get() = instanceRecords.values +

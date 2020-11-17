@@ -11,20 +11,6 @@ class SharedTaskRecord private constructor(
         private val taskJson: SharedTaskJson,
 ) : TaskRecord<ProjectType.Shared>(create, id, sharedProjectRecord, taskJson) {
 
-    constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-            false,
-            id,
-            projectRecord,
-            taskJson
-    )
-
-    constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-            true,
-            projectRecord.getTaskRecordId(),
-            projectRecord,
-            taskJson
-    )
-
     override val createObject: SharedTaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
@@ -55,6 +41,24 @@ class SharedTaskRecord private constructor(
 
             return taskJson
         }
+
+    override var assignedTo
+        get() = taskJson.assignedTo.keys
+        set(value) = setProperty(taskJson::assignedTo, value.associateWith { true })
+
+    constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
+            false,
+            id,
+            projectRecord,
+            taskJson
+    )
+
+    constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
+            true,
+            projectRecord.getTaskRecordId(),
+            projectRecord,
+            taskJson
+    )
 
     override fun deleteFromParent() = check(sharedProjectRecord.taskRecords.remove(id) == this)
 }

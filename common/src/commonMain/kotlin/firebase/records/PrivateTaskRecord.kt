@@ -11,20 +11,6 @@ class PrivateTaskRecord private constructor(
         private val taskJson: PrivateTaskJson,
 ) : TaskRecord<ProjectType.Private>(create, id, privateProjectRecord, taskJson) {
 
-    constructor(id: String, projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
-            false,
-            id,
-            projectRecord,
-            taskJson
-    )
-
-    constructor(projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
-            true,
-            projectRecord.getTaskRecordId(),
-            projectRecord,
-            taskJson
-    )
-
     override val createObject: PrivateTaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
@@ -55,6 +41,22 @@ class PrivateTaskRecord private constructor(
 
             return taskJson
         }
+
+    override val assignedTo = setOf<String>()
+
+    constructor(id: String, projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
+            false,
+            id,
+            projectRecord,
+            taskJson
+    )
+
+    constructor(projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
+            true,
+            projectRecord.getTaskRecordId(),
+            projectRecord,
+            taskJson
+    )
 
     override fun deleteFromParent() = check(privateProjectRecord.taskRecords.remove(id) == this)
 }

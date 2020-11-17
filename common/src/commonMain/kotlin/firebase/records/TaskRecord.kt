@@ -62,6 +62,17 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
     var ordinal by Committer(taskJson::ordinal)
 
+    abstract val assignedTo: Set<String>
+
+    final override val children
+        get() = instanceRecords.values +
+                singleScheduleRecords.values +
+                weeklyScheduleRecords.values +
+                monthlyDayScheduleRecords.values +
+                monthlyWeekScheduleRecords.values +
+                yearlyScheduleRecords.values +
+                noScheduleOrParentRecords.values
+
     init {
         if (name.isEmpty())
             throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
@@ -121,15 +132,6 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
             }
         }
     }
-
-    final override val children
-        get() = instanceRecords.values +
-                singleScheduleRecords.values +
-                weeklyScheduleRecords.values +
-                monthlyDayScheduleRecords.values +
-                monthlyWeekScheduleRecords.values +
-                yearlyScheduleRecords.values +
-                noScheduleOrParentRecords.values
 
     fun newInstanceRecord(
             instanceJson: InstanceJson,

@@ -9,7 +9,7 @@ class TaskRecord<T : ProjectType> private constructor(
         create: Boolean,
         val id: String,
         val projectRecord: ProjectRecord<T>,
-        private val taskJson: TaskJson
+        private val taskJson: PrivateTaskJson,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -33,7 +33,7 @@ class TaskRecord<T : ProjectType> private constructor(
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
             .toMutableMap()
 
-    override val createObject: TaskJson // because of duplicate functionality when converting local task
+    override val createObject: PrivateTaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
                 taskJson.instances = instanceRecords.entries
@@ -94,9 +94,9 @@ class TaskRecord<T : ProjectType> private constructor(
     var ordinal by Committer(taskJson::ordinal)
 
     constructor(
-        id: String,
-        projectRecord: ProjectRecord<T>,
-        taskJson: TaskJson
+            id: String,
+            projectRecord: ProjectRecord<T>,
+            taskJson: PrivateTaskJson,
     ) : this(
         false,
         id,
@@ -106,7 +106,7 @@ class TaskRecord<T : ProjectType> private constructor(
 
     constructor(
             projectRecord: ProjectRecord<T>,
-            taskJson: TaskJson
+            taskJson: PrivateTaskJson,
     ) : this(
             true,
             projectRecord.getTaskRecordId(),

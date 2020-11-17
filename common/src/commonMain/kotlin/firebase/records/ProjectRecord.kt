@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.records
 
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
-import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
@@ -63,7 +63,7 @@ abstract class ProjectRecord<T : ProjectType>(
                 taskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newTaskRecord(taskJson: TaskJson): TaskRecord<T> {
+    fun newTaskRecord(taskJson: PrivateTaskJson): TaskRecord<T> {
         val remoteTaskRecord = TaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 

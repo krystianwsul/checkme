@@ -532,7 +532,7 @@ class Task<T : ProjectType>(
             image: TaskJson.Image?,
             ordinal: Double? = null,
     ): Task<T> {
-        val taskJson = TaskJson(
+        val taskJson = PrivateTaskJson(
                 name,
                 now.long,
                 now.offset,

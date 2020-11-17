@@ -5,8 +5,8 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
-import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -51,7 +51,7 @@ abstract class Project<T : ProjectType> : Current {
 
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
-    fun newTask(taskJson: TaskJson): Task<T> {
+    fun newTask(taskJson: PrivateTaskJson): Task<T> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = Task(
@@ -103,7 +103,7 @@ abstract class Project<T : ProjectType> : Current {
             }.toMutableMap()
         }
 
-        val taskJson = TaskJson(
+        val taskJson = PrivateTaskJson(
                 oldTask.name,
                 now.long,
                 now.offset,

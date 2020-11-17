@@ -10,8 +10,8 @@ class SharedProjectJson @JvmOverloads constructor(
         override var startTimeOffset: Double? = null,
         override var endTime: Long? = null,
         override var endTimeOffset: Double? = null,
-        override var tasks: MutableMap<String, TaskJson> = mutableMapOf(),
+        override var tasks: MutableMap<String, PrivateTaskJson> = mutableMapOf(),
         override var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, SharedCustomTimeJson> = mutableMapOf(),
-        var users: MutableMap<String, UserJson> = mutableMapOf()
+        var users: MutableMap<String, UserJson> = mutableMapOf(),
 ) : ProjectJson

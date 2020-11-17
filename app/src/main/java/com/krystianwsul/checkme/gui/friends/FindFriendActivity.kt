@@ -230,8 +230,7 @@ class FindFriendActivity : NavBarActivity() {
     }
 
     private fun startSearch() {
-        if (findFriendEmail.text.isEmpty())
-            return
+        if (findFriendEmail.text.isEmpty()) return
 
         loading = true
         userPair = null

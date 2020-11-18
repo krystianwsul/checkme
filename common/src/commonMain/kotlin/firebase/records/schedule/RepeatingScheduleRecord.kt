@@ -10,7 +10,6 @@ abstract class RepeatingScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         createObject: ScheduleWrapper<T>,
         repeatingScheduleJson: RepeatingScheduleJson<T>,
-        val assignedToHelper: AssignedToHelper<T>,
         endTimeKey: String,
         id: String?,
 ) : ScheduleRecord<T>(

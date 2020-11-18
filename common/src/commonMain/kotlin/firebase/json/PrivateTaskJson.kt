@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.json
 
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
+import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -17,4 +18,4 @@ data class PrivateTaskJson @JvmOverloads constructor(
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
-) : TaskJson
+) : TaskJson<ProjectType.Private>

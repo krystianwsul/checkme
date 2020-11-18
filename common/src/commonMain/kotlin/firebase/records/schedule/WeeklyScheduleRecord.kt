@@ -9,13 +9,11 @@ import com.krystianwsul.common.utils.ProjectType
 class WeeklyScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper<T>,
-        assignedToHelper: AssignedToHelper<T>,
         id: String? = null,
 ) : RepeatingScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
         scheduleWrapper.weeklyScheduleJson!!,
-        assignedToHelper,
         "weeklyScheduleJson",
         id
 ) {

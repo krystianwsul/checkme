@@ -159,6 +159,14 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return projectInstanceRecord
     }
 
+    protected abstract fun newScheduleWrapper(
+            singleScheduleJson: SingleScheduleJson? = null,
+            weeklyScheduleJson: WeeklyScheduleJson? = null,
+            monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
+            monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
+            yearlyScheduleJson: YearlyScheduleJson? = null,
+    )
+
     fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord<T> {
         val singleScheduleRecord = SingleScheduleRecord(
                 this,

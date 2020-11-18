@@ -15,7 +15,7 @@ import com.krystianwsul.common.utils.TaskKey
 abstract class ScheduleRecord<T : ProjectType>(
         val taskRecord: TaskRecord<T>,
         final override val createObject: ScheduleWrapper<T>,
-        private val scheduleJson: ScheduleJson,
+        private val scheduleJson: ScheduleJson<T>,
         scheduleTypeSubkey: String,
         _id: String?,
 ) : RemoteRecord(_id == null) {

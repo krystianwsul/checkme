@@ -4,9 +4,9 @@ import com.krystianwsul.common.utils.ProjectType
 
 interface ScheduleWrapper<T : ProjectType> {
 
-    val singleScheduleJson: SingleScheduleJson?
-    val weeklyScheduleJson: WeeklyScheduleJson?
-    val monthlyDayScheduleJson: MonthlyDayScheduleJson?
-    val monthlyWeekScheduleJson: MonthlyWeekScheduleJson?
-    val yearlyScheduleJson: YearlyScheduleJson?
+    val singleScheduleJson: SingleScheduleJson<T>?
+    val weeklyScheduleJson: WeeklyScheduleJson<T>?
+    val monthlyDayScheduleJson: MonthlyDayScheduleJson<T>?
+    val monthlyWeekScheduleJson: MonthlyWeekScheduleJson<T>?
+    val yearlyScheduleJson: YearlyScheduleJson<T>?
 }

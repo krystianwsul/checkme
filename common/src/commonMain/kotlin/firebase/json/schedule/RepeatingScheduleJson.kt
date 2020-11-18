@@ -1,6 +1,8 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-interface RepeatingScheduleJson : ScheduleJson {
+import com.krystianwsul.common.utils.ProjectType
+
+interface RepeatingScheduleJson<T : ProjectType> : ScheduleJson<T> {
 
     val from: String?
     val until: String?

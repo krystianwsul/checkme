@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.ProjectType
 abstract class RepeatingScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         createObject: ScheduleWrapper<T>,
-        repeatingScheduleJson: RepeatingScheduleJson,
+        repeatingScheduleJson: RepeatingScheduleJson<T>,
         val assignedToHelper: AssignedToHelper<T>,
         endTimeKey: String,
         id: String?,

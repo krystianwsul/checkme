@@ -1,6 +1,8 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-interface WeeklyScheduleJson : RepeatingScheduleJson {
+import com.krystianwsul.common.utils.ProjectType
+
+interface WeeklyScheduleJson<T : ProjectType> : RepeatingScheduleJson<T> {
 
     val dayOfWeek: Int
     val interval: Int

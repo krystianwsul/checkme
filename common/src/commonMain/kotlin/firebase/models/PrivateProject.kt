@@ -150,7 +150,7 @@ class PrivateProject(
             ordinal = oldTask.ordinal
     ))
 
-    private fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
+    fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = Task(this, taskRecord, newRootInstanceManager(taskRecord))

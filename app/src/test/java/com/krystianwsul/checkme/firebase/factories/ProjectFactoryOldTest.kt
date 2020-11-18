@@ -10,12 +10,12 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
-import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -185,10 +185,10 @@ class ProjectFactoryOldTest {
                     ChangeType.REMOTE,
                     ProjectLoader.AddTaskEvent(
                             projectLoader.projectRecord,
-                            TaskRecord(
+                            PrivateTaskRecord(
                                     taskKey.taskId,
                                     projectLoader.projectRecord,
-                                    TaskJson("task")
+                                    PrivateTaskJson("task")
                             ),
                             EmptyTestSnapshot()
                     )

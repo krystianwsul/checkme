@@ -9,7 +9,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -122,7 +122,7 @@ class ProjectLoaderOldTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
     }
 
@@ -131,11 +131,11 @@ class ProjectLoaderOldTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task changed"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task changed"))))
         }
     }
 
@@ -145,13 +145,13 @@ class ProjectLoaderOldTest {
         val taskId2 = "taskKey2"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
         addTaskEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to TaskJson("task1"),
-                    taskId2 to TaskJson("task2")
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
             )))
         }
     }
@@ -162,13 +162,13 @@ class ProjectLoaderOldTest {
         val taskId2 = "taskKey2"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to TaskJson("task1"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
         addTaskEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to TaskJson("task1"),
-                    taskId2 to TaskJson("task2")
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
             )))
         }
     }
@@ -179,7 +179,7 @@ class ProjectLoaderOldTest {
 
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
@@ -192,11 +192,11 @@ class ProjectLoaderOldTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
         }
     }
 
@@ -216,11 +216,11 @@ class ProjectLoaderOldTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to TaskJson("task change"))))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
         }
     }
 
@@ -231,15 +231,15 @@ class ProjectLoaderOldTest {
 
         initialProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to TaskJson("task1"),
-                    taskId2 to TaskJson("task2")
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
             )))
         }
 
         changeProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to TaskJson("task1 change"),
-                    taskId2 to TaskJson("task2 change")
+                    taskId1 to PrivateTaskJson("task1 change"),
+                    taskId2 to PrivateTaskJson("task2 change")
             )))
         }
     }

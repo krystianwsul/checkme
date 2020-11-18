@@ -3,10 +3,10 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
-import com.krystianwsul.common.firebase.json.schedule.SingleScheduleJson
-import com.krystianwsul.common.firebase.json.schedule.WeeklyScheduleJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
+import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
+import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
@@ -65,8 +65,8 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour2)
 
-        val scheduleWrapper = ScheduleWrapper(
-                singleScheduleJson = SingleScheduleJson(
+        val scheduleWrapper = PrivateScheduleWrapper(
+                singleScheduleJson = PrivateSingleScheduleJson(
                         startTime = now.long,
                         year = day1.year,
                         month = day1.month,
@@ -76,7 +76,7 @@ class IrrelevantTest {
                 )
         )
 
-        val taskJson = TaskJson(
+        val taskJson = PrivateTaskJson(
                 name = "task",
                 startTime = now.long,
                 schedules = mutableMapOf("scheduleKey" to scheduleWrapper)
@@ -140,8 +140,8 @@ class IrrelevantTest {
 
         var now = ExactTimeStamp.Local(day1, hour1)
 
-        val singleScheduleWrapper = ScheduleWrapper(
-                singleScheduleJson = SingleScheduleJson(
+        val singleScheduleWrapper = PrivateScheduleWrapper(
+                singleScheduleJson = PrivateSingleScheduleJson(
                         startTime = now.long,
                         year = day1.year,
                         month = day1.month,
@@ -151,8 +151,8 @@ class IrrelevantTest {
                 )
         )
 
-        val weeklyScheduleWrapper = ScheduleWrapper(
-                weeklyScheduleJson = WeeklyScheduleJson(
+        val weeklyScheduleWrapper = PrivateScheduleWrapper(
+                weeklyScheduleJson = PrivateWeeklyScheduleJson(
                         startTime = now.long,
                         dayOfWeek = 1, // monday
                         hour = hour1.hour,
@@ -160,7 +160,7 @@ class IrrelevantTest {
                 )
         )
 
-        val taskJson = TaskJson(
+        val taskJson = PrivateTaskJson(
                 name = "task",
                 startTime = now.long,
                 schedules = mutableMapOf(

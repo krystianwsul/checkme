@@ -197,7 +197,7 @@ class ProjectsFactoryNewTest {
         initProjectsFactory()
 
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
-                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key
         ))
 
@@ -219,7 +219,7 @@ class ProjectsFactoryNewTest {
         initProjectsFactory()
 
         privateProjectRelay.accept(ValueTestSnapshot(PrivateProjectJson(
-                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key
         ))
 
@@ -255,7 +255,7 @@ class ProjectsFactoryNewTest {
 
         initProjectsFactory()
 
-        val taskJson = TaskJson("task")
+        val taskJson = PrivateTaskJson("task")
 
         val taskKey = projectsFactory.privateProject
                 .newTask(taskJson)
@@ -279,7 +279,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(ValueTestSnapshot(
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key)
         )
 
@@ -293,7 +293,7 @@ class ProjectsFactoryNewTest {
 
         emissionChecker.checkRemote {
             privateProjectRelay.accept(ValueTestSnapshot(
-                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson(name))),
+                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
                     privateProjectKey.key
             ))
         }
@@ -306,7 +306,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(ValueTestSnapshot(
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key)
         )
 
@@ -326,7 +326,7 @@ class ProjectsFactoryNewTest {
 
         emissionChecker.checkLocal {
             privateProjectRelay.accept(ValueTestSnapshot(
-                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson(name))),
+                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
                     privateProjectKey.key
             ))
         }
@@ -339,7 +339,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(ValueTestSnapshot(
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key)
         )
 
@@ -365,7 +365,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(ValueTestSnapshot(
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key
         ))
 
@@ -413,7 +413,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(ValueTestSnapshot(
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))),
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
                 privateProjectKey.key
         ))
 
@@ -600,7 +600,7 @@ class ProjectsFactoryNewTest {
                             every { tokens } returns mutableMapOf()
                         }
                 ),
-                tasks = mutableMapOf(taskKey.taskId to TaskJson("task"))
+                tasks = mutableMapOf(taskKey.taskId to SharedTaskJson("task"))
         ))
 
         val date = Date.today()

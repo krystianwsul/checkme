@@ -282,7 +282,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .privateProjectObservable
                 .accept(PrivateProjectJson(
-                        tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
+                        tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey)))
                 )
 
         val sharedTaskKey = "sharedTask"
@@ -292,7 +292,7 @@ class FactoryLoaderOldTest {
                 .accept(ValueTestSnapshot(
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
-                                tasks = mutableMapOf(sharedTaskKey to TaskJson(name = sharedTaskKey))
+                                tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
                         sharedProjectKey
                 ))
@@ -309,7 +309,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .privateProjectObservable
                 .accept(PrivateProjectJson(
-                        tasks = mutableMapOf(privateTaskKey to TaskJson(name = privateTaskKey)))
+                        tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey)))
                 )
 
         testFactoryProvider.database
@@ -317,7 +317,7 @@ class FactoryLoaderOldTest {
                 .accept(ValueTestSnapshot(
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
-                                tasks = mutableMapOf(sharedTaskKey to TaskJson(name = sharedTaskKey))
+                                tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
                         sharedProjectKey
                 ))
@@ -332,7 +332,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.apply {
 
             domain.checkChange {
-                database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to TaskJson("task"))))
+                database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task"))))
             }
         }
     }

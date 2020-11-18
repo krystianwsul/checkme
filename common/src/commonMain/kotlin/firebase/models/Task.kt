@@ -3,7 +3,10 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord

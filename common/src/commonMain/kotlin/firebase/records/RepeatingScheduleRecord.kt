@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.RepeatingScheduleJson
-import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.firebase.json.schedule.RepeatingScheduleJson
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
 

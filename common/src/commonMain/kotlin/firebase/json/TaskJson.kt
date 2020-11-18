@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import kotlinx.serialization.Serializable
 
 interface TaskJson {
@@ -16,7 +17,7 @@ interface TaskJson {
     var endData: EndData?
 
     var instances: MutableMap<String, InstanceJson>
-    var schedules: MutableMap<String, ScheduleWrapper>
+    val schedules: Map<String, ScheduleWrapper>
     var noScheduleOrParent: Map<String, NoScheduleOrParentJson>
 
     @Serializable

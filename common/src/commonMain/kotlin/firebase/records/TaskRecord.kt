@@ -1,6 +1,9 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey

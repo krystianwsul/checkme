@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.schedule
 
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads

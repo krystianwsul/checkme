@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.firebase.json.schedule.SharedScheduleWrapper
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -11,7 +12,7 @@ data class SharedTaskJson @JvmOverloads constructor(
         override var endTime: Long? = null,
         override var note: String? = null,
         override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
-        override var schedules: MutableMap<String, ScheduleWrapper> = mutableMapOf(),
+        override var schedules: MutableMap<String, SharedScheduleWrapper> = mutableMapOf(),
         override var image: TaskJson.Image? = null,
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),

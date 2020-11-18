@@ -243,14 +243,14 @@ class DomainFactory(
             dataId: Int,
             source: SaveService.Source,
             forceDomainChanged: Boolean = false,
-            values: MutableMap<String, Any?> = mutableMapOf()
+            values: MutableMap<String, Any?> = mutableMapOf(),
     ) = save(setOf(dataId), source, forceDomainChanged, values)
 
     fun save(
             dataIds: Set<Int>,
             source: SaveService.Source,
             forceDomainChanged: Boolean = false,
-            values: MutableMap<String, Any?> = mutableMapOf()
+            values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
@@ -707,7 +707,7 @@ class DomainFactory(
 
     fun notifyCloudPrivateFixed(
             projects: MutableSet<Project<*>>,
-            userKeys: MutableCollection<UserKey>
+            userKeys: MutableCollection<UserKey>,
     ) {
         aggregateData?.run {
             notificationProjects.addAll(projects)
@@ -755,6 +755,7 @@ class DomainFactory(
                                 && !it.getNotified(localFactory)
                                 && it.instanceDateTime.toLocalExactTimeStamp() <= now
                                 && !removedTaskKeys.contains(it.taskKey)
+                                && it.isAssignedToMe(now, myUserFactory.user)
                     }
                     .associateBy { it.instanceKey }
 
@@ -767,11 +768,7 @@ class DomainFactory(
                 .map { Pair(it, projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId)) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
-            val scheduleDate = Date(
-                    instanceShownRecord.scheduleYear,
-                    instanceShownRecord.scheduleMonth,
-                    instanceShownRecord.scheduleDay
-            )
+            val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
             val customTimeId = instanceShownRecord.scheduleCustomTimeId
 
             val customTimePair: Pair<String, String>?
@@ -787,8 +784,7 @@ class DomainFactory(
                 checkNotNull(instanceShownRecord.scheduleMinute)
 
                 customTimePair = null
-                hourMinute =
-                        HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
+                hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
             }
 
             val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
@@ -804,13 +800,9 @@ class DomainFactory(
             instanceShownRecord.notificationShown = false
         }
 
-        val shownInstanceKeys =
-                instanceShownPairs.filter { it.second != null }.map { (instanceShownRecord, task) ->
-                    val scheduleDate = Date(
-                            instanceShownRecord.scheduleYear,
-                            instanceShownRecord.scheduleMonth,
-                            instanceShownRecord.scheduleDay
-                    )
+        val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
+                .map { (instanceShownRecord, task) ->
+                    val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
                     val customTimeId = instanceShownRecord.scheduleCustomTimeId
                     val project = task!!.project
 
@@ -827,26 +819,21 @@ class DomainFactory(
                         checkNotNull(instanceShownRecord.scheduleMinute)
 
                         customTimeKey = null
-                        hourMinute = HourMinute(
-                                instanceShownRecord.scheduleHour,
-                                instanceShownRecord.scheduleMinute
-                        )
+                        hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
                     }
 
                     val taskKey = TaskKey(project.projectKey, instanceShownRecord.taskId)
                     InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
                 }
+                .toSet()
 
-        val showInstanceKeys = notificationInstances.keys.filter { !shownInstanceKeys.contains(it) }
+        val showInstanceKeys = notificationInstances.keys - shownInstanceKeys
 
         Preferences.tickLog.logLineHour("shown instances: " + shownInstanceKeys.joinToString(", ") {
-            getInstance(
-                    it
-            ).name
+            getInstance(it).name
         })
 
-        val hideInstanceKeys =
-                shownInstanceKeys.filter { !notificationInstances.containsKey(it) }.toSet()
+        val hideInstanceKeys = shownInstanceKeys - notificationInstances.keys
 
         for (showInstanceKey in showInstanceKeys)
             getInstance(showInstanceKey).setNotificationShown(localFactory, true)
@@ -862,20 +849,12 @@ class DomainFactory(
                     val silentParam =
                             if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
 
-                    NotificationWrapper.instance.notifyGroup(
-                            notificationInstances.values,
-                            silentParam,
-                            now
-                    )
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
                 } else { // instances shown
                     for (shownInstanceKey in shownInstanceKeys)
                         NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)
 
-                    NotificationWrapper.instance.notifyGroup(
-                            notificationInstances.values,
-                            silent,
-                            now
-                    )
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
                 }
             } else { // show instances
                 if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
@@ -916,8 +895,7 @@ class DomainFactory(
                 notifyInstance(instance, silent, now)
             }
 
-            val updateInstances =
-                    notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
+            val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             updateInstances.forEach {
                 Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
@@ -925,8 +903,7 @@ class DomainFactory(
             }
         }
 
-        if (!silent)
-            Preferences.lastTick = now.long
+        if (!silent) Preferences.lastTick = now.long
 
         val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
                 .mapNotNull { it.getNextAlarm(now, myUserFactory.user) }
@@ -935,8 +912,7 @@ class DomainFactory(
 
         NotificationWrapper.instance.updateAlarm(nextAlarm)
 
-        if (nextAlarm != null)
-            Preferences.tickLog.logLineHour("next tick: $nextAlarm")
+        nextAlarm?.let { Preferences.tickLog.logLineHour("next tick: $it") }
     }
 
     private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp.Local) =

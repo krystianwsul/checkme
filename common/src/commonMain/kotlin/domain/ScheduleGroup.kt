@@ -5,7 +5,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleData
 
@@ -46,14 +45,11 @@ sealed class ScheduleGroup<T : ProjectType> {
                         WeeklyKey(it.timePair, it.from, it.until, interval)
                     }
                     .map {
+                        val first = it.value.first()
+
                         Pair(
-                                it.value
-                                        .first()
-                                        .time,
+                                first.time,
                                 Weekly(
-                                        it.value
-                                                .first()
-                                                .customTimeKey,
                                         it.key.timePair,
                                         it.value,
                                         it.key.from,
@@ -93,8 +89,6 @@ sealed class ScheduleGroup<T : ProjectType> {
         }
     }
 
-    abstract val customTimeKey: CustomTimeKey<T>?
-
     abstract val scheduleData: ScheduleData
 
     abstract val schedules: List<Schedule<T>>
@@ -103,15 +97,12 @@ sealed class ScheduleGroup<T : ProjectType> {
             private val singleSchedule: SingleSchedule<T>
     ) : ScheduleGroup<T>() {
 
-        override val customTimeKey get() = singleSchedule.customTimeKey
-
         override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
 
         override val schedules get() = listOf(singleSchedule)
     }
 
     class Weekly<T : ProjectType>(
-            override val customTimeKey: CustomTimeKey<T>?,
             private val timePair: TimePair,
             private val weeklySchedules: List<WeeklySchedule<T>>,
             val from: Date?,
@@ -149,8 +140,6 @@ sealed class ScheduleGroup<T : ProjectType> {
             private val monthlyDaySchedule: MonthlyDaySchedule<T>
     ) : ScheduleGroup<T>() {
 
-        override val customTimeKey get() = monthlyDaySchedule.customTimeKey
-
         override val scheduleData
             get() = ScheduleData.MonthlyDay(
                     monthlyDaySchedule.dayOfMonth,
@@ -166,8 +155,6 @@ sealed class ScheduleGroup<T : ProjectType> {
     class MonthlyWeek<T : ProjectType>(
             private val monthlyWeekSchedule: MonthlyWeekSchedule<T>
     ) : ScheduleGroup<T>() {
-
-        override val customTimeKey get() = monthlyWeekSchedule.customTimeKey
 
         override val scheduleData
             get() = ScheduleData.MonthlyWeek(
@@ -185,8 +172,6 @@ sealed class ScheduleGroup<T : ProjectType> {
     class Yearly<T : ProjectType>(
             private val yearlySchedule: YearlySchedule<T>
     ) : ScheduleGroup<T>() {
-
-        override val customTimeKey get() = yearlySchedule.customTimeKey
 
         override val scheduleData
             get() = ScheduleData.Yearly(

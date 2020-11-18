@@ -1,6 +1,8 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-interface ScheduleWrapper {
+import com.krystianwsul.common.utils.ProjectType
+
+interface ScheduleWrapper<T : ProjectType> {
 
     val singleScheduleJson: SingleScheduleJson?
     val weeklyScheduleJson: WeeklyScheduleJson?

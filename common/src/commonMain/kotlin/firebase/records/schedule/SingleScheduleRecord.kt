@@ -9,8 +9,9 @@ import com.krystianwsul.common.utils.ProjectType
 
 open class SingleScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        scheduleWrapper: ScheduleWrapper,
-        id: String? = null
+        scheduleWrapper: ScheduleWrapper<T>,
+        val assignedToHelper: AssignedToHelper<T>,
+        id: String? = null,
 ) : ScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,

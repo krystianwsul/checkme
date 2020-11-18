@@ -73,7 +73,7 @@ abstract class RemoteRecord(create: Boolean) {
         shouldDelete = true
     }
 
-    protected fun <T> setProperty(innerProperty: KMutableProperty0<T>, value: T, path: String = key) {
+    fun <T> setProperty(innerProperty: KMutableProperty0<T>, value: T, path: String = key) {
         if (innerProperty.get() == value)
             return
 

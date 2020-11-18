@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
-import com.krystianwsul.common.firebase.records.SingleScheduleRecord
+import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType

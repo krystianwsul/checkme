@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.firebase.records.*
+import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 

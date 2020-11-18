@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.records.YearlyScheduleRecord
+import com.krystianwsul.common.firebase.records.schedule.YearlyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType

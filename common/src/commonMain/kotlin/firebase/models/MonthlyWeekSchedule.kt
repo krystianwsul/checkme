@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.firebase.records.MonthlyWeekScheduleRecord
+import com.krystianwsul.common.firebase.records.schedule.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ProjectType

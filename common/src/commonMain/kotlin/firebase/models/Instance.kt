@@ -11,7 +11,7 @@ import com.soywiz.klock.days
 class Instance<T : ProjectType> private constructor(
         val project: Project<T>,
         val task: Task<T>,
-        private var data: Data<T>
+        private var data: Data<T>,
 ) {
 
     companion object {
@@ -20,7 +20,7 @@ class Instance<T : ProjectType> private constructor(
                 scheduleDate: Date,
                 scheduleCustomTimeKey: CustomTimeKey<*>?,
                 scheduleHourMinute: HourMinute?,
-                taskKey: TaskKey
+                taskKey: TaskKey,
         ) = getNotificationId(
                 scheduleDate,
                 scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
@@ -41,7 +41,7 @@ class Instance<T : ProjectType> private constructor(
                 scheduleDate: Date,
                 scheduleCustomTimeData: Pair<String, String>?,
                 scheduleHourMinute: HourMinute?,
-                taskKey: Pair<String, String>
+                taskKey: Pair<String, String>,
         ): Int {
             check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
 
@@ -124,13 +124,13 @@ class Instance<T : ProjectType> private constructor(
     constructor(
             project: Project<T>,
             task: Task<T>,
-            instanceRecord: InstanceRecord<T>
+            instanceRecord: InstanceRecord<T>,
     ) : this(project, task, Data.Real(project, instanceRecord))
 
     constructor(
             project: Project<T>,
             task: Task<T>,
-            scheduleDateTime: DateTime
+            scheduleDateTime: DateTime,
     ) : this(project, task, Data.Virtual(scheduleDateTime))
 
     fun exists() = (data is Data.Real)
@@ -202,9 +202,11 @@ class Instance<T : ProjectType> private constructor(
         return createInstanceRecord()
     }
 
-    fun getOldestVisibles() = task.scheduleIntervals
-            .filter { it.matchesScheduleDateTime(scheduleDateTime, false) }
-            .map { it.schedule.oldestVisible }
+    private fun getMatchingScheduleIntervals() = task.scheduleIntervals.filter {
+        it.matchesScheduleDateTime(scheduleDateTime, false)
+    }
+
+    fun getOldestVisibles() = getMatchingScheduleIntervals().map { it.schedule.oldestVisible }
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
@@ -276,7 +278,7 @@ class Instance<T : ProjectType> private constructor(
     data class ParentInstanceData<T : ProjectType>(
             val instance: Instance<T>,
             val isRepeatingGroup: Boolean,
-            val taskHierarchy: TaskHierarchy<T>?
+            val taskHierarchy: TaskHierarchy<T>?,
     )
 
     fun getParentInstance(now: ExactTimeStamp.Local): ParentInstanceData<T>? {
@@ -468,6 +470,19 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
+    // todo assign next alarm, show assigned users on showInstanceActivity
+
+    // meaningless for child instances, but returns true for convenience
+    fun isAssignedToMe(myUser: MyUser, now: ExactTimeStamp.Local): Boolean {
+        if (!isRootInstance(now)) return true
+
+        return getMatchingScheduleIntervals().let {
+            it.isEmpty() || it.any {
+                it.schedule.assignedTo.let { it.isEmpty() || myUser.userKey in it }
+            }
+        }
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date
@@ -489,7 +504,7 @@ class Instance<T : ProjectType> private constructor(
 
         class Real<T : ProjectType>(
                 private val project: Project<T>,
-                val instanceRecord: InstanceRecord<T>
+                val instanceRecord: InstanceRecord<T>,
         ) : Data<T>() {
 
             fun getCustomTime(customTimeId: CustomTimeId<T>) = project.getCustomTime(customTimeId)
@@ -590,7 +605,7 @@ class Instance<T : ProjectType> private constructor(
                 scheduleDay: Int,
                 scheduleCustomTimeId: CustomTimeId<*>?,
                 scheduleHour: Int?,
-                scheduleMinute: Int?
+                scheduleMinute: Int?,
         ): Shown?
 
         fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {

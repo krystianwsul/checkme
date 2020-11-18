@@ -58,12 +58,15 @@ data class GroupListDataWrapper(
             var notificationShown: Boolean,
             val imageState: ImageState?,
             val isRecurringGroupChild: Boolean,
+            val isAssignedToMe: Boolean,
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
 
         lateinit var instanceDataParent: InstanceDataParent
 
         override val normalizedName by lazy { name.normalized() }
         override val normalizedNote by lazy { note?.normalized() }
+
+        val colorEnabled = taskCurrent && isAssignedToMe
 
         init {
             check(name.isNotEmpty())

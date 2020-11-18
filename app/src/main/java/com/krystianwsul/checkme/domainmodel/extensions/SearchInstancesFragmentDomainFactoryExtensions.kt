@@ -64,7 +64,8 @@ fun DomainFactory.getSearchInstancesData(
                         it.task.ordinal,
                         it.getNotificationShown(localFactory),
                         task.getImage(deviceDbInfo),
-                        it.isRepeatingGroupChild(now)
+                        it.isRepeatingGroupChild(now),
+                        it.isAssignedToMe(myUserFactory.user, now),
                 )
 
                 children.values.forEach { it.instanceDataParent = instanceData }

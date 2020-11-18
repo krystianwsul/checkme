@@ -143,7 +143,7 @@ class NotDoneGroupNode(
 
     override val name
         get() = if (singleInstance()) {
-            NameData(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary)
+            NameData(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
         } else {
             if (treeNode.isExpanded) {
                 null
@@ -161,7 +161,7 @@ class NotDoneGroupNode(
             } else {
                 Pair(
                         singleInstanceData.displayText!!,
-                        if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary
+                        if (singleInstanceData.colorEnabled) colorSecondary else colorDisabled
                 )
             }
         } else {
@@ -466,7 +466,7 @@ class NotDoneGroupNode(
                         ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
 
                 return text?.let {
-                    Pair(it, if (!instanceData.taskCurrent) colorDisabled else colorSecondary)
+                    Pair(it, if (instanceData.colorEnabled) colorSecondary else colorDisabled)
                 }
             }
         }
@@ -541,7 +541,11 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = NameData(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary)
+        override val name
+            get() = NameData(
+                    instanceData.name,
+                    if (instanceData.colorEnabled) colorPrimary else colorDisabled
+            )
 
         override val children get() = getChildrenText(treeNode, instanceData)
 

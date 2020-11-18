@@ -994,8 +994,10 @@ class Task<T : ProjectType>(
         return project.getAssignedTo(userKeys)
     }
 
-    fun setAssignedTo(userKeys: Set<UserKey>) {
-        taskRecord.assignedTo = userKeys.map { it.key }.toSet()
+    fun setAssignedTo(userKeys: Set<UserKey>?) {
+        taskRecord.assignedTo = userKeys.orEmpty()
+                .map { it.key }
+                .toSet()
     }
 
     fun isAssignedToMe(myUser: MyUser) = getAssignedTo().let { it.isEmpty() || myUser.userKey in it.keys }

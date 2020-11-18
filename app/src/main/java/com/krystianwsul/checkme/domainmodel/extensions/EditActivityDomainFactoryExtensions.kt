@@ -117,7 +117,7 @@ fun DomainFactory.createScheduleRootTask(
         name: String,
         scheduleDatas: List<ScheduleData>,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
 ): TaskKey = syncOnDomain {
@@ -140,7 +140,8 @@ fun DomainFactory.createScheduleRootTask(
             note,
             finalProjectId,
             imageUuid,
-            deviceDbInfo
+            deviceDbInfo,
+            assignedTo = sharedProjectParameters?.assignedTo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -206,7 +207,7 @@ fun DomainFactory.createRootTask(
         source: SaveService.Source,
         name: String,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
 ): TaskKey = syncOnDomain {
@@ -227,7 +228,8 @@ fun DomainFactory.createRootTask(
             note,
             finalProjectId,
             imageUuid,
-            deviceDbInfo
+            deviceDbInfo,
+            assignedTo = sharedProjectParameters?.assignedTo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -252,7 +254,7 @@ fun DomainFactory.updateScheduleTask(
         name: String,
         scheduleDatas: List<ScheduleData>,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
@@ -273,13 +275,16 @@ fun DomainFactory.updateScheduleTask(
         it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
+        setAssignedTo(sharedProjectParameters?.assignedTo)
 
         endAllCurrentTaskHierarchies(now)
         endAllCurrentNoScheduleOrParents(now)
 
         if (isGroupTask(now)) {
-            project.getTaskHierarchiesByParentTaskKey(taskKey)
-                    .forEach { it.childTask.invalidateParentTaskHierarchies() }
+            project.getTaskHierarchiesByParentTaskKey(taskKey).forEach {
+                it.childTask.invalidateParentTaskHierarchies()
+            }
+
             invalidateChildTaskHierarchies()
         }
 
@@ -290,8 +295,7 @@ fun DomainFactory.updateScheduleTask(
                 now
         )
 
-        if (imagePath != null)
-            setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+        if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
     updateNotifications(now)
@@ -378,7 +382,7 @@ fun DomainFactory.updateRootTask(
         taskKey: TaskKey,
         name: String,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
@@ -393,6 +397,7 @@ fun DomainFactory.updateRootTask(
         it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
+        setAssignedTo(sharedProjectParameters?.assignedTo)
 
         endAllCurrentTaskHierarchies(now)
         endAllCurrentSchedules(now)
@@ -426,7 +431,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         scheduleDatas: List<ScheduleData>,
         joinTaskKeys: List<TaskKey>,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean,
@@ -455,7 +460,8 @@ fun DomainFactory.createScheduleJoinRootTask(
             imageUuid,
             deviceDbInfo,
             allReminders,
-            ordinal
+            ordinal,
+            assignedTo = sharedProjectParameters?.assignedTo
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
@@ -531,7 +537,7 @@ fun DomainFactory.createJoinRootTask(
         name: String,
         joinTaskKeys: List<TaskKey>,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?, // todo assign
+        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
 ): TaskKey = syncOnDomain {
@@ -560,7 +566,8 @@ fun DomainFactory.createJoinRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            ordinal
+            ordinal,
+            sharedProjectParameters?.assignedTo
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)

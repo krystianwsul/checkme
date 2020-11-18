@@ -169,14 +169,19 @@ class PrivateProject(
             name: String,
             note: String?,
             ordinal: Double?,
-    ) = newTask(PrivateTaskJson(
-            name,
-            now.long,
-            now.offset,
-            note = note,
-            image = image,
-            ordinal = ordinal
-    ))
+            assignedTo: Set<UserKey>?,
+    ): Task<ProjectType.Private> {
+        check(assignedTo == null)
+
+        return newTask(PrivateTaskJson(
+                name,
+                now.long,
+                now.offset,
+                note = note,
+                image = image,
+                ordinal = ordinal
+        ))
+    }
 
     override fun getAssignedTo(userKeys: List<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

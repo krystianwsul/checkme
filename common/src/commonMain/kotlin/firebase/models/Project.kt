@@ -366,6 +366,7 @@ abstract class Project<T : ProjectType> : Current {
             name: String,
             note: String?,
             ordinal: Double?,
+            assignedTo: Set<UserKey>? = null,
     ): Task<T>
 
     abstract fun getAssignedTo(userKeys: List<UserKey>): Map<UserKey, ProjectUser>

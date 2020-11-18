@@ -234,13 +234,15 @@ class SharedProject(
             name: String,
             note: String?,
             ordinal: Double?,
+            assignedTo: Set<UserKey>?,
     ) = newTask(SharedTaskJson(
             name,
             now.long,
             now.offset,
             note = note,
             image = image,
-            ordinal = ordinal
+            ordinal = ordinal,
+            assignedTo = assignedTo.orEmpty().associate { it.key to true }
     ))
 
     override fun getAssignedTo(userKeys: List<UserKey>) = remoteUsers.filterKeys { it in userKeys }

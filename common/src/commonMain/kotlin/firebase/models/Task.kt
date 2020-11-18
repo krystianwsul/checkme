@@ -759,7 +759,6 @@ class Task<T : ProjectType>(
     }
 
     fun copySchedules(
-            // todo assign account for task being in same project
             deviceDbInfo: DeviceDbInfo,
             now: ExactTimeStamp.Local,
             schedules: List<Schedule<*>>,
@@ -1010,20 +1009,6 @@ class Task<T : ProjectType>(
 
         existingInstances.values.forEach { it.fixOffsets() }
     }
-
-    fun getAssignedTo(): Map<UserKey, ProjectUser> {
-        val userKeys = taskRecord.assignedTo.map(::UserKey)
-
-        return project.getAssignedTo(userKeys)
-    }
-
-    fun setAssignedTo(userKeys: Set<UserKey>?) {
-        taskRecord.assignedTo = userKeys.orEmpty()
-                .map { it.key }
-                .toSet()
-    }
-
-    fun isAssignedToMe(myUser: MyUser) = getAssignedTo().let { it.isEmpty() || myUser.userKey in it.keys }
 
     interface ScheduleTextFactory {
 

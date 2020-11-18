@@ -18,5 +18,4 @@ data class SharedTaskJson @JvmOverloads constructor(
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
-        var assignedTo: Map<String, Boolean> = mapOf(), // todo assign remove
 ) : TaskJson<ProjectType.Shared>

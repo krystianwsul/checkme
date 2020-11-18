@@ -42,9 +42,6 @@ class PrivateTaskRecord private constructor(
             return taskJson
         }
 
-    override var assignedTo = setOf<String>()
-        set(@Suppress("UNUSED_PARAMETER") value) = throw UnsupportedOperationException()
-
     constructor(id: String, projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
             false,
             id,

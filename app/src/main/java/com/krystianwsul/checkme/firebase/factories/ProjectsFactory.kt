@@ -190,7 +190,6 @@ class ProjectsFactory(
                 imageUuid,
                 deviceDbInfo,
                 ordinal,
-                assignedTo
         ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, allReminders) }
     }
 
@@ -202,7 +201,6 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             ordinal: Double? = null,
-            assignedTo: Set<UserKey>? = null,
     ) = createTaskHelper(
             now,
             name,
@@ -211,7 +209,6 @@ class ProjectsFactory(
             imageUuid,
             deviceDbInfo,
             ordinal,
-            assignedTo
     ).apply { setNoScheduleOrParent(now) }
 
     private fun createTaskHelper(
@@ -222,14 +219,12 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             ordinal: Double? = null,
-            assignedTo: Set<UserKey>? = null,
     ) = getProjectForce(projectId).createTask(
             now,
             imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
             name,
             note,
             ordinal,
-            assignedTo
     )
 
     fun createProject(

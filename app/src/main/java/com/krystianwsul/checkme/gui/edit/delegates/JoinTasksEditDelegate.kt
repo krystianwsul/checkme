@@ -91,10 +91,7 @@ class JoinTasksEditDelegate(
                 .also { EditActivity.createdTaskKey = it }
     }
 
-    override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey
-    ): TaskKey {
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -115,7 +112,7 @@ class JoinTasksEditDelegate(
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            sharedProjectParameters: SharedProjectParameters?,
+            sharedProjectKey: ProjectKey.Shared?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -126,7 +123,7 @@ class JoinTasksEditDelegate(
                         createParameters.name,
                         parameters.taskKeys,
                         createParameters.note,
-                        sharedProjectParameters,
+                        sharedProjectKey,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,

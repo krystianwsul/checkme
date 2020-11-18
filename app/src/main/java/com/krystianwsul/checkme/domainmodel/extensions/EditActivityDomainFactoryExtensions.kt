@@ -50,6 +50,7 @@ fun DomainFactory.getCreateTaskData(
 
         val parentKey: EditViewModel.ParentKey?
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
+        var assignedTo: Set<UserKey> = setOf()
 
         if (task.isRootTask(now)) {
             val schedules = task.getCurrentScheduleIntervals(now)
@@ -68,6 +69,10 @@ fun DomainFactory.getCreateTaskData(
                 scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
                     EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
                 }
+
+                assignedTo = schedules.map { it.schedule.assignedTo }
+                        .distinct()
+                        .single()
             }
         } else {
             val parentTask = task.getParentTask(now)!!
@@ -82,7 +87,10 @@ fun DomainFactory.getCreateTaskData(
                 task.note,
                 task.project.name,
                 task.getImage(deviceDbInfo),
-                task.getAssignedTo().keys
+                task.project
+                        .getAssignedTo(assignedTo)
+                        .map { it.key }
+                        .toSet()
         )
     }
 
@@ -207,7 +215,7 @@ fun DomainFactory.createRootTask(
         source: SaveService.Source,
         name: String,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
+        sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
 ): TaskKey = syncOnDomain {
@@ -218,7 +226,7 @@ fun DomainFactory.createRootTask(
 
     val now = ExactTimeStamp.Local.now
 
-    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
+    val finalProjectId = sharedProjectKey ?: defaultProjectId
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -229,7 +237,6 @@ fun DomainFactory.createRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            assignedTo = sharedProjectParameters?.assignedTo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -275,7 +282,6 @@ fun DomainFactory.updateScheduleTask(
         it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
-        setAssignedTo(sharedProjectParameters?.assignedTo)
 
         endAllCurrentTaskHierarchies(now)
         endAllCurrentNoScheduleOrParents(now)
@@ -383,7 +389,7 @@ fun DomainFactory.updateRootTask(
         taskKey: TaskKey,
         name: String,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
+        sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
@@ -395,10 +401,9 @@ fun DomainFactory.updateRootTask(
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
-        it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
+        it.updateProject(this, now, sharedProjectKey ?: defaultProjectId)
     }.apply {
         setName(name, note)
-        setAssignedTo(sharedProjectParameters?.assignedTo)
 
         endAllCurrentTaskHierarchies(now)
         endAllCurrentSchedules(now)
@@ -538,7 +543,7 @@ fun DomainFactory.createJoinRootTask(
         name: String,
         joinTaskKeys: List<TaskKey>,
         note: String?,
-        sharedProjectParameters: EditDelegate.SharedProjectParameters?,
+        sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
 ): TaskKey = syncOnDomain {
@@ -550,7 +555,7 @@ fun DomainFactory.createJoinRootTask(
 
     val now = ExactTimeStamp.Local.now
 
-    val finalProjectId = sharedProjectParameters?.key ?: joinTaskKeys.map { it.projectKey }
+    val finalProjectId = sharedProjectKey ?: joinTaskKeys.map { it.projectKey }
             .distinct()
             .single()
 
@@ -568,7 +573,6 @@ fun DomainFactory.createJoinRootTask(
             imageUuid,
             deviceDbInfo,
             ordinal,
-            sharedProjectParameters?.assignedTo
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)

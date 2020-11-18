@@ -37,6 +37,8 @@ class ParentMultiScheduleManager(
     private val scheduleProperty = NonNullRelayProperty(state.schedules) {
         if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task)
             parent = null
+
+        if (it.isEmpty()) assignedTo = setOf()
     }
 
     override var schedules by scheduleProperty

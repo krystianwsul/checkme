@@ -42,10 +42,6 @@ class SharedTaskRecord private constructor(
             return taskJson
         }
 
-    override var assignedTo
-        get() = taskJson.assignedTo.keys
-        set(value) = setProperty(taskJson::assignedTo, value.associateWith { true })
-
     constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
             false,
             id,

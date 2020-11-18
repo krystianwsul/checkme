@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 
@@ -114,14 +115,10 @@ class CreateTaskEditDelegate(
                 .also { EditActivity.createdTaskKey = it }
     }
 
-    override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey
-    ): TaskKey {
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
         check(createParameters.allReminders)
 
-        if (parameters is EditParameters.Share)
-            ShortcutManager.addShortcut(parentTaskKey)
+        if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
         return DomainFactory.instance
                 .createChildTask(
@@ -139,7 +136,7 @@ class CreateTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            sharedProjectParameters: SharedProjectParameters?,
+            sharedProjectKey: ProjectKey.Shared?,
     ): TaskKey {
         check(createParameters.allReminders)
 
@@ -149,7 +146,7 @@ class CreateTaskEditDelegate(
                         SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,
-                        sharedProjectParameters,
+                        sharedProjectKey,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value

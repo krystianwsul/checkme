@@ -191,7 +191,11 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
                 createTaskWithParent(createParameters, parentTaskKey)
             }
-            else -> createTaskWithoutReminder(createParameters, sharedProjectParameters)
+            else -> {
+                check(assignedTo.isEmpty())
+
+                createTaskWithoutReminder(createParameters, projectId)
+            }
         }
     }
 
@@ -208,7 +212,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
-            sharedProjectParameters: SharedProjectParameters?,
+            sharedProjectKey: ProjectKey.Shared?,
     ): TaskKey
 
     fun saveState(outState: Bundle) {

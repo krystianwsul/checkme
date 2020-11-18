@@ -150,7 +150,7 @@ fun DomainFactory.getGroupListData(
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
                 instance.isRepeatingGroupChild(now),
-                instance.isAssignedToMe(myUserFactory.user, now),
+                instance.isAssignedToMe(now, myUserFactory.user),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

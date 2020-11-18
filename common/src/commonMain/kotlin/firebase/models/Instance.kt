@@ -470,10 +470,17 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
-    // todo assign next alarm, show assigned users on showInstanceActivity
+    fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
+        if (!isRootInstance(now)) return listOf()
+
+        return getMatchingScheduleIntervals().flatMap { it.schedule.assignedTo }
+                .toSet()
+                .let(project::getAssignedTo)
+                .map { it.value }
+    }
 
     // meaningless for child instances, but returns true for convenience
-    fun isAssignedToMe(myUser: MyUser, now: ExactTimeStamp.Local): Boolean {
+    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
         if (!isRootInstance(now)) return true
 
         return getMatchingScheduleIntervals().let {

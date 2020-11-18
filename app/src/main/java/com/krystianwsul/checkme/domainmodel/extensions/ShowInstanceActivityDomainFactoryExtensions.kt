@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -27,7 +29,14 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
 
     var displayText = listOfNotNull(
             instance.getParentName(now).takeIf { it.isNotEmpty() },
-            instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
+            instanceDateTime.takeIf { instance.isRootInstance(now) }?.getDisplayText(),
+            instance.getAssignedTo(now)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        MyApplication.context.getString(R.string.assignedTo) +
+                                " " +
+                                it.joinToString(", ") { it.name }
+                    }
     ).joinToString("\n\n")
 
     if (debugMode) {
@@ -117,7 +126,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.getNotificationShown(localFactory),
                 childTask.getImage(deviceDbInfo),
                 childInstance.isRepeatingGroupChild(now),
-                childInstance.isAssignedToMe(myUserFactory.user, now),
+                childInstance.isAssignedToMe(now, myUserFactory.user),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

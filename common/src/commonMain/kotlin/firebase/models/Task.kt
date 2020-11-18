@@ -373,7 +373,7 @@ class Task<T : ProjectType>(
         return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
-    fun getNextAlarm(now: ExactTimeStamp.Local): TimeStamp? {
+    fun getNextAlarm(now: ExactTimeStamp.Local, myUser: MyUser): TimeStamp? {
         val existingInstances = existingInstances.values
         val scheduleNextInstances = getCurrentScheduleIntervals(now).mapNotNull {
             it.getDateTimesInRange(now.toOffset(), null)
@@ -381,7 +381,7 @@ class Task<T : ProjectType>(
                     ?.let(::getInstance)
         }
 
-        return (existingInstances + scheduleNextInstances)
+        return (existingInstances + scheduleNextInstances).filter { it.isAssignedToMe(now, myUser) }
                 .map { it.instanceDateTime.timeStamp }
                 .filter { it.toLocalExactTimeStamp() > now }
                 .minOrNull()

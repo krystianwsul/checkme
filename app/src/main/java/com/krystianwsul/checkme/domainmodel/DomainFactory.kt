@@ -552,7 +552,7 @@ class DomainFactory(
                                 childInstance.getNotificationShown(localFactory),
                                 childTask.getImage(deviceDbInfo),
                                 childInstance.isRepeatingGroupChild(now),
-                                childInstance.isAssignedToMe(myUserFactory.user, now),
+                                childInstance.isAssignedToMe(now, myUserFactory.user),
                         )
 
                         children.values.forEach { it.instanceDataParent = instanceData }
@@ -929,7 +929,7 @@ class DomainFactory(
             Preferences.lastTick = now.long
 
         val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
-                .mapNotNull { it.getNextAlarm(now) }
+                .mapNotNull { it.getNextAlarm(now, myUserFactory.user) }
                 .minOrNull()
                 .takeUnless { clear }
 

@@ -55,7 +55,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
                 it.isRepeatingGroupChild(now),
-                it.isAssignedToMe(myUserFactory.user, now),
+                it.isAssignedToMe(now, myUserFactory.user),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

@@ -4,13 +4,12 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-data class SharedPrivateMonthlyWeekScheduleJson @JvmOverloads constructor(
+data class SharedMonthlyDayScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
         override var startTimeOffset: Double? = null,
         override var endTime: Long? = null,
         override var endTimeOffset: Double? = null,
         override val dayOfMonth: Int = 0,
-        override val dayOfWeek: Int = 0,
         override val beginningOfMonth: Boolean = false,
         override val customTimeId: String? = null,
         override val hour: Int? = null,
@@ -19,4 +18,4 @@ data class SharedPrivateMonthlyWeekScheduleJson @JvmOverloads constructor(
         override val until: String? = null,
         override var oldestVisible: String? = null,
         override var assignedTo: Map<String, Boolean> = mapOf(),
-) : MonthlyWeekScheduleJson, AssignedToJson
+) : MonthlyDayScheduleJson, AssignedToJson

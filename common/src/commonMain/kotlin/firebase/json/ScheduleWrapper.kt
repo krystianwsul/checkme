@@ -1,13 +1,10 @@
 package com.krystianwsul.common.firebase.json
 
-import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
+interface ScheduleWrapper {
 
-@Serializable
-data class ScheduleWrapper @JvmOverloads constructor(
-        val singleScheduleJson: SingleScheduleJson? = null,
-        val weeklyScheduleJson: WeeklyScheduleJson? = null,
-        val monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
-        val monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
-        val yearlyScheduleJson: YearlyScheduleJson? = null
-)
+    val singleScheduleJson: SingleScheduleJson?
+    val weeklyScheduleJson: WeeklyScheduleJson?
+    val monthlyDayScheduleJson: MonthlyDayScheduleJson?
+    val monthlyWeekScheduleJson: MonthlyWeekScheduleJson?
+    val yearlyScheduleJson: YearlyScheduleJson?
+}

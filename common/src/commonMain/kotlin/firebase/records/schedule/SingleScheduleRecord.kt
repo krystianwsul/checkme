@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records.schedule
 
 
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
@@ -11,15 +12,16 @@ open class SingleScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper<T>,
         id: String? = null,
+        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : ScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
-        scheduleWrapper.singleScheduleJson!!,
+        scheduleWrapperBridge.singleScheduleJson!!,
         "singleScheduleJson",
         id,
 ) {
 
-    private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }
+    val singleScheduleJson by lazy { scheduleWrapperBridge.singleScheduleJson!! }
 
     open val originalTimePair get() = timePair
 

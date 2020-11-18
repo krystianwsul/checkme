@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records.schedule
 
 
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
 
@@ -10,15 +11,16 @@ class MonthlyWeekScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper<T>,
         id: String? = null,
+        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : RepeatingScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
-        scheduleWrapper.monthlyWeekScheduleJson!!,
+        scheduleWrapperBridge.monthlyWeekScheduleJson!!,
         "monthlyWeekScheduleJson",
         id
 ) {
 
-    private val monthlyWeekScheduleJson by lazy { createObject.monthlyWeekScheduleJson!! }
+    private val monthlyWeekScheduleJson by lazy { scheduleWrapperBridge.monthlyWeekScheduleJson!! }
 
     val weekOfMonth by lazy { monthlyWeekScheduleJson.dayOfMonth }
 

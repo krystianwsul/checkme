@@ -73,7 +73,7 @@ class SingleSchedule<T : ProjectType>(
     ) = Unit
 
     fun setAssignedTo(assignedTo: Set<UserKey>) {
-        val writeAssignedToJson = singleScheduleRecord.createObject.singleScheduleJson as? WriteAssignedToJson
+        val writeAssignedToJson = singleScheduleRecord.singleScheduleJson as? WriteAssignedToJson
                 ?: throw UnsupportedOperationException()
 
         rootTask.project.assignedToHelper.setAssignedTo(

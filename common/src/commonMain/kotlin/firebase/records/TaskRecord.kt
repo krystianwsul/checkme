@@ -99,37 +99,64 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         for ((id, scheduleWrapper) in taskJson.schedules) {
             check(id.isNotEmpty())
 
+            val scheduleWrapperBridge = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper)
+
             when {
-                scheduleWrapper.singleScheduleJson != null -> {
-                    check(scheduleWrapper.weeklyScheduleJson == null)
-                    check(scheduleWrapper.monthlyDayScheduleJson == null)
-                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapper.yearlyScheduleJson == null)
+                scheduleWrapperBridge.singleScheduleJson != null -> {
+                    check(scheduleWrapperBridge.weeklyScheduleJson == null)
+                    check(scheduleWrapperBridge.monthlyDayScheduleJson == null)
+                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
-                    singleScheduleRecords[id] = SingleScheduleRecord(this, scheduleWrapper, id)
+                    singleScheduleRecords[id] = SingleScheduleRecord(
+                            this,
+                            scheduleWrapper,
+                            id,
+                            scheduleWrapperBridge
+                    )
                 }
-                scheduleWrapper.weeklyScheduleJson != null -> {
-                    check(scheduleWrapper.monthlyDayScheduleJson == null)
-                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapper.yearlyScheduleJson == null)
+                scheduleWrapperBridge.weeklyScheduleJson != null -> {
+                    check(scheduleWrapperBridge.monthlyDayScheduleJson == null)
+                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
-                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(this, scheduleWrapper, id)
+                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(
+                            this,
+                            scheduleWrapper,
+                            id,
+                            scheduleWrapperBridge
+                    )
                 }
-                scheduleWrapper.monthlyDayScheduleJson != null -> {
-                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapper.yearlyScheduleJson == null)
+                scheduleWrapperBridge.monthlyDayScheduleJson != null -> {
+                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
-                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(this, scheduleWrapper, id)
+                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(
+                            this,
+                            scheduleWrapper,
+                            id,
+                            scheduleWrapperBridge
+                    )
                 }
-                scheduleWrapper.monthlyWeekScheduleJson != null -> {
-                    check(scheduleWrapper.yearlyScheduleJson == null)
+                scheduleWrapperBridge.monthlyWeekScheduleJson != null -> {
+                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
-                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(this, scheduleWrapper, id)
+                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(
+                            this,
+                            scheduleWrapper,
+                            id,
+                            scheduleWrapperBridge
+                    )
                 }
                 else -> {
-                    check(scheduleWrapper.yearlyScheduleJson != null)
+                    check(scheduleWrapperBridge.yearlyScheduleJson != null)
 
-                    yearlyScheduleRecords[id] = YearlyScheduleRecord(this, scheduleWrapper, id)
+                    yearlyScheduleRecords[id] = YearlyScheduleRecord(
+                            this,
+                            scheduleWrapper,
+                            id,
+                            scheduleWrapperBridge
+                    )
                 }
             }
         }

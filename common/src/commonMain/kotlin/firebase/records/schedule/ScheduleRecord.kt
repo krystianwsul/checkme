@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.schedule
 
 import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.HourMinute
@@ -56,4 +57,6 @@ abstract class ScheduleRecord<T : ProjectType>(
         get() = timePair.customTimeKey as? CustomTimeKey<T>
 
     val assignedTo get() = taskRecord.assignedToHelper.getAssignedTo(scheduleJson)
+
+    abstract val scheduleWrapperBridge: ScheduleWrapperBridge<T>
 }

@@ -63,11 +63,11 @@ class PrivateTaskRecord private constructor(
             monthlyWeekScheduleJson: MonthlyWeekScheduleJson<ProjectType.Private>?,
             yearlyScheduleJson: YearlyScheduleJson<ProjectType.Private>?,
     ) = PrivateScheduleWrapper(
-            singleScheduleJson as PrivateSingleScheduleJson,
-            weeklyScheduleJson as PrivateWeeklyScheduleJson,
-            monthlyDayScheduleJson as PrivateMonthlyDayScheduleJson,
-            monthlyWeekScheduleJson as PrivateMonthlyWeekScheduleJson,
-            yearlyScheduleJson as PrivateYearlyScheduleJson
+            singleScheduleJson as? PrivateSingleScheduleJson,
+            weeklyScheduleJson as? PrivateWeeklyScheduleJson,
+            monthlyDayScheduleJson as? PrivateMonthlyDayScheduleJson,
+            monthlyWeekScheduleJson as? PrivateMonthlyWeekScheduleJson,
+            yearlyScheduleJson as? PrivateYearlyScheduleJson
     )
 
     override fun deleteFromParent() = check(privateProjectRecord.taskRecords.remove(id) == this)

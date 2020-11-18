@@ -6,9 +6,9 @@ import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class SharedScheduleWrapper @JvmOverloads constructor(
-        override val singleScheduleJson: SharedSingleScheduleJson? = null,
-        override val weeklyScheduleJson: SharedWeeklyScheduleJson? = null,
-        override val monthlyDayScheduleJson: SharedMonthlyDayScheduleJson? = null,
-        override val monthlyWeekScheduleJson: SharedMonthlyWeekScheduleJson? = null,
-        override val yearlyScheduleJson: SharedYearlyScheduleJson? = null,
+        val singleScheduleJson: SharedSingleScheduleJson? = null,
+        val weeklyScheduleJson: SharedWeeklyScheduleJson? = null,
+        val monthlyDayScheduleJson: SharedMonthlyDayScheduleJson? = null,
+        val monthlyWeekScheduleJson: SharedMonthlyWeekScheduleJson? = null,
+        val yearlyScheduleJson: SharedYearlyScheduleJson? = null,
 ) : ScheduleWrapper<ProjectType.Shared>

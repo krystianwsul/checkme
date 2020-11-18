@@ -63,11 +63,11 @@ class SharedTaskRecord private constructor(
             monthlyWeekScheduleJson: MonthlyWeekScheduleJson<ProjectType.Shared>?,
             yearlyScheduleJson: YearlyScheduleJson<ProjectType.Shared>?,
     ) = SharedScheduleWrapper(
-            singleScheduleJson as SharedSingleScheduleJson,
-            weeklyScheduleJson as SharedWeeklyScheduleJson,
-            monthlyDayScheduleJson as SharedMonthlyDayScheduleJson,
-            monthlyWeekScheduleJson as SharedMonthlyWeekScheduleJson,
-            yearlyScheduleJson as SharedYearlyScheduleJson
+            singleScheduleJson as? SharedSingleScheduleJson,
+            weeklyScheduleJson as? SharedWeeklyScheduleJson,
+            monthlyDayScheduleJson as? SharedMonthlyDayScheduleJson,
+            monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
+            yearlyScheduleJson as? SharedYearlyScheduleJson
     )
 
     override fun deleteFromParent() = check(sharedProjectRecord.taskRecords.remove(id) == this)

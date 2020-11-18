@@ -18,5 +18,5 @@ data class SharedMonthlyDayScheduleJson @JvmOverloads constructor(
         override val from: String? = null,
         override val until: String? = null,
         override var oldestVisible: String? = null,
-        override var assignedTo: Map<String, Boolean> = mapOf(),
+        override val assignedTo: Map<String, Boolean> = mapOf(),
 ) : MonthlyDayScheduleJson<ProjectType.Shared>, AssignedToJson

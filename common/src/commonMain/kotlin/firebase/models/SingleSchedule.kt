@@ -1,16 +1,18 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.json.schedule.WriteAssignedToJson
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
+import com.krystianwsul.common.utils.UserKey
 
 class SingleSchedule<T : ProjectType>(
         rootTask: Task<T>,
-        val singleScheduleRecord: SingleScheduleRecord<T>
+        val singleScheduleRecord: SingleScheduleRecord<T>,
 ) : Schedule<T>(rootTask) {
 
     val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
@@ -70,10 +72,21 @@ class SingleSchedule<T : ProjectType>(
             now: ExactTimeStamp.Local,
     ) = Unit
 
+    fun setAssignedTo(assignedTo: Set<UserKey>) {
+        val writeAssignedToJson = singleScheduleRecord.createObject.singleScheduleJson as? WriteAssignedToJson
+                ?: throw UnsupportedOperationException()
+
+        rootTask.project.assignedToHelper.setAssignedTo(
+                writeAssignedToJson,
+                singleScheduleRecord,
+                assignedTo.map { it.key }.toSet(),
+        )
+    }
+
     private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord<T>(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,
-            singleScheduleRecord.id
+            singleScheduleRecord.id,
     ) {
 
         override val date get() = instance.instanceDate

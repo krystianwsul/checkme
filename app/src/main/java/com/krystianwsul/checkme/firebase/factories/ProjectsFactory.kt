@@ -180,7 +180,7 @@ class ProjectsFactory(
             deviceDbInfo: DeviceDbInfo,
             allReminders: Boolean = true,
             ordinal: Double? = null,
-            assignedTo: Set<UserKey>? = null,
+            assignedTo: Set<UserKey> = setOf(),
     ): Task<*> {
         return createTaskHelper(
                 now,
@@ -191,7 +191,7 @@ class ProjectsFactory(
                 deviceDbInfo,
                 ordinal,
                 assignedTo
-        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, allReminders) }
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, allReminders) }
     }
 
     fun createNoScheduleOrParentTask(

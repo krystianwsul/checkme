@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.getDateInMonth
 
 class MonthlyWeekSchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleRecord: MonthlyWeekScheduleRecord<T>
+        override val repeatingScheduleRecord: MonthlyWeekScheduleRecord<T>,
 ) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord

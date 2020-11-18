@@ -17,7 +17,7 @@ abstract class RepeatingScheduleRecord<T : ProjectType>(
         createObject,
         repeatingScheduleJson,
         endTimeKey,
-        id
+        id,
 ) {
 
     val from by lazy {

@@ -14,7 +14,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         val id: String,
         val projectRecord: ProjectRecord<T>,
         private val taskJson: TaskJson<T>,
-        private val assignedToHelper: AssignedToHelper<T>,
+        val assignedToHelper: AssignedToHelper<T>,
 ) : RemoteRecord(create) {
 
     companion object {

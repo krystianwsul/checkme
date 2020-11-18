@@ -21,7 +21,6 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>,
-        val copyScheduleHelper: CopyScheduleHelper<T>,
 ) : Current, CurrentOffset, QueryMatch {
 
     companion object {
@@ -388,17 +387,22 @@ class Task<T : ProjectType>(
                 .minOrNull()
     }
 
+    private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
+
     fun updateSchedules(
             ownerKey: UserKey,
             shownFactory: Instance.ShownFactory,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp.Local,
+            assignedTo: Set<UserKey>,
     ) {
         val removeSchedules = mutableListOf<Schedule<T>>()
-        val addScheduleDatas = scheduleDatas.toMutableList()
+        val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
 
         val oldScheduleIntervals = getCurrentScheduleIntervals(now).map { it.schedule }
-        val oldScheduleDatas = ScheduleGroup.getGroups(oldScheduleIntervals).map { it.scheduleData to it.schedules }
+        val oldScheduleDatas = ScheduleGroup.getGroups(oldScheduleIntervals).map {
+            ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules
+        }
 
         for ((key, value) in oldScheduleDatas) {
             val existing = addScheduleDatas.singleOrNull { it.first == key }
@@ -415,8 +419,10 @@ class Task<T : ProjectType>(
          */
 
         val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
-        val singleAddSchedulePair =
-                addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
+
+        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf {
+            it.first.scheduleData is ScheduleData.Single
+        }
 
         val oldMockPair = oldScheduleIntervals.filterIsInstance<SingleSchedule<T>>()
                 .singleOrNull()
@@ -424,27 +430,25 @@ class Task<T : ProjectType>(
                     singleSchedule.mockInstance?.let { Pair(singleSchedule, it) }
                 }
 
-        if (singleRemoveSchedule != null &&
-                singleAddSchedulePair != null &&
-                oldMockPair != null
+        if (singleRemoveSchedule != null
+                && singleAddSchedulePair != null
+                && oldMockPair != null
         ) {
             check(singleRemoveSchedule.scheduleId == oldMockPair.first.scheduleId)
 
-            oldMockPair.second
-                    .setInstanceDateTime(
-                            shownFactory,
-                            ownerKey,
-                            singleAddSchedulePair.run {
-                                DateTime(
-                                        (first as ScheduleData.Single).date,
-                                        second
-                                )
-                            },
-                            now
-                    )
+            if (assignedTo.isNotEmpty()) oldMockPair.first.setAssignedTo(assignedTo)
+
+            oldMockPair.second.setInstanceDateTime(
+                    shownFactory,
+                    ownerKey,
+                    singleAddSchedulePair.second.run {
+                        DateTime((first as ScheduleData.Single).date, second)
+                    },
+                    now
+            )
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
-            addSchedules(ownerKey, addScheduleDatas, now)
+            addSchedules(ownerKey, addScheduleDatas.map { it.second }, now, assignedTo)
         }
     }
 
@@ -557,7 +561,8 @@ class Task<T : ProjectType>(
             ownerKey: UserKey,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp.Local,
-    ) = createSchedules(ownerKey, now, scheduleDatas)
+            assignedTo: Set<UserKey>,
+    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo)
 
     fun addChild(childTask: Task<*>, now: ExactTimeStamp.Local) {
         @Suppress("UNCHECKED_CAST")
@@ -627,10 +632,12 @@ class Task<T : ProjectType>(
             ownerKey: UserKey,
             now: ExactTimeStamp.Local,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
+            assignedTo: Set<UserKey>,
             allReminders: Boolean = true,
     ) {
-        if (!allReminders)
-            check(scheduleDatas.single().first is ScheduleData.Single)
+        if (!allReminders) check(scheduleDatas.single().first is ScheduleData.Single)
+
+        val assignedToKeys = assignedTo.map { it.key }.toSet()
 
         for ((scheduleData, time) in scheduleDatas) {
             val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(ownerKey, time)
@@ -640,7 +647,7 @@ class Task<T : ProjectType>(
                     val date = scheduleData.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            copyScheduleHelper.newSingle(
+                            project.copyScheduleHelper.newSingle(
                                     now.long,
                                     now.offset,
                                     null,
@@ -651,7 +658,8 @@ class Task<T : ProjectType>(
                                     customTimeId?.value,
                                     hour,
                                     minute,
-                                    !allReminders
+                                    !allReminders,
+                                    assignedToKeys,
                             )
                     )
 
@@ -660,7 +668,7 @@ class Task<T : ProjectType>(
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                                copyScheduleHelper.newWeekly(
+                                project.copyScheduleHelper.newWeekly(
                                         now.long,
                                         now.offset,
                                         null,
@@ -671,7 +679,8 @@ class Task<T : ProjectType>(
                                         minute,
                                         scheduleData.from?.toJson(),
                                         scheduleData.until?.toJson(),
-                                        scheduleData.interval
+                                        scheduleData.interval,
+                                        assignedToKeys,
                                 )
                         )
 
@@ -682,7 +691,7 @@ class Task<T : ProjectType>(
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            copyScheduleHelper.newMonthlyDay(
+                            project.copyScheduleHelper.newMonthlyDay(
                                     now.long,
                                     now.offset,
                                     null,
@@ -693,7 +702,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson()
+                                    scheduleData.until?.toJson(),
+                                    assignedToKeys,
                             )
                     )
 
@@ -703,7 +713,7 @@ class Task<T : ProjectType>(
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            copyScheduleHelper.newMonthlyWeek(
+                            project.copyScheduleHelper.newMonthlyWeek(
                                     now.long,
                                     now.offset,
                                     null,
@@ -715,7 +725,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson()
+                                    scheduleData.until?.toJson(),
+                                    assignedToKeys,
                             )
                     )
 
@@ -723,7 +734,7 @@ class Task<T : ProjectType>(
                 }
                 is ScheduleData.Yearly -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            copyScheduleHelper.newYearly(
+                            project.copyScheduleHelper.newYearly(
                                     now.long,
                                     now.offset,
                                     null,
@@ -734,7 +745,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson()
+                                    scheduleData.until?.toJson(),
+                                    assignedToKeys,
                             )
                     )
 
@@ -756,17 +768,20 @@ class Task<T : ProjectType>(
         if (hasGroupSchedule) check(schedules.size == 1)
 
         for (schedule in schedules) {
-            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(
-                    deviceDbInfo.key,
-                    schedule.time
-            )
+            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
+
+            val assignedTo = schedule.takeIf { it.rootTask.project == project }
+                    ?.assignedTo
+                    .orEmpty()
+                    .map { it.key }
+                    .toSet()
 
             when (schedule) {
                 is SingleSchedule<*> -> {
                     val date = schedule.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            copyScheduleHelper.newSingle(
+                            project.copyScheduleHelper.newSingle(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -777,7 +792,8 @@ class Task<T : ProjectType>(
                                     customTimeId?.value,
                                     hour,
                                     minute,
-                                    schedule.group
+                                    schedule.group,
+                                    assignedTo
                             )
                     )
 
@@ -785,7 +801,7 @@ class Task<T : ProjectType>(
                 }
                 is WeeklySchedule<*> -> {
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                            copyScheduleHelper.newWeekly(
+                            project.copyScheduleHelper.newWeekly(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -796,7 +812,8 @@ class Task<T : ProjectType>(
                                     minute,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    schedule.interval
+                                    schedule.interval,
+                                    assignedTo
                             )
                     )
 
@@ -804,7 +821,7 @@ class Task<T : ProjectType>(
                 }
                 is MonthlyDaySchedule<*> -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            copyScheduleHelper.newMonthlyDay(
+                            project.copyScheduleHelper.newMonthlyDay(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -815,7 +832,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     schedule.from?.toJson(),
-                                    schedule.until?.toJson()
+                                    schedule.until?.toJson(),
+                                    assignedTo
                             )
                     )
 
@@ -823,7 +841,7 @@ class Task<T : ProjectType>(
                 }
                 is MonthlyWeekSchedule<*> -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            copyScheduleHelper.newMonthlyWeek(
+                            project.copyScheduleHelper.newMonthlyWeek(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -835,7 +853,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     schedule.from?.toJson(),
-                                    schedule.until?.toJson()
+                                    schedule.until?.toJson(),
+                                    assignedTo
                             )
                     )
 
@@ -843,7 +862,7 @@ class Task<T : ProjectType>(
                 }
                 is YearlySchedule<*> -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            copyScheduleHelper.newYearly(
+                            project.copyScheduleHelper.newYearly(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -854,7 +873,8 @@ class Task<T : ProjectType>(
                                     hour,
                                     minute,
                                     schedule.from?.toJson(),
-                                    schedule.until?.toJson()
+                                    schedule.until?.toJson(),
+                                    assignedTo
                             )
                     )
 

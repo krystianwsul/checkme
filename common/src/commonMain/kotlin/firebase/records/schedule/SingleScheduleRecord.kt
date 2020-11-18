@@ -16,7 +16,7 @@ open class SingleScheduleRecord<T : ProjectType>(
         scheduleWrapper,
         scheduleWrapper.singleScheduleJson!!,
         "singleScheduleJson",
-        id
+        id,
 ) {
 
     private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }

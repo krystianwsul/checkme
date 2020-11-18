@@ -5,6 +5,11 @@ import com.krystianwsul.common.utils.ProjectType
 
 sealed class CopyScheduleHelper<T : ProjectType> {
 
+    companion object {
+
+        private fun Set<String>.toMap() = associate { it to true }
+    }
+
     abstract fun newSingle(
             startTime: Long,
             startTimeOffset: Double?,
@@ -17,7 +22,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             hour: Int?,
             minute: Int?,
             group: Boolean,
-    ): SingleScheduleJson<T> // todo assign
+            assignedTo: Set<String>,
+    ): SingleScheduleJson<T>
 
     abstract fun newWeekly(
             startTime: Long,
@@ -31,7 +37,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             from: String?,
             until: String?,
             interval: Int,
-    ): WeeklyScheduleJson<T> // todo assign
+            assignedTo: Set<String>,
+    ): WeeklyScheduleJson<T>
 
     abstract fun newMonthlyDay(
             startTime: Long,
@@ -45,7 +52,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             minute: Int?,
             from: String?,
             until: String?,
-    ): MonthlyDayScheduleJson<T> // todo assign
+            assignedTo: Set<String>,
+    ): MonthlyDayScheduleJson<T>
 
     abstract fun newMonthlyWeek(
             startTime: Long,
@@ -60,7 +68,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             minute: Int?,
             from: String?,
             until: String?,
-    ): MonthlyWeekScheduleJson<T> // todo assign
+            assignedTo: Set<String>,
+    ): MonthlyWeekScheduleJson<T>
 
     abstract fun newYearly(
             startTime: Long,
@@ -74,7 +83,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             minute: Int?,
             from: String?,
             until: String?,
-    ): YearlyScheduleJson<T> // todo assign
+            assignedTo: Set<String>,
+    ): YearlyScheduleJson<T>
 
     object Private : CopyScheduleHelper<ProjectType.Private>() {
 
@@ -90,7 +100,10 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 hour: Int?,
                 minute: Int?,
                 group: Boolean,
+                assignedTo: Set<String>,
         ): SingleScheduleJson<ProjectType.Private> {
+            check(assignedTo.isEmpty())
+
             return PrivateSingleScheduleJson(
                     startTime,
                     startTimeOffset,
@@ -118,7 +131,10 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 interval: Int,
+                assignedTo: Set<String>,
         ): WeeklyScheduleJson<ProjectType.Private> {
+            check(assignedTo.isEmpty())
+
             return PrivateWeeklyScheduleJson(
                     startTime,
                     startTimeOffset,
@@ -146,7 +162,10 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): MonthlyDayScheduleJson<ProjectType.Private> {
+            check(assignedTo.isEmpty())
+
             return PrivateMonthlyDayScheduleJson(
                     startTime,
                     startTimeOffset,
@@ -175,7 +194,10 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): MonthlyWeekScheduleJson<ProjectType.Private> {
+            check(assignedTo.isEmpty())
+
             return PrivateMonthlyWeekScheduleJson(
                     startTime,
                     startTimeOffset,
@@ -204,7 +226,10 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): YearlyScheduleJson<ProjectType.Private> {
+            check(assignedTo.isEmpty())
+
             return PrivateYearlyScheduleJson(
                     startTime,
                     startTimeOffset,
@@ -235,6 +260,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 hour: Int?,
                 minute: Int?,
                 group: Boolean,
+                assignedTo: Set<String>,
         ) = SharedSingleScheduleJson(
                 startTime,
                 startTimeOffset,
@@ -246,7 +272,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 customTimeId,
                 hour,
                 minute,
-                group
+                group,
+                assignedTo.toMap()
         )
 
         override fun newWeekly(
@@ -261,6 +288,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 interval: Int,
+                assignedTo: Set<String>,
         ): WeeklyScheduleJson<ProjectType.Shared> {
             return SharedWeeklyScheduleJson(
                     startTime,
@@ -273,7 +301,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                     minute,
                     from,
                     until,
-                    interval
+                    interval,
+                    assignedTo = assignedTo.toMap(),
             )
         }
 
@@ -289,6 +318,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): MonthlyDayScheduleJson<ProjectType.Shared> {
             return SharedMonthlyDayScheduleJson(
                     startTime,
@@ -301,7 +331,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                     hour,
                     minute,
                     from,
-                    until
+                    until,
+                    assignedTo = assignedTo.toMap(),
             )
         }
 
@@ -318,6 +349,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): MonthlyWeekScheduleJson<ProjectType.Shared> {
             return SharedMonthlyWeekScheduleJson(
                     startTime,
@@ -331,7 +363,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                     hour,
                     minute,
                     from,
-                    until
+                    until,
+                    assignedTo = assignedTo.toMap(),
             )
         }
 
@@ -347,6 +380,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 minute: Int?,
                 from: String?,
                 until: String?,
+                assignedTo: Set<String>,
         ): YearlyScheduleJson<ProjectType.Shared> {
             return SharedYearlyScheduleJson(
                     startTime,
@@ -359,7 +393,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                     hour,
                     minute,
                     from,
-                    until
+                    until,
+                    assignedTo = assignedTo.toMap(),
             )
         }
     }

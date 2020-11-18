@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
+import com.krystianwsul.common.utils.UserKey
 
 abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntry {
 
@@ -109,8 +110,10 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     protected abstract fun matchesScheduleDateTimeHelper(
             scheduleDateTime: DateTime,
-            checkOldestVisible: Boolean
+            checkOldestVisible: Boolean,
     ): Boolean
+
+    val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
 
     override fun toString() = super.toString() + ", scheduleId: $scheduleId, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 

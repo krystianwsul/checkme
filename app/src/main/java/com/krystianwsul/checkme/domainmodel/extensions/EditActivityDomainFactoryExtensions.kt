@@ -141,7 +141,7 @@ fun DomainFactory.createScheduleRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            assignedTo = sharedProjectParameters?.assignedTo
+            assignedTo = sharedProjectParameters.nonNullAssignedTo
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }
@@ -292,7 +292,8 @@ fun DomainFactory.updateScheduleTask(
                 ownerKey,
                 localFactory,
                 scheduleDatas.map { it to getTime(it.timePair) },
-                now
+                now,
+                sharedProjectParameters.nonNullAssignedTo
         )
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -461,7 +462,7 @@ fun DomainFactory.createScheduleJoinRootTask(
             deviceDbInfo,
             allReminders,
             ordinal,
-            assignedTo = sharedProjectParameters?.assignedTo
+            assignedTo = sharedProjectParameters.nonNullAssignedTo
     )
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
@@ -797,3 +798,5 @@ private fun <T : ProjectType> DomainFactory.createChildTask(
 }
 
 private fun Collection<ProjectUser>.toUserDatas() = associate { it.id to EditViewModel.UserData(it.id, it.name) }
+
+private val EditDelegate.SharedProjectParameters?.nonNullAssignedTo get() = this?.assignedTo.orEmpty()

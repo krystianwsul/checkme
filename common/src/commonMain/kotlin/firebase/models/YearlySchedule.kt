@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ScheduleType
 
 class YearlySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleRecord: YearlyScheduleRecord<T>
+        override val repeatingScheduleRecord: YearlyScheduleRecord<T>,
 ) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord

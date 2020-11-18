@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.ScheduleType
 
 class WeeklySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleRecord: WeeklyScheduleRecord<T>
+        override val repeatingScheduleRecord: WeeklyScheduleRecord<T>,
 ) : RepeatingSchedule<T>(rootTask) {
 
     val dayOfWeek = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]

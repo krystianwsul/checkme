@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
+import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
@@ -17,7 +18,7 @@ class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
         private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
-) : Project<ProjectType.Private>(CopyScheduleHelper.Private) {
+) : Project<ProjectType.Private>(CopyScheduleHelper.Private, AssignedToHelper.Private) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -40,7 +41,7 @@ class PrivateProject(
                 .map {
                     val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
 
-                    Task(this, it, rootInstanceManager, CopyScheduleHelper.Private)
+                    Task(this, it, rootInstanceManager)
                 }
                 .associateBy { it.id }
                 .toMutableMap()
@@ -152,7 +153,7 @@ class PrivateProject(
     private fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(this, taskRecord, newRootInstanceManager(taskRecord), CopyScheduleHelper.Private)
+        val task = Task(this, taskRecord, newRootInstanceManager(taskRecord))
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

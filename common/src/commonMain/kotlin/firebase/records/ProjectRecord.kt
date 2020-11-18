@@ -7,9 +7,9 @@ import com.krystianwsul.common.utils.*
 @Suppress("LeakingThis")
 abstract class ProjectRecord<T : ProjectType>(
         create: Boolean,
-        private val projectJson: ProjectJson,
+        private val projectJson: ProjectJson<T>,
         private val _id: ProjectKey<T>,
-        committerKey: String
+        committerKey: String,
 ) : RemoteRecord(create) {
 
     companion object {

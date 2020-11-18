@@ -6,7 +6,6 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -22,6 +21,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>,
+        val copyScheduleHelper: CopyScheduleHelper<T>,
 ) : Current, CurrentOffset, QueryMatch {
 
     companion object {
@@ -640,7 +640,7 @@ class Task<T : ProjectType>(
                     val date = scheduleData.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            SingleScheduleJson(
+                            copyScheduleHelper.newSingle(
                                     now.long,
                                     now.offset,
                                     null,
@@ -660,7 +660,7 @@ class Task<T : ProjectType>(
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                                WeeklyScheduleJson(
+                                copyScheduleHelper.newWeekly(
                                         now.long,
                                         now.offset,
                                         null,
@@ -682,7 +682,7 @@ class Task<T : ProjectType>(
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            MonthlyDayScheduleJson(
+                            copyScheduleHelper.newMonthlyDay(
                                     now.long,
                                     now.offset,
                                     null,
@@ -703,7 +703,7 @@ class Task<T : ProjectType>(
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            MonthlyWeekScheduleJson(
+                            copyScheduleHelper.newMonthlyWeek(
                                     now.long,
                                     now.offset,
                                     null,
@@ -723,7 +723,7 @@ class Task<T : ProjectType>(
                 }
                 is ScheduleData.Yearly -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            YearlyScheduleJson(
+                            copyScheduleHelper.newYearly(
                                     now.long,
                                     now.offset,
                                     null,
@@ -747,13 +747,13 @@ class Task<T : ProjectType>(
     }
 
     fun copySchedules(
+            // todo assign account for task being in same project
             deviceDbInfo: DeviceDbInfo,
             now: ExactTimeStamp.Local,
-            schedules: Collection<Schedule<*>>,
+            schedules: List<Schedule<*>>,
     ) {
         val hasGroupSchedule = schedules.any { it is SingleSchedule<*> && it.group }
-        if (hasGroupSchedule)
-            check(schedules.size == 1)
+        if (hasGroupSchedule) check(schedules.size == 1)
 
         for (schedule in schedules) {
             val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(
@@ -766,7 +766,7 @@ class Task<T : ProjectType>(
                     val date = schedule.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            SingleScheduleJson(
+                            copyScheduleHelper.newSingle(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -785,7 +785,7 @@ class Task<T : ProjectType>(
                 }
                 is WeeklySchedule<*> -> {
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                            WeeklyScheduleJson(
+                            copyScheduleHelper.newWeekly(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -804,7 +804,7 @@ class Task<T : ProjectType>(
                 }
                 is MonthlyDaySchedule<*> -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            MonthlyDayScheduleJson(
+                            copyScheduleHelper.newMonthlyDay(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -823,7 +823,7 @@ class Task<T : ProjectType>(
                 }
                 is MonthlyWeekSchedule<*> -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            MonthlyWeekScheduleJson(
+                            copyScheduleHelper.newMonthlyWeek(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,
@@ -843,7 +843,7 @@ class Task<T : ProjectType>(
                 }
                 is YearlySchedule<*> -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            YearlyScheduleJson(
+                            copyScheduleHelper.newYearly(
                                     now.long,
                                     now.offset,
                                     schedule.endExactTimeStamp?.long,

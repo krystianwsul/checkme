@@ -18,8 +18,8 @@ import com.krystianwsul.common.utils.*
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
-        private val _newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>
-) : Project<ProjectType.Shared>() {
+        private val _newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
+) : Project<ProjectType.Shared>(CopyScheduleHelper.Shared) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -50,7 +50,7 @@ class SharedProject(
                 .map {
                     val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
 
-                    Task(this, it, rootInstanceManager)
+                    Task(this, it, rootInstanceManager, CopyScheduleHelper.Shared)
                 }
                 .associateBy { it.id }
                 .toMutableMap()
@@ -217,12 +217,9 @@ class SharedProject(
     private fun newTask(taskJson: SharedTaskJson): Task<ProjectType.Shared> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(
-                this,
-                taskRecord,
-                newRootInstanceManager(taskRecord)
-        )
+        val task = Task(this, taskRecord, newRootInstanceManager(taskRecord), CopyScheduleHelper.Shared)
         check(!_tasks.containsKey(task.id))
+
         _tasks[task.id] = task
 
         return task

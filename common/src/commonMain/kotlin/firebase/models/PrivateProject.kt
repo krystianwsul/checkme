@@ -17,7 +17,7 @@ class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
         private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
-) : Project<ProjectType.Private>() {
+) : Project<ProjectType.Private>(CopyScheduleHelper.Private) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -40,7 +40,7 @@ class PrivateProject(
                 .map {
                     val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
 
-                    Task(this, it, rootInstanceManager)
+                    Task(this, it, rootInstanceManager, CopyScheduleHelper.Private)
                 }
                 .associateBy { it.id }
                 .toMutableMap()
@@ -152,12 +152,9 @@ class PrivateProject(
     private fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(
-                this,
-                taskRecord,
-                newRootInstanceManager(taskRecord)
-        )
+        val task = Task(this, taskRecord, newRootInstanceManager(taskRecord), CopyScheduleHelper.Private)
         check(!_tasks.containsKey(task.id))
+
         _tasks[task.id] = task
 
         return task

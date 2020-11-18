@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -14,4 +15,4 @@ class SharedProjectJson @JvmOverloads constructor(
         override var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, SharedCustomTimeJson> = mutableMapOf(),
         var users: MutableMap<String, UserJson> = mutableMapOf(),
-) : ProjectJson
+) : ProjectJson<ProjectType.Shared>

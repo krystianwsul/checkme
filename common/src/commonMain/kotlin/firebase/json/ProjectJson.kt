@@ -1,6 +1,8 @@
 package com.krystianwsul.common.firebase.json
 
-interface ProjectJson {
+import com.krystianwsul.common.utils.ProjectType
+
+interface ProjectJson<T : ProjectType> {
 
     var name: String
 
@@ -10,7 +12,7 @@ interface ProjectJson {
     var endTime: Long?
     var endTimeOffset: Double?
 
-    val tasks: Map<String, TaskJson>
+    val tasks: Map<String, TaskJson<T>>
     var taskHierarchies: MutableMap<String, TaskHierarchyJson>
     val customTimes: Map<String, CustomTimeJson>
 }

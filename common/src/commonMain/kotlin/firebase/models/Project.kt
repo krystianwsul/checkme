@@ -16,7 +16,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : ProjectType> : Current {
+abstract class Project<T : ProjectType>(private val copyScheduleHelper: CopyScheduleHelper<T>) : Current {
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -104,7 +104,7 @@ abstract class Project<T : ProjectType> : Current {
 
         val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
 
-        val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
+        val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord), copyScheduleHelper)
         check(!_tasks.containsKey(newTask.id))
 
         if (Task.USE_ROOT_INSTANCES) {
@@ -119,13 +119,13 @@ abstract class Project<T : ProjectType> : Current {
 
         _tasks[newTask.id] = newTask
 
-        val currentScheduleIntervals = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
+        val currentSchedules = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
         val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
-        if (currentScheduleIntervals.isNotEmpty()) {
+        if (currentSchedules.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
 
-            newTask.copySchedules(deviceDbInfo, now, currentScheduleIntervals)
+            newTask.copySchedules(deviceDbInfo, now, currentSchedules)
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }

@@ -30,11 +30,13 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 
-    val startTime get() = scheduleJson.startTime
-    open var startTimeOffset by Committer(scheduleJson::startTimeOffset, "$key/$scheduleTypeSubkey")
+    val keyPlusSubkey = "$key/$scheduleTypeSubkey"
 
-    open var endTime by Committer(scheduleJson::endTime, "$key/$scheduleTypeSubkey")
-    open var endTimeOffset by Committer(scheduleJson::endTimeOffset, "$key/$scheduleTypeSubkey")
+    val startTime get() = scheduleJson.startTime
+    open var startTimeOffset by Committer(scheduleJson::startTimeOffset, keyPlusSubkey)
+
+    open var endTime by Committer(scheduleJson::endTime, keyPlusSubkey)
+    open var endTimeOffset by Committer(scheduleJson::endTimeOffset, keyPlusSubkey)
 
     val projectKey = taskRecord.projectKey
 

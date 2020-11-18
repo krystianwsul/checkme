@@ -35,6 +35,10 @@ sealed class AssignedToHelper<T : ProjectType> {
                 assignedToJson: WriteAssignedToJson,
                 singleScheduleRecord: SingleScheduleRecord<ProjectType.Shared>,
                 assignedTo: Set<String>,
-        ) = singleScheduleRecord.setProperty(assignedToJson::assignedTo, assignedTo.associateWith { true })
+        ) = singleScheduleRecord.setProperty(
+                assignedToJson::assignedTo,
+                assignedTo.associateWith { true },
+                singleScheduleRecord.keyPlusSubkey
+        )
     }
 }

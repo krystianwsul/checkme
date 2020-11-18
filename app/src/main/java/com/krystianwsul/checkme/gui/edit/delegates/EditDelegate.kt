@@ -84,7 +84,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
                     listOfNotNull(
                             parent.value
                                     ?.projectUsers
-                                    ?.takeIf { it.isNotEmpty() }
+                                    ?.takeIf { it.isNotEmpty() && schedules.isNotEmpty() }
                                     ?.let { EditActivity.Item.AssignTo }
                     ) +
                     EditActivity.Item.Image

@@ -74,8 +74,7 @@ abstract class RemoteRecord(create: Boolean) {
     }
 
     fun <T> setProperty(innerProperty: KMutableProperty0<T>, value: T, path: String = key) {
-        if (innerProperty.get() == value)
-            return
+        if (innerProperty.get() == value) return
 
         innerProperty.set(value)
         addValue("$path/${innerProperty.name}", value)

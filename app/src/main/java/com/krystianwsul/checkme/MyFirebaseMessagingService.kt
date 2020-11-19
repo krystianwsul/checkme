@@ -2,9 +2,7 @@ package com.krystianwsul.checkme
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.TickData
-import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.ticks.Ticker
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -22,8 +20,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             check(refresh.isNotEmpty())
             check(data[REFRESH_KEY] == "true")
 
-            if (MyApplication.instance.hasUserInfo)
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock("MyFirebaseMessagingService"))
+            if (MyApplication.instance.hasUserInfo) Ticker.tick("MyFirebaseMessagingService", true)
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

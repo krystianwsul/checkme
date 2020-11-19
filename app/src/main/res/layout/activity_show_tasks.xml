@@ -5,14 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".gui.tasks.ShowTasksActivity">
+    tools:context=".gui.tasks.ShowTasksActivity"
+    android:background="@color/materialBackground">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/showTasksCoordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/toolbar_collapse" />
+        <include
+            android:id="@+id/showTasksToolbarCollapseInclude"
+            layout="@layout/toolbar_collapse" />
 
         <FrameLayout
             android:layout_width="match_parent"

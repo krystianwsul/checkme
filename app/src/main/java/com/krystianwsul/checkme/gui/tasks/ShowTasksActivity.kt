@@ -9,6 +9,8 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityShowTasksBinding
+import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -20,9 +22,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.activity_show_tasks.*
-import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar_collapse.*
 
 class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
@@ -48,7 +47,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var showTasksViewModel: ShowTasksViewModel
 
-    override val taskSearch by lazy { collapseAppBarLayout.searchData }
+    override val taskSearch by lazy {
+        binding.showTasksToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchData
+    }
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -58,27 +61,35 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     private lateinit var parameters: Parameters
     private var copiedTaskKey: TaskKey? = null
 
+    private lateinit var binding: ActivityShowTasksBinding
+    private lateinit var bottomBinding: BottomBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_tasks)
+
+        binding = ActivityShowTasksBinding.inflate(layoutInflater)
+        bottomBinding = BottomBinding.bind(binding.root)
+        setContentView(binding.root)
 
         parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
-        collapseAppBarLayout.apply {
-            if (parameters.copying) hideShowDeleted()
+        binding.showTasksToolbarCollapseInclude
+                .collapseAppBarLayout
+                .apply {
+                    if (parameters.copying) hideShowDeleted()
 
-            setText(getString(parameters.title), null, null, true)
+                    setText(getString(parameters.title), null, null, true)
 
-            inflateMenu(R.menu.show_task_menu_top)
+                    inflateMenu(R.menu.show_task_menu_top)
 
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()
-                    else -> throw IllegalArgumentException()
+                    setOnMenuItemClickListener {
+                        when (it.itemId) {
+                            R.id.actionShowTaskSearch -> startSearch()
+                            else -> throw IllegalArgumentException()
+                        }
+                    }
                 }
-            }
-        }
 
         updateTopMenu()
 
@@ -86,7 +97,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         taskListFragment = getOrInitializeFragment(R.id.showTasksFragment) {
             TaskListFragment.newInstance()
-        }.also { it.setFab(bottomFab) }
+        }.also { it.setFab(bottomBinding.bottomFab) }
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
             start(parameters.taskKeys)
@@ -137,21 +148,22 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         updateBottomMenu()
     }
 
-    override val snackbarParent get() = showTasksCoordinator!!
+    override val snackbarParent get() = binding.showTasksCoordinator
 
     private fun updateBottomMenu() {
-        bottomAppBar.menu.run {
-            if (findItem(R.id.action_select_all) == null)
-                return
+        bottomBinding.bottomAppBar
+                .menu
+                .run {
+                    if (findItem(R.id.action_select_all) == null) return
 
-            findItem(R.id.action_select_all).isVisible = selectAllVisible
-        }
+                    findItem(R.id.action_select_all).isVisible = selectAllVisible
+                }
     }
 
-    override fun getBottomBar() = bottomAppBar!!
+    override fun getBottomBar() = bottomBinding.bottomAppBar
 
     override fun initBottomBar() {
-        bottomAppBar.apply {
+        bottomBinding.bottomAppBar.apply {
             animateReplaceMenu(R.menu.menu_select_all, ::updateBottomMenu)
 
             setOnMenuItemClickListener { item ->
@@ -165,7 +177,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = binding.showTasksToolbarCollapseInclude
+            .collapseAppBarLayout
+            .setExpanded(expanded)
 
     override fun startCopy(taskKey: TaskKey) {
         copiedTaskKey = taskKey
@@ -197,8 +211,10 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override fun onBackPressed() {
-        if (collapseAppBarLayout.isSearching) {
-            collapseAppBarLayout.closeSearch()
+        if (binding.showTasksToolbarCollapseInclude.collapseAppBarLayout.isSearching) {
+            binding.showTasksToolbarCollapseInclude
+                    .collapseAppBarLayout
+                    .closeSearch()
         } else {
             when (parameters) {
                 Parameters.Unscheduled -> super.onBackPressed()
@@ -223,11 +239,12 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
-        collapseAppBarLayout.menu.apply {
-            findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
-                    ?.childTaskDatas
-                    .isNullOrEmpty()
-        }
+        binding.showTasksToolbarCollapseInclude
+                .collapseAppBarLayout
+                .menu
+                .findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
+                ?.childTaskDatas
+                .isNullOrEmpty()
     }
 
     sealed class Parameters : Parcelable {

@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.DialogCameraGalleryBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
-import kotlinx.android.synthetic.main.dialog_camera_gallery.*
 
 class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -25,12 +26,15 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    override val backgroundView get() = cameraGalleryRoot!!
-    override val contentView get() = cameraGalleryBackground!!
+    override val backgroundView get() = binding.cameraGalleryRoot
+    override val contentView get() = binding.cameraGalleryBackground
 
     private var showRemove = false
 
     private val editActivity get() = activity as EditActivity
+
+    private val bindingProperty = ResettableProperty<DialogCameraGalleryBinding>()
+    private var binding by bindingProperty
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,11 +42,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
         showRemove = requireArguments().getBoolean(KEY_SHOW_REMOVE)
     }
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ) = inflater.inflate(R.layout.dialog_camera_gallery, container, false)!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = DialogCameraGalleryBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onStart() {
         super.onStart()
@@ -81,5 +81,11 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                 true
             }
         }
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 }

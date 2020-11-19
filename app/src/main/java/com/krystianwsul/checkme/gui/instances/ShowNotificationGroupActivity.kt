@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
+import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
@@ -15,15 +17,13 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_show_notification_group.*
-import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 import java.util.*
 
@@ -48,7 +48,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var showNotificationGroupViewModel: ShowNotificationGroupViewModel
 
-    override val snackbarParent get() = showNotificationGroupCoordinator!!
+    override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         @Suppress("UNCHECKED_CAST")
@@ -64,15 +64,25 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showNotificationGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy { collapseAppBarLayout.searchData }
+    override val instanceSearch by lazy {
+        binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchData
+    }
 
     private var data: ShowNotificationGroupViewModel.Data? = null
 
+    private lateinit var binding: ActivityShowNotificationGroupBinding
+    private lateinit var bottomBinding: BottomBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_notification_group)
 
-        groupListFragment.listener = this
+        binding = ActivityShowNotificationGroupBinding.inflate(layoutInflater)
+        bottomBinding = BottomBinding.bind(binding.root)
+        setContentView(binding.root)
+
+        binding.groupListFragment.listener = this
 
         check(intent.hasExtra(INSTANCES_KEY))
 
@@ -81,17 +91,19 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
         this.instanceKeys = HashSet(instanceKeys)
 
-        collapseAppBarLayout.apply {
-            hideShowDeleted()
+        binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .apply {
+                    hideShowDeleted()
 
-            inflateMenu(R.menu.show_task_menu_top)
-            setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.actionShowTaskSearch -> collapseAppBarLayout.startSearch()
-                    else -> throw IllegalArgumentException()
+                    inflateMenu(R.menu.show_task_menu_top)
+                    setOnMenuItemClickListener {
+                        when (it.itemId) {
+                            R.id.actionShowTaskSearch -> startSearch()
+                            else -> throw IllegalArgumentException()
+                        }
+                    }
                 }
-            }
-        }
 
         updateTopMenu()
         initBottomBar()
@@ -102,29 +114,31 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it
 
-                groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.groupListDataWrapper)
+                binding.groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.groupListDataWrapper)
 
                 updateTopMenu()
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+        tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(receiver)
     }
 
     private fun updateTopMenu() {
-        collapseAppBarLayout.menu.apply {
-            findItem(R.id.actionShowTaskSearch).isVisible = !data?.groupListDataWrapper
-                    ?.instanceDatas
-                    .isNullOrEmpty()
-        }
+        binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .menu
+                .findItem(R.id.actionShowTaskSearch)
+                .isVisible = !data?.groupListDataWrapper
+                ?.instanceDatas
+                .isNullOrEmpty()
     }
 
     override fun onStart() {
         super.onStart()
 
-        groupListFragment.checkCreatedTaskKey()
+        binding.groupListFragment.checkCreatedTaskKey()
     }
 
     override fun onDestroy() {
@@ -144,20 +158,23 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateBottomBar() {
-        bottomAppBar.menu
+        bottomBinding.bottomAppBar
+                .menu
                 .findItem(R.id.action_select_all)
                 ?.isVisible = selectAllVisible
     }
 
-    override fun getBottomBar() = bottomAppBar!!
+    override fun getBottomBar() = bottomBinding.bottomAppBar
 
     override fun initBottomBar() {
-        bottomAppBar.apply {
+        bottomBinding.bottomAppBar.apply {
             replaceMenu(R.menu.menu_select_all)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_select_all -> groupListFragment.treeViewAdapter.selectAll()
+                    R.id.action_select_all -> binding.groupListFragment
+                            .treeViewAdapter
+                            .selectAll()
                     else -> throw IllegalArgumentException()
                 }
 
@@ -174,12 +191,13 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = collapseAppBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = binding.showNotificationGroupToolbarCollapseInclude
+            .collapseAppBarLayout
+            .setExpanded(expanded)
 
     override fun onBackPressed() {
-        if (collapseAppBarLayout.isSearching)
-            collapseAppBarLayout.closeSearch()
-        else
-            super.onBackPressed()
+        binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .apply { if (isSearching) closeSearch() else super.onBackPressed() }
     }
 }

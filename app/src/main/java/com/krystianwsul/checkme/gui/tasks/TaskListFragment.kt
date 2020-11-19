@@ -13,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentTaskListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -41,10 +42,7 @@ import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.empty_text.*
-import kotlinx.android.synthetic.main.fragment_task_list.*
 import java.io.Serializable
 import java.util.*
 
@@ -178,8 +176,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var searchData: SearchData? = null
 
-    private val initializeDisposable = CompositeDisposable()
-
     private val listener get() = activity as Listener
 
     private var showImage = false
@@ -187,9 +183,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     override var scrollToTaskKey: TaskKey? = null
     override val listItemAddedListener get() = listener
-    override val recyclerView: RecyclerView get() = taskListRecycler
+    override val recyclerView: RecyclerView get() = binding.taskListRecycler
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
+
+    private val bindingProperty = ResettableProperty<FragmentTaskListBinding>()
+    private var binding by bindingProperty
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
@@ -241,21 +240,21 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_task_list, container, false)!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentTaskListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        taskListRecycler.layoutManager = LinearLayoutManager(context)
+        binding.taskListRecycler.layoutManager = LinearLayoutManager(context)
 
         viewCreatedDisposable += observeEmptySearchState(
                 initializedRelay,
                 listener.taskSearch,
                 { treeViewAdapter },
                 ::search,
-                taskListRecycler,
-                taskListProgress,
-                emptyTextLayout,
+                binding.taskListRecycler,
+                binding.taskListProgress,
+                binding.taskListEmptyTextInclude.emptyTextLayout,
                 { data!!.immediate },
                 { rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root }
         )
@@ -282,8 +281,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun initialize() {
         if (view == null) return
         if (data == null) return
-
-        initializeDisposable.clear()
 
         if (this::treeViewAdapter.isInitialized) {
             val selected = treeViewAdapter.selectedNodes
@@ -314,9 +311,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskAdapter = TaskAdapter(this)
             taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds, data!!.copying)
             treeViewAdapter = taskAdapter.treeViewAdapter
-            taskListRecycler.adapter = treeViewAdapter
-            taskListRecycler.itemAnimator = CustomItemAnimator()
-            dragHelper.attachToRecyclerView(taskListRecycler)
+
+            binding.taskListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
+
+            dragHelper.attachToRecyclerView(binding.taskListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
@@ -454,9 +455,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        bindingProperty.reset()
 
-        initializeDisposable.clear()
+        super.onDestroyView()
     }
 
     private inner class TaskAdapter(val taskListFragment: TaskListFragment) :

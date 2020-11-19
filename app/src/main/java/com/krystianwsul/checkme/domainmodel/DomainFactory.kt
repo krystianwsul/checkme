@@ -341,10 +341,13 @@ class DomainFactory(
         val tickData = TickHolder.getTickData()
 
         fun tick(tickData: TickData, forceNotify: Boolean) {
-            updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
+            updateNotificationsTick(
+                    now,
+                    tickData.silent && !forceNotify,
+                    "${tickData.source}, runType: $runType"
+            )
 
-            if (!tickData.waiting)
-                tickData.release()
+            if (!tickData.waiting) tickData.release()
         }
 
         fun notify() {

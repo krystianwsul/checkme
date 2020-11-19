@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setProjectEndTimeStamps
@@ -23,6 +24,7 @@ import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -32,8 +34,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.empty_text.*
-import kotlinx.android.synthetic.main.fragment_project_list.*
 import java.io.Serializable
 import java.util.*
 
@@ -127,6 +127,9 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
     }
 
+    private val bindingProperty = ResettableProperty<FragmentProjectListBinding>()
+    private var binding by bindingProperty
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -139,12 +142,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_project_list, container, false)!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentProjectListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        projectListRecycler.layoutManager = LinearLayoutManager(activity)
+        binding.projectListRecycler.layoutManager = LinearLayoutManager(activity)
 
         projectListViewModel = getViewModel<ProjectListViewModel>().apply {
             start()
@@ -156,17 +159,19 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private fun onLoadFinished(data: ProjectListViewModel.Data) {
         this.data = data
 
-        val hide = mutableListOf<View>(projectListProgress)
+        val hide = mutableListOf<View>(binding.projectListProgress)
         val show: View
 
         if (data.projectDatas.isEmpty()) {
-            hide.add(projectListRecycler)
-            show = emptyTextLayout
+            hide += binding.projectListRecycler
+            show = binding.projectListEmptyTextInclude.emptyTextLayout
 
-            emptyText.setText(R.string.projects_empty)
+            binding.projectListEmptyTextInclude
+                    .emptyText
+                    .setText(R.string.projects_empty)
         } else {
-            show = projectListRecycler
-            hide.add(emptyTextLayout)
+            show = binding.projectListRecycler
+            hide += binding.projectListEmptyTextInclude.emptyTextLayout
         }
 
         animateVisibility(listOf(show), hide, data.immediate)
@@ -184,8 +189,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             val projectListAdapter = ProjectListAdapter()
             projectListAdapter.initialize(data.projectDatas)
             treeViewAdapter = projectListAdapter.treeViewAdapter
-            projectListRecycler.adapter = treeViewAdapter
-            projectListRecycler.itemAnimator = CustomItemAnimator()
+
+            binding.projectListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
@@ -230,6 +238,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     override fun clearFab() {
         projectListFab = null
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 
     private inner class ProjectListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {

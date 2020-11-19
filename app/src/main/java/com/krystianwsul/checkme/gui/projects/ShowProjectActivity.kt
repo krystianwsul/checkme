@@ -5,22 +5,21 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityShowProjectBinding
+import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_show_project.*
-import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
 class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListener {
 
@@ -32,7 +31,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         fun newIntent(
                 context: Context,
-                projectId: ProjectKey.Shared
+                projectId: ProjectKey.Shared,
         ) = Intent(context, ShowProjectActivity::class.java).apply {
             putExtra(PROJECT_ID_KEY, projectId as Parcelable)
         }
@@ -54,6 +53,9 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
     private var selectAllVisible = false
 
+    private lateinit var binding: ActivityShowProjectBinding
+    private lateinit var bottomBinding: BottomBinding
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -74,7 +76,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
                 showProjectViewModel.stop()
 
-                userListFragment.save(toolbarEditText.text.toString())
+                userListFragment.save(binding.showProjectToolbarEditTextInclude.toolbarEditText.text.toString())
 
                 finish()
             }
@@ -89,11 +91,14 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_project)
+
+        binding = ActivityShowProjectBinding.inflate(layoutInflater)
+        bottomBinding = BottomBinding.bind(binding.root)
+        setContentView(binding.root)
 
         this.savedInstanceState = savedInstanceState
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.showProjectToolbarEditTextInclude.toolbar)
 
         supportActionBar!!.run {
             setDisplayHomeAsUpEnabled(true)
@@ -102,37 +107,34 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         initBottomBar()
 
-        toolbarEditText.addTextChangedListener(object : TextWatcher {
+        binding.showProjectToolbarEditTextInclude
+                .toolbarEditText
+                .addTextChangedListener(object : TextWatcher {
 
-            private var skip = true
+                    private var skip = true
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+                    override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+                    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
-            override fun afterTextChanged(s: Editable) {
-                if (skip) {
-                    skip = false
-                    return
+                    override fun afterTextChanged(s: Editable) {
+                        if (skip) skip = false else updateError()
+                    }
+                })
+
+        if (intent.hasExtra(PROJECT_ID_KEY)) projectId = intent.getParcelableExtra(PROJECT_ID_KEY)
+
+        userListFragment = supportFragmentManager.findFragmentById(R.id.show_project_frame) as? UserListFragment
+                ?: UserListFragment.newInstance().also {
+                    supportFragmentManager
+                            .beginTransaction()
+                            .add(R.id.show_project_frame, it)
+                            .commit()
                 }
 
-                updateError()
-            }
-        })
+        userListFragment.setFab(bottomBinding.bottomFab)
 
-        if (intent.hasExtra(PROJECT_ID_KEY))
-            projectId = intent.getParcelableExtra(PROJECT_ID_KEY)
-
-        userListFragment = supportFragmentManager.findFragmentById(R.id.show_project_frame) as? UserListFragment ?: UserListFragment.newInstance().also {
-            supportFragmentManager
-                    .beginTransaction()
-                    .add(R.id.show_project_frame, it)
-                    .commit()
-        }
-
-        userListFragment.setFab(bottomFab)
-
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
+        tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
 
         showProjectViewModel = getViewModel<ShowProjectViewModel>().apply {
             start(projectId)
@@ -145,13 +147,19 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         this.data = data
 
         if (savedInstanceState == null) {
-            toolbarEditText.setText(data!!.name)
+            binding.showProjectToolbarEditTextInclude
+                    .toolbarEditText
+                    .setText(data!!.name)
         } else {
             savedInstanceState = null
         }
 
-        toolbarLayout.visibility = View.VISIBLE
-        toolbarLayout.isHintAnimationEnabled = true
+        binding.showProjectToolbarEditTextInclude
+                .toolbarLayout
+                .apply {
+                    visibility = View.VISIBLE
+                    isHintAnimationEnabled = true
+                }
 
         invalidateOptionsMenu()
 
@@ -180,28 +188,44 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         if (data == null)
             return false
 
-        if (TextUtils.isEmpty(toolbarEditText.text) != TextUtils.isEmpty(data!!.name))
+        if (binding.showProjectToolbarEditTextInclude.toolbarEditText.text.isNullOrEmpty() != data!!.name.isNullOrEmpty())
             return true
 
-        return if (!TextUtils.isEmpty(toolbarEditText.text) && toolbarEditText.text.toString() != data!!.name) true else userListFragment.dataChanged()
+        return if (!binding.showProjectToolbarEditTextInclude
+                        .toolbarEditText
+                        .text
+                        .isNullOrEmpty()
+                && binding.showProjectToolbarEditTextInclude
+                        .toolbarEditText
+                        .text
+                        .toString() != data!!.name
+        ) {
+            true
+        } else {
+            userListFragment.dataChanged()
+        }
     }
 
     private fun updateError(): Boolean {
         check(data != null)
 
-        return if (TextUtils.isEmpty(toolbarEditText.text)) {
-            toolbarLayout.error = getString(R.string.nameError)
+        return if (binding.showProjectToolbarEditTextInclude.toolbarEditText.text.isNullOrEmpty()) {
+            binding.showProjectToolbarEditTextInclude
+                    .toolbarLayout
+                    .error = getString(R.string.nameError)
 
             true
         } else {
-            toolbarLayout.error = null
+            binding.showProjectToolbarEditTextInclude
+                    .toolbarLayout
+                    .error = null
 
             false
         }
     }
 
     override fun initBottomBar() {
-        bottomAppBar.apply {
+        bottomBinding.bottomAppBar.apply {
             replaceMenu(R.menu.menu_select_all)
 
             setOnMenuItemClickListener { item ->
@@ -214,10 +238,11 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         }
     }
 
-    override fun getBottomBar() = bottomAppBar!!
+    override fun getBottomBar() = bottomBinding.bottomAppBar
 
     private fun updateBottomMenu() {
-        bottomAppBar.menu
+        bottomBinding.bottomAppBar
+                .menu
                 .findItem(R.id.action_select_all)
                 ?.isVisible = selectAllVisible
     }
@@ -228,5 +253,5 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         updateBottomMenu()
     }
 
-    override val snackbarParent get() = showProjectCoordinator!!
+    override val snackbarParent get() = binding.showProjectCoordinator
 }

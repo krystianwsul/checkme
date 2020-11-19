@@ -16,10 +16,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -334,7 +331,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             return SaveState(addedIds, removedIds, selectedIds)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = getSelected()

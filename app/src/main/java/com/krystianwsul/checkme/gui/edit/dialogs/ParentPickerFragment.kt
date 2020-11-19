@@ -15,10 +15,7 @@ import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
@@ -230,8 +227,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun onCreateViewHolder(
                 parent: ViewGroup,
-                viewType: Int
-        ) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(
+                viewType: Int,
+        ) = DialogNodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(
                 R.layout.row_list_dialog,
                 parent,
                 false

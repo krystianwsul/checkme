@@ -16,10 +16,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -244,7 +241,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-                NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+                RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
     }
 
     private inner class CustomTimeNode(

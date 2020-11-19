@@ -129,8 +129,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                         .toImageLoader()
                         .load(rowBigImage!!)
 
-                if (taskImage.showImage)
-                    showImage(rowBigImage, taskImage)
+                if (taskImage.showImage) showImage(rowBigImage!!, taskImage)
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE

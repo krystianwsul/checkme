@@ -17,10 +17,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -236,7 +233,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeNodeCollection.nodes = userDataWrappers.map { it.initialize(treeNodeCollection) }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") placeHolder: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = userDataWrappers.filter { it.treeNode.isSelected }

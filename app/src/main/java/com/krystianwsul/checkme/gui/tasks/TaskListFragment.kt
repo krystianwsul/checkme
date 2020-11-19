@@ -541,7 +541,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             treeNodeCollection.nodes = treeNodes
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(taskListFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
 

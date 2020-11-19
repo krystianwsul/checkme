@@ -1069,7 +1069,7 @@ class GroupListFragment @JvmOverloads constructor(
         override fun onCreateViewHolder(
                 parent: ViewGroup,
                 viewType: Int,
-        ) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
+        ) = RegularNodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
 
         override val groupAdapter = this
 

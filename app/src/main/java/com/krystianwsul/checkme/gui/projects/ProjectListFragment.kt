@@ -18,10 +18,7 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NameData
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -272,8 +269,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun onCreateViewHolder(
                 parent: ViewGroup,
-                viewType: Int
-        ) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+                viewType: Int,
+        ) = RegularNodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 

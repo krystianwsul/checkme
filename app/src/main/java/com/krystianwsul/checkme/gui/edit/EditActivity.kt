@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import androidx.core.view.isVisible
@@ -18,11 +17,16 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityEditBinding
+import com.krystianwsul.checkme.databinding.RowImageBinding
+import com.krystianwsul.checkme.databinding.RowNoteBinding
+import com.krystianwsul.checkme.databinding.RowScheduleBinding
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -59,11 +63,6 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.activity_edit.*
-import kotlinx.android.synthetic.main.row_image.view.*
-import kotlinx.android.synthetic.main.row_note.view.*
-import kotlinx.android.synthetic.main.row_schedule.view.*
-import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import kotlin.properties.Delegates.observable
 
 
@@ -152,8 +151,8 @@ class EditActivity : NavBarActivity() {
     private val onChildAttachStateChangeListener = object : RecyclerView.OnChildAttachStateChangeListener { // keyboard hack
 
         override fun onChildViewAttachedToWindow(view: View) {
-            view.noteText?.let {
-                editRecycler.removeOnChildAttachStateChangeListener(this)
+            view.findViewById<TextInputEditText>(R.id.noteText)?.let {
+                binding.editRecycler.removeOnChildAttachStateChangeListener(this)
 
                 it.requestFocus()
 
@@ -179,11 +178,13 @@ class EditActivity : NavBarActivity() {
         save(false, allReminders)
     }
 
-    override val rootView get() = editRoot!!
+    override val rootView get() = binding.root
 
     private val noteChanges = PublishRelay.create<Unit>()
 
     private val imageHeightRelay = BehaviorRelay.create<Int>()
+
+    private lateinit var binding: ActivityEditBinding
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -199,8 +200,6 @@ class EditActivity : NavBarActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         fun trySave(andOpen: Boolean) {
-            checkNotNull(toolbarEditText)
-
             if (!updateError()) {
                 val showAllRemindersPlural = delegate.showAllRemindersDialog()
 
@@ -231,9 +230,11 @@ class EditActivity : NavBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit)
 
-        setSupportActionBar(toolbar)
+        binding = ActivityEditBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.editToolbarEditTextInclude.toolbar)
 
         supportActionBar!!.run {
             setDisplayHomeAsUpEnabled(true)
@@ -242,7 +243,7 @@ class EditActivity : NavBarActivity() {
 
         this.savedInstanceState = savedInstanceState
 
-        editRecycler.layoutManager = LinearLayoutManager(this)
+        binding.editRecycler.layoutManager = LinearLayoutManager(this)
 
         parameters = EditParameters.fromIntent(intent)
 
@@ -263,7 +264,7 @@ class EditActivity : NavBarActivity() {
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
 
-        hideKeyboardOnClickOutside(editRoot)
+        hideKeyboardOnClickOutside(binding.root)
 
         listOfNotNull(
                 parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
@@ -324,14 +325,18 @@ class EditActivity : NavBarActivity() {
                 imageHeightRelay
         ) { keyboardInset, noteHasFocus, _, imageHeight ->
             if (noteHasFocus) {
-                editToolbarAppBar.setExpanded(false)
+                binding.editToolbarEditTextInclude
+                        .editToolbarAppBar
+                        .setExpanded(false)
 
                 val padding = (keyboardInset - imageHeight).coerceAtLeast(0)
 
-                editRecycler.updatePadding(bottom = padding)
-                editRecycler.smoothScrollBy(0, padding)
+                binding.editRecycler.apply {
+                    updatePadding(bottom = padding)
+                    smoothScrollBy(0, padding)
+                }
             } else {
-                editRecycler.updatePadding(bottom = 0)
+                binding.editRecycler.updatePadding(bottom = 0)
             }
         }
                 .subscribe()
@@ -388,33 +393,31 @@ class EditActivity : NavBarActivity() {
         }
         hasDelegate = true
 
-        toolbarLayout.run {
-            visibility = View.VISIBLE
-            isHintAnimationEnabled = true
-        }
-
-        toolbarEditText.run {
-            if (savedInstanceState == null)
-                setText(delegate.initialName)
-
-            addTextChangedListener(object : TextWatcher {
-
-                private var skip = savedInstanceState != null
-
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
-
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
-
-                override fun afterTextChanged(s: Editable) {
-                    if (skip) {
-                        skip = false
-                        return
-                    }
-
-                    updateNameError()
+        binding.editToolbarEditTextInclude
+                .toolbarLayout
+                .run {
+                    visibility = View.VISIBLE
+                    isHintAnimationEnabled = true
                 }
-            })
-        }
+
+        binding.editToolbarEditTextInclude
+                .toolbarEditText
+                .run {
+                    if (savedInstanceState == null) setText(delegate.initialName)
+
+                    addTextChangedListener(object : TextWatcher {
+
+                        private var skip = savedInstanceState != null
+
+                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+
+                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+
+                        override fun afterTextChanged(s: Editable) {
+                            if (skip) skip = false else updateNameError()
+                        }
+                    })
+                }
 
         if (savedInstanceState?.containsKey(NOTE_HAS_FOCUS_KEY) == true) {
             savedInstanceState!!.run {
@@ -427,20 +430,23 @@ class EditActivity : NavBarActivity() {
             note = delegate.initialNote
         }
 
-        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(delegate.parentTreeDatas, parentFragmentListener)
+        tryGetFragment<ParentPickerFragment>(PARENT_PICKER_FRAGMENT_TAG)?.initialize(delegate.parentTreeDatas, parentFragmentListener)
 
         invalidateOptionsMenu()
 
-        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(delegate.customTimeDatas)
+        tryGetFragment<ScheduleDialogFragment>(SCHEDULE_DIALOG_TAG)?.initialize(delegate.customTimeDatas)
 
         createTaskAdapter = CreateTaskAdapter()
-        editRecycler.adapter = createTaskAdapter
-        editRecycler.itemAnimator = CustomItemAnimator()
 
-        if (noteHasFocusRelay.value!!) { // keyboard hack
-            editRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+        binding.editRecycler.apply {
+            adapter = createTaskAdapter
+            itemAnimator = CustomItemAnimator()
 
-            (editRecycler.layoutManager as LinearLayoutManager).scrollToPosition(createTaskAdapter.notePosition)
+            if (noteHasFocusRelay.value!!) { // keyboard hack
+                addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+
+                (layoutManager as LinearLayoutManager).scrollToPosition(createTaskAdapter.notePosition)
+            }
         }
     }
 
@@ -463,8 +469,16 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun updateNameError(): Boolean {
-        val error = if (toolbarEditText.text.isNullOrEmpty()) getString(R.string.nameError) else null
-        toolbarLayout.error = error
+        val error = getString(R.string.nameError).takeIf {
+            binding.editToolbarEditTextInclude
+                    .toolbarEditText
+                    .text
+                    .isNullOrEmpty()
+        }
+
+        binding.editToolbarEditTextInclude
+                .toolbarLayout
+                .error = error
 
         return error != null
     }
@@ -480,10 +494,15 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun dataChanged(): Boolean {
-        if (!hasDelegate)
-            return false
+        if (!hasDelegate) return false
 
-        return delegate.checkDataChanged(toolbarEditText.text.toString(), note)
+        return delegate.checkDataChanged(
+                binding.editToolbarEditTextInclude
+                        .toolbarEditText
+                        .text
+                        .toString(),
+                note
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -498,8 +517,13 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun save(andOpen: Boolean, allReminders: Boolean) {
-        val name = toolbarEditText.text.toString().trim { it <= ' ' }
-        check(!TextUtils.isEmpty(name))
+        val name = binding.editToolbarEditTextInclude
+                .toolbarEditText
+                .text
+                .toString()
+                .trim { it <= ' ' }
+
+        check(name.isNotEmpty())
 
         editViewModel.stop()
 
@@ -541,28 +565,20 @@ class EditActivity : NavBarActivity() {
 
         SCHEDULE {
 
-            override val layout = R.layout.row_schedule
-
-            override fun newHolder(view: View) = ScheduleHolder(view)
+            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) = ScheduleHolder(RowScheduleBinding.inflate(layoutInflater, parent, false))
         },
 
         NOTE {
 
-            override val layout = R.layout.row_note
-
-            override fun newHolder(view: View) = NoteHolder(view)
+            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) = NoteHolder(RowNoteBinding.inflate(layoutInflater, parent, false))
         },
 
         IMAGE {
 
-            override val layout = R.layout.row_image
-
-            override fun newHolder(view: View) = ImageHolder(view)
+            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) = ImageHolder(RowImageBinding.inflate(layoutInflater, parent, false))
         };
 
-        abstract val layout: Int
-
-        abstract fun newHolder(view: View): Holder
+        abstract fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup): Holder
     }
 
     @Suppress("PrivatePropertyName")
@@ -591,12 +607,9 @@ class EditActivity : NavBarActivity() {
 
         val notePosition get() = items.indexOf(Item.Note)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run {
-            newHolder(layoutInflater.inflate(layout, parent, false))
-        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run { newHolder(layoutInflater, parent) }
 
-        override fun onBindViewHolder(holder: Holder, position: Int) =
-                items[position].bind(this@EditActivity, holder)
+        override fun onBindViewHolder(holder: Holder, position: Int) = items[position].bind(this@EditActivity, holder)
 
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)
@@ -619,7 +632,9 @@ class EditActivity : NavBarActivity() {
                     .subscribe { getItem()?.onNewAssignedTo(this@EditActivity, holder) }
                     .addTo(holder.compositeDisposable)
 
-            holder.compositeDisposable += timeRelay.subscribe { getItem()?.onTimeChanged(this@EditActivity, holder) }
+            holder.compositeDisposable += timeRelay.subscribe {
+                getItem()?.onTimeChanged(this@EditActivity, holder)
+            }
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
@@ -638,27 +653,11 @@ class EditActivity : NavBarActivity() {
         val compositeDisposable = CompositeDisposable()
     }
 
-    class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
+    class ScheduleHolder(val rowScheduleBinding: RowScheduleBinding) : Holder(rowScheduleBinding.root)
 
-        val scheduleMargin = itemView.scheduleMargin!!
-        val scheduleLayout = itemView.scheduleLayout!!
-        val scheduleText = itemView.scheduleText!!
-    }
+    class NoteHolder(val rowNoteBinding: RowNoteBinding) : Holder(rowNoteBinding.root)
 
-    class NoteHolder(scheduleRow: View) : Holder(scheduleRow) {
-
-        val noteLayout = itemView.noteLayout!!
-        val noteText = itemView.noteText!!
-    }
-
-    class ImageHolder(itemView: View) : Holder(itemView) {
-
-        val imageImage = itemView.imageImage!!
-        val imageProgress = itemView.imageProgress!!
-        val imageLayout = itemView.imageLayout!!
-        val imageLayoutText = itemView.imageLayoutText!!
-        val imageEdit = itemView.imageEdit!!
-    }
+    class ImageHolder(val rowImageBinding: RowImageBinding) : Holder(rowImageBinding.root)
 
     sealed class Item {
 
@@ -682,17 +681,19 @@ class EditActivity : NavBarActivity() {
 
             override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as ScheduleHolder).apply {
-                    scheduleMargin.isVisible = true
+                    rowScheduleBinding.apply {
+                        scheduleMargin.isVisible = true
 
-                    scheduleLayout.run {
-                        hint = activity.getString(R.string.parentTask)
-                        error = null
-                        isHintAnimationEnabled = false
+                        scheduleLayout.run {
+                            hint = activity.getString(R.string.parentTask)
+                            error = null
+                            isHintAnimationEnabled = false
 
-                        onTimeChanged(activity, holder)
+                            onTimeChanged(activity, holder)
 
-                        addOneShotGlobalLayoutListener {
-                            isHintAnimationEnabled = true
+                            addOneShotGlobalLayoutListener {
+                                isHintAnimationEnabled = true
+                            }
                         }
                     }
 
@@ -705,7 +706,7 @@ class EditActivity : NavBarActivity() {
                         .parentScheduleManager
                         .parent
 
-                (holder as ScheduleHolder).apply {
+                (holder as ScheduleHolder).rowScheduleBinding.apply {
                     scheduleLayout.endIconMode = if (parent != null)
                         TextInputLayout.END_ICON_CLEAR_TEXT
                     else
@@ -738,7 +739,7 @@ class EditActivity : NavBarActivity() {
             override val holderType = HolderType.SCHEDULE
 
             override fun bind(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).apply {
+                (holder as ScheduleHolder).rowScheduleBinding.apply {
                     scheduleMargin.isVisible = false
 
                     scheduleLayout.run {
@@ -753,7 +754,7 @@ class EditActivity : NavBarActivity() {
                         setFixedOnClickListener(
                                 {
                                     val parameters = ScheduleDialogParameters(
-                                            adapterPosition,
+                                            holder.adapterPosition,
                                             scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
                                                     activity.delegate.scheduleHint
                                             ),
@@ -762,7 +763,7 @@ class EditActivity : NavBarActivity() {
 
                                     activity.parametersRelay.accept(parameters)
                                 },
-                                { activity.removeSchedule(adapterPosition) }
+                                { activity.removeSchedule(holder.adapterPosition) }
                         )
                     }
                 }
@@ -771,7 +772,11 @@ class EditActivity : NavBarActivity() {
             override fun onTimeChanged(activity: EditActivity, holder: Holder) {
                 activity.delegate
                         .getError(scheduleEntry)
-                        ?.let { (holder as ScheduleHolder).scheduleLayout.error = activity.getString(it.resource) }
+                        ?.let {
+                            (holder as ScheduleHolder).rowScheduleBinding
+                                    .scheduleLayout
+                                    .error = activity.getString(it.resource)
+                        }
             }
 
             private fun same(other: ScheduleEntry): Boolean {
@@ -794,7 +799,7 @@ class EditActivity : NavBarActivity() {
             override val holderType = HolderType.SCHEDULE
 
             override fun bind(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).apply {
+                (holder as ScheduleHolder).rowScheduleBinding.apply {
                     scheduleMargin.isVisible = false
 
                     scheduleLayout.run {
@@ -848,7 +853,7 @@ class EditActivity : NavBarActivity() {
             override fun bind(activity: EditActivity, holder: Holder) {
                 this.activity = activity
 
-                (holder as NoteHolder).apply {
+                (holder as NoteHolder).rowNoteBinding.apply {
                     noteLayout.isHintAnimationEnabled = true
 
                     noteText.run {
@@ -879,7 +884,7 @@ class EditActivity : NavBarActivity() {
             override fun bind(activity: EditActivity, holder: Holder) {
                 this.activity = activity
 
-                (holder as ImageHolder).apply {
+                (holder as ImageHolder).rowImageBinding.apply {
                     fun listener() = CameraGalleryFragment.newInstance(
                             activity.delegate
                                     .imageUrl
@@ -891,15 +896,15 @@ class EditActivity : NavBarActivity() {
                     imageEdit.setOnClickListener { listener() }
                     imageLayoutText.setFixedOnClickListener(::listener)
 
-                    itemView.removeOnLayoutChangeListener(layoutChangeListener)
-                    itemView.addOnLayoutChangeListener(layoutChangeListener)
+                    root.removeOnLayoutChangeListener(layoutChangeListener)
+                    root.addOnLayoutChangeListener(layoutChangeListener)
 
-                    itemView.updatePadding(bottom = activity.bottomInset)
+                    root.updatePadding(bottom = activity.bottomInset)
                 }
             }
 
             override fun onNewImageState(imageState: EditImageState, holder: Holder) {
-                (holder as ImageHolder).apply {
+                (holder as ImageHolder).rowImageBinding.apply {
                     if (imageState.loader != null) {
                         imageProgress.visibility = View.VISIBLE
                         imageImage.visibility = View.VISIBLE
@@ -922,7 +927,7 @@ class EditActivity : NavBarActivity() {
             override val holderType = HolderType.SCHEDULE
 
             override fun bind(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).apply {
+                (holder as ScheduleHolder).rowScheduleBinding.apply {
                     scheduleMargin.isVisible = false
 
                     scheduleLayout.apply {
@@ -958,12 +963,14 @@ class EditActivity : NavBarActivity() {
             }
 
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).scheduleText.setText(
-                        activity.delegate
-                                .parentScheduleManager
-                                .assignedToUsers
-                                .joinToString("\n") { it.name }
-                )
+                (holder as ScheduleHolder).rowScheduleBinding
+                        .scheduleText
+                        .setText(
+                                activity.delegate
+                                        .parentScheduleManager
+                                        .assignedToUsers
+                                        .joinToString("\n") { it.name }
+                        )
             }
         }
     }

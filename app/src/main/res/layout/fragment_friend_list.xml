@@ -10,14 +10,16 @@
         android:id="@+id/friendListProgress"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/friendListRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
-    <include layout="@layout/empty_text"/>
+    <include
+        android:id="@+id/friendListEmptyTextInclude"
+        layout="@layout/empty_text" />
 
 </RelativeLayout>

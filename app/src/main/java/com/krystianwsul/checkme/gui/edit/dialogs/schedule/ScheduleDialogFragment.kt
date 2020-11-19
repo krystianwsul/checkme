@@ -178,8 +178,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         )
     }
 
-    private val bindingRelay = ResettableProperty<FragmentScheduleDialogBinding>()
-    private var binding by bindingRelay
+    private val bindingProperty = ResettableProperty<FragmentScheduleDialogBinding>()
+    private var binding by bindingProperty
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -556,7 +556,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     override fun onDestroyView() {
-        bindingRelay.reset()
+        bindingProperty.reset()
 
         super.onDestroyView()
     }

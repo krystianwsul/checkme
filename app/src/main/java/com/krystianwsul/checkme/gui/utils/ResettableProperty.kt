@@ -7,6 +7,8 @@ class ResettableProperty<T : Any> : ReadWriteProperty<Any, T> {
 
     var value: T? = null
 
+    val isSet get() = value != null
+
     override fun getValue(thisRef: Any, property: KProperty<*>) = value!!
 
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {

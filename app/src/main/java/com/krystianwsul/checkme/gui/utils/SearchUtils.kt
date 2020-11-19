@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.gui.utils
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
@@ -10,7 +12,6 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
-import kotlinx.android.synthetic.main.empty_text.view.*
 
 @CheckResult
 fun <T : Any> observeEmptySearchState(
@@ -44,8 +45,8 @@ fun <T : Any> observeEmptySearchState(
         if (textId != null) {
             show += emptyTextLayout
 
-            emptyTextLayout.emptyText.setText(textId)
-            emptyTextLayout.emptyImage.setImageResource(drawableId)
+            emptyTextLayout.findViewById<TextView>(R.id.emptyText).setText(textId)
+            emptyTextLayout.findViewById<ImageView>(R.id.emptyImage).setImageResource(drawableId)
         } else {
             hide += emptyTextLayout
         }

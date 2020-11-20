@@ -11,8 +11,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AutoCompleteTextView
+import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
@@ -24,14 +26,13 @@ import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListenerAndFixIcon
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_show_custom_time.*
-import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
 class ShowCustomTimeActivity : NavBarActivity() {
@@ -54,7 +55,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         fun getEditIntent(
                 customTimeKey: CustomTimeKey.Private,
-                context: Context
+                context: Context,
         ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
             putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable)
@@ -83,8 +84,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         hourMinutes[dayOfWeek] = hourMinute
         timeViews.getValue(dayOfWeek).setText(hourMinute.toString())
 
-        if (dayOfWeek == DayOfWeek.SUNDAY)
-            timeAllDaysTime.setText(hourMinute.toString())
+        if (dayOfWeek == DayOfWeek.SUNDAY) binding.timeAllDaysTime.setText(hourMinute.toString())
     }
 
     private val allDaysListener = { hourMinute: HourMinute, _: SerializableUnit ->
@@ -93,14 +93,16 @@ class ShowCustomTimeActivity : NavBarActivity() {
             timeViews.getValue(dayOfWeek).setText(hourMinute.toString())
         }
 
-        timeAllDaysTime.setText(hourMinute.toString())
+        binding.timeAllDaysTime.setText(hourMinute.toString())
     }
 
     private var showCustomTimeViewModel: ShowCustomTimeViewModel? = null
 
     private var allDaysExpanded = false
 
-    override val rootView get() = showCustomTimeRoot!!
+    override val rootView get() = binding.showCustomTimeRoot
+
+    private lateinit var binding: ActivityShowCustomTimeBinding
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -120,7 +122,12 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
                 updateError()
 
-                val name = toolbarEditText.text.toString().trim { it <= ' ' }
+                val name = binding.showCustomTimeToolbarEditTextInclude
+                        .toolbarEditText
+                        .text
+                        .toString()
+                        .trim { it <= ' ' }
+
                 if (name.isNotEmpty()) {
                     showCustomTimeViewModel?.stop()
 
@@ -134,18 +141,14 @@ class ShowCustomTimeActivity : NavBarActivity() {
                         )
                     } else {
                         val customTimeKey = DomainFactory.instance.createCustomTime(
-                            SaveService.Source.GUI,
-                            name, hourMinutes
+                                SaveService.Source.GUI,
+                                name,
+                                hourMinutes
                         )
 
                         setResult(
-                            Activity.RESULT_OK,
-                            Intent().apply {
-                                putExtra(
-                                    CUSTOM_TIME_KEY,
-                                    customTimeKey as Parcelable
-                                )
-                            }
+                                Activity.RESULT_OK,
+                                Intent().apply { putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable) }
                         )
                     }
 
@@ -160,9 +163,11 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_custom_time)
 
-        setSupportActionBar(toolbar)
+        binding = ActivityShowCustomTimeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.showCustomTimeToolbarEditTextInclude.toolbar)
 
         supportActionBar!!.run {
             setDisplayHomeAsUpEnabled(true)
@@ -171,15 +176,17 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         this.savedInstanceState = savedInstanceState
 
-        timeViews = listOf(
-                Triple(DayOfWeek.SUNDAY, timeSundayName, timeSundayTime),
-                Triple(DayOfWeek.MONDAY, timeMondayName, timeMondayTime),
-                Triple(DayOfWeek.TUESDAY, timeTuesdayName, timeTuesdayTime),
-                Triple(DayOfWeek.WEDNESDAY, timeWednesdayName, timeWednesdayTime),
-                Triple(DayOfWeek.THURSDAY, timeThursdayName, timeThursdayTime),
-                Triple(DayOfWeek.FRIDAY, timeFridayName, timeFridayTime),
-                Triple(DayOfWeek.SATURDAY, timeSaturdayName, timeSaturdayTime)
-        ).associate { (dayOfWeek, name, time) ->
+        timeViews = binding.run {
+            listOf(
+                    Triple(DayOfWeek.SUNDAY, timeSundayName, timeSundayTime),
+                    Triple(DayOfWeek.MONDAY, timeMondayName, timeMondayTime),
+                    Triple(DayOfWeek.TUESDAY, timeTuesdayName, timeTuesdayTime),
+                    Triple(DayOfWeek.WEDNESDAY, timeWednesdayName, timeWednesdayTime),
+                    Triple(DayOfWeek.THURSDAY, timeThursdayName, timeThursdayTime),
+                    Triple(DayOfWeek.FRIDAY, timeFridayName, timeFridayTime),
+                    Triple(DayOfWeek.SATURDAY, timeSaturdayName, timeSaturdayTime)
+            )
+        }.associate { (dayOfWeek, name, time) ->
             name.text = dayOfWeek.toString()
 
             dayOfWeek to time
@@ -224,17 +231,16 @@ class ShowCustomTimeActivity : NavBarActivity() {
             setUpAllDaysToggle()
         }
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? ConfirmDialogFragment)?.listener = discardDialogListener
+        tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
 
-        timeAllDaysTime.setFixedOnClickListener {
+        binding.timeAllDaysTime.setFixedOnClickListener {
             TimePickerDialogFragment.newInstance(allDaysHourMinute, SerializableUnit).apply {
                 listener = allDaysListener
                 show(supportFragmentManager, TAG_TIME_PICKER_ALL_DAYS)
             }
         }
 
-        @Suppress("UNCHECKED_CAST")
-        (supportFragmentManager.findFragmentByTag(TAG_TIME_PICKER_ALL_DAYS) as? TimePickerDialogFragment<SerializableUnit>)?.listener = allDaysListener
+        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TAG_TIME_PICKER_ALL_DAYS)?.listener = allDaysListener
 
         DayOfWeek.values().forEach { dayOfWeek ->
             timeViews.getValue(dayOfWeek).setFixedOnClickListener {
@@ -247,25 +253,21 @@ class ShowCustomTimeActivity : NavBarActivity() {
             }
         }
 
-        @Suppress("UNCHECKED_CAST")
-        (supportFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment<DayOfWeek>)?.listener = timePickerDialogFragmentListener
+        tryGetFragment<TimePickerDialogFragment<DayOfWeek>>(TIME_PICKER_TAG)?.listener = timePickerDialogFragmentListener
 
-        toolbarEditText.addTextChangedListener(object : TextWatcher {
-            private var skip = savedInstanceState != null
+        binding.showCustomTimeToolbarEditTextInclude
+                .toolbarEditText
+                .addTextChangedListener(object : TextWatcher {
+                    private var skip = savedInstanceState != null
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+                    override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+                    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
-            override fun afterTextChanged(s: Editable) {
-                if (skip) {
-                    skip = false
-                    return
-                }
-
-                updateError()
-            }
-        })
+                    override fun afterTextChanged(s: Editable) {
+                        if (skip) skip = false else updateError()
+                    }
+                })
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -282,14 +284,17 @@ class ShowCustomTimeActivity : NavBarActivity() {
     private fun updateGui() {
         check(hourMinutes.isNotEmpty())
 
-        toolbarLayout.visibility = View.VISIBLE
-        showCustomTimeContainer.visibility = View.VISIBLE
+        binding.showCustomTimeToolbarEditTextInclude
+                .toolbarLayout
+                .visibility = View.VISIBLE
 
-        TransitionManager.beginDelayedTransition(showCustomTimeContainer)
-        timeIndividualDaysLayout.visibility = if (allDaysExpanded) View.VISIBLE else View.GONE
-        timeAllDaysTimeLayout.visibility = if (allDaysExpanded) View.GONE else View.VISIBLE
+        binding.showCustomTimeContainer.visibility = View.VISIBLE
 
-        timeAllDaysTime.setText(allDaysHourMinute.toString())
+        TransitionManager.beginDelayedTransition(binding.showCustomTimeContainer)
+        binding.timeIndividualDaysLayout.isVisible = allDaysExpanded
+        binding.timeAllDaysTimeLayout.isVisible = !allDaysExpanded
+
+        binding.timeAllDaysTime.setText(allDaysHourMinute.toString())
 
         for (dayOfWeek in DayOfWeek.values()) {
             val timeView = timeViews.getValue(dayOfWeek)
@@ -300,9 +305,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     private fun setUpAllDaysToggle() {
-        if (allDaysExpanded) timeAllDaysTextLayout.setChecked()
+        if (allDaysExpanded) binding.timeAllDaysTextLayout.setChecked()
 
-        timeAllDaysText.setFixedOnClickListenerAndFixIcon {
+        binding.timeAllDaysText.setFixedOnClickListenerAndFixIcon {
             allDaysExpanded = !allDaysExpanded
 
             if (!allDaysExpanded) {
@@ -323,7 +328,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
         if (savedInstanceState?.containsKey(KEY_HOUR_MINUTES) != true) {
             check(hourMinutes.isEmpty())
 
-            toolbarEditText.setText(data.name)
+            binding.showCustomTimeToolbarEditTextInclude
+                    .toolbarEditText
+                    .setText(data.name)
 
             hourMinutes = HashMap(data.hourMinutes)
 
@@ -340,8 +347,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     override fun onBackPressed() {
-        if (tryClose())
-            super.onBackPressed()
+        if (tryClose()) super.onBackPressed()
     }
 
     private fun tryClose() = if (dataChanged()) {
@@ -356,30 +362,35 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     private fun dataChanged(): Boolean {
+        val name = binding.showCustomTimeToolbarEditTextInclude
+                .toolbarEditText
+                .text
+
         if (customTimeKey == null) {
             check(data == null)
 
-            if (!toolbarEditText.text.isNullOrEmpty())
-                return true
+            if (!name.isNullOrEmpty()) return true
 
             return DayOfWeek.values().any { hourMinutes[it] != defaultHourMinute }
         } else {
-            if (data == null)
-                return false
+            if (data == null) return false
 
-            if (toolbarEditText.text.toString() != data!!.name)
-                return true
+            if (name.toString() != data!!.name) return true
 
             return DayOfWeek.values().any { hourMinutes[it] != data!!.hourMinutes[it] }
         }
     }
 
     private fun updateError() {
-        if (toolbarEditText.text.isNullOrEmpty()) {
-            toolbarLayout.error = getString(R.string.nameError)
-            toolbarLayout.setPadding(0, 0, 0, 0)
-        } else {
-            toolbarLayout.error = null
-        }
+        binding.showCustomTimeToolbarEditTextInclude
+                .toolbarLayout
+                .apply {
+                    if (binding.showCustomTimeToolbarEditTextInclude.toolbarEditText.text.isNullOrEmpty()) {
+                        error = getString(R.string.nameError)
+                        setPadding(0, 0, 0, 0)
+                    } else {
+                        error = null
+                    }
+                }
     }
 }

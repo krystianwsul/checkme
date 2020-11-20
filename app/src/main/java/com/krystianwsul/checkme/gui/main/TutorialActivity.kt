@@ -2,23 +2,21 @@ package com.krystianwsul.checkme.gui.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityTutorialBinding
 import com.krystianwsul.checkme.gui.base.NavBarActivity
-import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.TutorialViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_tutorial.*
 
 class TutorialActivity : NavBarActivity() {
 
@@ -39,9 +37,11 @@ class TutorialActivity : NavBarActivity() {
     var help: Boolean = false
         private set
 
-    override val rootView get() = tutorialCoordinator!!
+    override val rootView get() = binding.tutorialCoordinator
 
     override val applyBottomInset = true
+
+    private lateinit var binding: ActivityTutorialBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,57 +53,68 @@ class TutorialActivity : NavBarActivity() {
             return
         }
 
-        setContentView(R.layout.activity_tutorial)
+        binding = ActivityTutorialBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         window.navigationBarColor = ContextCompat.getColor(this, R.color.primaryColor12)
 
-        tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+        binding.tutorialPager.adapter = object : FragmentStatePagerAdapter(
+                supportFragmentManager,
+                BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
+        ) {
 
             override fun getCount() = 4
 
             override fun getItem(position: Int) = TutorialFragment.newInstance(position)
         }
 
-        tutorialFab.clicks()
+        binding.tutorialFab
+                .clicks()
                 .subscribe {
-                    if (tutorialPager.currentItem == tutorialPager.adapter!!.count - 1) {
-                        if (help)
-                            finish()
+                    binding.tutorialPager.apply {
+                        if (currentItem == adapter!!.count - 1)
+                            if (help) finish() else startSignIn()
                         else
-                            startSignIn()
-                    } else {
-                        tutorialPager.currentItem += 1
+                            currentItem += 1
                     }
                 }
                 .addTo(createDisposable)
 
-        tutorialDots.setupWithViewPager(tutorialPager)
+        binding.tutorialDots.setupWithViewPager(binding.tutorialPager)
 
-        tutorialSignIn.apply {
-            visibility = if (help) {
-                View.GONE
+        binding.tutorialSignIn.apply {
+            isVisible = if (help) {
+                false
             } else {
                 createDisposable += clicks().subscribe { startSignIn() }
-                View.VISIBLE
+                true
             }
         }
 
         tutorialViewModel.state
                 .subscribe {
                     when (it) {
-                        TutorialViewModel.State.Initial -> animateVisibility(tutorialLayout, tutorialProgress)
-                        TutorialViewModel.State.Progress -> animateVisibility(tutorialProgress, tutorialLayout)
+                        TutorialViewModel.State.Initial -> binding.apply {
+                            animateVisibility(tutorialLayout, tutorialProgress)
+                        }
+                        TutorialViewModel.State.Progress -> binding.apply {
+                            animateVisibility(tutorialProgress, tutorialLayout)
+                        }
                         is TutorialViewModel.State.Success -> {
-                            setSnackbar(object : SnackbarData {
-
-                                override fun show(snackbarListener: SnackbarListener) {
-                                    snackbarListener.showText(getString(R.string.signInAs) + " " + it.displayName, Snackbar.LENGTH_SHORT)
-                                }
-                            })
+                            setSnackbar { snackbarListener ->
+                                snackbarListener.showText(
+                                        getString(R.string.signInAs) + " " + it.displayName,
+                                        Snackbar.LENGTH_SHORT
+                                )
+                            }
 
                             startMain()
                         }
-                        TutorialViewModel.State.Error -> Snackbar.make(tutorialCoordinator, R.string.signInFailed, Snackbar.LENGTH_SHORT).show()
+                        TutorialViewModel.State.Error -> Snackbar.make(
+                                binding.tutorialCoordinator,
+                                R.string.signInFailed,
+                                Snackbar.LENGTH_SHORT
+                        ).show()
                     }
                 }
                 .addTo(createDisposable)

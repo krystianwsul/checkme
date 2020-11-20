@@ -20,6 +20,7 @@ import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -51,8 +52,6 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.empty_text.view.*
-import kotlinx.android.synthetic.main.fragment_group_list.view.*
 import java.util.*
 
 class GroupListFragment @JvmOverloads constructor(
@@ -141,11 +140,12 @@ class GroupListFragment @JvmOverloads constructor(
     private val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()
 
     val progressShown by lazy {
-        groupListRecycler.scrollStateChanges()
+        binding.groupListRecycler
+                .scrollStateChanges()
                 .filter { it == RecyclerView.SCROLL_STATE_IDLE }
                 .filter {
                     val progressPosition = treeViewAdapter.itemCount - 1
-                    val lastVisiblePosition = (groupListRecycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+                    val lastVisiblePosition = (binding.groupListRecycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
 
                     treeViewAdapter.showProgress && (progressPosition == lastVisiblePosition)
                 }
@@ -498,13 +498,17 @@ class GroupListFragment @JvmOverloads constructor(
     override var scrollToTaskKey: TaskKey? = null
 
     override val listItemAddedListener get() = listener
-    override val recyclerView: RecyclerView get() = groupListRecycler
+    override val recyclerView: RecyclerView get() = binding.groupListRecycler
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
     private var searchData: SearchData? = null
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
+
+    private val binding = FragmentGroupListBinding.inflate(LayoutInflater.from(context), this)
+
+    val emptyTextLayout get() = binding.groupListEmptyTextInclude.emptyTextLayout
 
     private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
@@ -550,9 +554,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     init {
-        inflate(context, R.layout.fragment_group_list, this)
-
-        groupListRecycler.layoutManager = LinearLayoutManager(context)
+        binding.groupListRecycler.layoutManager = LinearLayoutManager(context)
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) {
@@ -562,7 +564,9 @@ class GroupListFragment @JvmOverloads constructor(
                 if (containsKey(EXPANSION_STATE_KEY))
                     this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
 
-                groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
+                binding.groupListRecycler
+                        .layoutManager!!
+                        .onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
@@ -591,9 +595,9 @@ class GroupListFragment @JvmOverloads constructor(
                 listener.instanceSearch,
                 { treeViewAdapter },
                 ::search,
-                groupListRecycler,
-                groupListProgress,
-                emptyTextLayout,
+                binding.groupListRecycler,
+                binding.groupListProgress,
+                binding.groupListEmptyTextInclude.emptyTextLayout,
                 { parameters.immediate },
                 {
                     when (val parameters = parameters) {
@@ -695,7 +699,12 @@ class GroupListFragment @JvmOverloads constructor(
         if (treeViewAdapterInitialized)
             putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState)
 
-        putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
+        putParcelable(
+                LAYOUT_MANAGER_STATE,
+                binding.groupListRecycler
+                        .layoutManager!!
+                        .onSaveInstanceState()
+        )
 
         putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
 
@@ -751,10 +760,12 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeViewAdapter = groupAdapter.treeViewAdapter
 
-            groupListRecycler.adapter = treeViewAdapter
-            groupListRecycler.itemAnimator = CustomItemAnimator()
+            binding.groupListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
 
-            dragHelper.attachToRecyclerView(groupListRecycler)
+            dragHelper.attachToRecyclerView(binding.groupListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)

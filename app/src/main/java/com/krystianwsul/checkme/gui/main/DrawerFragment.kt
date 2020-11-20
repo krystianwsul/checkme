@@ -10,14 +10,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.MainNavigationBinding
+import com.krystianwsul.checkme.databinding.NavHeaderMainBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.main.MainActivity.Tab
 import com.krystianwsul.checkme.gui.main.MainActivity.TabSearchState
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.main_navigation.*
-import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -28,8 +29,8 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     override val alwaysExpand = false
 
-    override val backgroundView get() = drawerRoot!!
-    override val contentView get() = drawerContentWrapper!!
+    override val backgroundView get() = binding.drawerRoot
+    override val contentView get() = binding.drawerContentWrapper
 
     private val mainActivity get() = activity as MainActivity
 
@@ -41,16 +42,15 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         drawerViewModel.start()
     }
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ) = inflater.inflate(R.layout.main_navigation, container, false)!!
+    private val bindingProperty = ResettableProperty<MainNavigationBinding>()
+    private var binding by bindingProperty
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = MainNavigationBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        drawerBackgroundLayout.apply {
+        binding.drawerBackgroundLayout.apply {
             outlineProvider = object : ViewOutlineProvider() {
 
                 private val radius = resources.getDimension(R.dimen.bottom_sheet_corner_radius)
@@ -69,7 +69,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
             clipToOutline = true
         }
 
-        mainActivityNavigation.apply {
+        binding.mainActivityNavigation.apply {
             mainActivity.apply {
                 setCheckedItem(when (tabSearchStateRelay.value!!.tab) {
                     Tab.INSTANCES -> R.id.main_drawer_instances
@@ -126,15 +126,23 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         true
                     }
 
+                    val headerBinding = NavHeaderMainBinding.bind(this)
+
                     drawerViewModel.data
                             .subscribe {
-                                navHeaderPhoto.loadPhoto(it.photoUrl)
-                                navHeaderName.text = it.name
-                                navHeaderEmail.text = it.email
+                                headerBinding.navHeaderPhoto.loadPhoto(it.photoUrl)
+                                headerBinding.navHeaderName.text = it.name
+                                headerBinding.navHeaderEmail.text = it.email
                             }
                             .addTo(viewCreatedDisposable)
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 }

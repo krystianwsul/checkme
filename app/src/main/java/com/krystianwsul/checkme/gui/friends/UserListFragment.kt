@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
@@ -18,6 +19,7 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -29,8 +31,6 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.empty_text.*
-import kotlinx.android.synthetic.main.fragment_friend_list.*
 import java.util.*
 
 class UserListFragment : AbstractFragment(), FabUser {
@@ -89,18 +89,23 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private val listener get() = activity as UserListListener
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
+    private val bindingProperty = ResettableProperty<FragmentFriendListBinding>()
+    private var binding by bindingProperty
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentFriendListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        emptyTextPadding.visibility = View.VISIBLE
+        binding.friendListEmptyTextInclude
+                .emptyTextPadding
+                .visibility = View.VISIBLE
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        friendListRecycler.layoutManager = LinearLayoutManager(activity)
+        binding.friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SAVE_STATE_KEY) == true)
             saveState = savedInstanceState.getParcelable(SAVE_STATE_KEY)!!
@@ -150,7 +155,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun initialize() {
         if (data == null) return
-        if (friendListRecycler == null) return
+        if (!bindingProperty.isSet) return
 
         if (this::treeViewAdapter.isInitialized) {
             saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
@@ -164,8 +169,11 @@ class UserListFragment : AbstractFragment(), FabUser {
             val friendListAdapter = FriendListAdapter()
             friendListAdapter.initialize(data!!.userListDatas, saveState)
             treeViewAdapter = friendListAdapter.treeViewAdapter
-            friendListRecycler.adapter = treeViewAdapter
-            friendListRecycler.itemAnimator = CustomItemAnimator()
+
+            binding.friendListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
@@ -181,16 +189,18 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateVisibility(immediate: Boolean) {
-        val hide = mutableListOf<View>(friendListProgress)
+        val hide = mutableListOf<View>(binding.friendListProgress)
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
-            emptyText.setText(R.string.friends_empty)
+            binding.friendListEmptyTextInclude
+                    .emptyText
+                    .setText(R.string.friends_empty)
 
-            show = emptyTextLayout
-            hide += friendListRecycler
+            show = binding.friendListEmptyTextInclude.emptyTextLayout
+            hide += binding.friendListRecycler
         } else {
-            show = friendListRecycler
-            hide += emptyTextLayout
+            show = binding.friendListRecycler
+            hide += binding.friendListEmptyTextInclude.emptyTextLayout
         }
 
         animateVisibility(listOf(show), hide, immediate)
@@ -273,6 +283,12 @@ class UserListFragment : AbstractFragment(), FabUser {
     private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }
 
     private fun updateSelectAll() = listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
+    }
 
     inner class FriendListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
 

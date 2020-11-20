@@ -21,6 +21,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -1117,7 +1118,7 @@ class GroupListFragment @JvmOverloads constructor(
         override fun onCreateViewHolder(
                 parent: ViewGroup,
                 viewType: Int,
-        ) = RegularNodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
+        ) = RegularNodeHolder(RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
         override val groupAdapter = this
 

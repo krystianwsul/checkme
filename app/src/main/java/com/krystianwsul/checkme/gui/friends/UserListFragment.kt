@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
@@ -345,7 +346,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             return SaveState(addedIds, removedIds, selectedIds)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(RowListBinding.inflate(layoutInflater, parent, false))
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = getSelected()

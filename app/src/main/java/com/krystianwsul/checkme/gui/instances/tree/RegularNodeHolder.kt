@@ -1,22 +1,21 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
-import kotlinx.android.synthetic.main.row_list.view.*
+import com.krystianwsul.checkme.databinding.RowListBinding
 
-class RegularNodeHolder(view: View) : NodeHolder(view) {
+class RegularNodeHolder(rowListBinding: RowListBinding) : NodeHolder(rowListBinding.root) {
 
-    override val rowContainer = itemView.rowContainer!!
-    override val rowTextLayout = itemView.rowTextLayout!!
-    override val rowName = itemView.rowName!!
-    override val rowDetails = itemView.rowDetails!!
-    override val rowChildren = itemView.rowChildren!!
-    override val rowThumbnail = itemView.rowThumbnail!!
-    override val rowExpand = itemView.rowExpand!!
-    override val rowCheckBoxFrame = itemView.rowCheckboxFrame!!
-    override val rowCheckBox = itemView.rowCheckbox!!
-    override val rowMargin = itemView.rowMargin!!
-    override val rowImage = itemView.rowImage!!
-    override val rowBigImage = itemView.rowBigImage!!
-    override val rowBigImageLayout = itemView.rowBigImageLayout!!
-    override val rowSeparator = itemView.rowSeparator!!
+    override val rowContainer = rowListBinding.rowContainer
+    override val rowTextLayout = rowListBinding.rowTextLayout
+    override val rowName = rowListBinding.rowName
+    override val rowDetails = rowListBinding.rowDetails
+    override val rowChildren = rowListBinding.rowChildren
+    override val rowThumbnail = rowListBinding.rowThumbnail
+    override val rowExpand = rowListBinding.rowExpand
+    override val rowCheckBoxFrame = rowListBinding.rowCheckboxFrame
+    override val rowCheckBox = rowListBinding.rowCheckbox
+    override val rowMargin = rowListBinding.rowMargin
+    override val rowImage = rowListBinding.rowImage
+    override val rowBigImage = rowListBinding.rowBigImage
+    override val rowBigImageLayout = rowListBinding.rowBigImageLayout
+    override val rowSeparator = rowListBinding.rowSeparator
 }

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -247,7 +248,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-                RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+                RegularNodeHolder(RowListBinding.inflate(layoutInflater, parent, false))
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :

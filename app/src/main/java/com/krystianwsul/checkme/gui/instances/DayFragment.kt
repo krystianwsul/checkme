@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.instances
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -11,6 +11,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentDayBinding
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
@@ -18,7 +19,6 @@ import com.krystianwsul.common.time.Date
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.fragment_day.view.*
 import java.text.DateFormatSymbols
 import java.util.*
 
@@ -96,21 +96,23 @@ class DayFragment @JvmOverloads constructor(
 
     private val compositeDisposable = CompositeDisposable()
 
+    private val binding: FragmentDayBinding
+
     init {
         check(context is Host)
 
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         orientation = VERTICAL
 
-        View.inflate(context, R.layout.fragment_day, this)
+        binding = FragmentDayBinding.inflate(LayoutInflater.from(context), this)
 
-        groupListFragment.apply {
+        binding.groupListFragment.apply {
             listener = (context as MainActivity).daysGroupListListener
             forceSaveStateListener = { saveState() }
         }
     }
 
-    fun saveState() = activity.setState(key.value!!, groupListFragment.onSaveInstanceState())
+    fun saveState() = activity.setState(key.value!!, binding.groupListFragment.onSaveInstanceState())
 
     fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
         entry?.stop()
@@ -121,10 +123,10 @@ class DayFragment @JvmOverloads constructor(
         key.accept(Pair(timeRange, position))
 
         activity.getState(key.value!!)?.let {
-            groupListFragment.onRestoreInstanceState(it)
+            binding.groupListFragment.onRestoreInstanceState(it)
         }
 
-        floatingActionButton?.let(groupListFragment::setFab)
+        floatingActionButton?.let(binding.groupListFragment::setFab)
 
         entry = dayViewModel.getEntry(timeRange, position).apply { start() }
     }
@@ -139,7 +141,11 @@ class DayFragment @JvmOverloads constructor(
                 setFab(event.floatingActionButton)
 
                 activity.selectAllRelay
-                        .subscribe { groupListFragment.treeViewAdapter.selectAll() }
+                        .subscribe {
+                            binding.groupListFragment
+                                    .treeViewAdapter
+                                    .selectAll()
+                        }
                         .addTo(compositeDisposable)
             } else {
                 clearFab()
@@ -148,7 +154,15 @@ class DayFragment @JvmOverloads constructor(
         }.addTo(compositeDisposable)
 
         key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
-                .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.immediate, data.groupListDataWrapper) }
+                .subscribe { (key, data) ->
+                    binding.groupListFragment.setAll(
+                            key.first,
+                            key.second,
+                            data.dataId,
+                            data.immediate,
+                            data.groupListDataWrapper
+                    )
+                }
                 .addTo(compositeDisposable)
 
         hostEvents.switchMap { (key, event) ->
@@ -158,7 +172,7 @@ class DayFragment @JvmOverloads constructor(
                 Observable.never()
         }
                 .filter { it }
-                .subscribe { groupListFragment.checkCreatedTaskKey() }
+                .subscribe { binding.groupListFragment.checkCreatedTaskKey() }
                 .addTo(compositeDisposable)
     }
 
@@ -169,18 +183,17 @@ class DayFragment @JvmOverloads constructor(
     }
 
     private fun setFab(floatingActionButton: FloatingActionButton) {
-        if (this.floatingActionButton === floatingActionButton)
-            return
+        if (this.floatingActionButton === floatingActionButton) return
 
         this.floatingActionButton = floatingActionButton
 
-        groupListFragment.setFab(floatingActionButton)
+        binding.groupListFragment.setFab(floatingActionButton)
     }
 
     private fun clearFab() {
         floatingActionButton = null
 
-        groupListFragment.clearFab()
+        binding.groupListFragment.clearFab()
     }
 
     interface Host {

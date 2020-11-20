@@ -17,6 +17,7 @@ import com.jakewharton.rxbinding3.view.keys
 import com.jakewharton.rxbinding3.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -28,7 +29,6 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_find_friend.*
 
 class FindFriendActivity : NavBarActivity() {
 
@@ -47,7 +47,9 @@ class FindFriendActivity : NavBarActivity() {
     private var databaseReference: DatabaseReference? = null
     private var valueEventListener: ValueEventListener? = null
 
-    override val rootView get() = findFriendRoot!!
+    override val rootView get() = binding.findFriendRoot
+
+    private lateinit var binding: ActivityFindFriendBinding
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_find_friend, menu)
@@ -65,11 +67,12 @@ class FindFriendActivity : NavBarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_find_friend)
+        binding = ActivityFindFriendBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        setSupportActionBar(findFriendToolbar)
+        setSupportActionBar(binding.findFriendToolbar)
 
-        findFriendEmail.apply {
+        binding.findFriendEmail.apply {
             createDisposable += editorActionEvents {
                 if (it.actionId == EditorInfo.IME_ACTION_SEARCH) {
                     startSearch()
@@ -89,7 +92,7 @@ class FindFriendActivity : NavBarActivity() {
             }.subscribe()
         }
 
-        findFriendUserLayout.setOnClickListener {
+        binding.findFriendUserLayout.setOnClickListener {
             check(!loading)
 
             DomainFactory.instance.addFriend(SaveService.Source.GUI, userPair!!.first, userPair!!.second)
@@ -121,15 +124,14 @@ class FindFriendActivity : NavBarActivity() {
     override fun onStart() {
         super.onStart()
 
-        if (loading)
-            loadUser()
+        if (loading) loadUser()
     }
 
     private fun loadUser() {
         check(loading)
-        check(findFriendEmail.text.isNotEmpty())
+        check(binding.findFriendEmail.text.isNotEmpty())
 
-        val key = UserData.getKey(findFriendEmail.text.toString())
+        val key = UserData.getKey(binding.findFriendEmail.text.toString())
 
         valueEventListener = object : ValueEventListener {
 
@@ -143,7 +145,7 @@ class FindFriendActivity : NavBarActivity() {
                 if (dataSnapshot.exists()) {
                     userPair = UserKey(dataSnapshot.key!!) to dataSnapshot.getValue(UserWrapper::class.java)!!
                 } else {
-                    Snackbar.make(findFriendCoordinator, R.string.userNotFound, Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.findFriendCoordinator, R.string.userNotFound, Snackbar.LENGTH_SHORT).show()
                 }
 
                 updateLayout()
@@ -160,7 +162,7 @@ class FindFriendActivity : NavBarActivity() {
 
                 MyCrashlytics.logException(databaseError.toException())
 
-                Snackbar.make(findFriendCoordinator, R.string.connectionError, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.findFriendCoordinator, R.string.connectionError, Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -177,25 +179,30 @@ class FindFriendActivity : NavBarActivity() {
             userPair != null -> {
                 check(!loading)
 
-                findFriendEmail.isEnabled = true
-                show.add(findFriendUserLayout)
-                hide.add(findFriendProgress)
+                userPair!!.second
+                        .userData
+                        .apply {
+                            binding.findFriendUserPhoto.loadPhoto(photoUrl)
+                            binding.findFriendUserName.text = name
+                            binding.findFriendUserEmail.text = email
+                        }
 
-                userPair!!.second.userData.apply {
-                    findFriendUserPhoto.loadPhoto(photoUrl)
-                    findFriendUserName.text = name
-                    findFriendUserEmail.text = email
-                }
+                binding.findFriendEmail.isEnabled = true
+
+                show += binding.findFriendUserLayout
+                hide += binding.findFriendProgress
             }
             loading -> {
-                findFriendEmail.isEnabled = false
-                hide.add(findFriendUserLayout)
-                show.add(findFriendProgress)
+                binding.findFriendEmail.isEnabled = false
+
+                hide += binding.findFriendUserLayout
+                show += binding.findFriendProgress
             }
             else -> {
-                findFriendEmail.isEnabled = true
-                hide.add(findFriendUserLayout)
-                hide.add(findFriendProgress)
+                binding.findFriendEmail.isEnabled = true
+
+                hide += binding.findFriendUserLayout
+                hide += binding.findFriendProgress
             }
         }
 
@@ -230,7 +237,7 @@ class FindFriendActivity : NavBarActivity() {
     }
 
     private fun startSearch() {
-        if (findFriendEmail.text.isEmpty()) return
+        if (binding.findFriendEmail.text.isEmpty()) return
 
         loading = true
         userPair = null

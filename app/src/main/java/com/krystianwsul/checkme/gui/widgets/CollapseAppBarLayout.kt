@@ -7,6 +7,7 @@ import android.os.Parcelable
 import android.text.Layout
 import android.text.StaticLayout
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -19,6 +20,7 @@ import com.google.android.material.internal.CollapsingTextHelper
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.CollapseAppBarLayoutBinding
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -32,7 +34,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.collapse_app_bar_layout.view.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -50,12 +51,12 @@ class CollapseAppBarLayout : AppBarLayout {
     private var paddingLayout: View? = null
 
     private val collapsingTextHelper: CollapsingTextHelper by lazy {
-        toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
+        binding.toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
     }
 
     private val textLayout: StaticLayout get() = collapsingTextHelper.getPrivateField("textLayout")
 
-    val menu get() = toolbar.menu!!
+    val menu get() = binding.toolbar.menu!!
 
     private val inputMethodManager by lazy {
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -74,17 +75,17 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var collapseState: CollapseState = CollapseState.Expanded
 
-    init {
-        View.inflate(context, R.layout.collapse_app_bar_layout, this)
+    private val binding = CollapseAppBarLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
-        searchToolbar.apply {
+    init {
+        binding.searchToolbar.apply {
             inflateMenu(R.menu.main_activity_search)
 
             setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.actionSearchClose -> searchToolbarText.text = null
+                    R.id.actionSearchClose -> binding.searchToolbarText.text = null
                     R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
                     else -> throw IllegalArgumentException()
                 }
@@ -95,11 +96,12 @@ class CollapseAppBarLayout : AppBarLayout {
             setNavigationOnClickListener { closeSearch() }
         }
 
-        toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
+        binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
     fun hideShowDeleted() {
-        searchToolbar.menu
+        binding.searchToolbar
+                .menu
                 .findItem(R.id.actionSearchShowDeleted)
                 .isVisible = false
     }
@@ -108,7 +110,7 @@ class CollapseAppBarLayout : AppBarLayout {
         super.onAttachedToWindow()
 
         attachedToWindowDisposable += showDeleted.subscribe {
-            searchToolbar
+            binding.searchToolbar
                     .menu
                     .findItem(R.id.actionSearchShowDeleted)
                     .isChecked = it
@@ -117,7 +119,7 @@ class CollapseAppBarLayout : AppBarLayout {
         searchingRelay.flatMap {
             if (it) {
                 Observables.combineLatest(
-                        searchToolbarText.textChanges(),
+                        binding.searchToolbarText.textChanges(),
                         showDeleted
                 ) { searchText, showDeleted ->
                     NullableWrapper(SearchData(searchText.toString().normalized(), showDeleted))
@@ -156,9 +158,9 @@ class CollapseAppBarLayout : AppBarLayout {
         attachedToWindowDisposable += globalLayoutPerformed.subscribe {
             val hide = searchingRelay.value!! || collapseState is CollapseState.Collapsed
 
-            if (!hide) toolbarCollapseLayout.title = title
+            if (!hide) binding.toolbarCollapseLayout.title = title
 
-            toolbarCollapseText.also {
+            binding.toolbarCollapseText.also {
                 val hideText = text.isNullOrEmpty() || hide
 
                 it.isVisible = !hideText
@@ -174,7 +176,7 @@ class CollapseAppBarLayout : AppBarLayout {
                             .height
                 }
 
-                toolbarCollapseLayout.addOneShotGlobalLayoutListener {
+                binding.toolbarCollapseLayout.addOneShotGlobalLayoutListener {
                     animateHeight(
                             hideText,
                             immediate,
@@ -196,7 +198,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
         val newHeight = if (hideText) {
             // stupid hack because otherwise title doesn't show
-            (bottomMargin + textLayout.height).coerceAtLeast(toolbar.height) + if (titleHack) 1 else 0
+            (bottomMargin + textLayout.height).coerceAtLeast(binding.toolbar.height) + if (titleHack) 1 else 0
         } else {
             initialTextHeight!! + bottomMargin + textLayout.height
         }
@@ -216,10 +218,10 @@ class CollapseAppBarLayout : AppBarLayout {
         }
     }
 
-    fun inflateMenu(@MenuRes resId: Int) = toolbar.inflateMenu(resId)
+    fun inflateMenu(@MenuRes resId: Int) = binding.toolbar.inflateMenu(resId)
 
     fun setOnMenuItemClickListener(listener: (MenuItem) -> Unit) {
-        toolbar.setOnMenuItemClickListener {
+        binding.toolbar.setOnMenuItemClickListener {
             listener(it)
 
             true
@@ -229,13 +231,13 @@ class CollapseAppBarLayout : AppBarLayout {
     fun closeSearch() {
         expand(true)
 
-        searchToolbar.apply {
+        binding.searchToolbar.apply {
             check(isVisible)
 
             animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
         }
 
-        searchToolbarText.apply {
+        binding.searchToolbarText.apply {
             text = null
 
             inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
@@ -248,8 +250,8 @@ class CollapseAppBarLayout : AppBarLayout {
         collapseState = CollapseState.Collapsed(titleHack)
 
         attachedToWindowDisposable += globalLayoutPerformed.subscribe {
-            toolbarCollapseLayout.title = null
-            toolbarCollapseText.isVisible = false
+            binding.toolbarCollapseLayout.title = null
+            binding.toolbarCollapseText.isVisible = false
 
             animateHeight(true, immediate = false, titleHack = titleHack)
         }
@@ -258,10 +260,10 @@ class CollapseAppBarLayout : AppBarLayout {
     fun expand(titleHack: Boolean = false) {
         collapseState = CollapseState.Expanded
 
-        toolbarCollapseLayout.title = title
+        binding.toolbarCollapseLayout.title = title
 
-        val hideText = toolbarCollapseText.text.isEmpty()
-        toolbarCollapseText.isVisible = !hideText
+        val hideText = binding.toolbarCollapseText.text.isEmpty()
+        binding.toolbarCollapseText.isVisible = !hideText
 
         animateHeight(hideText, false, titleHack = titleHack)
     }
@@ -271,9 +273,9 @@ class CollapseAppBarLayout : AppBarLayout {
 
         collapse(true)
 
-        animateVisibility(listOf(searchToolbar), listOf(), duration = MyBottomBar.duration)
+        animateVisibility(listOf(binding.searchToolbar), listOf(), duration = MyBottomBar.duration)
 
-        searchToolbarText.apply {
+        binding.searchToolbarText.apply {
             requestFocus()
 
             inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
@@ -296,12 +298,12 @@ class CollapseAppBarLayout : AppBarLayout {
                 searchingRelay.accept(true)
                 showDeleted.accept(it.showDeleted)
 
-                searchToolbar.isVisible = true
+                binding.searchToolbar.isVisible = true
 
-                toolbarCollapseLayout.title = null
-                toolbarCollapseText.isVisible = false
+                binding.toolbarCollapseLayout.title = null
+                binding.toolbarCollapseText.isVisible = false
 
-                searchToolbarText.apply {
+                binding.searchToolbarText.apply {
                     setText(it.query)
 
                     requestFocus()

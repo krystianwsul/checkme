@@ -8,6 +8,8 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
+import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
@@ -18,6 +20,7 @@ import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -25,9 +28,6 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.activity_show_notification_group.*
-import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.*
 import java.io.Serializable
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
@@ -51,11 +51,15 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var showTaskInstancesViewModel: ShowTaskInstancesViewModel
 
-    override val snackbarParent get() = showNotificationGroupCoordinator!!
+    override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         @Suppress("UNCHECKED_CAST")
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(
+                SaveService.Source.GUI,
+                taskKeys as Set<TaskKey>,
+                removeInstances
+        )
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
@@ -71,26 +75,35 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
 
+    private lateinit var binding: ActivityShowNotificationGroupBinding
+    private lateinit var bottomBinding: BottomBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_notification_group)
 
-        groupListFragment.listener = this
+        binding = ActivityShowNotificationGroupBinding.inflate(layoutInflater)
+        bottomBinding = BottomBinding.bind(binding.root)
+        setContentView(binding.root)
 
-        setSupportActionBar(toolbar)
-
-        supportActionBar!!.title = null
+        binding.groupListFragment.listener = this
 
         check(intent.hasExtra(TASK_KEY))
 
         taskKey = intent.getParcelableExtra(TASK_KEY)!!
 
-        if (savedInstanceState != null)
-            page = savedInstanceState.getInt(KEY_PAGE)
+        savedInstanceState?.apply { page = getInt(KEY_PAGE) }
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
-            data.doOnNext { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.groupListDataWrapper, it.showLoader) }
-                    .switchMap { groupListFragment.progressShown }
+            data.doOnNext {
+                binding.groupListFragment.setTaskKey(
+                        taskKey,
+                        it.dataId,
+                        it.immediate,
+                        it.groupListDataWrapper,
+                        it.showLoader
+                )
+            }
+                    .switchMap { binding.groupListFragment.progressShown }
                     .doOnNext { page += 1 }
                     .startWith(Unit)
                     .subscribe { start(taskKey, page) }
@@ -99,7 +112,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         initBottomBar()
 
-        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+        tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(receiver)
     }
@@ -107,7 +120,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     override fun onStart() {
         super.onStart()
 
-        groupListFragment.checkCreatedTaskKey()
+        binding.groupListFragment.checkCreatedTaskKey()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -132,16 +145,18 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         updateBottomMenu()
     }
 
-    override fun getBottomBar() = bottomAppBar!!
+    override fun getBottomBar() = bottomBinding.bottomAppBar
 
     override fun initBottomBar() {
-        bottomAppBar.apply {
+        bottomBinding.bottomAppBar.apply {
             replaceMenu(R.menu.menu_select_all)
 
             setOnMenuItemClickListener { item ->
                 check(item.itemId == R.id.action_select_all)
 
-                groupListFragment.treeViewAdapter.selectAll()
+                binding.groupListFragment
+                        .treeViewAdapter
+                        .selectAll()
 
                 true
             }
@@ -155,10 +170,13 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateBottomMenu() {
-        bottomAppBar.menu
+        bottomBinding.bottomAppBar
+                .menu
                 .findItem(R.id.action_select_all)
                 ?.isVisible = selectAllVisible
     }
 
-    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
+    override fun setToolbarExpanded(expanded: Boolean) = binding.showNotificationGroupToolbarCollapseInclude
+            .collapseAppBarLayout
+            .setExpanded(expanded)
 }

@@ -11,18 +11,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
-import com.krystianwsul.checkme.gui.utils.SnackbarData
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.*
@@ -30,7 +31,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.fragment_edit_instances.*
 import java.util.*
 
 class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
@@ -51,16 +51,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         fun newInstance(instanceKeys: List<InstanceKey>) = EditInstancesFragment().apply {
             check(instanceKeys.isNotEmpty())
 
-            arguments = Bundle().apply {
-                putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys))
-            }
+            arguments = Bundle().apply { putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys)) }
         }
     }
 
     override val dialogStyle = R.style.BottomSheetDialogTheme_ActionMode
 
-    override val backgroundView get() = editInstancesRoot!!
-    override val contentView get() = editInstancesBackground!!
+    override val backgroundView get() = binding.editInstancesRoot
+    override val contentView get() = binding.editInstancesBackground
 
     private lateinit var date: Date
     private var data: EditInstancesViewModel.Data? = null
@@ -70,8 +68,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val broadcastReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            if (data != null)
-                updateError()
+            if (data != null) updateError()
         }
     }
 
@@ -100,7 +97,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        override fun onAddSelected() = startActivityForResult(ShowCustomTimeActivity.getCreateIntent(requireContext()), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
+        override fun onAddSelected() = startActivityForResult(
+                ShowCustomTimeActivity.getCreateIntent(requireContext()),
+                ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE
+        )
     }
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
@@ -123,6 +123,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     var listener: ((DomainFactory.EditInstancesUndoData) -> Unit)? = null
 
+    private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
+    private var binding by bindingProperty
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -130,7 +133,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.addListener(materialDatePickerListener)
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(DATE_KEY)) {
+        if (savedInstanceState?.containsKey(DATE_KEY) == true) {
             date = savedInstanceState.getParcelable(DATE_KEY)!!
 
             check(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY))
@@ -149,23 +152,19 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply { start(instanceKeys) }
     }
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ) = inflater.inflate(R.layout.fragment_edit_instances, container, false)!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentEditInstancesBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        editInstanceDate.setFixedOnClickListener {
+        binding.editInstanceDate.setFixedOnClickListener {
             newMaterialDatePicker(date).let {
                 it.addListener(materialDatePickerListener)
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
             }
         }
 
-        editInstanceSave.setOnClickListener {
+        binding.editInstanceSave.setOnClickListener {
             checkNotNull(data)
             check(isValidDate)
             check(isValidDateTime)
@@ -185,7 +184,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             listener?.invoke(editInstancesUndoData)
         }
 
-        editInstanceCancel.setOnClickListener { requireDialog().cancel() }
+        binding.editInstanceCancel.setOnClickListener { requireDialog().cancel() }
 
         editInstancesViewModel.data
                 .subscribe(this::onLoadFinished)
@@ -197,8 +196,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         requireActivity().registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
-        if (data != null)
-            updateError()
+        if (data != null) updateError()
     }
 
     override fun onPause() {
@@ -228,16 +226,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         this.data = data
 
         if (data.instanceDatas.any { it.value.done }) {
-            AbstractActivity.setSnackbar(object : SnackbarData {
-
-                override fun show(snackbarListener: SnackbarListener) = snackbarListener.showInstanceMarkedDone()
-            })
+            AbstractActivity.setSnackbar { snackbarListener -> snackbarListener.showInstanceMarkedDone() }
 
             dialog!!.cancel()
             return
         }
 
-        editInstanceLayout.visibility = View.VISIBLE
+        binding.editInstanceLayout.visibility = View.VISIBLE
 
         if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(DATE_KEY))) {
             check(!this::date.isInitialized)
@@ -262,11 +257,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         updateDateText()
 
-        @Suppress("UNCHECKED_CAST")
-        val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment<SerializableUnit>
-        timePickerDialogFragment?.listener = timePickerDialogFragmentListener
+        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener = timePickerDialogFragmentListener
 
-        editInstanceTime.setFixedOnClickListener {
+        binding.editInstanceTime.setFixedOnClickListener {
             val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
@@ -280,15 +273,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        val timeDialogFragment = childFragmentManager.findFragmentByTag(TIME_DIALOG_FRAGMENT_TAG) as? TimeDialogFragment
-        timeDialogFragment?.timeDialogListener = timeDialogListener
+        tryGetFragment<TimeDialogFragment>(TIME_DIALOG_FRAGMENT_TAG)?.timeDialogListener = timeDialogListener
     }
 
     private fun updateDateText() {
-        editInstanceDate.setText(date.getDisplayText())
+        binding.editInstanceDate.setText(date.getDisplayText())
 
         updateTimeText()
-
         updateError()
     }
 
@@ -298,24 +289,24 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         checkNotNull(data)
 
         if (timePairPersist!!.customTimeKey != null) {
-            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
-
-            editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date.dayOfWeek] + ")")
+            binding.editInstanceTime.setText(
+                    data!!.customTimeDatas
+                            .getValue(timePairPersist!!.customTimeKey!!)
+                            .run { name + " (" + hourMinutes.getValue(date.dayOfWeek) + ")" }
+            )
         } else {
-            editInstanceTime.setText(timePairPersist!!.hourMinute.toString())
+            binding.editInstanceTime.setText(timePairPersist!!.hourMinute.toString())
         }
     }
 
-    private val isValidDate: Boolean
-        get() = if (data != null) date >= Date.today() else false
+    private val isValidDate get() = data?.let { date >= Date.today() } == true
 
     //cached data doesn't contain new custom time
     private val isValidDateTime: Boolean
         get() {
             if (data != null) {
                 val hourMinute = if (timePairPersist!!.customTimeKey != null) {
-                    if (!data!!.customTimeDatas.containsKey(timePairPersist!!.customTimeKey))
-                        return false
+                    if (!data!!.customTimeDatas.containsKey(timePairPersist!!.customTimeKey)) return false
 
                     data!!.customTimeDatas
                             .getValue(timePairPersist!!.customTimeKey!!)
@@ -332,15 +323,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
     private fun updateError() {
-        if (isValidDate) {
-            editInstanceDateLayout.error = null
-            editInstanceTimeLayout.error = if (isValidDateTime) null else getString(R.string.error_time)
+        val (dateError, timeError) = if (isValidDate) {
+            null to if (isValidDateTime) null else getString(R.string.error_time)
         } else {
-            editInstanceDateLayout.error = getString(R.string.error_date)
-            editInstanceTimeLayout.error = null
+            getString(R.string.error_date) to null
         }
 
-        editInstanceSave.isEnabled = isValidDateTime
+        binding.editInstanceDateLayout.error = dateError
+        binding.editInstanceTimeLayout.error = timeError
+
+        binding.editInstanceSave.isEnabled = isValidDateTime
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -349,5 +341,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (resultCode == Activity.RESULT_OK)
             timePairPersist!!.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 }

@@ -8,15 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentDebugBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.base.AbstractFragment
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.fragment_debug.*
 
 class DebugFragment : AbstractFragment() {
 
@@ -25,11 +25,10 @@ class DebugFragment : AbstractFragment() {
         fun newInstance() = DebugFragment()
     }
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ) = inflater.inflate(R.layout.fragment_debug, container, false)!!
+    private val bindingProperty = ResettableProperty<FragmentDebugBinding>()
+    private var binding by bindingProperty
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentDebugBinding.inflate(inflater, container, false).also { binding = it }.root
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,7 +37,7 @@ class DebugFragment : AbstractFragment() {
         DomainFactory.instanceRelay
                 .filterNotNull()
                 .subscribe {
-                    debugViewSwitch.apply {
+                    binding.debugViewSwitch.apply {
                         isChecked = it.debugMode
 
                         setOnCheckedChangeListener { _, isChecked ->
@@ -48,10 +47,10 @@ class DebugFragment : AbstractFragment() {
                 }
                 .addTo(viewCreatedDisposable)
 
-        debugTick.setOnClickListener { Ticker.tick("DebugFragment") }
+        binding.debugTick.setOnClickListener { Ticker.tick("DebugFragment") }
 
-        debugLoad.setOnClickListener {
-            debugData.text = StringBuilder().apply {
+        binding.debugLoad.setOnClickListener {
+            binding.debugData.text = StringBuilder().apply {
                 val lastTick = Preferences.lastTick
                 val tickLog = Preferences.tickLog.log
 
@@ -106,5 +105,11 @@ class DebugFragment : AbstractFragment() {
                 append(tickLog)
             }
         }
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 }

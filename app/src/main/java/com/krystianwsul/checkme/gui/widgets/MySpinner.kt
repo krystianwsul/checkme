@@ -4,15 +4,15 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.view.View
+import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.updatePadding
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.ViewMySpinnerBinding
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import kotlinx.android.synthetic.main.view_my_spinner.view.*
 
 class MySpinner @JvmOverloads constructor(
     context: Context,
@@ -20,16 +20,12 @@ class MySpinner @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    init {
-        View.inflate(context, R.layout.view_my_spinner, this)
-    }
-
-    private val text by lazy { mySpinnerText!! }
+    private val binding = ViewMySpinnerBinding.inflate(LayoutInflater.from(context), this, true)
 
     private lateinit var items: List<*>
 
     fun setSelection(position: Int, immediate: Boolean = false) {
-        fun update() = text.setText(text.adapter.getItem(position).toString())
+        fun update() = binding.mySpinnerText.apply { setText(adapter.getItem(position).toString()) }
 
         if (immediate) update() else addOneShotGlobalLayoutListener { update() }
     }
@@ -39,7 +35,11 @@ class MySpinner @JvmOverloads constructor(
 
         this.items = items
 
-        text.setAdapter(object : ArrayAdapter<Any>(context, R.layout.cat_exposed_dropdown_popup_item, items) {
+        binding.mySpinnerText.setAdapter(object : ArrayAdapter<Any>(
+                context,
+                R.layout.cat_exposed_dropdown_popup_item,
+                items
+        ) {
 
             override fun getFilter() = object : Filter() {
 
@@ -55,14 +55,16 @@ class MySpinner @JvmOverloads constructor(
 
     fun addListener(listener: (Int) -> Unit) {
         addOneShotGlobalLayoutListener {
-            text.addTextChangedListener(object : TextWatcher {
+            binding.mySpinnerText.addTextChangedListener(object : TextWatcher {
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
                 override fun afterTextChanged(s: Editable?) {
-                    val stringValue = text.text.toString()
+                    val stringValue = binding.mySpinnerText
+                            .text
+                            .toString()
 
                     val item = items.single { it.toString() == stringValue }
 
@@ -72,17 +74,17 @@ class MySpinner @JvmOverloads constructor(
         }
     }
 
-    fun setDense() = mySpinnerText.updatePadding(top = 0, bottom = 0)
+    fun setDense() = binding.mySpinnerText.updatePadding(top = 0, bottom = 0)
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
 
-        mySpinnerLayout.isEnabled = enabled
-        mySpinnerText.setTextColor(
-            ContextCompat.getColor(
-                context,
-                if (enabled) R.color.textPrimary else R.color.textDisabled
-            )
+        binding.mySpinnerLayout.isEnabled = enabled
+        binding.mySpinnerText.setTextColor(
+                ContextCompat.getColor(
+                        context,
+                        if (enabled) R.color.textPrimary else R.color.textDisabled
+                )
         )
     }
 }

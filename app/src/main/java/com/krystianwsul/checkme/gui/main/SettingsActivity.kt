@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
@@ -26,8 +27,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.settings_activity.*
-import kotlinx.android.synthetic.main.toolbar.*
 
 class SettingsActivity : NavBarActivity() {
 
@@ -38,13 +37,17 @@ class SettingsActivity : NavBarActivity() {
 
     private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
 
-    override val rootView get() = settingsRoot!!
+    override val rootView get() = binding.settingsRoot
+
+    private lateinit var binding: SettingsActivityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.settings_activity)
 
-        setSupportActionBar(toolbar)
+        binding = SettingsActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.settingsToolbarInclude.toolbar)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -57,7 +60,7 @@ class SettingsActivity : NavBarActivity() {
             start()
 
             createDisposable += data.subscribe {
-                animateVisibility(settingsFrame, settingsProgress, immediate = it.immediate)
+                binding.run { animateVisibility(settingsFrame, settingsProgress, immediate = it.immediate) }
             }
         }
     }
@@ -72,12 +75,10 @@ class SettingsActivity : NavBarActivity() {
 
     private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount) {
         googleSignInAccount.photoUrl?.let { url ->
-            DomainFactory.addFirebaseListener {
-                it.updatePhotoUrl(SaveService.Source.GUI, url.toString())
-            }
+            DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
         }
 
-        Snackbar.make(settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(binding.settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
@@ -172,15 +173,6 @@ class SettingsActivity : NavBarActivity() {
                     true
                 }
             }
-
-            /*
-            showNotificationsPreference.isChecked = Preferences.showNotifications
-
-            showNotificationsPreference.setOnPreferenceChangeListener { _, newValue ->
-                Preferences.showNotifications = newValue as Boolean
-
-                true
-            }*/
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

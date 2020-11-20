@@ -10,6 +10,8 @@
         android:layout_height="fill_parent"
         android:id="@+id/showTimesList" />
 
-    <include layout="@layout/empty_text"/>
+    <include
+        android:id="@+id/showCustomTimesEmptyTextInclude"
+        layout="@layout/empty_text" />
 
 </RelativeLayout>

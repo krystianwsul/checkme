@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -18,6 +19,7 @@ import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -27,8 +29,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.empty_text.*
-import kotlinx.android.synthetic.main.fragment_show_custom_times.*
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), FabUser {
@@ -104,18 +104,21 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private val customTimesListListener get() = activity as CustomTimesListListener
 
+    private val bindingProperty = ResettableProperty<FragmentShowCustomTimesBinding>()
+    private var binding by bindingProperty
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         check(context is CustomTimesListListener)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_show_custom_times, container, false)!!
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentShowCustomTimesBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showTimesList.layoutManager = LinearLayoutManager(activity)
+        binding.showTimesList.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
             selectedCustomTimeKeys = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
@@ -148,29 +151,30 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             val customTimesAdapter = CustomTimesAdapter()
             customTimesAdapter.initialize()
             treeViewAdapter = customTimesAdapter.treeViewAdapter
-            showTimesList.adapter = treeViewAdapter
-            showTimesList.itemAnimator = CustomItemAnimator()
+
+            binding.showTimesList.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
             }
         }
 
-        val show: View
-        val hide: View
-        if (data.entries.isEmpty()) {
-            show = emptyTextLayout
-            hide = showTimesList
-            emptyText.setText(R.string.custom_times_empty)
+        val (show, hide) = if (data.entries.isEmpty()) {
+            binding.showCustomTimesEmptyTextInclude
+                    .emptyText
+                    .setText(R.string.custom_times_empty)
+
+            binding.showCustomTimesEmptyTextInclude.emptyTextLayout to binding.showTimesList
         } else {
-            show = showTimesList
-            hide = emptyTextLayout
+            binding.showTimesList to binding.showCustomTimesEmptyTextInclude.emptyTextLayout
         }
 
         animateVisibility(show, hide, immediate = data.immediate)
 
         updateSelectAll()
-
         updateFabVisibility()
     }
 
@@ -184,9 +188,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         super.onSaveInstanceState(outState)
 
         if (this::treeViewAdapter.isInitialized) {
-            val selectedCustomTimeIds = selectedIds
-            if (selectedCustomTimeIds.isNotEmpty())
-                outState.putParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(selectedCustomTimeIds))
+            selectedIds.takeIf { it.isNotEmpty() }?.let {
+                outState.putParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(it))
+            }
         }
     }
 
@@ -202,16 +206,18 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         showTimesFab?.let {
-            if (this::data.isInitialized && !selectionCallback.hasActionMode) {
-                it.show()
-            } else {
-                it.hide()
-            }
+            if (this::data.isInitialized && !selectionCallback.hasActionMode) it.show() else it.hide()
         }
     }
 
     override fun clearFab() {
         showTimesFab = null
+    }
+
+    override fun onDestroyView() {
+        bindingProperty.reset()
+
+        super.onDestroyView()
     }
 
     private inner class CustomTimesAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
@@ -244,9 +250,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                 RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
     }
 
-    private inner class CustomTimeNode(
-            val customTimeData: ShowCustomTimesViewModel.CustomTimeData
-    ) : GroupHolderNode(0) {
+    private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
+            GroupHolderNode(0) {
 
         public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
@@ -255,11 +260,14 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val ripple = true
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
-            treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeKeys?.contains(customTimeData.id)
-                    ?: false)
-            treeNode.setChildTreeNodes(listOf())
-            return treeNode
+        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>) = TreeNode(
+                this,
+                treeNodeCollection,
+                false,
+                selectedCustomTimeKeys?.contains(customTimeData.id) ?: false
+        ).also {
+            treeNode = it
+            it.setChildTreeNodes(listOf())
         }
 
         override val name = NameData(customTimeData.name)
@@ -270,7 +278,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val parentNode: ModelNode<NodeHolder>? = null
 
-        override fun onClick(holder: NodeHolder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+        override fun onClick(holder: NodeHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
         override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
 

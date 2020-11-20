@@ -350,8 +350,16 @@ inline fun <reified T : Fragment> AbstractActivity.getOrInitializeFragment(
         initializer: () -> T,
 ) = supportFragmentManager.getOrInitializeFragment(id, initializer)
 
+inline fun <reified T : Fragment> FragmentManager.tryGetFragment(@IdRes id: Int) = findFragmentById(id) as? T
+
+inline fun <reified T : Fragment> FragmentManager.tryGetFragment(tag: String) = findFragmentByTag(tag) as? T
+
+inline fun <reified T : Fragment> FragmentManager.forceGetFragment(@IdRes id: Int) = tryGetFragment<T>(id)!!
+
 inline fun <reified T : Fragment> AbstractActivity.forceGetFragment(@IdRes id: Int) =
-        supportFragmentManager.findFragmentById(id) as T
+        supportFragmentManager.forceGetFragment<T>(id)
 
 inline fun <reified T : Fragment> AbstractActivity.tryGetFragment(tag: String) =
-        supportFragmentManager.findFragmentByTag(tag) as? T
+        supportFragmentManager.tryGetFragment<T>(tag)
+
+inline fun <reified T : Fragment> Fragment.tryGetFragment(tag: String) = childFragmentManager.tryGetFragment<T>(tag)

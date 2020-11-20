@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
@@ -190,6 +191,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private val bindingProperty = ResettableProperty<FragmentTaskListBinding>()
     private var binding by bindingProperty
 
+    val emptyTextLayout get() = binding.taskListEmptyTextInclude.emptyTextLayout
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -200,16 +203,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }.joinToString("\n")
 
-    private fun inTree(shareTree: List<ChildTaskData>, childTaskData: ChildTaskData): Boolean {
-        if (shareTree.isEmpty())
-            return false
-
-        return if (shareTree.contains(childTaskData)) true else shareTree.any { inTree(it.children, childTaskData) }
+    private fun inTree(shareTree: List<ChildTaskData>, childTaskData: ChildTaskData): Boolean = when {
+        shareTree.isEmpty() -> false
+        shareTree.contains(childTaskData) -> true
+        else -> shareTree.any { inTree(it.children, childTaskData) }
     }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, childTaskData: ChildTaskData) {
         lines.add("-".repeat(indentation) + childTaskData.name)
-
 
         childTaskData.children.forEach { printTree(lines, indentation + 1, it) }
     }
@@ -237,7 +238,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
 
-        (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+        tryGetFragment<RemoveInstancesDialogFragment>(TAG_REMOVE_INSTANCES)?.listener = deleteInstancesListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentTaskListBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -487,7 +488,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 taskData: TaskData,
                 selectedTaskKeys: List<TaskKey>?,
                 expandedTaskKeys: List<TaskKey>?,
-                copying: Boolean
+                copying: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -550,7 +551,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 private val taskParent: TaskParent,
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
-                override val parentNode: ModelNode<NodeHolder>?
+                override val parentNode: ModelNode<NodeHolder>?,
         ) : GroupHolderNode(indentation), TaskParent, Sortable {
 
             override val keyChain = taskParent.keyChain + childTaskData.taskKey
@@ -582,7 +583,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,
                     nodeContainer: NodeContainer<NodeHolder>,
-                    expandedTaskKeys: List<TaskKey>?
+                    expandedTaskKeys: List<TaskKey>?,
             ): TreeNode<NodeHolder> {
                 val selected = if (selectedTaskKeys != null) {
                     check(selectedTaskKeys.isNotEmpty())
@@ -712,13 +713,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskData: TaskData,
             val reverseOrderForTopLevelNodes: Boolean,
             val copying: Boolean = false,
-            val showFirstSchedule: Boolean = true
+            val showFirstSchedule: Boolean = true,
     )
 
     data class TaskData(
             val childTaskDatas: List<ChildTaskData>,
             val note: String?,
-            val showFab: Boolean
+            val showFab: Boolean,
     )
 
     data class ChildTaskData(
@@ -732,7 +733,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val current: Boolean,
             val isVisible: Boolean,
             val alwaysShow: Boolean,
-            var ordinal: Double
+            var ordinal: Double,
     ) : Comparable<ChildTaskData>, QueryMatch {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)

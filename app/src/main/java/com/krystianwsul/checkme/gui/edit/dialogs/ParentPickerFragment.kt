@@ -6,16 +6,16 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
@@ -23,7 +23,6 @@ import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.fragment_parent_picker.view.*
 
 class ParentPickerFragment : AbstractDialogFragment() {
 
@@ -45,8 +44,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
     }
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var searchField: EditText
     private lateinit var searchChanges: Observable<String>
 
     private var taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>? = null
@@ -58,6 +55,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private val initializeDisposable = CompositeDisposable()
 
     private var query: String = ""
+
+    private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
+    private var binding by bindingProperty
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -72,18 +72,17 @@ class ParentPickerFragment : AbstractDialogFragment() {
             query = getString(QUERY_KEY)!!
         }
 
-        val view = requireActivity().layoutInflater
-                .inflate(R.layout.fragment_parent_picker, null)
-                .apply {
-                    recyclerView = parentPickerRecycler as RecyclerView
+        binding = FragmentParentPickerBinding.inflate(layoutInflater)
 
-                    searchField = parentPickerSearch as EditText
-                    searchChanges = searchField.textChanges().map { it.toString().normalized() }
-                }
+        searchChanges = binding.parentPickerSearch
+                .textChanges()
+                .map { it.toString().normalized() }
 
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
-                .setView(view)
-                .setPositiveButton(R.string.add_task) { _, _ -> listener.onNewParent(searchField.text?.toString()) }
+                .setView(binding.root)
+                .setPositiveButton(R.string.add_task) { _, _ ->
+                    listener.onNewParent(binding.parentPickerSearch.text?.toString())
+                }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY))
@@ -96,20 +95,19 @@ class ParentPickerFragment : AbstractDialogFragment() {
         this.taskDatas = taskDatas
         this.listener = listener
 
-        if (this::recyclerView.isInitialized)
-            initialize()
+        if (bindingProperty.isSet) initialize()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        recyclerView.layoutManager = LinearLayoutManager(activity)
+        binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
         if (taskDatas != null) initialize()
     }
 
     private fun initialize() {
-        check(taskDatas != null)
+        checkNotNull(taskDatas)
         check(activity != null)
 
         initializeDisposable.clear()
@@ -126,8 +124,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
             val taskAdapter = TaskAdapter(this)
             taskAdapter.initialize(taskDatas!!, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
-            recyclerView.adapter = treeViewAdapter
-            recyclerView.itemAnimator = CustomItemAnimator()
+
+            binding.parentPickerRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
 
             if (query.isNotEmpty()) treeViewAdapter!!.updateDisplayedNodes { search(query, it) }
         }
@@ -140,7 +141,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        searchField.apply {
+        binding.parentPickerSearch.apply {
             startDisposable += searchChanges.subscribe {
                 val drawable = if (it.isNullOrEmpty()) R.drawable.ic_close_white_24dp else R.drawable.ic_close_black_24dp
                 setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
@@ -148,8 +149,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             startDisposable += touches {
                 if (it.x >= width - totalPaddingEnd) {
-                    if (it.action == MotionEvent.ACTION_UP)
-                        text.clear()
+                    if (it.action == MotionEvent.ACTION_UP) text?.clear()
 
                     true
                 } else {
@@ -174,6 +174,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     override fun onDestroyView() {
         initializeDisposable.clear()
+
+        bindingProperty.reset()
 
         super.onDestroyView()
     }
@@ -204,7 +206,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         fun initialize(
                 taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-                expandedParentKeys: List<EditViewModel.ParentKey>?
+                expandedParentKeys: List<EditViewModel.ParentKey>?,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -244,7 +246,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 indentation: Int,
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
-                override val parentNode: ModelNode<NodeHolder>?
+                override val parentNode: ModelNode<NodeHolder>?,
         ) : GroupHolderNode(indentation), TaskParent {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
@@ -282,7 +284,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             fun initialize(
                     nodeContainer: NodeContainer<NodeHolder>,
-                    expandedParentKeys: List<EditViewModel.ParentKey>?
+                    expandedParentKeys: List<EditViewModel.ParentKey>?,
             ): TreeNode<NodeHolder> {
                 var expanded = false
                 if (expandedParentKeys != null) {

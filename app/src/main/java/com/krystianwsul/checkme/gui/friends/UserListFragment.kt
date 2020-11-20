@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -174,7 +175,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         updateFabVisibility()
         updateVisibility(data!!.immediate)
 
-        (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
+        tryGetFragment<FriendPickerFragment>(FRIEND_PICKER_TAG)?.let { initializeFriendPickerFragment(it) }
 
         updateSelectAll()
     }
@@ -183,13 +184,13 @@ class UserListFragment : AbstractFragment(), FabUser {
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
-            hide.add(friendListRecycler)
-            show = emptyTextLayout
-
             emptyText.setText(R.string.friends_empty)
+
+            show = emptyTextLayout
+            hide += friendListRecycler
         } else {
             show = friendListRecycler
-            hide.add(emptyTextLayout)
+            hide += emptyTextLayout
         }
 
         animateVisibility(listOf(show), hide, immediate)
@@ -198,25 +199,26 @@ class UserListFragment : AbstractFragment(), FabUser {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (this::treeViewAdapter.isInitialized)
-            (treeViewAdapter.treeModelAdapter as FriendListAdapter).let { outState.putParcelable(SAVE_STATE_KEY, it.getSaveState()) }
+        if (this::treeViewAdapter.isInitialized) {
+            (treeViewAdapter.treeModelAdapter as FriendListAdapter).let {
+                outState.putParcelable(SAVE_STATE_KEY, it.getSaveState())
+            }
+        }
     }
 
     fun dataChanged(): Boolean {
-        if (data == null)
-            return false
+        if (data == null) return false
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        if (saveState.addedIds.isNotEmpty())
-            return true
+        if (saveState.addedIds.isNotEmpty()) return true
 
         return saveState.removedIds.isNotEmpty()
     }
 
     fun save(name: String) {
         check(name.isNotEmpty())
-        check(data != null)
+        checkNotNull(data)
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
@@ -258,16 +260,12 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         friendListFab?.let {
-            if (data != null && !selectionCallback.hasActionMode) {
-                it.show()
-            } else {
-                it.hide()
-            }
+            if (data != null && !selectionCallback.hasActionMode) it.show() else it.hide()
         }
     }
 
     override fun clearFab() {
-        check(friendListFab != null)
+        checkNotNull(friendListFab)
 
         friendListFab = null
     }
@@ -315,7 +313,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
 
         fun getSaveState(): SaveState {
-            check(data != null)
+            checkNotNull(data)
 
             val oldUserIds = data!!.userListDatas
                     .map { it.id }
@@ -331,7 +329,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             return SaveState(addedIds, removedIds, selectedIds)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false))
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = getSelected()
@@ -345,7 +343,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
-            private val selectedIds: Set<UserKey>
+            private val selectedIds: Set<UserKey>,
     ) : GroupHolderNode(0) {
 
         override val ripple = true
@@ -367,10 +365,14 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
-            treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
-            treeNode.setChildTreeNodes(listOf())
-            return treeNode
+        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>) = TreeNode(
+                this,
+                treeNodeCollection,
+                false,
+                selectedIds.contains(userListData.id)
+        ).also {
+            treeNode = it
+            it.setChildTreeNodes(listOf())
         }
 
         override fun matches(filterCriteria: Any?) = false
@@ -382,7 +384,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     class SaveState(
             val addedIds: Set<UserKey>,
             val removedIds: Set<UserKey>,
-            val selectedIds: Set<UserKey>
+            val selectedIds: Set<UserKey>,
     ) : Parcelable
 
     interface UserListListener : SnackbarListener {

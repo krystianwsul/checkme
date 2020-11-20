@@ -13,6 +13,7 @@ import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
+import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -227,14 +228,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             treeNodeCollection.nodes = treeNodes
         }
 
-        override fun onCreateViewHolder(
-                parent: ViewGroup,
-                viewType: Int,
-        ) = DialogNodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(
-                R.layout.row_list_dialog,
-                parent,
-                false
-        ))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = DialogNodeHolder(RowListDialogBinding.inflate(layoutInflater, parent, false))
 
         override val hasActionMode = false
 

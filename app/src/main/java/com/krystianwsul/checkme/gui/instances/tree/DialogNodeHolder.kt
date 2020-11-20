@@ -1,24 +1,23 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import kotlinx.android.synthetic.main.row_list_dialog.view.*
+import com.krystianwsul.checkme.databinding.RowListDialogBinding
 
-class DialogNodeHolder(view: View) : NodeHolder(view) {
+class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(rowListDialogBinding.root) {
 
-    override val rowContainer = itemView.rowContainer!!
-    override val rowTextLayout = itemView.rowTextLayout!!
-    override val rowName = itemView.rowName!!
-    override val rowDetails = itemView.rowDetails!!
-    override val rowChildren = itemView.rowChildren!!
-    override val rowThumbnail = itemView.rowThumbnail!!
-    override val rowExpand = itemView.rowExpand!!
-    override val rowCheckBoxFrame = itemView.rowCheckboxFrame!!
-    override val rowCheckBox = itemView.rowCheckbox!!
-    override val rowMargin = itemView.rowMargin!!
+    override val rowContainer = rowListDialogBinding.rowContainer
+    override val rowTextLayout = rowListDialogBinding.rowTextLayout
+    override val rowName = rowListDialogBinding.rowName
+    override val rowDetails = rowListDialogBinding.rowDetails
+    override val rowChildren = rowListDialogBinding.rowChildren
+    override val rowThumbnail = rowListDialogBinding.rowThumbnail
+    override val rowExpand = rowListDialogBinding.rowExpand
+    override val rowCheckBoxFrame = rowListDialogBinding.rowCheckboxFrame
+    override val rowCheckBox = rowListDialogBinding.rowCheckbox
+    override val rowMargin = rowListDialogBinding.rowMargin
     override val rowImage: ImageView? = null
     override val rowBigImage: ImageView? = null
     override val rowBigImageLayout: RelativeLayout? = null
-    override val rowSeparator = itemView.rowSeparator!!
+    override val rowSeparator = rowListDialogBinding.rowSeparator
 }

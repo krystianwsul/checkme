@@ -48,5 +48,6 @@ class ImageNode(
             val imageState: ImageState,
             val onImageShown: (StfalconImageViewer<ImageState>) -> Unit,
             val onDismiss: () -> Unit,
-            val showImage: Boolean)
+            val showImage: Boolean,
+    )
 }

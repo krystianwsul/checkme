@@ -1105,7 +1105,8 @@ class GroupListFragment @JvmOverloads constructor(
 
                                     groupListFragment.imageViewerData = null
                                 },
-                                groupListFragment.showImage)
+                                groupListFragment.showImage
+                        )
                     }
             )
 

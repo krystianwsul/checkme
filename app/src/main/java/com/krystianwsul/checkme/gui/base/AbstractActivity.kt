@@ -2,12 +2,9 @@ package com.krystianwsul.checkme.gui.base
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.gui.utils.SnackbarData
@@ -46,15 +43,6 @@ abstract class AbstractActivity : AppCompatActivity() {
         MyCrashlytics.logMethod(this)
 
         super.onCreate(savedInstanceState)
-    }
-
-    override fun setContentView(layoutResID: Int) {
-        super.setContentView(layoutResID)
-
-        findViewById<ViewGroup>(android.R.id.content).getChildAt(0).setBackgroundColor(ContextCompat.getColor(
-                this,
-                R.color.materialBackground
-        ))
     }
 
     override fun onNewIntent(intent: Intent) {

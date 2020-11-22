@@ -72,7 +72,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".gui.edit.EditActivity"
-            android:theme="@style/AppTheme.NoSplash"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden|adjustResize"> <!-- keyboard hack -->
 
             <intent-filter>

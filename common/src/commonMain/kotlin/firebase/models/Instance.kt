@@ -447,11 +447,6 @@ class Instance<T : ProjectType> private constructor(
 
     fun isRepeatingGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.isRepeatingGroup ?: false
 
-    fun matchesQuery(
-            now: ExactTimeStamp.Local,
-            query: String,
-    ): Boolean = task.matchesQuery(query) || getChildInstances(now).any { it.first.matchesQuery(now, query) }
-
     fun onTaskEndChanged() {
         hierarchyExactTimeStampProperty.invalidate()
     }

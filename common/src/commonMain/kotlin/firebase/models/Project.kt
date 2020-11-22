@@ -339,6 +339,8 @@ abstract class Project<T : ProjectType>(
                     now,
                     onlyRoot = true
             )
+                    .filterQuery(query, now)
+                    .map { it.first }
 
             if (filterVisible) {
                 instances.filter { instance ->

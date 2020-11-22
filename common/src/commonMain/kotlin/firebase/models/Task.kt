@@ -357,7 +357,13 @@ class Task<T : ProjectType>(
 
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
-        instanceSequences += getExistingInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule, onlyRoot)
+        instanceSequences += getExistingInstances(
+                givenStartExactTimeStamp,
+                givenEndExactTimeStamp,
+                now,
+                bySchedule,
+                onlyRoot
+        )
 
         instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule)
 

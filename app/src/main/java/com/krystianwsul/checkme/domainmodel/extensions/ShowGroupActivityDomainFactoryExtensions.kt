@@ -32,10 +32,7 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
     ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
 }
 
-private fun DomainFactory.getGroupListData(
-        timeStamp: TimeStamp,
-        now: ExactTimeStamp.Local,
-): GroupListDataWrapper {
+private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp.Local): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 

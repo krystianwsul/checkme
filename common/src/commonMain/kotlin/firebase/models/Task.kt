@@ -302,6 +302,8 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp.Local,
             bySchedule: Boolean,
     ): Sequence<Instance<out T>> {
+        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
+
         val scheduleResults = scheduleIntervals.map {
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
@@ -352,8 +354,6 @@ class Task<T : ProjectType>(
 
         val startExactTimeStamp = listOfNotNull(givenStartExactTimeStamp, startExactTimeStampOffset).maxOrNull()!!
         val endExactTimeStamp = listOfNotNull(givenEndExactTimeStamp, endExactTimeStampOffset).minOrNull()
-
-        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 

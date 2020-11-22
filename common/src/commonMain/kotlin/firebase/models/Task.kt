@@ -270,7 +270,7 @@ class Task<T : ProjectType>(
     )
 
     private fun getExistingInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
             bySchedule: Boolean,
@@ -285,7 +285,7 @@ class Task<T : ProjectType>(
 
                     val exactTimeStamp = dateTime.toLocalExactTimeStamp()
 
-                    if (exactTimeStamp < startExactTimeStamp) return@filter false
+                    if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
 
                     if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
 
@@ -357,7 +357,7 @@ class Task<T : ProjectType>(
 
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
-        instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule, onlyRoot)
+        instanceSequences += getExistingInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule, onlyRoot)
 
         instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule)
 

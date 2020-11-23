@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import io.reactivex.Observable
 
-fun <T, U, V> Observable<T>.processChanges(
+fun <T : Any, U, V> Observable<T>.processChanges(
         keyGetter: (T) -> Set<U>,
         adder: (T, U) -> V,
-        remover: ((V) -> Unit)? = null
+        remover: ((V) -> Unit)? = null,
 ): Observable<MapChanges<T, U, V>> = scan(Pair<T?, MapChanges.Tmp<U, V>>(null, MapChanges.Tmp())) { (_, oldMapChanges), newData ->
     val oldMap = oldMapChanges.newMap
     val newKeys = keyGetter(newData)

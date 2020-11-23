@@ -21,7 +21,7 @@ object RemoteConfig {
     val observable = Observable.interval(0, 12, TimeUnit.HOURS)
             .switchMapSingle { config.fetchAndActivate().toSingle() }
             .filter { it.value == true }
-            .map { Unit }
+            .map { }
             .startWith(Unit)
             .map { Values(config) }
             .replay(1)

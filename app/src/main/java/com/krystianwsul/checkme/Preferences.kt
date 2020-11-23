@@ -50,8 +50,9 @@ object Preferences : FactoryProvider.Preferences {
                 .apply()
     }
 
-    var shortcuts: Map<TaskKey, LocalDateTime> by observable(deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString)
-            ?: mapOf<TaskKey, LocalDateTime>()) { _, _, newValue ->
+    var shortcuts: Map<TaskKey, LocalDateTime> by observable(
+            deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString) ?: mapOf()
+    ) { _, _, newValue ->
         shortcutString = serialize(HashMap(newValue))
     }
 

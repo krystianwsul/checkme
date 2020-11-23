@@ -150,7 +150,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     treeViewAdapter.showProgress && (progressPosition == lastVisiblePosition)
                 }
-                .map { Unit }!!
+                .map { }!!
     }
 
     private val parametersRelay = BehaviorRelay.create<GroupListParameters>()
@@ -470,7 +470,7 @@ class GroupListFragment @JvmOverloads constructor(
             floatingActionButtonRelay.accept(NullableWrapper(value))
         }
 
-    val shareData: String?
+    val shareData: String
         get() {
             val instanceDatas = parameters.groupListDataWrapper
                     .instanceDatas

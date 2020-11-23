@@ -466,7 +466,7 @@ class Task<T : ProjectType>(
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
             groups: Boolean = false,
-            currentByHierarchy: Boolean = false, // todo delete check all calls
+            currentByHierarchy: Boolean = false,
     ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {

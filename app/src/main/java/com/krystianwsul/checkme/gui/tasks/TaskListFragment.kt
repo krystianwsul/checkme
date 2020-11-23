@@ -762,7 +762,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return false
         }
 
-        fun showIfParentShown(searchData: SearchData?): Boolean { // todo delete check for other SearchData refs
+        fun showIfParentShown(searchData: SearchData?): Boolean {
             if (searchData == null) return isVisible
 
             if (!searchData.showDeleted && !isVisible) return false

@@ -21,7 +21,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
             parentHierarchyExactTimeStamp,
             groups = true,
             currentByHierarchy = true
-    ) // todo delete check parent/child hierarchy timeStamps match currentByHiearchy
+    )
             .map { taskHierarchy ->
                 val childTask = taskHierarchy.childTask
 

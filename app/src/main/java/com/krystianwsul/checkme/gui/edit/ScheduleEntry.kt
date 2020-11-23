@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.viewmodels.EditViewModel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
 
 @Parcelize

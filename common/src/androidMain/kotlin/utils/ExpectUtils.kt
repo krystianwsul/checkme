@@ -5,7 +5,7 @@ import android.util.Log
 import java.lang.ref.WeakReference
 
 actual typealias Serializable = java.io.Serializable
-actual typealias Parcelize = kotlinx.android.parcel.Parcelize
+actual typealias Parcelize = kotlinx.parcelize.Parcelize
 actual typealias Parcelable = android.os.Parcelable
 actual typealias WeakReference<T> = WeakReference<T>
 

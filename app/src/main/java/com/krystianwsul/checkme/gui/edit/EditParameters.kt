@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 sealed class EditParameters : Parcelable {
 

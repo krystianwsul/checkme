@@ -6,7 +6,7 @@ import androidx.annotation.StringRes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 class ConfirmDialogFragment : AbstractDialogFragment() {
 

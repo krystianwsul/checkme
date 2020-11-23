@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
 
@@ -67,10 +67,6 @@ ext {
     powermockVersion = '2.0.9'
     lifecycleVersion = '2.2.0'
     glideVersion = '4.11.0'
-}
-
-androidExtensions {
-    experimental = true
 }
 
 dependencies {

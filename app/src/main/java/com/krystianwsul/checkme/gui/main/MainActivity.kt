@@ -56,7 +56,7 @@ import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
@@ -628,7 +628,7 @@ class MainActivity :
                         it.query
                 ))
             }
-                    .map { Unit }
+                    .map { }
                     .startWith(Unit)
                     .switchMap { searchParameters }
                     .subscribe { start(it.first, it.second) }

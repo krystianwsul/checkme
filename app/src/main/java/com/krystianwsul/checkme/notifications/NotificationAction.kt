@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotified
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 sealed class NotificationAction : Parcelable {
 

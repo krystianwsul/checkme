@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 class AssignToDialogFragment : AbstractDialogFragment() {

@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 

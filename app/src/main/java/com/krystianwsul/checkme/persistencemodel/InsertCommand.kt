@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Parcelable
 import android.text.TextUtils
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class InsertCommand(private val tableName: String, private val contentValues: ContentValues) : Parcelable {

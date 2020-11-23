@@ -31,7 +31,7 @@ import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 class UserListFragment : AbstractFragment(), FabUser {

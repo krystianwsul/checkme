@@ -8,7 +8,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleType
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
 
 @Parcelize

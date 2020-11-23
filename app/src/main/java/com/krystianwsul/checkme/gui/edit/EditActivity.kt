@@ -62,7 +62,7 @@ import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.observable
 
 

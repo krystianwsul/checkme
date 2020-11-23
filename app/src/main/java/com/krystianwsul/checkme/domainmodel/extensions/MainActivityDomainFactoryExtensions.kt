@@ -29,7 +29,13 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
                 TaskListFragment.ChildTaskData(
                         task.name,
                         task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp, true),
+                        getTaskListChildTaskDatas(
+                                task,
+                                now,
+                                false,
+                                hierarchyExactTimeStamp,
+                                groups = true
+                        ),
                         task.note,
                         task.taskKey,
                         null,

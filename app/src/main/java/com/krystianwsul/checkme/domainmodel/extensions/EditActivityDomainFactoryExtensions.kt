@@ -754,7 +754,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                             childTask.name,
                             getTaskListChildTaskDatas(now, childTask, excludedTaskKeys, isRootGroupTask),
                             EditViewModel.ParentKey.Task(childTask.taskKey),
-                            childTask.getScheduleText(ScheduleText, now),
+                            childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
                             childTask.note,
                             EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
                             (childTask.project as? SharedProject)?.projectKey,

@@ -19,10 +19,7 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
             ?.asSequence()
             ?: getUnscheduledTasks(now)
 
-    val taskDatas = tasks.map {
-        val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
-        Pair(it, hierarchyExactTimeStamp)
-    }
+    val taskDatas = tasks.map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
             .map { (task, hierarchyExactTimeStamp) ->
                 TaskListFragment.ChildTaskData(
                         task.name,

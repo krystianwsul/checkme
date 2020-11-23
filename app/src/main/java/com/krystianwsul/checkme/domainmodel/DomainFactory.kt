@@ -632,21 +632,24 @@ class DomainFactory(
             parentTask: Task<*>,
             now: ExactTimeStamp.Local,
             alwaysShow: Boolean,
-            hierarchyExactTimeStamp: ExactTimeStamp,
+            parentHierarchyExactTimeStamp: ExactTimeStamp,
             groups: Boolean = false,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp, groups)
+        return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, groups, true)
                 .map { taskHierarchy ->
                     val childTask = taskHierarchy.childTask
 
+                    val childHierarchyExactTimeStamp =
+                            childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
+
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                            childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
                             getTaskListChildTaskDatas(
                                     childTask,
                                     now,
                                     alwaysShow,
-                                    hierarchyExactTimeStamp,
+                                    childHierarchyExactTimeStamp,
                                     groups
                             ),
                             childTask.note,

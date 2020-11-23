@@ -466,11 +466,20 @@ class Task<T : ProjectType>(
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
             groups: Boolean = false,
+            currentByHierarchy: Boolean = false, // todo delete check all calls
     ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
-            it.currentOffset(exactTimeStamp)
-                    && it.taskHierarchy.currentOffset(exactTimeStamp)
-                    && it.taskHierarchy.childTask.currentOffset(exactTimeStamp)
+            val currentCheckExactTimeStamp = if (currentByHierarchy) {
+                it.taskHierarchy
+                        .childTask
+                        .getHierarchyExactTimeStamp(exactTimeStamp)
+            } else {
+                exactTimeStamp
+            }
+
+            it.currentOffset(currentCheckExactTimeStamp)
+                    && it.taskHierarchy.currentOffset(currentCheckExactTimeStamp)
+                    && it.taskHierarchy.childTask.currentOffset(currentCheckExactTimeStamp)
         }
                 .map { it.taskHierarchy }
                 .toMutableSet()

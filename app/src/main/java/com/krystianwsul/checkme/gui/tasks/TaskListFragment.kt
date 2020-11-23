@@ -698,6 +698,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override fun matches(filterCriteria: Any?) = childTaskData.matchesSearch(filterCriteria as? SearchData)
 
             override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+
+            override fun parentHierarchyMatches(filterCriteria: Any?) = super.parentHierarchyMatches(filterCriteria)
+                    && childTaskData.showIfParentShown(filterCriteria as? SearchData)
+
+            override fun toString() = super.toString() + ", name: $name"
         }
     }
 
@@ -755,6 +760,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (matchesQuery(searchData.query)) return true
 
             return false
+        }
+
+        fun showIfParentShown(searchData: SearchData?): Boolean { // todo delete check for other SearchData refs
+            if (searchData == null) return isVisible
+
+            if (!searchData.showDeleted && !isVisible) return false
+
+            return true
         }
     }
 

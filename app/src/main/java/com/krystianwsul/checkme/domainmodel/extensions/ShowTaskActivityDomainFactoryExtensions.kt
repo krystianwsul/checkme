@@ -15,16 +15,22 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
     val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
-    val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
+    val parentHierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-    val childTaskDatas = task.getChildTaskHierarchies(hierarchyExactTimeStamp, true)
+    val childTaskDatas = task.getChildTaskHierarchies(
+            parentHierarchyExactTimeStamp,
+            groups = true,
+            currentByHierarchy = true
+    ) // todo delete check parent/child hierarchy timeStamps match currentByHiearchy
             .map { taskHierarchy ->
                 val childTask = taskHierarchy.childTask
 
+                val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
+
                 TaskListFragment.ChildTaskData(
                         childTask.name,
-                        childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(childTask, now, true, hierarchyExactTimeStamp),
+                        childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                        getTaskListChildTaskDatas(childTask, now, true, childHierarchyExactTimeStamp),
                         childTask.note,
                         childTask.taskKey,
                         taskHierarchy.taskHierarchyKey,
@@ -38,8 +44,8 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
             .sorted()
 
     var collapseText = listOfNotNull(
-            task.getParentName(hierarchyExactTimeStamp).takeIf { it.isNotEmpty() },
-            task.getScheduleTextMultiline(ScheduleText, hierarchyExactTimeStamp)
+            task.getParentName(parentHierarchyExactTimeStamp).takeIf { it.isNotEmpty() },
+            task.getScheduleTextMultiline(ScheduleText, parentHierarchyExactTimeStamp)
                     .takeIf { it.isNotEmpty() }
     ).joinToString("\n\n")
 

@@ -93,8 +93,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTaskToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    hideShowDeleted()
-
                     inflateMenu(R.menu.show_task_menu_top)
 
                     setOnMenuItemClickListener {

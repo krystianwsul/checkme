@@ -410,8 +410,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private fun updateFabVisibility(source: String) {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
-        taskListFragmentFab?.run {
 
+        taskListFragmentFab?.run {
             fun edit(editParameters: EditParameters.Create, closeActionMode: Boolean = false) = setOnClickListener {
                 if (closeActionMode) selectionCallback.actionMode!!.finish()
 

@@ -454,6 +454,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
         treeViewAdapter.setFilterCriteria(searchData, placeholder)
+        updateFabVisibility("search")
     }
 
     override fun onDestroyView() {

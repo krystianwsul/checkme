@@ -930,6 +930,8 @@ class EditActivity : NavBarActivity() {
             override val holderType = HolderType.ASSIGNED
 
             override fun bind(activity: EditActivity, holder: Holder) {
+                viewsMap.clear()
+
                 (holder as AssignedHolder).rowAssignedBinding.apply {
                     assignedLayout.apply {
                         hint = activity.getString(R.string.assignTask)

@@ -934,9 +934,7 @@ class EditActivity : NavBarActivity() {
 
             override fun bind(activity: EditActivity, holder: Holder) {
                 (holder as AssignedHolder).rowAssignedBinding.apply {
-                    scheduleMargin.isVisible = false
-
-                    scheduleLayout.apply {
+                    assignedLayout.apply {
                         hint = activity.getString(R.string.assignTask)
                         error = null
                         endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
@@ -947,7 +945,7 @@ class EditActivity : NavBarActivity() {
                         }
                     }
 
-                    scheduleText.setFixedOnClickListener {
+                    assignedText.setFixedOnClickListener {
                         AssignToDialogFragment.newInstance(
                                 activity.delegate
                                         .parentScheduleManager
@@ -970,7 +968,7 @@ class EditActivity : NavBarActivity() {
 
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
                 (holder as AssignedHolder).rowAssignedBinding
-                        .scheduleText
+                        .assignedText
                         .setText(
                                 activity.delegate
                                         .parentScheduleManager

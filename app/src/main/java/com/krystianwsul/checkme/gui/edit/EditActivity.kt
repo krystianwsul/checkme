@@ -608,9 +608,11 @@ class EditActivity : NavBarActivity() {
 
         val notePosition get() = items.indexOf(Item.Note)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = HolderType.values()[viewType].run { newHolder(layoutInflater, parent) }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+                HolderType.values()[viewType].run { newHolder(layoutInflater, parent) }
 
-        override fun onBindViewHolder(holder: Holder, position: Int) = items[position].bind(this@EditActivity, holder)
+        override fun onBindViewHolder(holder: Holder, position: Int) =
+                items[position].bind(this@EditActivity, holder)
 
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)

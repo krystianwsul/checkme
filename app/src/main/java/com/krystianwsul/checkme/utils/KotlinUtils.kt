@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.util.Base64
 import android.view.Menu
 import android.view.View
@@ -23,8 +24,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.google.android.gms.tasks.Task
+import com.google.android.material.chip.Chip
 import com.google.android.material.tabs.TabLayout
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -236,6 +242,37 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .placeholder(R.drawable.ic_account_circle_black_24dp)
         .apply(RequestOptions.circleCropTransform())
         .into(this)
+
+fun Chip.loadPhoto(url: String?) = Glide.with(this)
+        .load(url)
+        .placeholder(R.drawable.ic_account_circle_black_24dp)
+        .apply(RequestOptions.circleCropTransform())
+        .listener(object : RequestListener<Drawable> {
+
+            override fun onResourceReady(
+                    resource: Drawable,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean,
+            ): Boolean {
+                chipIcon = resource
+
+                return false
+            }
+
+            override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean,
+            ): Boolean {
+                setChipIconResource(R.drawable.ic_account_circle_black_24dp)
+
+                return false
+            }
+        })
+        .preload()
 
 fun newUuid() = UUID.randomUUID().toString()
 

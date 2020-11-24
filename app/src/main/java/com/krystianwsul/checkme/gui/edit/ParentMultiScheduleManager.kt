@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.UserKey
 
 class ParentMultiScheduleManager(
         savedInstanceState: Bundle?,
@@ -67,6 +68,10 @@ class ParentMultiScheduleManager(
 
     override fun addSchedule(scheduleEntry: ScheduleEntry) {
         mutateSchedules { it += scheduleEntry }
+    }
+
+    override fun removeAssignedTo(userKey: UserKey) {
+        assignedTo -= userKey
     }
 
     private fun toState() = ParentScheduleState(parent?.parentKey, schedules, assignedTo)

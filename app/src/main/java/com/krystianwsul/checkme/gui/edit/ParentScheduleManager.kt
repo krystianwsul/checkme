@@ -31,4 +31,6 @@ interface ParentScheduleManager {
     fun removeSchedule(position: Int)
 
     fun saveState(outState: Bundle)
+
+    fun removeAssignedTo(userKey: UserKey)
 }

@@ -36,10 +36,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParamete
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import com.krystianwsul.checkme.utils.hideKeyboardOnClickOutside
-import com.krystianwsul.checkme.utils.startTicks
-import com.krystianwsul.checkme.utils.tryGetFragment
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
@@ -967,14 +964,38 @@ class EditActivity : NavBarActivity() {
             }
 
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
-                (holder as AssignedHolder).rowAssignedBinding
-                        .assignedText
-                        .setText(
-                                activity.delegate
-                                        .parentScheduleManager
-                                        .assignedToUsers
-                                        .joinToString("\n") { it.name }
-                        )
+                (holder as AssignedHolder).rowAssignedBinding.apply {
+                    val users = activity.delegate
+                            .parentScheduleManager
+                            .assignedToUsers
+
+                    if (users.isEmpty()) {
+                        assignedLayout.isVisible = true
+                        assignedChipGroup.isVisible = false
+                    } else {
+                        assignedLayout.isVisible = false
+                        assignedChipGroup.isVisible = true
+
+                        assignedChipGroup.removeAllViews()
+
+                        users.forEach { user ->
+                            RowAssignedChipBinding.inflate(
+                                    LayoutInflater.from(root.context),
+                                    assignedChipGroup,
+                                    true
+                            ).apply {
+                                root.text = user.name
+                                root.loadPhoto(user.photoUrl)
+
+                                root.setOnCloseIconClickListener {
+                                    activity.delegate
+                                            .parentScheduleManager
+                                            .removeAssignedTo(user.key)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

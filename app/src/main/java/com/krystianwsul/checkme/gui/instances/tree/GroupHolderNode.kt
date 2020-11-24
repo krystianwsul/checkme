@@ -20,7 +20,6 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
-import com.stfalcon.imageviewer.loader.ImageLoader
 import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
@@ -107,7 +106,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
     }
 
     protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
-        val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
+        val viewer = StfalconImageViewer.Builder(
+                rowBigImage.context,
+                listOf(taskImage.imageState)
+        ) { view, image -> image.toImageLoader().load(view) }
                 .withTransitionFrom(rowBigImage)
                 .withDismissListener { taskImage.onDismiss() }
                 .show()
@@ -294,13 +296,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             }
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
-        }
-    }
-
-    object MyImageLoader : ImageLoader<ImageState> {
-
-        override fun loadImage(imageView: ImageView?, image: ImageState?) {
-            image!!.toImageLoader().load(imageView!!)
         }
     }
 

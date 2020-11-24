@@ -138,7 +138,7 @@ dependencies {
 
     implementation 'com.github.pakoito:RxPaper2:1.4.0'
 
-    implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'
+    implementation 'com.github.stfalcon:stfalcon-imageviewer:1.0.1'
 
     implementation project(path: ':treeadapter')
     implementation project(':common')

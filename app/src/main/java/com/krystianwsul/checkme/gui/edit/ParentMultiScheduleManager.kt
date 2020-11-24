@@ -50,7 +50,7 @@ class ParentMultiScheduleManager(
     private val assignedToProperty = NonNullRelayProperty(state.assignedTo)
     override var assignedTo by assignedToProperty
     override val assignedToObservable = assignedToProperty.observable
-    override val assignedToUsers get() = assignedTo.map { parent!!.projectUsers.getValue(it) }
+    override val assignedToUsers get() = assignedTo.associateWith { parent!!.projectUsers.getValue(it) }
 
     override val changed get() = toState() != initialState
 

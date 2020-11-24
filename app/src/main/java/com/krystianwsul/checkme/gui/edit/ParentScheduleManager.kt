@@ -18,7 +18,7 @@ interface ParentScheduleManager {
     var assignedTo: Set<UserKey>
     val assignedToObservable: Observable<Set<UserKey>>
 
-    val assignedToUsers: List<EditViewModel.UserData>
+    val assignedToUsers: Map<UserKey, EditViewModel.UserData>
 
     val changed: Boolean
 

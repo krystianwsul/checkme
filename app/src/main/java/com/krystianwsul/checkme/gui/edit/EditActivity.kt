@@ -963,6 +963,8 @@ class EditActivity : NavBarActivity() {
                 onNewAssignedTo(activity, holder)
             }
 
+            private val viewsMap = mutableMapOf<UserKey, View>()
+
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
                 (holder as AssignedHolder).rowAssignedBinding.apply {
                     val users = activity.delegate
@@ -976,23 +978,33 @@ class EditActivity : NavBarActivity() {
                         assignedLayout.isVisible = false
                         assignedChipGroup.isVisible = true
 
-                        assignedChipGroup.removeAllViews()
+                        val removeUserKeys = viewsMap.keys - users.keys
+                        val addUserKeys = users.keys - viewsMap.keys
 
-                        users.forEach { user ->
-                            RowAssignedChipBinding.inflate(
+                        removeUserKeys.forEach {
+                            assignedChipGroup.removeView(viewsMap.getValue(it))
+                            viewsMap.remove(it)
+                        }
+
+                        addUserKeys.forEach { userKey ->
+                            val user = users.getValue(userKey)
+
+                            viewsMap[userKey] = RowAssignedChipBinding.inflate(
                                     LayoutInflater.from(root.context),
                                     assignedChipGroup,
                                     true
-                            ).apply {
-                                root.text = user.name
-                                root.loadPhoto(user.photoUrl)
+                            )
+                                    .root
+                                    .apply {
+                                        text = user.name
+                                        loadPhoto(user.photoUrl)
 
-                                root.setOnCloseIconClickListener {
-                                    activity.delegate
-                                            .parentScheduleManager
-                                            .removeAssignedTo(user.key)
-                                }
-                            }
+                                        setOnCloseIconClickListener {
+                                            activity.delegate
+                                                    .parentScheduleManager
+                                                    .removeAssignedTo(user.key)
+                                        }
+                                    }
                         }
                     }
                 }

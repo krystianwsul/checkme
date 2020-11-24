@@ -78,15 +78,15 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
             Observables.combineLatest(it.parentObservable, it.scheduleObservable)
         }.map { (parent, schedules) ->
             listOf(EditActivity.Item.Parent) +
-                    schedules.map { EditActivity.Item.Schedule(it) } +
-                    EditActivity.Item.NewSchedule +
-                    EditActivity.Item.Note +
                     listOfNotNull(
                             parent.value
                                     ?.projectUsers
                                     ?.takeIf { it.isNotEmpty() && schedules.isNotEmpty() }
                                     ?.let { EditActivity.Item.AssignTo }
                     ) +
+                    schedules.map { EditActivity.Item.Schedule(it) } +
+                    EditActivity.Item.NewSchedule +
+                    EditActivity.Item.Note +
                     EditActivity.Item.Image
         }!!
     }

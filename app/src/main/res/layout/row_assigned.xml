@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/scheduleMargin"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_vertical_margin" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/scheduleLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/parentTask"
+        app:errorEnabled="true"
+        app:hintAnimationEnabled="false"
+        style="@style/MySpinner">
+
+        <AutoCompleteTextView
+            android:id="@+id/scheduleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor"
+            android:singleLine="false" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

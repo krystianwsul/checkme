@@ -23,10 +23,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.databinding.ActivityEditBinding
-import com.krystianwsul.checkme.databinding.RowImageBinding
-import com.krystianwsul.checkme.databinding.RowNoteBinding
-import com.krystianwsul.checkme.databinding.RowScheduleBinding
+import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -565,12 +562,19 @@ class EditActivity : NavBarActivity() {
 
         SCHEDULE {
 
-            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) = ScheduleHolder(RowScheduleBinding.inflate(layoutInflater, parent, false))
+            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
+                    ScheduleHolder(RowScheduleBinding.inflate(layoutInflater, parent, false))
         },
 
         NOTE {
 
             override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) = NoteHolder(RowNoteBinding.inflate(layoutInflater, parent, false))
+        },
+
+        ASSIGNED {
+
+            override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
+                    AssignedHolder(RowAssignedBinding.inflate(layoutInflater, parent, false))
         },
 
         IMAGE {
@@ -656,6 +660,8 @@ class EditActivity : NavBarActivity() {
     class ScheduleHolder(val rowScheduleBinding: RowScheduleBinding) : Holder(rowScheduleBinding.root)
 
     class NoteHolder(val rowNoteBinding: RowNoteBinding) : Holder(rowNoteBinding.root)
+
+    class AssignedHolder(val rowAssignedBinding: RowAssignedBinding) : Holder(rowAssignedBinding.root)
 
     class ImageHolder(val rowImageBinding: RowImageBinding) : Holder(rowImageBinding.root)
 
@@ -924,10 +930,10 @@ class EditActivity : NavBarActivity() {
 
         object AssignTo : Item() {
 
-            override val holderType = HolderType.SCHEDULE
+            override val holderType = HolderType.ASSIGNED
 
             override fun bind(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).rowScheduleBinding.apply {
+                (holder as AssignedHolder).rowAssignedBinding.apply {
                     scheduleMargin.isVisible = false
 
                     scheduleLayout.apply {
@@ -963,7 +969,7 @@ class EditActivity : NavBarActivity() {
             }
 
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
-                (holder as ScheduleHolder).rowScheduleBinding
+                (holder as AssignedHolder).rowAssignedBinding
                         .scheduleText
                         .setText(
                                 activity.delegate

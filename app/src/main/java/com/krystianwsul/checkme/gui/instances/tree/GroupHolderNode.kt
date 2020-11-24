@@ -1,9 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.app.Activity
+import android.graphics.Color
 import android.graphics.Rect
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +15,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -106,13 +110,30 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
     }
 
     protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
+        val activity = rowBigImage.context as Activity
+
+        fun setStatusColor(@ColorInt color: Int) {
+            activity.window.statusBarColor = color
+        }
+
+        val fixStatusBar = !activity.resources.isLandscape
+
         val viewer = StfalconImageViewer.Builder(
                 rowBigImage.context,
                 listOf(taskImage.imageState)
         ) { view, image -> image.toImageLoader().load(view) }
                 .withTransitionFrom(rowBigImage)
-                .withDismissListener { taskImage.onDismiss() }
+                .withDismissListener {
+                    taskImage.onDismiss()
+
+                    if (fixStatusBar)
+                        setStatusColor(ContextCompat.getColor(rowBigImage.context, R.color.primaryDarkColor))
+                }.apply {
+                    if (fixStatusBar) withHiddenStatusBar(false)
+                }
                 .show()
+
+        if (fixStatusBar) setStatusColor(Color.BLACK)
 
         taskImage.onImageShown(viewer)
     }

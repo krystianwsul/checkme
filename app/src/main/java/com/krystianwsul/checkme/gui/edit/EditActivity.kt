@@ -931,6 +931,23 @@ class EditActivity : NavBarActivity() {
 
             override val holderType = HolderType.ASSIGNED
 
+            private fun openDialog(editActivity: EditActivity) {
+                AssignToDialogFragment.newInstance(
+                        editActivity.delegate
+                                .parentScheduleManager
+                                .parent!!
+                                .projectUsers
+                                .values
+                                .toList(),
+                        editActivity.delegate
+                                .parentScheduleManager
+                                .assignedTo
+                                .toList()
+                )
+                        .apply { listener = editActivity::assignTo }
+                        .show(editActivity.supportFragmentManager, TAG_ASSIGN_TO)
+            }
+
             override fun bind(activity: EditActivity, holder: Holder) {
                 viewsMap.clear()
 
@@ -946,22 +963,7 @@ class EditActivity : NavBarActivity() {
                         }
                     }
 
-                    assignedText.setFixedOnClickListener {
-                        AssignToDialogFragment.newInstance(
-                                activity.delegate
-                                        .parentScheduleManager
-                                        .parent!!
-                                        .projectUsers
-                                        .values
-                                        .toList(),
-                                activity.delegate
-                                        .parentScheduleManager
-                                        .assignedTo
-                                        .toList()
-                        )
-                                .apply { listener = activity::assignTo }
-                                .show(activity.supportFragmentManager, TAG_ASSIGN_TO)
-                    }
+                    assignedText.setFixedOnClickListener { openDialog(activity) }
                 }
 
                 onNewAssignedTo(activity, holder)
@@ -1002,6 +1004,8 @@ class EditActivity : NavBarActivity() {
                                     .apply {
                                         text = user.name
                                         loadPhoto(user.photoUrl)
+
+                                        setOnClickListener { openDialog(activity) }
 
                                         setOnCloseIconClickListener {
                                             activity.delegate

@@ -16,7 +16,8 @@ class NodeCollection(
         val nodeContainer: NodeContainer<NodeHolder>,
         private val note: String?,
         val parentNode: ModelNode<NodeHolder>?,
-        val useDoneNode: Boolean = true
+        private val assignedTo: List<AssignedNode.User>,
+        val useDoneNode: Boolean = true,
 ) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -55,6 +56,12 @@ class NodeCollection(
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 
         return mutableListOf<TreeNode<NodeHolder>>().apply {
+            if (assignedTo.isNotEmpty()) {
+                check(indentation == 0)
+
+                add(AssignedNode(assignedTo, true, parentNode).initialize(nodeContainer))
+            }
+
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 

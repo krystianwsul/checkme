@@ -88,7 +88,8 @@ class NotDoneGroupNode(
                     false,
                     treeNode,
                     null,
-                    this
+                    this,
+                    listOf(),
             )
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
@@ -309,7 +310,8 @@ class NotDoneGroupNode(
                     false,
                     treeNode,
                     null,
-                    this
+                    this,
+                    listOf(),
             )
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
@@ -509,7 +511,8 @@ class NotDoneGroupNode(
                     false,
                     treeNode,
                     null,
-                    this
+                    this,
+                    listOf(),
             )
 
             treeNode.setChildTreeNodes(nodeCollection.initialize(

@@ -56,7 +56,8 @@ class DoneInstanceNode(
                 false,
                 treeNode,
                 null,
-                this
+                this,
+                listOf()
         )
 
         treeNode.setChildTreeNodes(nodeCollection.initialize(

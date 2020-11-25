@@ -288,7 +288,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override val name get() = NameData(projectData.name)
+            override val name get() = NameData.Visible(projectData.name)
 
             override val details get() = Pair(projectData.users, colorSecondary)
 

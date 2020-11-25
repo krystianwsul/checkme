@@ -91,7 +91,7 @@ class DoneInstanceNode(
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
     override val name
-        get() = NameData(
+        get() = NameData.Visible(
                 instanceData.name,
                 if (instanceData.colorEnabled) colorPrimary else colorDisabled
         )

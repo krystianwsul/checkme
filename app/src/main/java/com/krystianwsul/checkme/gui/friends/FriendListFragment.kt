@@ -265,7 +265,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val ripple = true
 
-        override val name = NameData(userListData.name)
+        override val name = NameData.Visible(userListData.name)
 
         override val details = Pair(userListData.email, colorSecondary)
 

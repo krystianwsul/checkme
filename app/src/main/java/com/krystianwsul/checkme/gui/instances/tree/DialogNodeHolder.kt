@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import com.google.android.material.chip.ChipGroup
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 
 class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(rowListDialogBinding.root) {
@@ -21,5 +20,5 @@ class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(
     override val rowBigImage: ImageView? = null
     override val rowBigImageLayout: RelativeLayout? = null
     override val rowSeparator = rowListDialogBinding.rowSeparator
-    override val rowChipGroup: ChipGroup? = null
+    override val rowChipGroup = rowListDialogBinding.rowChipGroup
 }

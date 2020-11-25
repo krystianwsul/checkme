@@ -655,7 +655,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     Pair(childTaskData.scheduleText, disabledOverride ?: colorSecondary)
                 }
 
-            override val name get() = NameData(childTaskData.name, disabledOverride ?: colorPrimary)
+            override val name get() = NameData.Visible(childTaskData.name, disabledOverride ?: colorPrimary)
 
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 if (copying) return

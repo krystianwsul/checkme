@@ -2,8 +2,17 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.annotation.ColorInt
 
-data class NameData(
-        val text: String,
-        @ColorInt val color: Int = GroupHolderNode.colorPrimary,
-        val unlimitedLines: Boolean = false
-)
+sealed class NameData {
+
+    open val unlimitedLines = false
+
+    data class Visible(
+            val text: String,
+            @ColorInt val color: Int = GroupHolderNode.colorPrimary,
+            override val unlimitedLines: Boolean = false,
+    ) : NameData()
+
+    object Invisible : NameData()
+
+    object Gone : NameData()
+}

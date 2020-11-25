@@ -38,7 +38,7 @@ class NoteNode(
 
     override val textSelectable = true
 
-    override val name get() = NameData(note, unlimitedLines = true)
+    override val name get() = NameData.Visible(note, unlimitedLines = true)
 
     override val isVisibleDuringActionMode = false
 

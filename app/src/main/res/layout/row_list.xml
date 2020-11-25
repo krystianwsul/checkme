@@ -72,7 +72,7 @@
                 android:singleLine="true"
                 android:textColor="@color/textSecondary"
                 android:textSize="@dimen/textSecondary"
-                tools:ignore="Deprecated"/>
+                tools:ignore="Deprecated" />
 
             <TextView
                 android:id="@+id/rowChildren"
@@ -81,7 +81,13 @@
                 android:singleLine="true"
                 android:textColor="@color/textSecondary"
                 android:textSize="@dimen/textSecondary"
-                tools:ignore="Deprecated"/>
+                tools:ignore="Deprecated" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/rowChipGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -129,12 +135,6 @@
             android:adjustViewBounds="true" />
 
     </RelativeLayout>
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/rowChipGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
 
     <View
         android:id="@+id/rowSeparator"

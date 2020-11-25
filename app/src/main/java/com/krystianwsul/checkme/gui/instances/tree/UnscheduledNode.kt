@@ -73,7 +73,7 @@ class UnscheduledNode(
         }
     }
 
-    override val name get() = NameData(groupListFragment.activity.getString(R.string.noReminder))
+    override val name get() = NameData.Visible(groupListFragment.activity.getString(R.string.noReminder))
 
     override val isVisibleWhenEmpty = false
 

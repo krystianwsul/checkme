@@ -75,7 +75,7 @@ class TaskNode(
         }
     }
 
-    override val name get() = NameData(taskData.name)
+    override val name get() = NameData.Visible(taskData.name)
 
     override val children: Pair<String, Int>?
         get() {

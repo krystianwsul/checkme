@@ -21,7 +21,7 @@ class ImageNode(
 
     data class Id(val id: Any)
 
-    override val name: NameData? = null
+    override val name = NameData.Gone
 
     override val isSeparatorVisibleWhenNotExpanded = true
 

@@ -302,7 +302,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = NameData(parentTreeData.name)
+            override val name get() = NameData.Visible(parentTreeData.name)
 
             override val details: Pair<String, Int>?
                 get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {

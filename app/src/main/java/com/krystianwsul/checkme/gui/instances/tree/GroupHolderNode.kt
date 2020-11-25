@@ -60,7 +60,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     protected abstract val treeNode: TreeNode<NodeHolder>
 
-    protected abstract val name: NameData?
+    protected abstract val name: NameData
 
     protected open val details: Pair<String, Int>? = null
 
@@ -152,35 +152,16 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             if (taskImage != null) {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
-                rowChipGroup!!.isVisible = false
+                rowChipGroup.isVisible = false
 
                 taskImage.imageState
                         .toImageLoader()
                         .load(rowBigImage!!)
 
                 if (taskImage.showImage) showImage(rowBigImage!!, taskImage)
-            } else if (assignedTo.isNotEmpty()) {
-                rowContainer.isVisible = false
-                rowBigImageLayout!!.isVisible = false
-                rowChipGroup!!.isVisible = true
-
-                assignedTo.forEach { user ->
-                    RowAssignedChipBinding.inflate(
-                            LayoutInflater.from(rowContainer.context),
-                            rowChipGroup,
-                            true
-                    )
-                            .root
-                            .apply {
-                                text = user.name
-                                loadPhoto(user.photoUrl)
-                                isCloseIconVisible = false
-                            }
-                }
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE
-                rowChipGroup?.isVisible = false
 
                 val checkBoxState = checkBoxState
                 val widthKey = WidthKey(
@@ -237,23 +218,28 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                 rowName.run {
                     name.let {
-                        if (it != null) {
-                            visibility = View.VISIBLE
-                            text = it.text
-                            setTextColor(it.color)
+                        when (it) {
+                            is NameData.Visible -> {
+                                visibility = View.VISIBLE
+                                text = it.text
+                                setTextColor(it.color)
 
-                            if (it.unlimitedLines) {
-                                maxLines = Int.MAX_VALUE
-                                isSingleLine = false
-                            } else {
-                                allocateTextViews += this
+                                if (it.unlimitedLines) {
+                                    maxLines = Int.MAX_VALUE
+                                    isSingleLine = false
+                                } else {
+                                    allocateTextViews += this
+                                }
                             }
-                        } else {
-                            visibility = View.INVISIBLE
+                            NameData.Invisible -> {
+                                visibility = View.INVISIBLE
 
-                            setSingleLine()
+                                setSingleLine()
+                            }
+                            NameData.Gone -> {
+                                visibility = View.GONE
+                            }
                         }
-
                         setTextIsSelectable(textSelectable)
                     }
                 }
@@ -261,7 +247,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowDetails.run {
                     details.let {
                         if (it != null) {
-                            check(name?.unlimitedLines != true)
+                            check(!name.unlimitedLines)
 
                             visibility = View.VISIBLE
                             text = it.first
@@ -277,7 +263,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowChildren.run {
                     children.let {
                         if (it != null) {
-                            check(name?.unlimitedLines != true)
+                            check(!name.unlimitedLines)
 
                             visibility = View.VISIBLE
                             text = it.first
@@ -338,6 +324,28 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
                     foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
+                }
+
+                if (assignedTo.isEmpty()) {
+                    rowChipGroup.isVisible = false
+                } else {
+                    rowChipGroup.isVisible = true
+
+                    rowChipGroup.removeAllViews()
+
+                    assignedTo.forEach { user ->
+                        RowAssignedChipBinding.inflate(
+                                LayoutInflater.from(rowContainer.context),
+                                rowChipGroup,
+                                true
+                        )
+                                .root
+                                .apply {
+                                    text = user.name
+                                    loadPhoto(user.photoUrl)
+                                    isCloseIconVisible = false
+                                }
+                    }
                 }
             }
 

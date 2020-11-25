@@ -271,7 +271,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             it.setChildTreeNodes(listOf())
         }
 
-        override val name = NameData(customTimeData.name)
+        override val name = NameData.Visible(customTimeData.name)
 
         override val details = Pair(customTimeData.details, colorSecondary)
 

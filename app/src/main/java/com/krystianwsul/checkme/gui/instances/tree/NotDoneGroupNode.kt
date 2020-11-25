@@ -144,12 +144,12 @@ class NotDoneGroupNode(
 
     override val name
         get() = if (singleInstance()) {
-            NameData(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
+            NameData.Visible(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
         } else {
             if (treeNode.isExpanded) {
-                null
+                NameData.Invisible
             } else {
-                NameData(instanceDatas.sorted().joinToString(", ") { it.name })
+                NameData.Visible(instanceDatas.sorted().joinToString(", ") { it.name })
             }
         }
 
@@ -545,7 +545,7 @@ class NotDoneGroupNode(
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
         override val name
-            get() = NameData(
+            get() = NameData.Visible(
                     instanceData.name,
                     if (instanceData.colorEnabled) colorPrimary else colorDisabled
             )

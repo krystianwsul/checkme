@@ -243,36 +243,35 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .apply(RequestOptions.circleCropTransform())
         .into(this)
 
-fun Chip.loadPhoto(url: String?) = Glide.with(this)
-        .load(url)
-        .placeholder(R.drawable.ic_account_circle_black_24dp)
-        .apply(RequestOptions.circleCropTransform())
-        .listener(object : RequestListener<Drawable> {
+fun Chip.loadPhoto(url: String?) {
+    setChipIconResource(R.drawable.ic_account_circle_black_24dp)
 
-            override fun onResourceReady(
-                    resource: Drawable,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean,
-            ): Boolean {
-                chipIcon = resource
+    Glide.with(this)
+            .load(url)
+            .apply(RequestOptions.circleCropTransform())
+            .listener(object : RequestListener<Drawable> {
 
-                return false
-            }
+                override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean,
+                ): Boolean {
+                    chipIcon = resource
 
-            override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean,
-            ): Boolean {
-                setChipIconResource(R.drawable.ic_account_circle_black_24dp)
+                    return false
+                }
 
-                return false
-            }
-        })
-        .preload()
+                override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean,
+                ) = false
+            })
+            .preload()
+}
 
 fun newUuid() = UUID.randomUUID().toString()
 

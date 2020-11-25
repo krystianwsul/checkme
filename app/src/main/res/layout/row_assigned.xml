@@ -13,10 +13,11 @@
         android:id="@+id/assignedLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/parentTask"
+        android:hint="@string/assignTask"
         app:errorEnabled="true"
         app:hintAnimationEnabled="false"
-        style="@style/MySpinner">
+        style="@style/MySpinner"
+        app:endIconMode="dropdown_menu">
 
         <AutoCompleteTextView
             android:id="@+id/assignedText"

@@ -951,20 +951,9 @@ class EditActivity : NavBarActivity() {
             override fun bind(activity: EditActivity, holder: Holder) {
                 viewsMap.clear()
 
-                (holder as AssignedHolder).rowAssignedBinding.apply {
-                    assignedLayout.apply {
-                        hint = activity.getString(R.string.assignTask)
-                        error = null
-                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
-
-                        isHintAnimationEnabled = false
-                        addOneShotGlobalLayoutListener {
-                            isHintAnimationEnabled = true
-                        }
-                    }
-
-                    assignedText.setFixedOnClickListener { openDialog(activity) }
-                }
+                (holder as AssignedHolder).rowAssignedBinding
+                        .assignedText
+                        .setFixedOnClickListener { openDialog(activity) }
 
                 onNewAssignedTo(activity, holder)
             }

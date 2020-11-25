@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.ChipGroup
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -21,6 +22,7 @@ abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     abstract val rowBigImage: ImageView?
     abstract val rowBigImageLayout: RelativeLayout?
     abstract val rowSeparator: View
+    abstract val rowChipGroup: ChipGroup?
 
     val compositeDisposable = CompositeDisposable()
 }

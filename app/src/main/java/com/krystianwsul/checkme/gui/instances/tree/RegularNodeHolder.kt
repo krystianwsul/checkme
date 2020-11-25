@@ -18,4 +18,5 @@ class RegularNodeHolder(rowListBinding: RowListBinding) : NodeHolder(rowListBind
     override val rowBigImage = rowListBinding.rowBigImage
     override val rowBigImageLayout = rowListBinding.rowBigImageLayout
     override val rowSeparator = rowListBinding.rowSeparator
+    override val rowChipGroup = rowListBinding.rowChipGroup
 }

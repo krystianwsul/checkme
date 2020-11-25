@@ -1004,7 +1004,6 @@ class GroupListFragment @JvmOverloads constructor(
         companion object {
 
             const val TYPE_GROUP = 0
-            const val TYPE_IMAGE = 1
         }
 
         val treeViewAdapter = TreeViewAdapter(

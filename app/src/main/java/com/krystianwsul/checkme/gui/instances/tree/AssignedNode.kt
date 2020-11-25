@@ -5,7 +5,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class AssignedNode(
-        private val assignedTo: List<User>,
+        override val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<NodeHolder>?,
 ) : GroupHolderNode(0) {
@@ -18,6 +18,14 @@ class AssignedNode(
     override val id get() = Id(nodeContainer.id)
 
     data class Id(val id: Any)
+
+    override val name: NameData? = null
+
+    override val isSeparatorVisibleWhenNotExpanded = true
+
+    override val isVisibleDuringActionMode = false
+
+    override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
     init {
         check(assignedTo.isNotEmpty())
@@ -32,15 +40,7 @@ class AssignedNode(
         return treeNode
     }
 
-    override val name get() = NameData(assignedTo.joinToString(", ") { it.name }, unlimitedLines = true)
-
-    override val isVisibleDuringActionMode = false
-
-    override val isSeparatorVisibleWhenNotExpanded = true
-
     override fun compareTo(other: ModelNode<NodeHolder>) = -1
-
-    override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
     override fun matches(filterCriteria: Any?) = false
 

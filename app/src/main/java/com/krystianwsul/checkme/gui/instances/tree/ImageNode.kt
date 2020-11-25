@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -25,8 +24,6 @@ class ImageNode(
     override val name: NameData? = null
 
     override val isSeparatorVisibleWhenNotExpanded = true
-
-    override val itemViewType = GroupListFragment.GroupAdapter.TYPE_IMAGE
 
     fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
         this.nodeContainer = nodeContainer

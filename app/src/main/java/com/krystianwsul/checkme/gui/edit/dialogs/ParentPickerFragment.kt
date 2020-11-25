@@ -256,10 +256,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             private val parentFragment get() = taskAdapter.parentPickerFragment
 
-            override val itemViewType = 0
-
-            override val colorBackground: Int
-                get() = taskBackground
+            override val colorBackground get() = taskBackground
 
             val expandedParentKeys: List<EditViewModel.ParentKey>
                 get() {

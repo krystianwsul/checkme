@@ -3,16 +3,19 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.Rect
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.utils.isLandscape
@@ -69,13 +72,15 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
-    override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
+    final override val itemViewType = GroupListFragment.GroupAdapter.TYPE_GROUP
 
     protected open val textSelectable = false
 
-    open val ripple = false
+    protected open val ripple = false
 
-    open val imageData: ImageNode.ImageData? = null
+    protected open val imageData: ImageNode.ImageData? = null
+
+    protected open val assignedTo: List<AssignedNode.User> = listOf()
 
     protected open val thumbnail: ImageState? = null
 
@@ -147,15 +152,35 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             if (taskImage != null) {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
+                rowChipGroup!!.isVisible = false
 
                 taskImage.imageState
                         .toImageLoader()
                         .load(rowBigImage!!)
 
                 if (taskImage.showImage) showImage(rowBigImage!!, taskImage)
+            } else if (assignedTo.isNotEmpty()) {
+                rowContainer.isVisible = false
+                rowBigImageLayout!!.isVisible = false
+                rowChipGroup!!.isVisible = true
+
+                assignedTo.forEach { user ->
+                    RowAssignedChipBinding.inflate(
+                            LayoutInflater.from(rowContainer.context),
+                            rowChipGroup,
+                            true
+                    )
+                            .root
+                            .apply {
+                                text = user.name
+                                loadPhoto(user.photoUrl)
+                                isCloseIconVisible = false
+                            }
+                }
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE
+                rowChipGroup?.isVisible = false
 
                 val checkBoxState = checkBoxState
                 val widthKey = WidthKey(

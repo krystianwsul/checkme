@@ -1025,6 +1025,20 @@ class Task<T : ProjectType>(
         existingInstances.values.forEach { it.fixOffsets() }
     }
 
+    fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
+        val currentScheduleIntervals = getCurrentScheduleIntervals(now)
+
+        return if (currentScheduleIntervals.isEmpty()) {
+            listOf()
+        } else {
+            currentScheduleIntervals.map { it.schedule.assignedTo }
+                    .distinct()
+                    .single()
+                    .let(project::getAssignedTo)
+                    .map { it.value }
+        }
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

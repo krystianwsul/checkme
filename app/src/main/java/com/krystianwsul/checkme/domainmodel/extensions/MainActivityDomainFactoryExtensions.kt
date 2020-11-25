@@ -50,7 +50,7 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
             .toMutableList()
 
     MainViewModel.Data(
-            TaskListFragment.TaskData(childTaskDatas, null, true),
+            TaskListFragment.TaskData(childTaskDatas, null, true, listOf()),
             myUserFactory.user.defaultTab
     )
 }
@@ -170,7 +170,8 @@ fun DomainFactory.getGroupListData(
             taskDatas,
             null,
             instanceDatas,
-            null
+            null,
+            listOf()
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

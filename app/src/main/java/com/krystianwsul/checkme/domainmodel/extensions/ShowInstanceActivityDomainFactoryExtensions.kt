@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.AssignedNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -30,7 +31,7 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
     var displayText = listOfNotNull(
             instance.getParentName(now).takeIf { it.isNotEmpty() },
             instanceDateTime.takeIf { instance.isRootInstance(now) }?.getDisplayText(),
-            instance.getAssignedTo(now)
+            instance.getAssignedTo(now) // todo assigned also for showTaskActivity
                     .takeIf { it.isNotEmpty() }
                     ?.let {
                         MyApplication.context.getString(R.string.assignedTo) +
@@ -138,9 +139,10 @@ private fun DomainFactory.getGroupListData(
             customTimeDatas,
             task.isVisible(now, false),
             listOf(),
-            task.note,
+            task.note, // todo assigned
             instanceDatas,
-            task.getImage(deviceDbInfo)
+            task.getImage(deviceDbInfo),
+            instance.getAssignedTo(now).map { AssignedNode.User(it.name, it.photoUrl) }
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

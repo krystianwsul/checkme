@@ -86,7 +86,13 @@ class DividerNode(
     ) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), placeholder)
 
     override fun compareTo(other: ModelNode<NodeHolder>): Int {
-        check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode || other is ImageNode)
+        check(
+                other is AssignedNode
+                        || other is NoteNode
+                        || other is NotDoneGroupNode
+                        || other is UnscheduledNode
+                        || other is ImageNode
+        )
 
         return 1
     }

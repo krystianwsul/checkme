@@ -64,7 +64,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             listOf(),
             null,
             instanceDatas,
-            null
+            null,
+            listOf()
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

@@ -97,7 +97,8 @@ fun DomainFactory.getSearchInstancesData(
                     taskDatas,
                     null,
                     cappedInstanceDatas,
-                    null
+                    null,
+                    listOf()
             )
 
             cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }

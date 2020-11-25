@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import com.krystianwsul.checkme.gui.instances.tree.AssignedNode
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -14,7 +15,8 @@ data class GroupListDataWrapper(
         val taskDatas: List<TaskData>,
         val note: String?,
         val instanceDatas: List<InstanceData>,
-        val imageData: ImageState?
+        val imageData: ImageState?,
+        val assignedTo: List<AssignedNode.User>,
 ) : InstanceDataParent {
 
     data class TaskData(

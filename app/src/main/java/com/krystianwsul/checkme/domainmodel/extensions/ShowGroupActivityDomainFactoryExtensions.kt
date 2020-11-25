@@ -87,7 +87,8 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
             listOf(),
             null,
             instanceDatas,
-            null
+            null,
+            listOf()
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

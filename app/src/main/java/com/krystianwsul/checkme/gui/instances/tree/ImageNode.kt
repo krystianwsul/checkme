@@ -36,7 +36,11 @@ class ImageNode(
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is NoteNode) 1 else -1
+    override fun compareTo(other: ModelNode<NodeHolder>) = when (other) {
+        is AssignedNode -> 1
+        is NoteNode -> 1
+        else -> -1
+    }
 
     override fun onClick(holder: NodeHolder) = showImage(holder.rowBigImage!!, imageData)
 

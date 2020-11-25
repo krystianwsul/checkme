@@ -1,15 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.gui.utils.SearchData
-import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(
-        val note: String,
+class AssignedNode(
+        private val assignedTo: List<User>,
         instance: Boolean,
-        override val parentNode: ModelNode<NodeHolder>?
+        override val parentNode: ModelNode<NodeHolder>?,
 ) : GroupHolderNode(0) {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
@@ -21,10 +19,8 @@ class NoteNode(
 
     data class Id(val id: Any)
 
-    private val normalizedNote by lazy { note.normalized() }
-
     init {
-        check(note.isNotEmpty())
+        check(assignedTo.isNotEmpty())
     }
 
     fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
@@ -36,31 +32,19 @@ class NoteNode(
         return treeNode
     }
 
-    override val textSelectable = true
-
-    override val name get() = NameData(note, unlimitedLines = true)
+    override val name get() = NameData(assignedTo.joinToString(", ") { it.name }, unlimitedLines = true)
 
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is AssignedNode) 1 else -1
+    override fun compareTo(other: ModelNode<NodeHolder>) = -1
 
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
-    override fun normalize() {
-        normalizedNote
-    }
+    override fun matches(filterCriteria: Any?) = false
 
-    override fun matches(filterCriteria: Any?): Boolean {
-        if (filterCriteria == null) return true
+    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
 
-        val query = (filterCriteria as SearchData).query
-
-        if (query.isEmpty()) return true
-
-        return normalizedNote.contains(query)
-    }
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+    data class User(val name: String, val photoUrl: String?)
 }

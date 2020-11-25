@@ -498,6 +498,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
 
+            if (taskData.assignedTo.isNotEmpty()) {
+                treeNodes += AssignedNode(
+                        taskData.assignedTo,
+                        false,
+                        null
+                ).initialize(treeNodeCollection)
+            }
+
             if (!taskData.note.isNullOrEmpty()) {
                 val noteNode = NoteNode(taskData.note, false, null)
 

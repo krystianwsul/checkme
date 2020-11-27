@@ -71,7 +71,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
     protected open val children: Pair<String, Int>? = null
 
     protected open val hasAvatar = false // todo delegate
-    open val checkBoxState: CheckBoxState = CheckBoxState.Gone
+    open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 

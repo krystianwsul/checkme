@@ -286,22 +286,7 @@ class EditActivity : NavBarActivity() {
                             if (result.position == null) {
                                 delegate.parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())
                             } else {
-                                check(result.position >= 1)
-
-                                val position = result.position - 1
-
-                                val oldId = if (position < delegate.parentScheduleManager.schedules.size) {
-                                    delegate.parentScheduleManager
-                                            .schedules[position]
-                                            .id
-                                } else {
-                                    null
-                                }
-
-                                delegate.parentScheduleManager.setSchedule(
-                                        position,
-                                        result.scheduleDialogData.toScheduleEntry(oldId)
-                                )
+                                delegate.setSchedule(result.position, result.scheduleDialogData)
                             }
                         }
                         is ScheduleDialogResult.Delete -> removeSchedule(result.position)
@@ -340,9 +325,9 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun removeSchedule(position: Int) {
-        check(position >= 1)
+        check(position >= 0)
 
-        delegate.parentScheduleManager.removeSchedule(position - 1)
+        delegate.removeSchedule(position)
     }
 
     @SuppressLint("CheckResult")
@@ -371,18 +356,15 @@ class EditActivity : NavBarActivity() {
         }
     }
 
-    private val loadFinishedDisposable = CompositeDisposable().also { createDisposable += it }
-
     private fun onLoadFinished(data: EditViewModel.Data) {
-        loadFinishedDisposable.clear()
-
-        if (hasDelegate) {
+        if (hasDelegate) { // todo the delegate type could change on the fly
             delegate.newData(data)
         } else {
             delegate = EditDelegate.fromParameters(
                     parameters,
                     data,
-                    savedInstanceState
+                    savedInstanceState,
+                    createDisposable
             )
         }
         hasDelegate = true

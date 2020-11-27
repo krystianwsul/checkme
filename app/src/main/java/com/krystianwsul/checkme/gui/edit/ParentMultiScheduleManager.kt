@@ -64,11 +64,9 @@ class ParentMultiScheduleManager(
     override fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) =
             mutateSchedules { it[position] = scheduleEntry }
 
-    override fun removeSchedule(position: Int) = mutateSchedules { it.removeAt(position) }
+    override fun removeSchedule(schedulePosition: Int) = mutateSchedules { it.removeAt(schedulePosition) }
 
-    override fun addSchedule(scheduleEntry: ScheduleEntry) {
-        mutateSchedules { it += scheduleEntry }
-    }
+    override fun addSchedule(scheduleEntry: ScheduleEntry) = mutateSchedules { it += scheduleEntry }
 
     override fun removeAssignedTo(userKey: UserKey) {
         assignedTo -= userKey

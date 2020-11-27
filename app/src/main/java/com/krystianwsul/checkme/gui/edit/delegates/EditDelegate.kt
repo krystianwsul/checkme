@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -13,9 +14,12 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.treeadapter.getCurrentValue
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.plusAssign
 
-abstract class EditDelegate(savedEditImageState: EditImageState?) {
+abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDisposable: CompositeDisposable) {
 
     companion object {
 
@@ -25,19 +29,32 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
                 parameters: EditParameters,
                 data: EditViewModel.Data,
                 savedInstanceState: Bundle?,
+                compositeDisposable: CompositeDisposable,
         ): EditDelegate {
             val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
+            fun <T : EditParameters> curry(
+                    editParameters: T,
+                    constructor: (T, EditViewModel.Data, Bundle?, EditImageState?, CompositeDisposable) -> EditDelegate,
+            ) = {
+                data: EditViewModel.Data,
+                savedInstanceState: Bundle?,
+                editImageState: EditImageState?,
+                compositeDisposable: CompositeDisposable,
+                ->
+                constructor(editParameters, data, savedInstanceState, editImageState, compositeDisposable)
+            }
+
             return when (parameters) {
-                is EditParameters.Copy -> CopyExistingTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
-                is EditParameters.Edit -> EditExistingTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
-                is EditParameters.Join -> JoinTasksEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
+                is EditParameters.Copy -> curry(parameters, ::CopyExistingTaskEditDelegate)
+                is EditParameters.Edit -> curry(parameters, ::EditExistingTaskEditDelegate)
+                is EditParameters.Join -> curry(parameters, ::JoinTasksEditDelegate)
                 is EditParameters.Create,
                 is EditParameters.Share,
                 is EditParameters.Shortcut,
                 EditParameters.None,
-                -> CreateTaskEditDelegate(parameters, data, savedInstanceState, savedEditImageState)
-            }
+                -> curry(parameters, ::CreateTaskEditDelegate)
+            }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
     }
 
@@ -68,8 +85,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState
-            ?: EditImageState.None)
+    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState ?: EditImageState.None)
 
     protected val parentLookup by lazy { ParentLookup() }
 
@@ -88,7 +104,9 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
                     EditActivity.Item.NewSchedule +
                     EditActivity.Item.Note +
                     EditActivity.Item.Image
-        }!!
+        }
+                .replay(1)!!
+                .apply { compositeDisposable += connect() }
     }
 
     fun checkDataChanged(name: String, note: String?): Boolean {
@@ -142,6 +160,26 @@ abstract class EditDelegate(savedEditImageState: EditImageState?) {
     }
 
     protected open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
+
+    private val scheduleOffset
+        get() = adapterItemObservable.getCurrentValue().indexOfFirst { it is EditActivity.Item.Schedule }
+
+    fun setSchedule(adapterPosition: Int, scheduleDialogData: ScheduleDialogData) {
+        val schedulePosition = adapterPosition - scheduleOffset
+
+        val oldId = if (schedulePosition < parentScheduleManager.schedules.size) {
+            parentScheduleManager.schedules[schedulePosition].id
+        } else {
+            null
+        }
+
+        val scheduleEntry = scheduleDialogData.toScheduleEntry(oldId)
+
+        parentScheduleManager.setSchedule(schedulePosition, scheduleEntry)
+    }
+
+    fun removeSchedule(adapterPosition: Int) =
+            parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
     inner class ParentLookup {
 

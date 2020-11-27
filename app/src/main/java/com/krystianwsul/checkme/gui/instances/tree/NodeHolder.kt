@@ -23,6 +23,7 @@ abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view), Expandabl
     abstract val rowBigImageLayout: RelativeLayout?
     abstract val rowSeparator: View
     abstract val rowChipGroup: ChipGroup
+    abstract val rowMarginEnd: View?
 
     val compositeDisposable = CompositeDisposable()
 }

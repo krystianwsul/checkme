@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -309,7 +310,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
                 // todo delegate remove these
-                if (delegates.none { it is ExpandableDelegate<*> }) rowExpand.isVisible = false
+                if (delegates.none { it is ExpandableDelegate<*> }) {
+                    rowExpand.isGone = true
+                    rowMarginEnd!!.isVisible = true
+                }
 
                 rowCheckBoxFrame.visibility = checkBoxState.visibility
 

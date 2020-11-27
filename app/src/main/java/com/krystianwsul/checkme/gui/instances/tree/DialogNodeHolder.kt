@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
@@ -21,4 +22,5 @@ class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(
     override val rowBigImageLayout: RelativeLayout? = null
     override val rowSeparator = rowListDialogBinding.rowSeparator
     override val rowChipGroup = rowListDialogBinding.rowChipGroup
+    override val rowMarginEnd: View? = null
 }

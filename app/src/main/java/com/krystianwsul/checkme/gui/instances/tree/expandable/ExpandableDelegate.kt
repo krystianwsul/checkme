@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree.expandable
 
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
@@ -14,7 +14,7 @@ class ExpandableDelegate<T>(private val treeNode: TreeNode<T>) : NodeDelegate
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as ExpandableHolder).rowExpand.run {
-            isVisible = treeNode.expandVisible
+            isInvisible = !treeNode.expandVisible
 
             setImageResource(
                     if (treeNode.isExpanded)

@@ -12,13 +12,15 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
         private val parameters: EditParameters.Join,
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?
-) : EditDelegate(editImageState) {
+        editImageState: EditImageState?,
+        compositeDisposable: CompositeDisposable,
+) : EditDelegate(editImageState, compositeDisposable) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
     override val showSaveAndOpen = false

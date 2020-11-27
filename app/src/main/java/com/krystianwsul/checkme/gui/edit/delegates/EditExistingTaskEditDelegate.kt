@@ -14,13 +14,15 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.disposables.CompositeDisposable
 
 class EditExistingTaskEditDelegate(
         private val parameters: EditParameters.Edit,
         data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?
-) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState) {
+        editImageState: EditImageState?,
+        compositeDisposable: CompositeDisposable,
+) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState, compositeDisposable) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)

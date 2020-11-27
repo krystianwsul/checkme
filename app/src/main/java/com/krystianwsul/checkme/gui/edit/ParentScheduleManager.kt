@@ -28,7 +28,7 @@ interface ParentScheduleManager {
 
     fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)
 
-    fun removeSchedule(position: Int)
+    fun removeSchedule(schedulePosition: Int)
 
     fun saveState(outState: Bundle)
 

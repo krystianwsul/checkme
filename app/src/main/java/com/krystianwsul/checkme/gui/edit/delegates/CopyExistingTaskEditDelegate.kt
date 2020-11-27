@@ -13,13 +13,15 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.disposables.CompositeDisposable
 
 class CopyExistingTaskEditDelegate(
         private val parameters: EditParameters.Copy,
         data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?
-) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState) {
+        editImageState: EditImageState?,
+        compositeDisposable: CompositeDisposable,
+) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState, compositeDisposable) {
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,

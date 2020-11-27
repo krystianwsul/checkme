@@ -12,13 +12,15 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
         private val parameters: EditParameters,
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?
-) : EditDelegate(editImageState) {
+        editImageState: EditImageState?,
+        compositeDisposable: CompositeDisposable,
+) : EditDelegate(editImageState, compositeDisposable) {
 
     override val initialName: String?
     override val scheduleHint: EditActivity.Hint.Schedule?

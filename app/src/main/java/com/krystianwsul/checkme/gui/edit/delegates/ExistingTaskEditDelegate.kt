@@ -7,12 +7,14 @@ import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?
-) : EditDelegate(editImageState) {
+        editImageState: EditImageState?,
+        compositeDisposable: CompositeDisposable,
+) : EditDelegate(editImageState, compositeDisposable) {
 
     protected val taskData get() = data.taskData!!
 

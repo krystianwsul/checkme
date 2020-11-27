@@ -4,9 +4,10 @@ import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.ChipGroup
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableHolder
 import io.reactivex.disposables.CompositeDisposable
 
-abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
+abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view), ExpandableHolder {
 
     abstract val rowContainer: LinearLayout
     abstract val rowTextLayout: LinearLayout

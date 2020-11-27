@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableModelNode
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -30,7 +31,8 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
-abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder> {
+abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder>,
+        ExpandableModelNode<NodeHolder> {
 
     companion object {
 
@@ -94,7 +96,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 treeNode.expandVisible,
                 treeNode.isExpanded,
                 checkBoxState,
-                imageData?.imageState
+                imageData?.imageState,
+                assignedTo,
+                thumbnail
         )
 
     protected open val colorBackground = GroupHolderNode.colorBackground
@@ -108,7 +112,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val expandVisible: Boolean,
             val isExpanded: Boolean,
             val checkBoxState: CheckBoxState,
-            val imageState: ImageState?
+            val imageState: ImageState?,
+            val assignedTo: List<AssignedNode.User>,
+            val thumbnail: ImageState?,
     ) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id

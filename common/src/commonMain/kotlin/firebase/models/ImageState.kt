@@ -11,8 +11,7 @@ sealed class ImageState : Serializable {
         override fun hashCode() = uuid.hashCode()
 
         override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
+            if (other === this) return true
 
             return if (other is ImageState) {
                 when (other) {
@@ -31,8 +30,7 @@ sealed class ImageState : Serializable {
         override fun hashCode() = uuid.hashCode()
 
         override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
+            if (other === this) return true
 
             return if (other is ImageState) {
                 when (other) {

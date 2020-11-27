@@ -37,12 +37,15 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
                     .subscribe { (treeNode, _) -> treeNode.onExpandClick() }
                     .addTo(compositeDisposable)
 
+            /* todo delegate consider moving this into the other classes.  Maybe publish observables in the holder,
+            subscribe in the delegate, and add a disposable to the holder that gets cleared when something binds to it?
+             */
             listOf(
                     rowCheckBoxFrame.clicks().doOnNext { rowCheckBox.toggle() },
                     rowCheckBox.clicks()
             ).merge()
                     .mapNodes()
-                    .subscribe { (_, groupHolderNode) -> // todo delegate
+                    .subscribe { (_, groupHolderNode) ->
                         ((groupHolderNode as? CheckableModelNode<*>)?.checkBoxState as? CheckBoxState.Visible)?.listener?.invoke()
                     }
                     .addTo(compositeDisposable)

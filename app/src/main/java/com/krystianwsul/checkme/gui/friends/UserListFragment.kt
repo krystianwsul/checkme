@@ -19,6 +19,8 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
+import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
@@ -361,7 +363,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
-    ) : GroupHolderNode(0) {
+    ) : GroupHolderNode(0), AvatarModelNode<NodeHolder> {
 
         override val ripple = true
 
@@ -376,9 +378,12 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val isSelectable = true
 
-        override val avatarImage = NullableWrapper(userListData.photoUrl)
-
         override val parentNode: ModelNode<NodeHolder>? = null
+
+        override val avatarUrl = userListData.photoUrl
+        override val hasAvatar = avatarUrl != null
+
+        override val delegates by lazy { listOf(AvatarDelegate(treeNode, this)) }
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 

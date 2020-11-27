@@ -19,6 +19,8 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
+import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -261,7 +263,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private inner class FriendNode(val userListData: FriendListViewModel.UserListData) : GroupHolderNode(0) {
+    private inner class FriendNode(val userListData: FriendListViewModel.UserListData) :
+            GroupHolderNode(0),
+            AvatarModelNode<NodeHolder> {
 
         override val ripple = true
 
@@ -276,9 +280,12 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val id = userListData.id
 
-        override val avatarImage = NullableWrapper(userListData.photoUrl)
-
         override val parentNode: ModelNode<NodeHolder>? = null
+
+        override val avatarUrl = userListData.photoUrl
+        override val hasAvatar = userListData.photoUrl != null
+
+        override val delegates by lazy { listOf(AvatarDelegate(treeNode, this)) }
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
 

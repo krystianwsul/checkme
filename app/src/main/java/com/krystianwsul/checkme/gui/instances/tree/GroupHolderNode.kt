@@ -19,8 +19,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableModelNode
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -33,8 +33,7 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
-abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder>,
-        ExpandableModelNode<NodeHolder> {
+abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder> {
 
     companion object {
 
@@ -72,7 +71,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     open val checkBoxState: CheckBoxState = CheckBoxState.Gone
 
-    protected open val avatarImage: NullableWrapper<String>? = null
+    protected open val hasAvatar = false // todo delegate
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
@@ -179,7 +178,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                                 .resources
                                 .configuration
                                 .orientation,
-                        avatarImage != null,
+                        hasAvatar,
                         thumbnail != null
                 )
 
@@ -314,21 +313,13 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     rowExpand.isGone = true
                     rowMarginEnd!!.isVisible = true
                 }
+                if (delegates.none { it is AvatarDelegate<*> }) rowImage?.isVisible = false
 
                 rowCheckBoxFrame.visibility = checkBoxState.visibility
 
                 rowCheckBox.isChecked = checkBoxState.checked
 
-                if (avatarImage != null) {
-                    rowImage!!.run {
-                        visibility = View.VISIBLE
-                        loadPhoto(avatarImage!!.value)
-                    }
-                } else {
-                    rowImage?.visibility = View.GONE
-                }
-
-                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && avatarImage == null) View.VISIBLE else View.GONE
+                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && hasAvatar) View.VISIBLE else View.GONE
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

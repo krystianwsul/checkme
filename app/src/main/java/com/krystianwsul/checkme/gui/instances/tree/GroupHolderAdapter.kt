@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import io.reactivex.Observable
@@ -40,8 +42,8 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
                     rowCheckBox.clicks()
             ).merge()
                     .mapNodes()
-                    .subscribe { (_, groupHolderNode) ->
-                        (groupHolderNode.checkBoxState as? GroupHolderNode.CheckBoxState.Visible)?.listener?.invoke()
+                    .subscribe { (_, groupHolderNode) -> // todo delegate
+                        ((groupHolderNode as? CheckableModelNode<*>)?.checkBoxState as? CheckBoxState.Visible)?.listener?.invoke()
                     }
                     .addTo(compositeDisposable)
         }

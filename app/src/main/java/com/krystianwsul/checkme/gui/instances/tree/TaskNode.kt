@@ -1,6 +1,9 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.utils.SearchData
@@ -12,8 +15,8 @@ class TaskNode(
         indentation: Int,
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
-        override val parentNode: ModelNode<NodeHolder>?
-) : GroupHolderNode(indentation), TaskParent {
+        override val parentNode: ModelNode<NodeHolder>?,
+) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -40,7 +43,7 @@ class TaskNode(
             }
         }
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
 
     fun initialize(
             parentTreeNode: TreeNode<NodeHolder>,

@@ -382,7 +382,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val avatarUrl = userListData.photoUrl
         override val hasAvatar = true
 
-        override val delegates by lazy { listOf(AvatarDelegate(treeNode, this)) }
+        override val delegates by lazy { listOf(AvatarDelegate(this)) }
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 

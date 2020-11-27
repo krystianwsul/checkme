@@ -1,5 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -9,8 +12,8 @@ import com.krystianwsul.treeadapter.TreeNode
 class NoteNode(
         val note: String,
         instance: Boolean,
-        override val parentNode: ModelNode<NodeHolder>?
-) : GroupHolderNode(0) {
+        override val parentNode: ModelNode<NodeHolder>?,
+) : GroupHolderNode(0), CheckableModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -43,6 +46,8 @@ class NoteNode(
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = true
+
+    override val delegates by lazy { listOf(CheckableDelegate(this)) }
 
     override fun compareTo(other: ModelNode<NodeHolder>) = if (other is AssignedNode) 1 else -1
 

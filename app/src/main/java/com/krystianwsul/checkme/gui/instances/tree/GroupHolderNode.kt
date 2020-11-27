@@ -20,6 +20,8 @@ import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -68,9 +70,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     protected open val children: Pair<String, Int>? = null
 
-    open val checkBoxState: CheckBoxState = CheckBoxState.Gone
-
     protected open val hasAvatar = false // todo delegate
+    open val checkBoxState: CheckBoxState = CheckBoxState.Gone
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
@@ -95,7 +96,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 details,
                 children,
                 indentation,
-                checkBoxState,
                 imageData?.imageState,
                 assignedTo,
                 thumbnail,
@@ -110,7 +110,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val details: Pair<String, Int>?,
             val children: Pair<String, Int>?,
             val indentation: Int,
-            val checkBoxState: CheckBoxState,
             val imageState: ImageState?,
             val assignedTo: List<AssignedNode.User>,
             val thumbnail: ImageState?,
@@ -169,7 +168,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE
 
-                val checkBoxState = checkBoxState
                 val widthKey = WidthKey(
                         indentation,
                         checkBoxState.visibility == View.GONE,
@@ -313,12 +311,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     rowMarginEnd!!.isVisible = true
                 }
                 if (delegates.none { it is AvatarDelegate<*> }) rowImage?.isVisible = false
+                if (delegates.none { it is CheckableDelegate<*> }) rowCheckBoxFrame.isGone = true
 
-                rowCheckBoxFrame.visibility = checkBoxState.visibility
-
-                rowCheckBox.isChecked = checkBoxState.checked
-
-                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && !hasAvatar) View.VISIBLE else View.GONE
+                rowMargin.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
@@ -360,40 +355,4 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val avatarVisible: Boolean,
             val thumbnailVisible: Boolean
     )
-
-    sealed class CheckBoxState {
-
-        abstract val visibility: Int
-        open val checked: Boolean = false
-
-        object Gone : CheckBoxState() {
-
-            override val visibility = View.GONE
-        }
-
-        object Invisible : CheckBoxState() {
-
-            override val visibility = View.INVISIBLE
-        }
-
-        class Visible(override val checked: Boolean, val listener: () -> Unit) : CheckBoxState() {
-
-            override val visibility = View.VISIBLE
-
-            override fun hashCode() = (if (checked) 1 else 0) + 31 * visibility
-
-            override fun equals(other: Any?): Boolean {
-                if (other === null) return false
-                if (other === this) return true
-
-                if (other !is Visible)
-                    return false
-
-                if (other.checked != checked)
-                    return false
-
-                return true
-            }
-        }
-    }
 }

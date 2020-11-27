@@ -2,6 +2,9 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -13,8 +16,8 @@ import java.util.*
 class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
-        override val parentNode: ModelNode<NodeHolder>?
-) : GroupHolderNode(indentation) {
+        override val parentNode: ModelNode<NodeHolder>?,
+) : GroupHolderNode(indentation), CheckableModelNode<NodeHolder> {
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
@@ -29,7 +32,7 @@ class DividerNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
 
     fun initialize(
             expanded: Boolean,

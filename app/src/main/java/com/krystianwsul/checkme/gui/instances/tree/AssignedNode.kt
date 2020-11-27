@@ -1,5 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -8,7 +11,7 @@ class AssignedNode(
         override val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(0) {
+) : GroupHolderNode(0), CheckableModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -24,6 +27,8 @@ class AssignedNode(
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override val isVisibleDuringActionMode = false
+
+    override val delegates by lazy { listOf(CheckableDelegate(this)) }
 
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 

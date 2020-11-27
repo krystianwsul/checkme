@@ -4,6 +4,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -15,8 +18,8 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 class DoneInstanceNode(
         indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
-        val dividerNode: DividerNode
-) : GroupHolderNode(indentation), NodeCollectionParent {
+        val dividerNode: DividerNode,
+) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder> {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -33,7 +36,7 @@ class DoneInstanceNode(
 
     override val parentNode = dividerNode
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
 
     fun initialize(
             dividerTreeNode: TreeNode<NodeHolder>,

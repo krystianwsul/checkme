@@ -8,6 +8,9 @@ import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -25,8 +28,8 @@ class NotDoneGroupNode(
         private val notDoneGroupCollection: NotDoneGroupCollection,
         val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
         private val searchResults: Boolean,
-        override val parentNode: ModelNode<NodeHolder>?
-) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
+        override val parentNode: ModelNode<NodeHolder>?,
+) : GroupHolderNode(indentation), NodeCollectionParent, Sortable, CheckableModelNode<NodeHolder> {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -47,7 +50,7 @@ class NotDoneGroupNode(
 
     override val thumbnail get() = if (singleInstance()) singleInstanceData.imageState else null
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
 
     init {
         check(instanceDatas.isNotEmpty())
@@ -241,10 +244,7 @@ class NotDoneGroupNode(
                 }
             }
         } else {
-            if (treeNode.isExpanded)
-                CheckBoxState.Gone
-            else
-                CheckBoxState.Invisible
+            if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
         }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
@@ -452,14 +452,14 @@ class NotDoneGroupNode(
     class NotDoneInstanceNode(
             indentation: Int,
             val instanceData: GroupListDataWrapper.InstanceData,
-            private val parentNotDoneGroupNode: NotDoneGroupNode
-    ) : GroupHolderNode(indentation), NodeCollectionParent {
+            private val parentNotDoneGroupNode: NotDoneGroupNode,
+    ) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder> {
 
         companion object {
 
             fun getChildrenText(
                     treeNode: TreeNode<NodeHolder>,
-                    instanceData: GroupListDataWrapper.InstanceData
+                    instanceData: GroupListDataWrapper.InstanceData,
             ): Pair<String, Int>? {
                 val text = treeNode.takeIf { !it.isExpanded }
                         ?.allChildren
@@ -493,7 +493,7 @@ class NotDoneGroupNode(
 
         override val parentNode = parentNotDoneGroupNode
 
-        override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+        override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
 
         fun initialize(
                 expandedInstances: Map<InstanceKey, Boolean>,

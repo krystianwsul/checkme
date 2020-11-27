@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
@@ -32,10 +33,13 @@ class DoneInstanceNode(
 
     override val parentNode = dividerNode
 
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+
     fun initialize(
             dividerTreeNode: TreeNode<NodeHolder>,
             expandedInstances: Map<InstanceKey, Boolean>,
-            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
+            selectedInstances: List<InstanceKey>,
+    ): TreeNode<NodeHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean

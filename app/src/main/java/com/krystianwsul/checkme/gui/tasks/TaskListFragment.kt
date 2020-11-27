@@ -28,6 +28,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -590,6 +591,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         addAll(taskWrappers.flatMap { it.expandedTaskKeys })
                     }
                 }
+
+            override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
 
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,

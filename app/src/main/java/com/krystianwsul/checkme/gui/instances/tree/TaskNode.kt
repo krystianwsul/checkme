@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.TaskKey
@@ -39,10 +40,13 @@ class TaskNode(
             }
         }
 
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+
     fun initialize(
             parentTreeNode: TreeNode<NodeHolder>,
             expandedTaskKeys: List<TaskKey>,
-            selectedTaskKeys: List<TaskKey>): TreeNode<NodeHolder> {
+            selectedTaskKeys: List<TaskKey>,
+    ): TreeNode<NodeHolder> {
         val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 

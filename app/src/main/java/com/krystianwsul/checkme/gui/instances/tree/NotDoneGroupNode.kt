@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -45,6 +46,8 @@ class NotDoneGroupNode(
     private val groupListFragment get() = groupAdapter.groupListFragment
 
     override val thumbnail get() = if (singleInstance()) singleInstanceData.imageState else null
+
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
 
     init {
         check(instanceDatas.isNotEmpty())
@@ -490,12 +493,14 @@ class NotDoneGroupNode(
 
         override val parentNode = parentNotDoneGroupNode
 
+        override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+
         fun initialize(
                 expandedInstances: Map<InstanceKey, Boolean>,
                 selected: Boolean,
                 selectedInstances: List<InstanceKey>,
                 selectedGroups: List<Long>,
-                notDoneGroupTreeNode: TreeNode<NodeHolder>
+                notDoneGroupTreeNode: TreeNode<NodeHolder>,
         ): TreeNode<NodeHolder> {
             val (expanded, doneExpanded) = if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
                 true to expandedInstances.getValue(instanceData.instanceKey)

@@ -15,7 +15,6 @@ abstract class NodeHolder(view: View) : RecyclerView.ViewHolder(view), Expandabl
     abstract val rowDetails: TextView
     abstract val rowChildren: TextView
     abstract val rowThumbnail: ImageView
-    abstract val rowExpand: ImageView
     abstract val rowCheckBoxFrame: FrameLayout
     abstract val rowCheckBox: CheckBox
     abstract val rowMargin: View

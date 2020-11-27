@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -30,12 +31,15 @@ class UnscheduledNode(
 
     override val parentNode: ModelNode<NodeHolder>? = null
 
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<NodeHolder>,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             expandedTaskKeys: List<TaskKey>,
-            selectedTaskKeys: List<TaskKey>): TreeNode<NodeHolder> {
+            selectedTaskKeys: List<TaskKey>,
+    ): TreeNode<NodeHolder> {
         check(!expanded || taskDatas.isNotEmpty())
 
         this.taskDatas = taskDatas

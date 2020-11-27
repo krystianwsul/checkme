@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -272,6 +273,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                     return expandedParentKeys
                 }
+
+            override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
 
             fun initialize(
                     nodeContainer: NodeContainer<NodeHolder>,

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -28,12 +29,14 @@ class DividerNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
+    override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<NodeHolder>,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedInstances: Map<InstanceKey, Boolean>,
-            selectedInstances: List<InstanceKey>
+            selectedInstances: List<InstanceKey>,
     ): TreeNode<NodeHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 

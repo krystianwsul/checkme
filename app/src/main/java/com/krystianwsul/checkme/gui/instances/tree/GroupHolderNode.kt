@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableModelNode
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -86,6 +87,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     protected open val thumbnail: ImageState? = null
 
+    protected open val delegates = listOf<NodeDelegate>()
+
     final override val state
         get() = State(
                 id,
@@ -109,15 +112,16 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val details: Pair<String, Int>?,
             val children: Pair<String, Int>?,
             val indentation: Int,
-            val expandVisible: Boolean,
+            val expandVisible: Boolean, // todo expand
             val isExpanded: Boolean,
             val checkBoxState: CheckBoxState,
             val imageState: ImageState?,
             val assignedTo: List<AssignedNode.User>,
             val thumbnail: ImageState?,
+            // todo expand delegateStates
     ) : ModelState {
 
-        override fun same(other: ModelState) = (other as State).id == id
+        override fun same(other: ModelState) = (other as State).id == id // todo expand delegateStates
     }
 
     protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
@@ -306,10 +310,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     }
                 }
 
-                rowExpand.run {
-                    visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
-                    setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-                }
+                delegates.forEach { it.onBindViewHolder(viewHolder) }
+                // todo delegate remove these
+                if (delegates.none { it is ExpandableDelegate<*> }) rowExpand.isVisible = false
 
                 rowCheckBoxFrame.visibility = checkBoxState.visibility
 

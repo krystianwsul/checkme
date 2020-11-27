@@ -96,12 +96,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 details,
                 children,
                 indentation,
-                treeNode.expandVisible,
-                treeNode.isExpanded,
                 checkBoxState,
                 imageData?.imageState,
                 assignedTo,
-                thumbnail
+                thumbnail,
+                delegates.map { it.state }
         )
 
     protected open val colorBackground = GroupHolderNode.colorBackground
@@ -112,16 +111,14 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val details: Pair<String, Int>?,
             val children: Pair<String, Int>?,
             val indentation: Int,
-            val expandVisible: Boolean, // todo expand
-            val isExpanded: Boolean,
             val checkBoxState: CheckBoxState,
             val imageState: ImageState?,
             val assignedTo: List<AssignedNode.User>,
             val thumbnail: ImageState?,
-            // todo expand delegateStates
+            val delegateStates: List<Any>,
     ) : ModelState {
 
-        override fun same(other: ModelState) = (other as State).id == id // todo expand delegateStates
+        override fun same(other: ModelState) = (other as State).id == id
     }
 
     protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {

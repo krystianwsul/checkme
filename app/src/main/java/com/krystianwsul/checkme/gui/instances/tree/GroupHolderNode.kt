@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -319,7 +318,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                 rowCheckBox.isChecked = checkBoxState.checked
 
-                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && hasAvatar) View.VISIBLE else View.GONE
+                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && !hasAvatar) View.VISIBLE else View.GONE
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

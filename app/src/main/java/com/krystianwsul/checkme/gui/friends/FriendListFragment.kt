@@ -29,7 +29,6 @@ import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
@@ -283,7 +282,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val parentNode: ModelNode<NodeHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
-        override val hasAvatar = userListData.photoUrl != null
+        override val hasAvatar = true
 
         override val delegates by lazy { listOf(AvatarDelegate(treeNode, this)) }
 

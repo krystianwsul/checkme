@@ -570,6 +570,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 override val parentNode: ModelNode<NodeHolder>?,
         ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode<NodeHolder> {
 
+            override val nodeType = NodeType.TASK_LIST_TASK
+
             override val keyChain = taskParent.keyChain + childTaskData.taskKey
 
             override val id = keyChain

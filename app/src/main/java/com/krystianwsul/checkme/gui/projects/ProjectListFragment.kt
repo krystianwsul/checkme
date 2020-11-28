@@ -21,10 +21,7 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
-import com.krystianwsul.checkme.gui.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
-import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -282,6 +279,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) :
                 GroupHolderNode(0),
                 MultiLineModelNode<NodeHolder> {
+
+            override val nodeType = NodeType.PROJECT
 
             override val ripple = true
 

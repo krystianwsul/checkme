@@ -22,6 +22,8 @@ class DividerNode(
         override val parentNode: ModelNode<NodeHolder>?,
 ) : GroupHolderNode(indentation), CheckableModelNode<NodeHolder>, SingleLineModelNode<NodeHolder> {
 
+    override val nodeType = NodeType.DIVIDER
+
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
     data class Id(val id: Any)

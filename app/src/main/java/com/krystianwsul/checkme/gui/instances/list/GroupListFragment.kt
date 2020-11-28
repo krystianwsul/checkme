@@ -1002,11 +1002,6 @@ class GroupListFragment @JvmOverloads constructor(
             compositeDisposable: CompositeDisposable,
     ) : GroupHolderAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
-        companion object {
-
-            const val TYPE_GROUP = 0
-        }
-
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),

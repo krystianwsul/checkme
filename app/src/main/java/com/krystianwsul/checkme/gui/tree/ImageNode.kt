@@ -21,6 +21,8 @@ class ImageNode(
 
     private lateinit var nodeContainer: NodeContainer<NodeHolder>
 
+    override val nodeType = NodeType.IMAGE
+
     override val id get() = Id(nodeContainer.id)
 
     data class Id(val id: Any)

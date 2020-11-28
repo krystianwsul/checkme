@@ -19,10 +19,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
-import com.krystianwsul.checkme.gui.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
-import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
@@ -369,6 +366,8 @@ class UserListFragment : AbstractFragment(), FabUser {
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
     ) : GroupHolderNode(0), AvatarModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+
+        override val nodeType = NodeType.USER
 
         override val ripple = true
 

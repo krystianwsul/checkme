@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
@@ -50,7 +49,9 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<NodeHolder> {
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
-    final override val itemViewType = GroupListFragment.GroupAdapter.TYPE_GROUP
+    abstract val nodeType: NodeType
+
+    final override val itemViewType by lazy { nodeType.ordinal }
 
     protected open val ripple = false
 

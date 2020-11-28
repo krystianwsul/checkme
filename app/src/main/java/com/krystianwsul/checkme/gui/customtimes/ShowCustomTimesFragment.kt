@@ -19,10 +19,7 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
-import com.krystianwsul.checkme.gui.tree.GroupHolderAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
-import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -263,6 +260,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
+
+        override val nodeType = NodeType.CUSTOM_TIME
 
         override val id = customTimeData.id
 

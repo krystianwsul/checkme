@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
@@ -252,6 +253,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
+
+            override val nodeType = NodeType.PARENT_PICKER_TASK
 
             override val ripple = true
 

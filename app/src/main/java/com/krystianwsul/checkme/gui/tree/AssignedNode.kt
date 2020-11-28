@@ -22,6 +22,8 @@ class AssignedNode(
 
     private lateinit var nodeContainer: NodeContainer<NodeHolder>
 
+    override val nodeType = NodeType.ASSIGNED
+
     override val id get() = Id(nodeContainer.id)
 
     data class Id(val id: Any)

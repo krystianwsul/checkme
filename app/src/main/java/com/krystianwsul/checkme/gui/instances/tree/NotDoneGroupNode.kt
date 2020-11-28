@@ -44,6 +44,8 @@ class NotDoneGroupNode(
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
+    override val nodeType = NodeType.NOT_DONE_GROUP
+
     override val ripple = true
 
     private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
@@ -503,6 +505,8 @@ class NotDoneGroupNode(
                 }
             }
         }
+
+        override val nodeType = NodeType.NOT_DONE_INSTANCE
 
         override val ripple = true
 

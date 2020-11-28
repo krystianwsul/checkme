@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
-import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
@@ -20,7 +19,10 @@ import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
@@ -212,7 +214,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         super.onDestroyView()
     }
 
-    private inner class FriendListAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
+    private inner class FriendListAdapter : BaseAdapter(), ActionModeCallback by selectionCallback {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
@@ -237,8 +239,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             treeNodeCollection.nodes = userDataWrappers.map { it.initialize(treeNodeCollection) }
         }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = RegularNodeHolder(RowListBinding.inflate(layoutInflater, parent, false))
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") placeHolder: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = userDataWrappers.filter { it.treeNode.isSelected }

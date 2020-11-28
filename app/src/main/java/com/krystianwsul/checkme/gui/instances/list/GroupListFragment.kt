@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +20,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -1000,7 +998,7 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable,
-    ) : GroupHolderAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
+    ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
@@ -1114,11 +1112,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             groupListFragment.showImage = false
         }
-
-        override fun onCreateViewHolder(
-                parent: ViewGroup,
-                viewType: Int,
-        ) = RegularNodeHolder(RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
         override val groupAdapter = this
 

@@ -12,14 +12,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
-import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -224,7 +226,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         super.onDestroyView()
     }
 
-    private inner class CustomTimesAdapter : GroupHolderAdapter(), ActionModeCallback by selectionCallback {
+    private inner class CustomTimesAdapter : BaseAdapter(), ActionModeCallback by selectionCallback {
 
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
@@ -249,9 +251,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             treeNodeCollection.nodes = customTimeWrappers.map { it.initialize(treeNodeCollection) }
         }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-                RegularNodeHolder(RowListBinding.inflate(layoutInflater, parent, false))
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :

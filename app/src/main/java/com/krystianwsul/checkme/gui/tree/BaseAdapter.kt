@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tree
 
+import android.view.ViewGroup
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
@@ -10,9 +11,15 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 
-abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
+abstract class BaseAdapter : TreeModelAdapter<NodeHolder> {
 
     protected abstract val treeNodeCollection: TreeNodeCollection<NodeHolder>
+
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NodeHolder {
+        val nodeType = NodeType.values()[viewType]
+
+        return nodeType.onCreateViewHolder(parent)
+    }
 
     final override fun onViewAttachedToWindow(holder: NodeHolder) {
         holder.apply {

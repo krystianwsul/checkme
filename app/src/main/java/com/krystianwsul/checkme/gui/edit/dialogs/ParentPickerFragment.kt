@@ -6,7 +6,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -14,9 +13,8 @@ import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
-import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.gui.tree.GroupHolderAdapter
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
@@ -199,7 +197,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :
-            GroupHolderAdapter(),
+            BaseAdapter(),
             TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
@@ -235,8 +233,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             treeNodeCollection.nodes = treeNodes
         }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = DialogNodeHolder(RowListDialogBinding.inflate(layoutInflater, parent, false))
 
         override val hasActionMode = false
 

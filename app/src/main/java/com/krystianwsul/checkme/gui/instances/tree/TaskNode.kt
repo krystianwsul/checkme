@@ -1,10 +1,14 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.TaskKey
@@ -16,7 +20,7 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<NodeHolder> {
+) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -43,7 +47,21 @@ class TaskNode(
             }
         }
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
+    override val delegates by lazy {
+        listOf(
+                ExpandableDelegate(treeNode),
+                CheckableDelegate(this),
+                MultiLineDelegate(this)
+        )
+    }
+
+    override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+                indentation,
+                checkBoxState.visibility == View.GONE,
+                hasAvatar,
+                thumbnail != null
+        )
 
     fun initialize(
             parentTreeNode: TreeNode<NodeHolder>,
@@ -82,7 +100,7 @@ class TaskNode(
         }
     }
 
-    override val name get() = NameData.Visible(taskData.name)
+    override val name get() = MultiLineNameData.Visible(taskData.name)
 
     override val children: Pair<String, Int>?
         get() {

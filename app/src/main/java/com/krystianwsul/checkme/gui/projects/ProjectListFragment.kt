@@ -19,7 +19,13 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
-import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -273,7 +279,9 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 viewType: Int,
         ) = RegularNodeHolder(RowListBinding.inflate(layoutInflater, parent, false))
 
-        inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
+        inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) :
+                GroupHolderNode(0),
+                MultiLineModelNode<NodeHolder> {
 
             override val ripple = true
 
@@ -288,13 +296,23 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override val name get() = NameData.Visible(projectData.name)
+            override val name get() = MultiLineNameData.Visible(projectData.name)
 
             override val details get() = Pair(projectData.users, colorSecondary)
 
             override val isSelectable = true
 
             override val parentNode: ModelNode<NodeHolder>? = null
+
+            override val delegates by lazy { listOf(MultiLineDelegate(this)) }
+
+            override val widthKey
+                get() = MultiLineDelegate.WidthKey(
+                        indentation,
+                        checkBoxState.visibility == View.GONE,
+                        hasAvatar,
+                        thumbnail != null
+                )
 
             override fun onClick(holder: NodeHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 

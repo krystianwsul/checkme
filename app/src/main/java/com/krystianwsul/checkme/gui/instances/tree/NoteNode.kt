@@ -1,8 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -13,7 +17,7 @@ class NoteNode(
         val note: String,
         instance: Boolean,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<NodeHolder> {
+) : GroupHolderNode(0), CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -41,13 +45,26 @@ class NoteNode(
 
     override val textSelectable = true
 
-    override val name get() = NameData.Visible(note, unlimitedLines = true)
+    override val name get() = MultiLineNameData.Visible(note, unlimitedLines = true)
 
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val delegates by lazy { listOf(CheckableDelegate(this)) }
+    override val delegates by lazy {
+        listOf(
+                CheckableDelegate(this),
+                MultiLineDelegate(this)
+        )
+    }
+
+    override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+                indentation,
+                checkBoxState.visibility == View.GONE,
+                hasAvatar,
+                thumbnail != null
+        )
 
     override fun compareTo(other: ModelNode<NodeHolder>) = if (other is AssignedNode) 1 else -1
 

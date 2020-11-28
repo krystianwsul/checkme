@@ -13,7 +13,7 @@ class RegularNodeHolder(rowListBinding: RowListBinding) : NodeHolder(rowListBind
     override val rowExpand = rowListBinding.rowExpand
     override val rowCheckBoxFrame = rowListBinding.rowCheckboxFrame
     override val rowCheckBox = rowListBinding.rowCheckbox
-    override val rowMargin = rowListBinding.rowMargin
+    override val rowMarginStart = rowListBinding.rowMargin
     override val rowImage = rowListBinding.rowImage
     override val rowBigImage = rowListBinding.rowBigImage
     override val rowBigImageLayout = rowListBinding.rowBigImageLayout

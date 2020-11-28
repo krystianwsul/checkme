@@ -18,9 +18,15 @@ import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
@@ -362,11 +368,11 @@ class UserListFragment : AbstractFragment(), FabUser {
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
-    ) : GroupHolderNode(0), AvatarModelNode<NodeHolder> {
+    ) : GroupHolderNode(0), AvatarModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
 
         override val ripple = true
 
-        override val name = NameData.Visible(userListData.name)
+        override val name = MultiLineNameData.Visible(userListData.name)
 
         override val details = Pair(userListData.email, colorSecondary)
 
@@ -382,7 +388,20 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val avatarUrl = userListData.photoUrl
         override val hasAvatar = true
 
-        override val delegates by lazy { listOf(AvatarDelegate(this)) }
+        override val delegates by lazy {
+            listOf(
+                    AvatarDelegate(this),
+                    MultiLineDelegate(this)
+            )
+        }
+
+        override val widthKey
+            get() = MultiLineDelegate.WidthKey(
+                    indentation,
+                    checkBoxState.visibility == View.GONE,
+                    hasAvatar,
+                    thumbnail != null
+            )
 
         override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 

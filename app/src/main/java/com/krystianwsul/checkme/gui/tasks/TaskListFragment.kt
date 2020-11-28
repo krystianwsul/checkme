@@ -29,6 +29,9 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -564,7 +567,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
                 override val parentNode: ModelNode<NodeHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, Sortable {
+        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode<NodeHolder> {
 
             override val keyChain = taskParent.keyChain + childTaskData.taskKey
 
@@ -592,7 +595,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     }
                 }
 
-            override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+            override val delegates by lazy {
+                listOf(
+                        ExpandableDelegate(treeNode),
+                        MultiLineDelegate(this)
+                )
+            }
+
+            override val widthKey
+                get() = MultiLineDelegate.WidthKey(
+                        indentation,
+                        checkBoxState.visibility == View.GONE,
+                        hasAvatar,
+                        thumbnail != null
+                )
 
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,
@@ -658,7 +674,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     Pair(childTaskData.scheduleText, disabledOverride ?: colorSecondary)
                 }
 
-            override val name get() = NameData.Visible(childTaskData.name, disabledOverride ?: colorPrimary)
+            override val name get() = MultiLineNameData.Visible(childTaskData.name, disabledOverride ?: colorPrimary)
 
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 if (copying) return
@@ -712,10 +728,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
-            override fun parentHierarchyMatches(filterCriteria: Any?) = super.parentHierarchyMatches(filterCriteria)
-                    && childTaskData.showIfParentShown(filterCriteria as? SearchData)
-
-            override fun toString() = super.toString() + ", name: $name"
+            override fun parentHierarchyMatches(filterCriteria: Any?) =
+                    super<GroupHolderNode>.parentHierarchyMatches(filterCriteria)
+                            && childTaskData.showIfParentShown(filterCriteria as? SearchData)
         }
     }
 

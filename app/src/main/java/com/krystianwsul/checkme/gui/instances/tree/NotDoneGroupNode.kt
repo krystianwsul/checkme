@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
@@ -12,6 +13,9 @@ import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -29,7 +33,12 @@ class NotDoneGroupNode(
         val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
         private val searchResults: Boolean,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(indentation), NodeCollectionParent, Sortable, CheckableModelNode<NodeHolder> {
+) :
+        GroupHolderNode(indentation),
+        NodeCollectionParent,
+        Sortable,
+        CheckableModelNode<NodeHolder>,
+        MultiLineModelNode<NodeHolder> {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -50,7 +59,21 @@ class NotDoneGroupNode(
 
     override val thumbnail get() = if (singleInstance()) singleInstanceData.imageState else null
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
+    override val delegates by lazy {
+        listOf(
+                ExpandableDelegate(treeNode),
+                CheckableDelegate(this),
+                MultiLineDelegate(this)
+        )
+    }
+
+    override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+                indentation,
+                checkBoxState.visibility == View.GONE,
+                hasAvatar,
+                thumbnail != null
+        )
 
     init {
         check(instanceDatas.isNotEmpty())
@@ -150,12 +173,12 @@ class NotDoneGroupNode(
 
     override val name
         get() = if (singleInstance()) {
-            NameData.Visible(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
+            MultiLineNameData.Visible(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
         } else {
             if (treeNode.isExpanded) {
-                NameData.Invisible
+                MultiLineNameData.Invisible
             } else {
-                NameData.Visible(instanceDatas.sorted().joinToString(", ") { it.name })
+                MultiLineNameData.Visible(instanceDatas.sorted().joinToString(", ") { it.name })
             }
         }
 
@@ -453,7 +476,11 @@ class NotDoneGroupNode(
             indentation: Int,
             val instanceData: GroupListDataWrapper.InstanceData,
             private val parentNotDoneGroupNode: NotDoneGroupNode,
-    ) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder> {
+    ) :
+            GroupHolderNode(indentation),
+            NodeCollectionParent,
+            CheckableModelNode<NodeHolder>,
+            MultiLineModelNode<NodeHolder> {
 
         companion object {
 
@@ -493,7 +520,21 @@ class NotDoneGroupNode(
 
         override val parentNode = parentNotDoneGroupNode
 
-        override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
+        override val delegates by lazy {
+            listOf(
+                    ExpandableDelegate(treeNode),
+                    CheckableDelegate(this),
+                    MultiLineDelegate(this),
+            )
+        }
+
+        override val widthKey
+            get() = MultiLineDelegate.WidthKey(
+                    indentation,
+                    checkBoxState.visibility == View.GONE,
+                    hasAvatar,
+                    thumbnail != null
+            )
 
         fun initialize(
                 expandedInstances: Map<InstanceKey, Boolean>,
@@ -550,7 +591,7 @@ class NotDoneGroupNode(
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
         override val name
-            get() = NameData.Visible(
+            get() = MultiLineNameData.Visible(
                     instanceData.name,
                     if (instanceData.colorEnabled) colorPrimary else colorDisabled
             )

@@ -18,7 +18,13 @@ import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
@@ -252,7 +258,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
-            GroupHolderNode(0) {
+            GroupHolderNode(0),
+            MultiLineModelNode<NodeHolder> {
 
         public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
@@ -271,13 +278,23 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             it.setChildTreeNodes(listOf())
         }
 
-        override val name = NameData.Visible(customTimeData.name)
+        override val name = MultiLineNameData.Visible(customTimeData.name)
 
         override val details = Pair(customTimeData.details, colorSecondary)
 
         override val isSelectable = true
 
         override val parentNode: ModelNode<NodeHolder>? = null
+
+        override val delegates by lazy { listOf(MultiLineDelegate(this)) }
+
+        override val widthKey
+            get() = MultiLineDelegate.WidthKey(
+                    indentation,
+                    checkBoxState.visibility == View.GONE,
+                    hasAvatar,
+                    thumbnail != null
+            )
 
         override fun onClick(holder: NodeHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 

@@ -1,8 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -11,7 +15,7 @@ class AssignedNode(
         override val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<NodeHolder> {
+) : GroupHolderNode(0), CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
 
     override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -22,15 +26,23 @@ class AssignedNode(
 
     data class Id(val id: Any)
 
-    override val name = NameData.Gone
+    override val name = MultiLineNameData.Gone
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override val isVisibleDuringActionMode = false
 
-    override val delegates by lazy { listOf(CheckableDelegate(this)) }
+    override val delegates by lazy { listOf(CheckableDelegate(this), MultiLineDelegate(this)) }
 
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
+
+    override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+                indentation,
+                checkBoxState.visibility == View.GONE,
+                hasAvatar,
+                thumbnail != null
+        )
 
     init {
         check(assignedTo.isNotEmpty())

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -8,6 +9,9 @@ import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
@@ -19,7 +23,7 @@ class DoneInstanceNode(
         indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode,
-) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder> {
+) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
 
     public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
@@ -36,7 +40,13 @@ class DoneInstanceNode(
 
     override val parentNode = dividerNode
 
-    override val delegates by lazy { listOf(ExpandableDelegate(treeNode), CheckableDelegate(this)) }
+    override val delegates by lazy {
+        listOf(
+                ExpandableDelegate(treeNode),
+                CheckableDelegate(this),
+                MultiLineDelegate(this)
+        )
+    }
 
     fun initialize(
             dividerTreeNode: TreeNode<NodeHolder>,
@@ -98,7 +108,7 @@ class DoneInstanceNode(
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
     override val name
-        get() = NameData.Visible(
+        get() = MultiLineNameData.Visible(
                 instanceData.name,
                 if (instanceData.colorEnabled) colorPrimary else colorDisabled
         )
@@ -135,14 +145,22 @@ class DoneInstanceNode(
 
                 groupListFragment.listener.showSnackbarNotDone(1) {
                     DomainFactory.instance.setInstanceDone(
-                        0,
-                        SaveService.Source.GUI,
-                        instanceData.instanceKey,
-                        true
+                            0,
+                            SaveService.Source.GUI,
+                            instanceData.instanceKey,
+                            true
                     )
                 }
             }
         }
+
+    override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+                indentation,
+                checkBoxState.visibility == View.GONE,
+                hasAvatar,
+                thumbnail != null
+        )
 
     override fun compareTo(other: ModelNode<NodeHolder>): Int {
         checkNotNull(instanceData.done)

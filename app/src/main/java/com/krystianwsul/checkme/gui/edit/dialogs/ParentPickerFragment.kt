@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,8 +16,14 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.DialogNodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -242,7 +249,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
                 override val parentNode: ModelNode<NodeHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent {
+        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<NodeHolder> {
 
             override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
@@ -274,7 +281,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     return expandedParentKeys
                 }
 
-            override val delegates by lazy { listOf(ExpandableDelegate(treeNode)) }
+            override val delegates by lazy {
+                listOf(
+                        ExpandableDelegate(treeNode),
+                        MultiLineDelegate(this)
+                )
+            }
+
+            override val widthKey
+                get() = MultiLineDelegate.WidthKey(
+                        indentation,
+                        checkBoxState.visibility == View.GONE,
+                        hasAvatar,
+                        thumbnail != null
+                )
 
             fun initialize(
                     nodeContainer: NodeContainer<NodeHolder>,
@@ -305,7 +325,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = NameData.Visible(parentTreeData.name)
+            override val name get() = MultiLineNameData.Visible(parentTreeData.name)
 
             override val details: Pair<String, Int>?
                 get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {

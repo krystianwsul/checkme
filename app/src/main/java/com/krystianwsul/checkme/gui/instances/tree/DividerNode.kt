@@ -1,15 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -21,7 +19,7 @@ class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(indentation), CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+) : GroupHolderNode(indentation), CheckableModelNode<NodeHolder>, SingleLineModelNode<NodeHolder> {
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
@@ -40,17 +38,9 @@ class DividerNode(
         listOf(
                 ExpandableDelegate(treeNode),
                 CheckableDelegate(this),
-                MultiLineDelegate(this)
+                SingleLineDelegate(this)
         )
     }
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
-                thumbnail != null
-        )
 
     fun initialize(
             expanded: Boolean,
@@ -93,7 +83,7 @@ class DividerNode(
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }
 
-    override val name get() = MultiLineNameData.Visible(groupListFragment.activity.getString(R.string.done))
+    override val text by lazy { groupListFragment.activity.getString(R.string.done) }
 
     override val checkBoxState = CheckBoxState.Invisible
 

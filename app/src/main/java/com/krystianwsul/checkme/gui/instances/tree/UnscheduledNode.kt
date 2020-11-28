@@ -1,15 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -19,7 +17,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(0), TaskParent, CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+) : GroupHolderNode(0), TaskParent, CheckableModelNode<NodeHolder>, SingleLineModelNode<NodeHolder> {
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
@@ -42,17 +40,9 @@ class UnscheduledNode(
         listOf(
                 ExpandableDelegate(treeNode),
                 CheckableDelegate(this),
-                MultiLineDelegate(this),
+                SingleLineDelegate(this),
         )
     }
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
-                thumbnail != null
-        )
 
     fun initialize(
             expanded: Boolean,
@@ -98,7 +88,7 @@ class UnscheduledNode(
         }
     }
 
-    override val name get() = MultiLineNameData.Visible(groupListFragment.activity.getString(R.string.noReminder))
+    override val text by lazy { groupListFragment.activity.getString(R.string.noReminder) }
 
     override val isVisibleWhenEmpty = false
 

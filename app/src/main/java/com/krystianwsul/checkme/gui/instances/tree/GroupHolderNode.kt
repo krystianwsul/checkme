@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -147,6 +148,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<NodeHolder> {
                 }
 
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
+
                 // todo delegate remove these
                 if (delegates.none { it is ExpandableDelegate<*> }) {
                     rowExpand.isGone = true
@@ -154,6 +156,10 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<NodeHolder> {
                 }
                 if (delegates.none { it is AvatarDelegate<*> }) rowImage?.isVisible = false
                 if (delegates.none { it is CheckableDelegate<*> }) rowCheckBoxFrame.isGone = true
+                if (delegates.none { it is MultiLineDelegate<*> }) {
+                    rowDetails.isGone = true
+                    rowChildren.isGone = true
+                }
 
                 rowMarginStart.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar
 

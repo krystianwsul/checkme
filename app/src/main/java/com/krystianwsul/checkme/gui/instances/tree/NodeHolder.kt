@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarHolder
 import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineHolder
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineHolder
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class NodeHolder(view: View) :
@@ -17,7 +18,8 @@ abstract class NodeHolder(view: View) :
         ExpandableHolder,
         AvatarHolder,
         CheckableHolder,
-        MultiLineHolder {
+        MultiLineHolder,
+        SingleLineHolder {
 
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView

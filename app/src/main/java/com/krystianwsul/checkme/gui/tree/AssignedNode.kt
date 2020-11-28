@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -66,4 +67,6 @@ class AssignedNode(
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
 
     data class User(val name: String, val photoUrl: String?)
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

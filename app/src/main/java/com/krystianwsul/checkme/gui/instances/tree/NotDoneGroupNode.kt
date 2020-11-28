@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -458,6 +459,12 @@ class NotDoneGroupNode(
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
+    override fun ordinalDesc() = if (singleInstance()) {
+        singleInstanceData.run { "$name $ordinal" }
+    } else {
+        null
+    }
+
     data class SingleId(val instanceKey: InstanceKey)
 
     class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp.Local) {
@@ -656,11 +663,9 @@ class NotDoneGroupNode(
         override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
         data class Id(val instanceKey: InstanceKey)
+
+        class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
     }
 
-    override fun ordinalDesc() = if (singleInstance()) {
-        singleInstanceData.run { "$name $ordinal" }
-    } else {
-        null
-    }
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

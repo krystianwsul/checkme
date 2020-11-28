@@ -1,11 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -133,4 +135,6 @@ class TaskNode(
     override fun matches(filterCriteria: Any?) = taskData.matchesQuery((filterCriteria as? SearchData)?.query)
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

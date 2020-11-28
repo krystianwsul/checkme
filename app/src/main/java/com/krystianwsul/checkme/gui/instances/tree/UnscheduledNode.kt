@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
@@ -8,6 +9,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -102,4 +104,6 @@ class UnscheduledNode(
     override fun matches(filterCriteria: Any?) = false
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

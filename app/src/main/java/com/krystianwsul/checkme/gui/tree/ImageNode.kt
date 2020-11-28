@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -67,4 +68,6 @@ class ImageNode(
             val onDismiss: () -> Unit,
             val showImage: Boolean,
     )
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

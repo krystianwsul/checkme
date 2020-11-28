@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -8,6 +9,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -193,4 +195,6 @@ class DoneInstanceNode(
     override fun matches(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

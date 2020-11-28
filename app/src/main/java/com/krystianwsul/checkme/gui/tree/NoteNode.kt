@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -87,4 +88,6 @@ class NoteNode(
     }
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 }

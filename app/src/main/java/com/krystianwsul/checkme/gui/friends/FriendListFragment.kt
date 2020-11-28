@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
+import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
@@ -19,10 +20,7 @@ import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
-import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
@@ -317,6 +315,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
+
+    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
 
     interface FriendListListener : SnackbarListener, ActionModeListener {
 

@@ -119,5 +119,5 @@ enum class NodeType {
         )
     };
 
-    abstract fun onCreateViewHolder(parent: ViewGroup): NodeHolder
+    abstract fun onCreateViewHolder(parent: ViewGroup): BaseHolder
 }

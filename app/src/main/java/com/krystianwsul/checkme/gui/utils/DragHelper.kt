@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -77,7 +77,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         endPosition = null
     }
 
-    abstract fun getTreeViewAdapter(): TreeViewAdapter<NodeHolder>
+    abstract fun getTreeViewAdapter(): TreeViewAdapter<BaseHolder>
 
     private fun canDropOverHelper(recyclerView: RecyclerView, target: RecyclerView.ViewHolder): Boolean {
         val treeNodeCollection = (recyclerView.adapter as TreeViewAdapter<*>).getTreeNodeCollection()

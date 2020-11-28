@@ -44,7 +44,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         fun newInstance() = ShowCustomTimesFragment()
     }
 
-    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
         private set
 
     private var selectedCustomTimeKeys: List<CustomTimeKey.Private>? = null
@@ -235,7 +235,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                 viewCreatedDisposable
         )
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+        override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
             private set
 
         fun initialize() {
@@ -253,9 +253,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
             GroupHolderNode(0),
-            MultiLineModelNode<NodeHolder> {
+            MultiLineModelNode<BaseHolder> {
 
-        public override lateinit var treeNode: TreeNode<NodeHolder>
+        public override lateinit var treeNode: TreeNode<BaseHolder>
             private set
 
         override val nodeType = NodeType.CUSTOM_TIME
@@ -264,7 +264,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val ripple = true
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>) = TreeNode(
+        fun initialize(treeNodeCollection: TreeNodeCollection<BaseHolder>) = TreeNode(
                 this,
                 treeNodeCollection,
                 false,
@@ -280,7 +280,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val isSelectable = true
 
-        override val parentNode: ModelNode<NodeHolder>? = null
+        override val parentNode: ModelNode<BaseHolder>? = null
 
         override val delegates by lazy { listOf(MultiLineDelegate(this)) }
 
@@ -292,9 +292,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     thumbnail != null
             )
 
-        override fun onClick(holder: NodeHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+        override fun onClick(holder: BaseHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
+        override fun compareTo(other: ModelNode<BaseHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
 
         override fun matches(filterCriteria: Any?) = false
 

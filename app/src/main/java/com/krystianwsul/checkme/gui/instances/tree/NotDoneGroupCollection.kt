@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.NodeContainer
@@ -12,7 +12,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 class NotDoneGroupCollection(
         private val indentation: Int,
         val nodeCollection: NodeCollection,
-        private val nodeContainer: NodeContainer<NodeHolder>
+        private val nodeContainer: NodeContainer<BaseHolder>,
 ) {
 
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
@@ -79,8 +79,8 @@ class NotDoneGroupCollection(
             expandedGroups: List<TimeStamp>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>
-    ): TreeNode<NodeHolder> {
+            selectedGroups: List<Long>,
+    ): TreeNode<BaseHolder> {
         check(instanceDatas.isNotEmpty())
 
         val notDoneGroupNode = NotDoneGroupNode(

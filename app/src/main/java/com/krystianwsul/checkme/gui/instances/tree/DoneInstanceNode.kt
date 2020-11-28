@@ -6,8 +6,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
@@ -28,9 +28,9 @@ class DoneInstanceNode(
         indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode,
-) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
 
-    public override lateinit var treeNode: TreeNode<NodeHolder>
+    public override lateinit var treeNode: TreeNode<BaseHolder>
         private set
 
     override val nodeType = NodeType.DONE
@@ -56,10 +56,10 @@ class DoneInstanceNode(
     }
 
     fun initialize(
-            dividerTreeNode: TreeNode<NodeHolder>,
+            dividerTreeNode: TreeNode<BaseHolder>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-    ): TreeNode<NodeHolder> {
+    ): TreeNode<BaseHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean
@@ -169,7 +169,7 @@ class DoneInstanceNode(
                 thumbnail != null
         )
 
-    override fun compareTo(other: ModelNode<NodeHolder>): Int {
+    override fun compareTo(other: ModelNode<BaseHolder>): Int {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = other as DoneInstanceNode
@@ -180,7 +180,7 @@ class DoneInstanceNode(
 
     override val isSelectable = true
 
-    override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+    override fun onClick(holder: BaseHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
     fun removeFromParent(x: TreeViewAdapter.Placeholder) {
         dividerNode.remove(this, x)

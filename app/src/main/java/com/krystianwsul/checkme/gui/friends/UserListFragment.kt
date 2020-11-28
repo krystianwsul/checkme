@@ -50,7 +50,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var projectId: ProjectKey.Shared? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
         private set
 
     private var data: ShowProjectViewModel.Data? = null
@@ -306,7 +306,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 viewCreatedDisposable
         )
 
-        public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+        public override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
             private set
 
         fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
@@ -363,7 +363,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
-    ) : GroupHolderNode(0), AvatarModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+    ) : GroupHolderNode(0), AvatarModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
 
         override val nodeType = NodeType.USER
 
@@ -373,14 +373,14 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        public override lateinit var treeNode: TreeNode<NodeHolder>
+        public override lateinit var treeNode: TreeNode<BaseHolder>
             private set
 
         override val id = userListData.id
 
         override val isSelectable = true
 
-        override val parentNode: ModelNode<NodeHolder>? = null
+        override val parentNode: ModelNode<BaseHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
         override val hasAvatar = true
@@ -400,9 +400,9 @@ class UserListFragment : AbstractFragment(), FabUser {
                     thumbnail != null
             )
 
-        override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
+        override fun compareTo(other: ModelNode<BaseHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>) = TreeNode(
+        fun initialize(treeNodeCollection: TreeNodeCollection<BaseHolder>) = TreeNode(
                 this,
                 treeNodeCollection,
                 false,

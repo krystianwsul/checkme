@@ -4,9 +4,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 
-class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(rowListDialogBinding.root) {
+class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : BaseHolder(rowListDialogBinding.root) {
 
     override val rowContainer = rowListDialogBinding.rowContainer
     override val rowTextLayout = rowListDialogBinding.rowTextLayout

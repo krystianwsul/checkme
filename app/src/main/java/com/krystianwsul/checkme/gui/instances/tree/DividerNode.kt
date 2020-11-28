@@ -20,8 +20,8 @@ import java.util.*
 class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
-        override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(indentation), CheckableModelNode<NodeHolder>, SingleLineModelNode<NodeHolder> {
+        override val parentNode: ModelNode<BaseHolder>?,
+) : GroupHolderNode(indentation), CheckableModelNode<BaseHolder>, SingleLineModelNode<BaseHolder> {
 
     override val nodeType = NodeType.DIVIDER
 
@@ -29,7 +29,7 @@ class DividerNode(
 
     data class Id(val id: Any)
 
-    override lateinit var treeNode: TreeNode<NodeHolder>
+    override lateinit var treeNode: TreeNode<BaseHolder>
         private set
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
@@ -48,11 +48,11 @@ class DividerNode(
 
     fun initialize(
             expanded: Boolean,
-            nodeContainer: NodeContainer<NodeHolder>,
+            nodeContainer: NodeContainer<BaseHolder>,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-    ): TreeNode<NodeHolder> {
+    ): TreeNode<BaseHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -67,8 +67,8 @@ class DividerNode(
     private fun newChildTreeNode(
             instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, Boolean>,
-            selectedInstances: List<InstanceKey>
-    ): TreeNode<NodeHolder> {
+            selectedInstances: List<InstanceKey>,
+    ): TreeNode<BaseHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
@@ -103,7 +103,7 @@ class DividerNode(
             placeholder: TreeViewAdapter.Placeholder
     ) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), placeholder)
 
-    override fun compareTo(other: ModelNode<NodeHolder>): Int {
+    override fun compareTo(other: ModelNode<BaseHolder>): Int {
         check(
                 other is AssignedNode
                         || other is NoteNode

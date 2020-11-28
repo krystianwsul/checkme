@@ -11,17 +11,17 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 
-abstract class BaseAdapter : TreeModelAdapter<NodeHolder> {
+abstract class BaseAdapter : TreeModelAdapter<BaseHolder> {
 
-    protected abstract val treeNodeCollection: TreeNodeCollection<NodeHolder>
+    protected abstract val treeNodeCollection: TreeNodeCollection<BaseHolder>
 
-    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NodeHolder {
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseHolder {
         val nodeType = NodeType.values()[viewType]
 
         return nodeType.onCreateViewHolder(parent)
     }
 
-    final override fun onViewAttachedToWindow(holder: NodeHolder) {
+    final override fun onViewAttachedToWindow(holder: BaseHolder) {
         holder.apply {
             fun Observable<*>.mapNodes() = map { adapterPosition }.filter { it >= 0 }.map {
                 treeNodeCollection.getNode(it).let {
@@ -59,5 +59,5 @@ abstract class BaseAdapter : TreeModelAdapter<NodeHolder> {
         }
     }
 
-    final override fun onViewDetachedFromWindow(holder: NodeHolder) = holder.compositeDisposable.clear()
+    final override fun onViewDetachedFromWindow(holder: BaseHolder) = holder.compositeDisposable.clear()
 }

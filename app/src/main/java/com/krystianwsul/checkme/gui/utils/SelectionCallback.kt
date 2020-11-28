@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.animateItems
 import com.krystianwsul.treeadapter.ActionModeCallback
@@ -31,7 +31,7 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
     private var menuClickPlaceholder: TreeViewAdapter.Placeholder? = null
     private var removingLast = false
 
-    protected abstract fun getTreeViewAdapter(): TreeViewAdapter<NodeHolder>
+    protected abstract fun getTreeViewAdapter(): TreeViewAdapter<BaseHolder>
 
     protected abstract val bottomBarData: Triple<MyBottomBar, Int, () -> Unit>
 

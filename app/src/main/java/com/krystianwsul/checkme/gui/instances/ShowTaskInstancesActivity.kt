@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
@@ -135,7 +135,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         super.onDestroy()
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<BaseHolder>) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

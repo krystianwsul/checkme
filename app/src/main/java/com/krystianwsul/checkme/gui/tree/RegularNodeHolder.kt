@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.tree
 
 import com.krystianwsul.checkme.databinding.RowListBinding
 
-abstract class RegularNodeHolder(rowListBinding: RowListBinding) : NodeHolder(rowListBinding.root) {
+abstract class RegularNodeHolder(rowListBinding: RowListBinding) : BaseHolder(rowListBinding.root) {
 
     override val rowContainer = rowListBinding.rowContainer
     override val rowTextLayout = rowListBinding.rowTextLayout

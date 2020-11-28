@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import io.reactivex.disposables.CompositeDisposable
 
-abstract class NodeHolder(view: View) :
+abstract class BaseHolder(view: View) :
         RecyclerView.ViewHolder(view),
         ExpandableHolder,
         AvatarHolder,

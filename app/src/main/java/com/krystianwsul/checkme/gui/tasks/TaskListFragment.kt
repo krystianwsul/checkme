@@ -71,7 +71,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var data: Data? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
         private set
 
     private val dragHelper by lazy {
@@ -484,7 +484,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 viewCreatedDisposable
         )
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+        override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
             private set
 
         override val taskAdapter = this
@@ -501,7 +501,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
+            val treeNodes = mutableListOf<TreeNode<BaseHolder>>()
 
             if (taskData.assignedTo.isNotEmpty()) {
                 treeNodes += AssignedNode(
@@ -564,8 +564,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 private val taskParent: TaskParent,
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
-                override val parentNode: ModelNode<NodeHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode<NodeHolder> {
+                override val parentNode: ModelNode<BaseHolder>?,
+        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode<BaseHolder> {
 
             override val nodeType = NodeType.TASK_LIST_TASK
 
@@ -573,7 +573,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val id = keyChain
 
-            public override lateinit var treeNode: TreeNode<NodeHolder>
+            public override lateinit var treeNode: TreeNode<BaseHolder>
                 private set
 
             override val ripple = true
@@ -612,9 +612,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,
-                    nodeContainer: NodeContainer<NodeHolder>,
+                    nodeContainer: NodeContainer<BaseHolder>,
                     expandedTaskKeys: List<TaskKey>?,
-            ): TreeNode<NodeHolder> {
+            ): TreeNode<BaseHolder> {
                 val selected = if (selectedTaskKeys != null) {
                     check(selectedTaskKeys.isNotEmpty())
                     selectedTaskKeys.contains(childTaskData.taskKey)
@@ -631,7 +631,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
-                val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
+                val treeNodes = mutableListOf<TreeNode<BaseHolder>>()
 
                 for (childTaskData in childTaskData.children) {
                     val taskWrapper = TaskWrapper(
@@ -691,7 +691,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val isSelectable = true
 
-            override fun onClick(holder: NodeHolder) {
+            override fun onClick(holder: BaseHolder) {
                 if (!copying)
                     taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
                 else if (indentation == 0)
@@ -700,7 +700,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val thumbnail = childTaskData.imageState
 
-            override fun compareTo(other: ModelNode<NodeHolder>) = if (other is TaskWrapper) {
+            override fun compareTo(other: ModelNode<BaseHolder>) = if (other is TaskWrapper) {
                 var comparison = childTaskData.compareTo(other.childTaskData)
                 if (taskListFragment.data!!.reverseOrderForTopLevelNodes && indentation == 0)
                     comparison = -comparison

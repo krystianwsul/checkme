@@ -40,7 +40,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -193,7 +193,7 @@ class MainActivity :
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
-        override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) {
+        override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<BaseHolder>) {
             onCreateActionMode(actionMode)
 
             check(onPageChangeDisposable == null)
@@ -299,7 +299,7 @@ class MainActivity :
 
             override fun onCreateGroupActionMode(
                     actionMode: ActionMode,
-                    treeViewAdapter: TreeViewAdapter<NodeHolder>,
+                    treeViewAdapter: TreeViewAdapter<BaseHolder>,
             ) {
                 onCreateActionMode(actionMode)
 

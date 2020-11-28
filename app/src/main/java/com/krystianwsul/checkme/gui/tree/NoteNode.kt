@@ -17,13 +17,13 @@ import com.krystianwsul.treeadapter.TreeNode
 class NoteNode(
         val note: String,
         instance: Boolean,
-        override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+        override val parentNode: ModelNode<BaseHolder>?,
+) : GroupHolderNode(0), CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
 
-    override lateinit var treeNode: TreeNode<NodeHolder>
+    override lateinit var treeNode: TreeNode<BaseHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer<NodeHolder>
+    private lateinit var nodeContainer: NodeContainer<BaseHolder>
 
     override val nodeType = NodeType.NOTE
 
@@ -37,7 +37,7 @@ class NoteNode(
         check(note.isNotEmpty())
     }
 
-    fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
+    fun initialize(nodeContainer: NodeContainer<BaseHolder>): TreeNode<BaseHolder> {
         this.nodeContainer = nodeContainer
 
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
@@ -69,7 +69,7 @@ class NoteNode(
                 thumbnail != null
         )
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is AssignedNode) 1 else -1
+    override fun compareTo(other: ModelNode<BaseHolder>) = if (other is AssignedNode) 1 else -1
 
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 

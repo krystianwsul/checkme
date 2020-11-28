@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.gui.instances.tree
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AssignedNode
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NoteNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -17,9 +17,9 @@ class NodeCollection(
         private val indentation: Int,
         val groupAdapter: GroupListFragment.GroupAdapter,
         val useGroups: Boolean,
-        val nodeContainer: NodeContainer<NodeHolder>,
+        val nodeContainer: NodeContainer<BaseHolder>,
         private val note: String?,
-        val parentNode: ModelNode<NodeHolder>?,
+        val parentNode: ModelNode<BaseHolder>?,
         private val assignedTo: List<AssignedNode.User>,
         val useDoneNode: Boolean = true,
 ) {
@@ -53,13 +53,13 @@ class NodeCollection(
             unscheduledExpanded: Boolean,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
-            imageData: ImageNode.ImageData?
-    ): List<TreeNode<NodeHolder>> {
+            imageData: ImageNode.ImageData?,
+    ): List<TreeNode<BaseHolder>> {
         fun GroupListDataWrapper.InstanceData.filterNotDone() = done == null || !useDoneNode
         val notDoneInstanceDatas = instanceDatas.filter { it.filterNotDone() }
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 
-        return mutableListOf<TreeNode<NodeHolder>>().apply {
+        return mutableListOf<TreeNode<BaseHolder>>().apply {
             if (assignedTo.isNotEmpty()) {
                 check(indentation == 0)
 

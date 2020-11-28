@@ -15,13 +15,13 @@ import com.krystianwsul.treeadapter.TreeNode
 class AssignedNode(
         override val assignedTo: List<User>,
         instance: Boolean,
-        override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+        override val parentNode: ModelNode<BaseHolder>?,
+) : GroupHolderNode(0), CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
 
-    override lateinit var treeNode: TreeNode<NodeHolder>
+    override lateinit var treeNode: TreeNode<BaseHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer<NodeHolder>
+    private lateinit var nodeContainer: NodeContainer<BaseHolder>
 
     override val nodeType = NodeType.ASSIGNED
 
@@ -51,7 +51,7 @@ class AssignedNode(
         check(assignedTo.isNotEmpty())
     }
 
-    fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
+    fun initialize(nodeContainer: NodeContainer<BaseHolder>): TreeNode<BaseHolder> {
         this.nodeContainer = nodeContainer
 
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
@@ -60,7 +60,7 @@ class AssignedNode(
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = -1
+    override fun compareTo(other: ModelNode<BaseHolder>) = -1
 
     override fun matches(filterCriteria: Any?) = false
 

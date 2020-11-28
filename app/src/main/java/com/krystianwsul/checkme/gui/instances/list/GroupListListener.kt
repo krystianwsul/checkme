@@ -4,7 +4,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
-import com.krystianwsul.checkme.gui.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -18,7 +18,7 @@ interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
     val subtaskDialogResult: Observable<SubtaskDialogFragment.Result> get() = Observable.never()
 
-    fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>)
+    fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<BaseHolder>)
 
     fun onDestroyGroupActionMode()
 

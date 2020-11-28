@@ -4,8 +4,8 @@ import android.view.View
 import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
@@ -24,10 +24,10 @@ class TaskNode(
         indentation: Int,
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
-        override val parentNode: ModelNode<NodeHolder>?,
-) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<NodeHolder>, MultiLineModelNode<NodeHolder> {
+        override val parentNode: ModelNode<BaseHolder>?,
+) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
 
-    override lateinit var treeNode: TreeNode<NodeHolder>
+    override lateinit var treeNode: TreeNode<BaseHolder>
         private set
 
     override val nodeType = NodeType.UNSCHEDULED_TASK
@@ -71,10 +71,10 @@ class TaskNode(
         )
 
     fun initialize(
-            parentTreeNode: TreeNode<NodeHolder>,
+            parentTreeNode: TreeNode<BaseHolder>,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
-    ): TreeNode<NodeHolder> {
+    ): TreeNode<BaseHolder> {
         val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
@@ -99,7 +99,7 @@ class TaskNode(
 
     private fun expanded() = treeNode.isExpanded
 
-    override fun compareTo(other: ModelNode<NodeHolder>) = (other as TaskNode).taskData.startExactTimeStamp.let {
+    override fun compareTo(other: ModelNode<BaseHolder>) = (other as TaskNode).taskData.startExactTimeStamp.let {
         if (indentation == 0) {
             -taskData.startExactTimeStamp.compareTo(it)
         } else {
@@ -122,7 +122,7 @@ class TaskNode(
             return text?.let { Pair(it, colorSecondary) }
         }
 
-    override fun onClick(holder: NodeHolder) {
+    override fun onClick(holder: BaseHolder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
 

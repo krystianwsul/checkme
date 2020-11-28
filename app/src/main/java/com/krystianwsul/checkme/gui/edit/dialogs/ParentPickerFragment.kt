@@ -15,8 +15,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.BaseHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
@@ -56,7 +56,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private var taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>? = null
     lateinit var listener: Listener
 
-    private var treeViewAdapter: TreeViewAdapter<NodeHolder>? = null
+    private var treeViewAdapter: TreeViewAdapter<BaseHolder>? = null
     private var expandedParentKeys: List<EditViewModel.ParentKey>? = null
 
     private val initializeDisposable = CompositeDisposable()
@@ -208,7 +208,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val expandedParentKeys get() = taskWrappers.flatMap { it.expandedParentKeys }
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+        override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
             private set
 
         fun initialize(
@@ -221,7 +221,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             taskWrappers = ArrayList()
 
-            val treeNodes = ArrayList<TreeNode<NodeHolder>>()
+            val treeNodes = ArrayList<TreeNode<BaseHolder>>()
 
             for (parentTreeData in taskDatas.values) {
                 val taskWrapper = TaskWrapper(0, this, parentTreeData, null)
@@ -244,10 +244,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 indentation: Int,
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
-                override val parentNode: ModelNode<NodeHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<NodeHolder> {
+                override val parentNode: ModelNode<BaseHolder>?,
+        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<BaseHolder> {
 
-            override lateinit var treeNode: TreeNode<NodeHolder>
+            override lateinit var treeNode: TreeNode<BaseHolder>
                 private set
 
             override val nodeType = NodeType.PARENT_PICKER_TASK
@@ -295,9 +295,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 )
 
             fun initialize(
-                    nodeContainer: NodeContainer<NodeHolder>,
+                    nodeContainer: NodeContainer<BaseHolder>,
                     expandedParentKeys: List<EditViewModel.ParentKey>?,
-            ): TreeNode<NodeHolder> {
+            ): TreeNode<BaseHolder> {
                 var expanded = false
                 if (expandedParentKeys != null) {
                     check(expandedParentKeys.isNotEmpty())
@@ -308,7 +308,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 taskWrappers = ArrayList()
 
-                val treeNodes = ArrayList<TreeNode<NodeHolder>>()
+                val treeNodes = ArrayList<TreeNode<BaseHolder>>()
 
                 for (parentTreeData in parentTreeData.parentTreeDatas.values) {
                     val taskWrapper = TaskWrapper(indentation + 1, this, parentTreeData, this)
@@ -345,7 +345,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     return text?.let { Pair(it, colorSecondary) }
                 }
 
-            override fun onClick(holder: NodeHolder) {
+            override fun onClick(holder: BaseHolder) {
                 val parentPickerFragment = parentFragment
 
                 parentPickerFragment.dismiss()
@@ -353,7 +353,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 parentPickerFragment.listener.onTaskSelected(parentTreeData)
             }
 
-            override fun compareTo(other: ModelNode<NodeHolder>): Int {
+            override fun compareTo(other: ModelNode<BaseHolder>): Int {
                 var comparison = parentTreeData.sortKey.compareTo((other as TaskWrapper).parentTreeData.sortKey)
                 if (indentation == 0)
                     comparison = -comparison

@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer

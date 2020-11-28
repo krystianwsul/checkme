@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.animateItems
 import com.krystianwsul.treeadapter.ActionModeCallback

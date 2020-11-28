@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.multiline
+package com.krystianwsul.checkme.gui.tree.multiline
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.treeadapter.ModelNode

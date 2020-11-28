@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.gui.instances.tree.singleline
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.NodeDelegate
 
 class SingleLineDelegate<T>(private val singleLineModelNode: SingleLineModelNode<T>) : NodeDelegate
         where T : RecyclerView.ViewHolder,

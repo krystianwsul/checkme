@@ -1,8 +1,8 @@
-package com.krystianwsul.checkme.gui.instances.tree.avatar
+package com.krystianwsul.checkme.gui.tree.avatar
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
+import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import com.krystianwsul.checkme.utils.loadPhoto
 
 class AvatarDelegate<T>(private val avatarModelNode: AvatarModelNode<T>) : NodeDelegate

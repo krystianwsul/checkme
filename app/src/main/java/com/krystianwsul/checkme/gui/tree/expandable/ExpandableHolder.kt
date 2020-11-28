@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.expandable
+package com.krystianwsul.checkme.gui.tree.expandable
 
 import android.widget.ImageView
 

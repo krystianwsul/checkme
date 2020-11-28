@@ -1,12 +1,12 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode

@@ -1,7 +1,7 @@
-package com.krystianwsul.checkme.gui.instances.tree.multiline
+package com.krystianwsul.checkme.gui.tree.multiline
 
 import androidx.annotation.ColorInt
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 
 sealed class MultiLineNameData {
 

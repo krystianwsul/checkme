@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.multiline
+package com.krystianwsul.checkme.gui.tree.multiline
 
 import android.widget.LinearLayout
 import android.widget.TextView

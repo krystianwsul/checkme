@@ -1,11 +1,11 @@
-package com.krystianwsul.checkme.gui.instances.tree.multiline
+package com.krystianwsul.checkme.gui.tree.multiline
 
 import android.graphics.Rect
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
+import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 

@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeViewAdapter

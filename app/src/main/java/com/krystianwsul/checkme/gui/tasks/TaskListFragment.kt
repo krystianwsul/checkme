@@ -28,11 +28,12 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
-import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.main.FabUser
+import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService

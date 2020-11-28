@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.tree
 
 import android.app.Activity
 import android.graphics.Color
@@ -16,11 +16,11 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
-import com.krystianwsul.checkme.gui.instances.tree.avatar.AvatarDelegate
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
+import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -72,7 +72,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<NodeHolder> {
                 delegates.map { it.state }
         )
 
-    protected open val colorBackground = GroupHolderNode.colorBackground
+    protected open val colorBackground = Companion.colorBackground
 
     data class State(
             val id: Any,

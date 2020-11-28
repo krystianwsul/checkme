@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.tree
 
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
 import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import io.reactivex.Observable

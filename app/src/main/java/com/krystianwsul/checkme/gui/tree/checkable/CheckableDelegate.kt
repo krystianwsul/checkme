@@ -1,7 +1,7 @@
-package com.krystianwsul.checkme.gui.instances.tree.checkable
+package com.krystianwsul.checkme.gui.tree.checkable
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
+import com.krystianwsul.checkme.gui.tree.NodeDelegate
 
 class CheckableDelegate<T>(private val checkableModelNode: CheckableModelNode<T>) : NodeDelegate
         where T : RecyclerView.ViewHolder,

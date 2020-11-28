@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.NodeContainer

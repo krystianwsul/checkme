@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.gui.instances.tree.expandable
+package com.krystianwsul.checkme.gui.tree.expandable
 
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.instances.tree.NodeDelegate
+import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import com.krystianwsul.treeadapter.TreeNode
 
 class ExpandableDelegate<T>(private val treeNode: TreeNode<T>) : NodeDelegate

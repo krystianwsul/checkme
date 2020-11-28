@@ -1,9 +1,10 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
+import com.krystianwsul.checkme.gui.tree.NodeHolder
 
 class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : NodeHolder(rowListDialogBinding.root) {
 

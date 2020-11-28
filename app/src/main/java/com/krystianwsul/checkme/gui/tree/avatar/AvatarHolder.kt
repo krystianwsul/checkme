@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.avatar
+package com.krystianwsul.checkme.gui.tree.avatar
 
 import android.widget.ImageView
 

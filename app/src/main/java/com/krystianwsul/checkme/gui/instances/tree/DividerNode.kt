@@ -2,12 +2,13 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.instances.tree.checkable.CheckableModelNode
-import com.krystianwsul.checkme.gui.instances.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
+import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer

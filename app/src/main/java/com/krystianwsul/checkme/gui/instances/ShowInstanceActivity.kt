@@ -19,8 +19,8 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -356,7 +356,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             val shareData = binding.groupListFragment.shareData
                             Utils.share(
                                     this@ShowInstanceActivity,
-                                    if (shareData.isNullOrEmpty()) it.name else it.name + "\n" + shareData
+                                    it.name + if (shareData.isEmpty()) "" else "\n" + shareData
                             )
                         }
                         R.id.instance_menu_show_task -> {

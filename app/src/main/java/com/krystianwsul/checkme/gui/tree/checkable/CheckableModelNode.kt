@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.checkable
+package com.krystianwsul.checkme.gui.tree.checkable
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.treeadapter.ModelNode

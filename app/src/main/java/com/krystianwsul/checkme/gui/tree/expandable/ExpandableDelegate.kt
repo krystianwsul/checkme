@@ -6,7 +6,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import com.krystianwsul.treeadapter.TreeNode
 
-class ExpandableDelegate<T>(private val treeNode: TreeNode<T>) : NodeDelegate
+class ExpandableDelegate<T>(private val treeNode: TreeNode<T>) :
+        NodeDelegate
         where T : RecyclerView.ViewHolder,
               T : ExpandableHolder {
 

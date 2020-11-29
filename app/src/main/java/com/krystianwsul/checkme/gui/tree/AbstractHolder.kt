@@ -42,6 +42,8 @@ abstract class AbstractHolder(view: View) :
     override val holderPosition get() = adapterPosition
 
     override fun onViewAttachedToWindow() {
+        super<ExpandableHolder>.onViewAttachedToWindow()
+
         itemView.clicks()
                 .mapNodes()
                 .subscribe { (treeNode, _) -> treeNode.onClick(this) }
@@ -50,11 +52,6 @@ abstract class AbstractHolder(view: View) :
         itemView.longClicks { true }
                 .mapNodes()
                 .subscribe { (_, groupHolderNode) -> groupHolderNode.onLongClick(this) }
-                .addTo(compositeDisposable)
-
-        rowExpand.clicks()
-                .mapNodes()
-                .subscribe { (treeNode, _) -> treeNode.onExpandClick() }
                 .addTo(compositeDisposable)
 
         /* todo delegate consider moving this into the other classes.  Maybe publish observables in the holder,

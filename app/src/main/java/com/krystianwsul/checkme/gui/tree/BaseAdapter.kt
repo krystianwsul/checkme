@@ -8,8 +8,7 @@ abstract class BaseAdapter : TreeModelAdapter<AbstractHolder> {
 
     protected abstract val treeNodeCollection: TreeNodeCollection<AbstractHolder>
 
-    fun getNode(adapterPosition: Int) =
-            treeNodeCollection.getNode(adapterPosition).let { it to it.modelNode as GroupHolderNode }
+    fun getTreeNode(adapterPosition: Int) = treeNodeCollection.getNode(adapterPosition)
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             NodeType.values()[viewType].onCreateViewHolder(this, parent)

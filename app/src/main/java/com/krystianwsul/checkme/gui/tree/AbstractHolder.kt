@@ -43,13 +43,14 @@ abstract class AbstractHolder(view: View) :
         super<CheckableHolder>.onViewAttachedToWindow()
 
         itemView.clicks()
-                .mapNodes()
-                .subscribe { (treeNode, _) -> treeNode.onClick(this) }
+                .mapTreeNode()
+                .subscribe { it.onClick(this) }
                 .addTo(compositeDisposable)
 
+        // todo delegate draggable, or at least refactor GroupHolderNode.onLongClick to not be retarded
         itemView.longClicks { true }
-                .mapNodes()
-                .subscribe { (_, groupHolderNode) -> groupHolderNode.onLongClick(this) }
+                .mapTreeNode()
+                .subscribe { (it.modelNode as GroupHolderNode).onLongClick(this) }
                 .addTo(compositeDisposable)
     }
 }

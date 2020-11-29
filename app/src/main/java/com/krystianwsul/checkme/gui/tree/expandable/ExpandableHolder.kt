@@ -13,8 +13,8 @@ interface ExpandableHolder : BaseHolder {
         super.onViewAttachedToWindow()
 
         rowExpand.clicks()
-                .mapNodes()
-                .subscribe { (treeNode, _) -> treeNode.onExpandClick() }
+                .mapTreeNode()
+                .subscribe { it.onExpandClick() }
                 .addTo(compositeDisposable)
     }
 }

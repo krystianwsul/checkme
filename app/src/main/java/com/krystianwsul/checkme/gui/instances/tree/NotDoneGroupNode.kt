@@ -278,12 +278,12 @@ class NotDoneGroupNode(
         val groupListFragment = groupAdapter.groupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
-        if (singleInstance() &&
-                groupListFragment.parameters.groupListDataWrapper.taskEditable != false &&
-                treeNodeCollection.selectedChildren.isEmpty() &&
-                indentation == 0 &&
-                treeNodeCollection.nodes.none { it.isExpanded } &&
-                groupListFragment.parameters.draggable
+        if (singleInstance()
+                && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
+                && treeNodeCollection.selectedChildren.isEmpty()
+                && indentation == 0
+                && treeNodeCollection.nodes.none { it.isExpanded }
+                && groupListFragment.parameters.draggable
         ) {
             groupListFragment.dragHelper.startDrag(viewHolder)
             treeNode.onLongClickSelect(viewHolder, true)

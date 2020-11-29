@@ -681,7 +681,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 val treeNodeCollection = taskAdapter.treeNodeCollection
 
-                if (taskListFragment.rootTaskData != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
+                if (taskListFragment.rootTaskData != null
+                        && treeNodeCollection.selectedChildren.isEmpty()
+                        && indentation == 0
+                        && treeNodeCollection.nodes.none { it.isExpanded }
+                ) {
                     taskListFragment.dragHelper.startDrag(viewHolder)
                     treeNode.onLongClickSelect(viewHolder, true)
                 } else {

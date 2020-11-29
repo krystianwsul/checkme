@@ -4,5 +4,5 @@ import android.widget.TextView
 
 interface SingleLineHolder {
 
-    val rowName: TextView
+    val rowName: TextView // todo delegate rename to avoid collisions
 }

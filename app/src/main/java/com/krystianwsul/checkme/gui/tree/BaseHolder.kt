@@ -10,7 +10,7 @@ interface BaseHolder {
     val baseAdapter: BaseAdapter
     val holderPosition: Int
 
-    fun Observable<*>.mapNodes() = filter { holderPosition >= 0 }.map { baseAdapter.getNodes(holderPosition) }!!
+    fun Observable<*>.mapNodes() = filter { holderPosition >= 0 }.map { baseAdapter.getNode(holderPosition) }!!
 
     fun onViewAttachedToWindow() = Unit
 

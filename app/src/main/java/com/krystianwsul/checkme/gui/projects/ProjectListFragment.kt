@@ -51,7 +51,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var projectListFab: FloatingActionButton? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
     private var data: ProjectListViewModel.Data? = null
@@ -257,7 +257,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         private lateinit var projectNodes: MutableList<ProjectNode>
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
+        override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         fun initialize(projectDatas: SortedMap<ProjectKey.Shared, ProjectListViewModel.ProjectData>) {
@@ -273,7 +273,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) :
                 GroupHolderNode(0),
-                MultiLineModelNode<BaseHolder> {
+                MultiLineModelNode<AbstractHolder> {
 
             override val nodeType = NodeType.PROJECT
 
@@ -281,10 +281,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val id = projectData.id
 
-            public override lateinit var treeNode: TreeNode<BaseHolder>
+            public override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
 
-            fun initialize(treeNodeCollection: TreeNodeCollection<BaseHolder>): TreeNode<BaseHolder> {
+            fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>): TreeNode<AbstractHolder> {
                 treeNode = TreeNode(this, treeNodeCollection, false, selectedProjectIds.contains(projectData.id))
                 treeNode.setChildTreeNodes(ArrayList())
                 return treeNode
@@ -296,7 +296,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override val parentNode: ModelNode<BaseHolder>? = null
+            override val parentNode: ModelNode<AbstractHolder>? = null
 
             override val delegates by lazy { listOf(MultiLineDelegate(this)) }
 
@@ -308,9 +308,9 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         thumbnail != null
                 )
 
-            override fun onClick(holder: BaseHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
+            override fun onClick(holder: AbstractHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
-            override fun compareTo(other: ModelNode<BaseHolder>): Int {
+            override fun compareTo(other: ModelNode<AbstractHolder>): Int {
                 check(other is ProjectNode)
 
                 return projectData.id.compareTo(other.projectData.id)
@@ -322,7 +322,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 
     interface ProjectListListener : SnackbarListener, ActionModeListener {
 

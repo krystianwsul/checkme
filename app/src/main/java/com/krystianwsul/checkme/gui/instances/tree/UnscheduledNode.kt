@@ -6,10 +6,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
-import com.krystianwsul.checkme.gui.tree.BaseHolder
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
-import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -22,7 +19,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(0), TaskParent, CheckableModelNode<BaseHolder>, SingleLineModelNode<BaseHolder> {
+) : GroupHolderNode(0), TaskParent, CheckableModelNode<AbstractHolder>, SingleLineModelNode<AbstractHolder> {
 
     override val nodeType = NodeType.UNSCHEDULED
 
@@ -32,7 +29,7 @@ class UnscheduledNode(
 
     private lateinit var taskDatas: List<GroupListDataWrapper.TaskData>
 
-    override lateinit var treeNode: TreeNode<BaseHolder>
+    override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
     private val taskNodes = mutableListOf<TaskNode>()
@@ -41,7 +38,7 @@ class UnscheduledNode(
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
-    override val parentNode: ModelNode<BaseHolder>? = null
+    override val parentNode: ModelNode<AbstractHolder>? = null
 
     override val delegates by lazy {
         listOf(
@@ -53,11 +50,11 @@ class UnscheduledNode(
 
     fun initialize(
             expanded: Boolean,
-            nodeContainer: NodeContainer<BaseHolder>,
+            nodeContainer: NodeContainer<AbstractHolder>,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
-    ): TreeNode<BaseHolder> {
+    ): TreeNode<AbstractHolder> {
         check(!expanded || taskDatas.isNotEmpty())
 
         this.taskDatas = taskDatas
@@ -83,9 +80,9 @@ class UnscheduledNode(
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override fun onClick(holder: BaseHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
+    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
 
-    override fun compareTo(other: ModelNode<BaseHolder>) = when {
+    override fun compareTo(other: ModelNode<AbstractHolder>) = when {
         searchResults -> -1
         other is DividerNode -> -1
         else -> {
@@ -105,5 +102,8 @@ class UnscheduledNode(
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 }

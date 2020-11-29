@@ -96,7 +96,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         private fun nodesToSelectedDatas(
-                treeNodes: List<TreeNode<BaseHolder>>,
+                treeNodes: List<TreeNode<AbstractHolder>>,
                 includeGroups: Boolean,
         ): Set<GroupListDataWrapper.SelectedData> {
             val instanceDatas = ArrayList<GroupListDataWrapper.SelectedData>()
@@ -129,7 +129,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     lateinit var listener: GroupListListener
 
-    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<BaseHolder>>()
+    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
 
     var treeViewAdapter
         get() = treeViewAdapterRelay.value!!
@@ -1006,7 +1006,7 @@ class GroupListFragment @JvmOverloads constructor(
                 compositeDisposable
         )
 
-        public override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
+        public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         private lateinit var nodeCollection: NodeCollection

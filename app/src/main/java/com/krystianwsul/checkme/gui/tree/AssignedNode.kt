@@ -15,13 +15,13 @@ import com.krystianwsul.treeadapter.TreeNode
 class AssignedNode(
         override val assignedTo: List<User>,
         instance: Boolean,
-        override val parentNode: ModelNode<BaseHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
+        override val parentNode: ModelNode<AbstractHolder>?,
+) : GroupHolderNode(0), CheckableModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
 
-    override lateinit var treeNode: TreeNode<BaseHolder>
+    override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer<BaseHolder>
+    private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val nodeType = NodeType.ASSIGNED
 
@@ -51,7 +51,7 @@ class AssignedNode(
         check(assignedTo.isNotEmpty())
     }
 
-    fun initialize(nodeContainer: NodeContainer<BaseHolder>): TreeNode<BaseHolder> {
+    fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
 
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
@@ -60,7 +60,7 @@ class AssignedNode(
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode<BaseHolder>) = -1
+    override fun compareTo(other: ModelNode<AbstractHolder>) = -1
 
     override fun matches(filterCriteria: Any?) = false
 
@@ -68,5 +68,8 @@ class AssignedNode(
 
     data class User(val name: String, val photoUrl: String?)
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 }

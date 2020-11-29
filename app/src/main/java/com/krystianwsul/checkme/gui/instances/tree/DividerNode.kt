@@ -20,8 +20,8 @@ import java.util.*
 class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
-        override val parentNode: ModelNode<BaseHolder>?,
-) : GroupHolderNode(indentation), CheckableModelNode<BaseHolder>, SingleLineModelNode<BaseHolder> {
+        override val parentNode: ModelNode<AbstractHolder>?,
+) : GroupHolderNode(indentation), CheckableModelNode<AbstractHolder>, SingleLineModelNode<AbstractHolder> {
 
     override val nodeType = NodeType.DIVIDER
 
@@ -29,7 +29,7 @@ class DividerNode(
 
     data class Id(val id: Any)
 
-    override lateinit var treeNode: TreeNode<BaseHolder>
+    override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
@@ -48,11 +48,11 @@ class DividerNode(
 
     fun initialize(
             expanded: Boolean,
-            nodeContainer: NodeContainer<BaseHolder>,
+            nodeContainer: NodeContainer<AbstractHolder>,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-    ): TreeNode<BaseHolder> {
+    ): TreeNode<AbstractHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -68,7 +68,7 @@ class DividerNode(
             instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-    ): TreeNode<BaseHolder> {
+    ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
@@ -103,7 +103,7 @@ class DividerNode(
             placeholder: TreeViewAdapter.Placeholder
     ) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), placeholder)
 
-    override fun compareTo(other: ModelNode<BaseHolder>): Int {
+    override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         check(
                 other is AssignedNode
                         || other is NoteNode
@@ -121,5 +121,8 @@ class DividerNode(
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 }

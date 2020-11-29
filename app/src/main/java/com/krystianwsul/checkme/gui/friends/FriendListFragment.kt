@@ -47,7 +47,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         fun newInstance() = FriendListFragment()
     }
 
-    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
     private var data: FriendListViewModel.Data? = null
@@ -222,7 +222,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                 viewCreatedDisposable
         )
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
+        override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         fun initialize() {
@@ -265,8 +265,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private inner class FriendNode(val userListData: FriendListViewModel.UserListData) :
             GroupHolderNode(0),
-            AvatarModelNode<BaseHolder>,
-            MultiLineModelNode<BaseHolder> {
+            AvatarModelNode<AbstractHolder>,
+            MultiLineModelNode<AbstractHolder> {
 
         override val ripple = true
 
@@ -274,7 +274,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        public override lateinit var treeNode: TreeNode<BaseHolder>
+        public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
         override val nodeType = NodeType.FRIEND
@@ -283,7 +283,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val id = userListData.id
 
-        override val parentNode: ModelNode<BaseHolder>? = null
+        override val parentNode: ModelNode<AbstractHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
         override val hasAvatar = true
@@ -303,9 +303,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
                     thumbnail != null
             )
 
-        override fun compareTo(other: ModelNode<BaseHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
+        override fun compareTo(other: ModelNode<AbstractHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<BaseHolder>): TreeNode<BaseHolder> {
+        fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>): TreeNode<AbstractHolder> {
             treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
             treeNode.setChildTreeNodes(listOf())
             return treeNode
@@ -316,7 +316,10 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 
     interface FriendListListener : SnackbarListener, ActionModeListener {
 

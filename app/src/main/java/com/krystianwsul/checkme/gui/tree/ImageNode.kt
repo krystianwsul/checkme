@@ -14,13 +14,13 @@ import java.util.*
 
 class ImageNode(
         override val imageData: ImageData,
-        override val parentNode: ModelNode<BaseHolder>?,
-) : GroupHolderNode(0), MultiLineModelNode<BaseHolder> {
+        override val parentNode: ModelNode<AbstractHolder>?,
+) : GroupHolderNode(0), MultiLineModelNode<AbstractHolder> {
 
-    override lateinit var treeNode: TreeNode<BaseHolder>
+    override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer<BaseHolder>
+    private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val nodeType = NodeType.IMAGE
 
@@ -42,7 +42,7 @@ class ImageNode(
                 thumbnail != null
         )
 
-    fun initialize(nodeContainer: NodeContainer<BaseHolder>): TreeNode<BaseHolder> {
+    fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
 
@@ -50,13 +50,13 @@ class ImageNode(
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode<BaseHolder>) = when (other) {
+    override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is AssignedNode -> 1
         is NoteNode -> 1
         else -> -1
     }
 
-    override fun onClick(holder: BaseHolder) = showImage(holder.rowBigImage!!, imageData)
+    override fun onClick(holder: AbstractHolder) = showImage(holder.rowBigImage!!, imageData)
 
     override fun matches(filterCriteria: Any?) = false
 
@@ -69,5 +69,8 @@ class ImageNode(
             val showImage: Boolean,
     )
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 }

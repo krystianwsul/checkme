@@ -29,7 +29,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 
-abstract class GroupHolderNode(val indentation: Int) : ModelNode<BaseHolder> {
+abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder> {
 
     companion object {
 
@@ -42,7 +42,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<BaseHolder> {
         val colorBackground by lazy { getColor(R.color.materialBackground) }
     }
 
-    protected abstract val treeNode: TreeNode<BaseHolder>
+    protected abstract val treeNode: TreeNode<AbstractHolder>
 
     protected open val hasAvatar = false // todo delegate
     open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
@@ -117,7 +117,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<BaseHolder> {
     }
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
-        val groupHolder = viewHolder as BaseHolder
+        val groupHolder = viewHolder as AbstractHolder
 
         groupHolder.run {
             val taskImage = imageData

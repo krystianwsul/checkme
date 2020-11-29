@@ -11,23 +11,21 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.merge
 
-abstract class BaseAdapter : TreeModelAdapter<BaseHolder> {
+abstract class BaseAdapter : TreeModelAdapter<AbstractHolder> {
 
-    protected abstract val treeNodeCollection: TreeNodeCollection<BaseHolder>
+    protected abstract val treeNodeCollection: TreeNodeCollection<AbstractHolder>
 
-    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseHolder {
-        val nodeType = NodeType.values()[viewType]
+    fun getNodes(adapterPosition: Int) =
+            treeNodeCollection.getNode(adapterPosition).let { it to it.modelNode as GroupHolderNode }
 
-        return nodeType.onCreateViewHolder(parent)
-    }
+    final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            NodeType.values()[viewType].onCreateViewHolder(this, parent)
 
-    final override fun onViewAttachedToWindow(holder: BaseHolder) {
+    final override fun onViewAttachedToWindow(holder: AbstractHolder) {
+        holder.onViewAttachedToWindow()
+
         holder.apply {
-            fun Observable<*>.mapNodes() = map { adapterPosition }.filter { it >= 0 }.map {
-                treeNodeCollection.getNode(it).let {
-                    Pair(it, it.modelNode as GroupHolderNode)
-                }
-            }
+            fun Observable<*>.mapNodes() = map { holderPosition }.filter { it >= 0 }.map(::getNodes)
 
             itemView.clicks()
                     .mapNodes()
@@ -59,5 +57,5 @@ abstract class BaseAdapter : TreeModelAdapter<BaseHolder> {
         }
     }
 
-    final override fun onViewDetachedFromWindow(holder: BaseHolder) = holder.compositeDisposable.clear()
+    final override fun onViewDetachedFromWindow(holder: AbstractHolder) = holder.onViewDetachedFromWindow()
 }

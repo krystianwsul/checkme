@@ -6,10 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.tree.BaseHolder
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
-import com.krystianwsul.checkme.gui.tree.RegularNodeHolder
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
@@ -28,9 +25,12 @@ class DoneInstanceNode(
         indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode,
-) : GroupHolderNode(indentation), NodeCollectionParent, CheckableModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
+) : GroupHolderNode(indentation),
+        NodeCollectionParent,
+        CheckableModelNode<AbstractHolder>,
+        MultiLineModelNode<AbstractHolder> {
 
-    public override lateinit var treeNode: TreeNode<BaseHolder>
+    public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
     override val nodeType = NodeType.DONE
@@ -56,10 +56,10 @@ class DoneInstanceNode(
     }
 
     fun initialize(
-            dividerTreeNode: TreeNode<BaseHolder>,
+            dividerTreeNode: TreeNode<AbstractHolder>,
             expandedInstances: Map<InstanceKey, Boolean>,
             selectedInstances: List<InstanceKey>,
-    ): TreeNode<BaseHolder> {
+    ): TreeNode<AbstractHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean
@@ -169,7 +169,7 @@ class DoneInstanceNode(
                 thumbnail != null
         )
 
-    override fun compareTo(other: ModelNode<BaseHolder>): Int {
+    override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = other as DoneInstanceNode
@@ -180,7 +180,7 @@ class DoneInstanceNode(
 
     override val isSelectable = true
 
-    override fun onClick(holder: BaseHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
     fun removeFromParent(x: TreeViewAdapter.Placeholder) {
         dividerNode.remove(this, x)
@@ -196,5 +196,8 @@ class DoneInstanceNode(
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 }

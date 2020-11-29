@@ -16,108 +16,126 @@ enum class NodeType {
 
     CUSTOM_TIME {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = ShowCustomTimesFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ShowCustomTimesFragment.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     PARENT_PICKER_TASK {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = DialogNodeHolder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DialogNodeHolder(
+                baseAdapter,
                 RowListDialogBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     FRIEND {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = FriendListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = FriendListFragment.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     USER {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = UserListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UserListFragment.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     DIVIDER {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = DividerNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DividerNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     DONE {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = DoneInstanceNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DoneInstanceNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     NOT_DONE_GROUP {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = NotDoneGroupNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NotDoneGroupNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     NOT_DONE_INSTANCE {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = NotDoneGroupNode.NotDoneInstanceNode.Holder(
+        override fun onCreateViewHolder(
+                baseAdapter: BaseAdapter,
+                parent: ViewGroup,
+        ) = NotDoneGroupNode.NotDoneInstanceNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     UNSCHEDULED_TASK {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = TaskNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     UNSCHEDULED {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = UnscheduledNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UnscheduledNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     PROJECT {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = ProjectListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ProjectListFragment.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     TASK_LIST_TASK {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = TaskListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskListFragment.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     ASSIGNED {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = AssignedNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     IMAGE {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = ImageNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
     NOTE {
 
-        override fun onCreateViewHolder(parent: ViewGroup) = NoteNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
+                baseAdapter,
                 RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     };
 
-    abstract fun onCreateViewHolder(parent: ViewGroup): BaseHolder
+    abstract fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup): AbstractHolder
 }

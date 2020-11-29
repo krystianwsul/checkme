@@ -50,7 +50,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var projectId: ProjectKey.Shared? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter<BaseHolder>
+    lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
     private var data: ShowProjectViewModel.Data? = null
@@ -306,7 +306,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 viewCreatedDisposable
         )
 
-        public override lateinit var treeNodeCollection: TreeNodeCollection<BaseHolder>
+        public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
@@ -363,7 +363,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
-    ) : GroupHolderNode(0), AvatarModelNode<BaseHolder>, MultiLineModelNode<BaseHolder> {
+    ) : GroupHolderNode(0), AvatarModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
 
         override val nodeType = NodeType.USER
 
@@ -373,14 +373,14 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        public override lateinit var treeNode: TreeNode<BaseHolder>
+        public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
         override val id = userListData.id
 
         override val isSelectable = true
 
-        override val parentNode: ModelNode<BaseHolder>? = null
+        override val parentNode: ModelNode<AbstractHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
         override val hasAvatar = true
@@ -400,9 +400,9 @@ class UserListFragment : AbstractFragment(), FabUser {
                     thumbnail != null
             )
 
-        override fun compareTo(other: ModelNode<BaseHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
+        override fun compareTo(other: ModelNode<AbstractHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection<BaseHolder>) = TreeNode(
+        fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>) = TreeNode(
                 this,
                 treeNodeCollection,
                 false,
@@ -417,7 +417,10 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
 
-    class Holder(rowListBinding: RowListBinding) : RegularNodeHolder(rowListBinding)
+    class Holder(
+            override val baseAdapter: BaseAdapter,
+            rowListBinding: RowListBinding,
+    ) : RegularNodeHolder(rowListBinding)
 
     @Parcelize
     class SaveState(

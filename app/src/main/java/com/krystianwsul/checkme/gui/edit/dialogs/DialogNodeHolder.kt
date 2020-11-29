@@ -4,9 +4,13 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
-import com.krystianwsul.checkme.gui.tree.BaseHolder
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
 
-class DialogNodeHolder(rowListDialogBinding: RowListDialogBinding) : BaseHolder(rowListDialogBinding.root) {
+class DialogNodeHolder(
+        override val baseAdapter: BaseAdapter,
+        rowListDialogBinding: RowListDialogBinding,
+) : AbstractHolder(rowListDialogBinding.root) {
 
     override val rowContainer = rowListDialogBinding.rowContainer
     override val rowTextLayout = rowListDialogBinding.rowTextLayout

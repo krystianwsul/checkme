@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.gui.tree.BaseHolder
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -328,7 +328,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     override fun onCreateGroupActionMode(
             actionMode: ActionMode,
-            treeViewAdapter: TreeViewAdapter<BaseHolder>,
+            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
     ) = binding.showInstanceToolbarCollapseInclude
             .collapseAppBarLayout
             .collapse()

@@ -12,12 +12,12 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     override val isExpanded get() = expanded
 
-    private var childTreeNodes: MutableList<TreeNode<T>>? = null
+    private lateinit var childTreeNodes: MutableList<TreeNode<T>>
 
     val itemViewType = modelNode.itemViewType
 
     fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
-        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
         if (!modelNode.isSelectable) return
 
@@ -53,8 +53,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     val selectedNodes: List<TreeNode<T>>
         get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
+            checkChildTreeNodesSet()
 
             val selectedTreeNodes = ArrayList<TreeNode<T>>()
 
@@ -65,21 +64,18 @@ class TreeNode<T : RecyclerView.ViewHolder>(
                 selectedTreeNodes += this
             }
 
-            selectedTreeNodes += childTreeNodes!!.flatMap { it.selectedNodes }
+            selectedTreeNodes += childTreeNodes.flatMap { it.selectedNodes }
 
             return selectedTreeNodes
         }
 
     val expandVisible: Boolean
         get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
+            checkChildTreeNodesSet()
 
-            if (!visible())
-                throw InvisibleNodeException()
+            if (!visible()) throw InvisibleNodeException()
 
-            if (childTreeNodes!!.none { it.canBeShown() })
-                return false
+            if (childTreeNodes.none { it.canBeShown() }) return false
 
             return true
         }
@@ -89,13 +85,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     // hiding
     // showing
     fun onExpandClick() {
-        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        if (childTreeNodes!!.isEmpty()) throw EmptyExpandedException()
+        if (childTreeNodes.isEmpty()) throw EmptyExpandedException()
 
         treeViewAdapter.updateDisplayedNodes { placeholder ->
             expanded = if (expanded) { // collapsing
-                childTreeNodes!!.forEach { it.deselectRecursive(placeholder) }
+                childTreeNodes.forEach { it.deselectRecursive(placeholder) }
 
                 false
             } else { // expanding
@@ -125,9 +121,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             return nextTreeNode.isExpanded || modelNode.isSeparatorVisibleWhenNotExpanded
         }
 
-    val allChildren: List<TreeNode<T>>
-        get() = childTreeNodes
-                ?: throw SetChildTreeNodesNotCalledException()
+    val allChildren: List<TreeNode<T>> get() = childTreeNodes
 
     init {
         if (selected && !modelNode.isSelectable)
@@ -138,15 +132,11 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {
-        if (this.childTreeNodes != null)
-            throw SetChildTreeNodesCalledTwiceException()
+        if (this::childTreeNodes.isInitialized) throw SetChildTreeNodesCalledTwiceException()
 
-        if (expanded && childTreeNodes.isEmpty())
-            throw EmptyExpandedException()
+        if (expanded && childTreeNodes.isEmpty()) throw EmptyExpandedException()
 
-        this.childTreeNodes = ArrayList(childTreeNodes)
-
-        this.childTreeNodes!!.sort()
+        this.childTreeNodes = childTreeNodes.sorted().toMutableList()
     }
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
@@ -154,7 +144,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 
     private fun toggleSelected(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
         if (!modelNode.isSelectable) return
 
@@ -180,7 +170,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     private fun propagateSelection(selected: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         if (modelNode.toggleDescendants)
-            childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(placeholder, false) }
+            childTreeNodes.filter { it.selected != selected }.forEach { it.toggleSelected(placeholder, false) }
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode
@@ -190,25 +180,20 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     private fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.decrementSelected(placeholder)
 
     fun getNode(position: Int): TreeNode<T> {
-        var currPosition = position
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        check(currPosition >= 0)
-        check(currPosition < displayedNodes.size)
+        check(position in displayedNodes.indices)
 
-        if (currPosition == 0)
-            return this
+        if (position == 0) return this
 
         check(expanded)
 
-        currPosition--
+        var currPosition = position - 1
 
-        for (notDoneGroupTreeNode in childTreeNodes!!) {
+        for (notDoneGroupTreeNode in childTreeNodes) {
             val notDoneDisplayedSize = notDoneGroupTreeNode.displayedNodes.size
 
-            if (currPosition < notDoneDisplayedSize)
-                return notDoneGroupTreeNode.getNode(currPosition)
+            if (currPosition < notDoneDisplayedSize) return notDoneGroupTreeNode.getNode(currPosition)
 
             currPosition -= notDoneDisplayedSize
         }
@@ -217,20 +202,17 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     override fun getPosition(treeNode: TreeNode<T>): Int {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        if (treeNode === this)
-            return 0
-
-        if (!expanded)
-            return -1
+        if (treeNode === this) return 0
+        if (!expanded) return -1
 
         var offset = 1
-        for (childTreeNode in childTreeNodes!!) {
+        for (childTreeNode in childTreeNodes) {
             val position = childTreeNode.getPosition(treeNode)
-            if (position >= 0)
-                return offset + position
+
+            if (position >= 0) return offset + position
+
             offset += childTreeNode.displayedNodes.size
         }
 
@@ -257,8 +239,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     fun selectAll(placeholder: TreeViewAdapter.Placeholder) {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
         if (modelNode.isSelectable) {
             check(modelNode.isVisibleDuringActionMode)
@@ -269,25 +250,24 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         }
 
         if (expanded) {
-            check(childTreeNodes!!.isNotEmpty())
+            check(childTreeNodes.isNotEmpty())
 
-            childTreeNodes!!.forEach { it.selectAll(placeholder) }
+            childTreeNodes.forEach { it.selectAll(placeholder) }
         }
     }
 
     override val displayedNodes: List<TreeNode<T>>
         get() {
-            if (!canBeShown())
-                return listOf()
+            if (!canBeShown()) return listOf()
 
             return if (expanded)
-                listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
+                listOf(this) + childTreeNodes.flatMap { it.displayedNodes }
             else
                 listOf(this)
         }
 
     fun canBeShown(): Boolean {
-        if (childTreeNodes == null) throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
@@ -296,23 +276,21 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (!matches && modelNode.canBeShownWithFilterCriteria(treeViewAdapter.filterCriteria) == false) return false
 
-        if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.none { it.canBeShown() }) return false
+        if (!modelNode.isVisibleWhenEmpty && childTreeNodes.none { it.canBeShown() }) return false
 
         return true
     }
 
     private fun matches(filterCriteria: Any?) = modelNode.matches(filterCriteria)
 
-    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes!!.any {
+    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes.any {
         it.matches(filterCriteria) || it.hasMatchingChild(filterCriteria)
     }
 
     private fun visible(): Boolean {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        if (!canBeShown())
-            return false
+        if (!canBeShown()) return false
 
         return if (parent is TreeNodeCollection<T>) {
             true
@@ -322,49 +300,40 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     override fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        if (!childTreeNodes!!.contains(treeNode))
+        if (!childTreeNodes.contains(treeNode))
             throw NoSuchNodeException()
 
         val visible = visible()
 
-        childTreeNodes!!.remove(treeNode)
+        childTreeNodes.remove(treeNode)
 
-        if (!visible)
-            return
+        if (!visible) return
 
-        if (expanded) {
-            if (0 == childTreeNodes!!.map { it.displayedNodes.size }.sum())
-                expanded = false
-        }
+        if (expanded && 0 == childTreeNodes.map { it.displayedNodes.size }.sum()) expanded = false
     }
 
     fun removeAll(placeholder: TreeViewAdapter.Placeholder) {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        ArrayList(childTreeNodes!!).forEach { remove(it, placeholder) }
+        ArrayList(childTreeNodes).forEach { remove(it, placeholder) }
     }
 
     override fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
+        checkChildTreeNodesSet()
 
-        childTreeNodes!! += treeNode
-        childTreeNodes!!.sort()
+        childTreeNodes.add(treeNode)
+        childTreeNodes.sort()
     }
 
     override val selectedChildren: List<TreeNode<T>>
         get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
+            checkChildTreeNodesSet()
 
-            if (childTreeNodes!!.isEmpty())
-                throw NoChildrenException()
+            if (childTreeNodes.isEmpty()) throw NoChildrenException()
 
-            return childTreeNodes!!.filter { it.isSelected }
+            return childTreeNodes.filter { it.isSelected }
         }
 
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
@@ -380,35 +349,39 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     fun deselect(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (!selected)
-            throw NotSelectedException()
+        if (!selected) throw NotSelectedException()
 
         toggleSelected(placeholder, recursive)
     }
 
     private fun deselectRecursive(placeholder: TreeViewAdapter.Placeholder) {
-        childTreeNodes!!.forEach { it.deselectRecursive(placeholder) }
+        checkChildTreeNodesSet()
 
-        if (selected)
-            deselect(placeholder, false)
+        if (selected) deselect(placeholder, false)
     }
 
     fun normalize() {
         modelNode.normalize()
 
-        childTreeNodes!!.forEach { it.normalize() }
+        childTreeNodes.forEach { it.normalize() }
     }
 
     fun collapseAll() {
-        childTreeNodes!!.forEach { it.collapseAll() }
+        childTreeNodes.forEach { it.collapseAll() }
 
         if (expanded) expanded = false
     }
 
     fun expandMatching(filterCriteria: Any, placeholder: TreeViewAdapter.Placeholder) {
-        if (hasMatchingChild(filterCriteria) && childTreeNodes!!.isNotEmpty()) expanded = true
+        checkChildTreeNodesSet()
 
-        childTreeNodes!!.forEach { it.expandMatching(filterCriteria, placeholder) }
+        if (hasMatchingChild(filterCriteria) && childTreeNodes.isNotEmpty()) expanded = true
+
+        childTreeNodes.forEach { it.expandMatching(filterCriteria, placeholder) }
+    }
+
+    private fun checkChildTreeNodesSet() {
+        if (!this::childTreeNodes.isInitialized) throw SetChildTreeNodesNotCalledException()
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

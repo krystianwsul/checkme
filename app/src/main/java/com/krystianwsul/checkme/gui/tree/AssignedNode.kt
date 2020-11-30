@@ -4,8 +4,10 @@ import android.view.View
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.treeadapter.ModelNode
@@ -77,7 +79,7 @@ class AssignedNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListAssignedBinding,
-    ) : AbstractHolder(binding.root) {
+    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, MultiLineHolder {
 
         override val rowContainer = binding.rowContainer
         override val rowTextLayout = binding.rowTextLayout

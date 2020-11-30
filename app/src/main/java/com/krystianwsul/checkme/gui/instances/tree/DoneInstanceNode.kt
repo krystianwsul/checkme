@@ -12,9 +12,12 @@ import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
+import com.krystianwsul.checkme.gui.tree.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
@@ -202,7 +205,7 @@ class DoneInstanceNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListCheckableBinding,
-    ) : AbstractHolder(binding.root) {
+    ) : AbstractHolder(binding.root), ExpandableHolder, CheckableHolder, MultiLineHolder {
 
         override val rowContainer = binding.rowContainer
         override val rowTextLayout = binding.rowTextLayout

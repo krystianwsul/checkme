@@ -6,11 +6,13 @@ import android.widget.RelativeLayout
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 
 class DialogNodeHolder(
         override val baseAdapter: BaseAdapter,
         rowListDialogBinding: RowListDialogBinding,
-) : AbstractHolder(rowListDialogBinding.root) {
+) : AbstractHolder(rowListDialogBinding.root), ExpandableHolder, MultiLineHolder {
 
     override val rowContainer = rowListDialogBinding.rowContainer
     override val rowTextLayout = rowListDialogBinding.rowTextLayout

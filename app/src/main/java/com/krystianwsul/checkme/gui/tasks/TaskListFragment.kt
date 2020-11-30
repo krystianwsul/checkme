@@ -31,7 +31,9 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.*
@@ -742,7 +744,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListExpandableMultilineBinding,
-    ) : AbstractHolder(binding.root) {
+    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder {
 
         override val rowContainer = binding.rowContainer
         override val rowTextLayout = binding.rowTextLayout

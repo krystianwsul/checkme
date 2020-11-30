@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListExpandableSinglelineBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
+import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineHolder
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -13,6 +14,7 @@ import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -108,7 +110,7 @@ class UnscheduledNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListExpandableSinglelineBinding,
-    ) : AbstractHolder(binding.root) {
+    ) : AbstractHolder(binding.root), ExpandableHolder, SingleLineHolder {
 
         override val rowContainer = binding.rowContainer
         override val rowTextLayout = binding.rowTextLayout

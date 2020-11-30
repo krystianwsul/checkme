@@ -97,21 +97,21 @@ class NoteNode(
             binding: RowListNoteBinding,
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListNoteContainer
+        override val rowTextLayout = binding.rowListNoteTextLayout
+        override val rowName = binding.rowListNoteName
+        override val rowDetails = binding.rowListNoteDetails
+        override val rowChildren = binding.rowListNoteChildren
+        override val rowThumbnail = binding.rowListNoteThumbnail
+        override val rowExpand = binding.rowListNoteExpand
+        override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListNoteCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListNoteMargin
+        override val rowImage = binding.rowListNoteImage
+        override val rowBigImage = binding.rowListNoteBigImage
+        override val rowBigImageLayout = binding.rowListNoteBigImageLayout
+        override val rowSeparator = binding.rowListNoteSeparator
+        override val rowChipGroup = binding.rowListNoteChipGroup
+        override val rowMarginEnd = binding.rowListNoteMarginEnd
     }
 }

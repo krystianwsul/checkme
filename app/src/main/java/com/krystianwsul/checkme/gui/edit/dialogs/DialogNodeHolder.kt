@@ -14,20 +14,20 @@ class DialogNodeHolder(
         rowListDialogBinding: RowListDialogBinding,
 ) : AbstractHolder(rowListDialogBinding.root), ExpandableHolder, MultiLineHolder {
 
-    override val rowContainer = rowListDialogBinding.rowContainer
-    override val rowTextLayout = rowListDialogBinding.rowTextLayout
-    override val rowName = rowListDialogBinding.rowName
-    override val rowDetails = rowListDialogBinding.rowDetails
-    override val rowChildren = rowListDialogBinding.rowChildren
-    override val rowThumbnail = rowListDialogBinding.rowThumbnail
-    override val rowExpand = rowListDialogBinding.rowExpand
-    override val rowCheckBoxFrame = rowListDialogBinding.rowListCheckboxInclude.rowCheckboxFrame
-    override val rowCheckBox = rowListDialogBinding.rowListCheckboxInclude.rowCheckbox
-    override val rowMarginStart = rowListDialogBinding.rowMargin
+    override val rowContainer = rowListDialogBinding.rowListDialogContainer
+    override val rowTextLayout = rowListDialogBinding.rowListDialogTextLayout
+    override val rowName = rowListDialogBinding.rowListDialogName
+    override val rowDetails = rowListDialogBinding.rowListDialogDetails
+    override val rowChildren = rowListDialogBinding.rowListDialogChildren
+    override val rowThumbnail = rowListDialogBinding.rowListDialogThumbnail
+    override val rowExpand = rowListDialogBinding.rowListDialogExpand
+    override val rowCheckBoxFrame = rowListDialogBinding.rowListDialogCheckboxInclude.rowCheckboxFrame
+    override val rowCheckBox = rowListDialogBinding.rowListDialogCheckboxInclude.rowCheckbox
+    override val rowMarginStart = rowListDialogBinding.rowListDialogMargin
     override val rowImage: ImageView? = null
     override val rowBigImage: ImageView? = null
     override val rowBigImageLayout: RelativeLayout? = null
-    override val rowSeparator = rowListDialogBinding.rowSeparator
-    override val rowChipGroup = rowListDialogBinding.rowChipGroup
+    override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
+    override val rowChipGroup = rowListDialogBinding.rowListDialogChipGroup
     override val rowMarginEnd: View? = null
 }

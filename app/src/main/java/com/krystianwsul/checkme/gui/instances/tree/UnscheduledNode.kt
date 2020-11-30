@@ -112,21 +112,21 @@ class UnscheduledNode(
             binding: RowListExpandableSinglelineBinding,
     ) : AbstractHolder(binding.root), ExpandableHolder, SingleLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListExpandableSingleLineContainer
+        override val rowTextLayout = binding.rowListExpandableSingleLineTextLayout
+        override val rowName = binding.rowListExpandableSingleLineName
+        override val rowDetails = binding.rowListExpandableSingleLineDetails
+        override val rowChildren = binding.rowListExpandableSingleLineChildren
+        override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
+        override val rowExpand = binding.rowListExpandableSingleLineExpand
+        override val rowCheckBoxFrame = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListExpandableSingleLineMargin
+        override val rowImage = binding.rowListExpandableSingleLineImage
+        override val rowBigImage = binding.rowListExpandableSingleLineBigImage
+        override val rowBigImageLayout = binding.rowListExpandableSingleLineBigImageLayout
+        override val rowSeparator = binding.rowListExpandableSingleLineSeparator
+        override val rowChipGroup = binding.rowListExpandableSingleLineChipGroup
+        override val rowMarginEnd = binding.rowListExpandableSingleLineMarginEnd
     }
 }

@@ -331,22 +331,22 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             binding: RowListMultilineBinding,
     ) : AbstractHolder(binding.root), MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListMultilineContainer
+        override val rowTextLayout = binding.rowListMultilineTextLayout
+        override val rowName = binding.rowListMultilineName
+        override val rowDetails = binding.rowListMultilineDetails
+        override val rowChildren = binding.rowListMultilineChildren
+        override val rowThumbnail = binding.rowListMultilineThumbnail
+        override val rowExpand = binding.rowListMultilineExpand
+        override val rowCheckBoxFrame = binding.rowListMultilineCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListMultilineCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListMultilineMargin
+        override val rowImage = binding.rowListMultilineImage
+        override val rowBigImage = binding.rowListMultilineBigImage
+        override val rowBigImageLayout = binding.rowListMultilineBigImageLayout
+        override val rowSeparator = binding.rowListMultilineSeparator
+        override val rowChipGroup = binding.rowListMultilineChipGroup
+        override val rowMarginEnd = binding.rowListMultilineMarginEnd
     }
 
     interface ProjectListListener : SnackbarListener, ActionModeListener {

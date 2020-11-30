@@ -81,21 +81,21 @@ class AssignedNode(
             binding: RowListAssignedBinding,
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListAssignedContainer
+        override val rowTextLayout = binding.rowListAssignedTextLayout
+        override val rowName = binding.rowListAssignedName
+        override val rowDetails = binding.rowListAssignedDetails
+        override val rowChildren = binding.rowListAssignedChildren
+        override val rowThumbnail = binding.rowListAssignedThumbnail
+        override val rowExpand = binding.rowListAssignedExpand
+        override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListAssignedCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListAssignedMargin
+        override val rowImage = binding.rowListAssignedImage
+        override val rowBigImage = binding.rowListAssignedBigImage
+        override val rowBigImageLayout = binding.rowListAssignedBigImageLayout
+        override val rowSeparator = binding.rowListAssignedSeparator
+        override val rowChipGroup = binding.rowListAssignedChipGroup
+        override val rowMarginEnd = binding.rowListAssignedMarginEnd
     }
 }

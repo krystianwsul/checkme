@@ -72,21 +72,21 @@ class ImageNode(
             binding: RowListImageBinding,
     ) : AbstractHolder(binding.root) {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListImageContainer
+        override val rowTextLayout = binding.rowListImageTextLayout
+        override val rowName = binding.rowListImageName
+        override val rowDetails = binding.rowListImageDetails
+        override val rowChildren = binding.rowListImageChildren
+        override val rowThumbnail = binding.rowListImageThumbnail
+        override val rowExpand = binding.rowListImageExpand
+        override val rowCheckBoxFrame = binding.rowListImageCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListImageCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListImageMargin
+        override val rowImage = binding.rowListImageImage
+        override val rowBigImage = binding.rowListImageBigImage
+        override val rowBigImageLayout = binding.rowListImageBigImageLayout
+        override val rowSeparator = binding.rowListImageSeparator
+        override val rowChipGroup = binding.rowListImageChipGroup
+        override val rowMarginEnd = binding.rowListImageMarginEnd
     }
 }

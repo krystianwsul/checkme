@@ -427,22 +427,22 @@ class UserListFragment : AbstractFragment(), FabUser {
             AvatarHolder,
             MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListAvatarContainer
+        override val rowTextLayout = binding.rowListAvatarTextLayout
+        override val rowName = binding.rowListAvatarName
+        override val rowDetails = binding.rowListAvatarDetails
+        override val rowChildren = binding.rowListAvatarChildren
+        override val rowThumbnail = binding.rowListAvatarThumbnail
+        override val rowExpand = binding.rowListAvatarExpand
+        override val rowCheckBoxFrame = binding.rowListAvatarCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListAvatarCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListAvatarMargin
+        override val rowImage = binding.rowListAvatarImage
+        override val rowBigImage = binding.rowListAvatarBigImage
+        override val rowBigImageLayout = binding.rowListAvatarBigImageLayout
+        override val rowSeparator = binding.rowListAvatarSeparator
+        override val rowChipGroup = binding.rowListAvatarChipGroup
+        override val rowMarginEnd = binding.rowListAvatarMarginEnd
     }
 
     @Parcelize

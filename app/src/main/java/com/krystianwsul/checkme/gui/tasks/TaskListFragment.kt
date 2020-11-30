@@ -746,22 +746,22 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             binding: RowListExpandableMultilineBinding,
     ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListExpandableMultilineContainer
+        override val rowTextLayout = binding.rowListExpandableMultilineTextLayout
+        override val rowName = binding.rowListExpandableMultilineName
+        override val rowDetails = binding.rowListExpandableMultilineDetails
+        override val rowChildren = binding.rowListExpandableMultilineChildren
+        override val rowThumbnail = binding.rowListExpandableMultilineThumbnail
+        override val rowExpand = binding.rowListExpandableMultilineExpand
+        override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListExpandableMultilineCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListExpandableMultilineMargin
+        override val rowImage = binding.rowListExpandableMultilineImage
+        override val rowBigImage = binding.rowListExpandableMultilineBigImage
+        override val rowBigImageLayout = binding.rowListExpandableMultilineBigImageLayout
+        override val rowSeparator = binding.rowListExpandableMultilineSeparator
+        override val rowChipGroup = binding.rowListExpandableMultilineChipGroup
+        override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
     }
 
     private interface TaskParent {

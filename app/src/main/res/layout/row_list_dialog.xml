@@ -9,7 +9,7 @@
     tools:ignore="UnusedAttribute">
 
     <LinearLayout
-        android:id="@+id/rowContainer"
+        android:id="@+id/rowListDialogContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -17,17 +17,17 @@
         android:gravity="center_vertical">
 
         <include
-            android:id="@+id/rowListCheckboxInclude"
+            android:id="@+id/rowListDialogCheckboxInclude"
             layout="@layout/row_list_checkbox" />
 
         <View
-            android:id="@+id/rowMargin"
+            android:id="@+id/rowListDialogMargin"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:visibility="gone" />
 
         <LinearLayout
-            android:id="@+id/rowTextLayout"
+            android:id="@+id/rowListDialogTextLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -35,7 +35,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/rowName"
+                android:id="@+id/rowListDialogName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -44,7 +44,7 @@
                 tools:ignore="Deprecated" />
 
             <TextView
-                android:id="@+id/rowDetails"
+                android:id="@+id/rowListDialogDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -53,7 +53,7 @@
                 tools:ignore="Deprecated" />
 
             <TextView
-                android:id="@+id/rowChildren"
+                android:id="@+id/rowListDialogChildren"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
@@ -62,7 +62,7 @@
                 tools:ignore="Deprecated" />
 
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/rowChipGroup"
+                android:id="@+id/rowListDialogChipGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
@@ -70,14 +70,14 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/rowThumbnail"
+            android:id="@+id/rowListDialogThumbnail"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginEnd="8dp"
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/rowExpand"
+            android:id="@+id/rowListDialogExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:paddingStart="16dp"
@@ -89,7 +89,7 @@
     </LinearLayout>
 
     <View
-        android:id="@+id/rowSeparator"
+        android:id="@+id/rowListDialogSeparator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"

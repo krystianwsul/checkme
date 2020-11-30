@@ -207,21 +207,21 @@ class DoneInstanceNode(
             binding: RowListCheckableBinding,
     ) : AbstractHolder(binding.root), ExpandableHolder, CheckableHolder, MultiLineHolder {
 
-        override val rowContainer = binding.rowContainer
-        override val rowTextLayout = binding.rowTextLayout
-        override val rowName = binding.rowName
-        override val rowDetails = binding.rowDetails
-        override val rowChildren = binding.rowChildren
-        override val rowThumbnail = binding.rowThumbnail
-        override val rowExpand = binding.rowExpand
-        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowMargin
-        override val rowImage = binding.rowImage
-        override val rowBigImage = binding.rowBigImage
-        override val rowBigImageLayout = binding.rowBigImageLayout
-        override val rowSeparator = binding.rowSeparator
-        override val rowChipGroup = binding.rowChipGroup
-        override val rowMarginEnd = binding.rowMarginEnd
+        override val rowContainer = binding.rowListCheckableContainer
+        override val rowTextLayout = binding.rowListCheckableTextLayout
+        override val rowName = binding.rowListCheckableName
+        override val rowDetails = binding.rowListCheckableDetails
+        override val rowChildren = binding.rowListCheckableChildren
+        override val rowThumbnail = binding.rowListCheckableThumbnail
+        override val rowExpand = binding.rowListCheckableExpand
+        override val rowCheckBoxFrame = binding.rowListCheckableCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListCheckableCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowListCheckableMargin
+        override val rowImage = binding.rowListCheckableImage
+        override val rowBigImage = binding.rowListCheckableBigImage
+        override val rowBigImageLayout = binding.rowListCheckableBigImageLayout
+        override val rowSeparator = binding.rowListCheckableSeparator
+        override val rowChipGroup = binding.rowListCheckableChipGroup
+        override val rowMarginEnd = binding.rowListCheckableMarginEnd
     }
 }

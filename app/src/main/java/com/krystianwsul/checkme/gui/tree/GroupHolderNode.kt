@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -46,6 +47,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected open val hasAvatar = false // todo delegate
     open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
+    protected open val checkBoxVisibility = View.GONE // todo delegate
 
     abstract val nodeType: NodeType
 
@@ -154,11 +156,12 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                     rowMarginEnd!!.isVisible = true
                 }
                 if (delegates.none { it is AvatarDelegate<*> }) rowImage?.isVisible = false
-                if (delegates.none { it is CheckableDelegate<*> }) rowCheckBoxFrame.isGone = true
                 if (delegates.none { it is MultiLineDelegate<*> }) {
                     rowDetails.isGone = true
                     rowChildren.isGone = true
                 }
+                if (delegates.none { it is CheckableDelegate<*> || it is InvisibleCheckboxDelegate<*> })
+                    rowCheckBoxFrame.visibility = checkBoxVisibility
 
                 rowMarginStart.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar
 

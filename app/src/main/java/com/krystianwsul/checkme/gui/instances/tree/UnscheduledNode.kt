@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -8,8 +9,6 @@ import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNod
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -19,7 +18,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(0), TaskParent, CheckableModelNode<AbstractHolder>, SingleLineModelNode<AbstractHolder> {
+) : GroupHolderNode(0), TaskParent, SingleLineModelNode<AbstractHolder> {
 
     override val nodeType = NodeType.UNSCHEDULED
 
@@ -43,10 +42,11 @@ class UnscheduledNode(
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
-                CheckableDelegate(this),
                 SingleLineDelegate(this),
         )
     }
+
+    override val checkBoxVisibility = View.INVISIBLE
 
     fun initialize(
             expanded: Boolean,

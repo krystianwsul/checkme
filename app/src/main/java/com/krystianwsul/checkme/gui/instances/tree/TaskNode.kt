@@ -6,8 +6,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
@@ -22,7 +20,7 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), TaskParent, CheckableModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
+) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<AbstractHolder> {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -54,7 +52,6 @@ class TaskNode(
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
-                CheckableDelegate(this),
                 MultiLineDelegate(this)
         )
     }
@@ -66,6 +63,8 @@ class TaskNode(
                 hasAvatar,
                 thumbnail != null
         )
+
+    override val checkBoxVisibility = View.INVISIBLE
 
     fun initialize(
             parentTreeNode: TreeNode<AbstractHolder>,

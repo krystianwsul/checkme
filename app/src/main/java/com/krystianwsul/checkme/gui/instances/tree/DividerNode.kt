@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -7,8 +8,6 @@ import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -21,7 +20,7 @@ class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), CheckableModelNode<AbstractHolder>, SingleLineModelNode<AbstractHolder> {
+) : GroupHolderNode(indentation), SingleLineModelNode<AbstractHolder> {
 
     override val nodeType = NodeType.DIVIDER
 
@@ -41,10 +40,11 @@ class DividerNode(
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
-                CheckableDelegate(this),
                 SingleLineDelegate(this)
         )
     }
+
+    override val checkBoxVisibility get() = View.INVISIBLE
 
     fun initialize(
             expanded: Boolean,

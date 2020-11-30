@@ -25,7 +25,7 @@ abstract class AbstractHolder(view: View) :
         CheckableHolder,
         InvisibleCheckboxHolder,
         MultiLineHolder,
-        SingleLineHolder {
+        SingleLineHolder { // todo delegate don't implement all
 
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView

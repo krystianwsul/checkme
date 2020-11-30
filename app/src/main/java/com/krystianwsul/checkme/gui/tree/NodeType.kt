@@ -2,8 +2,7 @@ package com.krystianwsul.checkme.gui.tree
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.krystianwsul.checkme.databinding.RowListBinding
-import com.krystianwsul.checkme.databinding.RowListDialogBinding
+import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
@@ -18,7 +17,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ShowCustomTimesFragment.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListMultilineBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -34,7 +33,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = FriendListFragment.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListAvatarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -42,7 +41,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UserListFragment.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListAvatarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -50,7 +49,11 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DividerNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListExpandableSinglelineBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                )
         )
     },
 
@@ -58,7 +61,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DoneInstanceNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -66,7 +69,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NotDoneGroupNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -77,7 +80,7 @@ enum class NodeType {
                 parent: ViewGroup,
         ) = NotDoneGroupNode.NotDoneInstanceNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -85,7 +88,11 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListExpandableMultilineBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                )
         )
     },
 
@@ -93,7 +100,11 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UnscheduledNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListExpandableSinglelineBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                )
         )
     },
 
@@ -101,7 +112,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ProjectListFragment.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListMultilineBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -109,7 +120,11 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskListFragment.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListExpandableMultilineBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                )
         )
     },
 
@@ -117,7 +132,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListAssignedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -125,7 +140,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListImageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
@@ -133,7 +148,7 @@ enum class NodeType {
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
                 baseAdapter,
-                RowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                RowListNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     };
 

@@ -2,12 +2,15 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.databinding.RowListBinding
+import com.krystianwsul.checkme.databinding.RowListExpandableSinglelineBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.common.utils.TaskKey
@@ -104,6 +107,24 @@ class UnscheduledNode(
 
     class Holder(
             override val baseAdapter: BaseAdapter,
-            rowListBinding: RowListBinding,
-    ) : RegularNodeHolder(rowListBinding)
+            binding: RowListExpandableSinglelineBinding,
+    ) : AbstractHolder(binding.root) {
+
+        override val rowContainer = binding.rowContainer
+        override val rowTextLayout = binding.rowTextLayout
+        override val rowName = binding.rowName
+        override val rowDetails = binding.rowDetails
+        override val rowChildren = binding.rowChildren
+        override val rowThumbnail = binding.rowThumbnail
+        override val rowExpand = binding.rowExpand
+        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowMargin
+        override val rowImage = binding.rowImage
+        override val rowBigImage = binding.rowBigImage
+        override val rowBigImageLayout = binding.rowBigImageLayout
+        override val rowSeparator = binding.rowSeparator
+        override val rowChipGroup = binding.rowChipGroup
+        override val rowMarginEnd = binding.rowMarginEnd
+    }
 }

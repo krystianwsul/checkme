@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
-import com.krystianwsul.checkme.databinding.RowListBinding
+import com.krystianwsul.checkme.databinding.RowListImageBinding
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -69,6 +69,24 @@ class ImageNode(
 
     class Holder(
             override val baseAdapter: BaseAdapter,
-            rowListBinding: RowListBinding,
-    ) : RegularNodeHolder(rowListBinding)
+            binding: RowListImageBinding,
+    ) : AbstractHolder(binding.root) {
+
+        override val rowContainer = binding.rowContainer
+        override val rowTextLayout = binding.rowTextLayout
+        override val rowName = binding.rowName
+        override val rowDetails = binding.rowDetails
+        override val rowChildren = binding.rowChildren
+        override val rowThumbnail = binding.rowThumbnail
+        override val rowExpand = binding.rowExpand
+        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowMargin
+        override val rowImage = binding.rowImage
+        override val rowBigImage = binding.rowBigImage
+        override val rowBigImageLayout = binding.rowBigImageLayout
+        override val rowSeparator = binding.rowSeparator
+        override val rowChipGroup = binding.rowChipGroup
+        override val rowMarginEnd = binding.rowMarginEnd
+    }
 }

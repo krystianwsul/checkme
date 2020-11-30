@@ -14,7 +14,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentTaskListBinding
-import com.krystianwsul.checkme.databinding.RowListBinding
+import com.krystianwsul.checkme.databinding.RowListExpandableMultilineBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -741,8 +741,26 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     class Holder(
             override val baseAdapter: BaseAdapter,
-            rowListBinding: RowListBinding,
-    ) : RegularNodeHolder(rowListBinding)
+            binding: RowListExpandableMultilineBinding,
+    ) : AbstractHolder(binding.root) {
+
+        override val rowContainer = binding.rowContainer
+        override val rowTextLayout = binding.rowTextLayout
+        override val rowName = binding.rowName
+        override val rowDetails = binding.rowDetails
+        override val rowChildren = binding.rowChildren
+        override val rowThumbnail = binding.rowThumbnail
+        override val rowExpand = binding.rowExpand
+        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowMargin
+        override val rowImage = binding.rowImage
+        override val rowBigImage = binding.rowBigImage
+        override val rowBigImageLayout = binding.rowBigImageLayout
+        override val rowSeparator = binding.rowSeparator
+        override val rowChipGroup = binding.rowChipGroup
+        override val rowMarginEnd = binding.rowMarginEnd
+    }
 
     private interface TaskParent {
 

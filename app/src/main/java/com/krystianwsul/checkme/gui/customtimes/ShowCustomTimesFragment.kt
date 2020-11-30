@@ -12,14 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
-import com.krystianwsul.checkme.databinding.RowListBinding
+import com.krystianwsul.checkme.databinding.RowListMultilineBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.BaseAdapter
+import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -303,8 +306,26 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     class Holder(
             override val baseAdapter: BaseAdapter,
-            rowListBinding: RowListBinding,
-    ) : RegularNodeHolder(rowListBinding)
+            binding: RowListMultilineBinding,
+    ) : AbstractHolder(binding.root) {
+
+        override val rowContainer = binding.rowContainer
+        override val rowTextLayout = binding.rowTextLayout
+        override val rowName = binding.rowName
+        override val rowDetails = binding.rowDetails
+        override val rowChildren = binding.rowChildren
+        override val rowThumbnail = binding.rowThumbnail
+        override val rowExpand = binding.rowExpand
+        override val rowCheckBoxFrame = binding.rowListCheckboxInclude.rowCheckboxFrame
+        override val rowCheckBox = binding.rowListCheckboxInclude.rowCheckbox
+        override val rowMarginStart = binding.rowMargin
+        override val rowImage = binding.rowImage
+        override val rowBigImage = binding.rowBigImage
+        override val rowBigImageLayout = binding.rowBigImageLayout
+        override val rowSeparator = binding.rowSeparator
+        override val rowChipGroup = binding.rowChipGroup
+        override val rowMarginEnd = binding.rowMarginEnd
+    }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {
 

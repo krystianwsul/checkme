@@ -104,17 +104,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
     val separatorVisible: Boolean
         get() {
-            if (!parent.isExpanded)
-                throw InvisibleNodeException()
+            if (!parent.isExpanded) throw InvisibleNodeException()
 
             val positionInCollection = treeNodeCollection.getPosition(this)
             check(positionInCollection >= 0)
 
-            if (positionInCollection == treeNodeCollection.displayedNodes.size - 1)
-                return false
-
-            if (parent.getPosition(this) == parent.displayedNodes.size - 1)
-                return true
+            if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
+            if (parent.getPosition(this) == parent.displayedNodes.size - 1) return true
 
             val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1)
 
@@ -124,11 +120,9 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     val allChildren: List<TreeNode<T>> get() = childTreeNodes
 
     init {
-        if (selected && !modelNode.isSelectable)
-            throw NotSelectableSelectedException()
+        if (selected && !modelNode.isSelectable) throw NotSelectableSelectedException()
 
-        if (modelNode.isSelectable && !modelNode.isVisibleDuringActionMode)
-            throw SelectableNotVisibleException()
+        if (modelNode.isSelectable && !modelNode.isVisibleDuringActionMode) throw SelectableNotVisibleException()
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {

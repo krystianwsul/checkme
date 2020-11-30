@@ -222,5 +222,10 @@ class DoneInstanceNode(
         override val rowSeparator = binding.rowListCheckableSeparator
         override val rowChipGroup = binding.rowListCheckableChipGroup
         override val rowMarginEnd = binding.rowListCheckableMarginEnd
+
+        override fun onViewAttachedToWindow() {
+            super<AbstractHolder>.onViewAttachedToWindow()
+            super<ExpandableHolder>.onViewAttachedToWindow()
+        }
     }
 }

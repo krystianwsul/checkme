@@ -761,6 +761,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val rowSeparator = binding.rowListExpandableMultilineSeparator
         override val rowChipGroup = binding.rowListExpandableMultilineChipGroup
         override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
+
+        override fun onViewAttachedToWindow() {
+            super<AbstractHolder>.onViewAttachedToWindow()
+            super<ExpandableHolder>.onViewAttachedToWindow()
+        }
     }
 
     private interface TaskParent {

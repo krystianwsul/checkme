@@ -151,7 +151,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
                 // todo delegate remove these
                 if (delegates.none { it is ExpandableDelegate }) {
-                    rowExpand.isGone = true
                     rowMarginEnd!!.isVisible = true
                 }
                 if (delegates.none { it is MultiLineDelegate }) {

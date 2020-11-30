@@ -103,7 +103,6 @@ class NoteNode(
         override val rowDetails = binding.rowListNoteDetails
         override val rowChildren = binding.rowListNoteChildren
         override val rowThumbnail = binding.rowListNoteThumbnail
-        override val rowExpand = binding.rowListNoteExpand
         override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListNoteCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListNoteMargin

@@ -83,18 +83,6 @@
             android:layout_height="0dp"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/rowListImageExpand"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="7dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:contentDescription="@string/expand"
-            android:src="@drawable/ic_expand_more_black_36dp"
-            android:visibility="invisible" />
-
     </LinearLayout>
 
     <RelativeLayout

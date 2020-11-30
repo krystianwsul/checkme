@@ -127,5 +127,10 @@ class UnscheduledNode(
         override val rowSeparator = binding.rowListExpandableSingleLineSeparator
         override val rowChipGroup = binding.rowListExpandableSingleLineChipGroup
         override val rowMarginEnd = binding.rowListExpandableSingleLineMarginEnd
+
+        override fun onViewAttachedToWindow() {
+            super<AbstractHolder>.onViewAttachedToWindow()
+            super<ExpandableHolder>.onViewAttachedToWindow()
+        }
     }
 }

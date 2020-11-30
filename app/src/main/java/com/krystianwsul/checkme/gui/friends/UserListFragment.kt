@@ -433,7 +433,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val rowDetails = binding.rowListAvatarDetails
         override val rowChildren = binding.rowListAvatarChildren
         override val rowThumbnail = binding.rowListAvatarThumbnail
-        override val rowExpand = binding.rowListAvatarExpand
         override val rowCheckBoxFrame = binding.rowListAvatarCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListAvatarCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListAvatarMargin

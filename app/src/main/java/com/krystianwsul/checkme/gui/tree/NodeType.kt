@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
 enum class NodeType {
 
-    CUSTOM_TIME {
+    CUSTOM_TIME { // MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ShowCustomTimesFragment.Holder(
                 baseAdapter,
@@ -22,7 +22,7 @@ enum class NodeType {
         )
     },
 
-    PARENT_PICKER_TASK {
+    PARENT_PICKER_TASK { // ExpandableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DialogNodeHolder(
                 baseAdapter,
@@ -30,7 +30,7 @@ enum class NodeType {
         )
     },
 
-    FRIEND {
+    FRIEND { // AvatarDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = FriendListFragment.Holder(
                 baseAdapter,
@@ -38,7 +38,7 @@ enum class NodeType {
         )
     },
 
-    USER {
+    USER { // AvatarDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UserListFragment.Holder(
                 baseAdapter,
@@ -46,7 +46,7 @@ enum class NodeType {
         )
     },
 
-    DIVIDER {
+    DIVIDER { // ExpandableDelegate, SingleLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DividerNode.Holder(
                 baseAdapter,
@@ -54,7 +54,7 @@ enum class NodeType {
         )
     },
 
-    DONE {
+    DONE { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DoneInstanceNode.Holder(
                 baseAdapter,
@@ -62,7 +62,7 @@ enum class NodeType {
         )
     },
 
-    NOT_DONE_GROUP {
+    NOT_DONE_GROUP { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NotDoneGroupNode.Holder(
                 baseAdapter,
@@ -70,7 +70,7 @@ enum class NodeType {
         )
     },
 
-    NOT_DONE_INSTANCE {
+    NOT_DONE_INSTANCE { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(
                 baseAdapter: BaseAdapter,
@@ -81,7 +81,7 @@ enum class NodeType {
         )
     },
 
-    UNSCHEDULED_TASK {
+    UNSCHEDULED_TASK { // ExpandableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
                 baseAdapter,
@@ -89,7 +89,7 @@ enum class NodeType {
         )
     },
 
-    UNSCHEDULED {
+    UNSCHEDULED { // ExpandableDelegate, SingleLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UnscheduledNode.Holder(
                 baseAdapter,
@@ -97,7 +97,7 @@ enum class NodeType {
         )
     },
 
-    PROJECT {
+    PROJECT { // MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ProjectListFragment.Holder(
                 baseAdapter,
@@ -105,7 +105,7 @@ enum class NodeType {
         )
     },
 
-    TASK_LIST_TASK {
+    TASK_LIST_TASK { // ExpandableDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskListFragment.Holder(
                 baseAdapter,
@@ -113,7 +113,7 @@ enum class NodeType {
         )
     },
 
-    ASSIGNED {
+    ASSIGNED { // InvisibleCheckboxDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
                 baseAdapter,
@@ -121,7 +121,7 @@ enum class NodeType {
         )
     },
 
-    IMAGE {
+    IMAGE { // none
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
                 baseAdapter,
@@ -129,7 +129,7 @@ enum class NodeType {
         )
     },
 
-    NOTE {
+    NOTE { // InvisibleCheckboxDelegate, MultiLineDelegate
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
                 baseAdapter,

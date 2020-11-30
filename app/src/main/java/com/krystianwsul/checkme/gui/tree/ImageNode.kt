@@ -32,8 +32,6 @@ class ImageNode(
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val delegates by lazy { listOf(MultiLineDelegate(this)) }
-
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
                 indentation,

@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.ChipGroup
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
-import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineHolder
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
@@ -24,8 +23,7 @@ abstract class AbstractHolder(view: View) :
         AvatarHolder,
         CheckableHolder,
         InvisibleCheckboxHolder,
-        MultiLineHolder,
-        SingleLineHolder { // todo delegate don't implement all
+        MultiLineHolder { // todo delegate don't implement all
 
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView

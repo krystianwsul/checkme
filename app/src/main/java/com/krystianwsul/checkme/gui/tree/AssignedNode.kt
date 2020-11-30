@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.gui.tree
 import android.view.View
 import com.krystianwsul.checkme.databinding.RowListBinding
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.checkable.CheckableModelNode
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
@@ -16,7 +16,7 @@ class AssignedNode(
         override val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), CheckableModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
+) : GroupHolderNode(0), InvisibleCheckboxModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -35,8 +35,14 @@ class AssignedNode(
 
     override val isVisibleDuringActionMode = false
 
-    override val delegates by lazy { listOf(CheckableDelegate(this), MultiLineDelegate(this)) }
+    override val delegates by lazy {
+        listOf(
+                InvisibleCheckboxDelegate(this),
+                MultiLineDelegate(this)
+        )
+    }
 
+    override val checkBoxInvisible = instance
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
     override val widthKey

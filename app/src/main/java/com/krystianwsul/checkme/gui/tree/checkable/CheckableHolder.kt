@@ -19,7 +19,7 @@ interface CheckableHolder : BaseHolder {
         ).merge()
                 .mapTreeNode()
                 .subscribe {  // todo delegate checkable move to delegate
-                    ((it as CheckableModelNode<*>).checkBoxState as? CheckBoxState.Visible)?.listener?.invoke()
+                    ((it.modelNode as CheckableModelNode<*>).checkBoxState as? CheckBoxState.Visible)?.listener?.invoke()
                 }
                 .addTo(compositeDisposable)
     }

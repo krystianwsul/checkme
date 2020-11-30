@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.gui.instances.tree.singleline.SingleLineHolder
 import com.krystianwsul.checkme.gui.tree.avatar.AvatarHolder
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -22,6 +23,7 @@ abstract class AbstractHolder(view: View) :
         ExpandableHolder,
         AvatarHolder,
         CheckableHolder,
+        InvisibleCheckboxHolder,
         MultiLineHolder,
         SingleLineHolder {
 

@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.tree.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
@@ -155,7 +154,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                     rowExpand.isGone = true
                     rowMarginEnd!!.isVisible = true
                 }
-                if (delegates.none { it is AvatarDelegate }) rowImage?.isVisible = false
                 if (delegates.none { it is MultiLineDelegate }) {
                     rowDetails.isGone = true
                     rowChildren.isGone = true

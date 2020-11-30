@@ -122,7 +122,6 @@ class UnscheduledNode(
         override val rowCheckBoxFrame = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListExpandableSingleLineMargin
-        override val rowImage = binding.rowListExpandableSingleLineImage
         override val rowBigImage = binding.rowListExpandableSingleLineBigImage
         override val rowBigImageLayout = binding.rowListExpandableSingleLineBigImageLayout
         override val rowSeparator = binding.rowListExpandableSingleLineSeparator

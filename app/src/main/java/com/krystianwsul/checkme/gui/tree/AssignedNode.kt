@@ -91,7 +91,6 @@ class AssignedNode(
         override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListAssignedCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListAssignedMargin
-        override val rowImage = binding.rowListAssignedImage
         override val rowBigImage = binding.rowListAssignedBigImage
         override val rowBigImageLayout = binding.rowListAssignedBigImageLayout
         override val rowSeparator = binding.rowListAssignedSeparator

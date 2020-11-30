@@ -25,16 +25,6 @@
             android:layout_height="0dp"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/rowListExpandableSingleLineImage"
-            android:layout_width="@dimen/listImage"
-            android:layout_height="@dimen/listImage"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="7dp"
-            android:visibility="gone" />
-
         <LinearLayout
             android:id="@+id/rowListExpandableSingleLineTextLayout"
             android:layout_width="0dp"

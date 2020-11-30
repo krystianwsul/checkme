@@ -320,7 +320,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override val rowCheckBoxFrame = binding.rowListMultilineCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListMultilineCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListMultilineMargin
-        override val rowImage = binding.rowListMultilineImage
         override val rowBigImage = binding.rowListMultilineBigImage
         override val rowBigImageLayout = binding.rowListMultilineBigImageLayout
         override val rowSeparator = binding.rowListMultilineSeparator

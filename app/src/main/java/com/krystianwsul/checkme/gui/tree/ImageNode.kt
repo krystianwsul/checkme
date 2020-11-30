@@ -82,7 +82,6 @@ class ImageNode(
         override val rowCheckBoxFrame = binding.rowListImageCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListImageCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListImageMargin
-        override val rowImage = binding.rowListImageImage
         override val rowBigImage = binding.rowListImageBigImage
         override val rowBigImageLayout = binding.rowListImageBigImageLayout
         override val rowSeparator = binding.rowListImageSeparator

@@ -22,7 +22,7 @@ class DividerNode(
         indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), SingleLineModelNode<AbstractHolder> {
+) : GroupHolderNode(indentation), SingleLineModelNode {
 
     override val nodeType = NodeType.DIVIDER
 

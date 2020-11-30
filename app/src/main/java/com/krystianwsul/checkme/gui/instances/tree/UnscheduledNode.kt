@@ -23,7 +23,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(0), TaskParent, SingleLineModelNode<AbstractHolder> {
+) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
 
     override val nodeType = NodeType.UNSCHEDULED
 

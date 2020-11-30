@@ -15,7 +15,7 @@ import java.util.*
 class ImageNode(
         override val imageData: ImageData,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), MultiLineModelNode<AbstractHolder> {
+) : GroupHolderNode(0), MultiLineModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

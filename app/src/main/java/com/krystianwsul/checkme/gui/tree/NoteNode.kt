@@ -20,7 +20,7 @@ class NoteNode(
         val note: String,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), InvisibleCheckboxModelNode<AbstractHolder>, MultiLineModelNode<AbstractHolder> {
+) : GroupHolderNode(0), InvisibleCheckboxModelNode, MultiLineModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

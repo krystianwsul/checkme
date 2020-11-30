@@ -9,9 +9,7 @@ import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
-class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>) : NodeDelegate
-        where T : RecyclerView.ViewHolder,
-              T : MultiLineHolder {
+class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegate {
 
     companion object {
 
@@ -20,7 +18,7 @@ class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>
         private val textWidths = InitMap<Pair<Int, WidthKey>, BehaviorRelay<Int>> { BehaviorRelay.create() }
     }
 
-    override val state get() = multiLineModelNode.run { State(name, details, children) }
+    override val state get() = modelNode.run { State(name, details, children) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as MultiLineHolder).apply {
@@ -29,12 +27,12 @@ class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>
                             .resources
                             .configuration
                             .orientation,
-                    multiLineModelNode.widthKey
+                    modelNode.widthKey
             )
 
             val textWidthRelay = textWidths[widthKey]
 
-            val minLines = multiLineModelNode.run { 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0) }
+            val minLines = modelNode.run { 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0) }
 
             fun allocateLines(textViews: List<TextView>) {
                 var remainingLines = TOTAL_LINES - minLines
@@ -72,7 +70,7 @@ class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>
             val allocateTextViews = mutableListOf<TextView>()
 
             rowName.run {
-                multiLineModelNode.name.let {
+                modelNode.name.let {
                     when (it) {
                         is MultiLineNameData.Visible -> {
                             visibility = View.VISIBLE
@@ -94,14 +92,14 @@ class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>
                         MultiLineNameData.Gone -> visibility = View.GONE
                     }
 
-                    setTextIsSelectable(multiLineModelNode.textSelectable)
+                    setTextIsSelectable(modelNode.textSelectable)
                 }
             }
 
             rowDetails.run {
-                multiLineModelNode.details.let {
+                modelNode.details.let {
                     if (it != null) {
-                        check(!multiLineModelNode.name.unlimitedLines)
+                        check(!modelNode.name.unlimitedLines)
 
                         visibility = View.VISIBLE
                         text = it.first
@@ -115,9 +113,9 @@ class MultiLineDelegate<T>(private val multiLineModelNode: MultiLineModelNode<T>
             }
 
             rowChildren.run {
-                multiLineModelNode.children.let {
+                modelNode.children.let {
                     if (it != null) {
-                        check(!multiLineModelNode.name.unlimitedLines)
+                        check(!modelNode.name.unlimitedLines)
 
                         visibility = View.VISIBLE
                         text = it.first

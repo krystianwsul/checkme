@@ -245,7 +245,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
                 override val parentNode: ModelNode<AbstractHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<AbstractHolder> {
+        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set

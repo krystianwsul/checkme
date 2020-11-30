@@ -25,7 +25,7 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode<AbstractHolder> {
+) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

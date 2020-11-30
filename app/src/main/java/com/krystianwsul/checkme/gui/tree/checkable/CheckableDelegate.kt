@@ -3,9 +3,7 @@ package com.krystianwsul.checkme.gui.tree.checkable
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 
-class CheckableDelegate<T>(private val modelNode: CheckableModelNode<T>) : NodeDelegate
-        where T : RecyclerView.ViewHolder,
-              T : CheckableHolder {
+class CheckableDelegate(private val modelNode: CheckableModelNode) : NodeDelegate {
 
     override val state get() = State(modelNode.checkBoxState)
 

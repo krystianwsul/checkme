@@ -151,16 +151,16 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
 
                 // todo delegate remove these
-                if (delegates.none { it is ExpandableDelegate<*> }) {
+                if (delegates.none { it is ExpandableDelegate }) {
                     rowExpand.isGone = true
                     rowMarginEnd!!.isVisible = true
                 }
-                if (delegates.none { it is AvatarDelegate<*> }) rowImage?.isVisible = false
-                if (delegates.none { it is MultiLineDelegate<*> }) {
+                if (delegates.none { it is AvatarDelegate }) rowImage?.isVisible = false
+                if (delegates.none { it is MultiLineDelegate }) {
                     rowDetails.isGone = true
                     rowChildren.isGone = true
                 }
-                if (delegates.none { it is CheckableDelegate<*> || it is InvisibleCheckboxDelegate<*> })
+                if (delegates.none { it is CheckableDelegate || it is InvisibleCheckboxDelegate })
                     rowCheckBoxFrame.visibility = checkBoxVisibility
 
                 rowMarginStart.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar

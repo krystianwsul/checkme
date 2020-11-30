@@ -4,9 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 
-class InvisibleCheckboxDelegate<T>(private val modelNode: InvisibleCheckboxModelNode<T>) : NodeDelegate
-        where T : RecyclerView.ViewHolder,
-              T : InvisibleCheckboxHolder {
+class InvisibleCheckboxDelegate(private val modelNode: InvisibleCheckboxModelNode) : NodeDelegate {
 
     override val state get() = State(modelNode.checkBoxInvisible)
 

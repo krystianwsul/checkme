@@ -5,17 +5,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 
-class SingleLineDelegate<T>(private val singleLineModelNode: SingleLineModelNode<T>) : NodeDelegate
-        where T : RecyclerView.ViewHolder,
-              T : SingleLineHolder {
+class SingleLineDelegate(private val modelNode: SingleLineModelNode) : NodeDelegate {
 
-    override val state get() = State(singleLineModelNode.text)
+    override val state get() = State(modelNode.text)
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as SingleLineHolder).apply {
             rowName.run {
                 visibility = View.VISIBLE // todo delegate
-                text = singleLineModelNode.text
+                text = modelNode.text
                 setTextColor(GroupHolderNode.colorPrimary) // todo delegate
             }
         }

@@ -270,8 +270,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private inner class FriendNode(val userListData: FriendListViewModel.UserListData) :
             GroupHolderNode(0),
-            AvatarModelNode<AbstractHolder>,
-            MultiLineModelNode<AbstractHolder> {
+            AvatarModelNode,
+            MultiLineModelNode {
 
         override val ripple = true
 

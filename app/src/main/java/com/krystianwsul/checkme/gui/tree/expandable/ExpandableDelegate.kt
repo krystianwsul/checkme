@@ -6,10 +6,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import com.krystianwsul.treeadapter.TreeNode
 
-class ExpandableDelegate<T>(private val treeNode: TreeNode<T>) :
-        NodeDelegate
-        where T : RecyclerView.ViewHolder,
-              T : ExpandableHolder {
+class ExpandableDelegate(private val treeNode: TreeNode<*>) : NodeDelegate {
 
     override val state get() = treeNode.run { State(expandVisible, isExpanded) }
 

@@ -257,7 +257,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
             GroupHolderNode(0),
-            MultiLineModelNode<AbstractHolder> {
+            MultiLineModelNode {
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set

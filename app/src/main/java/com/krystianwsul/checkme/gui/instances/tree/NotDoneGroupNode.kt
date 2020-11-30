@@ -42,8 +42,8 @@ class NotDoneGroupNode(
         GroupHolderNode(indentation),
         NodeCollectionParent,
         Sortable,
-        CheckableModelNode<AbstractHolder>,
-        MultiLineModelNode<AbstractHolder> {
+        CheckableModelNode,
+        MultiLineModelNode {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -495,8 +495,8 @@ class NotDoneGroupNode(
     ) :
             GroupHolderNode(indentation),
             NodeCollectionParent,
-            CheckableModelNode<AbstractHolder>,
-            MultiLineModelNode<AbstractHolder> {
+            CheckableModelNode,
+            MultiLineModelNode {
 
         companion object {
 

@@ -33,8 +33,8 @@ class DoneInstanceNode(
         val dividerNode: DividerNode,
 ) : GroupHolderNode(indentation),
         NodeCollectionParent,
-        CheckableModelNode<AbstractHolder>,
-        MultiLineModelNode<AbstractHolder> {
+        CheckableModelNode,
+        MultiLineModelNode {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

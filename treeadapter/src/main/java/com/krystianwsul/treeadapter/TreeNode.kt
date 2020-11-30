@@ -23,9 +23,14 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (modelNode.isDraggable) {
             val startingDrag = modelNode.tryStartDrag(viewHolder)
-            onLongClickSelect(viewHolder, startingDrag)
+
+            if (!startingDrag) selected = !selected
+
+            modelNode.onBindViewHolder(viewHolder, startingDrag)
+
+            if (!startingDrag) treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
         } else {
-            treeViewAdapter.updateDisplayedNodes(this::toggleSelected) // todo delegate move selectable out of this?
+            treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
         }
     }
 
@@ -176,14 +181,6 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     private fun propagateSelection(selected: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         if (modelNode.toggleDescendants)
             childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(placeholder, false) }
-    }
-
-    private fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
-        if (!startingDrag) selected = !selected
-
-        modelNode.onBindViewHolder(viewHolder, startingDrag)
-
-        if (!startingDrag) treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode

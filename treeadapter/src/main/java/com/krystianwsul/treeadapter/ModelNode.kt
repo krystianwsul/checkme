@@ -24,6 +24,8 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     val parentNode: ModelNode<T>?
 
+    val isDraggable get() = false
+
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
     fun onClick(holder: T) = Unit
@@ -43,4 +45,6 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
     fun parentHierarchyMatches(filterCriteria: Any?): Boolean = matches(filterCriteria) || parentNode?.parentHierarchyMatches(filterCriteria) == true
 
     fun ordinalDesc(): String? = null
+
+    fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
 }

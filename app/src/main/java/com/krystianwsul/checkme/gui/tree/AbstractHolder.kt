@@ -47,10 +47,9 @@ abstract class AbstractHolder(view: View) :
                 .subscribe { it.onClick(this) }
                 .addTo(compositeDisposable)
 
-        // todo delegate draggable, or at least refactor GroupHolderNode.onLongClick to not be retarded
         itemView.longClicks { true }
                 .mapTreeNode()
-                .subscribe { (it.modelNode as GroupHolderNode).onLongClick(this) }
+                .subscribe { it.onLongClick(this) }
                 .addTo(compositeDisposable)
     }
 }

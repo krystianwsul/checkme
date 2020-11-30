@@ -274,11 +274,13 @@ class NotDoneGroupNode(
             if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
         }
 
-    override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
+    override val isDraggable = true
+
+    override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
-        if (singleInstance()
+        return if (singleInstance()
                 && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
                 && treeNodeCollection.selectedChildren.isEmpty()
                 && indentation == 0
@@ -286,9 +288,10 @@ class NotDoneGroupNode(
                 && groupListFragment.parameters.draggable
         ) {
             groupListFragment.dragHelper.startDrag(viewHolder)
-            treeNode.onLongClickSelect(viewHolder, true)
+
+            true
         } else {
-            treeNode.onLongClickSelect(viewHolder, false)
+            false
         }
     }
 

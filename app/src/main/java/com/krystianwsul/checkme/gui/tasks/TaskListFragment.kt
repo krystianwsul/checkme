@@ -676,24 +676,25 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val name get() = MultiLineNameData.Visible(childTaskData.name, disabledOverride ?: colorPrimary)
 
-            override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
-                if (copying) return
+            override val isSelectable = !copying
 
+            override val isDraggable = true
+
+            override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
                 val treeNodeCollection = taskAdapter.treeNodeCollection
 
-                if (taskListFragment.rootTaskData != null
+                return if (taskListFragment.rootTaskData != null
                         && treeNodeCollection.selectedChildren.isEmpty()
                         && indentation == 0
                         && treeNodeCollection.nodes.none { it.isExpanded }
                 ) {
                     taskListFragment.dragHelper.startDrag(viewHolder)
-                    treeNode.onLongClickSelect(viewHolder, true)
+
+                    true
                 } else {
-                    treeNode.onLongClickSelect(viewHolder, false)
+                    false
                 }
             }
-
-            override val isSelectable = true
 
             override fun onClick(holder: AbstractHolder) {
                 if (!copying)

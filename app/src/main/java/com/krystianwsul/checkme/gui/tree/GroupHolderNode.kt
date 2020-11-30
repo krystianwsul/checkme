@@ -47,8 +47,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
     protected open val hasAvatar = false // todo delegate
     open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
 
-    open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
-
     abstract val nodeType: NodeType
 
     final override val itemViewType by lazy { nodeType.ordinal }

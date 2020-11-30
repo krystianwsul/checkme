@@ -19,8 +19,8 @@ class DialogNodeHolder(
     override val rowChildren = rowListDialogBinding.rowChildren
     override val rowThumbnail = rowListDialogBinding.rowThumbnail
     override val rowExpand = rowListDialogBinding.rowExpand
-    override val rowCheckBoxFrame = rowListDialogBinding.rowCheckboxFrame
-    override val rowCheckBox = rowListDialogBinding.rowCheckbox
+    override val rowCheckBoxFrame = rowListDialogBinding.rowListCheckboxInclude.rowCheckboxFrame
+    override val rowCheckBox = rowListDialogBinding.rowListCheckboxInclude.rowCheckbox
     override val rowMarginStart = rowListDialogBinding.rowMargin
     override val rowImage: ImageView? = null
     override val rowBigImage: ImageView? = null

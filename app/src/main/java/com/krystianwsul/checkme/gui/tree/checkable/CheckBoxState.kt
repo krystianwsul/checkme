@@ -27,11 +27,9 @@ sealed class CheckBoxState {
             if (other === null) return false
             if (other === this) return true
 
-            if (other !is Visible)
-                return false
+            if (other !is Visible) return false
 
-            if (other.checked != checked)
-                return false
+            if (other.checked != checked) return false
 
             return true
         }

@@ -11,8 +11,8 @@ abstract class RegularNodeHolder(rowListBinding: RowListBinding) : AbstractHolde
     override val rowChildren = rowListBinding.rowChildren
     override val rowThumbnail = rowListBinding.rowThumbnail
     override val rowExpand = rowListBinding.rowExpand
-    override val rowCheckBoxFrame = rowListBinding.rowCheckboxFrame
-    override val rowCheckBox = rowListBinding.rowCheckbox
+    override val rowCheckBoxFrame = rowListBinding.rowListCheckboxInclude.rowCheckboxFrame
+    override val rowCheckBox = rowListBinding.rowListCheckboxInclude.rowCheckbox
     override val rowMarginStart = rowListBinding.rowMargin
     override val rowImage = rowListBinding.rowImage
     override val rowBigImage = rowListBinding.rowBigImage

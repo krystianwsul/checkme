@@ -10,9 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListImageBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
@@ -24,7 +21,7 @@ import java.util.*
 class ImageNode(
         override val imageData: ImageData,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), MultiLineModelNode {
+) : GroupHolderNode(0) {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -37,17 +34,7 @@ class ImageNode(
 
     data class Id(val id: Any)
 
-    override val name = MultiLineNameData.Gone
-
     override val isSeparatorVisibleWhenNotExpanded = true
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
-                thumbnail != null
-        )
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer

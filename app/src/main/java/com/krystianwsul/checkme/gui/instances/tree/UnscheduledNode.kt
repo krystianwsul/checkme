@@ -1,18 +1,14 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.databinding.RowListExpandableSinglelineBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -24,7 +20,7 @@ class UnscheduledNode(
         private val searchResults: Boolean,
 ) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
 
-    override val nodeType = NodeType.UNSCHEDULED
+    override val nodeType = NodeType.EXPANDABLE_SINGLELINE
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 
@@ -103,23 +99,4 @@ class UnscheduledNode(
     override fun matches(filterCriteria: Any?) = false
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
-
-    class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListExpandableSinglelineBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, SingleLineHolder {
-
-        override val rowContainer = binding.rowListExpandableSingleLineContainer
-        override val rowName = binding.rowListExpandableSingleLineName
-        override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
-        override val rowExpand = binding.rowListExpandableSingleLineExpand
-        override val rowMarginStart = binding.rowListExpandableSingleLineMargin
-        override val rowSeparator = binding.rowListExpandableSingleLineSeparator
-        override val rowMarginEnd = binding.rowListExpandableSingleLineMarginEnd
-
-        override fun onViewAttachedToWindow() {
-            super<AbstractHolder>.onViewAttachedToWindow()
-            super<ExpandableHolder>.onViewAttachedToWindow()
-        }
-    }
 }

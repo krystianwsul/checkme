@@ -4,8 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
-import com.krystianwsul.checkme.gui.instances.tree.*
+import com.krystianwsul.checkme.gui.instances.tree.DoneInstanceNode
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupNode
+import com.krystianwsul.checkme.gui.instances.tree.TaskNode
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.tree.holders.ExpandableSinglelineHolder
 import com.krystianwsul.checkme.gui.tree.holders.RowListAvatarHolder
 import com.krystianwsul.checkme.gui.tree.holders.RowListMultilineHolder
 
@@ -35,11 +38,9 @@ enum class NodeType {
         )
     },
 
-    DIVIDER {
-        // ExpandableHolder, SingleLineHolder
-        // RowListExpandableSinglelineBinding
+    EXPANDABLE_SINGLELINE { // ExpandableHolder, SingleLineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DividerNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ExpandableSinglelineHolder(
                 baseAdapter,
                 RowListExpandableSinglelineBinding.inflate(
                         LayoutInflater.from(parent.context),
@@ -89,20 +90,6 @@ enum class NodeType {
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
                 baseAdapter,
                 RowListExpandableMultilineBinding.inflate(
-                        LayoutInflater.from(parent.context),
-                        parent,
-                        false
-                )
-        )
-    },
-
-    UNSCHEDULED {
-        // ExpandableHolder, SingleLineHolder
-        // RowListExpandableSinglelineBinding
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UnscheduledNode.Holder(
-                baseAdapter,
-                RowListExpandableSinglelineBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false

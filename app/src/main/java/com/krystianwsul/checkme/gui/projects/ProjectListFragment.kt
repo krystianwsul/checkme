@@ -338,7 +338,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override val rowChildren = binding.rowListMultilineChildren
         override val rowThumbnail = binding.rowListMultilineThumbnail
         override val rowCheckBoxFrame = binding.rowListMultilineCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListMultilineCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListMultilineMargin
         override val rowBigImage = binding.rowListMultilineBigImage
         override val rowBigImageLayout = binding.rowListMultilineBigImageLayout

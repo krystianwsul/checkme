@@ -226,6 +226,7 @@ class DoneInstanceNode(
         override fun onViewAttachedToWindow() {
             super<AbstractHolder>.onViewAttachedToWindow()
             super<ExpandableHolder>.onViewAttachedToWindow()
+            super<CheckableHolder>.onViewAttachedToWindow()
         }
     }
 }

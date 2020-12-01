@@ -333,7 +333,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val rowChildren = binding.rowListAvatarChildren
         override val rowThumbnail = binding.rowListAvatarThumbnail
         override val rowCheckBoxFrame = binding.rowListAvatarCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListAvatarCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListAvatarMargin
         override val rowImage = binding.rowListAvatarImage
         override val rowBigImage = binding.rowListAvatarBigImage

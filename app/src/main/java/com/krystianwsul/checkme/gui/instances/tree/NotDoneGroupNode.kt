@@ -722,6 +722,7 @@ class NotDoneGroupNode(
         override fun onViewAttachedToWindow() {
             super<AbstractHolder>.onViewAttachedToWindow()
             super<ExpandableHolder>.onViewAttachedToWindow()
+            super<CheckableHolder>.onViewAttachedToWindow()
         }
     }
 }

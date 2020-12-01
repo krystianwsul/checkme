@@ -136,7 +136,6 @@ class DividerNode(
         override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
         override val rowExpand = binding.rowListExpandableSingleLineExpand
         override val rowCheckBoxFrame = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListExpandableSingleLineMargin
         override val rowBigImage = binding.rowListExpandableSingleLineBigImage
         override val rowBigImageLayout = binding.rowListExpandableSingleLineBigImageLayout

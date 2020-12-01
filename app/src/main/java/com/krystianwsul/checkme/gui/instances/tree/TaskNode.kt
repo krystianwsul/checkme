@@ -150,7 +150,6 @@ class TaskNode(
         override val rowThumbnail = binding.rowListExpandableMultilineThumbnail
         override val rowExpand = binding.rowListExpandableMultilineExpand
         override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListExpandableMultilineCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListExpandableMultilineMargin
         override val rowBigImage = binding.rowListExpandableMultilineBigImage
         override val rowBigImageLayout = binding.rowListExpandableMultilineBigImageLayout

@@ -13,7 +13,9 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
 enum class NodeType {
 
-    CUSTOM_TIME { // MultiLineDelegate
+    CUSTOM_TIME {
+        // MultilineHolder
+        // RowListMultilineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ShowCustomTimesFragment.Holder(
                 baseAdapter,
@@ -21,7 +23,9 @@ enum class NodeType {
         )
     },
 
-    PARENT_PICKER_TASK { // ExpandableDelegate, MultiLineDelegate
+    PARENT_PICKER_TASK {
+        // ExpandableHolder, MultiLineHolder
+        // RowListDialogBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DialogNodeHolder(
                 baseAdapter,
@@ -29,7 +33,9 @@ enum class NodeType {
         )
     },
 
-    FRIEND { // AvatarDelegate, MultiLineDelegate
+    FRIEND {
+        // AvatarHolder, MultiLineHolder
+        // RowListAvatarBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = FriendListFragment.Holder(
                 baseAdapter,
@@ -37,7 +43,9 @@ enum class NodeType {
         )
     },
 
-    USER { // AvatarDelegate, MultiLineDelegate
+    USER {
+        // AvatarHolder, MultiLineHolder
+        // RowListAvatarBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UserListFragment.Holder(
                 baseAdapter,
@@ -45,7 +53,9 @@ enum class NodeType {
         )
     },
 
-    DIVIDER { // ExpandableDelegate, SingleLineDelegate
+    DIVIDER {
+        // ExpandableHolder, SingleLineHolder
+        // RowListExpandableSinglelineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DividerNode.Holder(
                 baseAdapter,
@@ -57,7 +67,9 @@ enum class NodeType {
         )
     },
 
-    DONE { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
+    DONE {
+        // ExpandableHolder, CheckableHolder, MultiLineHolder
+        // RowListCheckableBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DoneInstanceNode.Holder(
                 baseAdapter,
@@ -65,7 +77,9 @@ enum class NodeType {
         )
     },
 
-    NOT_DONE_GROUP { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
+    NOT_DONE_GROUP {
+        // ExpandableHolder, CheckableHolder, MultiLineHolder
+        // RowListCheckableBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NotDoneGroupNode.Holder(
                 baseAdapter,
@@ -73,7 +87,9 @@ enum class NodeType {
         )
     },
 
-    NOT_DONE_INSTANCE { // ExpandableDelegate, CheckableDelegate, MultiLineDelegate
+    NOT_DONE_INSTANCE {
+        // ExpandableHolder, CheckableHolder, MultiLineHolder
+        // RowListCheckableBinding
 
         override fun onCreateViewHolder(
                 baseAdapter: BaseAdapter,
@@ -84,7 +100,9 @@ enum class NodeType {
         )
     },
 
-    UNSCHEDULED_TASK { // ExpandableDelegate, MultiLineDelegate
+    UNSCHEDULED_TASK {
+        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder
+        // RowListExpandableMultilineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
                 baseAdapter,
@@ -96,7 +114,9 @@ enum class NodeType {
         )
     },
 
-    UNSCHEDULED { // ExpandableDelegate, SingleLineDelegate
+    UNSCHEDULED {
+        // ExpandableHolder, SingleLineHolder
+        // RowListExpandableSinglelineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UnscheduledNode.Holder(
                 baseAdapter,
@@ -108,7 +128,9 @@ enum class NodeType {
         )
     },
 
-    PROJECT { // MultiLineDelegate
+    PROJECT {
+        // MultiLineHolder
+        // RowListMultilineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ProjectListFragment.Holder(
                 baseAdapter,
@@ -116,7 +138,9 @@ enum class NodeType {
         )
     },
 
-    TASK_LIST_TASK { // ExpandableDelegate, MultiLineDelegate
+    TASK_LIST_TASK {
+        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder
+        // RowListExpandableMultilineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskListFragment.Holder(
                 baseAdapter,
@@ -128,7 +152,9 @@ enum class NodeType {
         )
     },
 
-    ASSIGNED { // InvisibleCheckboxDelegate, MultiLineDelegate
+    ASSIGNED {
+        // InvisibleCheckboxHolder
+        // RowListAssignedBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
                 baseAdapter,
@@ -136,7 +162,9 @@ enum class NodeType {
         )
     },
 
-    IMAGE { // none
+    IMAGE {
+        // none
+        // RowListImageBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
                 baseAdapter,
@@ -144,7 +172,9 @@ enum class NodeType {
         )
     },
 
-    NOTE { // InvisibleCheckboxDelegate, MultiLineDelegate
+    NOTE {
+        // InvisibleCheckboxHolder
+        // RowListNoteBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
                 baseAdapter,

@@ -20,9 +20,7 @@ enum class NodeType {
         )
     },
 
-    PARENT_PICKER_TASK {
-        // ExpandableHolder, MultiLineHolder
-        // RowListDialogBinding
+    DIALOG { // ExpandableHolder, MultiLineHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DialogNodeHolder(
                 baseAdapter,

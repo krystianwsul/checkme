@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
-import com.krystianwsul.checkme.databinding.RowListMultilineBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setProjectEndTimeStamps
@@ -26,7 +25,6 @@ import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -324,22 +322,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
         }
-    }
-
-    class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListMultilineBinding,
-    ) : AbstractHolder(binding.root), MultiLineHolder {
-
-        override val rowContainer = binding.rowListMultilineContainer
-        override val rowTextLayout = binding.rowListMultilineTextLayout
-        override val rowName = binding.rowListMultilineName
-        override val rowDetails = binding.rowListMultilineDetails
-        override val rowChildren = binding.rowListMultilineChildren
-        override val rowThumbnail = binding.rowListMultilineThumbnail
-        override val rowMarginStart = binding.rowListMultilineMargin
-        override val rowSeparator = binding.rowListMultilineSeparator
-        override val rowMarginEnd = binding.rowListMultilineMarginEnd
     }
 
     interface ProjectListListener : SnackbarListener, ActionModeListener {

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.checkable
+package com.krystianwsul.checkme.gui.tree.delegates.checkable
 
 import android.widget.CheckBox
 import android.widget.FrameLayout

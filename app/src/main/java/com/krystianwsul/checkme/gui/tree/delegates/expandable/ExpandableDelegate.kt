@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.expandable
+package com.krystianwsul.checkme.gui.tree.delegates.expandable
 
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView

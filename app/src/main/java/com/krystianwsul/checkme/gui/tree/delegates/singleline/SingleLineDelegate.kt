@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree.singleline
+package com.krystianwsul.checkme.gui.tree.delegates.singleline
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

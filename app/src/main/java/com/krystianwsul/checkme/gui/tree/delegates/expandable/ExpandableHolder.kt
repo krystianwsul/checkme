@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.expandable
+package com.krystianwsul.checkme.gui.tree.delegates.expandable
 
 import android.widget.ImageView
 import com.jakewharton.rxbinding3.view.clicks

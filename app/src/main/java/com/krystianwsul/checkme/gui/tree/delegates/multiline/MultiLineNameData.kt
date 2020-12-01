@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.multiline
+package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
 import androidx.annotation.ColorInt
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode

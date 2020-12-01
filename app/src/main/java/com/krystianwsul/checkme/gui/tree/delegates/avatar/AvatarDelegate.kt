@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.avatar
+package com.krystianwsul.checkme.gui.tree.delegates.avatar
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tree.NodeDelegate

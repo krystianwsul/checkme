@@ -4,10 +4,10 @@ import android.view.LayoutInflater
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
-import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState

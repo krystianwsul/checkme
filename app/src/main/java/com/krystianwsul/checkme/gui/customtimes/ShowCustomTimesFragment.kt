@@ -23,10 +23,10 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar

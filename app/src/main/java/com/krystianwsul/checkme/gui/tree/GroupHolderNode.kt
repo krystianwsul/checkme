@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode

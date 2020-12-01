@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree.invisible_checkbox
+package com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

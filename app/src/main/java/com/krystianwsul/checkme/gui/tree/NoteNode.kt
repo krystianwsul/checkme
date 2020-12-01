@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListNoteBinding
-import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode

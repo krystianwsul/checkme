@@ -4,8 +4,8 @@ import android.view.View
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
+import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 
 class DialogNodeHolder(
         override val baseAdapter: BaseAdapter,

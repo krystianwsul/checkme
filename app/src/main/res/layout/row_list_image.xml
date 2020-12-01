@@ -38,7 +38,6 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/rowListImageBigImageLayout"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="16dp"

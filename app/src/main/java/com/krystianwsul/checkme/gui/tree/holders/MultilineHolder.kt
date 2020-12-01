@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 
-class RowListMultilineHolder(
+class MultilineHolder(
         override val baseAdapter: BaseAdapter,
         binding: RowListMultilineBinding,
 ) : AbstractHolder(binding.root), MultiLineHolder {

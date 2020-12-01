@@ -23,7 +23,7 @@ import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
@@ -277,7 +277,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 GroupHolderNode(0),
                 MultiLineModelNode {
 
-            override val nodeType = NodeType.MULTILINE
+            override val holderType = HolderType.MULTILINE
 
             override val ripple = true
 

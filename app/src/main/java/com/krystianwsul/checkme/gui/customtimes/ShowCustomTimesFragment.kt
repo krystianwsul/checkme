@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
@@ -260,7 +260,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
-        override val nodeType = NodeType.MULTILINE
+        override val holderType = HolderType.MULTILINE
 
         override val id = customTimeData.id
 

@@ -14,7 +14,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentTaskListBinding
-import com.krystianwsul.checkme.databinding.RowListExpandableMultilineBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -31,12 +30,9 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.*
@@ -572,7 +568,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 override val parentNode: ModelNode<AbstractHolder>?,
         ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode, InvisibleCheckboxModelNode {
 
-            override val nodeType = NodeType.TASK_LIST_TASK
+            override val holderType = HolderType.EXPANDABLE_MULTILINE
 
             override val keyChain = taskParent.keyChain + childTaskData.taskKey
 
@@ -744,29 +740,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override fun parentHierarchyMatches(filterCriteria: Any?) =
                     super<GroupHolderNode>.parentHierarchyMatches(filterCriteria)
                             && childTaskData.showIfParentShown(filterCriteria as? SearchData)
-        }
-    }
-
-    class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListExpandableMultilineBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder {
-
-        override val rowContainer = binding.rowListExpandableMultilineContainer
-        override val rowTextLayout = binding.rowListExpandableMultilineTextLayout
-        override val rowName = binding.rowListExpandableMultilineName
-        override val rowDetails = binding.rowListExpandableMultilineDetails
-        override val rowChildren = binding.rowListExpandableMultilineChildren
-        override val rowThumbnail = binding.rowListExpandableMultilineThumbnail
-        override val rowExpand = binding.rowListExpandableMultilineExpand
-        override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListExpandableMultilineMargin
-        override val rowSeparator = binding.rowListExpandableMultilineSeparator
-        override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
-
-        override fun onViewAttachedToWindow() {
-            super<AbstractHolder>.onViewAttachedToWindow()
-            super<ExpandableHolder>.onViewAttachedToWindow()
         }
     }
 

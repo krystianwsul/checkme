@@ -22,7 +22,7 @@ import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
@@ -279,7 +279,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
-        override val nodeType = NodeType.AVATAR
+        override val holderType = HolderType.AVATAR
 
         override val isSelectable = true
 

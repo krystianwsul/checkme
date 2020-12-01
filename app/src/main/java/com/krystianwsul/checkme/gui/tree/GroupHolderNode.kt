@@ -34,9 +34,9 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
     protected open val hasAvatar = false // todo delegate
     open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
 
-    abstract val nodeType: NodeType
+    abstract val holderType: HolderType
 
-    final override val itemViewType by lazy { nodeType.ordinal }
+    final override val itemViewType by lazy { holderType.ordinal }
 
     protected open val ripple = false
 

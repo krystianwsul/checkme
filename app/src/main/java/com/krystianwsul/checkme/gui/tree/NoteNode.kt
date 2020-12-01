@@ -23,7 +23,7 @@ class NoteNode(
 
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
-    override val nodeType = NodeType.NOTE
+    override val holderType = HolderType.NOTE
 
     override val id get() = Id(nodeContainer.id)
 

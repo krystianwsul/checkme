@@ -1,21 +1,16 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
-import com.krystianwsul.checkme.databinding.RowListExpandableMultilineBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
@@ -33,7 +28,7 @@ class TaskNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val nodeType = NodeType.UNSCHEDULED_TASK
+    override val holderType = HolderType.EXPANDABLE_MULTILINE
 
     override val id = taskData.taskKey
 
@@ -140,27 +135,4 @@ class TaskNode(
     override fun matches(filterCriteria: Any?) = taskData.matchesQuery((filterCriteria as? SearchData)?.query)
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
-
-    class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListExpandableMultilineBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder {
-
-        override val rowContainer = binding.rowListExpandableMultilineContainer
-        override val rowTextLayout = binding.rowListExpandableMultilineTextLayout
-        override val rowName = binding.rowListExpandableMultilineName
-        override val rowDetails = binding.rowListExpandableMultilineDetails
-        override val rowChildren = binding.rowListExpandableMultilineChildren
-        override val rowThumbnail = binding.rowListExpandableMultilineThumbnail
-        override val rowExpand = binding.rowListExpandableMultilineExpand
-        override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListExpandableMultilineMargin
-        override val rowSeparator = binding.rowListExpandableMultilineSeparator
-        override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
-
-        override fun onViewAttachedToWindow() {
-            super<AbstractHolder>.onViewAttachedToWindow()
-            super<ExpandableHolder>.onViewAttachedToWindow()
-        }
-    }
 }

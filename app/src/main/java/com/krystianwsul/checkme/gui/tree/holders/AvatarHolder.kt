@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 
-class RowListAvatarHolder(override val baseAdapter: BaseAdapter, binding: RowListAvatarBinding) :
+class AvatarHolder(override val baseAdapter: BaseAdapter, binding: RowListAvatarBinding) :
         AbstractHolder(binding.root),
         AvatarHolder,
         MultiLineHolder {

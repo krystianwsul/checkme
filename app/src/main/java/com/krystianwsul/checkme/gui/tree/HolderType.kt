@@ -4,18 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
-import com.krystianwsul.checkme.gui.instances.tree.TaskNode
-import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.gui.tree.holders.ExpandableSinglelineHolder
-import com.krystianwsul.checkme.gui.tree.holders.RowListAvatarHolder
-import com.krystianwsul.checkme.gui.tree.holders.RowListCheckableHolder
-import com.krystianwsul.checkme.gui.tree.holders.RowListMultilineHolder
+import com.krystianwsul.checkme.gui.tree.holders.*
 
-enum class NodeType {
+enum class HolderType {
 
     MULTILINE { // MultilineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListMultilineHolder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = MultilineHolder(
                 baseAdapter,
                 RowListMultilineBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
@@ -31,7 +26,7 @@ enum class NodeType {
 
     AVATAR { // AvatarHolder, MultiLineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListAvatarHolder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AvatarHolder(
                 baseAdapter,
                 RowListAvatarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
@@ -49,35 +44,19 @@ enum class NodeType {
         )
     },
 
-    CHECKABLE {
-        // ExpandableHolder, CheckableHolder, MultiLineHolder
-        // RowListCheckableBinding
+    CHECKABLE { // ExpandableHolder, CheckableHolder, MultiLineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListCheckableHolder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = CheckableHolder(
                 baseAdapter,
                 RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 
-    UNSCHEDULED_TASK {
+    EXPANDABLE_MULTILINE {
         // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder
         // RowListExpandableMultilineBinding
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskNode.Holder(
-                baseAdapter,
-                RowListExpandableMultilineBinding.inflate(
-                        LayoutInflater.from(parent.context),
-                        parent,
-                        false
-                )
-        )
-    },
-
-    TASK_LIST_TASK {
-        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder
-        // RowListExpandableMultilineBinding
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = TaskListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ExpandableMultilineHolder(
                 baseAdapter,
                 RowListExpandableMultilineBinding.inflate(
                         LayoutInflater.from(parent.context),

@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
@@ -367,7 +367,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             private val selectedIds: Set<UserKey>,
     ) : GroupHolderNode(0), AvatarModelNode, MultiLineModelNode {
 
-        override val nodeType = NodeType.AVATAR
+        override val holderType = HolderType.AVATAR
 
         override val ripple = true
 

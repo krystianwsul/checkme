@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
@@ -20,7 +20,7 @@ class UnscheduledNode(
         private val searchResults: Boolean,
 ) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
 
-    override val nodeType = NodeType.EXPANDABLE_SINGLELINE
+    override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 

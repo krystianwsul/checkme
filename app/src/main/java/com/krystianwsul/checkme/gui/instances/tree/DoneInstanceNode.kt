@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.tree.NodeType
+import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
@@ -34,7 +34,7 @@ class DoneInstanceNode(
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val nodeType = NodeType.CHECKABLE
+    override val holderType = HolderType.CHECKABLE
 
     override val ripple = true
 

@@ -20,7 +20,7 @@ class DividerNode(
         override val parentNode: ModelNode<AbstractHolder>?,
 ) : GroupHolderNode(indentation), SingleLineModelNode {
 
-    override val nodeType = NodeType.EXPANDABLE_SINGLELINE
+    override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
     override val id get() = Id(nodeCollection.nodeContainer.id)
 

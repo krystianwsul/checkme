@@ -11,7 +11,7 @@ abstract class BaseAdapter : TreeModelAdapter<AbstractHolder> {
     fun getTreeNode(adapterPosition: Int) = treeNodeCollection.getNode(adapterPosition)
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            NodeType.values()[viewType].onCreateViewHolder(this, parent)
+            HolderType.values()[viewType].onCreateViewHolder(this, parent)
 
     final override fun onViewAttachedToWindow(holder: AbstractHolder) = holder.onViewAttachedToWindow()
 

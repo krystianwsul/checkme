@@ -7,10 +7,11 @@ import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 
-class RowListCheckableHolder(
+class CheckableHolder(
         override val baseAdapter: BaseAdapter,
         binding: RowListCheckableBinding,
-) : AbstractHolder(binding.root), ExpandableHolder, CheckableHolder, MultiLineHolder {
+) : AbstractHolder(binding.root), ExpandableHolder,
+        CheckableHolder, MultiLineHolder {
 
     override val rowContainer = binding.rowListCheckableContainer
     override val rowTextLayout = binding.rowListCheckableTextLayout

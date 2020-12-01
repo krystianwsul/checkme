@@ -44,7 +44,7 @@ class NotDoneGroupNode(
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val nodeType = NodeType.CHECKABLE
+    override val holderType = HolderType.CHECKABLE
 
     override val ripple = true
 
@@ -515,7 +515,7 @@ class NotDoneGroupNode(
             }
         }
 
-        override val nodeType = NodeType.CHECKABLE
+        override val holderType = HolderType.CHECKABLE
 
         override val ripple = true
 

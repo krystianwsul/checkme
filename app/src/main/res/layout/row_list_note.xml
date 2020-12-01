@@ -26,7 +26,6 @@
             android:visibility="gone" />
 
         <LinearLayout
-            android:id="@+id/rowListNoteTextLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -35,31 +34,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/rowListNoteName"
+                android:id="@+id/rowListNoteText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
                 android:textColor="@color/textPrimary"
                 android:textSize="@dimen/textPrimary"
-                tools:ignore="Deprecated" />
-
-            <TextView
-                android:id="@+id/rowListNoteDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textColor="@color/textSecondary"
-                android:textSize="@dimen/textSecondary"
-                tools:ignore="Deprecated" />
-
-            <TextView
-                android:id="@+id/rowListNoteChildren"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textColor="@color/textSecondary"
-                android:textSize="@dimen/textSecondary"
-                tools:ignore="Deprecated" />
+                tools:ignore="Deprecated"
+                android:textIsSelectable="true" />
 
         </LinearLayout>
 

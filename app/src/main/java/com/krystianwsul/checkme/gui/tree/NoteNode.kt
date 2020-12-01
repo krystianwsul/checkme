@@ -1,15 +1,11 @@
 package com.krystianwsul.checkme.gui.tree
 
-import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListNoteBinding
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -20,7 +16,7 @@ class NoteNode(
         val note: String,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), InvisibleCheckboxModelNode, MultiLineModelNode {
+) : GroupHolderNode(0), InvisibleCheckboxModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -48,28 +44,21 @@ class NoteNode(
         return treeNode
     }
 
-    override val textSelectable = true
-
-    override val name get() = MultiLineNameData.Visible(note, unlimitedLines = true)
-
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override val delegates by lazy {
         listOf(
-                InvisibleCheckboxDelegate(this),
-                MultiLineDelegate(this)
+                InvisibleCheckboxDelegate(this)
         )
     }
 
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
-                thumbnail != null
-        )
+    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
+        super.onBindViewHolder(viewHolder, startingDrag)
+
+        (viewHolder as Holder).rowText.text = note
+    }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is AssignedNode) 1 else -1
 
@@ -95,13 +84,10 @@ class NoteNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListNoteBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, MultiLineHolder {
+    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
         override val rowContainer = binding.rowListNoteContainer
-        override val rowTextLayout = binding.rowListNoteTextLayout
-        override val rowName = binding.rowListNoteName
-        override val rowDetails = binding.rowListNoteDetails
-        override val rowChildren = binding.rowListNoteChildren
+        val rowText = binding.rowListNoteText
         override val rowThumbnail = binding.rowListNoteThumbnail
         override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListNoteMargin

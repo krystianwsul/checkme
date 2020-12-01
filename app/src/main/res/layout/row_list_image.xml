@@ -21,22 +21,6 @@
             android:layout_height="0dp"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="7dp"
-            android:orientation="vertical">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/rowListImageChipGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
         <ImageView
             android:id="@+id/rowListImageThumbnail"
             android:layout_width="36dp"
@@ -60,8 +44,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="15dp"
-        android:visibility="gone">
+        android:layout_marginBottom="15dp">
 
         <ProgressBar
             android:layout_width="wrap_content"

@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListImageBinding
@@ -62,9 +61,7 @@ class ImageNode(
         super.onBindViewHolder(viewHolder, startingDrag)
 
         (viewHolder as Holder).apply {
-            rowContainer.visibility = View.GONE
-            rowBigImageLayout.visibility = View.VISIBLE
-            rowChipGroup.isVisible = false
+            rowContainer.visibility = View.GONE // todo delegate
 
             imageData.imageState
                     .toImageLoader()
@@ -133,7 +130,6 @@ class ImageNode(
         val rowBigImage = binding.rowListImageBigImage
         val rowBigImageLayout = binding.rowListImageBigImageLayout
         override val rowSeparator = binding.rowListImageSeparator
-        override val rowChipGroup = binding.rowListImageChipGroup
         override val rowMarginEnd = binding.rowListImageMarginEnd
     }
 }

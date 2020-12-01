@@ -335,7 +335,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val rowMarginStart = binding.rowListAvatarMargin
         override val rowImage = binding.rowListAvatarImage
         override val rowSeparator = binding.rowListAvatarSeparator
-        override val rowChipGroup = binding.rowListAvatarChipGroup
         override val rowMarginEnd = binding.rowListAvatarMarginEnd
     }
 

@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.ChipGroup
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
 import io.reactivex.disposables.CompositeDisposable
@@ -16,7 +15,6 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
     abstract val rowThumbnail: ImageView
     abstract val rowMarginStart: View
     abstract val rowSeparator: View
-    abstract val rowChipGroup: ChipGroup
     abstract val rowMarginEnd: View?
 
     final override val compositeDisposable = CompositeDisposable()

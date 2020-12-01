@@ -116,7 +116,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
 
-                return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
+                return oldStates[oldItemPosition].modelState.id == newStates[newItemPosition].modelState.id
             }
 
             override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)

@@ -762,7 +762,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListExpandableMultilineMargin
         override val rowSeparator = binding.rowListExpandableMultilineSeparator
-        override val rowChipGroup = binding.rowListExpandableMultilineChipGroup
         override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
 
         override fun onViewAttachedToWindow() {

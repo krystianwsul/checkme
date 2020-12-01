@@ -61,12 +61,6 @@
                 android:textSize="@dimen/textSecondary"
                 tools:ignore="Deprecated" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/rowListNoteChipGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
         </LinearLayout>
 
         <ImageView

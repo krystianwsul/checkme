@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.tree
 
-import android.view.LayoutInflater
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -8,11 +7,9 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
@@ -45,18 +42,15 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected open val imageData: ImageNode.ImageData? = null // todo delegate image
 
-    protected open val assignedTo: List<AssignedNode.User> = listOf() // todo delegate assigned
-
     protected open val thumbnail: ImageState? = null
 
     protected open val delegates = listOf<NodeDelegate>()
 
-    final override val state
+    override val state: ModelState
         get() = State(
                 id,
                 indentation,
                 imageData?.imageState,
-                assignedTo,
                 thumbnail,
                 delegates.map { it.state }
         )
@@ -64,16 +58,12 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
     protected open val colorBackground = Companion.colorBackground
 
     data class State(
-            val id: Any,
+            override val id: Any,
             val indentation: Int,
             val imageState: ImageState?,
-            val assignedTo: List<AssignedNode.User>,
             val thumbnail: ImageState?,
             val delegateStates: List<Any>,
-    ) : ModelState {
-
-        override fun same(other: ModelState) = (other as State).id == id
-    }
+    ) : ModelState
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as AbstractHolder
@@ -105,28 +95,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
                     foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
-                }
-
-                if (assignedTo.isEmpty()) {
-                    rowChipGroup.isVisible = false
-                } else {
-                    rowChipGroup.isVisible = true
-
-                    rowChipGroup.removeAllViews()
-
-                    assignedTo.forEach { user ->
-                        RowAssignedChipBinding.inflate(
-                                LayoutInflater.from(rowContainer.context),
-                                rowChipGroup,
-                                true
-                        )
-                                .root
-                                .apply {
-                                    text = user.name
-                                    loadPhoto(user.photoUrl)
-                                    isCloseIconVisible = false
-                                }
-                    }
                 }
             }
 

@@ -42,12 +42,6 @@
                 android:textSize="@dimen/textPrimary"
                 tools:ignore="Deprecated" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/rowListExpandableSingleLineChipGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
         </LinearLayout>
 
         <ImageView

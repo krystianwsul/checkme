@@ -21,7 +21,6 @@ class DialogNodeHolder(
     override val rowExpand = rowListDialogBinding.rowListDialogExpand
     override val rowMarginStart = rowListDialogBinding.rowListDialogMargin
     override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
-    override val rowChipGroup = rowListDialogBinding.rowListDialogChipGroup
     override val rowMarginEnd: View? = null
 
     override fun onViewAttachedToWindow() {

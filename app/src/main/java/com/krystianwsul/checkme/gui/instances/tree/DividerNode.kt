@@ -131,7 +131,6 @@ class DividerNode(
         override val rowExpand = binding.rowListExpandableSingleLineExpand
         override val rowMarginStart = binding.rowListExpandableSingleLineMargin
         override val rowSeparator = binding.rowListExpandableSingleLineSeparator
-        override val rowChipGroup = binding.rowListExpandableSingleLineChipGroup
         override val rowMarginEnd = binding.rowListExpandableSingleLineMarginEnd
 
         override fun onViewAttachedToWindow() {

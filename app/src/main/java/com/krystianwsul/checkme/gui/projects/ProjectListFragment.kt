@@ -339,7 +339,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override val rowThumbnail = binding.rowListMultilineThumbnail
         override val rowMarginStart = binding.rowListMultilineMargin
         override val rowSeparator = binding.rowListMultilineSeparator
-        override val rowChipGroup = binding.rowListMultilineChipGroup
         override val rowMarginEnd = binding.rowListMultilineMarginEnd
     }
 

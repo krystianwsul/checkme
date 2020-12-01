@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.LayoutInflater
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
@@ -9,10 +8,6 @@ import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineNameData
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -23,7 +18,7 @@ class AssignedNode(
         private val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(0), InvisibleCheckboxModelNode, MultiLineModelNode {
+) : GroupHolderNode(0), InvisibleCheckboxModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -36,29 +31,14 @@ class AssignedNode(
 
     data class Id(val id: Any)
 
-    override val name = MultiLineNameData.Gone
-
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override val isVisibleDuringActionMode = false
 
-    override val delegates by lazy {
-        listOf(
-                InvisibleCheckboxDelegate(this),
-                MultiLineDelegate(this)
-        )
-    }
+    override val delegates by lazy { listOf(InvisibleCheckboxDelegate(this)) }
 
     override val checkBoxInvisible = instance
     override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
-                thumbnail != null
-        )
 
     override val state get() = State(super.state, assignedTo)
 
@@ -108,13 +88,9 @@ class AssignedNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListAssignedBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, MultiLineHolder {
+    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
         override val rowContainer = binding.rowListAssignedContainer
-        override val rowTextLayout = binding.rowListAssignedTextLayout
-        override val rowName = binding.rowListAssignedName
-        override val rowDetails = binding.rowListAssignedDetails
-        override val rowChildren = binding.rowListAssignedChildren
         override val rowThumbnail = binding.rowListAssignedThumbnail
         override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListAssignedMargin

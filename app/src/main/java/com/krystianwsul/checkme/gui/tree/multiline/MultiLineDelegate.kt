@@ -89,7 +89,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
 
                             setSingleLine()
                         }
-                        MultiLineNameData.Gone -> visibility = View.GONE
+                        MultiLineNameData.Gone -> visibility = View.GONE // todo delegate no longer used
                     }
 
                     setTextIsSelectable(modelNode.textSelectable)

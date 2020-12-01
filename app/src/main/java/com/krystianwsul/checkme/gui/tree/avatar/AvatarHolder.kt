@@ -4,5 +4,5 @@ import android.widget.ImageView
 
 interface AvatarHolder {
 
-    val rowImage: ImageView? // todo delegate
+    val rowImage: ImageView
 }

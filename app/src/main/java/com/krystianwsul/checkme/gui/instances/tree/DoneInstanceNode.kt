@@ -217,8 +217,6 @@ class DoneInstanceNode(
         override val rowCheckBoxFrame = binding.rowListCheckableCheckboxInclude.rowCheckboxFrame
         override val rowCheckBox = binding.rowListCheckableCheckboxInclude.rowCheckbox
         override val rowMarginStart = binding.rowListCheckableMargin
-        override val rowBigImage = binding.rowListCheckableBigImage
-        override val rowBigImageLayout = binding.rowListCheckableBigImageLayout
         override val rowSeparator = binding.rowListCheckableSeparator
         override val rowChipGroup = binding.rowListCheckableChipGroup
         override val rowMarginEnd = binding.rowListCheckableMarginEnd

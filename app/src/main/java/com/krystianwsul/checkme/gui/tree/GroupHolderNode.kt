@@ -1,11 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
-import android.app.Activity
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
-import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -16,14 +12,12 @@ import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
-import com.stfalcon.imageviewer.StfalconImageViewer
 
 abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder> {
 
@@ -81,55 +75,14 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
         override fun same(other: ModelState) = (other as State).id == id
     }
 
-    protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
-        val activity = rowBigImage.context as Activity
-
-        fun setStatusColor(@ColorInt color: Int) {
-            activity.window.statusBarColor = color
-        }
-
-        val fixStatusBar = !activity.resources.isLandscape
-
-        val viewer = StfalconImageViewer.Builder(
-                rowBigImage.context,
-                listOf(taskImage.imageState)
-        ) { view, image -> image.toImageLoader().load(view) }
-                .withTransitionFrom(rowBigImage)
-                .withDismissListener {
-                    taskImage.onDismiss()
-
-                    if (fixStatusBar)
-                        setStatusColor(ContextCompat.getColor(rowBigImage.context, R.color.primaryDarkColor))
-                }.apply {
-                    if (fixStatusBar) withHiddenStatusBar(false)
-                }
-                .show()
-
-        if (fixStatusBar) setStatusColor(Color.BLACK)
-
-        taskImage.onImageShown(viewer)
-    }
-
-    final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
+    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as AbstractHolder
 
         groupHolder.run {
             val taskImage = imageData
 
-            if (taskImage != null) {
-                rowContainer.visibility = View.GONE
-                rowBigImageLayout!!.visibility = View.VISIBLE
-                rowChipGroup.isVisible = false
-
-                taskImage.imageState
-                        .toImageLoader()
-                        .load(rowBigImage!!)
-
-                if (taskImage.showImage) showImage(rowBigImage!!, taskImage)
-            } else {
+            if (taskImage == null) {
                 rowContainer.visibility = View.VISIBLE
-                rowBigImageLayout?.visibility = View.GONE
-
                 rowContainer.setIndent(indentation)
 
                 rowThumbnail.apply {

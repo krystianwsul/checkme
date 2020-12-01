@@ -317,8 +317,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override val rowChildren = binding.rowListMultilineChildren
         override val rowThumbnail = binding.rowListMultilineThumbnail
         override val rowMarginStart = binding.rowListMultilineMargin
-        override val rowBigImage = binding.rowListMultilineBigImage
-        override val rowBigImageLayout = binding.rowListMultilineBigImageLayout
         override val rowSeparator = binding.rowListMultilineSeparator
         override val rowChipGroup = binding.rowListMultilineChipGroup
         override val rowMarginEnd = binding.rowListMultilineMarginEnd

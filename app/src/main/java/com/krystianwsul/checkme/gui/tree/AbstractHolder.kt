@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tree
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.ChipGroup
 import com.jakewharton.rxbinding3.view.clicks
@@ -16,8 +15,6 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView
     abstract val rowMarginStart: View
-    abstract val rowBigImage: ImageView?
-    abstract val rowBigImageLayout: RelativeLayout?
     abstract val rowSeparator: View
     abstract val rowChipGroup: ChipGroup
     abstract val rowMarginEnd: View?

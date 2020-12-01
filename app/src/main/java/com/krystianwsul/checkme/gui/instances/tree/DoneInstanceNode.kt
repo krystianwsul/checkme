@@ -1,23 +1,18 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
-import com.krystianwsul.checkme.databinding.RowListCheckableBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.SearchData
@@ -39,7 +34,7 @@ class DoneInstanceNode(
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val nodeType = NodeType.DONE
+    override val nodeType = NodeType.CHECKABLE
 
     override val ripple = true
 
@@ -201,29 +196,4 @@ class DoneInstanceNode(
     override fun matches(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
-
-    class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListCheckableBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, CheckableHolder, MultiLineHolder {
-
-        override val rowContainer = binding.rowListCheckableContainer
-        override val rowTextLayout = binding.rowListCheckableTextLayout
-        override val rowName = binding.rowListCheckableName
-        override val rowDetails = binding.rowListCheckableDetails
-        override val rowChildren = binding.rowListCheckableChildren
-        override val rowThumbnail = binding.rowListCheckableThumbnail
-        override val rowExpand = binding.rowListCheckableExpand
-        override val rowCheckBoxFrame = binding.rowListCheckableCheckboxInclude.rowCheckboxFrame
-        override val rowCheckBox = binding.rowListCheckableCheckboxInclude.rowCheckbox
-        override val rowMarginStart = binding.rowListCheckableMargin
-        override val rowSeparator = binding.rowListCheckableSeparator
-        override val rowMarginEnd = binding.rowListCheckableMarginEnd
-
-        override fun onViewAttachedToWindow() {
-            super<AbstractHolder>.onViewAttachedToWindow()
-            super<ExpandableHolder>.onViewAttachedToWindow()
-            super<CheckableHolder>.onViewAttachedToWindow()
-        }
-    }
 }

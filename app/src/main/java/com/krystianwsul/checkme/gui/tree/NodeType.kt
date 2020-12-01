@@ -4,12 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
-import com.krystianwsul.checkme.gui.instances.tree.DoneInstanceNode
-import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupNode
 import com.krystianwsul.checkme.gui.instances.tree.TaskNode
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.holders.ExpandableSinglelineHolder
 import com.krystianwsul.checkme.gui.tree.holders.RowListAvatarHolder
+import com.krystianwsul.checkme.gui.tree.holders.RowListCheckableHolder
 import com.krystianwsul.checkme.gui.tree.holders.RowListMultilineHolder
 
 enum class NodeType {
@@ -50,34 +49,11 @@ enum class NodeType {
         )
     },
 
-    DONE {
+    CHECKABLE {
         // ExpandableHolder, CheckableHolder, MultiLineHolder
         // RowListCheckableBinding
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DoneInstanceNode.Holder(
-                baseAdapter,
-                RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    },
-
-    NOT_DONE_GROUP {
-        // ExpandableHolder, CheckableHolder, MultiLineHolder
-        // RowListCheckableBinding
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NotDoneGroupNode.Holder(
-                baseAdapter,
-                RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    },
-
-    NOT_DONE_INSTANCE {
-        // ExpandableHolder, CheckableHolder, MultiLineHolder
-        // RowListCheckableBinding
-
-        override fun onCreateViewHolder(
-                baseAdapter: BaseAdapter,
-                parent: ViewGroup,
-        ) = NotDoneGroupNode.NotDoneInstanceNode.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListCheckableHolder(
                 baseAdapter,
                 RowListCheckableBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )

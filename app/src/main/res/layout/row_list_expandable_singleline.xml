@@ -16,8 +16,8 @@
         android:gravity="center_vertical">
 
         <include
-            android:id="@+id/rowListExpandableSingleLineCheckboxInclude"
-            layout="@layout/row_list_checkbox" />
+            layout="@layout/row_list_checkbox"
+            android:visibility="invisible" />
 
         <View
             android:id="@+id/rowListExpandableSingleLineMargin"

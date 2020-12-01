@@ -32,6 +32,9 @@ import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
@@ -567,7 +570,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
                 override val parentNode: ModelNode<AbstractHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode {
+        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode, InvisibleCheckboxModelNode {
 
             override val nodeType = NodeType.TASK_LIST_TASK
 
@@ -600,7 +603,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val delegates by lazy {
                 listOf(
                         ExpandableDelegate(treeNode),
-                        MultiLineDelegate(this)
+                        MultiLineDelegate(this),
+                        InvisibleCheckboxDelegate(this),
                 )
             }
 
@@ -611,6 +615,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         hasAvatar,
                         thumbnail != null
                 )
+
+            override val checkBoxInvisible = false
 
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,
@@ -744,7 +750,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListExpandableMultilineBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder {
+    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder {
 
         override val rowContainer = binding.rowListExpandableMultilineContainer
         override val rowTextLayout = binding.rowListExpandableMultilineTextLayout

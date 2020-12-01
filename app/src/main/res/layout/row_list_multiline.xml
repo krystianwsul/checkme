@@ -15,10 +15,6 @@
         android:minHeight="51dp"
         android:gravity="center_vertical">
 
-        <include
-            android:id="@+id/rowListMultilineCheckboxInclude"
-            layout="@layout/row_list_checkbox" />
-
         <View
             android:id="@+id/rowListMultilineMargin"
             android:layout_width="16dp"

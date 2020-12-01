@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListExpandableSinglelineBinding
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -45,8 +44,6 @@ class DividerNode(
                 SingleLineDelegate(this)
         )
     }
-
-    override val checkBoxVisibility get() = View.INVISIBLE
 
     fun initialize(
             expanded: Boolean,
@@ -135,7 +132,6 @@ class DividerNode(
         override val rowChildren = binding.rowListExpandableSingleLineChildren
         override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
         override val rowExpand = binding.rowListExpandableSingleLineExpand
-        override val rowCheckBoxFrame = binding.rowListExpandableSingleLineCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListExpandableSingleLineMargin
         override val rowBigImage = binding.rowListExpandableSingleLineBigImage
         override val rowBigImageLayout = binding.rowListExpandableSingleLineBigImageLayout

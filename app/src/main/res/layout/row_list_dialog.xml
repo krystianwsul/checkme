@@ -16,10 +16,6 @@
         android:minHeight="36dp"
         android:gravity="center_vertical">
 
-        <include
-            android:id="@+id/rowListDialogCheckboxInclude"
-            layout="@layout/row_list_checkbox" />
-
         <View
             android:id="@+id/rowListDialogMargin"
             android:layout_width="0dp"

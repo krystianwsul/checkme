@@ -11,6 +11,9 @@ import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxHolder
+import com.krystianwsul.checkme.gui.tree.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.multiline.MultiLineModelNode
@@ -25,7 +28,7 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode {
+) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -57,7 +60,8 @@ class TaskNode(
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
-                MultiLineDelegate(this)
+                MultiLineDelegate(this),
+                InvisibleCheckboxDelegate(this),
         )
     }
 
@@ -69,7 +73,7 @@ class TaskNode(
                 thumbnail != null
         )
 
-    override val checkBoxVisibility = View.INVISIBLE
+    override val checkBoxInvisible = true
 
     fun initialize(
             parentTreeNode: TreeNode<AbstractHolder>,
@@ -140,7 +144,7 @@ class TaskNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListExpandableMultilineBinding,
-    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder {
+    ) : AbstractHolder(binding.root), ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder {
 
         override val rowContainer = binding.rowListExpandableMultilineContainer
         override val rowTextLayout = binding.rowListExpandableMultilineTextLayout

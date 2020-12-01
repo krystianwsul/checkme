@@ -8,14 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.ChipGroup
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineHolder
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 
-abstract class AbstractHolder(view: View) :
-        RecyclerView.ViewHolder(view),
-        BaseHolder,
-        MultiLineHolder { // todo delegate don't implement all
+abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseHolder {
 
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView

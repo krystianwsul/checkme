@@ -110,10 +110,7 @@ class UnscheduledNode(
     ) : AbstractHolder(binding.root), ExpandableHolder, SingleLineHolder {
 
         override val rowContainer = binding.rowListExpandableSingleLineContainer
-        override val rowTextLayout = binding.rowListExpandableSingleLineTextLayout
         override val rowName = binding.rowListExpandableSingleLineName
-        override val rowDetails = binding.rowListExpandableSingleLineDetails
-        override val rowChildren = binding.rowListExpandableSingleLineChildren
         override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
         override val rowExpand = binding.rowListExpandableSingleLineExpand
         override val rowMarginStart = binding.rowListExpandableSingleLineMargin

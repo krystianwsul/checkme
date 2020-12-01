@@ -8,7 +8,6 @@ import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
@@ -17,7 +16,6 @@ import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.tree.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -147,14 +145,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
 
                 // todo delegate remove these
-                if (delegates.none { it is ExpandableDelegate }) {
-                    rowMarginEnd!!.isVisible = true
-                }
-                if (delegates.none { it is MultiLineDelegate }) {
-                    rowDetails.isGone = true
-                    rowChildren.isGone = true
-                }
-
+                if (delegates.none { it is ExpandableDelegate }) rowMarginEnd!!.isVisible = true
                 rowMarginStart.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar
 
                 itemView.run {

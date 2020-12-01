@@ -279,7 +279,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 GroupHolderNode(0),
                 MultiLineModelNode {
 
-            override val nodeType = NodeType.PROJECT
+            override val nodeType = NodeType.MULTILINE
 
             override val ripple = true
 

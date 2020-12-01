@@ -3,21 +3,18 @@ package com.krystianwsul.checkme.gui.tree
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.databinding.*
-import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
-import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.tree.holders.RowListMultilineHolder
 
 enum class NodeType {
 
-    CUSTOM_TIME {
-        // MultilineHolder
-        // RowListMultilineBinding
+    MULTILINE { // MultilineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ShowCustomTimesFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListMultilineHolder(
                 baseAdapter,
                 RowListMultilineBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
@@ -125,16 +122,6 @@ enum class NodeType {
                         parent,
                         false
                 )
-        )
-    },
-
-    PROJECT {
-        // MultiLineHolder
-        // RowListMultilineBinding
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ProjectListFragment.Holder(
-                baseAdapter,
-                RowListMultilineBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 

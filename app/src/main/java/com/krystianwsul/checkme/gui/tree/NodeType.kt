@@ -4,10 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.edit.dialogs.DialogNodeHolder
-import com.krystianwsul.checkme.gui.friends.FriendListFragment
-import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.tree.holders.RowListAvatarHolder
 import com.krystianwsul.checkme.gui.tree.holders.RowListMultilineHolder
 
 enum class NodeType {
@@ -28,21 +27,9 @@ enum class NodeType {
         )
     },
 
-    FRIEND {
-        // AvatarHolder, MultiLineHolder
-        // RowListAvatarBinding
+    AVATAR { // AvatarHolder, MultiLineHolder
 
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = FriendListFragment.Holder(
-                baseAdapter,
-                RowListAvatarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    },
-
-    USER {
-        // AvatarHolder, MultiLineHolder
-        // RowListAvatarBinding
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = UserListFragment.Holder(
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = RowListAvatarHolder(
                 baseAdapter,
                 RowListAvatarBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )

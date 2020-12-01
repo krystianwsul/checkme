@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
-import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
@@ -25,10 +24,8 @@ import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.NodeType
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarHolder
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -282,7 +279,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
-        override val nodeType = NodeType.FRIEND
+        override val nodeType = NodeType.AVATAR
 
         override val isSelectable = true
 
@@ -319,23 +316,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override fun matches(filterCriteria: Any?) = false
 
         override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
-    }
-
-    class Holder(override val baseAdapter: BaseAdapter, binding: RowListAvatarBinding) :
-            AbstractHolder(binding.root),
-            AvatarHolder,
-            MultiLineHolder {
-
-        override val rowContainer = binding.rowListAvatarContainer
-        override val rowTextLayout = binding.rowListAvatarTextLayout
-        override val rowName = binding.rowListAvatarName
-        override val rowDetails = binding.rowListAvatarDetails
-        override val rowChildren = binding.rowListAvatarChildren
-        override val rowThumbnail = binding.rowListAvatarThumbnail
-        override val rowMarginStart = binding.rowListAvatarMargin
-        override val rowImage = binding.rowListAvatarImage
-        override val rowSeparator = binding.rowListAvatarSeparator
-        override val rowMarginEnd = binding.rowListAvatarMarginEnd
     }
 
     interface FriendListListener : SnackbarListener, ActionModeListener {

@@ -17,7 +17,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
+) : GroupHolderNode(), TaskParent, SingleLineModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 

@@ -25,10 +25,10 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class DoneInstanceNode(
-        indentation: Int,
+        override val indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode,
-) : GroupHolderNode(indentation),
+) : GroupHolderNode(),
         NodeCollectionParent,
         CheckableModelNode,
         MultiLineModelNode,

@@ -274,7 +274,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
 
         inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) :
-                GroupHolderNode(0),
+                GroupHolderNode(),
                 MultiLineModelNode {
 
             override val holderType = HolderType.MULTILINE

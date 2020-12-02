@@ -266,7 +266,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     private inner class FriendNode(val userListData: FriendListViewModel.UserListData) :
-            GroupHolderNode(0),
+            GroupHolderNode(),
             AvatarModelNode,
             MultiLineModelNode {
 

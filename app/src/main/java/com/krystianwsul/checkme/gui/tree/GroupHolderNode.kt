@@ -12,7 +12,7 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
-abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder> {
+abstract class GroupHolderNode : ModelNode<AbstractHolder> {
 
     companion object {
 
@@ -36,6 +36,8 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
     protected open val imageData: ImageNode.ImageData? = null // todo delegate image
 
     protected open val delegates = listOf<NodeDelegate>()
+
+    open val indentation: Int = 0
 
     override val state: ModelState
         get() = State(

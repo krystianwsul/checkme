@@ -240,11 +240,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
         override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
         private inner class TaskWrapper(
-                indentation: Int,
+                override val indentation: Int,
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
                 override val parentNode: ModelNode<AbstractHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode {
+        ) : GroupHolderNode(), TaskParent, MultiLineModelNode {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set

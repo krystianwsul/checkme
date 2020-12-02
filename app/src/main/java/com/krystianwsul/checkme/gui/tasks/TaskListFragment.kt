@@ -563,13 +563,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
 
         inner class TaskWrapper(
-                indentation: Int,
+                override val indentation: Int,
                 private val taskParent: TaskParent,
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
                 override val parentNode: ModelNode<AbstractHolder>?,
         ) :
-                GroupHolderNode(indentation),
+                GroupHolderNode(),
                 TaskParent,
                 Sortable,
                 MultiLineModelNode,

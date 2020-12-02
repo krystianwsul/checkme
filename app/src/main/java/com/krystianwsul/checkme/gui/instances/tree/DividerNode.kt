@@ -14,10 +14,10 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
 class DividerNode(
-        indentation: Int,
+        override val indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), SingleLineModelNode {
+) : GroupHolderNode(), SingleLineModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 

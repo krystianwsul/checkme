@@ -254,8 +254,10 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
-            GroupHolderNode(0),
+            GroupHolderNode(),
             MultiLineModelNode {
+
+        override val indentation = 0
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set

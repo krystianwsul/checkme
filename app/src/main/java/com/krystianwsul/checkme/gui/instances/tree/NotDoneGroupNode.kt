@@ -31,13 +31,13 @@ import com.krystianwsul.treeadapter.*
 import java.util.*
 
 class NotDoneGroupNode(
-        indentation: Int,
+        override val indentation: Int,
         private val notDoneGroupCollection: NotDoneGroupCollection,
         val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
         private val searchResults: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) :
-        GroupHolderNode(indentation),
+        GroupHolderNode(),
         NodeCollectionParent,
         Sortable,
         CheckableModelNode,
@@ -489,11 +489,11 @@ class NotDoneGroupNode(
     }
 
     class NotDoneInstanceNode(
-            indentation: Int,
+            override val indentation: Int,
             val instanceData: GroupListDataWrapper.InstanceData,
             private val parentNotDoneGroupNode: NotDoneGroupNode,
     ) :
-            GroupHolderNode(indentation),
+            GroupHolderNode(),
             NodeCollectionParent,
             CheckableModelNode,
             MultiLineModelNode,

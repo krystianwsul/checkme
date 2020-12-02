@@ -19,11 +19,11 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
 class TaskNode(
-        indentation: Int,
+        override val indentation: Int,
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode, ThumbnailModelNode {
+) : GroupHolderNode(), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode, ThumbnailModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

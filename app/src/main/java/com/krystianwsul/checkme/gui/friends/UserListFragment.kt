@@ -365,7 +365,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
             private val selectedIds: Set<UserKey>,
-    ) : GroupHolderNode(0), AvatarModelNode, MultiLineModelNode {
+    ) : GroupHolderNode(), AvatarModelNode, MultiLineModelNode {
 
         override val holderType = HolderType.AVATAR
 

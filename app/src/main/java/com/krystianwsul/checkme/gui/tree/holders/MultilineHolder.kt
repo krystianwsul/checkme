@@ -17,5 +17,4 @@ class MultilineHolder(
     override val rowChildren = binding.rowListMultilineChildren
     override val rowThumbnail = binding.rowListMultilineThumbnail
     override val rowSeparator = binding.rowListMultilineSeparator
-    override val rowMarginEnd = binding.rowListMultilineMarginEnd
 }

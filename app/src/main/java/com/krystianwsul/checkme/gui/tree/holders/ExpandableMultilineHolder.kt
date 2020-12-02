@@ -22,7 +22,6 @@ class ExpandableMultilineHolder(
     override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
     override val rowMarginStart = binding.rowListExpandableMultilineMargin
     override val rowSeparator = binding.rowListExpandableMultilineSeparator
-    override val rowMarginEnd = binding.rowListExpandableMultilineMarginEnd
 
     override fun onViewAttachedToWindow() {
         super<AbstractHolder>.onViewAttachedToWindow()

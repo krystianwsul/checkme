@@ -94,7 +94,6 @@ class AssignedNode(
         override val rowMarginStart = binding.rowListAssignedMargin
         override val rowSeparator = binding.rowListAssignedSeparator
         val rowChipGroup = binding.rowListAssignedChipGroup
-        override val rowMarginEnd = binding.rowListAssignedMarginEnd
     }
 
     data class State(val superState: ModelState, val assignedTo: List<User>) : ModelState {

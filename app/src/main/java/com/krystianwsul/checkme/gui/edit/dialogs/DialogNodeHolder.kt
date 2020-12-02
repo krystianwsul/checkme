@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.edit.dialogs
 
-import android.view.View
 import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
@@ -20,7 +19,6 @@ class DialogNodeHolder(
     override val rowThumbnail = rowListDialogBinding.rowListDialogThumbnail
     override val rowExpand = rowListDialogBinding.rowListDialogExpand
     override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
-    override val rowMarginEnd: View? = null
 
     override fun onViewAttachedToWindow() {
         super<AbstractHolder>.onViewAttachedToWindow()

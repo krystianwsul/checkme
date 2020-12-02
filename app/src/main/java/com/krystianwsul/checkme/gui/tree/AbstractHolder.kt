@@ -14,7 +14,6 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
     abstract val rowContainer: LinearLayout
     abstract val rowThumbnail: ImageView
     abstract val rowSeparator: View
-    abstract val rowMarginEnd: View?
 
     final override val compositeDisposable = CompositeDisposable()
 

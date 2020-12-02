@@ -3,12 +3,10 @@ package com.krystianwsul.checkme.gui.tree
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
@@ -38,7 +36,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected open val imageData: ImageNode.ImageData? = null // todo delegate image
 
-    protected open val thumbnail: ImageState? = null // todo delegate?
+    protected open val thumbnail: ImageState? = null
 
     protected open val delegates = listOf<NodeDelegate>()
 
@@ -82,9 +80,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                 }
 
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
-
-                // todo delegate remove these
-                if (delegates.none { it is ExpandableDelegate }) rowMarginEnd!!.isVisible = true
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

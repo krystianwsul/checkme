@@ -115,6 +115,5 @@ class ImageNode(
         override val rowThumbnail = binding.rowListImageThumbnail
         val rowBigImage = binding.rowListImageBigImage
         override val rowSeparator = binding.rowListImageSeparator
-        override val rowMarginEnd = binding.rowListImageMarginEnd
     }
 }

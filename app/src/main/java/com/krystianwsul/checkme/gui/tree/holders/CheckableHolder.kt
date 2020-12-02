@@ -24,7 +24,6 @@ class CheckableHolder(
     override val rowCheckBox = binding.rowListCheckableCheckboxInclude.rowCheckbox
     override val rowMarginStart = binding.rowListCheckableMargin
     override val rowSeparator = binding.rowListCheckableSeparator
-    override val rowMarginEnd = binding.rowListCheckableMarginEnd
 
     override fun onViewAttachedToWindow() {
         super<AbstractHolder>.onViewAttachedToWindow()

@@ -90,6 +90,5 @@ class NoteNode(
         override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListNoteMargin
         override val rowSeparator = binding.rowListNoteSeparator
-        override val rowMarginEnd = binding.rowListNoteMarginEnd
     }
 }

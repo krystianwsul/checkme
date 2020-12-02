@@ -46,12 +46,6 @@
             android:layout_marginBottom="7dp"
             android:visibility="gone" />
 
-        <View
-            android:id="@+id/rowListExpandableSingleLineMarginEnd"
-            android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
         <ImageView
             android:id="@+id/rowListExpandableSingleLineExpand"
             android:layout_width="wrap_content"

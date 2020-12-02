@@ -8,7 +8,7 @@ class SingleLineDelegate(private val modelNode: SingleLineModelNode) : NodeDeleg
     override val state get() = State(modelNode.text)
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-        (viewHolder as SingleLineHolder).rowName.text = modelNode.text
+        (viewHolder as SingleLineHolder).rowText.text = modelNode.text
     }
 
     data class State(val text: String)

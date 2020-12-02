@@ -148,7 +148,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
             val indentation: Int,
             val checkBoxGone: Boolean, // todo delegate? check usages
             val avatarVisible: Boolean, // todo delegate? check usages.  I think this should really be asking, is there a margin on the left?
-            val thumbnailVisible: Boolean,
+            val thumbnailVisible: Boolean, // todo delegate I don't think accounts for expanding, either.  Maybe a per-holder implementation would be better?
     )
 
     private class InitMap<T, U>(private val initializer: (T) -> U) {

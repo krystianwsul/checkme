@@ -17,7 +17,6 @@ class AvatarHolder(override val baseAdapter: BaseAdapter, binding: RowListAvatar
     override val rowDetails = binding.rowListAvatarDetails
     override val rowChildren = binding.rowListAvatarChildren
     override val rowThumbnail = binding.rowListAvatarThumbnail
-    override val rowMarginStart = binding.rowListAvatarMargin
     override val rowImage = binding.rowListAvatarImage
     override val rowSeparator = binding.rowListAvatarSeparator
     override val rowMarginEnd = binding.rowListAvatarMarginEnd

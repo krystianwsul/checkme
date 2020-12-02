@@ -279,8 +279,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
-        override val showStartMargin = false
-
         override val holderType = HolderType.AVATAR
 
         override val isSelectable = true

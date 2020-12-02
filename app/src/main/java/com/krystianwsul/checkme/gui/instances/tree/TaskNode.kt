@@ -26,8 +26,6 @@ class TaskNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val showStartMargin = false
-
     override val holderType = HolderType.EXPANDABLE_MULTILINE
 
     override val id = taskData.taskKey

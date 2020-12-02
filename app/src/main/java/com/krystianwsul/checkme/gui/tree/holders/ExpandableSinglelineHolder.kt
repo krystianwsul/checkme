@@ -15,7 +15,6 @@ class ExpandableSinglelineHolder(
     override val rowName = binding.rowListExpandableSingleLineName
     override val rowThumbnail = binding.rowListExpandableSingleLineThumbnail
     override val rowExpand = binding.rowListExpandableSingleLineExpand
-    override val rowMarginStart = binding.rowListExpandableSingleLineMargin
     override val rowSeparator = binding.rowListExpandableSingleLineSeparator
     override val rowMarginEnd = binding.rowListExpandableSingleLineMarginEnd
 

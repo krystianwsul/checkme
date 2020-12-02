@@ -568,8 +568,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 override val parentNode: ModelNode<AbstractHolder>?,
         ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode, InvisibleCheckboxModelNode {
 
-            override val showStartMargin = true
-
             override val holderType = HolderType.EXPANDABLE_MULTILINE
 
             override val keyChain = taskParent.keyChain + childTaskData.taskKey

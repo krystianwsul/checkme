@@ -26,8 +26,6 @@ class ImageNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val showStartMargin = false
-
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val holderType = HolderType.IMAGE
@@ -115,7 +113,6 @@ class ImageNode(
 
         override val rowContainer = binding.rowListImageContainer
         override val rowThumbnail = binding.rowListImageThumbnail
-        override val rowMarginStart = binding.rowListImageMargin
         val rowBigImage = binding.rowListImageBigImage
         override val rowSeparator = binding.rowListImageSeparator
         override val rowMarginEnd = binding.rowListImageMarginEnd

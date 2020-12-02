@@ -30,8 +30,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected abstract val treeNode: TreeNode<AbstractHolder>
 
-    protected abstract val showStartMargin: Boolean // todo delegate
-
     abstract val holderType: HolderType
 
     final override val itemViewType by lazy { holderType.ordinal }
@@ -87,7 +85,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
                 // todo delegate remove these
                 if (delegates.none { it is ExpandableDelegate }) rowMarginEnd!!.isVisible = true
-                rowMarginStart.isVisible = showStartMargin
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

@@ -277,8 +277,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 GroupHolderNode(0),
                 MultiLineModelNode {
 
-            override val showStartMargin = true
-
             override val holderType = HolderType.MULTILINE
 
             override val ripple = true

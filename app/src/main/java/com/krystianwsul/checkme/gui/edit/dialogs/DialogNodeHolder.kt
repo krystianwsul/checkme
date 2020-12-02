@@ -19,7 +19,6 @@ class DialogNodeHolder(
     override val rowChildren = rowListDialogBinding.rowListDialogChildren
     override val rowThumbnail = rowListDialogBinding.rowListDialogThumbnail
     override val rowExpand = rowListDialogBinding.rowListDialogExpand
-    override val rowMarginStart = rowListDialogBinding.rowListDialogMargin
     override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
     override val rowMarginEnd: View? = null
 

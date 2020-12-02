@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tree.delegates.checkable
 
+import android.view.View
 import android.widget.CheckBox
 import android.widget.FrameLayout
 import com.jakewharton.rxbinding3.view.clicks
@@ -11,6 +12,7 @@ interface CheckableHolder : BaseHolder {
 
     val rowCheckBoxFrame: FrameLayout
     val rowCheckBox: CheckBox
+    val rowMarginStart: View
 
     override fun onViewAttachedToWindow() {
         listOf(

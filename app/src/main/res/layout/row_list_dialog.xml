@@ -16,12 +16,6 @@
         android:minHeight="36dp"
         android:gravity="center_vertical">
 
-        <View
-            android:id="@+id/rowListDialogMargin"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
         <LinearLayout
             android:id="@+id/rowListDialogTextLayout"
             android:layout_width="0dp"

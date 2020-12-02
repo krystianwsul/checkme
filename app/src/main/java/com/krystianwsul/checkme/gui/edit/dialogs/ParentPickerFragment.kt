@@ -249,8 +249,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
 
-            override val showStartMargin = true
-
             override val holderType = HolderType.DIALOG
 
             override val ripple = true

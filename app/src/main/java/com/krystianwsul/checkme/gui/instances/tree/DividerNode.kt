@@ -28,8 +28,6 @@ class DividerNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val showStartMargin = false
-
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
 
     private val groupAdapter get() = nodeCollection.groupAdapter

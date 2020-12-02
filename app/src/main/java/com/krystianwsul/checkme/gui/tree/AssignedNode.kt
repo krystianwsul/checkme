@@ -22,8 +22,6 @@ class AssignedNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val showStartMargin get() = !checkBoxInvisible
-
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val holderType = HolderType.ASSIGNED

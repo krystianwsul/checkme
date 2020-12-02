@@ -19,12 +19,6 @@
             layout="@layout/row_list_checkbox"
             android:visibility="invisible" />
 
-        <View
-            android:id="@+id/rowListExpandableSingleLineMargin"
-            android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"

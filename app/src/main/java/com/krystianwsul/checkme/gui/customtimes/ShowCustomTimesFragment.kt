@@ -260,8 +260,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
-        override val showStartMargin = true
-
         override val holderType = HolderType.MULTILINE
 
         override val id = customTimeData.id

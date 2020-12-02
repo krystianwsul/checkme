@@ -34,8 +34,6 @@ class DoneInstanceNode(
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
-    override val showStartMargin = false
-
     override val holderType = HolderType.CHECKABLE
 
     override val ripple = true

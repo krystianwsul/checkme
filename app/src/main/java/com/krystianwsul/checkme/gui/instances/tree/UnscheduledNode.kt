@@ -19,8 +19,6 @@ class UnscheduledNode(
         private val searchResults: Boolean,
 ) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
 
-    override val showStartMargin = false
-
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
     override val id get() = Id(nodeCollection.nodeContainer.id)

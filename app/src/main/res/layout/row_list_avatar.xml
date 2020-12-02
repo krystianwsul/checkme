@@ -15,12 +15,6 @@
         android:minHeight="51dp"
         android:gravity="center_vertical">
 
-        <View
-            android:id="@+id/rowListAvatarMargin"
-            android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-
         <ImageView
             android:id="@+id/rowListAvatarImage"
             android:layout_width="@dimen/listImage"

@@ -367,8 +367,6 @@ class UserListFragment : AbstractFragment(), FabUser {
             private val selectedIds: Set<UserKey>,
     ) : GroupHolderNode(0), AvatarModelNode, MultiLineModelNode {
 
-        override val showStartMargin = false
-
         override val holderType = HolderType.AVATAR
 
         override val ripple = true

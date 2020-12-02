@@ -147,7 +147,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
     data class WidthKey(
             val indentation: Int,
             val checkBoxGone: Boolean, // todo delegate? check usages
-            val avatarVisible: Boolean, // todo delegate? check usages
+            val avatarVisible: Boolean, // todo delegate? check usages.  I think this should really be asking, is there a margin on the left?
             val thumbnailVisible: Boolean,
     )
 

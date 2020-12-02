@@ -4,6 +4,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
 import com.krystianwsul.common.utils.InstanceKey
@@ -17,7 +19,7 @@ class DividerNode(
         override val indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(), SingleLineModelNode {
+) : GroupHolderNode(), SingleLineModelNode, IndentationModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
@@ -37,7 +39,8 @@ class DividerNode(
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
-                SingleLineDelegate(this)
+                SingleLineDelegate(this),
+                IndentationDelegate(this)
         )
     }
 

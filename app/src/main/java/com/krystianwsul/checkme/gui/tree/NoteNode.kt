@@ -84,7 +84,6 @@ class NoteNode(
             binding: RowListNoteBinding,
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
-        override val rowContainer = binding.rowListNoteContainer
         val rowText = binding.rowListNoteText
         override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListNoteMargin

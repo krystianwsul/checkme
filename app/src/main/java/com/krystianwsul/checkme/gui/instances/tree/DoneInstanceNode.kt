@@ -12,6 +12,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
@@ -32,7 +34,8 @@ class DoneInstanceNode(
         NodeCollectionParent,
         CheckableModelNode,
         MultiLineModelNode,
-        ThumbnailModelNode {
+        ThumbnailModelNode,
+        IndentationModelNode {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -56,7 +59,8 @@ class DoneInstanceNode(
                 ExpandableDelegate(treeNode),
                 CheckableDelegate(this),
                 MultiLineDelegate(this),
-                ThumbnailDelegate(this)
+                ThumbnailDelegate(this),
+                IndentationDelegate(this)
         )
     }
 

@@ -16,7 +16,7 @@ enum class HolderType {
         )
     },
 
-    DIALOG { // ExpandableHolder, MultiLineHolder
+    DIALOG { // ExpandableHolder, MultiLineHolder, IndentationHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DialogNodeHolder(
                 baseAdapter,
@@ -32,7 +32,7 @@ enum class HolderType {
         )
     },
 
-    EXPANDABLE_SINGLELINE { // ExpandableHolder, SingleLineHolder
+    EXPANDABLE_SINGLELINE { // ExpandableHolder, SingleLineHolder, IndentationHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ExpandableSinglelineHolder(
                 baseAdapter,
@@ -44,7 +44,7 @@ enum class HolderType {
         )
     },
 
-    CHECKABLE { // ExpandableHolder, CheckableHolder, MultiLineHolder, ThumbnailHolder
+    CHECKABLE { // ExpandableHolder, CheckableHolder, MultiLineHolder, ThumbnailHolder, IndentationHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = CheckableHolder(
                 baseAdapter,
@@ -53,8 +53,7 @@ enum class HolderType {
     },
 
     EXPANDABLE_MULTILINE {
-        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder, ThumbnailHolder
-        // RowListExpandableMultilineBinding
+        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder, ThumbnailHolder, IndentationHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ExpandableMultilineHolder(
                 baseAdapter,

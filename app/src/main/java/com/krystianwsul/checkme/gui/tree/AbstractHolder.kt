@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.View
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
@@ -10,7 +9,6 @@ import io.reactivex.rxkotlin.addTo
 
 abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseHolder {
 
-    abstract val rowContainer: LinearLayout
     abstract val rowSeparator: View
 
     final override val compositeDisposable = CompositeDisposable()

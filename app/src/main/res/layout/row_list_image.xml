@@ -7,16 +7,6 @@
     android:foreground="@drawable/item_background_material"
     tools:ignore="UnusedAttribute">
 
-    <LinearLayout
-        android:id="@+id/rowListImageContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:minHeight="51dp"
-        android:gravity="center_vertical">
-
-    </LinearLayout>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="200dp"

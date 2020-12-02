@@ -395,7 +395,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
-                    indentation,
+                    0,
                     true,
                     true,
                     false

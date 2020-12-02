@@ -10,7 +10,6 @@ class MultilineHolder(
         binding: RowListMultilineBinding,
 ) : AbstractHolder(binding.root), MultiLineHolder {
 
-    override val rowContainer = binding.rowListMultilineContainer
     override val rowTextLayout = binding.rowListMultilineTextLayout
     override val rowName = binding.rowListMultilineName
     override val rowDetails = binding.rowListMultilineDetails

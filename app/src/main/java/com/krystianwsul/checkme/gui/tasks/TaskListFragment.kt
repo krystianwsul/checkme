@@ -30,6 +30,8 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
@@ -574,7 +576,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 Sortable,
                 MultiLineModelNode,
                 InvisibleCheckboxModelNode,
-                ThumbnailModelNode {
+                ThumbnailModelNode,
+                IndentationModelNode {
 
             override val holderType = HolderType.EXPANDABLE_MULTILINE
 
@@ -609,7 +612,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         ExpandableDelegate(treeNode),
                         MultiLineDelegate(this),
                         InvisibleCheckboxDelegate(this),
-                        ThumbnailDelegate(this)
+                        ThumbnailDelegate(this),
+                        IndentationDelegate(this)
                 )
             }
 

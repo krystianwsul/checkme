@@ -11,7 +11,6 @@ class AvatarHolder(override val baseAdapter: BaseAdapter, binding: RowListAvatar
         AvatarHolder,
         MultiLineHolder {
 
-    override val rowContainer = binding.rowListAvatarContainer
     override val rowTextLayout = binding.rowListAvatarTextLayout
     override val rowName = binding.rowListAvatarName
     override val rowDetails = binding.rowListAvatarDetails

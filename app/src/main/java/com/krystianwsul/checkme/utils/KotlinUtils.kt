@@ -20,6 +20,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.bumptech.glide.Glide
@@ -123,7 +124,7 @@ private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): Lis
     return ArrayList(list.subList(0, i))
 }
 
-fun View.setIndent(indent: Int) = setPadding((indent * 48 * context.resources.displayMetrics.density + 0.5f).toInt(), 0, 0, 0)
+fun View.setIndent(indent: Int) = updatePadding((indent * 48 * context.resources.displayMetrics.density + 0.5f).toInt())
 
 fun <T> removeFromGetter(getter: () -> List<T>, action: (T) -> Unit) {
     var list = getter()

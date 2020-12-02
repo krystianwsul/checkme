@@ -4,12 +4,13 @@ import com.krystianwsul.checkme.databinding.RowListDialogBinding
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
 
 class DialogNodeHolder(
         override val baseAdapter: BaseAdapter,
         rowListDialogBinding: RowListDialogBinding,
-) : AbstractHolder(rowListDialogBinding.root), ExpandableHolder, MultiLineHolder {
+) : AbstractHolder(rowListDialogBinding.root), ExpandableHolder, MultiLineHolder, IndentationHolder {
 
     override val rowContainer = rowListDialogBinding.rowListDialogContainer
     override val rowTextLayout = rowListDialogBinding.rowListDialogTextLayout

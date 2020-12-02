@@ -257,8 +257,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             GroupHolderNode(),
             MultiLineModelNode {
 
-        override val indentation = 0
-
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
@@ -290,7 +288,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
-                    indentation,
+                    0,
                     true,
                     false,
                     false

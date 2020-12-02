@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tree
 
 import android.app.Activity
 import android.graphics.Color
-import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
@@ -48,8 +47,6 @@ class ImageNode(
         super.onBindViewHolder(viewHolder, startingDrag)
 
         (viewHolder as Holder).apply {
-            rowContainer.visibility = View.GONE // todo delegate
-
             imageData.imageState
                     .toImageLoader()
                     .load(rowBigImage)
@@ -111,7 +108,6 @@ class ImageNode(
             binding: RowListImageBinding,
     ) : AbstractHolder(binding.root) {
 
-        override val rowContainer = binding.rowListImageContainer
         val rowBigImage = binding.rowListImageBigImage
         override val rowSeparator = binding.rowListImageSeparator
     }

@@ -6,6 +6,8 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
@@ -23,7 +25,13 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode, ThumbnailModelNode {
+) :
+        GroupHolderNode(),
+        TaskParent,
+        MultiLineModelNode,
+        InvisibleCheckboxModelNode,
+        ThumbnailModelNode,
+        IndentationModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -57,7 +65,8 @@ class TaskNode(
                 ExpandableDelegate(treeNode),
                 MultiLineDelegate(this),
                 InvisibleCheckboxDelegate(this),
-                ThumbnailDelegate(this)
+                ThumbnailDelegate(this),
+                IndentationDelegate(this)
         )
     }
 

@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -37,12 +36,9 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
 
     protected open val delegates = listOf<NodeDelegate>()
 
-    open val indentation: Int = 0
-
     override val state: ModelState
         get() = State(
                 id,
-                indentation,
                 imageData?.imageState,
                 delegates.map { it.state }
         )
@@ -51,7 +47,6 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
 
     data class State(
             override val id: Any,
-            val indentation: Int,
             val imageState: ImageState?,
             val delegateStates: List<Any>,
     ) : ModelState
@@ -63,9 +58,6 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
             val taskImage = imageData
 
             if (taskImage == null) {
-                rowContainer.visibility = View.VISIBLE
-                rowContainer.setIndent(indentation)
-
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
 
                 itemView.run {

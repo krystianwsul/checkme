@@ -61,7 +61,7 @@ class AssignedNode(
 
             assignedTo.forEach { user ->
                 RowAssignedChipBinding.inflate(
-                        LayoutInflater.from(rowContainer.context),
+                        LayoutInflater.from(viewHolder.itemView.context),
                         rowChipGroup,
                         true
                 )
@@ -88,7 +88,6 @@ class AssignedNode(
             binding: RowListAssignedBinding,
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
-        override val rowContainer = binding.rowListAssignedContainer
         override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListAssignedMargin
         override val rowSeparator = binding.rowListAssignedSeparator

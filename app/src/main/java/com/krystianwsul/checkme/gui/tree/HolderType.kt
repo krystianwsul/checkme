@@ -44,7 +44,7 @@ enum class HolderType {
         )
     },
 
-    CHECKABLE { // ExpandableHolder, CheckableHolder, MultiLineHolder
+    CHECKABLE { // ExpandableHolder, CheckableHolder, MultiLineHolder, ThumbnailHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = CheckableHolder(
                 baseAdapter,
@@ -53,7 +53,7 @@ enum class HolderType {
     },
 
     EXPANDABLE_MULTILINE {
-        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder
+        // ExpandableHolder, MultiLineHolder, InvisibleCheckboxHolder, ThumbnailHolder
         // RowListExpandableMultilineBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ExpandableMultilineHolder(

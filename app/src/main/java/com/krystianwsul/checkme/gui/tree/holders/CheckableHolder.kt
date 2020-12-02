@@ -6,12 +6,12 @@ import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableHolder
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineHolder
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailHolder
 
 class CheckableHolder(
         override val baseAdapter: BaseAdapter,
         binding: RowListCheckableBinding,
-) : AbstractHolder(binding.root), ExpandableHolder,
-        CheckableHolder, MultiLineHolder {
+) : AbstractHolder(binding.root), ExpandableHolder, CheckableHolder, MultiLineHolder, ThumbnailHolder {
 
     override val rowContainer = binding.rowListCheckableContainer
     override val rowTextLayout = binding.rowListCheckableTextLayout

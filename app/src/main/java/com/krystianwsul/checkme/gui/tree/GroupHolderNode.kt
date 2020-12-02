@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
@@ -36,8 +35,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected open val imageData: ImageNode.ImageData? = null // todo delegate image
 
-    protected open val thumbnail: ImageState? = null
-
     protected open val delegates = listOf<NodeDelegate>()
 
     override val state: ModelState
@@ -45,7 +42,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
                 id,
                 indentation,
                 imageData?.imageState,
-                thumbnail,
                 delegates.map { it.state }
         )
 
@@ -55,7 +51,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
             override val id: Any,
             val indentation: Int,
             val imageState: ImageState?,
-            val thumbnail: ImageState?,
             val delegateStates: List<Any>,
     ) : ModelState
 
@@ -68,16 +63,6 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
             if (taskImage == null) {
                 rowContainer.visibility = View.VISIBLE
                 rowContainer.setIndent(indentation)
-
-                rowThumbnail.apply {
-                    if (thumbnail != null) {
-                        visibility = View.VISIBLE
-
-                        thumbnail!!.toImageLoader().load(this, true)
-                    } else {
-                        visibility = View.GONE
-                    }
-                }
 
                 delegates.forEach { it.onBindViewHolder(viewHolder) }
 

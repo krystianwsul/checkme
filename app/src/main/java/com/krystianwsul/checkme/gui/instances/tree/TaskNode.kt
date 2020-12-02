@@ -11,6 +11,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleC
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -21,7 +23,7 @@ class TaskNode(
         val taskData: GroupListDataWrapper.TaskData,
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode {
+) : GroupHolderNode(indentation), TaskParent, MultiLineModelNode, InvisibleCheckboxModelNode, ThumbnailModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -55,6 +57,7 @@ class TaskNode(
                 ExpandableDelegate(treeNode),
                 MultiLineDelegate(this),
                 InvisibleCheckboxDelegate(this),
+                ThumbnailDelegate(this)
         )
     }
 

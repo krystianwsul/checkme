@@ -54,13 +54,6 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/rowListDialogThumbnail"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone" />
-
-        <ImageView
             android:id="@+id/rowListDialogExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

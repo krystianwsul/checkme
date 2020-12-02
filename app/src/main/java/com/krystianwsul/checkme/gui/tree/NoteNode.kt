@@ -86,7 +86,6 @@ class NoteNode(
 
         override val rowContainer = binding.rowListNoteContainer
         val rowText = binding.rowListNoteText
-        override val rowThumbnail = binding.rowListNoteThumbnail
         override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListNoteMargin
         override val rowSeparator = binding.rowListNoteSeparator

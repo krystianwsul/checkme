@@ -112,7 +112,6 @@ class ImageNode(
     ) : AbstractHolder(binding.root) {
 
         override val rowContainer = binding.rowListImageContainer
-        override val rowThumbnail = binding.rowListImageThumbnail
         val rowBigImage = binding.rowListImageBigImage
         override val rowSeparator = binding.rowListImageSeparator
     }

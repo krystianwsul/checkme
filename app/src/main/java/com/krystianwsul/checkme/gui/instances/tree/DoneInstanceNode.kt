@@ -15,6 +15,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
@@ -29,7 +31,8 @@ class DoneInstanceNode(
 ) : GroupHolderNode(indentation),
         NodeCollectionParent,
         CheckableModelNode,
-        MultiLineModelNode {
+        MultiLineModelNode,
+        ThumbnailModelNode {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -52,7 +55,8 @@ class DoneInstanceNode(
         listOf(
                 ExpandableDelegate(treeNode),
                 CheckableDelegate(this),
-                MultiLineDelegate(this)
+                MultiLineDelegate(this),
+                ThumbnailDelegate(this)
         )
     }
 

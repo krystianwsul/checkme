@@ -291,7 +291,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     indentation,
                     true,
                     false,
-                    thumbnail != null
+                    false
             )
 
         override fun onClick(holder: AbstractHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))

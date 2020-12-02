@@ -307,7 +307,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         indentation,
                         true,
                         false,
-                        thumbnail != null
+                        false
                 )
 
             override fun onClick(holder: AbstractHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))

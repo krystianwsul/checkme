@@ -89,7 +89,6 @@ class AssignedNode(
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
         override val rowContainer = binding.rowListAssignedContainer
-        override val rowThumbnail = binding.rowListAssignedThumbnail
         override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListAssignedMargin
         override val rowSeparator = binding.rowListAssignedSeparator

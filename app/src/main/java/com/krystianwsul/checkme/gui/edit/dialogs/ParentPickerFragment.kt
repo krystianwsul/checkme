@@ -290,7 +290,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                         indentation,
                         true,
                         false,
-                        thumbnail != null
+                        false
                 )
 
             fun initialize(

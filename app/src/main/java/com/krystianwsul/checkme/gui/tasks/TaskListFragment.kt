@@ -35,6 +35,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleC
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -566,7 +568,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val childTaskData: ChildTaskData,
                 private val copying: Boolean,
                 override val parentNode: ModelNode<AbstractHolder>?,
-        ) : GroupHolderNode(indentation), TaskParent, Sortable, MultiLineModelNode, InvisibleCheckboxModelNode {
+        ) :
+                GroupHolderNode(indentation),
+                TaskParent,
+                Sortable,
+                MultiLineModelNode,
+                InvisibleCheckboxModelNode,
+                ThumbnailModelNode {
 
             override val holderType = HolderType.EXPANDABLE_MULTILINE
 
@@ -601,6 +609,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         ExpandableDelegate(treeNode),
                         MultiLineDelegate(this),
                         InvisibleCheckboxDelegate(this),
+                        ThumbnailDelegate(this)
                 )
             }
 

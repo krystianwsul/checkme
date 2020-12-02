@@ -301,7 +301,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                     indentation,
                     true,
                     true,
-                    thumbnail != null
+                    false
             )
 
         override fun compareTo(other: ModelNode<AbstractHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)

@@ -77,19 +77,13 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                             text = it.text
                             setTextColor(it.color)
 
-                            if (it.unlimitedLines) {
-                                maxLines = Int.MAX_VALUE
-                                isSingleLine = false
-                            } else {
-                                allocateTextViews += this
-                            }
+                            allocateTextViews += this
                         }
                         MultiLineNameData.Invisible -> {
                             visibility = View.INVISIBLE
 
                             setSingleLine()
                         }
-                        MultiLineNameData.Gone -> visibility = View.GONE // todo delegate no longer used
                     }
                 }
             }
@@ -97,8 +91,6 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
             rowDetails.run {
                 modelNode.details.let {
                     if (it != null) {
-                        check(!modelNode.name.unlimitedLines)
-
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
@@ -113,8 +105,6 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
             rowChildren.run {
                 modelNode.children.let {
                     if (it != null) {
-                        check(!modelNode.name.unlimitedLines)
-
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)

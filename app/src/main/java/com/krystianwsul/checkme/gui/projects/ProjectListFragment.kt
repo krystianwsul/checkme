@@ -277,6 +277,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 GroupHolderNode(0),
                 MultiLineModelNode {
 
+            override val showStartMargin = true
+
             override val holderType = HolderType.MULTILINE
 
             override val ripple = true
@@ -305,8 +307,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
                         indentation,
-                        checkBoxState.visibility == View.GONE,
-                        hasAvatar,
+                        true,
+                        false,
                         thumbnail != null
                 )
 

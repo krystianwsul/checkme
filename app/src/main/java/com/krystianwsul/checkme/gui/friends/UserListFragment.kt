@@ -367,6 +367,8 @@ class UserListFragment : AbstractFragment(), FabUser {
             private val selectedIds: Set<UserKey>,
     ) : GroupHolderNode(0), AvatarModelNode, MultiLineModelNode {
 
+        override val showStartMargin = false
+
         override val holderType = HolderType.AVATAR
 
         override val ripple = true
@@ -385,7 +387,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val parentNode: ModelNode<AbstractHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
-        override val hasAvatar = true
 
         override val delegates by lazy {
             listOf(
@@ -397,8 +398,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
                     indentation,
-                    checkBoxState.visibility == View.GONE,
-                    hasAvatar,
+                    true,
+                    true,
                     thumbnail != null
             )
 

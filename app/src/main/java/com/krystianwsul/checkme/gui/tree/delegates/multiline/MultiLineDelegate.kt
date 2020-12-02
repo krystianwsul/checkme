@@ -146,8 +146,8 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
 
     data class WidthKey(
             val indentation: Int,
-            val checkBoxVisible: Boolean,
-            val avatarVisible: Boolean,
+            val checkBoxGone: Boolean, // todo delegate? check usages
+            val avatarVisible: Boolean, // todo delegate? check usages
             val thumbnailVisible: Boolean,
     )
 

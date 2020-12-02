@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.*
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
@@ -28,6 +27,8 @@ class DividerNode(
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
+
+    override val showStartMargin = false
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
 
@@ -84,8 +85,6 @@ class DividerNode(
     }
 
     override val text by lazy { groupListFragment.activity.getString(R.string.done) }
-
-    override val checkBoxState = CheckBoxState.Invisible
 
     fun remove(doneInstanceNode: DoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))

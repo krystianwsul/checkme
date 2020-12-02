@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
@@ -27,6 +25,8 @@ class TaskNode(
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
+
+    override val showStartMargin = false
 
     override val holderType = HolderType.EXPANDABLE_MULTILINE
 
@@ -63,8 +63,8 @@ class TaskNode(
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
                 indentation,
-                checkBoxState.visibility == View.GONE,
-                hasAvatar,
+                false,
+                false,
                 thumbnail != null
         )
 
@@ -125,8 +125,6 @@ class TaskNode(
     override fun onClick(holder: AbstractHolder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
-
-    override val checkBoxState = CheckBoxState.Invisible
 
     override val isSelectable = true
 

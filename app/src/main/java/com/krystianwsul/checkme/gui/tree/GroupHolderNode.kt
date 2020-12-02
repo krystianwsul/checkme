@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.common.firebase.models.ImageState
@@ -31,8 +30,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected abstract val treeNode: TreeNode<AbstractHolder>
 
-    protected open val hasAvatar = false // todo delegate
-    open val checkBoxState: CheckBoxState = CheckBoxState.Gone // todo delegate
+    protected abstract val showStartMargin: Boolean // todo delegate
 
     abstract val holderType: HolderType
 
@@ -89,7 +87,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
                 // todo delegate remove these
                 if (delegates.none { it is ExpandableDelegate }) rowMarginEnd!!.isVisible = true
-                rowMarginStart.isVisible = checkBoxState.visibility == View.GONE && !hasAvatar
+                rowMarginStart.isVisible = showStartMargin
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

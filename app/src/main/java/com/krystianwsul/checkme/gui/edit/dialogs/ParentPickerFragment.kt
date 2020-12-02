@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.MotionEvent
-import android.view.View
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -250,6 +249,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
 
+            override val showStartMargin = true
+
             override val holderType = HolderType.DIALOG
 
             override val ripple = true
@@ -289,8 +290,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
                         indentation,
-                        checkBoxState.visibility == View.GONE,
-                        hasAvatar,
+                        true,
+                        false,
                         thumbnail != null
                 )
 

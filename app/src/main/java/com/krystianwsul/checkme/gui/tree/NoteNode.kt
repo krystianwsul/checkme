@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListNoteBinding
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
@@ -20,6 +19,8 @@ class NoteNode(
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
+
+    override val showStartMargin get() = !checkBoxInvisible
 
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
@@ -63,7 +64,6 @@ class NoteNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is AssignedNode) 1 else -1
 
     override val checkBoxInvisible = instance
-    override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
     override fun normalize() {
         normalizedNote

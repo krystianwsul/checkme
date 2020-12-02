@@ -44,6 +44,8 @@ class NotDoneGroupNode(
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
+    override val showStartMargin get() = checkBoxState == CheckBoxState.Gone
+
     override val holderType = HolderType.CHECKABLE
 
     override val ripple = true
@@ -74,7 +76,7 @@ class NotDoneGroupNode(
         get() = MultiLineDelegate.WidthKey(
                 indentation,
                 checkBoxState.visibility == View.GONE,
-                hasAvatar,
+                false,
                 thumbnail != null
         )
 
@@ -515,6 +517,8 @@ class NotDoneGroupNode(
             }
         }
 
+        override val showStartMargin = false
+
         override val holderType = HolderType.CHECKABLE
 
         override val ripple = true
@@ -546,7 +550,7 @@ class NotDoneGroupNode(
             get() = MultiLineDelegate.WidthKey(
                     indentation,
                     checkBoxState.visibility == View.GONE,
-                    hasAvatar,
+                    false,
                     thumbnail != null
             )
 

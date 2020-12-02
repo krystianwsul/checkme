@@ -279,6 +279,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set
 
+        override val showStartMargin = false
+
         override val holderType = HolderType.AVATAR
 
         override val isSelectable = true
@@ -288,7 +290,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val parentNode: ModelNode<AbstractHolder>? = null
 
         override val avatarUrl = userListData.photoUrl
-        override val hasAvatar = true
 
         override val delegates by lazy {
             listOf(
@@ -300,8 +301,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
                     indentation,
-                    checkBoxState.visibility == View.GONE,
-                    hasAvatar,
+                    true,
+                    true,
                     thumbnail != null
             )
 

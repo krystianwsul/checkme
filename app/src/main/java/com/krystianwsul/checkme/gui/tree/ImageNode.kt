@@ -26,6 +26,8 @@ class ImageNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
+    override val showStartMargin = false
+
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val holderType = HolderType.IMAGE

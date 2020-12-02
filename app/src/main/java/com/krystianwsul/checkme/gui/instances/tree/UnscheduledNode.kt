@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
@@ -19,6 +18,8 @@ class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
 ) : GroupHolderNode(0), TaskParent, SingleLineModelNode {
+
+    override val showStartMargin = false
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
@@ -93,8 +94,6 @@ class UnscheduledNode(
     override val text by lazy { groupListFragment.activity.getString(R.string.noReminder) }
 
     override val isVisibleWhenEmpty = false
-
-    override val checkBoxState = CheckBoxState.Invisible
 
     override fun matches(filterCriteria: Any?) = false
 

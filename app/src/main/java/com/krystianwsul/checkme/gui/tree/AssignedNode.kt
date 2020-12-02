@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
@@ -23,6 +22,8 @@ class AssignedNode(
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
+    override val showStartMargin get() = !checkBoxInvisible
+
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
     override val holderType = HolderType.ASSIGNED
@@ -38,7 +39,6 @@ class AssignedNode(
     override val delegates by lazy { listOf(InvisibleCheckboxDelegate(this)) }
 
     override val checkBoxInvisible = instance
-    override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 
     override val state get() = State(super.state, assignedTo)
 

@@ -10,7 +10,5 @@ interface MultiLineModelNode {
 
     val indentation: Int
 
-    val textSelectable get() = false // todo delegate note
-
     val widthKey: MultiLineDelegate.WidthKey// todo delegate simplify for each subclass
 }

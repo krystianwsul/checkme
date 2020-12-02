@@ -42,7 +42,7 @@ abstract class GroupHolderNode(val indentation: Int) : ModelNode<AbstractHolder>
 
     protected open val imageData: ImageNode.ImageData? = null // todo delegate image
 
-    protected open val thumbnail: ImageState? = null
+    protected open val thumbnail: ImageState? = null // todo delegate?
 
     protected open val delegates = listOf<NodeDelegate>()
 

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 
-interface NodeDelegate { // todo delegate generic (if possible?)
+interface NodeDelegate {
 
     val state: Any
 

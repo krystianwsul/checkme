@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleC
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
@@ -25,6 +26,8 @@ class NoteNode(
     override val holderType = HolderType.NOTE
 
     override val id get() = Id(nodeContainer.id)
+
+    override val state get() = State(super.state, note)
 
     data class Id(val id: Any)
 
@@ -78,6 +81,11 @@ class NoteNode(
     }
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+
+    data class State(val superState: ModelState, val note: String) : ModelState {
+
+        override val id = superState.id
+    }
 
     class Holder(
             override val baseAdapter: BaseAdapter,

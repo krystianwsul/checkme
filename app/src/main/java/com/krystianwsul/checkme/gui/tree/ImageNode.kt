@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -30,6 +31,8 @@ class ImageNode(
     override val holderType = HolderType.IMAGE
 
     override val id get() = Id(nodeContainer.id)
+
+    override val state get() = State(super.state, imageData.imageState)
 
     data class Id(val id: Any)
 
@@ -102,6 +105,11 @@ class ImageNode(
             val onDismiss: () -> Unit,
             val showImage: Boolean,
     )
+
+    data class State(val superState: ModelState, val imageState: ImageState) : ModelState {
+
+        override val id = superState.id
+    }
 
     class Holder(
             override val baseAdapter: BaseAdapter,

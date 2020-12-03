@@ -294,7 +294,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val name get() = MultiLineNameData.Visible(projectData.name)
 
-            override val details get() = Pair(projectData.users, colorSecondary)
+            override val details get() = Pair(projectData.users, R.color.textSecondary)
 
             override val isSelectable = true
 

@@ -42,13 +42,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         private const val SHOW_DELETE_KEY = "showDelete"
 
         fun newInstance(showDelete: Boolean) = ParentPickerFragment().apply {
-            arguments = Bundle().apply {
-                putBoolean(SHOW_DELETE_KEY, showDelete)
-            }
-        }
-
-        private val taskBackground by lazy {
-            GroupHolderNode.getColor(android.R.color.white)
+            arguments = Bundle().apply { putBoolean(SHOW_DELETE_KEY, showDelete) }
         }
     }
 
@@ -263,8 +257,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             private val parentFragment get() = taskAdapter.parentPickerFragment
 
-            override val colorBackground get() = taskBackground
-
             val expandedParentKeys: List<EditViewModel.ParentKey>
                 get() {
                     val expandedParentKeys = ArrayList<EditViewModel.ParentKey>()
@@ -331,7 +323,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(parentTreeData.scheduleText, colorSecondary)
+                    Pair(parentTreeData.scheduleText, R.color.textSecondary)
                 }
 
             override val children: Pair<String, Int>?
@@ -344,7 +336,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                             ?.joinToString(", ") { it.parentTreeData.name }
                             ?: parentTreeData.note.takeIf { !it.isNullOrEmpty() }
 
-                    return text?.let { Pair(it, colorSecondary) }
+                    return text?.let { Pair(it, R.color.textSecondary) }
                 }
 
             override fun onClick(holder: AbstractHolder) {

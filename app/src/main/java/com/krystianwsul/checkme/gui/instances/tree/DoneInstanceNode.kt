@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -126,13 +127,13 @@ class DoneInstanceNode(
     override val name
         get() = MultiLineNameData.Visible(
                 instanceData.name,
-                if (instanceData.colorEnabled) colorPrimary else colorDisabled
+                if (instanceData.colorEnabled) R.color.textPrimary else R.color.textDisabled
         )
 
     override val details
         get() = instanceData.displayText
                 .takeUnless { it.isNullOrEmpty() }
-                ?.let { Pair(it, if (instanceData.colorEnabled) colorSecondary else colorDisabled) }
+                ?.let { Pair(it, if (instanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled) }
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenText(treeNode, instanceData)
 

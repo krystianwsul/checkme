@@ -669,7 +669,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
-            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.isVisible }
+            private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.isVisible }
 
             override val children: Pair<String, Int>?
                 get() {
@@ -681,17 +681,21 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             ?.joinToString(", ") { it.childTaskData.name }
                             ?: childTaskData.note.takeIf { !it.isNullOrEmpty() }
 
-                    return text?.let { Pair(it, disabledOverride ?: colorSecondary) }
+                    return text?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
                 }
 
             override val details
                 get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(childTaskData.scheduleText, disabledOverride ?: colorSecondary)
+                    Pair(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
                 }
 
-            override val name get() = MultiLineNameData.Visible(childTaskData.name, disabledOverride ?: colorPrimary)
+            override val name
+                get() = MultiLineNameData.Visible(
+                        childTaskData.name,
+                        disabledOverride ?: R.color.textPrimary
+                )
 
             override val isSelectable = !copying
 
@@ -751,7 +755,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
             override fun parentHierarchyMatches(filterCriteria: Any?) =
-                    super<GroupHolderNode>.parentHierarchyMatches(filterCriteria)
+                    super.parentHierarchyMatches(filterCriteria)
                             && childTaskData.showIfParentShown(filterCriteria as? SearchData)
         }
     }

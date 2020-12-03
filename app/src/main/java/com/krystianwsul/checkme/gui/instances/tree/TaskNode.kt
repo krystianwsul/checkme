@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -129,7 +130,7 @@ class TaskNode(
                     ?.joinToString(", ") { it.taskData.name }
                     ?: taskData.note.takeIf { !it.isNullOrEmpty() }
 
-            return text?.let { Pair(it, colorSecondary) }
+            return text?.let { Pair(it, R.color.textSecondary) }
         }
 
     override fun onClick(holder: AbstractHolder) {

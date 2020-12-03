@@ -278,7 +278,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val name = MultiLineNameData.Visible(customTimeData.name)
 
-        override val details = Pair(customTimeData.details, colorSecondary)
+        override val details = Pair(customTimeData.details, R.color.textSecondary)
 
         override val isSelectable = true
 

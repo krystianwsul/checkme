@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
-import androidx.annotation.ColorInt
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import androidx.annotation.ColorRes
+import com.krystianwsul.checkme.R
 
 sealed class MultiLineNameData {
 
     data class Visible(
             val text: String,
-            @ColorInt val color: Int = GroupHolderNode.colorPrimary,
+            @ColorRes val colorId: Int = R.color.textPrimary,
     ) : MultiLineNameData()
 
     object Invisible : MultiLineNameData()

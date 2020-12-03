@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tree.delegates.multiline
 import android.graphics.Rect
 import android.view.View
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
@@ -75,7 +76,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                         is MultiLineNameData.Visible -> {
                             visibility = View.VISIBLE
                             text = it.text
-                            setTextColor(it.color)
+                            setTextColor(ContextCompat.getColor(context, it.colorId))
 
                             allocateTextViews += this
                         }
@@ -93,7 +94,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
-                        setTextColor(it.second)
+                        setTextColor(ContextCompat.getColor(context, it.second))
 
                         allocateTextViews += this
                     } else {
@@ -107,7 +108,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
-                        setTextColor(it.second)
+                        setTextColor(ContextCompat.getColor(context, it.second))
 
                         allocateTextViews += this
                     } else {

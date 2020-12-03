@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -184,7 +185,10 @@ class NotDoneGroupNode(
 
     override val name
         get() = if (singleInstance()) {
-            MultiLineNameData.Visible(singleInstanceData.name, if (singleInstanceData.colorEnabled) colorPrimary else colorDisabled)
+            MultiLineNameData.Visible(
+                    singleInstanceData.name,
+                    if (singleInstanceData.colorEnabled) R.color.textPrimary else R.color.textDisabled
+            )
         } else {
             if (treeNode.isExpanded) {
                 MultiLineNameData.Invisible
@@ -202,7 +206,7 @@ class NotDoneGroupNode(
             } else {
                 Pair(
                         singleInstanceData.displayText!!,
-                        if (singleInstanceData.colorEnabled) colorSecondary else colorDisabled
+                        if (singleInstanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled
                 )
             }
         } else {
@@ -216,7 +220,7 @@ class NotDoneGroupNode(
 
             val text = date.getDisplayText() + ", " + timeText
 
-            Pair(text, colorSecondary)
+            Pair(text, R.color.textSecondary)
         }
 
     override val children
@@ -520,7 +524,7 @@ class NotDoneGroupNode(
                         ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
 
                 return text?.let {
-                    Pair(it, if (instanceData.colorEnabled) colorSecondary else colorDisabled)
+                    Pair(it, if (instanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled)
                 }
             }
         }
@@ -619,7 +623,7 @@ class NotDoneGroupNode(
         override val name
             get() = MultiLineNameData.Visible(
                     instanceData.name,
-                    if (instanceData.colorEnabled) colorPrimary else colorDisabled
+                    if (instanceData.colorEnabled) R.color.textPrimary else R.color.textDisabled
             )
 
         override val children get() = getChildrenText(treeNode, instanceData)

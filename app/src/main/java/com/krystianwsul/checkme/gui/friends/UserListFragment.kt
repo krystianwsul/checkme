@@ -395,7 +395,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             get() = MultiLineDelegate.WidthKey(
                     0,
                     true,
-                    true,
+                    false,
                     false
             )
 

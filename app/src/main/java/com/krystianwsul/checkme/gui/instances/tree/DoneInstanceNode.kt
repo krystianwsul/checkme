@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
@@ -172,9 +171,9 @@ class DoneInstanceNode(
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
                 indentation,
-                checkBoxState.visibility == View.GONE,
-                false,
-                thumbnail != null
+                true,
+                thumbnail != null,
+                true
         )
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {

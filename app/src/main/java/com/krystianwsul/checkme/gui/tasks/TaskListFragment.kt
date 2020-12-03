@@ -618,9 +618,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
                         indentation,
-                        true,
                         false,
-                        thumbnail != null
+                        thumbnail != null,
+                        true
                 )
 
             override val checkBoxInvisible = false

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -80,9 +79,9 @@ class NotDoneGroupNode(
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
                 indentation,
-                checkBoxState.visibility == View.GONE,
-                false,
-                thumbnail != null
+                checkBoxState != CheckBoxState.Gone,
+                thumbnail != null,
+                true
         )
 
     init {
@@ -557,9 +556,9 @@ class NotDoneGroupNode(
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
                     indentation,
-                    checkBoxState.visibility == View.GONE,
-                    false,
-                    thumbnail != null
+                    true,
+                    thumbnail != null,
+                    true
             )
 
         fun initialize(

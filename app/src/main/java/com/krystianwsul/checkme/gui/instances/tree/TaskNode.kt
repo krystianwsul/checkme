@@ -72,9 +72,9 @@ class TaskNode(
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
                 indentation,
-                false,
-                false,
-                thumbnail != null
+                true,
+                thumbnail != null,
+                true
         )
 
     override val checkBoxInvisible = true

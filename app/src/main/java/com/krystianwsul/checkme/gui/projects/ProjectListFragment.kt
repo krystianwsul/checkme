@@ -303,7 +303,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
                         0,
-                        true,
+                        false,
                         false,
                         false
                 )

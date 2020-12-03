@@ -8,5 +8,5 @@ interface MultiLineModelNode {
 
     val children: Pair<String, Int>? get() = null
 
-    val widthKey: MultiLineDelegate.WidthKey// todo delegate simplify for each subclass
+    val widthKey: MultiLineDelegate.WidthKey
 }

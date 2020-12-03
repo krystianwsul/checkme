@@ -281,9 +281,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
                         indentation,
-                        true,
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 )
 
             fun initialize(

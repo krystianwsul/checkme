@@ -19,7 +19,7 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import java.util.*
 
 class ImageNode(
-        override val imageData: ImageData,
+        private val imageData: ImageData,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) : GroupHolderNode() {
 

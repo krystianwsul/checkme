@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
@@ -32,39 +31,24 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
 
     protected open val ripple = false
 
-    protected open val imageData: ImageNode.ImageData? = null // todo delegate image
-
     protected open val delegates = listOf<NodeDelegate>()
 
-    override val state: ModelState
-        get() = State(
-                id,
-                imageData?.imageState,
-                delegates.map { it.state }
-        )
+    override val state: ModelState get() = State(id, delegates.map { it.state })
 
     protected open val colorBackground = Companion.colorBackground
 
-    data class State(
-            override val id: Any,
-            val imageState: ImageState?,
-            val delegateStates: List<Any>,
-    ) : ModelState
+    data class State(override val id: Any, val delegateStates: List<Any>) : ModelState
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as AbstractHolder
 
         groupHolder.run {
-            val taskImage = imageData
+            delegates.forEach { it.onBindViewHolder(viewHolder) }
 
-            if (taskImage == null) {
-                delegates.forEach { it.onBindViewHolder(viewHolder) }
+            itemView.run {
+                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
-                itemView.run {
-                    setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
-
-                    foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
-                }
+                foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
             }
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE

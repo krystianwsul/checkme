@@ -279,8 +279,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val holderType = HolderType.MULTILINE
 
-            override val ripple = true
-
             override val id = projectData.id
 
             public override lateinit var treeNode: TreeNode<AbstractHolder>

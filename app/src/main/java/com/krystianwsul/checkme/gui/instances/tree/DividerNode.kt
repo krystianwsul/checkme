@@ -44,6 +44,8 @@ class DividerNode(
         )
     }
 
+    override val disableRipple = true
+
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<AbstractHolder>,

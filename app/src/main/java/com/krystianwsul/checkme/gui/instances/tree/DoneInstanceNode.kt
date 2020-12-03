@@ -43,8 +43,6 @@ class DoneInstanceNode(
 
     override val holderType = HolderType.CHECKABLE
 
-    override val ripple = true
-
     private lateinit var nodeCollection: NodeCollection
 
     private val parentNodeCollection get() = dividerNode.nodeCollection

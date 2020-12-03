@@ -588,8 +588,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             public override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
 
-            override val ripple = true
-
             private val taskWrappers = mutableListOf<TaskWrapper>()
 
             override val taskAdapter get() = taskParent.taskAdapter

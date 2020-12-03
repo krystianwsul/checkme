@@ -247,8 +247,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val holderType = HolderType.DIALOG
 
-            override val ripple = true
-
             override val id = parentTreeData.parentKey
 
             private lateinit var taskWrappers: MutableList<TaskWrapper>

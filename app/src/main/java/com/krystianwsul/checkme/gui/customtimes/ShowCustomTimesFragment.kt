@@ -264,8 +264,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val id = customTimeData.id
 
-        override val ripple = true
-
         fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>) = TreeNode(
                 this,
                 treeNodeCollection,

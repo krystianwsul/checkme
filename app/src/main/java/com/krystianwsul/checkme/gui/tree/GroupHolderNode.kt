@@ -16,7 +16,7 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
 
     final override val itemViewType by lazy { holderType.ordinal }
 
-    protected open val ripple = false
+    protected open val disableRipple = false
 
     protected open val delegates = listOf<NodeDelegate>()
 
@@ -39,7 +39,7 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
                             R.color.materialBackground
                 ))
 
-                foreground = if (ripple && !isPressed)
+                foreground = if (!disableRipple && !isPressed)
                     ContextCompat.getDrawable(context, R.drawable.item_background_material)
                 else
                     null

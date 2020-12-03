@@ -40,6 +40,8 @@ class AssignedNode(
 
     override val state get() = State(super.state, assignedTo)
 
+    override val disableRipple = true
+
     init {
         check(assignedTo.isNotEmpty())
     }

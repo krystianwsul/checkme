@@ -53,8 +53,6 @@ class NotDoneGroupNode(
 
     override val holderType = HolderType.CHECKABLE
 
-    override val ripple = true
-
     private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
 
     private var singleInstanceNodeCollection: NodeCollection? = null
@@ -530,8 +528,6 @@ class NotDoneGroupNode(
         }
 
         override val holderType = HolderType.CHECKABLE
-
-        override val ripple = true
 
         override val isSelectable = true
 

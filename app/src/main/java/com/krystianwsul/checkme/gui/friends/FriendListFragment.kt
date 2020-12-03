@@ -270,8 +270,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
             AvatarModelNode,
             MultiLineModelNode {
 
-        override val ripple = true
-
         override val name = MultiLineNameData.Visible(userListData.name)
 
         override val details = Pair(userListData.email, R.color.textSecondary)

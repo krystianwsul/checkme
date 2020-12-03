@@ -33,6 +33,8 @@ class NoteNode(
 
     private val normalizedNote by lazy { note.normalized() }
 
+    override val disableRipple = true
+
     init {
         check(note.isNotEmpty())
     }

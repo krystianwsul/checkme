@@ -169,7 +169,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             )
         }
 
-        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = listener.onDestroyActionMode()
+        override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
+            listener.onDestroyActionMode()
+            updateFabVisibility("onLastRemoved")
+        }
     }
 
     private var taskListFragmentFab: FloatingActionButton? = null

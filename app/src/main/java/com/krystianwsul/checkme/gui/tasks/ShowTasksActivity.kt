@@ -143,7 +143,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     override fun onDestroyActionMode() = Unit
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
-        this.selectAllVisible = selectAllVisible
+        this.selectAllVisible = selectAllVisible && !parameters.copying
 
         updateBottomMenu()
     }

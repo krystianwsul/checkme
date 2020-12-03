@@ -17,7 +17,7 @@ class AssignedNode(
         private val assignedTo: List<User>,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(), InvisibleCheckboxModelNode {
+) : AbstractModelNode(), InvisibleCheckboxModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

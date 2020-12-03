@@ -571,7 +571,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 private val copying: Boolean,
                 override val parentNode: ModelNode<AbstractHolder>?,
         ) :
-                GroupHolderNode(),
+                AbstractModelNode(),
                 TaskParent,
                 Sortable,
                 MultiLineModelNode,

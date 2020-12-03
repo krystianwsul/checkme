@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
@@ -17,7 +17,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : GroupHolderNode(), TaskParent, SingleLineModelNode {
+) : AbstractModelNode(), TaskParent, SingleLineModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 

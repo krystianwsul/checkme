@@ -40,7 +40,7 @@ class NotDoneGroupNode(
         private val searchResults: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) :
-        GroupHolderNode(),
+        AbstractModelNode(),
         NodeCollectionParent,
         Sortable,
         CheckableModelNode,
@@ -499,7 +499,7 @@ class NotDoneGroupNode(
             val instanceData: GroupListDataWrapper.InstanceData,
             private val parentNotDoneGroupNode: NotDoneGroupNode,
     ) :
-            GroupHolderNode(),
+            AbstractModelNode(),
             NodeCollectionParent,
             CheckableModelNode,
             MultiLineModelNode,

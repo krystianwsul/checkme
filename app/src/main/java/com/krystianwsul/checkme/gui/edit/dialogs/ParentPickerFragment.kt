@@ -14,8 +14,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
@@ -240,7 +240,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 private val taskParent: TaskParent,
                 val parentTreeData: EditViewModel.ParentTreeData,
                 override val parentNode: ModelNode<AbstractHolder>?,
-        ) : GroupHolderNode(), TaskParent, MultiLineModelNode, IndentationModelNode {
+        ) : AbstractModelNode(), TaskParent, MultiLineModelNode, IndentationModelNode {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set

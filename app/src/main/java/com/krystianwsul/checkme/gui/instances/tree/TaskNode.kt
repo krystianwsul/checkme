@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
@@ -27,7 +27,7 @@ class TaskNode(
         private val taskParent: TaskParent,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) :
-        GroupHolderNode(),
+        AbstractModelNode(),
         TaskParent,
         MultiLineModelNode,
         InvisibleCheckboxModelNode,

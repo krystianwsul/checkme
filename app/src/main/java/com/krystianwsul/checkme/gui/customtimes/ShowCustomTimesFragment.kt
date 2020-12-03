@@ -19,8 +19,8 @@ import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
@@ -254,7 +254,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) :
-            GroupHolderNode(),
+            AbstractModelNode(),
             MultiLineModelNode {
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>

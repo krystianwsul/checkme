@@ -8,7 +8,7 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
-abstract class GroupHolderNode : ModelNode<AbstractHolder> {
+abstract class AbstractModelNode : ModelNode<AbstractHolder> {
 
     protected abstract val treeNode: TreeNode<AbstractHolder>
 
@@ -25,12 +25,10 @@ abstract class GroupHolderNode : ModelNode<AbstractHolder> {
     data class State(override val id: Any, val delegateStates: List<Any>) : ModelState
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
-        val groupHolder = viewHolder as AbstractHolder
-
-        groupHolder.run {
+        (viewHolder as AbstractHolder).apply {
             delegates.forEach { it.onBindViewHolder(viewHolder) }
 
-            itemView.run {
+            itemView.apply {
                 setBackgroundColor(ContextCompat.getColor(
                         context,
                         if (treeNode.isSelected && !(isPressed && startingDrag))

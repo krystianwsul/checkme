@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
@@ -31,7 +31,7 @@ class DoneInstanceNode(
         override val indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
         val dividerNode: DividerNode,
-) : GroupHolderNode(),
+) : AbstractModelNode(),
         NodeCollectionParent,
         CheckableModelNode,
         MultiLineModelNode,

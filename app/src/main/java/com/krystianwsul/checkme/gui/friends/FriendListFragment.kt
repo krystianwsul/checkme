@@ -20,8 +20,8 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
@@ -266,7 +266,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     private inner class FriendNode(val userListData: FriendListViewModel.UserListData) :
-            GroupHolderNode(),
+            AbstractModelNode(),
             AvatarModelNode,
             MultiLineModelNode {
 

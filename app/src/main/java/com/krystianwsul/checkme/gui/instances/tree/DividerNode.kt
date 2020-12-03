@@ -19,7 +19,7 @@ class DividerNode(
         override val indentation: Int,
         val nodeCollection: NodeCollection,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : GroupHolderNode(), SingleLineModelNode, IndentationModelNode {
+) : AbstractModelNode(), SingleLineModelNode, IndentationModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import androidx.annotation.IdRes
@@ -735,7 +734,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
 
-                Log.e("asdf", "magic later selection: " + treeViewAdapter.selectedNodes.size)
                 search(searchData, placeholder)
 
                 (parameters as? GroupListParameters.Search)?.let {
@@ -770,8 +768,6 @@ class GroupListFragment @JvmOverloads constructor(
             }
 
             dragHelper.attachToRecyclerView(binding.groupListRecycler)
-
-            Log.e("asdf", "magic initial selection: " + treeViewAdapter.selectedNodes.size)
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)

@@ -166,7 +166,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         super.onDestroy()
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<AbstractHolder>) = Unit
+    override fun onCreateGroupActionMode(
+            actionMode: ActionMode,
+            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+            initial: Boolean,
+    ) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

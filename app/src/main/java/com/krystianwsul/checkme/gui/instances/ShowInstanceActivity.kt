@@ -329,6 +329,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     override fun onCreateGroupActionMode(
             actionMode: ActionMode,
             treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+            initial: Boolean,
     ) = binding.showInstanceToolbarCollapseInclude
             .collapseAppBarLayout
             .collapse()

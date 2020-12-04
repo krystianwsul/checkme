@@ -177,30 +177,39 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
         unselect(placeholder)
     }
 
-    fun setSelected(selected: Int, placeholder: TreeViewAdapter.Placeholder) {
+    fun setSelected(selected: Int, placeholder: TreeViewAdapter.Placeholder, initial: Boolean) {
         if (selected > this.selected) {
-            for (i in this.selected until selected)
-                incrementSelected(placeholder)
+            var currentInitial = initial
+
+            for (i in this.selected until selected) {
+                incrementSelected(placeholder, currentInitial)
+                currentInitial = false
+            }
         } else if (selected < this.selected) {
-            for (i in this.selected downTo selected + 1)
-                decrementSelected(placeholder)
+            check(!initial)
+
+            for (i in this.selected downTo selected + 1) decrementSelected(placeholder)
         }
     }
 
-    override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) {
+    override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) {
         selected++
 
         when (selected) {
             1 -> {
                 check(actionMode == null)
-                onFirstAdded(placeholder)
+                onFirstAdded(placeholder, initial)
             }
             2 -> {
                 checkNotNull(actionMode)
+                check(!initial)
+
                 onSecondAdded()
             }
             else -> {
                 checkNotNull(actionMode)
+                check(!initial)
+
                 onOtherAdded()
             }
         }
@@ -249,7 +258,7 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
     protected abstract fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean
 
     @CallSuper
-    protected open fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) = updateMenu()
+    protected open fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) = updateMenu()
 
     @CallSuper
     protected open fun onSecondAdded() = updateMenu()

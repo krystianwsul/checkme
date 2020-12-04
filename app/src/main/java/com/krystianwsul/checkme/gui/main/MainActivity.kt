@@ -10,7 +10,6 @@ import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
@@ -183,6 +182,15 @@ class MainActivity :
     private val subtaskDialogResultDays = PublishRelay.create<SubtaskDialogFragment.Result>()
     private val subtaskDialogResultSearch = PublishRelay.create<SubtaskDialogFragment.Result>()
 
+    private sealed class TabLayoutVisibility {
+
+        object Visible : TabLayoutVisibility()
+
+        data class Gone(val initial: Boolean) : TabLayoutVisibility()
+    }
+
+    private val tabLayoutVisibleRelay = PublishRelay.create<TabLayoutVisibility>()
+
     val daysGroupListListener = object : GroupListListener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
@@ -193,7 +201,11 @@ class MainActivity :
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
-        override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
+        override fun onCreateGroupActionMode(
+                actionMode: ActionMode,
+                treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+                initial: Boolean,
+        ) {
             onCreateActionMode(actionMode)
 
             check(onPageChangeDisposable == null)
@@ -202,6 +214,8 @@ class MainActivity :
                     .pageSelections()
                     .skip(1)
                     .subscribe { actionMode.finish() }
+
+            tabLayoutVisibleRelay.accept(TabLayoutVisibility.Gone(initial))
         }
 
         override fun onDestroyGroupActionMode() {
@@ -211,6 +225,8 @@ class MainActivity :
 
             onPageChangeDisposable!!.dispose()
             onPageChangeDisposable = null
+
+            tabLayoutVisibleRelay.accept(TabLayoutVisibility.Visible)
         }
 
         override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
@@ -300,6 +316,7 @@ class MainActivity :
             override fun onCreateGroupActionMode(
                     actionMode: ActionMode,
                     treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+                    initial: Boolean,
             ) {
                 onCreateActionMode(actionMode)
 
@@ -683,6 +700,25 @@ class MainActivity :
 
         tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_DAYS)?.listener = subtaskDialogResultDays::accept
         tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_SEARCH)?.listener = subtaskDialogResultSearch::accept
+
+        var tabHeight = -1
+
+        Observables.combineLatest(
+                tabLayoutVisibleRelay,
+                binding.mainTabLayout
+                        .onGlobalLayout()
+                        .doOnSuccess { tabHeight = binding.mainTabLayout.height }
+                        .toObservable()
+        )
+                .subscribe { (tabLayoutVisibility, _) ->
+                    check(tabHeight > 0)
+
+                    when (tabLayoutVisibility) {
+                        is TabLayoutVisibility.Visible -> binding.mainTabLayout.animateHeight(0, false)
+                        is TabLayoutVisibility.Gone -> binding.mainTabLayout.animateHeight(-tabHeight, tabLayoutVisibility.initial)
+                    }
+                }
+                .addTo(createDisposable)
     }
 
     private fun deleteTasks(taskKeys: Set<TaskKey>) {
@@ -979,26 +1015,26 @@ class MainActivity :
         )
     }
 
+    private fun View.setTopMargin(height: Int) = updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = height }
+
+    private fun View.animateHeight(targetHeight: Int, immediate: Boolean) {
+        if (immediate) {
+            setTopMargin(targetHeight)
+        } else {
+            ValueAnimator.ofInt(top, targetHeight).apply {
+                addUpdateListener { setTopMargin(it.animatedValue as Int) }
+                duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+                start()
+            }
+        }
+    }
+
     private fun updateCalendarHeight() {
         if (binding.mainCalendar.height == 0) return // prevent executing before global layout
 
         val targetHeight = if (calendarOpen) binding.mainCalendar.height else 0
 
-        fun setHeight(height: Int) = binding.mainFrame.updateLayoutParams<FrameLayout.LayoutParams> { topMargin = height }
-
-        if (calendarInitial) {
-            setHeight(targetHeight)
-
-            calendarInitial = false
-        } else {
-            val animation = ValueAnimator.ofInt(binding.mainFrame.top, targetHeight)
-            animation.addUpdateListener {
-                val height = it.animatedValue as Int
-                setHeight(height)
-            }
-            animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-            animation.start()
-        }
+        binding.mainFrame.animateHeight(targetHeight, calendarInitial)
     }
 
     private fun updateCalendarDate() {

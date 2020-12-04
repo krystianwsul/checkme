@@ -231,7 +231,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override val hasActionMode = false
 
-        override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
+        override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) =
+                throw UnsupportedOperationException()
 
         override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 

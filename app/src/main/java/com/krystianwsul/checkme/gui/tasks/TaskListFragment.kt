@@ -135,12 +135,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return true
         }
 
-        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             listener.onCreateActionMode(actionMode!!)
 
-            super.onFirstAdded(placeholder)
+            super.onFirstAdded(placeholder, initial)
         }
 
         override fun updateMenu() {
@@ -320,7 +320,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         data!!.copying
                 )
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, false)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
@@ -335,7 +335,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             dragHelper.attachToRecyclerView(binding.taskListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
 
                 search(searchData, it)
             }

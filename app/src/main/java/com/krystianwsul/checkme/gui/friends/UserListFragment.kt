@@ -81,12 +81,12 @@ class UserListFragment : AbstractFragment(), FabUser {
             return true
         }
 
-        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
-            super.onFirstAdded(placeholder)
+            super.onFirstAdded(placeholder, initial)
         }
 
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = updateFabVisibility()
@@ -170,7 +170,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data!!.userListDatas, saveState)
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, false)
             }
         } else {
             val friendListAdapter = FriendListAdapter()
@@ -183,7 +183,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             }
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
             }
         }
 

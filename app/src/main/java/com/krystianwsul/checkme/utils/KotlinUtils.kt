@@ -75,14 +75,19 @@ fun Set<DayOfWeek>.prettyPrint(): String {
     } + ": "
 }
 
-fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+fun View.addOneShotGlobalLayoutListener(action: () -> Unit) =
+        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
 
-    override fun onGlobalLayout() {
-        viewTreeObserver.removeOnGlobalLayoutListener(this)
+            override fun onGlobalLayout() {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-        action()
-    }
-})
+                action()
+            }
+        })
+
+fun View.onGlobalLayout() = Single.create<Unit> { emitter ->
+    addOneShotGlobalLayoutListener { emitter.onSuccess(Unit) }
+}
 
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)
@@ -160,7 +165,7 @@ fun Context.startDate(receiver: BroadcastReceiver) {
 }
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() =
-    filter { it.value != null }.map { it.value!! }!!
+        filter { it.value != null }.map { it.value!! }!!
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
@@ -176,7 +181,7 @@ private fun onComplete(
         taskKeysBefore: TaskKeys?,
         databaseMessage: String?,
         successful: Boolean,
-        exception: Exception?
+        exception: Exception?,
 ) {
     val message = "firebase write: $caller $databaseMessage " + (values?.let { ", \nvalues: $values" }
             ?: "")
@@ -344,16 +349,16 @@ fun <T : Any, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
         map { NullableWrapper(mapper(it)) }.filterNotNull()
 
 fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
-    publish().apply { compositeDisposable += connect() }!!
+        publish().apply { compositeDisposable += connect() }!!
 
 fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
-    cache().apply { compositeDisposable += subscribe() }!!
+        cache().apply { compositeDisposable += subscribe() }!!
 
 @Suppress("unused")
 fun Disposable.ignore() = Unit
 
 fun webSearchIntent(query: String) =
-    Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
+        Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
 
 @SuppressLint("ClickableViewAccessibility")
 fun hideKeyboardOnClickOutside(view: View) {

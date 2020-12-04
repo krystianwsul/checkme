@@ -85,14 +85,14 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             return true
         }
 
-        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder) {
+        override fun onFirstAdded(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
             (activity as CustomTimesListListener).onCreateActionMode(actionMode!!)
 
-            super.onFirstAdded(placeholder)
+            super.onFirstAdded(placeholder, initial)
         }
 
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
@@ -151,7 +151,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).initialize()
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, false)
             }
         } else {
             val customTimesAdapter = CustomTimesAdapter()
@@ -164,7 +164,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             }
 
             treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
             }
         }
 

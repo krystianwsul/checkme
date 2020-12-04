@@ -18,7 +18,11 @@ interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
     val subtaskDialogResult: Observable<SubtaskDialogFragment.Result> get() = Observable.never()
 
-    fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<AbstractHolder>)
+    fun onCreateGroupActionMode(
+            actionMode: ActionMode,
+            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+            initial: Boolean,
+    )
 
     fun onDestroyGroupActionMode()
 

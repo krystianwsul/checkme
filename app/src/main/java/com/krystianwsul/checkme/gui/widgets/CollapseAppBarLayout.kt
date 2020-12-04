@@ -54,7 +54,7 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbarCollapseLayout.getPrivateField("collapsingTextHelper")
     }
 
-    private val textLayout: StaticLayout get() = collapsingTextHelper.getPrivateField("textLayout")
+    private val textLayout: StaticLayout? get() = collapsingTextHelper.getPrivateField("textLayout")
 
     val menu get() = binding.toolbar.menu!!
 
@@ -196,11 +196,12 @@ class CollapseAppBarLayout : AppBarLayout {
             paddingLayout?.setPadding(0, 0, 0, newHeight)
         }
 
-        val newHeight = if (hideText) {
-            // stupid hack because otherwise title doesn't show
-            (bottomMargin + textLayout.height).coerceAtLeast(binding.toolbar.height) + if (titleHack) 1 else 0
-        } else {
-            initialTextHeight!! + bottomMargin + textLayout.height
+        val newHeight = when {
+            collapseState is CollapseState.Collapsed || textLayout == null -> binding.toolbar.height
+            hideText -> {
+                (bottomMargin + textLayout!!.height).coerceAtLeast(binding.toolbar.height) + if (titleHack) 1 else 0
+            }
+            else -> initialTextHeight!! + bottomMargin + textLayout!!.height
         }
 
         if (immediate || abs(newHeight - height) <= 1) { // same stupid hack

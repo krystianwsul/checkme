@@ -405,8 +405,8 @@ class Task<T : ProjectType>(
         val removeSchedules = mutableListOf<Schedule<T>>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
 
-        val oldScheduleIntervals = getCurrentScheduleIntervals(now).map { it.schedule }
-        val oldScheduleDatas = ScheduleGroup.getGroups(oldScheduleIntervals).map {
+        val oldSchedules = getCurrentScheduleIntervals(now).map { it.schedule }
+        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map {
             ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules
         }
 
@@ -430,26 +430,15 @@ class Task<T : ProjectType>(
             it.first.scheduleData is ScheduleData.Single
         }
 
-        val oldMockPair = oldScheduleIntervals.filterIsInstance<SingleSchedule<T>>()
-                .singleOrNull()
-                ?.let { singleSchedule ->
-                    singleSchedule.mockInstance?.let { Pair(singleSchedule, it) }
-                }
+        if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
+            check(singleRemoveSchedule.scheduleId == singleRemoveSchedule.scheduleId)
 
-        if (singleRemoveSchedule != null
-                && singleAddSchedulePair != null
-                && oldMockPair != null
-        ) {
-            check(singleRemoveSchedule.scheduleId == oldMockPair.first.scheduleId)
+            if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
-            if (assignedTo.isNotEmpty()) oldMockPair.first.setAssignedTo(assignedTo)
-
-            oldMockPair.second.setInstanceDateTime(
+            singleRemoveSchedule.getInstance(this).setInstanceDateTime(
                     shownFactory,
                     ownerKey,
-                    singleAddSchedulePair.second.run {
-                        DateTime((first as ScheduleData.Single).date, second)
-                    },
+                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
                     now
             )
         } else {

@@ -15,7 +15,7 @@ class SingleSchedule<T : ProjectType>(
         val singleScheduleRecord: SingleScheduleRecord<T>,
 ) : Schedule<T>(rootTask) {
 
-    val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
+    private val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
 
     override val scheduleRecord get() = mockInstance?.let { MockRecord(it) } ?: singleScheduleRecord
 

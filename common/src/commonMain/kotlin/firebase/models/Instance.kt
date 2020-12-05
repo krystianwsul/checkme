@@ -246,7 +246,7 @@ class Instance<T : ProjectType> private constructor(
     }
 
     private fun matchesSchedule() = task.scheduleIntervals.any {
-        it.matchesScheduleDateTime(scheduleDateTime, true)
+        it.matchesScheduleDateTime(scheduleDateTime, true) // todo possibly use schedule.getDateTimes for this
     }
 
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {

@@ -168,9 +168,7 @@ class EditActivity : NavBarActivity() {
         override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
     }
 
-    private val allRemindersListener = { allReminders: Boolean ->
-        save(false, allReminders)
-    }
+    private val allRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
 
     override val rootView get() = binding.root
 
@@ -194,28 +192,25 @@ class EditActivity : NavBarActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         fun trySave(andOpen: Boolean) {
-            if (!updateError()) {
-                val showAllRemindersPlural = delegate.showAllRemindersDialog()
+            if (updateError()) return
 
-                if (showAllRemindersPlural != null) {
-                    check(!andOpen)
+            val showAllRemindersPlural = delegate.showAllRemindersDialog()
 
-                    AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
-                            .apply { listener = allRemindersListener }
-                            .show(supportFragmentManager, TAG_ALL_REMINDERS)
-                } else {
-                    save(andOpen, true)
-                }
+            if (showAllRemindersPlural != null) {
+                check(!andOpen)
+
+                AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
+                        .apply { listener = allRemindersListener }
+                        .show(supportFragmentManager, TAG_ALL_REMINDERS)
+            } else {
+                save(andOpen, true)
             }
         }
 
         when (item.itemId) {
             R.id.action_save -> trySave(false)
             R.id.action_save_and_open -> trySave(true)
-            android.R.id.home -> {
-                if (tryClose())
-                    finish()
-            }
+            android.R.id.home -> if (tryClose()) finish()
             else -> throw UnsupportedOperationException()
         }
 

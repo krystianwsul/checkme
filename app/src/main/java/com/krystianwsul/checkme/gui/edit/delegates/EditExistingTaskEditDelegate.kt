@@ -85,7 +85,7 @@ class EditExistingTaskEditDelegate(
                 parentTaskKey,
                 createParameters.note,
                 imageUrl.value!!.writeImagePath,
-                parameters.removeInstanceKey,
+                parameters.openedFromInstanceKey,
                 createParameters.allReminders
         )
     }

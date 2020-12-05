@@ -97,7 +97,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Edit(val taskKey: TaskKey, val removeInstanceKey: InstanceKey? = null) : EditParameters() {
+    class Edit(val taskKey: TaskKey, val openedFromInstanceKey: InstanceKey? = null) : EditParameters() {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 

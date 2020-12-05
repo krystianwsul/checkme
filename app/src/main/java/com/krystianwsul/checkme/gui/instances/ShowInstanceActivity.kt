@@ -215,7 +215,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     } == true
 
     private fun updateTopMenu() {
-        binding.showInstanceToolbarCollapseInclude.collapseAppBarLayout
+        binding.showInstanceToolbarCollapseInclude
+                .collapseAppBarLayout
                 .menu
                 .apply {
                     findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper

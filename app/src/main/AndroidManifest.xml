@@ -59,11 +59,13 @@
             android:name=".gui.instances.ShowNotificationGroupActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:autoRemoveFromRecents="true" />
         <activity
             android:name=".gui.instances.ShowInstanceActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:autoRemoveFromRecents="true" />
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
             android:theme="@style/AppTheme.Toolbar" />
@@ -73,12 +75,13 @@
         <activity
             android:name=".gui.edit.EditActivity"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden|adjustResize"> <!-- keyboard hack -->
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:autoRemoveFromRecents="true"> <!-- keyboard hack -->
 
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="text/plain"/>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
 
             <meta-data

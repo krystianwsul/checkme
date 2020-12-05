@@ -270,10 +270,9 @@ class Instance<T : ProjectType> private constructor(
         return done > cutoff
     }
 
-    private fun isEligibleParentInstance(now: ExactTimeStamp.Local): Boolean =
-            getParentInstance(now)?.instance
-                    ?.isEligibleParentInstance(now)
-                    ?: (exists() || matchesSchedule())
+    private fun isExistingOrCorrectlyGenerated(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
+            ?.isExistingOrCorrectlyGenerated(now)
+            ?: (exists() || matchesSchedule())
 
     data class ParentInstanceData<T : ProjectType>(
             val instance: Instance<T>,
@@ -314,7 +313,7 @@ class Instance<T : ProjectType> private constructor(
             check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
 
             return parentTask.getInstance(scheduleDateTime)
-                    .takeIf { it.isEligibleParentInstance(now) }
+                    .takeIf { it.isExistingOrCorrectlyGenerated(now) }
                     ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
         }
 

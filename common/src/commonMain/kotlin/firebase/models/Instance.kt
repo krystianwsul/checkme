@@ -270,8 +270,8 @@ class Instance<T : ProjectType> private constructor(
         return done > cutoff
     }
 
-    private fun isExistingOrCorrectlyGenerated(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
-            ?.isExistingOrCorrectlyGenerated(now)
+    private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
+            ?.isReachableFromMainScreen(now)
             ?: (exists() || matchesSchedule())
 
     data class ParentInstanceData<T : ProjectType>(
@@ -312,8 +312,13 @@ class Instance<T : ProjectType> private constructor(
         } else {
             check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
 
+            /**
+             * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
+             * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
+             * for now.
+             */
             return parentTask.getInstance(scheduleDateTime)
-                    .takeIf { it.isExistingOrCorrectlyGenerated(now) }
+                    .takeIf { it.isReachableFromMainScreen(now) }
                     ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
         }
 

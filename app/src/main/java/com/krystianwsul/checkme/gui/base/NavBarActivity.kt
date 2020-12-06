@@ -19,8 +19,8 @@ abstract class NavBarActivity : AbstractActivity() {
 
     protected val keyboardInsetRelay = BehaviorRelay.create<Int>()
 
-    override fun setContentView(layoutResID: Int) {
-        super.setContentView(layoutResID)
+    override fun setContentView(view: View) {
+        super.setContentView(view)
 
         val insetsRelay = BehaviorRelay.create<WindowInsetsCompat>()
 

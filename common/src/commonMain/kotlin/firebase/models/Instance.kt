@@ -315,7 +315,14 @@ class Instance<T : ProjectType> private constructor(
             /**
              * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
              * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
-             * for now.
+             * for now.  There would be a discrepancy when accessing an instance in a different way
+             * (ShowTaskInstancesActivity is the only one that comes to mind).
+             *
+             * I think a parent is truly eligible if:
+             * 1. It, or any instance in the hierarchy above it, exists
+             * 2. The root instance matches a schedule
+             *
+             * Yet another reason to consider checking if task.getInstances() contains the instance.
              */
             return parentTask.getInstance(scheduleDateTime)
                     .takeIf { it.isReachableFromMainScreen(now) }

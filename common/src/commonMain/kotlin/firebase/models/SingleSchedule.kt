@@ -117,7 +117,7 @@ class SingleSchedule<T : ProjectType>(
     }
 
     override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (scheduleDateTime.date != date) return false
+        if (singleScheduleRecord.originalDate != scheduleDateTime.date) return false
 
         return singleScheduleRecord.originalTimePair == scheduleDateTime.time.timePair
     }

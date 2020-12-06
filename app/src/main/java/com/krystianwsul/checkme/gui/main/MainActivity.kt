@@ -1035,6 +1035,7 @@ class MainActivity :
         val targetHeight = if (calendarOpen) binding.mainCalendar.height else 0
 
         binding.mainFrame.animateHeight(targetHeight, calendarInitial)
+        calendarInitial = false
     }
 
     private fun updateCalendarDate() {

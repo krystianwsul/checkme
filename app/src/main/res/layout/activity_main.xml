@@ -87,14 +87,15 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:elevation="6dp"
+                    android:background="@color/colorPrimary">
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/mainTabLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/colorPrimary"
-                        android:elevation="6dp"
                         android:theme="@style/AppTheme.AppBarOverlay"
                         app:tabGravity="center"
                         app:tabMode="scrollable"

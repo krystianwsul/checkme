@@ -12,11 +12,9 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(
-        val note: String,
-        instance: Boolean,
-        override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode(), InvisibleCheckboxModelNode {
+class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), InvisibleCheckboxModelNode {
+
+    override val parentNode: ModelNode<AbstractHolder>? = null
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -37,6 +35,7 @@ class NoteNode(
 
     init {
         check(note.isNotEmpty())
+        check(parentNode == null)
     }
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
@@ -52,11 +51,7 @@ class NoteNode(
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val delegates by lazy {
-        listOf(
-                InvisibleCheckboxDelegate(this)
-        )
-    }
+    override val delegates by lazy { listOf(InvisibleCheckboxDelegate(this)) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)

@@ -205,10 +205,10 @@ class Instance<T : ProjectType> private constructor(
 
     /**
      * todo:
-     * 3. Consider replacing the check in `isVisible` with just switching the `checkOldestVisible` param value.
      * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
      * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
      * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
+     * 6. Clean up usage in `isVisible` vs. `isVisibleHelper`
      */
 
     // this does not account for whether or not this is a rootInstance
@@ -244,13 +244,7 @@ class Instance<T : ProjectType> private constructor(
         val isVisible = if (
                 !exists()
                 && isRootInstance(now)
-                && getOldestVisibles().map { it.date }.run {
-                    when {
-                        isEmpty() -> false
-                        contains(null) -> false
-                        else -> requireNoNulls().minOrNull()!! > scheduleDate
-                    }
-                }
+                && getMatchingScheduleIntervals(true).isEmpty()
         ) {
             false
         } else {

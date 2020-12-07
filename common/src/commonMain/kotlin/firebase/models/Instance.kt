@@ -507,16 +507,8 @@ class Instance<T : ProjectType> private constructor(
                 .map { it.value }
     }
 
-    // meaningless for child instances, but returns true for convenience
-    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
-        if (!isRootInstance(now)) return true
-
-        return getMatchingScheduleIntervals(false).let {
-            it.isEmpty() || it.any {
-                it.schedule.assignedTo.let { it.isEmpty() || myUser.userKey in it }
-            }
-        }
-    }
+    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
+            getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
 
     private sealed class Data<T : ProjectType> {
 

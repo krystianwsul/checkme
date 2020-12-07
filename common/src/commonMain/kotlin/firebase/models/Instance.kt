@@ -210,6 +210,8 @@ class Instance<T : ProjectType> private constructor(
      * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
      * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
      */
+
+    // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean) = task.scheduleIntervals.filter {
         it.matchesScheduleDateTime(scheduleDateTime, checkOldestVisible)
     }

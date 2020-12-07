@@ -202,6 +202,11 @@ class Instance<T : ProjectType> private constructor(
         return createInstanceRecord()
     }
 
+    /**
+     * todo: First, generalize this to accept `checkOldestVisible` as a param, then use everywhere.  (Some applications
+     * do need to ignore it, like `assignedTo`.  Then, benchmark compared to `task.getInstances`.  Finally, consider
+     * replacing the check in `isVisible` with just switching the `checkOldestVisible` param value.
+     */
     private fun getMatchingScheduleIntervals() = task.scheduleIntervals.filter {
         it.matchesScheduleDateTime(scheduleDateTime, false)
     }

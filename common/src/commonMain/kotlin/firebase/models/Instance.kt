@@ -499,8 +499,10 @@ class Instance<T : ProjectType> private constructor(
     fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
         if (!isRootInstance(now)) return listOf()
 
-        return getMatchingScheduleIntervals(false).flatMap { it.schedule.assignedTo }
-                .toSet()
+        return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
+                .distinct()
+                .singleOrEmpty()
+                .orEmpty()
                 .let(project::getAssignedTo)
                 .map { it.value }
     }

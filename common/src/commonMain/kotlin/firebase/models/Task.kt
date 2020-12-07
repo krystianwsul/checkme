@@ -298,20 +298,21 @@ class Task<T : ProjectType>(
     private fun getScheduleDateTimes(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-    ): Sequence<DateTime> {
+    ): Sequence<Pair<DateTime, List<ScheduleInterval<T>>>> {
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
-        val scheduleResults = scheduleIntervals.map {
-            it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
+        val scheduleResults = scheduleIntervals.map { scheduleInterval ->
+            scheduleInterval.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp).map { it to scheduleInterval }
         }
 
-        return combineSequences(scheduleResults) {
+        return combineSequencesGrouping(scheduleResults) {
             throwIfInterrupted()
 
+            val nextDateTime = it.filterNotNull().minOrNull()!!
+
             it.mapIndexed { index, dateTime -> index to dateTime }
-                    .filter { it.second != null }
-                    .minByOrNull { it.second!! }!!
-                    .first
+                    .filter { it.second == nextDateTime }
+                    .map { it.first }
         }.distinct()
     }
 
@@ -326,7 +327,7 @@ class Task<T : ProjectType>(
         return scheduleSequence.mapNotNull {
             throwIfInterrupted()
 
-            getInstance(it).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
+            getInstance(it.first).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
         }
     }
 

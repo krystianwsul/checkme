@@ -65,9 +65,7 @@ fun <T : ProjectType> combineInstanceSequences(
     }
 }
 
-private data class SequenceHolder<T : Any>(
-        private val sequence: Sequence<T>
-) {
+private data class SequenceHolder<T : Any>(private val sequence: Sequence<T>) {
 
     private val iterator = sequence.iterator()
 

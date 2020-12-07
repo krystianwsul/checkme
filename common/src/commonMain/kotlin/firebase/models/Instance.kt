@@ -204,18 +204,16 @@ class Instance<T : ProjectType> private constructor(
 
     /**
      * todo:
-     * !. Generalize this to accept `checkOldestVisible` as a param, then use everywhere.  (Some applications
-     * do need to ignore it, like `assignedTo`.
      * 2. Benchmark compared to `task.getInstances`.
      * 3. Consider replacing the check in `isVisible` with just switching the `checkOldestVisible` param value.
      * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
      * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
      */
-    private fun getMatchingScheduleIntervals() = task.scheduleIntervals.filter {
-        it.matchesScheduleDateTime(scheduleDateTime, false)
+    private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean) = task.scheduleIntervals.filter {
+        it.matchesScheduleDateTime(scheduleDateTime, checkOldestVisible)
     }
 
-    fun getOldestVisibles() = getMatchingScheduleIntervals().map { it.schedule.oldestVisible }
+    fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
@@ -254,9 +252,7 @@ class Instance<T : ProjectType> private constructor(
         return isVisible
     }
 
-    private fun matchesSchedule() = task.scheduleIntervals.any {
-        it.matchesScheduleDateTime(scheduleDateTime, true) // todo possibly use schedule.getDateTimes for this
-    }
+    private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
 
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
         if (!ignoreHidden && data.hidden) return false
@@ -488,7 +484,7 @@ class Instance<T : ProjectType> private constructor(
     fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
         if (!isRootInstance(now)) return listOf()
 
-        return getMatchingScheduleIntervals().flatMap { it.schedule.assignedTo }
+        return getMatchingScheduleIntervals(false).flatMap { it.schedule.assignedTo }
                 .toSet()
                 .let(project::getAssignedTo)
                 .map { it.value }
@@ -498,7 +494,7 @@ class Instance<T : ProjectType> private constructor(
     fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
         if (!isRootInstance(now)) return true
 
-        return getMatchingScheduleIntervals().let {
+        return getMatchingScheduleIntervals(false).let {
             it.isEmpty() || it.any {
                 it.schedule.assignedTo.let { it.isEmpty() || myUser.userKey in it }
             }

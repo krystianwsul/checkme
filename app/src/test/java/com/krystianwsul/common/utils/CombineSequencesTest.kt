@@ -25,27 +25,29 @@ class CombineSequencesTest {
 
     @Test
     fun testGrouping() {
-        val sequence1 = sequenceOf(1 to "a", 2 to "b", 3 to "c", 4 to "d", 5 to "e", 6 to "f", 7 to "g")
-        val sequence2 = sequenceOf(2 to "a", 4 to "b", 6 to "c")
-        val sequence3 = sequenceOf(3 to "a", 6 to "b")
+        val sequence1 = sequenceOf(1.0 to "a", 2.0 to "b", 3.0 to "c", 4.0 to "d", 5.0 to "e", 6.0 to "f", 7.0 to "g")
+        val sequence2 = sequenceOf(2.0 to "a", 4.0 to "b", 6.0 to "c")
+        val sequence3 = sequenceOf(3.0 to "a", 6.0 to "b")
 
         val result = combineSequencesGrouping(listOf(sequence1, sequence2, sequence3)) {
-            val next = it.filterNotNull().minOrNull()
+            val next = it.filterNotNull()
+                    .minByOrNull { it.first }!!
+                    .first
 
             it.mapIndexed { index, value -> index to value }
-                    .filter { next == it.second }
+                    .filter { next == it.second?.first }
                     .map { it.first }
         }
 
         assertEquals(
                 listOf(
-                        1 to listOf("a"),
-                        2 to listOf("b", "a"),
-                        3 to listOf("c", "a"),
-                        4 to listOf("d", "b"),
-                        5 to listOf("e"),
-                        6 to listOf("f", "c", "b"),
-                        7 to listOf("g")
+                        listOf(1.0 to "a"),
+                        listOf(2.0 to "b", 2.0 to "a"),
+                        listOf(3.0 to "c", 3.0 to "a"),
+                        listOf(4.0 to "d", 4.0 to "b"),
+                        listOf(5.0 to "e"),
+                        listOf(6.0 to "f", 6.0 to "c", 6.0 to "b"),
+                        listOf(7.0 to "g")
                 ),
                 result.toList()
         )

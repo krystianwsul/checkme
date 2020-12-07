@@ -36,3 +36,9 @@ fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek
         return Date(year, month, daysInMonth - day + 1)
     }
 }
+
+fun <T> Collection<T>.singleOrEmpty(): T? {
+    check(size < 2)
+
+    return singleOrNull()
+}

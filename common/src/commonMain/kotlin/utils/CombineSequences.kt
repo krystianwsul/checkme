@@ -2,10 +2,10 @@ package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.firebase.models.Instance
 
-fun <T : Any, U : Any> combineSequencesGrouping(
-        sequences: List<Sequence<Pair<T, U>>>,
+fun <T : Any> combineSequencesGrouping(
+        sequences: List<Sequence<T>>,
         selector: (List<T?>) -> List<Int>,
-): Sequence<Pair<T, List<U>>> {
+): Sequence<List<T>> {
     val sequenceHolders = sequences.map(::SequenceHolder)
 
     return generateSequence {
@@ -13,22 +13,16 @@ fun <T : Any, U : Any> combineSequencesGrouping(
 
         if (nextValues.filterNotNull().isEmpty()) return@generateSequence null
 
-        val nextIndicies = selector(nextValues.map { it?.first })
-        check(nextValues.indices.toList().containsAll(nextIndicies))
+        val nextIndices = selector(nextValues)
+        check(nextValues.indices.toList().containsAll(nextIndices))
 
-        val selectedSequenceHolders = nextIndicies.map { sequenceHolders[it] }
+        val selectedSequenceHolders = nextIndices.map { sequenceHolders[it] }
 
-        val nextPairs = selectedSequenceHolders.map { it.nextValue!! }
-
-        val nextT = nextPairs.map { it.first }
-                .distinct()
-                .single()
-
-        val nextUs = nextPairs.map { it.second }
+        val nextValue = selectedSequenceHolders.map { it.nextValue!! }
 
         selectedSequenceHolders.forEach { it.getNext() }
 
-        nextT to nextUs
+        nextValue
     }
 }
 

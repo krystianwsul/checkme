@@ -295,10 +295,14 @@ class Task<T : ProjectType>(
                 .map { it.first }
     }
 
-    private fun getScheduleDateTimes(
+    /*
+     Note: this groups by the DateTime's Date and HourMinute, not strict equality.  A list may have pairs with various
+     customTimes, for example.
+     */
+    fun getScheduleDateTimes(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-    ): Sequence<Pair<DateTime, List<ScheduleInterval<T>>>> {
+    ): Sequence<List<Pair<DateTime, ScheduleInterval<T>>>> {
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
         val scheduleResults = scheduleIntervals.map { scheduleInterval ->
@@ -308,12 +312,14 @@ class Task<T : ProjectType>(
         return combineSequencesGrouping(scheduleResults) {
             throwIfInterrupted()
 
-            val nextDateTime = it.filterNotNull().minOrNull()!!
+            val nextDateTime = it.filterNotNull()
+                    .minByOrNull { it.first }!!
+                    .first
 
             it.mapIndexed { index, dateTime -> index to dateTime }
-                    .filter { it.second == nextDateTime }
+                    .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
                     .map { it.first }
-        }.distinct()
+        }
     }
 
     // contains only generated instances
@@ -324,10 +330,13 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
-        return scheduleSequence.mapNotNull {
+        return scheduleSequence.flatMap {
             throwIfInterrupted()
 
-            getInstance(it.first).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
+            it.map { it.first }
+                    .distinct()
+                    .map(::getInstance)
+                    .filter { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
         }
     }
 

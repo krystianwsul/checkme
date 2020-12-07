@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
@@ -204,7 +205,6 @@ class Instance<T : ProjectType> private constructor(
 
     /**
      * todo:
-     * 2. Benchmark compared to `task.getInstances`.
      * 3. Consider replacing the check in `isVisible` with just switching the `checkOldestVisible` param value.
      * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
      * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
@@ -212,8 +212,20 @@ class Instance<T : ProjectType> private constructor(
      */
 
     // this does not account for whether or not this is a rootInstance
-    private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean) = task.scheduleIntervals.filter {
-        it.matchesScheduleDateTime(scheduleDateTime, checkOldestVisible)
+    private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
+        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
+
+        return task.getScheduleDateTimes(
+                exactTimeStamp,
+                exactTimeStamp.plusOne(),
+                true,
+                checkOldestVisible
+        )
+                .toList()
+                .singleOrEmpty()
+                .orEmpty()
+                .filter { it.first == scheduleDateTime }
+                .map { it.second }
     }
 
     fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }

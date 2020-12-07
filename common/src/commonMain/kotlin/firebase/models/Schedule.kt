@@ -59,6 +59,8 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean = false,
+            checkOldestVisible: Boolean = true,
     ): Sequence<DateTime>
 
     abstract fun isVisible(

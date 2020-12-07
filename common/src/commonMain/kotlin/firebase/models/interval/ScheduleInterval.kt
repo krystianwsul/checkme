@@ -22,7 +22,15 @@ class ScheduleInterval<T : ProjectType>(
     fun getDateTimesInRange(
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
-    ) = schedule.getDateTimesInRange(this, givenStartExactTimeStamp, givenEndExactTimeStamp)
+            originalDateTime: Boolean = false,
+            checkOldestVisible: Boolean = true,
+    ) = schedule.getDateTimesInRange(
+            this,
+            givenStartExactTimeStamp,
+            givenEndExactTimeStamp,
+            originalDateTime,
+            checkOldestVisible,
+    )
 
     fun matchesScheduleDateTime(scheduleDateTime: DateTime, checkOldestVisible: Boolean) =
         schedule.matchesScheduleDateTime(this, scheduleDateTime, checkOldestVisible)

@@ -23,20 +23,24 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     private val oldestVisibleDate by oldestVisibleDateProperty
 
     override val oldestVisible
-        get() = oldestVisibleDate?.let {
-            OldestVisible.RepeatingNonNull(it)
-        } ?: OldestVisible.RepeatingNull
+        get() = oldestVisibleDate?.let { OldestVisible.RepeatingNonNull(it) } ?: OldestVisible.RepeatingNull
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean,
+            checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStampOffset,
-                repeatingScheduleRecord.from?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
+                repeatingScheduleRecord.from?.let {
+                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+                },
                 givenStartExactTimeStamp,
-                oldestVisibleDate?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
+                oldestVisibleDate?.takeIf { checkOldestVisible }?.let {
+                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+                },
                 scheduleInterval.startExactTimeStampOffset
         ).maxOrNull()!!
 
@@ -102,7 +106,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     private fun getDateTimeInDate(
             date: Date,
             startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?
+            endHourMilli: HourMilli?,
     ): DateTime? {
         if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
 

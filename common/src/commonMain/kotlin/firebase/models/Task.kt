@@ -82,13 +82,12 @@ class Task<T : ProjectType>(
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
-    private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
+    private val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
 
-    val scheduleIntervals
-        get() = intervals.mapNotNull {
-            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
-        }.flatten()
+    val scheduleIntervals by invalidatableLazy {
+        intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
+    }.apply { intervalsProperty.addCallback { invalidate() } }
 
     val parentHierarchyIntervals
         get() = intervals.mapNotNull {
@@ -302,11 +301,18 @@ class Task<T : ProjectType>(
     fun getScheduleDateTimes(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean = false,
+            checkOldestVisible: Boolean = true,
     ): Sequence<List<Pair<DateTime, ScheduleInterval<T>>>> {
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
         val scheduleResults = scheduleIntervals.map { scheduleInterval ->
-            scheduleInterval.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp).map { it to scheduleInterval }
+            scheduleInterval.getDateTimesInRange(
+                    startExactTimeStamp,
+                    endExactTimeStamp,
+                    originalDateTime,
+                    checkOldestVisible
+            ).map { it to scheduleInterval }
         }
 
         return combineSequencesGrouping(scheduleResults) {

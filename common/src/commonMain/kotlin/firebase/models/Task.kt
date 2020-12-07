@@ -295,19 +295,17 @@ class Task<T : ProjectType>(
                 .map { it.first }
     }
 
-    // contains only generated instances
-    private fun getScheduleInstances(
+    private fun getScheduleDateTimes(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-    ): Sequence<Instance<out T>> {
+    ): Sequence<DateTime> {
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
         val scheduleResults = scheduleIntervals.map {
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
 
-        val scheduleSequence = combineSequences(scheduleResults) {
+        return combineSequences(scheduleResults) {
             throwIfInterrupted()
 
             it.mapIndexed { index, dateTime -> index to dateTime }
@@ -315,6 +313,15 @@ class Task<T : ProjectType>(
                     .minByOrNull { it.second!! }!!
                     .first
         }.distinct()
+    }
+
+    // contains only generated instances
+    private fun getScheduleInstances(
+            startExactTimeStamp: ExactTimeStamp.Offset,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
+    ): Sequence<Instance<out T>> {
+        val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
         return scheduleSequence.mapNotNull {
             throwIfInterrupted()

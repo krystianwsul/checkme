@@ -208,6 +208,7 @@ class Instance<T : ProjectType> private constructor(
      * 3. Consider replacing the check in `isVisible` with just switching the `checkOldestVisible` param value.
      * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
      * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
+     * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
      */
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean) = task.scheduleIntervals.filter {
         it.matchesScheduleDateTime(scheduleDateTime, checkOldestVisible)

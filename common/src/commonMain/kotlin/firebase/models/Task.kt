@@ -300,7 +300,6 @@ class Task<T : ProjectType>(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            bySchedule: Boolean,
     ): Sequence<Instance<out T>> {
         if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
 
@@ -308,17 +307,20 @@ class Task<T : ProjectType>(
             it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
         }
 
-        val scheduleInstanceSequences = scheduleResults.map {
+        val scheduleSequence = combineSequences(scheduleResults) {
             throwIfInterrupted()
 
-            it.mapNotNull {
-                throwIfInterrupted()
+            it.mapIndexed { index, dateTime -> index to dateTime }
+                    .filter { it.second != null }
+                    .minByOrNull { it.second!! }!!
+                    .first
+        }.distinct()
 
-                getInstance(it).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
-            }
+        return scheduleSequence.mapNotNull {
+            throwIfInterrupted()
+
+            getInstance(it).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
         }
-
-        return combineInstanceSequences(scheduleInstanceSequences, bySchedule)
     }
 
     // contains only generated instances
@@ -365,7 +367,7 @@ class Task<T : ProjectType>(
                 onlyRoot
         )
 
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule)
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(

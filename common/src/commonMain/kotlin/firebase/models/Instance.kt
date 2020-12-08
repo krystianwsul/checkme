@@ -221,7 +221,6 @@ class Instance<T : ProjectType> private constructor(
     /**
      * todo:
      * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
-     * 6. Clean up usage in `isVisible` vs. `isVisibleHelper`
      */
 
     // this does not account for whether or not this is a rootInstance
@@ -276,7 +275,6 @@ class Instance<T : ProjectType> private constructor(
 
         if (parentInstance != null) {
             return parentInstance.instance.isVisible(now, hack24)
-
         } else {
             if (!exists() && getMatchingScheduleIntervals(true).isEmpty()) return false
 

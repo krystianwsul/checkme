@@ -218,11 +218,6 @@ class Instance<T : ProjectType> private constructor(
         ).toList()
     }.addTo(task.scheduleIntervalsProperty)
 
-    /**
-     * todo:
-     * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
-     */
-
     // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
         val filtered = if (checkOldestVisible) {
@@ -276,7 +271,7 @@ class Instance<T : ProjectType> private constructor(
         if (parentInstance != null) {
             return parentInstance.instance.isVisible(now, hack24)
         } else {
-            if (!exists() && getMatchingScheduleIntervals(true).isEmpty()) return false
+            if (!exists() && matchesSchedule()) return false
 
             val done = done ?: return true
 

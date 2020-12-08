@@ -284,6 +284,7 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
+    // This is a misnomer, don't get any ideas
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
             ?.isReachableFromMainScreen(now)
             ?: (exists() || matchesSchedule())

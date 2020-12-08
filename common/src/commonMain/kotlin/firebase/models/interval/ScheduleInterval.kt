@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.firebase.models.Schedule
 import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CurrentOffset
 import com.krystianwsul.common.utils.ProjectType
@@ -31,9 +30,6 @@ class ScheduleInterval<T : ProjectType>(
             originalDateTime,
             checkOldestVisible,
     )
-
-    fun matchesScheduleDateTime(scheduleDateTime: DateTime, checkOldestVisible: Boolean) =
-        schedule.matchesScheduleDateTime(this, scheduleDateTime, checkOldestVisible)
 
     fun updateOldestVisible(now: ExactTimeStamp.Local) = schedule.updateOldestVisible(this, now)
 }

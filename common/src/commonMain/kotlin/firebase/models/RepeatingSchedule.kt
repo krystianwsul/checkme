@@ -103,6 +103,12 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         return nullableSequence.filterNotNull()
     }
 
+    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {
+        return oldestVisibleDate?.let {
+            ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) <= exactTimeStamp
+        } ?: true
+    }
+
     private fun getDateTimeInDate(
             date: Date,
             startHourMilli: HourMilli?,
@@ -163,18 +169,4 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
         oldestVisibleDateProperty.invalidate()
     }
-
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (checkOldestVisible && oldestVisibleDate?.let { scheduleDateTime.date < it } == true) return false
-
-        if (timePair != scheduleDateTime.time.timePair) return false
-
-        if (from?.let { scheduleDateTime.date < it } == true) return false
-
-        if (until?.let { scheduleDateTime.date > it } == true) return false
-
-        return matchesScheduleDateRepeatingHelper(scheduleDateTime.date)
-    }
-
-    protected abstract fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean
 }

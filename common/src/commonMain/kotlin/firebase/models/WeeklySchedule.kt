@@ -32,6 +32,4 @@ class WeeklySchedule<T : ProjectType>(
 
         return true
     }
-
-    override fun matchesScheduleDateRepeatingHelper(scheduleDate: Date) = scheduleDate.dayOfWeek == dayOfWeek
 }

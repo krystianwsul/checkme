@@ -29,11 +29,11 @@ class MonthlyWeekSchedule<T : ProjectType>(
         return dateThisMonth == date
     }
 
-    private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleRecord.weekOfMonth, dayOfWeek, repeatingScheduleRecord.beginningOfMonth)
-
-    override fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean {
-        val date = scheduleDate.run { getDateInMonth(year, month) }
-
-        return date == scheduleDate
-    }
+    private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
+            year,
+            month,
+            repeatingScheduleRecord.weekOfMonth,
+            dayOfWeek,
+            repeatingScheduleRecord.beginningOfMonth
+    )
 }

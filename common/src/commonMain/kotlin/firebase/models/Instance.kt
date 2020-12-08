@@ -206,7 +206,8 @@ class Instance<T : ProjectType> private constructor(
     /**
      * todo:
      * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
-     * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task`.
+     * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task` and changing
+     * instance dateTime.
      * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
      * 6. Clean up usage in `isVisible` vs. `isVisibleHelper`
      */
@@ -215,13 +216,22 @@ class Instance<T : ProjectType> private constructor(
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
         val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
 
-        return task.getScheduleDateTimes(
+        val unfiltered = task.getScheduleDateTimes(
                 exactTimeStamp,
                 exactTimeStamp.plusOne(),
                 true,
-                checkOldestVisible
+                false
         )
-                .toList()
+
+        val filtered = if (checkOldestVisible) {
+            unfiltered.map {
+                it.filter { it.second.schedule.isAfterOldestVisible(exactTimeStamp) }
+            }
+        } else {
+            unfiltered
+        }
+
+        return filtered.toList()
                 .singleOrEmpty()
                 .orEmpty()
                 .filter { it.first == scheduleDateTime }

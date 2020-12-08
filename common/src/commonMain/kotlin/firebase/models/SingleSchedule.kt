@@ -69,6 +69,8 @@ class SingleSchedule<T : ProjectType>(
         return getInstance(task).isVisible(now, hack24)
     }
 
+    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
+
     override val oldestVisible = OldestVisible.Single
 
     override fun updateOldestVisible(
@@ -118,12 +120,6 @@ class SingleSchedule<T : ProjectType>(
             set(value) {
                 singleScheduleRecord.endTimeOffset = value
             }
-    }
-
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (singleScheduleRecord.originalDate != scheduleDateTime.date) return false
-
-        return singleScheduleRecord.originalTimePair == scheduleDateTime.time.timePair
     }
 
     val group = singleScheduleRecord.group

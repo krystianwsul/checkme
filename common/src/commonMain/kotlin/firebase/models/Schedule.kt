@@ -70,6 +70,8 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             hack24: Boolean,
     ): Boolean
 
+    abstract fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean
+
     fun delete() {
         rootTask.deleteSchedule(this)
         scheduleRecord.delete()
@@ -91,29 +93,6 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     abstract val oldestVisible: OldestVisible
 
     abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local)
-
-    fun matchesScheduleDateTime(
-            scheduleInterval: ScheduleInterval<T>,
-            scheduleDateTime: DateTime,
-            checkOldestVisible: Boolean
-    ): Boolean {
-        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp()
-
-        if (exactTimeStamp < startExactTimeStampOffset) return false
-
-        if (exactTimeStamp < scheduleInterval.startExactTimeStampOffset) return false
-
-        if (endExactTimeStampOffset?.let { exactTimeStamp >= it } == true) return false
-
-        if (scheduleInterval.endExactTimeStampOffset?.let { exactTimeStamp >= it } == true) return false
-
-        return matchesScheduleDateTimeHelper(scheduleDateTime, checkOldestVisible)
-    }
-
-    protected abstract fun matchesScheduleDateTimeHelper(
-            scheduleDateTime: DateTime,
-            checkOldestVisible: Boolean,
-    ): Boolean
 
     val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
 

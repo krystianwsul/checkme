@@ -249,15 +249,7 @@ class Instance<T : ProjectType> private constructor(
             cachedIsVisible?.let { return it }
         }
 
-        val isVisible = if (
-                !exists()
-                && isRootInstance(now)
-                && getMatchingScheduleIntervals(true).isEmpty()
-        ) {
-            false
-        } else {
-            isVisibleHelper(now, hack24, ignoreHidden)
-        }
+        val isVisible = isVisibleHelper(now, hack24, ignoreHidden)
 
         instanceLocker?.let {
             if (hack24)
@@ -272,6 +264,9 @@ class Instance<T : ProjectType> private constructor(
     private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
 
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
+        if (!exists() && isRootInstance(now) && getMatchingScheduleIntervals(true).isEmpty())
+            return false
+
         if (!ignoreHidden && data.hidden) return false
 
         if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false

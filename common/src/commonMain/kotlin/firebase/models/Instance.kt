@@ -266,27 +266,25 @@ class Instance<T : ProjectType> private constructor(
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
         if (!ignoreHidden && data.hidden) return false
 
-        val doesntMatchSchedule by lazy { !exists() && getMatchingScheduleIntervals(true).isEmpty() }
-        val parentInstance by lazy { getParentInstance(now) }
-
-        if (doesntMatchSchedule && parentInstance == null) return false
-
         if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
 
-        parentInstance?.instance
-                ?.isVisible(now, hack24)
-                ?.let { return it }
+        val parentInstance = getParentInstance(now)
 
-        if (doesntMatchSchedule) return false
+        if (parentInstance != null) {
+            return parentInstance.instance.isVisible(now, hack24)
 
-        val done = done ?: return true
+        } else {
+            if (!exists() && getMatchingScheduleIntervals(true).isEmpty()) return false
 
-        val cutoff = if (hack24)
-            ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
-        else
-            now
+            val done = done ?: return true
 
-        return done > cutoff
+            val cutoff = if (hack24)
+                ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
+            else
+                now
+
+            return done > cutoff
+        }
     }
 
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance

@@ -162,12 +162,16 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
-                    .map { it.taskHierarchy }
                     .filter {
-                        it.notDeletedOffset(hierarchyExactTimeStamp)
-                                && it.childTask.notDeletedOffset(hierarchyExactTimeStamp)
+                        val taskHierarchy = it.taskHierarchy
+                        val childTask = taskHierarchy.childTask
+                        val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
+
+                        it.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
                     }
+                    .map { it.taskHierarchy }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
                         it.first

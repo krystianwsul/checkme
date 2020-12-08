@@ -264,18 +264,20 @@ class Instance<T : ProjectType> private constructor(
     private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
 
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
-        if (!exists() && isRootInstance(now) && getMatchingScheduleIntervals(true).isEmpty())
-            return false
-
         if (!ignoreHidden && data.hidden) return false
+
+        val doesntMatchSchedule by lazy { !exists() && getMatchingScheduleIntervals(true).isEmpty() }
+        val parentInstance by lazy { getParentInstance(now) }
+
+        if (doesntMatchSchedule && parentInstance == null) return false
 
         if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
 
-        getParentInstance(now)?.instance
+        parentInstance?.instance
                 ?.isVisible(now, hack24)
                 ?.let { return it }
 
-        if (!exists() && !matchesSchedule()) return false
+        if (doesntMatchSchedule) return false
 
         val done = done ?: return true
 

@@ -45,4 +45,10 @@ actual open class InvalidatableLazyImpl<T> actual constructor(
     actual operator fun setValue(any: Any, property: KProperty<*>, t: T) {
         _value = t
     }
+
+    actual fun addTo(invalidatableLazyImplCallbacks: InvalidatableLazyImplCallbacks<*>): InvalidatableLazyImpl<T> {
+        invalidatableLazyImplCallbacks.addCallback { invalidate() }
+
+        return this
+    }
 }

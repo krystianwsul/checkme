@@ -39,15 +39,6 @@ class Task<T : ProjectType>(
     }
     val endData by endDataProperty
 
-    private val _existingInstances = taskRecord.instanceRecords
-            .values
-            .toMutableList<InstanceRecord<T>>()
-            .apply { addAll(rootInstanceManager.records) }
-            .map { Instance(project, this, it) }
-            .toMutableList()
-            .associateBy { it.scheduleKey }
-            .toMutableMap()
-
     private val _schedules = mutableListOf<Schedule<T>>()
 
     private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
@@ -85,9 +76,11 @@ class Task<T : ProjectType>(
     private val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
 
-    val scheduleIntervals by invalidatableLazy {
+    val scheduleIntervalsProperty = invalidatableLazyCallbacks {
         intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
     }.apply { intervalsProperty.addCallback { invalidate() } }
+
+    val scheduleIntervals by scheduleIntervalsProperty
 
     val parentHierarchyIntervals
         get() = intervals.mapNotNull {
@@ -107,6 +100,15 @@ class Task<T : ProjectType>(
                 .filter { it.taskHierarchy.parentTaskKey == taskKey }
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
+
+    private val _existingInstances = taskRecord.instanceRecords
+            .values
+            .toMutableList<InstanceRecord<T>>()
+            .apply { addAll(rootInstanceManager.records) }
+            .map { Instance(project, this, it) }
+            .toMutableList()
+            .associateBy { it.scheduleKey }
+            .toMutableMap()
 
     var ordinal
         get() = taskRecord.ordinal ?: startExactTimeStamp.long.toDouble()

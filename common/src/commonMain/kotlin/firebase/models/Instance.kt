@@ -94,7 +94,7 @@ class Instance<T : ProjectType> private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val instanceCustomTimeKey
-        get() = (instanceTime as? Time.Custom<T>)?.key
+    get() = (instanceTime as? Time.Custom<T>)?.key
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
@@ -195,7 +195,7 @@ class Instance<T : ProjectType> private constructor(
 
     fun getDisplayData(now: ExactTimeStamp.Local) = if (isRootInstance(now)) instanceDateTime else null
 
-    private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<*> {
+    private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<T> {
         (data as? Data.Real)?.let { return it }
 
         getParentInstance(now)?.instance?.createInstanceHierarchy(now)
@@ -203,36 +203,34 @@ class Instance<T : ProjectType> private constructor(
         return createInstanceRecord()
     }
 
+    private val matchingScheduleIntervals by invalidatableLazy {
+        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
+
+        task.getScheduleDateTimes(
+                exactTimeStamp,
+                exactTimeStamp.plusOne(),
+                originalDateTime = true,
+                checkOldestVisible = false
+        ).toList()
+    }.addTo(task.scheduleIntervalsProperty)
+
     /**
      * todo:
-     * 4. Consider caching the result for `checkOldestVisible = false`, filtering that result for
-     * `checkOldestVisible = true`, and invalidating on the appropriate property change in the `Task` and changing
-     * instance dateTime.
      * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
      * 6. Clean up usage in `isVisible` vs. `isVisibleHelper`
      */
 
     // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
-        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
-
-        val unfiltered = task.getScheduleDateTimes(
-                exactTimeStamp,
-                exactTimeStamp.plusOne(),
-                true,
-                false
-        )
-
         val filtered = if (checkOldestVisible) {
-            unfiltered.map {
-                it.filter { it.second.schedule.isAfterOldestVisible(exactTimeStamp) }
+            matchingScheduleIntervals.map {
+                it.filter { it.second.schedule.isAfterOldestVisible(scheduleDateTime.toLocalExactTimeStamp()) }
             }
         } else {
-            unfiltered
+            matchingScheduleIntervals
         }
 
-        return filtered.toList()
-                .singleOrEmpty()
+        return filtered.singleOrEmpty()
                 .orEmpty()
                 .filter { it.first == scheduleDateTime }
                 .map { it.second }
@@ -403,10 +401,9 @@ class Instance<T : ProjectType> private constructor(
     ) {
         check(isRootInstance(now))
 
-        createInstanceHierarchy(now)
+        if (dateTime == instanceDateTime) return
 
-        @Suppress("UNCHECKED_CAST")
-        (data as Data.Real<T>).instanceRecord.let {
+        createInstanceHierarchy(now).instanceRecord.let {
             it.instanceDate = dateTime.date
 
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {

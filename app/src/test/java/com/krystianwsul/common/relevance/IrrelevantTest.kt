@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
@@ -19,8 +20,7 @@ import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class IrrelevantTest {
@@ -37,6 +37,12 @@ class IrrelevantTest {
             every { getPrivateTaskRecordId(any()) } returns "taskRecordId"
             every { newPrivateNoScheduleOrParentRecordId(any(), any()) } returns "noScheduleOrParentRecordId"
         }
+
+        private val shownFactory = mockk<Instance.ShownFactory> {
+            every { getShown(any(), any()) } returns mockk(relaxed = true)
+        }
+
+        private val projectParent = mockk<Project.Parent>()
     }
 
     @Test
@@ -49,8 +55,6 @@ class IrrelevantTest {
         val hour2 = HourMinute(2, 1).toHourMilli()
         val hour3 = HourMinute(3, 1).toHourMilli()
         val hour4 = HourMinute(4, 1)
-
-        val parent = mockk<Project.Parent>()
 
         var now = ExactTimeStamp.Local(day1, hour1)
 
@@ -90,10 +94,6 @@ class IrrelevantTest {
 
         val instance = task.getPastRootInstances(now).single()
 
-        val shownFactory = mockk<Instance.ShownFactory> {
-            every { getShown(any(), any()) } returns mockk(relaxed = true)
-        }
-
         instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)), now)
 
         // 3: after second reminder, remove schedule, then set reminder done
@@ -121,7 +121,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour1)
 
-        Irrelevant.setIrrelevant(parent, project, now)
+        Irrelevant.setIrrelevant(projectParent, project, now)
 
         assertTrue(task.isReminderless())
     }
@@ -135,8 +135,6 @@ class IrrelevantTest {
         val hour1 = HourMinute(1, 0).toHourMilli()
         val hour2 = HourMinute(2, 0).toHourMilli()
         val hour3 = HourMinute(3, 0).toHourMilli()
-
-        val parent = mockk<Project.Parent>()
 
         var now = ExactTimeStamp.Local(day1, hour1)
 
@@ -203,10 +201,6 @@ class IrrelevantTest {
 
         val instance = task.getPastRootInstances(now).single()
 
-        val shownFactory = mockk<Instance.ShownFactory> {
-            every { getShown(any(), any()) } returns mockk(relaxed = true)
-        }
-
         instance.setDone(shownFactory, true, now)
         projectRecord.getValues(mutableMapOf())
 
@@ -217,9 +211,85 @@ class IrrelevantTest {
         assertFalse(task.getPastRootInstances(now).single().isVisible(now, true))
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(parent, project, now)
+        Irrelevant.setIrrelevant(projectParent, project, now)
 
         assertTrue(task.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(task.getPastRootInstances(now).toList().isEmpty())
+    }
+
+    @Test
+    fun testDeletedChildTaskIsntInInstance() {
+        // 1: Create task with single schedule and single child
+        // 2: Delete single child with remove instances option
+        // 3: Add new child
+        // 4: Reschedule instance
+        // 5: check instance has only the second child
+
+        val day1 = Date(2020, 10, 6) // tuesday
+        val day2 = Date(2020, 10, 7) // wednesday
+        val hour1 = HourMinute(1, 0).toHourMilli()
+        val hour2 = HourMinute(2, 0).toHourMilli()
+        val hour3 = HourMinute(3, 0).toHourMilli()
+
+        var now = ExactTimeStamp.Local(day1, hour1)
+
+        val projectKey = ProjectKey.Private(userKey.key)
+
+        val singleScheduleWrapper = PrivateScheduleWrapper(
+                singleScheduleJson = PrivateSingleScheduleJson(
+                        startTime = now.long,
+                        year = day1.year,
+                        month = day1.month,
+                        day = day1.day,
+                        hour = hour2.hour,
+                        minute = hour2.minute
+                )
+        )
+
+        val parentTaskJson = PrivateTaskJson(
+                name = "parentTask",
+                startTime = now.long,
+                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper)
+        )
+
+        val parentTaskId = "parentTaskKey"
+        val parentTaskKey = TaskKey(ProjectKey.Private(userKey.key), parentTaskId)
+
+        val child1TaskJson = PrivateTaskJson(
+                name = "child1Task",
+                startTime = now.long,
+        )
+
+        val child1TaskId = "child1TaskKey"
+        val child1TaskKey = TaskKey(ProjectKey.Private(userKey.key), child1TaskId)
+
+        val taskHierarchy1Json = TaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                childTaskId = child1TaskId,
+                startTime = now.long
+        )
+
+        val taskHierarchy1Id = "taskHierarchy1"
+
+        val projectJson = PrivateProjectJson(
+                startTime = now.long,
+                tasks = mutableMapOf(parentTaskId to parentTaskJson, child1TaskId to child1TaskJson),
+                taskHierarchies = mutableMapOf(taskHierarchy1Id to taskHierarchy1Json)
+        )
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+
+        val project = PrivateProject(projectRecord, mapOf()) {
+            mockk {
+                every { records } returns mutableListOf()
+            }
+        }
+
+        val parentTask = project.tasks.single { it.isRootTask(now) }
+
+        now = ExactTimeStamp.Local(day1, hour2)
+
+        val instance = parentTask.getPastRootInstances(now).single()
+
+        assertEquals(1, instance.getChildInstances(now).size)
     }
 }

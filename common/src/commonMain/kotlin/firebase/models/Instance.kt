@@ -163,12 +163,16 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
-                    .map { it.taskHierarchy }
                     .filter {
-                        it.notDeletedOffset(hierarchyExactTimeStamp)
-                                && it.childTask.notDeletedOffset(hierarchyExactTimeStamp)
+                        val taskHierarchy = it.taskHierarchy
+                        val childTask = taskHierarchy.childTask
+                        val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
+
+                        it.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
                     }
+                    .map { it.taskHierarchy }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
                         it.first
@@ -213,12 +217,6 @@ class Instance<T : ProjectType> private constructor(
                 checkOldestVisible = false
         ).toList()
     }.addTo(task.scheduleIntervalsProperty)
-
-    /**
-     * todo:
-     * 5. Isn't `isReachableFromMainScreen` the same as `isVisible`?
-     * 6. Clean up usage in `isVisible` vs. `isVisibleHelper`
-     */
 
     // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
@@ -272,9 +270,8 @@ class Instance<T : ProjectType> private constructor(
 
         if (parentInstance != null) {
             return parentInstance.instance.isVisible(now, hack24)
-
         } else {
-            if (!exists() && getMatchingScheduleIntervals(true).isEmpty()) return false
+            if (!exists() && !matchesSchedule()) return false
 
             val done = done ?: return true
 
@@ -287,6 +284,7 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
+    // This is a misnomer, don't get any ideas
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
             ?.isReachableFromMainScreen(now)
             ?: (exists() || matchesSchedule())

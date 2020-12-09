@@ -308,7 +308,6 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        val irrelevant = Irrelevant.setIrrelevant(projectParent, project, now, false)
-        assertTrue(irrelevant.irrelevantExistingInstances.size == 1)
+        Irrelevant.setIrrelevant(projectParent, project, now, false)
     }
 }

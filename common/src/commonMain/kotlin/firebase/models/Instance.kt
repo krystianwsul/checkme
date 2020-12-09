@@ -185,9 +185,11 @@ class Instance<T : ProjectType> private constructor(
                     .toList()
         }
 
-        instanceLocker?.childInstances = childInstances
+        val filteredChildInstances = childInstances.filter { !it.first.isInvisibleBecauseOfEndData(now) }
 
-        return childInstances
+        instanceLocker?.childInstances = filteredChildInstances
+
+        return filteredChildInstances
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local) = listOfNotNull(
@@ -261,10 +263,13 @@ class Instance<T : ProjectType> private constructor(
 
     private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
 
+    private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
+            task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
+
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
         if (!ignoreHidden && data.hidden) return false
 
-        if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
+        if (isInvisibleBecauseOfEndData(now)) return false
 
         val parentInstance = getParentInstance(now)
 

@@ -20,8 +20,7 @@ import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class IrrelevantTest {
@@ -260,20 +259,37 @@ class IrrelevantTest {
                 name = "child1Task",
                 startTime = now.long,
         )
-
         val child1TaskId = "child1TaskKey"
         val taskHierarchy1Json = TaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
                 startTime = now.long
         )
-
         val taskHierarchy1Id = "taskHierarchy1"
+
+        val child2TaskJson = PrivateTaskJson(
+                name = "child2Task",
+                startTime = now.long,
+        )
+        val child2TaskId = "child2TaskKey"
+        val taskHierarchy2Json = TaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                childTaskId = child2TaskId,
+                startTime = now.long
+        )
+        val taskHierarchy2Id = "taskHierarchy2"
 
         val projectJson = PrivateProjectJson(
                 startTime = now.long,
-                tasks = mutableMapOf(parentTaskId to parentTaskJson, child1TaskId to child1TaskJson),
-                taskHierarchies = mutableMapOf(taskHierarchy1Id to taskHierarchy1Json)
+                tasks = mutableMapOf(
+                        parentTaskId to parentTaskJson,
+                        child1TaskId to child1TaskJson,
+                        child2TaskId to child2TaskJson
+                ),
+                taskHierarchies = mutableMapOf(
+                        taskHierarchy1Id to taskHierarchy1Json,
+                        taskHierarchy2Id to taskHierarchy2Json
+                )
         )
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
 
@@ -284,27 +300,48 @@ class IrrelevantTest {
         }
 
         val parentTask = project.tasks.single { it.isRootTask(now) }
+        assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
+
+        val child1Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child1TaskId }
+                .childTask
+
+        val child2Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child2TaskId }
+                .childTask
 
         now = ExactTimeStamp.Local(day1, hour2)
 
         val parentInstance = parentTask.getPastRootInstances(now).single()
+        assertEquals(2, parentInstance.getChildInstances(now).size)
 
-        val childInstance = parentInstance.getChildInstances(now)
-                .single()
-                .first
+        val child1Instance = parentInstance.getChildInstances(now)
+                .single {
+                    it.first
+                            .instanceKey
+                            .taskKey
+                            .taskId == child1TaskId
+                }.first
 
-        childInstance.setDone(shownFactory, true, now)
+        val child2Instance = parentInstance.getChildInstances(now)
+                .single {
+                    it.first
+                            .instanceKey
+                            .taskKey
+                            .taskId == child2TaskId
+                }.first
+
+        child1Instance.setDone(shownFactory, true, now)
 
         now = ExactTimeStamp.Local(day1, hour3)
 
-        val child1Task = parentTask.getChildTaskHierarchies(now).single().childTask
-
         child1Task.setEndData(Task.EndData(now, true))
+        child2Task.setEndData(Task.EndData(now, true))
 
         now = ExactTimeStamp.Local(day1, hour4)
 
         assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
-        assertTrue(parentInstance.getChildInstances(now).isEmpty())
+        assertTrue(parentInstance.getChildInstances(now).single().first == child1Instance)
 
         now = ExactTimeStamp.Local(day2, hour5)
 

@@ -20,7 +20,8 @@ import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IrrelevantTest {
@@ -230,6 +231,8 @@ class IrrelevantTest {
         val hour1 = HourMinute(1, 0).toHourMilli()
         val hour2 = HourMinute(2, 0).toHourMilli()
         val hour3 = HourMinute(3, 0).toHourMilli()
+        val hour4 = HourMinute(4, 0).toHourMilli()
+        val hour5 = HourMinute(5, 0).toHourMilli()
 
         var now = ExactTimeStamp.Local(day1, hour1)
 
@@ -251,9 +254,7 @@ class IrrelevantTest {
                 startTime = now.long,
                 schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper)
         )
-
         val parentTaskId = "parentTaskKey"
-        val parentTaskKey = TaskKey(ProjectKey.Private(userKey.key), parentTaskId)
 
         val child1TaskJson = PrivateTaskJson(
                 name = "child1Task",
@@ -261,8 +262,6 @@ class IrrelevantTest {
         )
 
         val child1TaskId = "child1TaskKey"
-        val child1TaskKey = TaskKey(ProjectKey.Private(userKey.key), child1TaskId)
-
         val taskHierarchy1Json = TaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
@@ -288,8 +287,28 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour2)
 
-        val instance = parentTask.getPastRootInstances(now).single()
+        val parentInstance = parentTask.getPastRootInstances(now).single()
 
-        assertEquals(1, instance.getChildInstances(now).size)
+        val childInstance = parentInstance.getChildInstances(now)
+                .single()
+                .first
+
+        childInstance.setDone(shownFactory, true, now)
+
+        now = ExactTimeStamp.Local(day1, hour3)
+
+        val child1Task = parentTask.getChildTaskHierarchies(now).single().childTask
+
+        child1Task.setEndData(Task.EndData(now, true))
+
+        now = ExactTimeStamp.Local(day1, hour4)
+
+        assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
+        assertTrue(parentInstance.getChildInstances(now).isEmpty())
+
+        now = ExactTimeStamp.Local(day2, hour5)
+
+        val irrelevant = Irrelevant.setIrrelevant(projectParent, project, now, false)
+        assertTrue(irrelevant.irrelevantExistingInstances.size == 1)
     }
 }

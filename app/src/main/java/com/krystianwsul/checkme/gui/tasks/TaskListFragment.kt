@@ -511,19 +511,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-            if (taskData.assignedTo.isNotEmpty()) {
-                treeNodes += AssignedNode(
-                        taskData.assignedTo,
-                        false,
-                        null
-                ).initialize(treeNodeCollection)
-            }
+            if (taskData.assignedTo.isNotEmpty())
+                treeNodes += AssignedNode(taskData.assignedTo, null).initialize(treeNodeCollection)
 
-            if (!taskData.note.isNullOrEmpty()) {
-                val noteNode = NoteNode(taskData.note, false, null)
-
-                treeNodes += noteNode.initialize(treeNodeCollection)
-            }
+            if (!taskData.note.isNullOrEmpty())
+                treeNodes += NoteNode(taskData.note, null).initialize(treeNodeCollection)
 
             taskListFragment.rootTaskData
                     ?.imageState

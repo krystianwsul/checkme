@@ -2,9 +2,6 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListNoteBinding
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -12,11 +9,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(
-        val note: String,
-        instance: Boolean,
-        override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode(), InvisibleCheckboxModelNode {
+class NoteNode(val note: String, override val parentNode: ModelNode<AbstractHolder>?) : AbstractModelNode() {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -52,12 +45,6 @@ class NoteNode(
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val delegates by lazy {
-        listOf(
-                InvisibleCheckboxDelegate(this)
-        )
-    }
-
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
@@ -65,8 +52,6 @@ class NoteNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is AssignedNode) 1 else -1
-
-    override val checkBoxInvisible = instance
 
     override fun normalize() {
         normalizedNote
@@ -92,11 +77,9 @@ class NoteNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListNoteBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
+    ) : AbstractHolder(binding.root) {
 
         val rowText = binding.rowListNoteText
-        override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListNoteMargin
         override val rowSeparator = binding.rowListNoteSeparator
     }
 }

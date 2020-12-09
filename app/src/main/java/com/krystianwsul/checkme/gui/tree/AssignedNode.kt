@@ -4,9 +4,6 @@ import android.view.LayoutInflater
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -15,9 +12,8 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class AssignedNode(
         private val assignedTo: List<User>,
-        instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode(), InvisibleCheckboxModelNode {
+) : AbstractModelNode() {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -33,10 +29,6 @@ class AssignedNode(
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override val isVisibleDuringActionMode = false
-
-    override val delegates by lazy { listOf(InvisibleCheckboxDelegate(this)) }
-
-    override val checkBoxInvisible = instance
 
     override val state get() = State(super.state, assignedTo)
 
@@ -88,10 +80,8 @@ class AssignedNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListAssignedBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
+    ) : AbstractHolder(binding.root) {
 
-        override val rowCheckBoxFrame = binding.rowListAssignedCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListAssignedMargin
         override val rowSeparator = binding.rowListAssignedSeparator
         val rowChipGroup = binding.rowListAssignedChipGroup
     }

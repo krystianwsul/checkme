@@ -520,7 +520,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes += ImageNode(
+                        treeNodes += ImageNode( // todo create some sort of imageViewerHost, merge code wtih GroupListFragment
                                 ImageNode.ImageData(
                                         it,
                                         { viewer ->

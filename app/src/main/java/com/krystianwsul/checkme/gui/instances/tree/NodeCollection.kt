@@ -64,7 +64,7 @@ class NodeCollection(
 
                     add(AssignedNode(assignedTo).initialize(nodeContainer))
                 } else {
-                    add(DetailsNode("assigned to: " + assignedTo.joinToString(", ") { it.name }, parentNode).initialize(nodeContainer))
+                    add(DetailsNode("assigned to: " + assignedTo.joinToString(", ") { it.name }, true, parentNode).initialize(nodeContainer))
                 }
             }
 

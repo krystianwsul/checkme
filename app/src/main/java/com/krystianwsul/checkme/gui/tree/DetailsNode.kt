@@ -2,6 +2,9 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListDetailsBinding
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
+import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -11,8 +14,9 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class DetailsNode(
         private val details: String,
+        instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode() {
+) : AbstractModelNode(), InvisibleCheckboxModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -48,6 +52,12 @@ class DetailsNode(
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
+    override val delegates by lazy {
+        listOf(
+                InvisibleCheckboxDelegate(this)
+        )
+    }
+
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
@@ -55,6 +65,8 @@ class DetailsNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
+
+    override val checkBoxInvisible = instance
 
     override fun normalize() {
         normalizedNote
@@ -80,9 +92,11 @@ class DetailsNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListDetailsBinding,
-    ) : AbstractHolder(binding.root) {
+    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
         val rowText = binding.rowListDetailsText
+        override val rowCheckBoxFrame = binding.rowListDetailsCheckboxInclude.rowCheckboxFrame
+        override val rowMarginStart = binding.rowListDetailsMargin
         override val rowSeparator = binding.rowListDetailsSeparator
     }
 }

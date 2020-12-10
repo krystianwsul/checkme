@@ -10,10 +10,9 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class AssignedNode(
-        private val assignedTo: List<User>,
-        override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode() {
+class AssignedNode(private val assignedTo: List<User>) : AbstractModelNode() {
+
+    override val parentNode: ModelNode<AbstractHolder>? = null
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

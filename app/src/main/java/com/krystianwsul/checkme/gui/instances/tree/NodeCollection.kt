@@ -62,15 +62,16 @@ class NodeCollection(
         return mutableListOf<TreeNode<AbstractHolder>>().apply {
             if (assignedTo.isNotEmpty()) {
                 check(indentation == 0)
+                check(parentNode == null)
 
-                add(AssignedNode(assignedTo, parentNode).initialize(nodeContainer))
+                add(AssignedNode(assignedTo).initialize(nodeContainer))
             }
 
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
                 check(parentNode == null)
 
-                add(NoteNode(note, parentNode).initialize(nodeContainer))
+                add(NoteNode(note).initialize(nodeContainer))
             }
 
             imageData?.let {

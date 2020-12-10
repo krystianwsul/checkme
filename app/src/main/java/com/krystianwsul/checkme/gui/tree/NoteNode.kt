@@ -9,7 +9,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(val note: String) : AbstractModelNode(), InvisibleCheckboxModelNode {
+class NoteNode(val note: String) : AbstractModelNode() {
 
     override val parentNode: ModelNode<AbstractHolder>? = null
 

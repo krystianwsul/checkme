@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
@@ -38,7 +39,8 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
                         task.current(now),
                         task.isVisible(now, false),
                         false,
-                        task.ordinal
+                        task.ordinal,
+                        AssignedNode.User.fromProjectUsers(task.getAssignedTo(now)),
                 )
             }
             .sorted()

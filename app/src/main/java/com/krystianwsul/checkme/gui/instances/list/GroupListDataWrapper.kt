@@ -61,6 +61,7 @@ data class GroupListDataWrapper(
             val imageState: ImageState?,
             val isRecurringGroupChild: Boolean,
             val isAssignedToMe: Boolean,
+            val assignedTo: List<AssignedNode.User>,
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
 
         lateinit var instanceDataParent: InstanceDataParent

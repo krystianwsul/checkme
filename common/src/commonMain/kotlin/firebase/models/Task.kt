@@ -1042,7 +1042,7 @@ class Task<T : ProjectType>(
     }
 
     fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
-        val currentScheduleIntervals = getCurrentScheduleIntervals(now)
+        val currentScheduleIntervals = getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
 
         return if (currentScheduleIntervals.isEmpty()) {
             listOf()

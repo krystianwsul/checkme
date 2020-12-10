@@ -771,7 +771,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     data class TaskData(
             val childTaskDatas: List<ChildTaskData>,
-            val note: String?, // todo assigned
+            val note: String?,
             val showFab: Boolean,
             val assignedTo: List<AssignedNode.User>,
     )
@@ -788,6 +788,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val isVisible: Boolean,
             val alwaysShow: Boolean,
             var ordinal: Double,
+            val assignedTo: List<AssignedNode.User>,
     ) : Comparable<ChildTaskData>, QueryMatch {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)

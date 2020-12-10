@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
 import com.krystianwsul.checkme.databinding.RowListAssignedBinding
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
@@ -74,7 +75,13 @@ class AssignedNode(private val assignedTo: List<User>) : AbstractModelNode() {
 
     override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
 
-    data class User(val name: String, val photoUrl: String?)
+    data class User(val name: String, val photoUrl: String?) {
+
+        companion object {
+
+            fun fromProjectUsers(users: List<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
+        }
+    }
 
     class Holder(
             override val baseAdapter: BaseAdapter,

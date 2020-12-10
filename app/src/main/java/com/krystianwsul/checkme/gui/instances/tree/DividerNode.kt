@@ -108,6 +108,7 @@ class DividerNode(
                         || other is NotDoneGroupNode
                         || other is UnscheduledNode
                         || other is ImageNode
+                        || other is DetailsNode
         )
 
         return 1

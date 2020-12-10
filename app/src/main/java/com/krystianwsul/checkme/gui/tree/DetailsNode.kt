@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.databinding.RowListNoteBinding
+import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -10,7 +10,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class DetailsNode(
-        val note: String,
+        private val details: String,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) : AbstractModelNode() {
 
@@ -19,20 +19,20 @@ class DetailsNode(
 
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
-    override val holderType = HolderType.NOTE
+    override val holderType = HolderType.DETAILS
 
     override val id get() = Id(nodeContainer.id)
 
-    override val state get() = State(super.state, note)
+    override val state get() = State(super.state, details)
 
     data class Id(val id: Any)
 
-    private val normalizedNote by lazy { note.normalized() }
+    private val normalizedNote by lazy { details.normalized() }
 
     override val disableRipple = true
 
     init {
-        check(note.isNotEmpty())
+        check(details.isNotEmpty())
     }
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
@@ -51,10 +51,10 @@ class DetailsNode(
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
-        (viewHolder as Holder).rowText.text = note
+        (viewHolder as Holder).rowText.text = details
     }
 
-    override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is AssignedNode) 1 else -1
+    override fun compareTo(other: ModelNode<AbstractHolder>) = -1
 
     override fun normalize() {
         normalizedNote
@@ -79,10 +79,10 @@ class DetailsNode(
 
     class Holder(
             override val baseAdapter: BaseAdapter,
-            binding: RowListNoteBinding,
+            binding: RowListDetailsBinding,
     ) : AbstractHolder(binding.root) {
 
-        val rowText = binding.rowListNoteText
-        override val rowSeparator = binding.rowListNoteSeparator
+        val rowText = binding.rowListDetailsText
+        override val rowSeparator = binding.rowListDetailsSeparator
     }
 }

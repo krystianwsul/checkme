@@ -66,7 +66,6 @@ enum class HolderType {
     },
 
     ASSIGNED {
-        // InvisibleCheckboxHolder
         // RowListAssignedBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
@@ -86,12 +85,20 @@ enum class HolderType {
     },
 
     NOTE {
-        // InvisibleCheckboxHolder
         // RowListNoteBinding
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
                 baseAdapter,
                 RowListNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
+    },
+
+    DETAILS {
+        // RowListNoteBinding
+
+        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DetailsNode.Holder(
+                baseAdapter,
+                RowListDetailsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     };
 

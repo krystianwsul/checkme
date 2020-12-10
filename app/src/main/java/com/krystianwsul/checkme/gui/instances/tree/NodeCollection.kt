@@ -2,10 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
-import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.AssignedNode
-import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.checkme.gui.tree.NoteNode
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -61,10 +58,14 @@ class NodeCollection(
 
         return mutableListOf<TreeNode<AbstractHolder>>().apply {
             if (assignedTo.isNotEmpty()) {
-                check(indentation == 0)
-                check(parentNode == null)
+                if (indentation == 0) {
+                    check(indentation == 0)
+                    check(parentNode == null)
 
-                add(AssignedNode(assignedTo).initialize(nodeContainer))
+                    add(AssignedNode(assignedTo).initialize(nodeContainer))
+                } else {
+                    add(DetailsNode("assigned to: " + assignedTo.joinToString(", ") { it.name }, parentNode).initialize(nodeContainer))
+                }
             }
 
             if (!note.isNullOrEmpty()) {

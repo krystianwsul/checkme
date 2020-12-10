@@ -88,7 +88,7 @@ class DoneInstanceNode(
                 treeNode,
                 null,
                 this,
-                listOf()
+                instanceData.assignedTo
         )
 
         treeNode.setChildTreeNodes(nodeCollection.initialize(

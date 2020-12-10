@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -43,7 +44,8 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
                         task.current(now),
                         task.isVisible(now, false),
                         false,
-                        task.ordinal
+                        task.ordinal,
+                        AssignedNode.User.fromProjectUsers(task.getAssignedTo(now)),
                 )
             }
             .sortedDescending()
@@ -157,6 +159,7 @@ fun DomainFactory.getGroupListData(
                 task.getImage(deviceDbInfo),
                 instance.isRepeatingGroupChild(now),
                 instance.isAssignedToMe(now, myUserFactory.user),
+                AssignedNode.User.fromProjectUsers(instance.getAssignedTo(now)),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

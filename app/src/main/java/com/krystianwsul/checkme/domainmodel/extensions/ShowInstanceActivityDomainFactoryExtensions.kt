@@ -119,6 +119,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.getImage(deviceDbInfo),
                 childInstance.isRepeatingGroupChild(now),
                 childInstance.isAssignedToMe(now, myUserFactory.user),
+                AssignedNode.User.fromProjectUsers(childInstance.getAssignedTo(now)),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

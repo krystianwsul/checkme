@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
@@ -74,6 +75,7 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
                 task.getImage(deviceDbInfo),
                 instance.isRepeatingGroupChild(now),
                 instance.isAssignedToMe(now, myUserFactory.user),
+                AssignedNode.User.fromProjectUsers(instance.getAssignedTo(now)),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }

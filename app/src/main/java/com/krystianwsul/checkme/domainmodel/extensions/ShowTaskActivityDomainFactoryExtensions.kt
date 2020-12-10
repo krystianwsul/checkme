@@ -39,7 +39,8 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                         childTask.current(now),
                         childTask.isVisible(now, false),
                         true,
-                        childTask.ordinal
+                        childTask.ordinal,
+                        AssignedNode.User.fromProjectUsers(childTask.getAssignedTo(now))
                 )
             }
             .sorted()
@@ -62,7 +63,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                     childTaskDatas.toMutableList(),
                     task.note,
                     task.isVisible(now, false),
-                    task.getAssignedTo(now).map { AssignedNode.User(it.name, it.photoUrl) }
+                    AssignedNode.User.fromProjectUsers(task.getAssignedTo(now))
             ),
             task.getImage(deviceDbInfo),
             task.current(now)

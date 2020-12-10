@@ -127,7 +127,7 @@ class NotDoneGroupNode(
                     treeNode,
                     null,
                     this,
-                    listOf(),
+                    instanceData.assignedTo,
             )
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
@@ -352,7 +352,7 @@ class NotDoneGroupNode(
                     treeNode,
                     null,
                     this,
-                    listOf(),
+                    instanceDatas.single().assignedTo,
             )
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
@@ -374,7 +374,7 @@ class NotDoneGroupNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
-        is AssignedNode, is NoteNode, is ImageNode -> 1
+        is AssignedNode, is NoteNode, is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
             val timeStampComparison = exactTimeStamp.compareTo(other.exactTimeStamp)
             if (timeStampComparison != 0) {
@@ -583,7 +583,7 @@ class NotDoneGroupNode(
                     treeNode,
                     null,
                     this,
-                    listOf(),
+                    instanceData.assignedTo,
             )
 
             treeNode.setChildTreeNodes(nodeCollection.initialize(

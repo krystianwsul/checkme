@@ -643,6 +643,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
+                if (childTaskData.assignedTo.isNotEmpty()) {
+                    check(indentation == 0)
+                    check(parentNode == null)
+
+                    treeNodes += DetailsNode("assigned to: " + childTaskData.assignedTo.joinToString(", ") { it.name }, this).initialize(nodeContainer)
+                }
+
                 for (childTaskData in childTaskData.children) {
                     val taskWrapper = TaskWrapper(
                             indentation + 1,

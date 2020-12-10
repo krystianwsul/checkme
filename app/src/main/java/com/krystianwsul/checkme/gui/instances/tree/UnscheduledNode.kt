@@ -7,6 +7,8 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
 import com.krystianwsul.common.utils.TaskKey
@@ -17,7 +19,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
         private val nodeCollection: NodeCollection,
         private val searchResults: Boolean,
-) : AbstractModelNode(), TaskParent, SingleLineModelNode {
+) : AbstractModelNode(), TaskParent, SingleLineModelNode, IndentationModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
 
@@ -38,10 +40,13 @@ class UnscheduledNode(
 
     override val parentNode: ModelNode<AbstractHolder>? = null
 
+    override val indentation = 0
+
     override val delegates by lazy {
         listOf(
                 ExpandableDelegate(treeNode),
                 SingleLineDelegate(this),
+                IndentationDelegate(this)
         )
     }
 

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tree
 
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
@@ -13,7 +14,8 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class DetailsNode(
-        private val details: String,
+        private val assignedTo: String,
+        private val note: String?,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
 ) : AbstractModelNode(), InvisibleCheckboxModelNode {
@@ -27,17 +29,13 @@ class DetailsNode(
 
     override val id get() = Id(nodeContainer.id)
 
-    override val state get() = State(super.state, details)
+    override val state get() = State(super.state, assignedTo)
 
     data class Id(val id: Any)
 
-    private val normalizedNote by lazy { details.normalized() }
+    private val normalizedNote by lazy { assignedTo.normalized() }
 
     override val disableRipple = true
-
-    init {
-        check(details.isNotEmpty())
-    }
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
@@ -50,8 +48,6 @@ class DetailsNode(
 
     override val isVisibleDuringActionMode = false
 
-    override val isSeparatorVisibleWhenNotExpanded = true
-
     override val delegates by lazy {
         listOf(
                 InvisibleCheckboxDelegate(this)
@@ -61,7 +57,17 @@ class DetailsNode(
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
-        (viewHolder as Holder).rowText.text = details
+        (viewHolder as Holder).apply {
+            rowAssignedTo.apply {
+                isVisible = assignedTo.isNotEmpty()
+                text = "assigned to: $assignedTo"
+            }
+
+            rowNote.apply {
+                isVisible = !note.isNullOrEmpty()
+                text = note
+            }
+        }
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
@@ -94,7 +100,8 @@ class DetailsNode(
             binding: RowListDetailsBinding,
     ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
 
-        val rowText = binding.rowListDetailsText
+        val rowAssignedTo = binding.rowListDetailsAssignedTo
+        val rowNote = binding.rowListDetailsNote
         override val rowCheckBoxFrame = binding.rowListDetailsCheckboxInclude.rowCheckboxFrame
         override val rowMarginStart = binding.rowListDetailsMargin
         override val rowSeparator = binding.rowListDetailsSeparator

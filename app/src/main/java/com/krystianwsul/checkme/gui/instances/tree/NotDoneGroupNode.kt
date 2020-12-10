@@ -125,7 +125,7 @@ class NotDoneGroupNode(
                     groupAdapter,
                     false,
                     treeNode,
-                    null,
+                    instanceData.note,
                     this,
                     instanceData.assignedTo,
             )
@@ -345,14 +345,16 @@ class NotDoneGroupNode(
 
             treeNode.remove(childTreeNode1, placeholder)
 
+            val instanceData = instanceDatas.single()
+
             singleInstanceNodeCollection = NodeCollection(
                     indentation + 1,
                     groupAdapter,
                     false,
                     treeNode,
-                    null,
+                    instanceData.note,
                     this,
-                    instanceDatas.single().assignedTo,
+                    instanceData.assignedTo,
             )
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
@@ -511,14 +513,17 @@ class NotDoneGroupNode(
                     treeNode: TreeNode<AbstractHolder>,
                     instanceData: GroupListDataWrapper.InstanceData,
             ): Pair<String, Int>? {
-                val text = treeNode.takeIf { !it.isExpanded }
-                        ?.allChildren
-                        ?.filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
-                        ?.map { it.modelNode as NotDoneGroupNode }
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.sorted()
-                        ?.joinToString(", ") { it.singleInstanceData.name }
-                        ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
+                val text = if (treeNode.isExpanded) {
+                    null
+                } else {
+                    treeNode.allChildren
+                            .filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
+                            .map { it.modelNode as NotDoneGroupNode }
+                            .takeIf { it.isNotEmpty() }
+                            ?.sorted()
+                            ?.joinToString(", ") { it.singleInstanceData.name }
+                            ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
+                }
 
                 return text?.let {
                     Pair(it, if (instanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled)
@@ -581,7 +586,7 @@ class NotDoneGroupNode(
                     groupAdapter,
                     false,
                     treeNode,
-                    null,
+                    instanceData.note,
                     this,
                     instanceData.assignedTo,
             )

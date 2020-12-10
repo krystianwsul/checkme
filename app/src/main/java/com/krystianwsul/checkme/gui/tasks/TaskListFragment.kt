@@ -643,11 +643,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-                if (childTaskData.assignedTo.isNotEmpty()) {
-                    check(indentation == 0)
-                    check(parentNode == null)
-
-                    treeNodes += DetailsNode("assigned to: " + childTaskData.assignedTo.joinToString(", ") { it.name }, false, this).initialize(nodeContainer)
+                if (childTaskData.assignedTo.isNotEmpty() || !childTaskData.note.isNullOrEmpty()) {
+                    treeNodes += DetailsNode(
+                            childTaskData.assignedTo.joinToString(", ") { it.name },
+                            childTaskData.note,
+                            false,
+                            this
+                    ).initialize(nodeContainer)
                 }
 
                 for (childTaskData in childTaskData.children) {
@@ -673,13 +675,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val children: Pair<String, Int>?
                 get() {
-                    val text = treeNode.takeIf { !it.isExpanded }
-                            ?.allChildren
-                            ?.filter { it.modelNode is TaskWrapper && it.canBeShown() }
-                            ?.map { it.modelNode as TaskWrapper }
-                            ?.takeIf { it.isNotEmpty() }
-                            ?.joinToString(", ") { it.childTaskData.name }
-                            ?: childTaskData.note.takeIf { !it.isNullOrEmpty() }
+                    val text = if (treeNode.isExpanded) {
+                        null
+                    } else {
+                        treeNode.allChildren
+                                .filter { it.modelNode is TaskWrapper && it.canBeShown() }
+                                .map { it.modelNode as TaskWrapper }
+                                .takeIf { it.isNotEmpty() }
+                                ?.joinToString(", ") { it.childTaskData.name }
+                                ?: childTaskData.note.takeIf { !it.isNullOrEmpty() }
+                    }
 
                     return text?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
                 }

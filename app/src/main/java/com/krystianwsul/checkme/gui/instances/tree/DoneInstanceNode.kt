@@ -86,7 +86,7 @@ class DoneInstanceNode(
                 groupAdapter,
                 false,
                 treeNode,
-                null,
+                instanceData.note,
                 this,
                 instanceData.assignedTo
         )

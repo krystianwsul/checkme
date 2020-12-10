@@ -33,7 +33,16 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/rowListDetailsText"
+                android:id="@+id/rowListDetailsAssignedTo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textPrimary"
+                android:textSize="@dimen/textPrimary"
+                tools:ignore="Deprecated"
+                android:textIsSelectable="true" />
+
+            <TextView
+                android:id="@+id/rowListDetailsNote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/textPrimary"

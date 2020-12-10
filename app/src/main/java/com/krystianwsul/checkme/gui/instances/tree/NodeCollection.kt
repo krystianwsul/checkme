@@ -57,22 +57,22 @@ class NodeCollection(
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 
         return mutableListOf<TreeNode<AbstractHolder>>().apply {
-            if (assignedTo.isNotEmpty()) {
-                if (indentation == 0) {
-                    check(indentation == 0)
-                    check(parentNode == null)
-
-                    add(AssignedNode(assignedTo).initialize(nodeContainer))
-                } else {
-                    add(DetailsNode("assigned to: " + assignedTo.joinToString(", ") { it.name }, true, parentNode).initialize(nodeContainer))
-                }
-            }
-
-            if (!note.isNullOrEmpty()) {
-                check(indentation == 0)
+            if (indentation == 0) {
                 check(parentNode == null)
 
-                add(NoteNode(note).initialize(nodeContainer))
+                if (assignedTo.isNotEmpty()) add(AssignedNode(assignedTo).initialize(nodeContainer))
+                if (!note.isNullOrEmpty()) add(NoteNode(note).initialize(nodeContainer))
+            } else {
+                checkNotNull(parentNode)
+
+                if (assignedTo.isNotEmpty() || !note.isNullOrEmpty()) {
+                    add(DetailsNode(
+                            assignedTo.joinToString(", ") { it.name },
+                            note,
+                            true,
+                            parentNode
+                    ).initialize(nodeContainer))
+                }
             }
 
             imageData?.let {

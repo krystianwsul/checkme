@@ -3,6 +3,9 @@ package com.krystianwsul.checkme.gui.tree
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListDetailsBinding
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
+import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
@@ -18,7 +21,8 @@ class DetailsNode(
         private val note: String?,
         instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-) : AbstractModelNode(), InvisibleCheckboxModelNode {
+        override val indentation: Int,
+) : AbstractModelNode(), InvisibleCheckboxModelNode, IndentationModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -49,9 +53,7 @@ class DetailsNode(
     override val isVisibleDuringActionMode = false
 
     override val delegates by lazy {
-        listOf(
-                InvisibleCheckboxDelegate(this)
-        )
+        listOf(InvisibleCheckboxDelegate(this), IndentationDelegate(this))
     }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
@@ -72,7 +74,7 @@ class DetailsNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
 
-    override val checkBoxInvisible = instance
+    override val checkBoxInvisible = false // instance todo details
 
     override fun normalize() {
         normalizedNote
@@ -98,8 +100,9 @@ class DetailsNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListDetailsBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
+    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, IndentationHolder {
 
+        override val rowContainer = binding.rowListDetailsContainer
         val rowAssignedTo = binding.rowListDetailsAssignedTo
         val rowNote = binding.rowListDetailsNote
         override val rowCheckBoxFrame = binding.rowListDetailsCheckboxInclude.rowCheckboxFrame

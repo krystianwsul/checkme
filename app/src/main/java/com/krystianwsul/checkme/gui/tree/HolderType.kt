@@ -65,8 +65,7 @@ enum class HolderType {
         )
     },
 
-    ASSIGNED {
-        // RowListAssignedBinding
+    ASSIGNED { // none
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
                 baseAdapter,
@@ -74,9 +73,7 @@ enum class HolderType {
         )
     },
 
-    IMAGE {
-        // none
-        // RowListImageBinding
+    IMAGE { // none
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
                 baseAdapter,
@@ -84,8 +81,7 @@ enum class HolderType {
         )
     },
 
-    NOTE {
-        // RowListNoteBinding
+    NOTE { // none
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
                 baseAdapter,
@@ -93,8 +89,7 @@ enum class HolderType {
         )
     },
 
-    DETAILS {
-        // RowListNoteBinding
+    DETAILS { // InvisibleCheckboxHolder, IndentationHolder
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = DetailsNode.Holder(
                 baseAdapter,

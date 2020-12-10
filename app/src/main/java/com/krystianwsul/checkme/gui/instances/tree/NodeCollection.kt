@@ -70,7 +70,8 @@ class NodeCollection(
                             assignedTo.joinToString(", ") { it.name },
                             note,
                             true,
-                            parentNode
+                            parentNode,
+                            indentation
                     ).initialize(nodeContainer))
                 }
             }

@@ -648,7 +648,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             childTaskData.assignedTo.joinToString(", ") { it.name },
                             childTaskData.note,
                             false,
-                            this
+                            this,
+                            indentation + 1
                     ).initialize(nodeContainer)
                 }
 

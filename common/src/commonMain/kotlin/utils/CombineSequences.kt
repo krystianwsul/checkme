@@ -2,6 +2,30 @@ package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.firebase.models.Instance
 
+fun <T : Any> combineSequencesGrouping(
+        sequences: List<Sequence<T>>,
+        selector: (List<T?>) -> List<Int>,
+): Sequence<List<T>> {
+    val sequenceHolders = sequences.map(::SequenceHolder)
+
+    return generateSequence {
+        val nextValues = sequenceHolders.map { it.nextValue }
+
+        if (nextValues.filterNotNull().isEmpty()) return@generateSequence null
+
+        val nextIndices = selector(nextValues)
+        check(nextValues.indices.toList().containsAll(nextIndices))
+
+        val selectedSequenceHolders = nextIndices.map { sequenceHolders[it] }
+
+        val nextValue = selectedSequenceHolders.map { it.nextValue!! }
+
+        selectedSequenceHolders.forEach { it.getNext() }
+
+        nextValue
+    }
+}
+
 fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>) -> Int): Sequence<T> {
     val sequenceHolders = sequences.map(::SequenceHolder)
 
@@ -35,9 +59,7 @@ fun <T : ProjectType> combineInstanceSequences(
     }
 }
 
-private data class SequenceHolder<T : Any>(
-        private val sequence: Sequence<T>
-) {
+private data class SequenceHolder<T : Any>(private val sequence: Sequence<T>) {
 
     private val iterator = sequence.iterator()
 

@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
@@ -93,7 +94,7 @@ class Instance<T : ProjectType> private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val instanceCustomTimeKey
-        get() = (instanceTime as? Time.Custom<T>)?.key
+    get() = (instanceTime as? Time.Custom<T>)?.key
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
@@ -162,12 +163,16 @@ class Instance<T : ProjectType> private constructor(
         } else {
             task.childHierarchyIntervals
                     .asSequence()
-                    .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
-                    .map { it.taskHierarchy }
                     .filter {
-                        it.notDeletedOffset(hierarchyExactTimeStamp)
-                                && it.childTask.notDeletedOffset(hierarchyExactTimeStamp)
+                        val taskHierarchy = it.taskHierarchy
+                        val childTask = taskHierarchy.childTask
+                        val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
+
+                        it.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
+                                && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
                     }
+                    .map { it.taskHierarchy }
                     .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
                     .filter {
                         it.first
@@ -180,9 +185,11 @@ class Instance<T : ProjectType> private constructor(
                     .toList()
         }
 
-        instanceLocker?.childInstances = childInstances
+        val filteredChildInstances = childInstances.filter { !it.first.isInvisibleBecauseOfEndData(now) }
 
-        return childInstances
+        instanceLocker?.childInstances = filteredChildInstances
+
+        return filteredChildInstances
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local) = listOfNotNull(
@@ -194,7 +201,7 @@ class Instance<T : ProjectType> private constructor(
 
     fun getDisplayData(now: ExactTimeStamp.Local) = if (isRootInstance(now)) instanceDateTime else null
 
-    private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<*> {
+    private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<T> {
         (data as? Data.Real)?.let { return it }
 
         getParentInstance(now)?.instance?.createInstanceHierarchy(now)
@@ -202,11 +209,34 @@ class Instance<T : ProjectType> private constructor(
         return createInstanceRecord()
     }
 
-    private fun getMatchingScheduleIntervals() = task.scheduleIntervals.filter {
-        it.matchesScheduleDateTime(scheduleDateTime, false)
+    private val matchingScheduleIntervals by invalidatableLazy {
+        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
+
+        task.getScheduleDateTimes(
+                exactTimeStamp,
+                exactTimeStamp.plusOne(),
+                originalDateTime = true,
+                checkOldestVisible = false
+        ).toList()
+    }.addTo(task.scheduleIntervalsProperty)
+
+    // this does not account for whether or not this is a rootInstance
+    private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
+        val filtered = if (checkOldestVisible) {
+            matchingScheduleIntervals.map {
+                it.filter { it.second.schedule.isAfterOldestVisible(scheduleDateTime.toLocalExactTimeStamp()) }
+            }
+        } else {
+            matchingScheduleIntervals
+        }
+
+        return filtered.singleOrEmpty()
+                .orEmpty()
+                .filter { it.first == scheduleDateTime }
+                .map { it.second }
     }
 
-    fun getOldestVisibles() = getMatchingScheduleIntervals().map { it.schedule.oldestVisible }
+    fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
@@ -219,21 +249,7 @@ class Instance<T : ProjectType> private constructor(
             cachedIsVisible?.let { return it }
         }
 
-        val isVisible = if (
-                !exists()
-                && isRootInstance(now)
-                && getOldestVisibles().map { it.date }.run {
-                    when {
-                        isEmpty() -> false
-                        contains(null) -> false
-                        else -> requireNoNulls().minOrNull()!! > scheduleDate
-                    }
-                }
-        ) {
-            false
-        } else {
-            isVisibleHelper(now, hack24, ignoreHidden)
-        }
+        val isVisible = isVisibleHelper(now, hack24, ignoreHidden)
 
         instanceLocker?.let {
             if (hack24)
@@ -245,31 +261,35 @@ class Instance<T : ProjectType> private constructor(
         return isVisible
     }
 
-    private fun matchesSchedule() = task.scheduleIntervals.any {
-        it.matchesScheduleDateTime(scheduleDateTime, true) // todo possibly use schedule.getDateTimes for this
-    }
+    private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
+
+    private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
+            task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
 
     private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
         if (!ignoreHidden && data.hidden) return false
 
-        if (task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }) return false
+        if (isInvisibleBecauseOfEndData(now)) return false
 
-        getParentInstance(now)?.instance
-                ?.isVisible(now, hack24)
-                ?.let { return it }
+        val parentInstance = getParentInstance(now)
 
-        if (!exists() && !matchesSchedule()) return false
+        if (parentInstance != null) {
+            return parentInstance.instance.isVisible(now, hack24)
+        } else {
+            if (!exists() && !matchesSchedule()) return false
 
-        val done = done ?: return true
+            val done = done ?: return true
 
-        val cutoff = if (hack24)
-            ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
-        else
-            now
+            val cutoff = if (hack24)
+                ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
+            else
+                now
 
-        return done > cutoff
+            return done > cutoff
+        }
     }
 
+    // This is a misnomer, don't get any ideas
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
             ?.isReachableFromMainScreen(now)
             ?: (exists() || matchesSchedule())
@@ -379,10 +399,9 @@ class Instance<T : ProjectType> private constructor(
     ) {
         check(isRootInstance(now))
 
-        createInstanceHierarchy(now)
+        if (dateTime == instanceDateTime) return
 
-        @Suppress("UNCHECKED_CAST")
-        (data as Data.Real<T>).instanceRecord.let {
+        createInstanceHierarchy(now).instanceRecord.let {
             it.instanceDate = dateTime.date
 
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
@@ -479,22 +498,16 @@ class Instance<T : ProjectType> private constructor(
     fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
         if (!isRootInstance(now)) return listOf()
 
-        return getMatchingScheduleIntervals().flatMap { it.schedule.assignedTo }
-                .toSet()
+        return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
+                .distinct()
+                .singleOrEmpty()
+                .orEmpty()
                 .let(project::getAssignedTo)
                 .map { it.value }
     }
 
-    // meaningless for child instances, but returns true for convenience
-    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
-        if (!isRootInstance(now)) return true
-
-        return getMatchingScheduleIntervals().let {
-            it.isEmpty() || it.any {
-                it.schedule.assignedTo.let { it.isEmpty() || myUser.userKey in it }
-            }
-        }
-    }
+    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
+            getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
 
     private sealed class Data<T : ProjectType> {
 

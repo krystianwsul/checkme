@@ -29,7 +29,7 @@ class SingleSchedule<T : ProjectType>(
 
     private val originalScheduleDateTime
         get() = singleScheduleRecord.run { // specifically not scheduleRecord
-            DateTime(date, originalTimePair.toTime())
+            DateTime(originalDate, originalTimePair.toTime())
         }
 
     fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)
@@ -38,7 +38,11 @@ class SingleSchedule<T : ProjectType>(
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean,
+            checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
+        val dateTime = if (originalDateTime) originalScheduleDateTime else dateTime
+
         val scheduleExactTimeStamp = dateTime.timeStamp.toLocalExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > scheduleExactTimeStamp } == true) return emptySequence()
@@ -64,6 +68,8 @@ class SingleSchedule<T : ProjectType>(
 
         return getInstance(task).isVisible(now, hack24)
     }
+
+    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
 
     override val oldestVisible = OldestVisible.Single
 
@@ -114,12 +120,6 @@ class SingleSchedule<T : ProjectType>(
             set(value) {
                 singleScheduleRecord.endTimeOffset = value
             }
-    }
-
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (singleScheduleRecord.originalDate != scheduleDateTime.date) return false
-
-        return singleScheduleRecord.originalTimePair == scheduleDateTime.time.timePair
     }
 
     val group = singleScheduleRecord.group

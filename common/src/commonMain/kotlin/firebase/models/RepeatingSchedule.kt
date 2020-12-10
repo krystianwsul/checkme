@@ -23,20 +23,24 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     private val oldestVisibleDate by oldestVisibleDateProperty
 
     override val oldestVisible
-        get() = oldestVisibleDate?.let {
-            OldestVisible.RepeatingNonNull(it)
-        } ?: OldestVisible.RepeatingNull
+        get() = oldestVisibleDate?.let { OldestVisible.RepeatingNonNull(it) } ?: OldestVisible.RepeatingNull
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean,
+            checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStampOffset,
-                repeatingScheduleRecord.from?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
+                repeatingScheduleRecord.from?.let {
+                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+                },
                 givenStartExactTimeStamp,
-                oldestVisibleDate?.let { ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) },
+                oldestVisibleDate?.takeIf { checkOldestVisible }?.let {
+                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+                },
                 scheduleInterval.startExactTimeStampOffset
         ).maxOrNull()!!
 
@@ -99,10 +103,16 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         return nullableSequence.filterNotNull()
     }
 
+    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {
+        return oldestVisibleDate?.let {
+            ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) <= exactTimeStamp
+        } ?: true
+    }
+
     private fun getDateTimeInDate(
             date: Date,
             startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?
+            endHourMilli: HourMilli?,
     ): DateTime? {
         if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
 
@@ -159,18 +169,4 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
         oldestVisibleDateProperty.invalidate()
     }
-
-    override fun matchesScheduleDateTimeHelper(scheduleDateTime: DateTime, checkOldestVisible: Boolean): Boolean {
-        if (checkOldestVisible && oldestVisibleDate?.let { scheduleDateTime.date < it } == true) return false
-
-        if (timePair != scheduleDateTime.time.timePair) return false
-
-        if (from?.let { scheduleDateTime.date < it } == true) return false
-
-        if (until?.let { scheduleDateTime.date > it } == true) return false
-
-        return matchesScheduleDateRepeatingHelper(scheduleDateTime.date)
-    }
-
-    protected abstract fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean
 }

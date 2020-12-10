@@ -74,8 +74,8 @@ class TaskRelevance(val task: Task<*>) {
 
         task.existingInstances
                 .values
-                .filter { it.filterOldestVisible(now, true) }
-                .map { instanceRelevances[it.instanceKey]!! }
+                .filter { it.isRootInstance(now) && it.filterOldestVisible(now, true) }
+                .map { instanceRelevances.getValue(it.instanceKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 

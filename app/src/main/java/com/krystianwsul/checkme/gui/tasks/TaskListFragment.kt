@@ -511,21 +511,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-            if (taskData.assignedTo.isNotEmpty()) {
-                treeNodes += AssignedNode(
-                        taskData.assignedTo,
-                        false,
-                        null
-                ).initialize(treeNodeCollection)
-            }
+            if (taskData.assignedTo.isNotEmpty())
+                treeNodes += AssignedNode(taskData.assignedTo, null).initialize(treeNodeCollection)
 
             if (!taskData.note.isNullOrEmpty())
-                treeNodes += NoteNode(taskData.note, false).initialize(treeNodeCollection)
+                treeNodes += NoteNode(taskData.note, null).initialize(treeNodeCollection)
 
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes += ImageNode(
+                        treeNodes += ImageNode( // todo create some sort of imageViewerHost, merge code wtih GroupListFragment
                                 ImageNode.ImageData(
                                         it,
                                         { viewer ->

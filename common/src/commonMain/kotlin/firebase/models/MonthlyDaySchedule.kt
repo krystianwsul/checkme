@@ -32,10 +32,4 @@ class MonthlyDaySchedule<T : ProjectType>(
             repeatingScheduleRecord.dayOfMonth,
             repeatingScheduleRecord.beginningOfMonth
     )
-
-    override fun matchesScheduleDateRepeatingHelper(scheduleDate: Date): Boolean {
-        val date = scheduleDate.run { getDateInMonth(year, month) }
-
-        return date == scheduleDate
-    }
 }

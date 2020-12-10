@@ -14,15 +14,9 @@
         android:minHeight="51dp"
         android:gravity="center_vertical">
 
-        <include
-            android:id="@+id/rowListNoteCheckboxInclude"
-            layout="@layout/row_list_checkbox" />
-
         <View
-            android:id="@+id/rowListNoteMargin"
             android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+            android:layout_height="0dp" />
 
         <LinearLayout
             android:layout_width="0dp"

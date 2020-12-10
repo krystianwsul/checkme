@@ -39,15 +39,6 @@ class Task<T : ProjectType>(
     }
     val endData by endDataProperty
 
-    private val _existingInstances = taskRecord.instanceRecords
-            .values
-            .toMutableList<InstanceRecord<T>>()
-            .apply { addAll(rootInstanceManager.records) }
-            .map { Instance(project, this, it) }
-            .toMutableList()
-            .associateBy { it.scheduleKey }
-            .toMutableMap()
-
     private val _schedules = mutableListOf<Schedule<T>>()
 
     private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
@@ -82,13 +73,14 @@ class Task<T : ProjectType>(
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
-    private val intervalsProperty = invalidatableLazy { IntervalBuilder.build(this) }
+    private val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
 
-    val scheduleIntervals
-        get() = intervals.mapNotNull {
-            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
-        }.flatten()
+    val scheduleIntervalsProperty = invalidatableLazyCallbacks {
+        intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
+    }.apply { intervalsProperty.addCallback { invalidate() } }
+
+    val scheduleIntervals by scheduleIntervalsProperty
 
     val parentHierarchyIntervals
         get() = intervals.mapNotNull {
@@ -108,6 +100,15 @@ class Task<T : ProjectType>(
                 .filter { it.taskHierarchy.parentTaskKey == taskKey }
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
+
+    private val _existingInstances = taskRecord.instanceRecords
+            .values
+            .toMutableList<InstanceRecord<T>>()
+            .apply { addAll(rootInstanceManager.records) }
+            .map { Instance(project, this, it) }
+            .toMutableList()
+            .associateBy { it.scheduleKey }
+            .toMutableMap()
 
     var ordinal
         get() = taskRecord.ordinal ?: startExactTimeStamp.long.toDouble()
@@ -295,30 +296,56 @@ class Task<T : ProjectType>(
                 .map { it.first }
     }
 
+    /*
+     Note: this groups by the DateTime's Date and HourMinute, not strict equality.  A list may have pairs with various
+     customTimes, for example.
+     */
+    fun getScheduleDateTimes(
+            startExactTimeStamp: ExactTimeStamp.Offset,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            originalDateTime: Boolean = false,
+            checkOldestVisible: Boolean = true,
+    ): Sequence<List<Pair<DateTime, ScheduleInterval<T>>>> {
+        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
+
+        val scheduleResults = scheduleIntervals.map { scheduleInterval ->
+            scheduleInterval.getDateTimesInRange(
+                    startExactTimeStamp,
+                    endExactTimeStamp,
+                    originalDateTime,
+                    checkOldestVisible
+            ).map { it to scheduleInterval }
+        }
+
+        return combineSequencesGrouping(scheduleResults) {
+            throwIfInterrupted()
+
+            val nextDateTime = it.filterNotNull()
+                    .minByOrNull { it.first }!!
+                    .first
+
+            it.mapIndexed { index, dateTime -> index to dateTime }
+                    .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
+                    .map { it.first }
+        }
+    }
+
     // contains only generated instances
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            bySchedule: Boolean,
     ): Sequence<Instance<out T>> {
-        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
+        val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
-        val scheduleResults = scheduleIntervals.map {
-            it.getDateTimesInRange(startExactTimeStamp, endExactTimeStamp)
-        }
-
-        val scheduleInstanceSequences = scheduleResults.map {
+        return scheduleSequence.flatMap {
             throwIfInterrupted()
 
-            it.mapNotNull {
-                throwIfInterrupted()
-
-                getInstance(it).takeIf { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
-            }
+            it.map { it.first }
+                    .distinct()
+                    .map(::getInstance)
+                    .filter { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
         }
-
-        return combineInstanceSequences(scheduleInstanceSequences, bySchedule)
     }
 
     // contains only generated instances
@@ -365,7 +392,7 @@ class Task<T : ProjectType>(
                 onlyRoot
         )
 
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now, bySchedule)
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(

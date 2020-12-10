@@ -2,9 +2,6 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowListNoteBinding
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -12,7 +9,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), InvisibleCheckboxModelNode {
+class NoteNode(val note: String) : AbstractModelNode(), InvisibleCheckboxModelNode {
 
     override val parentNode: ModelNode<AbstractHolder>? = null
 
@@ -35,7 +32,6 @@ class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), Invis
 
     init {
         check(note.isNotEmpty())
-        check(parentNode == null)
     }
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
@@ -51,8 +47,6 @@ class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), Invis
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val delegates by lazy { listOf(InvisibleCheckboxDelegate(this)) }
-
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
@@ -60,8 +54,6 @@ class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), Invis
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is AssignedNode) 1 else -1
-
-    override val checkBoxInvisible = instance
 
     override fun normalize() {
         normalizedNote
@@ -87,11 +79,9 @@ class NoteNode(val note: String, instance: Boolean) : AbstractModelNode(), Invis
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListNoteBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder {
+    ) : AbstractHolder(binding.root) {
 
         val rowText = binding.rowListNoteText
-        override val rowCheckBoxFrame = binding.rowListNoteCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListNoteMargin
         override val rowSeparator = binding.rowListNoteSeparator
     }
 }

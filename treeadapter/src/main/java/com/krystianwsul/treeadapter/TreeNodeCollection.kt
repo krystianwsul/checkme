@@ -136,29 +136,39 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
         val adjustedPosition = min(visibleNodes.size - 1, position) // padding
 
-        val previousNode = adjustedPosition.takeIf { it > 0 }?.let { visibleNodes[adjustedPosition - 1] }
-        val node = visibleNodes[adjustedPosition]
-        val nextNode = adjustedPosition.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[adjustedPosition + 1] }
+        val previousNode = adjustedPosition.takeIf { it > 0 }
+                ?.let { visibleNodes[adjustedPosition - 1] }
+                ?.modelNode
+                as? Sortable
+
+        val currentNode = visibleNodes[adjustedPosition].modelNode as Sortable
+
+        val nextNode = adjustedPosition.takeIf { it < visibleNodes.size - 1 }
+                ?.let { visibleNodes[adjustedPosition + 1] }
+                ?.modelNode
+                as? Sortable
+
+        check(previousNode != null || nextNode != null)
 
         val previousOrdinal: Double
         val nextOrdinal: Double
         if (previousNode != null) {
-            previousOrdinal = (previousNode.modelNode as Sortable).getOrdinal()
+            previousOrdinal = previousNode.getOrdinal()
 
             val lastOrdinal = if (previousOrdinal.toInt() == ceil(previousOrdinal).toInt())
                 previousOrdinal + 1
             else
                 ceil(previousOrdinal)
 
-            nextOrdinal = (nextNode?.modelNode as? Sortable)?.getOrdinal() ?: lastOrdinal
+            nextOrdinal = nextNode?.getOrdinal() ?: lastOrdinal
         } else {
-            nextOrdinal = (nextNode!!.modelNode as Sortable).getOrdinal()
+            nextOrdinal = (nextNode as Sortable).getOrdinal()
             previousOrdinal = nextOrdinal - 1000
         }
 
         printOrdinals("setNewItemPosition before")
 
-        (node.modelNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
+        currentNode.setOrdinal((previousOrdinal + nextOrdinal) / 2)
 
         printOrdinals("setNewItemPosition after")
     }

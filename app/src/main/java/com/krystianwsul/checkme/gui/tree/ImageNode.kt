@@ -88,8 +88,7 @@ class ImageNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
-        is AssignedNode -> 1
-        is NoteNode -> 1
+        is DetailsNode -> 1
         else -> -1
     }
 

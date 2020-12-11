@@ -103,9 +103,7 @@ class DividerNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         check(
-                other is AssignedNode
-                        || other is NoteNode
-                        || other is NotDoneGroupNode
+                other is NotDoneGroupNode
                         || other is UnscheduledNode
                         || other is ImageNode
                         || other is DetailsNode

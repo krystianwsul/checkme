@@ -65,27 +65,11 @@ enum class HolderType {
         )
     },
 
-    ASSIGNED { // none
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = AssignedNode.Holder(
-                baseAdapter,
-                RowListAssignedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    },
-
     IMAGE { // none
 
         override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = ImageNode.Holder(
                 baseAdapter,
                 RowListImageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    },
-
-    NOTE { // none
-
-        override fun onCreateViewHolder(baseAdapter: BaseAdapter, parent: ViewGroup) = NoteNode.Holder(
-                baseAdapter,
-                RowListNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     },
 

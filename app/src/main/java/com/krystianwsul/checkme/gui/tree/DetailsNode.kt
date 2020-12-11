@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -29,7 +30,7 @@ class DetailsNode(
 
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
 
-    override val indentation = indentation - 1
+    override val indentation = (indentation - 1).coerceAtLeast(0)
 
     override val holderType = HolderType.DETAILS
 
@@ -66,6 +67,8 @@ class DetailsNode(
         super.onBindViewHolder(viewHolder, startingDrag)
 
         (viewHolder as Holder).apply {
+            rowTopMargin.isVisible = treeNode.treeNodeCollection.getPosition(treeNode) == 0
+
             if (projectInfo != null) {
                 rowProjectContainer.isVisible = true
 
@@ -134,6 +137,7 @@ class DetailsNode(
             binding: RowListDetailsBinding,
     ) : AbstractHolder(binding.root), IndentationHolder {
 
+        val rowTopMargin = binding.rowListDetailsTopMargin
         override val rowContainer = binding.rowListDetailsContainer
         val rowProjectContainer = binding.rowListDetailsProjectContainer
         val rowProject = binding.rowListDetailsProject
@@ -144,5 +148,13 @@ class DetailsNode(
         override val rowSeparator = binding.rowListDetailsSeparator
     }
 
-    data class ProjectInfo(val name: String, val assignedTo: List<AssignedNode.User>)
+    data class ProjectInfo(val name: String, val assignedTo: List<User>)
+
+    data class User(val name: String, val photoUrl: String?) {
+
+        companion object {
+
+            fun fromProjectUsers(users: List<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
+        }
+    }
 }

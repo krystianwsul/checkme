@@ -52,7 +52,7 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
             .toMutableList()
 
     MainViewModel.Data(
-            TaskListFragment.TaskData(childTaskDatas, null, true, listOf()),
+            TaskListFragment.TaskData(childTaskDatas, null, true, null),
             myUserFactory.user.defaultTab
     )
 }

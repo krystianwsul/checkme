@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
-import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainResult
@@ -40,7 +39,7 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 
 fun Task<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
     return if (isRootTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) {
-        DetailsNode.ProjectInfo(project.name, AssignedNode.User.fromProjectUsers(getAssignedTo(now)))
+        DetailsNode.ProjectInfo(project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
     } else {
         check(getAssignedTo(now).isEmpty())
 
@@ -50,7 +49,7 @@ fun Task<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? 
 
 fun Instance<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
     return if (isRootInstance(now) && project is SharedProject) {
-        DetailsNode.ProjectInfo(project.name, AssignedNode.User.fromProjectUsers(getAssignedTo(now)))
+        DetailsNode.ProjectInfo(project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
     } else {
         check(getAssignedTo(now).isEmpty())
 

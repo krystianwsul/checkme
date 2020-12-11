@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
@@ -64,7 +63,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                     childTaskDatas.toMutableList(),
                     task.note,
                     task.isVisible(now, false),
-                    AssignedNode.User.fromProjectUsers(task.getAssignedTo(now))
+                    task.getProjectInfo(now),
             ),
             task.getImage(deviceDbInfo),
             task.current(now)

@@ -376,7 +376,7 @@ class NotDoneGroupNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
-        is AssignedNode, is NoteNode, is ImageNode, is DetailsNode -> 1
+        is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
             val timeStampComparison = exactTimeStamp.compareTo(other.exactTimeStamp)
             if (timeStampComparison != 0) {

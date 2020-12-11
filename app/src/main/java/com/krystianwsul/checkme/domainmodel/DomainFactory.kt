@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
@@ -557,7 +556,7 @@ class DomainFactory(
                                 childTask.getImage(deviceDbInfo),
                                 childInstance.isRepeatingGroupChild(now),
                                 childInstance.isAssignedToMe(now, myUserFactory.user),
-                                AssignedNode.User.fromProjectUsers(childInstance.getAssignedTo(now)),
+                                childInstance.getProjectInfo(now),
                         )
 
                         children.values.forEach { it.instanceDataParent = instanceData }
@@ -662,7 +661,7 @@ class DomainFactory(
                             childTask.isVisible(now, false),
                             alwaysShow,
                             childTask.ordinal,
-                            AssignedNode.User.fromProjectUsers(childTask.getAssignedTo(now)),
+                            childTask.getProjectInfo(now),
                     )
                 }
     }

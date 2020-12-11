@@ -127,7 +127,7 @@ class NotDoneGroupNode(
                     treeNode,
                     instanceData.note,
                     this,
-                    instanceData.assignedTo,
+                    instanceData.projectInfo,
             )
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
@@ -354,7 +354,7 @@ class NotDoneGroupNode(
                     treeNode,
                     instanceData.note,
                     this,
-                    instanceData.assignedTo,
+                    instanceData.projectInfo,
             )
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
@@ -588,7 +588,7 @@ class NotDoneGroupNode(
                     treeNode,
                     instanceData.note,
                     this,
-                    instanceData.assignedTo,
+                    instanceData.projectInfo,
             )
 
             treeNode.setChildTreeNodes(nodeCollection.initialize(

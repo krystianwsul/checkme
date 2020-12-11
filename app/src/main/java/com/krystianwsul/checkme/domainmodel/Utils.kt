@@ -2,11 +2,17 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
+import com.krystianwsul.checkme.gui.tree.AssignedNode
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
+import com.krystianwsul.common.time.ExactTimeStamp
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
@@ -30,4 +36,24 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
     val hasMore = elements.size < elementsPlusOne.size
 
     return Pair(elements, hasMore)
+}
+
+fun Task<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
+    return if (isRootTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) {
+        DetailsNode.ProjectInfo(project.name, AssignedNode.User.fromProjectUsers(getAssignedTo(now)))
+    } else {
+        check(getAssignedTo(now).isEmpty())
+
+        null
+    }
+}
+
+fun Instance<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
+    return if (isRootInstance(now) && project is SharedProject) {
+        DetailsNode.ProjectInfo(project.name, AssignedNode.User.fromProjectUsers(getAssignedTo(now)))
+    } else {
+        check(getAssignedTo(now).isEmpty())
+
+        null
+    }
 }

@@ -88,7 +88,7 @@ class DoneInstanceNode(
                 treeNode,
                 instanceData.note,
                 this,
-                instanceData.assignedTo
+                instanceData.projectInfo
         )
 
         treeNode.setChildTreeNodes(nodeCollection.initialize(

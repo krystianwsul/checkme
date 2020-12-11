@@ -729,7 +729,7 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.groupListDataWrapper.imageData,
                         parameters.showProgress,
                         parameters.useDoneNode,
-                        parameters.groupListDataWrapper.assignedTo,
+                        parameters.groupListDataWrapper.projectInfo,
                 )
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
@@ -757,7 +757,7 @@ class GroupListFragment @JvmOverloads constructor(
                     parameters.groupListDataWrapper.imageData,
                     parameters.showProgress,
                     parameters.useDoneNode,
-                    parameters.groupListDataWrapper.assignedTo,
+                    parameters.groupListDataWrapper.projectInfo,
             )
 
             treeViewAdapter = groupAdapter.treeViewAdapter
@@ -1060,7 +1060,7 @@ class GroupListFragment @JvmOverloads constructor(
                 imageState: ImageState?,
                 showProgress: Boolean,
                 useDoneNode: Boolean,
-                assignedTo: List<AssignedNode.User>,
+                projectInfo: DetailsNode.ProjectInfo?,
         ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
@@ -1074,7 +1074,7 @@ class GroupListFragment @JvmOverloads constructor(
                     treeNodeCollection,
                     note,
                     null,
-                    assignedTo,
+                    projectInfo,
                     useDoneNode,
             )
 

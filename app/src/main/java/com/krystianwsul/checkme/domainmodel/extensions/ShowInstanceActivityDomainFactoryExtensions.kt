@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -119,7 +119,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.getImage(deviceDbInfo),
                 childInstance.isRepeatingGroupChild(now),
                 childInstance.isAssignedToMe(now, myUserFactory.user),
-                AssignedNode.User.fromProjectUsers(childInstance.getAssignedTo(now)),
+                childInstance.getProjectInfo(now),
         )
 
         children.values.forEach { it.instanceDataParent = instanceData }
@@ -134,7 +134,7 @@ private fun DomainFactory.getGroupListData(
             task.note,
             instanceDatas,
             task.getImage(deviceDbInfo),
-            instance.getAssignedTo(now).map { AssignedNode.User(it.name, it.photoUrl) }
+            instance.getProjectInfo(now)
     )
 
     instanceDatas.forEach { it.instanceDataParent = dataWrapper }

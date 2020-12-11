@@ -643,9 +643,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-                if (childTaskData.assignedTo.isNotEmpty() || !childTaskData.note.isNullOrEmpty()) {
+                if (childTaskData.projectInfo != null || !childTaskData.note.isNullOrEmpty()) {
                     treeNodes += DetailsNode(
-                            childTaskData.assignedTo.joinToString(", ") { it.name },
+                            childTaskData.projectInfo,
                             childTaskData.note,
                             this,
                             indentation + 1
@@ -796,7 +796,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val isVisible: Boolean,
             val alwaysShow: Boolean,
             var ordinal: Double,
-            val assignedTo: List<AssignedNode.User>,
+            val projectInfo: DetailsNode.ProjectInfo?,
     ) : Comparable<ChildTaskData>, QueryMatch {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)

@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AssignedNode
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
@@ -40,7 +41,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                         childTask.isVisible(now, false),
                         true,
                         childTask.ordinal,
-                        AssignedNode.User.fromProjectUsers(childTask.getAssignedTo(now))
+                        childTask.getProjectInfo(now),
                 )
             }
             .sorted()

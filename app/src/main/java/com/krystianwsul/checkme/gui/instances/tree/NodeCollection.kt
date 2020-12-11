@@ -17,7 +17,7 @@ class NodeCollection(
         val nodeContainer: NodeContainer<AbstractHolder>,
         private val note: String?,
         val parentNode: ModelNode<AbstractHolder>?,
-        private val assignedTo: List<AssignedNode.User>,
+        private val projectInfo: DetailsNode.ProjectInfo?,
         val useDoneNode: Boolean = true,
 ) {
 
@@ -60,14 +60,14 @@ class NodeCollection(
             if (indentation == 0) {
                 check(parentNode == null)
 
-                if (assignedTo.isNotEmpty()) add(AssignedNode(assignedTo).initialize(nodeContainer))
+                if (projectInfo != null) add(AssignedNode(projectInfo.assignedTo).initialize(nodeContainer))
                 if (!note.isNullOrEmpty()) add(NoteNode(note).initialize(nodeContainer))
             } else {
                 checkNotNull(parentNode)
 
-                if (assignedTo.isNotEmpty() || !note.isNullOrEmpty()) {
+                if (projectInfo != null || !note.isNullOrEmpty()) {
                     add(DetailsNode(
-                            assignedTo.joinToString(", ") { it.name },
+                            projectInfo,
                             note,
                             parentNode,
                             indentation

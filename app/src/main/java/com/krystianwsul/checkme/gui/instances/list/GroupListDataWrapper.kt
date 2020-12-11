@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.gui.tree.AssignedNode
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -16,7 +16,7 @@ data class GroupListDataWrapper(
         val note: String?,
         val instanceDatas: List<InstanceData>,
         val imageData: ImageState?,
-        val assignedTo: List<AssignedNode.User>,
+        val projectInfo: DetailsNode.ProjectInfo?,
 ) : InstanceDataParent {
 
     data class TaskData(
@@ -61,7 +61,7 @@ data class GroupListDataWrapper(
             val imageState: ImageState?,
             val isRecurringGroupChild: Boolean,
             val isAssignedToMe: Boolean,
-            val assignedTo: List<AssignedNode.User>,
+            val projectInfo: DetailsNode.ProjectInfo?,
     ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
 
         lateinit var instanceDataParent: InstanceDataParent

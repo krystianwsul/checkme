@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.databinding.RowAssignedChipBinding
+import com.krystianwsul.checkme.databinding.RowAssignedChipDetailsBinding
 import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
@@ -72,7 +72,7 @@ class DetailsNode(
                 rowAssignedTo.removeAllViews()
 
                 projectInfo.assignedTo.forEach { user ->
-                    RowAssignedChipBinding.inflate(
+                    RowAssignedChipDetailsBinding.inflate(
                             LayoutInflater.from(viewHolder.itemView.context),
                             rowAssignedTo,
                             true
@@ -89,13 +89,19 @@ class DetailsNode(
             }
 
             if (note.isNullOrEmpty()) {
-                rowNote.isGone = true
+                rowNoteContainer.isGone = true
             } else {
-                rowNote.isVisible = true
+                rowNoteContainer.isVisible = true
 
                 rowNote.text = note
             }
+
+            rowMargin.isVisible = projectInfo != null && !note.isNullOrEmpty()
         }
+    }
+
+    override fun onClick(holder: AbstractHolder) {
+        parentNode?.onClick(holder)
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
@@ -130,6 +136,8 @@ class DetailsNode(
         val rowProjectContainer = binding.rowListDetailsProjectContainer
         val rowProject = binding.rowListDetailsProject
         val rowAssignedTo = binding.rowListDetailsAssignedTo
+        val rowMargin = binding.rowListDetailsMargin
+        val rowNoteContainer = binding.rowListDetailsNoteContainer
         val rowNote = binding.rowListDetailsNote
         override val rowSeparator = binding.rowListDetailsSeparator
     }

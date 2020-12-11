@@ -583,7 +583,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             public override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
 
-            private val taskWrappers = mutableListOf<TaskWrapper>()
+            private lateinit var taskWrappers: List<TaskWrapper>
 
             override val taskAdapter get() = taskParent.taskAdapter
 
@@ -652,18 +652,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     ).initialize(nodeContainer)
                 }
 
-                for (childTaskData in childTaskData.children) {
-                    val taskWrapper = TaskWrapper(
+                taskWrappers = childTaskData.children.map {
+                    TaskWrapper(
                             indentation + 1,
                             this,
-                            childTaskData,
+                            it,
                             copying,
                             this
-                    )
-
-                    treeNodes.add(taskWrapper.initialize(selectedTaskKeys, treeNode, expandedTaskKeys))
-
-                    taskWrappers.add(taskWrapper)
+                    ).also { treeNodes += it.initialize(selectedTaskKeys, treeNode, expandedTaskKeys) }
                 }
 
                 treeNode.setChildTreeNodes(treeNodes)

@@ -958,7 +958,8 @@ class Task<T : ProjectType>(
         if (!generatedInstances.containsKey(instanceKey))
             generatedInstances[instanceKey] = Instance(project, this, scheduleDateTime)
 
-        return generatedInstances.getValue(instanceKey)
+        return generatedInstances[instanceKey]
+                ?: throw InstanceKeyNotFoundException("instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(", \n"))
     }
 
     fun getScheduleText(
@@ -1074,4 +1075,6 @@ class Task<T : ProjectType>(
             val deleteInstances: Boolean,
             val exactTimeStampOffset: ExactTimeStamp.Offset = exactTimeStampLocal.toOffset(),
     )
+
+    private class InstanceKeyNotFoundException(message: String) : Exception(message)
 }

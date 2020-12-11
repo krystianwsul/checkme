@@ -107,19 +107,19 @@ class Instance<T : ProjectType> private constructor(
 
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
-    private val hierarchyExactTimeStampProperty = invalidatableLazy {
+    private val hierarchyExactTimeStampEndRangeProperty = invalidatableLazy {
         listOfNotNull(
                 task.endExactTimeStampOffset?.let { Pair(it.minusOne(), "task end") },
                 doneOffset?.let { Pair(it.minusOne(), "done") }
         ).minByOrNull { it.first }
     }
 
-    private val hierarchyExactTimeStamp by hierarchyExactTimeStampProperty
+    private val hierarchyExactTimeStampEndRange by hierarchyExactTimeStampEndRangeProperty
 
     init {
-        task.endDataProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
-        doneProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
-        doneOffsetProperty.addCallback(hierarchyExactTimeStampProperty::invalidate)
+        task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
     }
 
     constructor(
@@ -192,10 +192,13 @@ class Instance<T : ProjectType> private constructor(
         return filteredChildInstances
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local) = listOfNotNull(
-            hierarchyExactTimeStamp,
-            Pair(now, "now"),
-    ).minByOrNull { it.first }!!
+    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local): Pair<ExactTimeStamp, String> {
+        if (now < task.startExactTimeStampOffset) return task.startExactTimeStampOffset to "task start"
+
+        hierarchyExactTimeStampEndRange?.let { if (now > it.first) return it }
+
+        return now to "now"
+    }
 
     fun isRootInstance(now: ExactTimeStamp.Local) = getParentInstance(now) == null
 
@@ -478,7 +481,7 @@ class Instance<T : ProjectType> private constructor(
     fun isRepeatingGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.isRepeatingGroup ?: false
 
     fun onTaskEndChanged() {
-        hierarchyExactTimeStampProperty.invalidate()
+        hierarchyExactTimeStampEndRangeProperty.invalidate()
     }
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime

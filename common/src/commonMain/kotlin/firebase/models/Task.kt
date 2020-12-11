@@ -474,10 +474,8 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) = listOfNotNull(
-            exactTimeStamp,
-            endExactTimeStampOffset?.minusOne()
-    ).minOrNull()!!
+    fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
+            exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,

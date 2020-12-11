@@ -647,7 +647,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     treeNodes += DetailsNode(
                             childTaskData.assignedTo.joinToString(", ") { it.name },
                             childTaskData.note,
-                            false,
                             this,
                             indentation + 1
                     ).initialize(nodeContainer)

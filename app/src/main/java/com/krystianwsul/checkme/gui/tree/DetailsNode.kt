@@ -6,9 +6,6 @@ import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxHolder
-import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -19,15 +16,16 @@ import com.krystianwsul.treeadapter.TreeNode
 class DetailsNode(
         private val assignedTo: String,
         private val note: String?,
-        instance: Boolean,
         override val parentNode: ModelNode<AbstractHolder>?,
-        override val indentation: Int,
-) : AbstractModelNode(), InvisibleCheckboxModelNode, IndentationModelNode {
+        indentation: Int,
+) : AbstractModelNode(), IndentationModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
     private lateinit var nodeContainer: NodeContainer<AbstractHolder>
+
+    override val indentation = indentation - 1
 
     override val holderType = HolderType.DETAILS
 
@@ -52,9 +50,7 @@ class DetailsNode(
 
     override val isVisibleDuringActionMode = false
 
-    override val delegates by lazy {
-        listOf(InvisibleCheckboxDelegate(this), IndentationDelegate(this))
-    }
+    override val delegates by lazy { listOf(IndentationDelegate(this)) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
@@ -73,8 +69,6 @@ class DetailsNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
-
-    override val checkBoxInvisible = false // instance todo details
 
     override fun normalize() {
         normalizedNote
@@ -100,13 +94,11 @@ class DetailsNode(
     class Holder(
             override val baseAdapter: BaseAdapter,
             binding: RowListDetailsBinding,
-    ) : AbstractHolder(binding.root), InvisibleCheckboxHolder, IndentationHolder {
+    ) : AbstractHolder(binding.root), IndentationHolder {
 
         override val rowContainer = binding.rowListDetailsContainer
         val rowAssignedTo = binding.rowListDetailsAssignedTo
         val rowNote = binding.rowListDetailsNote
-        override val rowCheckBoxFrame = binding.rowListDetailsCheckboxInclude.rowCheckboxFrame
-        override val rowMarginStart = binding.rowListDetailsMargin
         override val rowSeparator = binding.rowListDetailsSeparator
     }
 }

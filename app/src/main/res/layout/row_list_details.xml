@@ -16,15 +16,9 @@
         android:minHeight="51dp"
         android:gravity="center_vertical">
 
-        <include
-            android:id="@+id/rowListDetailsCheckboxInclude"
-            layout="@layout/row_list_checkbox" />
-
         <View
-            android:id="@+id/rowListDetailsMargin"
             android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+            android:layout_height="0dp" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"

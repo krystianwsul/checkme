@@ -69,7 +69,6 @@ class NodeCollection(
                     add(DetailsNode(
                             assignedTo.joinToString(", ") { it.name },
                             note,
-                            true,
                             parentNode,
                             indentation
                     ).initialize(nodeContainer))

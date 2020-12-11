@@ -14,6 +14,8 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     val isSeparatorVisibleWhenNotExpanded get() = false
 
+    val showSeparatorWhenParentExpanded get() = true
+
     val state: ModelState
 
     val id: Any

@@ -110,12 +110,13 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             check(positionInCollection >= 0)
 
             if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
-            if (parent.getPosition(this) == parent.displayedNodes.size - 1) return true
+            if (parent.getPosition(this) == parent.displayedNodes.size - 1) return parent.wantsSeparators
 
             val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1)
-
-            return nextTreeNode.isExpanded || modelNode.isSeparatorVisibleWhenNotExpanded
+            return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators
         }
+
+    override val wantsSeparators get() = displayedChildNodes.any { it.modelNode.showSeparatorWhenParentExpanded }
 
     val allChildren: List<TreeNode<T>> get() = childTreeNodes
 
@@ -254,10 +255,17 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         get() {
             if (!canBeShown()) return listOf()
 
+            return listOf(this) + displayedChildNodes
+        }
+
+    private val displayedChildNodes: List<TreeNode<T>>
+        get() {
+            check(canBeShown())
+
             return if (expanded)
-                listOf(this) + childTreeNodes.flatMap { it.displayedNodes }
+                childTreeNodes.flatMap { it.displayedNodes }
             else
-                listOf(this)
+                listOf()
         }
 
     fun canBeShown(): Boolean {

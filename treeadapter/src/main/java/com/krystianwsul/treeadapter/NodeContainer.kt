@@ -16,6 +16,8 @@ interface NodeContainer<T : RecyclerView.ViewHolder> {
 
     val id: Any
 
+    val wantsSeparators: Boolean
+
     fun getPosition(treeNode: TreeNode<T>): Int
 
     fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)

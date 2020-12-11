@@ -27,6 +27,8 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
             printOrdinals("setNodes")
         }
 
+    override val wantsSeparators = false
+
     private fun printOrdinals(prefix: String) = treeNodesRelay.value!!.mapNotNull {
         it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" }
     }

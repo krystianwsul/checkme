@@ -43,6 +43,8 @@ class DetailsNode(
 
     override val disableRipple = true
 
+    override val showSeparatorWhenParentExpanded = false
+
     init {
         check(projectInfo != null || !note.isNullOrEmpty())
     }

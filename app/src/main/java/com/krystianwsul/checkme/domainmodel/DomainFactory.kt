@@ -87,7 +87,8 @@ class DomainFactory(
                 val silent = (tickData?.silent ?: true) && newTickData.silent
                 val notifyListeners = (tickData?.domainChanged ?: false) || newTickData.domainChanged
 
-                if (notifyListeners) domainFactory.domainChanged.accept(setOf())
+                if (notifyListeners) domainFactory.domainListenerManager.notify()
+
                 domainFactory.updateNotificationsTick(source, silent, newTickData.source)
 
                 if (tickData?.waiting == true) {
@@ -151,7 +152,7 @@ class DomainFactory(
 
     private var aggregateData: AggregateData? = null
 
-    val domainChanged = BehaviorRelay.createDefault(setOf<Int>())
+    val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
         private set
@@ -202,7 +203,7 @@ class DomainFactory(
                 .values
                 .forEach { it.fixOffsets() }
 
-        save(setOf(), SaveService.Source.SERVICE)
+        save(null, SaveService.Source.SERVICE)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -221,7 +222,7 @@ class DomainFactory(
     val uuid get() = localFactory.uuid
 
     var debugMode by observable(false) { _, _, _ ->
-        domainChanged.accept(setOf())
+        domainListenerManager.notify()
     }
 
     private fun updateIsSaved() {
@@ -240,14 +241,7 @@ class DomainFactory(
     }
 
     fun save(
-            dataId: Int,
-            source: SaveService.Source,
-            forceDomainChanged: Boolean = false,
-            values: MutableMap<String, Any?> = mutableMapOf(),
-    ) = save(setOf(dataId), source, forceDomainChanged, values)
-
-    fun save(
-            dataIds: Set<Int>,
+            dataId: Int?,
             source: SaveService.Source,
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
@@ -256,7 +250,7 @@ class DomainFactory(
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
-            check(dataIds.isEmpty() || dataIds.single() == 0)
+            check(dataId == null || dataId == 0)
 
             return
         }
@@ -271,11 +265,9 @@ class DomainFactory(
         if (values.isNotEmpty())
             AndroidDatabaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
-        if (changes || forceDomainChanged)
-            domainChanged.accept(dataIds)
+        if (changes || forceDomainChanged) domainListenerManager.notify(dataId)
 
-        if (changes)
-            updateIsSaved()
+        if (changes) updateIsSaved()
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {

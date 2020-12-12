@@ -24,14 +24,22 @@ abstract class DomainListener<D : DomainData> {
 
         disposable = DomainFactory.instanceRelay
                 .filterNotNull()
-                .switchMap { domainFactory -> domainFactory.domainChanged.map { Pair(domainFactory, it) } }
-                .filter { (_, dataIds) -> !dataIds.contains(data.value?.dataId) }
+                .switchMap { domainFactory ->
+                    domainFactory.domainListenerManager
+                            .addListener(this)
+                            .map { domainFactory }
+                }
                 .observeOn(Schedulers.single())
                 .toFlowable(BackpressureStrategy.LATEST)
-                .map { (domainFactory, _) -> getDataResult(domainFactory) }
+                .map { getDataResult(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { it.data!! }
                 .filter { data.value != it }
+                .doFinally {
+                    DomainFactory.nullableInstance
+                            ?.domainListenerManager
+                            ?.removeListener(this)
+                }
                 .subscribe(data)
     }
 

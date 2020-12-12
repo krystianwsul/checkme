@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
@@ -176,7 +177,7 @@ fun DomainFactory.undoInstancesAddHour(
 }
 
 fun DomainFactory.setInstanceDone(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKey: InstanceKey,
         done: Boolean,
@@ -192,7 +193,7 @@ fun DomainFactory.setInstanceDone(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(notificationType, source)
 
     notifyCloud(instance.project)
 

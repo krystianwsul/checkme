@@ -20,13 +20,28 @@ class DomainListenerManager {
         domainListeners.remove(domainListener)
     }
 
-    fun notify(dataId: Int? = null) {
-        val eligibleListeners = if (dataId != null && dataId != 0) {
-            domainListeners.filter { it.key.data.value?.dataId != dataId }.map { it.value }
-        } else {
-            domainListeners.values
+    fun notify(notificationType: NotificationType) {
+        fun Map.Entry<DomainListener<*>, *>.dataId() = key.data.value?.dataId
+
+        val eligibleListeners = when (notificationType) {
+            NotificationType.All -> domainListeners.values
+            is NotificationType.Skip -> {
+                domainListeners.filter { it.dataId() != notificationType.dataId }.map { it.value }
+            }
+            is NotificationType.First -> {
+                domainListeners.entries.sortedByDescending { it.dataId() == notificationType.dataId }.map { it.value }
+            }
         }
 
         eligibleListeners.forEach { it.accept(Unit) }
+    }
+
+    sealed class NotificationType {
+
+        object All : NotificationType()
+
+        data class Skip(val dataId: Int) : NotificationType()
+
+        data class First(val dataId: Int) : NotificationType()
     }
 }

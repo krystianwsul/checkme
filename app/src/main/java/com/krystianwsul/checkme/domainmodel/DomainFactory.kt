@@ -8,6 +8,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -87,7 +88,7 @@ class DomainFactory(
                 val silent = (tickData?.silent ?: true) && newTickData.silent
                 val notifyListeners = (tickData?.domainChanged ?: false) || newTickData.domainChanged
 
-                if (notifyListeners) domainFactory.domainListenerManager.notify()
+                if (notifyListeners) domainFactory.domainListenerManager.notify(NotificationType.All)
 
                 domainFactory.updateNotificationsTick(source, silent, newTickData.source)
 
@@ -222,7 +223,7 @@ class DomainFactory(
     val uuid get() = localFactory.uuid
 
     var debugMode by observable(false) { _, _, _ ->
-        domainListenerManager.notify()
+        domainListenerManager.notify(NotificationType.All)
     }
 
     private fun updateIsSaved() {
@@ -245,12 +246,27 @@ class DomainFactory(
             source: SaveService.Source,
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
+    ) = save(
+            dataId?.let(NotificationType::Skip) ?: NotificationType.All,
+            source,
+            forceDomainChanged,
+            values
+    )
+
+    fun save(
+            notificationType: NotificationType,
+            source: SaveService.Source,
+            forceDomainChanged: Boolean = false,
+            values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
-            check(dataId == null || dataId == 0)
+            check(
+                    notificationType is NotificationType.All ||
+                            (notificationType is NotificationType.Skip && notificationType.dataId == 0)
+            )
 
             return
         }
@@ -265,7 +281,7 @@ class DomainFactory(
         if (values.isNotEmpty())
             AndroidDatabaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
-        if (changes || forceDomainChanged) domainListenerManager.notify(dataId)
+        if (changes || forceDomainChanged) domainListenerManager.notify(notificationType)
 
         if (changes) updateIsSaved()
     }

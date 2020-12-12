@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -320,12 +321,14 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.groupListFragment.setInstanceKey(instanceKey, data.dataId, immediate, data.groupListDataWrapper)
     }
 
-    private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
-            0,
-            SaveService.Source.GUI,
-            instanceKey,
-            done
-    )
+    private fun setDone(done: Boolean) {
+        DomainFactory.instance.setInstanceDone(
+                DomainListenerManager.NotificationType.First(data!!.dataId),
+                SaveService.Source.GUI,
+                instanceKey,
+                done
+        )
+    }
 
     override fun onCreateGroupActionMode(
             actionMode: ActionMode,

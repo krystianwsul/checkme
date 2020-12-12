@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -244,7 +245,7 @@ class NotDoneGroupNode(
                     val newDone = singleInstanceData.done == null
 
                     fun updateDone() = DomainFactory.instance.setInstanceDone(
-                            groupAdapter.dataId,
+                            DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
                             SaveService.Source.GUI,
                             instanceKey,
                             newDone
@@ -270,7 +271,7 @@ class NotDoneGroupNode(
 
                     groupListFragment.listener.showSnackbarDone(1) {
                         DomainFactory.instance.setInstanceDone(
-                                0,
+                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                 SaveService.Source.GUI,
                                 instanceKey,
                                 !newDone
@@ -643,7 +644,7 @@ class NotDoneGroupNode(
                             .treeViewAdapter
                             .updateDisplayedNodes {
                                 instanceData.done = DomainFactory.instance.setInstanceDone(
-                                        groupAdapter.dataId,
+                                        DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
                                         SaveService.Source.GUI,
                                         instanceKey,
                                         true
@@ -657,7 +658,12 @@ class NotDoneGroupNode(
                             }
 
                     groupListFragment.listener.showSnackbarDone(1) {
-                        DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
+                        DomainFactory.instance.setInstanceDone(
+                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                SaveService.Source.GUI,
+                                instanceKey,
+                                false
+                        )
                     }
                 }
             }

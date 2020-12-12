@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.common.firebase.models.Instance
 import kotlin.properties.Delegates.observable
+import kotlin.reflect.KProperty
 
 class InstanceShownRecord(
         created: Boolean,
@@ -118,11 +119,13 @@ class InstanceShownRecord(
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID)
     }
 
-    override var notified by observable(mNotified) { _, _, _ -> changed = true }
+    private fun <T> setChanged(@Suppress("UNUSED_PARAMETER") property: KProperty<*>, oldValue: T, newValue: T) {
+        if (oldValue != newValue) changed = true
+    }
 
-    override var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
-
-    var projectId by observable(mProjectId) { _, _, _ -> changed = true }
+    override var notified by observable(mNotified, ::setChanged)
+    override var notificationShown by observable(mNotificationShown, ::setChanged)
+    var projectId by observable(mProjectId, ::setChanged)
 
     init {
         check(scheduleHour == null == (scheduleMinute == null))

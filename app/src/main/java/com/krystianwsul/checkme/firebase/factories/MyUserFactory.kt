@@ -52,6 +52,7 @@ class MyUserFactory(
 
     private fun setTab() {
         factoryProvider.preferences.tab = user.defaultTab
+        factoryProvider.preferences.addDefaultReminder = user.defaultReminder
     }
 
     fun onNewSnapshot(snapshot: Snapshot): ChangeType {

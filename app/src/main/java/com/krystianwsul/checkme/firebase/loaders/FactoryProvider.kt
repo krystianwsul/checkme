@@ -79,6 +79,7 @@ interface FactoryProvider {
     interface Preferences {
 
         var tab: Int
+        var addDefaultReminder: Boolean
     }
 
     class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {

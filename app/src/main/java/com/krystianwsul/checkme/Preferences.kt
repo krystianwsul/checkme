@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme
 
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -27,6 +28,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_SAVE_LOG = "saveLog"
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
+    private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -38,11 +40,19 @@ object Preferences : FactoryProvider.Preferences {
 
     val tickLog = Logger(TICK_LOG)
 
-    override var tab by observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
-        sharedPreferences.edit()
-                .putInt(TAB_KEY, newValue)
-                .apply()
+    private fun <T> preferenceObservable(
+            initial: SharedPreferences.() -> T,
+            write: SharedPreferences.Editor.(T) -> Unit,
+    ) = observable(sharedPreferences.initial()) { _, _, newValue ->
+        sharedPreferences.edit { write(newValue) }
     }
+
+    override var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
+
+    override var addDefaultReminder by preferenceObservable(
+            { getBoolean(KEY_ADD_DEFAULT_REMINDER, true) },
+            { putBoolean(KEY_ADD_DEFAULT_REMINDER, it) }
+    )
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit()

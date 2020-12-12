@@ -6,6 +6,6 @@ interface MyUserProperties {
 
     fun setToken(deviceDbInfo: DeviceDbInfo)
 
-    var defaultReminder: Boolean
+    var defaultReminder: Boolean // todo remove these two after 2021-01-12
     var defaultTab: Int
 }

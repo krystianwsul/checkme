@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
-import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -29,6 +29,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
+    private const val KEY_TIME_RANGE = "timeRange"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -103,6 +104,18 @@ object Preferences : FactoryProvider.Preferences {
             sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
     ) { _, _, newValue -> putNotificationLevel(newValue) }
 
+    private val timeRangeProperty =
+            NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
+    var timeRange by timeRangeProperty
+    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()!!
+
+    init {
+        timeRangeObservable.subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }.ignore()
+    }
+
+    @Suppress("unused")
+    private fun Any?.ignore() = Unit
+
     private fun putNotificationLevel(notificationLevel: NotificationLevel) {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
     }
@@ -111,7 +124,7 @@ object Preferences : FactoryProvider.Preferences {
 
         final override fun getValue(
                 thisRef: Any,
-                property: KProperty<*>
+                property: KProperty<*>,
         ) = sharedPreferences.getString(key, "")!!
     }
 
@@ -155,5 +168,11 @@ object Preferences : FactoryProvider.Preferences {
     enum class NotificationLevel {
 
         NONE, MEDIUM, HIGH
+    }
+
+    enum class TimeRange {
+        DAY,
+        WEEK,
+        MONTH
     }
 }

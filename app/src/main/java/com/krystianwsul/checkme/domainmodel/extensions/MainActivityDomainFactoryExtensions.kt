@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -60,7 +60,7 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
 fun DomainFactory.getGroupListData(
         now: ExactTimeStamp.Local,
         position: Int,
-        timeRange: MainActivity.TimeRange,
+        timeRange: Preferences.TimeRange,
 ): DayViewModel.DayData = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
@@ -75,12 +75,12 @@ fun DomainFactory.getGroupListData(
         val startCalendar = now.calendar
 
         when (timeRange) {
-            MainActivity.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
-            MainActivity.TimeRange.WEEK -> {
+            Preferences.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
+            Preferences.TimeRange.WEEK -> {
                 startCalendar.add(Calendar.WEEK_OF_YEAR, position)
                 startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
             }
-            MainActivity.TimeRange.MONTH -> {
+            Preferences.TimeRange.MONTH -> {
                 startCalendar.add(Calendar.MONTH, position)
                 startCalendar.set(Calendar.DAY_OF_MONTH, 1)
             }
@@ -92,12 +92,12 @@ fun DomainFactory.getGroupListData(
     val endCalendar = now.calendar
 
     when (timeRange) {
-        MainActivity.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
-        MainActivity.TimeRange.WEEK -> {
+        Preferences.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
+        Preferences.TimeRange.WEEK -> {
             endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
             endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
         }
-        MainActivity.TimeRange.MONTH -> {
+        Preferences.TimeRange.MONTH -> {
             endCalendar.add(Calendar.MONTH, position + 1)
             endCalendar.set(Calendar.DAY_OF_MONTH, 1)
         }
@@ -107,7 +107,7 @@ fun DomainFactory.getGroupListData(
 
     val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now).toList()
 
-    if (position == 0 && timeRange == MainActivity.TimeRange.DAY) {
+    if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->
             Pair(existingInstanceCount, currentInstances.size - existingInstanceCount)
         }

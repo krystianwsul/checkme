@@ -86,7 +86,7 @@ class DebugFragment : AbstractFragment() {
                 append(Preferences.saveLog.log)
 
                 val t1 = ExactTimeStamp.Local.now
-                DomainFactory.instance.getGroupListData(ExactTimeStamp.Local.now, 0, MainActivity.TimeRange.DAY)
+                DomainFactory.instance.getGroupListData(ExactTimeStamp.Local.now, 0, Preferences.TimeRange.DAY)
                 val t2 = ExactTimeStamp.Local.now
 
                 append("\n\ntoday: ")

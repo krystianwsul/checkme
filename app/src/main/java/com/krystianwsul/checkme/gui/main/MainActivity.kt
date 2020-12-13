@@ -72,7 +72,6 @@ class MainActivity :
     companion object {
 
         private const val KEY_TAB_SEARCH_STATE = "tabSearchState"
-        private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
@@ -110,8 +109,6 @@ class MainActivity :
     override lateinit var hostEvents: Observable<DayFragment.Event>
         private set
 
-    private var timeRange = TimeRange.DAY
-
     private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
     private var searchSelectAllVisible = false
     private var taskSelectAllVisible = false
@@ -129,7 +126,7 @@ class MainActivity :
     val dayViewModel by lazy { getViewModel<DayViewModel>() }
     private val searchInstancesViewModel by lazy { getViewModel<SearchInstancesViewModel>() }
 
-    private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
+    private lateinit var states: MutableMap<Pair<Preferences.TimeRange, Int>, Bundle>
 
     val selectAllRelay = PublishRelay.create<Unit>()
 
@@ -257,9 +254,9 @@ class MainActivity :
 
     override fun getBottomBar() = bottomBinding.bottomAppBar
 
-    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
+    fun getState(pair: Pair<Preferences.TimeRange, Int>) = states[pair]
 
-    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
+    fun setState(pair: Pair<Preferences.TimeRange, Int>, bundle: Bundle) {
         states[pair] = bundle
     }
 
@@ -374,9 +371,6 @@ class MainActivity :
                 check(containsKey(KEY_TAB_SEARCH_STATE))
                 overrideTabSearchState = getParcelable(KEY_TAB_SEARCH_STATE)!!
 
-                check(containsKey(TIME_RANGE_KEY))
-                timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
-
                 check(containsKey(DEBUG_KEY))
                 debug = getBoolean(DEBUG_KEY)
 
@@ -434,13 +428,13 @@ class MainActivity :
             menuInflater.inflate(R.menu.main_activity_filter, menu)
 
             val triples = listOf(
-                    R.id.actionMainFilterDay to TimeRange.DAY,
-                    R.id.actionMainFilterWeek to TimeRange.WEEK,
-                    R.id.actionMainFilterMonth to TimeRange.MONTH
+                    R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
+                    R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
+                    R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
             ).map { Triple(it.first, it.second, menu.findItem(it.first)) }
 
-            fun updateTimeRangeFilter() {
-                triples.single { it.second == timeRange }.third.isChecked = true
+            fun updateTimeRangeFilter() { // todo observable
+                triples.single { it.second == Preferences.timeRange }.third.isChecked = true
             }
 
             updateTimeRangeFilter()
@@ -450,10 +444,10 @@ class MainActivity :
                 if (triple != null) {
                     check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
 
-                    val newTimeRange = triple.second
+                    val timeRange = triple.second
 
-                    if (newTimeRange != timeRange) {
-                        timeRange = newTimeRange
+                    if (timeRange != Preferences.timeRange) {
+                        Preferences.timeRange = timeRange
 
                         binding.mainTabLayout.removeAllTabs()
                         binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
@@ -465,8 +459,7 @@ class MainActivity :
                         groupSelectAllVisible.clear()
                         updateBottomMenu()
 
-                        if (timeRange != TimeRange.DAY)
-                            calendarOpen = false
+                        if (timeRange != Preferences.TimeRange.DAY) calendarOpen = false
 
                         updateCalendarDate()
                         updateCalendarHeight()
@@ -784,7 +777,7 @@ class MainActivity :
         val itemVisibilities = when (tabSearchStateRelay.value) {
             is TabSearchState.Instances -> {
                 listOf(
-                        R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
+                        R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
                         R.id.actionMainSearch to true
                 )
             }
@@ -810,7 +803,6 @@ class MainActivity :
             super.onSaveInstanceState(this)
 
             putParcelable(KEY_TAB_SEARCH_STATE, tabSearchStateRelay.value!!)
-            putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
             if (tabSearchStateRelay.value!!.isSearching) putString(SEARCH_KEY, binding.mainSearchText.text.toString())
@@ -1039,8 +1031,7 @@ class MainActivity :
     }
 
     private fun updateCalendarDate() {
-        if (timeRange != TimeRange.DAY)
-            return
+        if (Preferences.timeRange != Preferences.TimeRange.DAY) return
 
         binding.mainCalendar.date = LocalDate.now()
                 .plusDays(binding.mainDaysPager.currentPosition)
@@ -1080,11 +1071,11 @@ class MainActivity :
             val maxPosition = position + 10
             binding.mainTabLayout.apply {
                 (tabCount..maxPosition).forEach {
-                    addTab(newTab().setText(DayFragment.getTitle(timeRange, it)))
+                    addTab(newTab().setText(DayFragment.getTitle(Preferences.timeRange, it)))
                 }
             }
 
-            holder.dayFragment.setPosition(timeRange, position)
+            holder.dayFragment.setPosition(Preferences.timeRange, position)
         }
     }
 
@@ -1211,12 +1202,7 @@ class MainActivity :
         open val elevated = true
     }
 
-    enum class TimeRange {
-        DAY,
-        WEEK,
-        MONTH
-    }
-
     @Parcelize
-    private class ParcelableState(val timeRange: TimeRange, val position: Int, val state: Bundle) : Parcelable
+    private class ParcelableState(val timeRange: Preferences.TimeRange, val position: Int, val state: Bundle) :
+            Parcelable
 }

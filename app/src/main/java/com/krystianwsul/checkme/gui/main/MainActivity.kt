@@ -381,8 +381,6 @@ class MainActivity :
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
 
-                updateCalendarDate()
-
                 states = getParcelableArrayList<ParcelableState>(DAY_STATES_KEY)!!.associate {
                     Pair(it.timeRange, it.position) to it.state
                 }.toMutableMap()
@@ -424,44 +422,17 @@ class MainActivity :
             date = Date.today()
         }
 
+        menuInflater.inflate(R.menu.main_activity_filter, binding.mainActivityToolbar.menu)
+
+        val timeRangeTriples = listOf(
+                R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
+                R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
+                R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
+        ).map { Triple(it.first, it.second, binding.mainActivityToolbar.menu.findItem(it.first)) }
+
         binding.mainActivityToolbar.apply {
-            menuInflater.inflate(R.menu.main_activity_filter, menu)
-
-            val triples = listOf(
-                    R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
-                    R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
-                    R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
-            ).map { Triple(it.first, it.second, menu.findItem(it.first)) }
-
-            fun updateTimeRangeFilter() { // todo observable
-                triples.single { it.second == Preferences.timeRange }.third.isChecked = true
-            }
-
-            updateTimeRangeFilter()
-
-            Preferences.timeRangeObservable
-                    .skip(1)
-                    .subscribe {
-                        binding.mainTabLayout.removeAllTabs()
-                        binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
-
-                        binding.mainTabLayout.selectTab(
-                                binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
-                        )
-
-                        groupSelectAllVisible.clear()
-                        updateBottomMenu()
-
-                        if (it != Preferences.TimeRange.DAY) calendarOpen = false
-
-                        updateCalendarDate()
-                        updateCalendarHeight()
-                        updateTimeRangeFilter()
-                    }
-                    .addTo(createDisposable)
-
             setOnMenuItemClickListener { item ->
-                val triple = triples.singleOrNull { it.first == item.itemId }
+                val triple = timeRangeTriples.singleOrNull { it.first == item.itemId }
                 if (triple != null) {
                     check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
 
@@ -553,13 +524,32 @@ class MainActivity :
 
                 updateCalendarDate()
             }.addTo(createDisposable)
-
-            adapter = MyFragmentStatePagerAdapter()
         }
 
         binding.mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
         setTabSearchState(overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab()), true)
+
+        Preferences.timeRangeObservable
+                .subscribe {
+                    binding.mainTabLayout.removeAllTabs()
+                    binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+
+                    binding.mainTabLayout.selectTab(
+                            binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
+                    )
+
+                    groupSelectAllVisible.clear()
+
+                    updateBottomMenu()
+
+                    if (it != Preferences.TimeRange.DAY) calendarOpen = false
+                    updateCalendarDate()
+                    updateCalendarHeight()
+
+                    timeRangeTriples.single { it.second == Preferences.timeRange }.third.isChecked = true
+                }
+                .addTo(createDisposable)
 
         initBottomBar()
 
@@ -944,8 +934,6 @@ class MainActivity :
         tabSearchStateRelay.accept(tabSearchState)
 
         animateVisibility(showViews, hideViews, immediate, shortAnimTime)
-
-        updateCalendarHeight()
 
         if (wasSearching && !isSearching) closeSearch()
 

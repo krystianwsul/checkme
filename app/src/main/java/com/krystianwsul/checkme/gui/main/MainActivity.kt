@@ -439,16 +439,9 @@ class MainActivity :
 
             updateTimeRangeFilter()
 
-            setOnMenuItemClickListener { item ->
-                val triple = triples.singleOrNull { it.first == item.itemId }
-                if (triple != null) {
-                    check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
-
-                    val timeRange = triple.second
-
-                    if (timeRange != Preferences.timeRange) {
-                        Preferences.timeRange = timeRange
-
+            Preferences.timeRangeObservable
+                    .skip(1)
+                    .subscribe {
                         binding.mainTabLayout.removeAllTabs()
                         binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
@@ -459,12 +452,20 @@ class MainActivity :
                         groupSelectAllVisible.clear()
                         updateBottomMenu()
 
-                        if (timeRange != Preferences.TimeRange.DAY) calendarOpen = false
+                        if (it != Preferences.TimeRange.DAY) calendarOpen = false
 
                         updateCalendarDate()
                         updateCalendarHeight()
                         updateTimeRangeFilter()
                     }
+                    .addTo(createDisposable)
+
+            setOnMenuItemClickListener { item ->
+                val triple = triples.singleOrNull { it.first == item.itemId }
+                if (triple != null) {
+                    check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
+
+                    Preferences.timeRange = triple.second
                 } else {
                     when (item.itemId) {
                         R.id.actionMainCalendar -> {

@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
+import androidx.core.view.MenuCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -423,6 +424,7 @@ class MainActivity :
         }
 
         menuInflater.inflate(R.menu.main_activity_filter, binding.mainActivityToolbar.menu)
+        MenuCompat.setGroupDividerEnabled(binding.mainActivityToolbar.menu, true)
 
         val timeRangeTriples = listOf(
                 R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
@@ -765,7 +767,9 @@ class MainActivity :
     }
 
     private fun updateTopMenu() {
-        val itemVisibilities = when (tabSearchStateRelay.value) {
+        val tabSearchState = tabSearchStateRelay.value!!
+
+        val itemVisibilities = when (tabSearchState) {
             is TabSearchState.Instances -> {
                 listOf(
                         R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
@@ -785,6 +789,7 @@ class MainActivity :
         binding.mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
                 menu.setGroupVisible(R.id.actionMainFilter, tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
+                menu.findItem(R.id.actionMainAssigned).isVisible = tabSearchState.tab.showAssignedTo
             }
         }
     }
@@ -1180,8 +1185,12 @@ class MainActivity :
         INSTANCES {
 
             override val elevated = false
+            override val showAssignedTo = true
         },
-        TASKS,
+        TASKS {
+
+            override val showAssignedTo = true
+        },
         PROJECTS,
         CUSTOM_TIMES,
         FRIENDS,
@@ -1189,6 +1198,7 @@ class MainActivity :
         ABOUT;
 
         open val elevated = true
+        open val showAssignedTo = false
     }
 
     @Parcelize

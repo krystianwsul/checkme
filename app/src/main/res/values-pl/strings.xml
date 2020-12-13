@@ -129,4 +129,5 @@
     <string name="subtaskDialogMessage">Dodać nowe zadanie o tym samym czasie?</string>
     <string name="assignTask">Przydziel zadanie</string>
     <string name="assignedTo">Przydzielone do:</string>
+    <string name="showAssignedTo">Pokaż przydzielone innym</string>
 </resources>

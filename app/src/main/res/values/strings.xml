@@ -130,4 +130,5 @@
     <string name="subtaskDialogMessage">Add a new task at this time?</string>
     <string name="assignTask">Assign task</string>
     <string name="assignedTo">Assigned to:</string>
+    <string name="showAssignedTo">Show assigned to others</string>
 </resources>

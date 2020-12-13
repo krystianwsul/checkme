@@ -749,9 +749,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun normalize() = childTaskData.normalize()
 
-            override fun matches(filterCriteria: Any?) = childTaskData.matchesSearch(filterCriteria as? SearchData)
-
-            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+            override fun matches(filterCriteria: Any?) =
+                    ModelNode.MatchResult.fromBoolean(childTaskData.matchesSearch(filterCriteria as? SearchData))
 
             override fun parentHierarchyMatches(filterCriteria: Any?) =
                     super.parentHierarchyMatches(filterCriteria)

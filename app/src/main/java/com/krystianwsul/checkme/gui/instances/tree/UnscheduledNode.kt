@@ -97,8 +97,4 @@ class UnscheduledNode(
     override val text by lazy { groupListFragment.activity.getString(R.string.noReminder) }
 
     override val isVisibleWhenEmpty = false
-
-    override fun matches(filterCriteria: Any?) = false
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean? = null
 }

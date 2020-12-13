@@ -295,10 +295,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override fun onClick(holder: AbstractHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
         override fun compareTo(other: ModelNode<AbstractHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
-
-        override fun matches(filterCriteria: Any?) = false
-
-        override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {

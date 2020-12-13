@@ -115,7 +115,9 @@ class DetailsNode(
         normalizedNote
     }
 
-    override fun matches(filterCriteria: Any?): Boolean {
+    override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(matchesHelper(filterCriteria))
+
+    private fun matchesHelper(filterCriteria: Any?): Boolean {
         if (filterCriteria == null) return true
 
         val query = (filterCriteria as SearchData).query
@@ -124,8 +126,6 @@ class DetailsNode(
 
         return normalizedNote?.contains(query) == true
     }
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

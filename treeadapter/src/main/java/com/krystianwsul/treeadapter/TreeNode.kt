@@ -276,7 +276,8 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         val matches = modelNode.parentHierarchyMatches(treeViewAdapter.filterCriteria)
                 || hasMatchingChild(treeViewAdapter.filterCriteria)
 
-        if (!matches && modelNode.canBeShownWithFilterCriteria(treeViewAdapter.filterCriteria) == false) return false
+        if (!matches && modelNode.matches(treeViewAdapter.filterCriteria) == ModelNode.MatchResult.DOESNT_MATCH)
+            return false
 
         if (!modelNode.isVisibleWhenEmpty && childTreeNodes.none { it.canBeShown() }) return false
 
@@ -286,7 +287,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     private fun matches(filterCriteria: Any?) = modelNode.matches(filterCriteria)
 
     private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes.any {
-        it.matches(filterCriteria) || it.hasMatchingChild(filterCriteria)
+        it.matches(filterCriteria) == ModelNode.MatchResult.MATCHES || it.hasMatchingChild(filterCriteria)
     }
 
     private fun visible(): Boolean {

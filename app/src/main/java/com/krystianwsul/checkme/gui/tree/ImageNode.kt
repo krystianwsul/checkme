@@ -94,10 +94,6 @@ class ImageNode(
 
     override fun onClick(holder: AbstractHolder) = showImage((holder as Holder).rowBigImage, imageData)
 
-    override fun matches(filterCriteria: Any?) = false
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
-
     class ImageData(
             val imageState: ImageState,
             val onImageShown: (StfalconImageViewer<ImageState>) -> Unit,

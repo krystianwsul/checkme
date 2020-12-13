@@ -467,11 +467,9 @@ class NotDoneGroupNode(
 
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
-    override fun matches(filterCriteria: Any?) = instanceDatas.any {
+    override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(instanceDatas.any {
         it.matchesQuery((filterCriteria as? SearchData)?.query)
-    }
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+    })
 
     override fun ordinalDesc() = if (singleInstance()) {
         singleInstanceData.run { "$name $ordinal" }
@@ -682,9 +680,8 @@ class NotDoneGroupNode(
 
         override fun normalize() = instanceData.normalize()
 
-        override fun matches(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
-
-        override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+        override fun matches(filterCriteria: Any?) =
+                ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery((filterCriteria as? SearchData)?.query))
 
         data class Id(val instanceKey: InstanceKey)
     }

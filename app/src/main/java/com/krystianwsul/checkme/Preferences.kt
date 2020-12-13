@@ -30,6 +30,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
     private const val KEY_TIME_RANGE = "timeRange"
+    private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -50,10 +51,12 @@ object Preferences : FactoryProvider.Preferences {
 
     override var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
 
-    override var addDefaultReminder by preferenceObservable(
-            { getBoolean(KEY_ADD_DEFAULT_REMINDER, true) },
-            { putBoolean(KEY_ADD_DEFAULT_REMINDER, it) }
+    private fun booleanObservable(key: String, defValue: Boolean) = preferenceObservable(
+            { getBoolean(key, defValue) },
+            { putBoolean(key, it) }
     )
+
+    override var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit()
@@ -110,7 +113,9 @@ object Preferences : FactoryProvider.Preferences {
     val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()!!
 
     init {
-        timeRangeObservable.subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }.ignore()
+        timeRangeObservable.skip(0)
+                .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
+                .ignore()
     }
 
     @Suppress("unused")
@@ -118,6 +123,16 @@ object Preferences : FactoryProvider.Preferences {
 
     private fun putNotificationLevel(notificationLevel: NotificationLevel) {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
+    }
+
+    private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
+    var showAssigned by showAssignedProperty
+    val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
+
+    init {
+        showAssignedObservable.skip(0)
+                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
+                .ignore()
     }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {

@@ -433,6 +433,12 @@ class MainActivity :
         ).map { Triple(it.first, it.second, binding.mainActivityToolbar.menu.findItem(it.first)) }
 
         binding.mainActivityToolbar.apply {
+            val assignedItem = menu.findItem(R.id.actionMainAssigned)
+
+            Preferences.showAssignedObservable
+                    .subscribe { assignedItem.isChecked = it }
+                    .addTo(createDisposable)
+
             setOnMenuItemClickListener { item ->
                 val triple = timeRangeTriples.singleOrNull { it.first == item.itemId }
                 if (triple != null) {
@@ -461,6 +467,7 @@ class MainActivity :
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                             }
                         }
+                        R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                         else -> throw IllegalArgumentException()
                     }
                 }

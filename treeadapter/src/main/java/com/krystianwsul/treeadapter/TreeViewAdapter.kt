@@ -165,7 +165,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         treeNodeCollection!!.apply {
             collapseAll()
 
-            if (filterCriteria.hasQuery) expandMatching(filterCriteria, placeholder)
+            if (filterCriteria.expandMatchingInstances) expandMatching(filterCriteria, placeholder)
         }
     }
 
@@ -275,6 +275,6 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     interface FilterCriteria {
 
-        val hasQuery: Boolean
+        val expandMatchingInstances: Boolean
     }
 }

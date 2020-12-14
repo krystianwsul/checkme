@@ -309,10 +309,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeNode.setChildTreeNodes(listOf())
             return treeNode
         }
-
-        override fun matches(filterCriteria: Any?) = false
-
-        override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
 
     interface FriendListListener : SnackbarListener, ActionModeListener {

@@ -200,7 +200,6 @@ class DoneInstanceNode(
 
     override fun normalize() = instanceData.normalize()
 
-    override fun matches(filterCriteria: Any?) = instanceData.matchesQuery((filterCriteria as? SearchData)?.query)
-
-    override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+    override fun matches(filterCriteria: Any?) =
+            ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery((filterCriteria as? SearchData)?.query))
 }

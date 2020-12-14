@@ -10,6 +10,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentDayBinding
 import com.krystianwsul.checkme.gui.main.MainActivity
@@ -32,10 +33,10 @@ class DayFragment @JvmOverloads constructor(
 
     companion object {
 
-        fun getTitle(timeRange: MainActivity.TimeRange, position: Int): String {
+        fun getTitle(timeRange: Preferences.TimeRange, position: Int): String {
             fun getString(@StringRes stringId: Int) = MyApplication.instance.getString(stringId)
 
-            return if (timeRange == MainActivity.TimeRange.DAY) {
+            return if (timeRange == Preferences.TimeRange.DAY) {
                 when (position) {
                     0 -> getString(R.string.today)
                     1 -> getString(R.string.tomorrow)
@@ -48,7 +49,7 @@ class DayFragment @JvmOverloads constructor(
                     }
                 }
             } else {
-                if (timeRange == MainActivity.TimeRange.WEEK) {
+                if (timeRange == Preferences.TimeRange.WEEK) {
                     val startDate = Date(
                             Calendar.getInstance()
                                     .apply {
@@ -72,7 +73,7 @@ class DayFragment @JvmOverloads constructor(
 
                     "$startDate - $endDate"
                 } else {
-                    check(timeRange == MainActivity.TimeRange.MONTH)
+                    check(timeRange == Preferences.TimeRange.MONTH)
 
                     val month = Calendar.getInstance().run {
                         add(Calendar.MONTH, position)
@@ -85,7 +86,7 @@ class DayFragment @JvmOverloads constructor(
         }
     }
 
-    private val key = BehaviorRelay.create<Pair<MainActivity.TimeRange, Int>>()
+    private val key = BehaviorRelay.create<Pair<Preferences.TimeRange, Int>>()
 
     private var floatingActionButton: FloatingActionButton? = null
 
@@ -114,7 +115,7 @@ class DayFragment @JvmOverloads constructor(
 
     fun saveState() = activity.setState(key.value!!, binding.groupListFragment.onSaveInstanceState())
 
-    fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
+    fun setPosition(timeRange: Preferences.TimeRange, position: Int) {
         entry?.stop()
         compositeDisposable.clear()
 

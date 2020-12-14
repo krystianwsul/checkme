@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -29,7 +30,6 @@ import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
-import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.utils.*
@@ -73,19 +73,19 @@ class GroupListFragment @JvmOverloads constructor(
         private const val KEY_SHOW_IMAGE = "showImage"
         private const val KEY_SEARCH_DATA = "searchData"
 
-        private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
+        private fun rangePositionToDate(timeRange: Preferences.TimeRange, position: Int): Date {
             check(position >= 0)
 
             val calendar = Calendar.getInstance()
 
             if (position > 0) {
                 when (timeRange) {
-                    MainActivity.TimeRange.DAY -> calendar.add(Calendar.DATE, position)
-                    MainActivity.TimeRange.WEEK -> {
+                    Preferences.TimeRange.DAY -> calendar.add(Calendar.DATE, position)
+                    Preferences.TimeRange.WEEK -> {
                         calendar.add(Calendar.WEEK_OF_YEAR, position)
                         calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
                     }
-                    MainActivity.TimeRange.MONTH -> {
+                    Preferences.TimeRange.MONTH -> {
                         calendar.add(Calendar.MONTH, position)
                         calendar.set(Calendar.DAY_OF_MONTH, 1)
                     }
@@ -502,7 +502,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
-    private var searchData: SearchData? = null
+    private var searchData = SearchData()
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
 
@@ -570,7 +570,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
-                searchData = getParcelable(KEY_SEARCH_DATA)
+                searchData = getParcelable(KEY_SEARCH_DATA)!!
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -646,7 +646,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     fun setAll(
-            timeRange: MainActivity.TimeRange,
+            timeRange: Preferences.TimeRange,
             position: Int,
             dataId: Int,
             immediate: Boolean,
@@ -744,7 +744,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
             }
         } else {
-            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable)
+            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, SearchData())
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -784,8 +784,9 @@ class GroupListFragment @JvmOverloads constructor(
         initializedRelay.accept(Unit)
     }
 
-    private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(searchData: SearchData, placeholder: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
+
         treeViewAdapter.setFilterCriteria(searchData, placeholder)
     }
 
@@ -998,12 +999,14 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable,
+            searchData: SearchData,
     ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                compositeDisposable
+                compositeDisposable,
+                searchData
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

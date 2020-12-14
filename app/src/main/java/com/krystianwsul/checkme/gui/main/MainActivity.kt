@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
+import androidx.core.view.MenuCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -72,7 +73,6 @@ class MainActivity :
     companion object {
 
         private const val KEY_TAB_SEARCH_STATE = "tabSearchState"
-        private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
@@ -110,8 +110,6 @@ class MainActivity :
     override lateinit var hostEvents: Observable<DayFragment.Event>
         private set
 
-    private var timeRange = TimeRange.DAY
-
     private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
     private var searchSelectAllVisible = false
     private var taskSelectAllVisible = false
@@ -129,7 +127,7 @@ class MainActivity :
     val dayViewModel by lazy { getViewModel<DayViewModel>() }
     private val searchInstancesViewModel by lazy { getViewModel<SearchInstancesViewModel>() }
 
-    private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
+    private lateinit var states: MutableMap<Pair<Preferences.TimeRange, Int>, Bundle>
 
     val selectAllRelay = PublishRelay.create<Unit>()
 
@@ -142,7 +140,7 @@ class MainActivity :
                 binding.mainSearchText.textChanges(),
                 showDeleted
         )
-                .map { NullableWrapper(SearchData(it.first.toString().normalized(), it.second)) }
+                .map { SearchData(it.first.toString().normalized(), it.second) }
                 .replay(1)
                 .apply { createDisposable += connect() }!!
     }
@@ -152,7 +150,7 @@ class MainActivity :
             if ((tabSearchState as? TabSearchState.Tasks)?.isSearching == true)
                 searchData
             else
-                NullableWrapper()
+                SearchData()
         }
     }
 
@@ -195,7 +193,7 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+        override val instanceSearch = Observable.just(SearchData())
 
         override val subtaskDialogResult = subtaskDialogResultDays
 
@@ -257,9 +255,9 @@ class MainActivity :
 
     override fun getBottomBar() = bottomBinding.bottomAppBar
 
-    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
+    fun getState(pair: Pair<Preferences.TimeRange, Int>) = states[pair]
 
-    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
+    fun setState(pair: Pair<Preferences.TimeRange, Int>, bundle: Bundle) {
         states[pair] = bundle
     }
 
@@ -307,7 +305,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+            override val instanceSearch = Observable.just(SearchData())
 
             override val subtaskDialogResult = subtaskDialogResultSearch
 
@@ -374,9 +372,6 @@ class MainActivity :
                 check(containsKey(KEY_TAB_SEARCH_STATE))
                 overrideTabSearchState = getParcelable(KEY_TAB_SEARCH_STATE)!!
 
-                check(containsKey(TIME_RANGE_KEY))
-                timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
-
                 check(containsKey(DEBUG_KEY))
                 debug = getBoolean(DEBUG_KEY)
 
@@ -386,8 +381,6 @@ class MainActivity :
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
-
-                updateCalendarDate()
 
                 states = getParcelableArrayList<ParcelableState>(DAY_STATES_KEY)!!.associate {
                     Pair(it.timeRange, it.position) to it.state
@@ -430,48 +423,28 @@ class MainActivity :
             date = Date.today()
         }
 
+        menuInflater.inflate(R.menu.main_activity_filter, binding.mainActivityToolbar.menu)
+        MenuCompat.setGroupDividerEnabled(binding.mainActivityToolbar.menu, true)
+
+        val timeRangeTriples = listOf(
+                R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
+                R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
+                R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
+        ).map { Triple(it.first, it.second, binding.mainActivityToolbar.menu.findItem(it.first)) }
+
         binding.mainActivityToolbar.apply {
-            menuInflater.inflate(R.menu.main_activity_filter, menu)
+            val assignedItem = menu.findItem(R.id.actionMainAssigned)
 
-            val triples = listOf(
-                    R.id.actionMainFilterDay to TimeRange.DAY,
-                    R.id.actionMainFilterWeek to TimeRange.WEEK,
-                    R.id.actionMainFilterMonth to TimeRange.MONTH
-            ).map { Triple(it.first, it.second, menu.findItem(it.first)) }
-
-            fun updateTimeRangeFilter() {
-                triples.single { it.second == timeRange }.third.isChecked = true
-            }
-
-            updateTimeRangeFilter()
+            Preferences.showAssignedObservable
+                    .subscribe { assignedItem.isChecked = it }
+                    .addTo(createDisposable)
 
             setOnMenuItemClickListener { item ->
-                val triple = triples.singleOrNull { it.first == item.itemId }
+                val triple = timeRangeTriples.singleOrNull { it.first == item.itemId }
                 if (triple != null) {
                     check(tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
 
-                    val newTimeRange = triple.second
-
-                    if (newTimeRange != timeRange) {
-                        timeRange = newTimeRange
-
-                        binding.mainTabLayout.removeAllTabs()
-                        binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
-
-                        binding.mainTabLayout.selectTab(
-                                binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
-                        )
-
-                        groupSelectAllVisible.clear()
-                        updateBottomMenu()
-
-                        if (timeRange != TimeRange.DAY)
-                            calendarOpen = false
-
-                        updateCalendarDate()
-                        updateCalendarHeight()
-                        updateTimeRangeFilter()
-                    }
+                    Preferences.timeRange = triple.second
                 } else {
                     when (item.itemId) {
                         R.id.actionMainCalendar -> {
@@ -494,6 +467,7 @@ class MainActivity :
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                             }
                         }
+                        R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                         else -> throw IllegalArgumentException()
                     }
                 }
@@ -559,19 +533,38 @@ class MainActivity :
 
                 updateCalendarDate()
             }.addTo(createDisposable)
-
-            adapter = MyFragmentStatePagerAdapter()
         }
 
         binding.mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
         setTabSearchState(overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab()), true)
 
+        Preferences.timeRangeObservable
+                .subscribe {
+                    binding.mainTabLayout.removeAllTabs()
+                    binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+
+                    binding.mainTabLayout.selectTab(
+                            binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
+                    )
+
+                    groupSelectAllVisible.clear()
+
+                    updateBottomMenu()
+
+                    if (it != Preferences.TimeRange.DAY) calendarOpen = false
+                    updateCalendarDate()
+                    updateCalendarHeight()
+
+                    timeRangeTriples.single { it.second == Preferences.timeRange }.third.isChecked = true
+                }
+                .addTo(createDisposable)
+
         initBottomBar()
 
-        taskSearch.filter { tabSearchStateRelay.value!!.tab == Tab.TASKS }
+        tabSearchStateRelay.filter { it is TabSearchState.Tasks }
                 .subscribe {
-                    bottomBinding.bottomFab.apply { if (it.value != null) show() else hide() }
+                    bottomBinding.bottomFab.apply { if (it.isSearching) show() else hide() }
                 }
                 .addTo(createDisposable)
 
@@ -616,7 +609,7 @@ class MainActivity :
                     searchDataObservable
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
-                    searchData
+                    NullableWrapper(searchData)
                 } else {
                     searchPage = 0
                     NullableWrapper()
@@ -781,10 +774,12 @@ class MainActivity :
     }
 
     private fun updateTopMenu() {
-        val itemVisibilities = when (tabSearchStateRelay.value) {
+        val tabSearchState = tabSearchStateRelay.value!!
+
+        val itemVisibilities = when (tabSearchState) {
             is TabSearchState.Instances -> {
                 listOf(
-                        R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
+                        R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
                         R.id.actionMainSearch to true
                 )
             }
@@ -801,6 +796,7 @@ class MainActivity :
         binding.mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
                 menu.setGroupVisible(R.id.actionMainFilter, tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
+                menu.findItem(R.id.actionMainAssigned).isVisible = tabSearchState.tab.showAssignedTo
             }
         }
     }
@@ -810,7 +806,6 @@ class MainActivity :
             super.onSaveInstanceState(this)
 
             putParcelable(KEY_TAB_SEARCH_STATE, tabSearchStateRelay.value!!)
-            putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
             if (tabSearchStateRelay.value!!.isSearching) putString(SEARCH_KEY, binding.mainSearchText.text.toString())
@@ -952,8 +947,6 @@ class MainActivity :
 
         animateVisibility(showViews, hideViews, immediate, shortAnimTime)
 
-        updateCalendarHeight()
-
         if (wasSearching && !isSearching) closeSearch()
 
         if (!isSearching) updateTopMenu()
@@ -1039,8 +1032,7 @@ class MainActivity :
     }
 
     private fun updateCalendarDate() {
-        if (timeRange != TimeRange.DAY)
-            return
+        if (Preferences.timeRange != Preferences.TimeRange.DAY) return
 
         binding.mainCalendar.date = LocalDate.now()
                 .plusDays(binding.mainDaysPager.currentPosition)
@@ -1080,11 +1072,11 @@ class MainActivity :
             val maxPosition = position + 10
             binding.mainTabLayout.apply {
                 (tabCount..maxPosition).forEach {
-                    addTab(newTab().setText(DayFragment.getTitle(timeRange, it)))
+                    addTab(newTab().setText(DayFragment.getTitle(Preferences.timeRange, it)))
                 }
             }
 
-            holder.dayFragment.setPosition(timeRange, position)
+            holder.dayFragment.setPosition(Preferences.timeRange, position)
         }
     }
 
@@ -1200,8 +1192,12 @@ class MainActivity :
         INSTANCES {
 
             override val elevated = false
+            override val showAssignedTo = true
         },
-        TASKS,
+        TASKS {
+
+            override val showAssignedTo = true
+        },
         PROJECTS,
         CUSTOM_TIMES,
         FRIENDS,
@@ -1209,14 +1205,10 @@ class MainActivity :
         ABOUT;
 
         open val elevated = true
-    }
-
-    enum class TimeRange {
-        DAY,
-        WEEK,
-        MONTH
+        open val showAssignedTo = false
     }
 
     @Parcelize
-    private class ParcelableState(val timeRange: TimeRange, val position: Int, val state: Bundle) : Parcelable
+    private class ParcelableState(val timeRange: Preferences.TimeRange, val position: Int, val state: Bundle) :
+            Parcelable
 }

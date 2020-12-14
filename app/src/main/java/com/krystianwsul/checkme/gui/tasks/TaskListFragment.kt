@@ -45,7 +45,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskHierarchyKey
@@ -189,7 +188,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var searchData: SearchData? = null
+    private var searchData = SearchData()
 
     private val listener get() = activity as Listener
 
@@ -248,7 +247,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(expandedTaskIds!!.isNotEmpty())
             }
 
-            searchData = getParcelable(KEY_SEARCH_DATA)
+            searchData = getParcelable(KEY_SEARCH_DATA)!!
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
 
@@ -464,7 +463,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(searchData: SearchData, placeholder: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
         treeViewAdapter.setFilterCriteria(searchData, placeholder)
         updateFabVisibility("search")
@@ -749,9 +748,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun normalize() = childTaskData.normalize()
 
-            override fun matches(filterCriteria: Any?) = childTaskData.matchesSearch(filterCriteria as? SearchData)
-
-            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = false
+            override fun matches(filterCriteria: Any?) =
+                    ModelNode.MatchResult.fromBoolean(childTaskData.matchesSearch(filterCriteria as? SearchData))
 
             override fun parentHierarchyMatches(filterCriteria: Any?) =
                     super.parentHierarchyMatches(filterCriteria)
@@ -828,7 +826,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<NullableWrapper<SearchData>>
+        val taskSearch: Observable<SearchData>
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

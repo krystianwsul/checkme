@@ -4,8 +4,8 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
-import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -29,6 +29,8 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
+    private const val KEY_TIME_RANGE = "timeRange"
+    private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -49,10 +51,12 @@ object Preferences : FactoryProvider.Preferences {
 
     override var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
 
-    override var addDefaultReminder by preferenceObservable(
-            { getBoolean(KEY_ADD_DEFAULT_REMINDER, true) },
-            { putBoolean(KEY_ADD_DEFAULT_REMINDER, it) }
+    private fun booleanObservable(key: String, defValue: Boolean) = preferenceObservable(
+            { getBoolean(key, defValue) },
+            { putBoolean(key, it) }
     )
+
+    override var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit()
@@ -103,15 +107,39 @@ object Preferences : FactoryProvider.Preferences {
             sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
     ) { _, _, newValue -> putNotificationLevel(newValue) }
 
+    private val timeRangeProperty =
+            NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
+    var timeRange by timeRangeProperty
+    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()!!
+
+    init {
+        timeRangeObservable.skip(0)
+                .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
+                .ignore()
+    }
+
+    @Suppress("unused")
+    private fun Any?.ignore() = Unit
+
     private fun putNotificationLevel(notificationLevel: NotificationLevel) {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
+    }
+
+    private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
+    var showAssigned by showAssignedProperty
+    val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
+
+    init {
+        showAssignedObservable.skip(0)
+                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
+                .ignore()
     }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 
         final override fun getValue(
                 thisRef: Any,
-                property: KProperty<*>
+                property: KProperty<*>,
         ) = sharedPreferences.getString(key, "")!!
     }
 
@@ -155,5 +183,11 @@ object Preferences : FactoryProvider.Preferences {
     enum class NotificationLevel {
 
         NONE, MEDIUM, HIGH
+    }
+
+    enum class TimeRange {
+        DAY,
+        WEEK,
+        MONTH
     }
 }

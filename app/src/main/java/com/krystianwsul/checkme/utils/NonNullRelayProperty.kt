@@ -5,7 +5,10 @@ import io.reactivex.Observable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-open class NonNullRelayProperty<T : Any>(initialValue: T, private val beforeSet: ((T) -> Unit)? = null) : ReadWriteProperty<Any, T> {
+open class NonNullRelayProperty<T : Any>(
+        initialValue: T,
+        private val beforeSet: ((T) -> Unit)? = null,
+) : ReadWriteProperty<Any, T> {
 
     private val relay = BehaviorRelay.createDefault(initialValue)
 

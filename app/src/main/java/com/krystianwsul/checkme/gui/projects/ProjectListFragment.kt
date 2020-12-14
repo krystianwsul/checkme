@@ -315,10 +315,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                 return projectData.id.compareTo(other.projectData.id)
             }
-
-            override fun matches(filterCriteria: Any?) = false
-
-            override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
         }
     }
 

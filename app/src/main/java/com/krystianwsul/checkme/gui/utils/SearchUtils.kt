@@ -8,25 +8,24 @@ import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
 
 @CheckResult
-fun <T : Any> observeEmptySearchState(
+fun observeEmptySearchState(
         initialized: Observable<Unit>,
-        filterCriteria: Observable<NullableWrapper<T>>,
+        searchDataObservable: Observable<SearchData>,
         treeViewAdapter: () -> TreeViewAdapter<*>,
-        search: (T?, TreeViewAdapter.Placeholder) -> Unit,
+        search: (SearchData, TreeViewAdapter.Placeholder) -> Unit,
         recyclerView: RecyclerView,
         progressView: View,
         emptyTextLayout: LinearLayout,
         immediate: () -> Boolean,
-        emptyTextId: () -> Int?
-) = Observables.combineLatest(initialized, filterCriteria).subscribe { (_, filterCriteriaWrapper) ->
+        emptyTextId: () -> Int?,
+) = Observables.combineLatest(initialized, searchDataObservable).subscribe { (_, searchData) ->
     val emptyBefore = treeViewAdapter().displayedNodes.isEmpty()
-    treeViewAdapter().updateDisplayedNodes { search(filterCriteriaWrapper.value, it) }
+    treeViewAdapter().updateDisplayedNodes { search(searchData, it) }
 
     val emptyAfter = treeViewAdapter().displayedNodes.isEmpty()
     if (emptyBefore && !emptyAfter)
@@ -38,9 +37,10 @@ fun <T : Any> observeEmptySearchState(
     if (emptyAfter) {
         hide += recyclerView
 
-        val (textId, drawableId) = filterCriteriaWrapper.value
-                ?.let { R.string.noResults to R.drawable.search }
-                ?: Pair(emptyTextId(), R.drawable.empty)
+        val (textId, drawableId) = if (searchData.query.isNotEmpty())
+            R.string.noResults to R.drawable.search
+        else
+            emptyTextId() to R.drawable.empty
 
         if (textId != null) {
             show += emptyTextLayout

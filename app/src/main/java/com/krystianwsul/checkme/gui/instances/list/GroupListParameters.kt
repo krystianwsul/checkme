@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.gui.main.MainActivity
+import com.krystianwsul.checkme.Preferences
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
 
@@ -17,7 +17,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             val position: Int,
-            val timeRange: MainActivity.TimeRange,
+            val timeRange: Preferences.TimeRange,
             val differentPage: Boolean,
     ) : GroupListParameters(false) {
 

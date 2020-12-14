@@ -5,7 +5,10 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class SearchData(val query: String, val showDeleted: Boolean) : Parcelable, TreeViewAdapter.FilterCriteria {
+data class SearchData(
+        val query: String = "",
+        val showDeleted: Boolean = false,
+) : Parcelable, TreeViewAdapter.FilterCriteria {
 
-    override val hasQuery get() = query.isNotEmpty()
+    override val expandMatchingInstances get() = query.isNotEmpty()
 }

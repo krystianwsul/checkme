@@ -410,10 +410,6 @@ class UserListFragment : AbstractFragment(), FabUser {
             treeNode = it
             it.setChildTreeNodes(listOf())
         }
-
-        override fun matches(filterCriteria: Any?) = false
-
-        override fun canBeShownWithFilterCriteria(filterCriteria: Any?) = true
     }
 
     @Parcelize

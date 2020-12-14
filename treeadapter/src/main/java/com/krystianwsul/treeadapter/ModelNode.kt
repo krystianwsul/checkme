@@ -34,19 +34,23 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun normalize() = Unit
 
-    // does this node match the filter criteria (false if filtering not implemented, set canBeShown to true)
-    fun matches(filterCriteria: Any?): Boolean
-
-    // can the node be shown when filtering, if it doesn't match (like an ImageNode)
-    // true = show
-    // false = don't show
-    // null = let children decide
-    fun canBeShownWithFilterCriteria(filterCriteria: Any?): Boolean?
+    fun matches(filterCriteria: Any?) = MatchResult.ALWAYS_VISIBLE
 
     // does this node or one of its parents match the filter criteria
-    fun parentHierarchyMatches(filterCriteria: Any?): Boolean = matches(filterCriteria) || parentNode?.parentHierarchyMatches(filterCriteria) == true
+    fun parentHierarchyMatches(filterCriteria: Any?): Boolean =
+            matches(filterCriteria) == MatchResult.MATCHES || parentNode?.parentHierarchyMatches(filterCriteria) == true
 
     fun ordinalDesc(): String? = null
 
     fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
+
+    enum class MatchResult {
+
+        ALWAYS_VISIBLE, MATCHES, DOESNT_MATCH;
+
+        companion object {
+
+            fun fromBoolean(matches: Boolean) = if (matches) MATCHES else DOESNT_MATCH
+        }
+    }
 }

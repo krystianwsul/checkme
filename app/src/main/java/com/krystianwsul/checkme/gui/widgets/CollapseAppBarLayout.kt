@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.Observable
@@ -67,7 +66,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    val searchData = BehaviorRelay.create<NullableWrapper<SearchData>>()
+    val searchData = BehaviorRelay.create<SearchData>()
 
     private val attachedToWindowDisposable = CompositeDisposable()
 
@@ -122,10 +121,10 @@ class CollapseAppBarLayout : AppBarLayout {
                         binding.searchToolbarText.textChanges(),
                         showDeleted
                 ) { searchText, showDeleted ->
-                    NullableWrapper(SearchData(searchText.toString().normalized(), showDeleted))
+                    SearchData(searchText.toString().normalized(), showDeleted)
                 }
             } else {
-                Observable.just(NullableWrapper())
+                Observable.just(SearchData())
             }
         }
                 .subscribe(searchData)
@@ -283,32 +282,28 @@ class CollapseAppBarLayout : AppBarLayout {
         }
     }
 
-    override fun onSaveInstanceState(): Parcelable {
-        return SavedState(super.onSaveInstanceState()).apply {
-            searchData = this@CollapseAppBarLayout.searchData
-                    .getCurrentValue()
-                    .value
-        }
-    }
+    override fun onSaveInstanceState(): Parcelable = SavedState(
+            super.onSaveInstanceState(),
+            this@CollapseAppBarLayout.searchData.getCurrentValue(),
+            this@CollapseAppBarLayout.isSearching
+    )
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
 
-            state.searchData?.let {
-                searchingRelay.accept(true)
-                showDeleted.accept(it.showDeleted)
+            binding.searchToolbarText.setText(state.searchData.query)
+            showDeleted.accept(state.searchData.showDeleted)
 
+            searchingRelay.accept(state.isSearching)
+
+            if (state.isSearching) {
                 binding.searchToolbar.isVisible = true
 
                 binding.toolbarCollapseLayout.title = null
                 binding.toolbarCollapseText.isVisible = false
 
-                binding.searchToolbarText.apply {
-                    setText(it.query)
-
-                    requestFocus()
-                }
+                binding.searchToolbarText.requestFocus()
             }
         } else {
             super.onRestoreInstanceState(state)
@@ -329,18 +324,24 @@ class CollapseAppBarLayout : AppBarLayout {
             }
         }
 
-        var searchData: SearchData? = null
+        var searchData: SearchData
+        var isSearching: Boolean
 
         constructor(source: Parcel) : super(source) {
-            searchData = source.readParcelable(SavedState::class.java.classLoader)
+            searchData = source.readParcelable(SavedState::class.java.classLoader)!!
+            isSearching = source.readInt() == 1
         }
 
-        constructor(superState: Parcelable?) : super(superState)
+        constructor(superState: Parcelable?, searchData: SearchData, isSearching: Boolean) : super(superState) {
+            this.searchData = searchData
+            this.isSearching = isSearching
+        }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
 
             out.writeParcelable(searchData, 0)
+            out.writeInt(if (isSearching) 1 else 0)
         }
     }
 

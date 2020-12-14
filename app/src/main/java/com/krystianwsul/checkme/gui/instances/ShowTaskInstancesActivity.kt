@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
@@ -73,7 +72,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var page = 0
 
-    override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+    override val instanceSearch = Observable.just(SearchData())
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding

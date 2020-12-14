@@ -19,16 +19,17 @@ import io.reactivex.schedulers.Schedulers
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val padding: Pair<Int, Int>?,
-        private val compositeDisposable: CompositeDisposable
+        private val compositeDisposable: CompositeDisposable,
+        initialFilterCriteria: FilterCriteria = FilterCriteria.Empty,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
-
-    internal var filterCriteria: FilterCriteria? = null
-        private set
 
     companion object {
 
         private const val TYPE_PADDING = 1000
     }
+
+    internal var filterCriteria = initialFilterCriteria
+        private set
 
     private var treeNodeCollection: TreeNodeCollection<T>? = null
 
@@ -90,8 +91,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
         val newFilterCriteria = filterCriteria
 
-        if (newFilterCriteria?.let { it != oldFilterCriteria } == true)
-            updateSearchExpansion(newFilterCriteria, Placeholder.instance)
+        if (newFilterCriteria != oldFilterCriteria) updateSearchExpansion(newFilterCriteria, Placeholder.instance)
 
         updating = false
 
@@ -162,10 +162,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     }
 
     fun updateSearchExpansion(filterCriteria: FilterCriteria, placeholder: Placeholder) {
-        treeNodeCollection!!.apply {
-            collapseAll()
-
-            if (filterCriteria.expandMatchingInstances) expandMatching(filterCriteria, placeholder)
+        if (filterCriteria.expandMatchingInstances) {
+            treeNodeCollection!!.apply {
+                collapseAll()
+                expandMatching(filterCriteria, placeholder)
+            }
         }
     }
 
@@ -227,7 +228,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     fun moveItem(
             from: Int,
             to: Int,
-            placeholder: Placeholder
+            placeholder: Placeholder,
     ) = treeNodeCollection?.moveItem(from, to, placeholder)
             ?: throw SetTreeNodeCollectionNotCalledException()
 
@@ -239,7 +240,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
-    fun setFilterCriteria(filterCriteria: FilterCriteria?, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
+    fun setFilterCriteria(filterCriteria: FilterCriteria, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 
         if (normalizedObservable.getCurrentValue()) {
@@ -269,12 +270,17 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
         companion object {
 
-            val instance = Placeholder()
+            internal val instance = Placeholder()
         }
     }
 
     interface FilterCriteria {
 
         val expandMatchingInstances: Boolean
+
+        object Empty : FilterCriteria {
+
+            override val expandMatchingInstances = false
+        }
     }
 }

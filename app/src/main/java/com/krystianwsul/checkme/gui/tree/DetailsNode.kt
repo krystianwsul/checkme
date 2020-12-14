@@ -118,9 +118,9 @@ class DetailsNode(
     override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(matchesHelper(filterCriteria))
 
     private fun matchesHelper(filterCriteria: Any?): Boolean {
-        if (filterCriteria == null) return true
+        if (filterCriteria !is SearchData) return true
 
-        val query = (filterCriteria as SearchData).query
+        val query = filterCriteria.query
 
         if (query.isEmpty()) return true
 

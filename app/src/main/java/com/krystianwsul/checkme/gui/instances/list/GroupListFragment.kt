@@ -502,7 +502,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
-    private var searchData: SearchData? = null
+    private var searchData = SearchData()
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
 
@@ -570,7 +570,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
-                searchData = getParcelable(KEY_SEARCH_DATA)
+                searchData = getParcelable(KEY_SEARCH_DATA)!!
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -744,7 +744,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
             }
         } else {
-            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable)
+            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, SearchData())
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -784,8 +784,9 @@ class GroupListFragment @JvmOverloads constructor(
         initializedRelay.accept(Unit)
     }
 
-    private fun search(searchData: SearchData?, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(searchData: SearchData, placeholder: TreeViewAdapter.Placeholder) {
         this.searchData = searchData
+
         treeViewAdapter.setFilterCriteria(searchData, placeholder)
     }
 
@@ -998,12 +999,14 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable,
+            searchData: SearchData,
     ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                compositeDisposable
+                compositeDisposable,
+                searchData
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

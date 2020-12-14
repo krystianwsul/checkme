@@ -131,8 +131,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 adapter = treeViewAdapter
                 itemAnimator = CustomItemAnimator()
             }
-
-            if (query.isNotEmpty()) treeViewAdapter!!.updateDisplayedNodes { search(query, it) }
         }
 
         initializeDisposable += searchChanges.subscribe { query ->
@@ -185,10 +183,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private fun search(query: String, placeholder: TreeViewAdapter.Placeholder) {
         this.query = query
 
-        treeViewAdapter!!.setFilterCriteria(
-                query.takeIf { it.isNotEmpty() }?.let { SearchData(it, false) },
-                placeholder
-        )
+        treeViewAdapter!!.setFilterCriteria(SearchData(query), placeholder)
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :
@@ -197,7 +192,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
-        val treeViewAdapter = TreeViewAdapter(this, null, viewCreatedDisposable)
+        val treeViewAdapter = TreeViewAdapter(
+                this,
+                null,
+                viewCreatedDisposable,
+                SearchData(query)
+        )
 
         override val taskAdapter = this
 

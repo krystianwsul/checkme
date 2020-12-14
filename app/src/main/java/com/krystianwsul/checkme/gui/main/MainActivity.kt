@@ -140,7 +140,7 @@ class MainActivity :
                 binding.mainSearchText.textChanges(),
                 showDeleted
         )
-                .map { NullableWrapper(SearchData(it.first.toString().normalized(), it.second)) }
+                .map { SearchData(it.first.toString().normalized(), it.second) }
                 .replay(1)
                 .apply { createDisposable += connect() }!!
     }
@@ -150,7 +150,7 @@ class MainActivity :
             if ((tabSearchState as? TabSearchState.Tasks)?.isSearching == true)
                 searchData
             else
-                NullableWrapper()
+                SearchData()
         }
     }
 
@@ -193,7 +193,7 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+        override val instanceSearch = Observable.just(SearchData())
 
         override val subtaskDialogResult = subtaskDialogResultDays
 
@@ -305,7 +305,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.just(NullableWrapper<SearchData>())
+            override val instanceSearch = Observable.just(SearchData())
 
             override val subtaskDialogResult = subtaskDialogResultSearch
 
@@ -562,9 +562,9 @@ class MainActivity :
 
         initBottomBar()
 
-        taskSearch.filter { tabSearchStateRelay.value!!.tab == Tab.TASKS }
+        tabSearchStateRelay.filter { it is TabSearchState.Tasks }
                 .subscribe {
-                    bottomBinding.bottomFab.apply { if (it.value != null) show() else hide() }
+                    bottomBinding.bottomFab.apply { if (it.isSearching) show() else hide() }
                 }
                 .addTo(createDisposable)
 
@@ -609,7 +609,7 @@ class MainActivity :
                     searchDataObservable
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
-                    searchData
+                    NullableWrapper(searchData)
                 } else {
                     searchPage = 0
                     NullableWrapper()

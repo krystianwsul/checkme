@@ -60,9 +60,16 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
 
     fun newData(data: EditViewModel.Data) {
         this.data = data
+
+        tmpParentTaskKey?.let {
+            check(parentScheduleManager.trySetParentTask(it))
+            tmpParentTaskKey = null
+        }
     }
 
     protected abstract var data: EditViewModel.Data
+
+    private var tmpParentTaskKey: TaskKey? = null
 
     open val initialName: String? = null
     open val initialNote: String? = null
@@ -183,7 +190,9 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
 
     inner class ParentLookup {
 
-        fun findTaskData(parentKey: EditViewModel.ParentKey): EditViewModel.ParentTreeData {
+        fun findTaskData(parentKey: EditViewModel.ParentKey) = tryFindTaskData(parentKey)!!
+
+        fun tryFindTaskData(parentKey: EditViewModel.ParentKey): EditViewModel.ParentTreeData? {
             fun helper(
                     taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
                     parentKey: EditViewModel.ParentKey,
@@ -196,11 +205,18 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
                         .singleOrNull()
             }
 
-            return helper(data.parentTreeDatas, parentKey)!!
+            return helper(data.parentTreeDatas, parentKey)
         }
     }
 
     open fun showAllRemindersDialog(): Boolean? = null // null = no, true/false = plural
+
+    fun setParentTask(taskKey: TaskKey) {
+        check(tmpParentTaskKey == null)
+
+        if (!parentScheduleManager.trySetParentTask(taskKey))
+            tmpParentTaskKey = taskKey
+    }
 
     fun createTask(createParameters: CreateParameters): TaskKey {
         check(createParameters.allReminders || showAllRemindersDialog() != null)

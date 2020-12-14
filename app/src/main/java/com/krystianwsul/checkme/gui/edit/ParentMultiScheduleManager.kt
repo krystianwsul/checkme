@@ -26,8 +26,7 @@ class ParentMultiScheduleManager(
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
-        if (it?.parentKey is EditViewModel.ParentKey.Task)
-            mutateSchedules { it.clear() }
+        if (it?.parentKey is EditViewModel.ParentKey.Task) mutateSchedules { it.clear() }
 
         assignedTo = setOf()
     }
@@ -54,8 +53,10 @@ class ParentMultiScheduleManager(
 
     override val changed get() = toState() != initialState
 
-    override fun setParentTask(taskKey: TaskKey) {
-        parent = parentLookup.findTaskData(EditViewModel.ParentKey.Task(taskKey))
+    override fun trySetParentTask(taskKey: TaskKey): Boolean {
+        parent = parentLookup.tryFindTaskData(EditViewModel.ParentKey.Task(taskKey)) ?: return false
+
+        return true
     }
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =

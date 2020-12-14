@@ -22,7 +22,7 @@ interface ParentScheduleManager {
 
     val changed: Boolean
 
-    fun setParentTask(taskKey: TaskKey)
+    fun trySetParentTask(taskKey: TaskKey): Boolean
 
     fun addSchedule(scheduleEntry: ScheduleEntry)
 

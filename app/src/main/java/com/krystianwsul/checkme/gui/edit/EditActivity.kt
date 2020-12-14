@@ -351,6 +351,8 @@ class EditActivity : NavBarActivity() {
         }
     }
 
+    private var first = true
+
     private fun onLoadFinished(data: EditViewModel.Data) {
         if (hasDelegate) { // todo the delegate type could change on the fly
             delegate.newData(data)
@@ -374,20 +376,25 @@ class EditActivity : NavBarActivity() {
         binding.editToolbarEditTextInclude
                 .toolbarEditText
                 .run {
-                    if (savedInstanceState == null) setText(delegate.initialName)
+                    if (first) {
+                        // first doesn't handle activity recreated
+                        if (savedInstanceState == null) setText(delegate.initialName)
 
-                    addTextChangedListener(object : TextWatcher {
+                        addTextChangedListener(object : TextWatcher {
 
-                        private var skip = savedInstanceState != null
+                            private var skip = savedInstanceState != null
 
-                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+                            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
-                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+                            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
-                        override fun afterTextChanged(s: Editable) {
-                            if (skip) skip = false else updateNameError()
-                        }
-                    })
+                            override fun afterTextChanged(s: Editable) {
+                                if (skip) skip = false else updateNameError()
+                            }
+                        })
+
+                        first = false
+                    }
                 }
 
         if (savedInstanceState?.containsKey(NOTE_HAS_FOCUS_KEY) == true) {
@@ -482,7 +489,7 @@ class EditActivity : NavBarActivity() {
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                delegate.parentScheduleManager.setParentTask(taskKey)
+                delegate.setParentTask(taskKey)
             }
         }
     }

@@ -468,7 +468,7 @@ class NotDoneGroupNode(
 
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
-    override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(instanceDatas.any {
+    override fun matches(filterCriteria: Any) = ModelNode.MatchResult.fromBoolean(instanceDatas.any {
         it.matchesQuery((filterCriteria as? SearchData).orEmpty())
     })
 
@@ -681,7 +681,7 @@ class NotDoneGroupNode(
 
         override fun normalize() = instanceData.normalize()
 
-        override fun matches(filterCriteria: Any?) =
+        override fun matches(filterCriteria: Any) =
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery((filterCriteria as? SearchData).orEmpty()))
 
         data class Id(val instanceKey: InstanceKey)

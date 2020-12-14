@@ -358,8 +358,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun matches(filterCriteria: Any?) =
-                    ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery((filterCriteria as? SearchData).orEmpty()))
+            override fun matches(filterCriteria: Any) = ModelNode.MatchResult.fromBoolean(
+                    parentTreeData.matchesQuery((filterCriteria as? SearchData).orEmpty())
+            )
         }
     }
 

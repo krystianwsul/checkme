@@ -115,7 +115,7 @@ class DetailsNode(
         normalizedNote
     }
 
-    override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(matchesHelper(filterCriteria))
+    override fun matches(filterCriteria: Any) = ModelNode.MatchResult.fromBoolean(matchesHelper(filterCriteria))
 
     private fun matchesHelper(filterCriteria: Any?): Boolean {
         if (filterCriteria !is SearchData) return true

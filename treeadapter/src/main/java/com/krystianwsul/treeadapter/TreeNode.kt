@@ -7,7 +7,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         val modelNode: ModelNode<T>,
         val parent: NodeContainer<T>,
         private var expanded: Boolean,
-        private var selected: Boolean
+        private var selected: Boolean,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
     override val isExpanded get() = expanded
@@ -268,25 +268,31 @@ class TreeNode<T : RecyclerView.ViewHolder>(
                 listOf()
         }
 
+    /**
+     * todo: consider adding a cache that can be used when these values are known not to change, such as after
+     * updateDisplayedNodes finishes running
+     */
     fun canBeShown(): Boolean {
         checkChildTreeNodesSet()
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
-        val matches = modelNode.parentHierarchyMatches(treeViewAdapter.filterCriteria)
-                || hasMatchingChild(treeViewAdapter.filterCriteria)
+        if (treeViewAdapter.filterCriteria.hasQuery) {
+            val matches = modelNode.parentHierarchyMatches(treeViewAdapter.filterCriteria)
+                    || hasMatchingChild(treeViewAdapter.filterCriteria)
 
-        if (!matches && modelNode.matches(treeViewAdapter.filterCriteria) == ModelNode.MatchResult.DOESNT_MATCH)
-            return false
+            if (!matches && modelNode.matches(treeViewAdapter.filterCriteria) == ModelNode.MatchResult.DOESNT_MATCH)
+                return false
+        }
 
         if (!modelNode.isVisibleWhenEmpty && childTreeNodes.none { it.canBeShown() }) return false
 
         return true
     }
 
-    private fun matches(filterCriteria: Any?) = modelNode.matches(filterCriteria)
+    private fun matches(filterCriteria: Any) = modelNode.matches(filterCriteria)
 
-    private fun hasMatchingChild(filterCriteria: Any?): Boolean = childTreeNodes.any {
+    private fun hasMatchingChild(filterCriteria: Any): Boolean = childTreeNodes.any {
         it.matches(filterCriteria) == ModelNode.MatchResult.MATCHES || it.hasMatchingChild(filterCriteria)
     }
 
@@ -412,7 +418,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             val isSelected: Boolean,
             val expandVisible: Boolean,
             val separatorVisibility: Boolean,
-            val modelState: ModelState
+            val modelState: ModelState,
     )
 
     override val id get() = modelNode.id

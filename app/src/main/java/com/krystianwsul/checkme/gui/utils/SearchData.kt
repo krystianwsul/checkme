@@ -11,8 +11,6 @@ data class SearchData(
         val showDeleted: Boolean = false,
 ) : Parcelable, TreeViewAdapter.FilterCriteria, QueryData {
 
-    override val expandMatchingInstances get() = query.isNotEmpty()
-
     override val hasQuery get() = query.isNotEmpty()
 }
 

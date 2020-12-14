@@ -140,6 +140,6 @@ class TaskNode(
 
     override val thumbnail = taskData.imageState
 
-    override fun matches(filterCriteria: Any?) =
+    override fun matches(filterCriteria: Any) =
             ModelNode.MatchResult.fromBoolean(taskData.matchesQuery((filterCriteria as? SearchData).orEmpty()))
 }

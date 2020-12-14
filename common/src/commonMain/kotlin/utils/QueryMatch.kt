@@ -5,13 +5,17 @@ interface QueryMatch {
     val normalizedName: String
     val normalizedNote: String?
 
-    fun matchesQuery(query: String?): Boolean {
-        if (query.isNullOrEmpty()) return true
+    fun matchesQuery(queryData: QueryData): Boolean {
+        log("magic $this matchesQuery 1")
+        if (queryData.query.isEmpty()) return true
 
-        if (normalizedName.contains(query)) return true
+        log("magic $this matchesQuery 2")
+        if (normalizedName.contains(queryData.query)) return true
 
-        if (normalizedNote?.contains(query) == true) return true
+        log("magic $this matchesQuery 3")
+        if (normalizedNote?.contains(queryData.query) == true) return true
 
+        log("magic $this matchesQuery 4")
         return false
     }
 }

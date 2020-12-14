@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
@@ -512,12 +513,12 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            query: String? = null,
+            queryData: QueryData = QueryData.Empty,
             filterVisible: Boolean = true,
     ): Sequence<Instance<*>> {
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, query, filterVisible) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryData, filterVisible) }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -529,7 +530,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
-            query: String? = null,
+            query: SearchData = SearchData(),
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
                 .mapNotNull { (childInstance, _) ->
@@ -539,7 +540,7 @@ class DomainFactory(
 
                     val childTaskMatches = childTask.matchesQuery(query)
 
-                    val childrenQuery = if (childTaskMatches) null else query
+                    val childrenQuery = if (childTaskMatches) SearchData() else query
 
                     val children = getChildInstanceDatas(childInstance, now, childrenQuery)
 

@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.SearchData
+import com.krystianwsul.checkme.gui.utils.orEmpty
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
@@ -468,7 +469,7 @@ class NotDoneGroupNode(
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
     override fun matches(filterCriteria: Any?) = ModelNode.MatchResult.fromBoolean(instanceDatas.any {
-        it.matchesQuery((filterCriteria as? SearchData)?.query)
+        it.matchesQuery((filterCriteria as? SearchData).orEmpty())
     })
 
     override fun ordinalDesc() = if (singleInstance()) {
@@ -681,7 +682,7 @@ class NotDoneGroupNode(
         override fun normalize() = instanceData.normalize()
 
         override fun matches(filterCriteria: Any?) =
-                ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery((filterCriteria as? SearchData)?.query))
+                ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery((filterCriteria as? SearchData).orEmpty()))
 
         data class Id(val instanceKey: InstanceKey)
     }

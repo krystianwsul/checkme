@@ -619,7 +619,8 @@ class MainActivity :
             val searchParameters = Observables.combineLatest(
                     instanceSearch.filterNotNull()
                             .map { it.query }
-                            .distinctUntilChanged(),
+                            .distinctUntilChanged()
+                            .map { SearchData(it) },
                     binding.mainSearchGroupListFragment
                             .progressShown
                             .doOnNext { searchPage += 1 }
@@ -635,7 +636,7 @@ class MainActivity :
                         it.immediate,
                         it.groupListDataWrapper,
                         it.showLoader,
-                        it.query
+                        it.searchData
                 ))
             }
                     .map { }

@@ -319,7 +319,7 @@ abstract class Project<T : ProjectType>(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            query: String? = null,
+            queryData: QueryData = QueryData.Empty,
             filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
@@ -327,7 +327,7 @@ abstract class Project<T : ProjectType>(
         throwIfInterrupted()
 
         val filteredTasks = tasks.asSequence()
-                .filterQuery(query)
+                .filterQuery(queryData)
                 .toList()
 
         val instanceSequences = filteredTasks.map { (task, _) ->
@@ -339,7 +339,7 @@ abstract class Project<T : ProjectType>(
                     now,
                     onlyRoot = true
             )
-                    .filterQuery(query, now)
+                    .filterQuery(queryData, now)
                     .map { it.first }
 
             if (filterVisible) {

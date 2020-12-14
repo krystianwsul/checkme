@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.gui.utils.SearchData
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
 
@@ -60,12 +61,12 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             override val showProgress: Boolean,
-            val query: String,
+            val searchData: SearchData,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false
 
-        override val fabActionMode = if (query.isEmpty()) FabActionMode.BOTH else FabActionMode.NONE
+        override val fabActionMode = if (searchData.hasQuery) FabActionMode.NONE else FabActionMode.BOTH
     }
 
     enum class FabActionMode(val showSubtask: Boolean, val showTime: Boolean) {

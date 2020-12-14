@@ -810,7 +810,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             if (!searchData.showDeleted && !isVisible) return false
 
-            if (matchesQuery(searchData.query)) return true
+            if (matchesQuery(searchData)) return true
 
             return false
         }

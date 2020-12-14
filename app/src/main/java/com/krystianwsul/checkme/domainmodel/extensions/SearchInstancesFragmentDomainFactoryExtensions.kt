@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
@@ -17,8 +18,8 @@ import com.krystianwsul.common.locker.LockerManager
 const val PAGE_SIZE = 20
 
 fun DomainFactory.getSearchInstancesData(
-        query: String,
-        page: Int
+        searchData: SearchData,
+        page: Int,
 ): DomainResult<SearchInstancesViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
@@ -34,7 +35,7 @@ fun DomainFactory.getSearchInstancesData(
                     null,
                     null,
                     now,
-                    query,
+                    searchData,
                     filterVisible = !debugMode
             ).takeAndHasMore(desiredCount)
 
@@ -43,7 +44,7 @@ fun DomainFactory.getSearchInstancesData(
 
                 val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-                val childrenQuery = if (task.matchesQuery(query)) null else query
+                val childrenQuery = if (task.matchesQuery(searchData)) SearchData() else searchData
 
                 val children = getChildInstanceDatas(it, now, childrenQuery)
 
@@ -78,9 +79,9 @@ fun DomainFactory.getSearchInstancesData(
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
             val taskDatas = getUnscheduledTasks(now)
-                    .filterQuery(query)
+                    .filterQuery(searchData)
                     .map { (task, filterResult) ->
-                        val childQuery = if (filterResult == FilterResult.MATCHES) null else query
+                        val childQuery = if (filterResult == FilterResult.MATCHES) SearchData() else searchData
 
                         GroupListDataWrapper.TaskData(
                                 task.taskKey,
@@ -105,7 +106,7 @@ fun DomainFactory.getSearchInstancesData(
 
             cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-            SearchInstancesViewModel.Data(dataWrapper, hasMore, query)
+            SearchInstancesViewModel.Data(dataWrapper, hasMore, searchData)
         }
     }
 }

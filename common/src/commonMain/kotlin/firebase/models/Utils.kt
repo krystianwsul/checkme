@@ -5,11 +5,11 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.QueryData
 
-fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(queryData: QueryData) = if (queryData.hasQuery) {
+fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(queryData: QueryData) = if (queryData.query.isNotEmpty()) {
     fun filterQuery(task: Task<out T>): FilterResult {
         throwIfInterrupted()
 
-        if (task.matchesQuery(queryData)) return FilterResult.MATCHES
+        if (task.matchesQueryData(queryData)) return FilterResult.MATCHES
 
         if (task.childHierarchyIntervals.any { filterQuery(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH })
             return FilterResult.CHILD_MATCHES
@@ -25,11 +25,12 @@ fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(queryData: QueryData) = 
 fun <T : ProjectType> Sequence<Instance<out T>>.filterQuery(
         queryData: QueryData,
         now: ExactTimeStamp.Local,
-) = if (queryData.hasQuery) {
+        myUser: MyUser,
+) = if (queryData.query.isNotEmpty() || !queryData.showAssigned) {
     fun filterQuery(instance: Instance<out T>): FilterResult {
         throwIfInterrupted()
 
-        if (instance.task.matchesQuery(queryData)) return FilterResult.MATCHES
+        if (instance.matchesQueryData(queryData, now, myUser)) return FilterResult.MATCHES
 
         if (instance.getChildInstances(now).any { filterQuery(it.first) != FilterResult.DOESNT_MATCH })
             return FilterResult.CHILD_MATCHES

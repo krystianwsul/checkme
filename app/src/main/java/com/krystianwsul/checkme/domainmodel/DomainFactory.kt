@@ -513,12 +513,14 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            queryData: QueryData = QueryData.Empty,
+            queryData: QueryData? = null,
             filterVisible: Boolean = true,
     ): Sequence<Instance<*>> {
+        val queryParams = queryData?.let { Project.QueryParams(it, myUserFactory.user) }
+
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryData, filterVisible) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryParams, filterVisible) }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -538,7 +540,7 @@ class DomainFactory(
 
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-                    val childTaskMatches = childTask.matchesQuery(query)
+                    val childTaskMatches = childTask.matchesQueryData(query)
 
                     val childrenQuery = if (childTaskMatches) SearchData() else query
 
@@ -671,6 +673,7 @@ class DomainFactory(
                             alwaysShow,
                             childTask.ordinal,
                             childTask.getProjectInfo(now),
+                            childTask.isAssignedToMe(now, myUserFactory.user),
                     )
                 }
     }

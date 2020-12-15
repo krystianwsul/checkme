@@ -193,7 +193,7 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Observable.just(SearchData())
+        override val instanceSearch = Preferences.showAssignedObservable.map { SearchData(showAssigned = it) }
 
         override val subtaskDialogResult = subtaskDialogResultDays
 

@@ -44,7 +44,7 @@ fun DomainFactory.getSearchInstancesData(
 
                 val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-                val childrenQuery = if (task.matchesQuery(searchData)) SearchData() else searchData
+                val childrenQuery = if (task.matchesQueryData(searchData)) SearchData() else searchData
 
                 val children = getChildInstanceDatas(it, now, childrenQuery)
 
@@ -89,7 +89,8 @@ fun DomainFactory.getSearchInstancesData(
                                 getGroupListChildTaskDatas(task, now, childQuery),
                                 task.startExactTimeStamp,
                                 task.note,
-                                task.getImage(deviceDbInfo)
+                                task.getImage(deviceDbInfo),
+                                task.isAssignedToMe(now, myUserFactory.user),
                         )
                     }
                     .toList()

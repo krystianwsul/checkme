@@ -1054,6 +1054,11 @@ class Task<T : ProjectType>(
         }
     }
 
+    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
+            getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
+
+    fun matchesQueryData(queryData: QueryData) = matchesQuery(queryData.query)
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

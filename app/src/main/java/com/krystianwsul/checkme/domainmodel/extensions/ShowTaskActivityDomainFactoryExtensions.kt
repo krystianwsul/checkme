@@ -41,6 +41,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                         true,
                         childTask.ordinal,
                         childTask.getProjectInfo(now),
+                        childTask.isAssignedToMe(now, myUserFactory.user),
                 )
             }
             .sorted()

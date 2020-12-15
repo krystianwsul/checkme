@@ -46,6 +46,7 @@ fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain
                         false,
                         task.ordinal,
                         task.getProjectInfo(now),
+                        task.isAssignedToMe(now, myUserFactory.user),
                 )
             }
             .sortedDescending()
@@ -125,7 +126,8 @@ fun DomainFactory.getGroupListData(
                     getGroupListChildTaskDatas(it, now),
                     it.startExactTimeStamp,
                     it.note,
-                    it.getImage(deviceDbInfo)
+                    it.getImage(deviceDbInfo),
+                    it.isAssignedToMe(now, myUserFactory.user),
             )
         }.toList()
     } else {

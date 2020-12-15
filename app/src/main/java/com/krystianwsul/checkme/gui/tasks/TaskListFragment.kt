@@ -42,11 +42,11 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.QueryDataMatch
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
@@ -793,7 +793,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val alwaysShow: Boolean,
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
-    ) : Comparable<ChildTaskData>, QueryMatch {
+            override val isAssignedToMe: Boolean,
+    ) : Comparable<ChildTaskData>, QueryDataMatch {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
@@ -810,7 +811,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             if (!searchData.showDeleted && !isVisible) return false
 
-            if (matchesQuery(searchData)) return true
+            if (matchesQueryData(searchData)) return true
 
             return false
         }

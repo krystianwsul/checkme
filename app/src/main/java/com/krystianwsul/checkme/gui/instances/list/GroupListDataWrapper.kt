@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.checkme.utils.QueryDataMatch
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.QueryMatch
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import java.util.*
@@ -26,7 +26,8 @@ data class GroupListDataWrapper(
             val startExactTimeStamp: ExactTimeStamp.Local,
             override val note: String?,
             val imageState: ImageState?,
-    ) : SelectedData, QueryMatch {
+            override val isAssignedToMe: Boolean,
+    ) : SelectedData, QueryDataMatch {
 
         init {
             check(name.isNotEmpty())
@@ -60,9 +61,9 @@ data class GroupListDataWrapper(
             var notificationShown: Boolean,
             val imageState: ImageState?,
             val isRecurringGroupChild: Boolean,
-            val isAssignedToMe: Boolean,
+            override val isAssignedToMe: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,
-    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatch {
+    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryDataMatch {
 
         lateinit var instanceDataParent: InstanceDataParent
 

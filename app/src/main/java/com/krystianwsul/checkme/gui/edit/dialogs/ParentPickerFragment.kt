@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SearchData
-import com.krystianwsul.checkme.gui.utils.orEmpty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -358,9 +357,18 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun matches(filterCriteria: Any) = ModelNode.MatchResult.fromBoolean(
-                    parentTreeData.matchesQuery((filterCriteria as? SearchData).orEmpty())
-            )
+            override fun matches(filterCriteria: Any): ModelNode.MatchResult {
+                val searchData = filterCriteria as? SearchData
+
+                return if (searchData == null) {
+                    ModelNode.MatchResult.MATCHES
+                } else {
+                    check(!searchData.showDeleted)
+                    check(searchData.showAssigned)
+
+                    ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery(searchData.query))
+                }
+            }
         }
     }
 

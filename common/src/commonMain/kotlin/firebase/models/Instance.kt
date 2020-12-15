@@ -512,6 +512,15 @@ class Instance<T : ProjectType> private constructor(
     fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
             getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
 
+    fun matchesQueryData(queryData: QueryData, now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
+        if (!task.matchesQuery(queryData.query)) return false
+
+        if (queryData.showAssigned) return true
+        if (!isAssignedToMe(now, myUser)) return false
+
+        return true
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

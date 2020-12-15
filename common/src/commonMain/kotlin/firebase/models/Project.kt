@@ -315,11 +315,13 @@ abstract class Project<T : ProjectType>(
                 .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
+    data class QueryParams(val queryData: QueryData, val myUser: MyUser)
+
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            queryData: QueryData = QueryData.Empty,
+            queryParams: QueryParams? = null,
             filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
@@ -327,10 +329,14 @@ abstract class Project<T : ProjectType>(
         throwIfInterrupted()
 
         val filteredTasks = tasks.asSequence()
-                .filterQuery(queryData)
+                .let { sequence ->
+                    queryParams?.let {
+                        sequence.filterQuery(it.queryData).map { it.first }
+                    } ?: sequence
+                }
                 .toList()
 
-        val instanceSequences = filteredTasks.map { (task, _) ->
+        val instanceSequences = filteredTasks.map { task ->
             throwIfInterrupted()
 
             val instances = task.getInstances(
@@ -339,8 +345,11 @@ abstract class Project<T : ProjectType>(
                     now,
                     onlyRoot = true
             )
-                    .filterQuery(queryData, now)
-                    .map { it.first }
+                    .let { sequence ->
+                        queryParams?.let {
+                            sequence.filterQuery(it.queryData, now, it.myUser).map { it.first }
+                        } ?: sequence
+                    }
 
             if (filterVisible) {
                 instances.filter { instance ->

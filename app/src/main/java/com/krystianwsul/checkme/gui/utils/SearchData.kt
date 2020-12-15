@@ -9,9 +9,12 @@ import kotlinx.parcelize.Parcelize
 data class SearchData(
         override val query: String = "",
         val showDeleted: Boolean = false,
+        override val showAssigned: Boolean = true,
 ) : Parcelable, TreeViewAdapter.FilterCriteria, QueryData {
 
-    override val hasQuery get() = query.isNotEmpty()
+    override val hasQuery get() = query.isNotEmpty() || showDeleted || !showAssigned
+
+    override val expandMatches get() = query.isNotEmpty()
 }
 
 fun SearchData?.orEmpty() = this ?: SearchData()

@@ -251,7 +251,8 @@ fun DomainFactory.getGroupListChildTaskDatas(
                     getGroupListChildTaskDatas(childTask, now, childQuery),
                     childTask.startExactTimeStamp,
                     childTask.note,
-                    childTask.getImage(deviceDbInfo)
+                    childTask.getImage(deviceDbInfo),
+                    childTask.isAssignedToMe(now, myUserFactory.user),
             )
         }
         .toList()

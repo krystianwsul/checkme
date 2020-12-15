@@ -3,13 +3,11 @@ package com.krystianwsul.common.utils
 interface QueryData {
 
     val query: String
-
-    val hasQuery: Boolean
+    val showAssigned: Boolean
 
     object Empty : QueryData {
 
         override val query = ""
-
-        override val hasQuery = false
+        override val showAssigned = true
     }
 }

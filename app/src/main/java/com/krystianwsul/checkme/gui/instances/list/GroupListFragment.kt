@@ -737,8 +737,13 @@ class GroupListFragment @JvmOverloads constructor(
                 search(filterCriteria, placeholder)
 
                 (parameters as? GroupListParameters.Search)?.let {
-                    if (previousQuery != it.filterCriteria)
-                        treeViewAdapter.updateSearchExpansion(it.filterCriteria, placeholder)
+                    if (previousQuery != it.filterCriteria) {
+                        if (previousQuery.query.isNotEmpty() && it.filterCriteria.query.isEmpty()) {
+                            treeViewAdapter.collapseAll()
+                        } else {
+                            treeViewAdapter.updateSearchExpansion(it.filterCriteria, placeholder)
+                        }
+                    }
 
                     previousQuery = it.filterCriteria
                 }

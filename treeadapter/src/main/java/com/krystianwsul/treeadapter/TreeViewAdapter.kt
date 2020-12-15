@@ -164,6 +164,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         updates.accept(Unit)
     }
 
+    fun collapseAll() = treeNodeCollection!!.collapseAll()
+
     fun updateSearchExpansion(filterCriteria: FilterCriteria, placeholder: Placeholder) {
         if (filterCriteria.expandMatches) {
             treeNodeCollection!!.apply {

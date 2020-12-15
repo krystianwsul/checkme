@@ -1,4 +1,4 @@
-package com.krystianwsul.common.utils
+package com.krystianwsul.common.criteria
 
 interface QueryMatch {
 

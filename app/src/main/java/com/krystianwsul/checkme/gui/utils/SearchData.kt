@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.utils
 
 import android.os.Parcelable
-import com.krystianwsul.common.utils.QueryData
+import com.krystianwsul.common.criteria.QueryData
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlinx.parcelize.Parcelize
 

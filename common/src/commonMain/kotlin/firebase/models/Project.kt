@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.criteria.QueryData
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion

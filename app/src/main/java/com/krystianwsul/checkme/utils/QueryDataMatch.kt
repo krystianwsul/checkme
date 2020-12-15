@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.common.utils.QueryData
-import com.krystianwsul.common.utils.QueryMatch
+import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.QueryMatch
 
 interface QueryDataMatch : QueryMatch {
 

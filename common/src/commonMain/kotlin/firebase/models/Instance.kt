@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.criteria.QueryData
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord

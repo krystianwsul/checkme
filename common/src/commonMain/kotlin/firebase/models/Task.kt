@@ -1,5 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.QueryMatch
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData

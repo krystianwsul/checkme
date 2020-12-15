@@ -1,9 +1,9 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.criteria.QueryData
 import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.QueryData
 
 fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(queryData: QueryData) = if (queryData.query.isNotEmpty()) {
     fun filterQuery(task: Task<out T>): FilterResult {

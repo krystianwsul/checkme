@@ -6,10 +6,10 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Task
@@ -237,13 +237,13 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) = getTasks().fi
 fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task<*>,
         now: ExactTimeStamp.Local,
-        searchData: SearchData = SearchData(),
+        searchCriteria: SearchCriteria? = null,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
         .asSequence()
         .map { it.childTask }
-        .filterQuery(searchData)
+        .filterQuery(searchCriteria?.query)
         .map { (childTask, filterResult) ->
-            val childQuery = if (filterResult == FilterResult.MATCHES) SearchData() else searchData
+            val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
             GroupListDataWrapper.TaskData(
                     childTask.taskKey,

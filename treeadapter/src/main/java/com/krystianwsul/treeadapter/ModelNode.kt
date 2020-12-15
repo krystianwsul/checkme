@@ -34,11 +34,9 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun normalize() = Unit
 
-    fun matches(filterCriteria: Any) = MatchResult.ALWAYS_VISIBLE
+    fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) = true
 
-    // does this node or one of its parents match the filter criteria
-    fun parentHierarchyMatches(filterCriteria: Any): Boolean =
-            matches(filterCriteria) == MatchResult.MATCHES || parentNode?.parentHierarchyMatches(filterCriteria) == true
+    fun matchesQuery(query: String) = MatchResult.ALWAYS_VISIBLE
 
     fun ordinalDesc(): String? = null
 

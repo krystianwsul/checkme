@@ -277,24 +277,40 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
-        if (treeViewAdapter.filterCriteria.hasQuery) {
-            val matches = modelNode.parentHierarchyMatches(treeViewAdapter.filterCriteria)
-                    || hasMatchingChild(treeViewAdapter.filterCriteria)
+        if (!modelNode.matchesFilterParams(treeViewAdapter.filterCriteria.filterParams)) return false
 
-            if (!matches && modelNode.matches(treeViewAdapter.filterCriteria) == ModelNode.MatchResult.DOESNT_MATCH)
-                return false
+        val matchResult = modelNode.matchesQuery(treeViewAdapter.filterCriteria.query)
+
+        when (matchResult) {
+            ModelNode.MatchResult.ALWAYS_VISIBLE -> {
+                return modelNode.isVisibleWhenEmpty || childTreeNodes.any { it.canBeShown() }
+            }
+            ModelNode.MatchResult.MATCHES -> {
+                check(modelNode.isVisibleWhenEmpty)
+
+                return true
+            }
+            ModelNode.MatchResult.DOESNT_MATCH -> {
+                check(modelNode.isVisibleWhenEmpty)
+
+                return parentHierarchyMatchesQuery() || childHierarchyMatchesQuery(treeViewAdapter.filterCriteria.query)
+            }
         }
-
-        if (!modelNode.isVisibleWhenEmpty && childTreeNodes.none { it.canBeShown() }) return false
-
-        return true
     }
 
-    private fun matches(filterCriteria: Any) = modelNode.matches(filterCriteria)
+    private fun matchesQuery(query: String) =
+            modelNode.matchesQuery(query) == ModelNode.MatchResult.MATCHES
 
-    private fun hasMatchingChild(filterCriteria: Any): Boolean = childTreeNodes.any {
-        it.matches(filterCriteria) == ModelNode.MatchResult.MATCHES || it.hasMatchingChild(filterCriteria)
+    private fun parentHierarchyMatchesQuery(): Boolean {
+        return if (parent is TreeNode<T>) {
+            parent.matchesQuery(treeViewAdapter.filterCriteria.query) || parent.parentHierarchyMatchesQuery()
+        } else {
+            false
+        }
     }
+
+    private fun childHierarchyMatchesQuery(query: String): Boolean =
+            childTreeNodes.any { it.matchesQuery(query) || it.childHierarchyMatchesQuery(query) }
 
     private fun visible(): Boolean {
         checkChildTreeNodesSet()
@@ -381,12 +397,16 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (expanded) expanded = false
     }
 
-    fun expandMatching(filterCriteria: Any, placeholder: TreeViewAdapter.Placeholder) {
+    fun expandMatching(query: String, placeholder: TreeViewAdapter.Placeholder) {
         checkChildTreeNodesSet()
 
-        if (hasMatchingChild(filterCriteria) && childTreeNodes.isNotEmpty()) expanded = true
+        if (!visible()) return
+        if (!expandVisible) return
+        if (childTreeNodes.none { canBeShown() }) return
 
-        childTreeNodes.forEach { it.expandMatching(filterCriteria, placeholder) }
+        if (childHierarchyMatchesQuery(query)) expanded = true
+
+        childTreeNodes.forEach { it.expandMatching(query, placeholder) }
     }
 
     private fun checkChildTreeNodesSet() {

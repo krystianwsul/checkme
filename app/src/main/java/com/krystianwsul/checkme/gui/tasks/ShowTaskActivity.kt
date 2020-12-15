@@ -77,7 +77,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     override val taskSearch by lazy {
         binding.showTaskToolbarCollapseInclude
                 .collapseAppBarLayout
-                .searchData
+                .filterCriteria
     }
 
     private lateinit var binding: ActivityShowTaskBinding

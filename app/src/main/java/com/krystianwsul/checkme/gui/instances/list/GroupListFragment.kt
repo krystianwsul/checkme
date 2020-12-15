@@ -502,7 +502,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
-    private var searchData = SearchData()
+    private var filterCriteria = TreeViewAdapter.FilterCriteria()
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
 
@@ -570,7 +570,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
-                searchData = getParcelable(KEY_SEARCH_DATA)!!
+                filterCriteria = getParcelable(KEY_SEARCH_DATA)!!
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -708,10 +708,10 @@ class GroupListFragment @JvmOverloads constructor(
 
         putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
 
-        putParcelable(KEY_SEARCH_DATA, searchData)
+        putParcelable(KEY_SEARCH_DATA, filterCriteria)
     }
 
-    private lateinit var previousQuery: SearchData
+    private lateinit var previousQuery: TreeViewAdapter.FilterCriteria
 
     private fun initialize() {
         if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
@@ -734,17 +734,17 @@ class GroupListFragment @JvmOverloads constructor(
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
 
-                search(searchData, placeholder)
+                search(filterCriteria, placeholder)
 
                 (parameters as? GroupListParameters.Search)?.let {
-                    if (previousQuery != it.searchData)
-                        treeViewAdapter.updateSearchExpansion(it.searchData, placeholder)
+                    if (previousQuery != it.filterCriteria)
+                        treeViewAdapter.updateSearchExpansion(it.filterCriteria, placeholder)
 
-                    previousQuery = it.searchData
+                    previousQuery = it.filterCriteria
                 }
             }
         } else {
-            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, SearchData())
+            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, filterCriteria)
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -773,7 +773,7 @@ class GroupListFragment @JvmOverloads constructor(
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
             }
 
-            (parameters as? GroupListParameters.Search)?.let { previousQuery = it.searchData }
+            (parameters as? GroupListParameters.Search)?.let { previousQuery = it.filterCriteria }
         }
 
         setGroupMenuItemVisibility()
@@ -784,10 +784,10 @@ class GroupListFragment @JvmOverloads constructor(
         initializedRelay.accept(Unit)
     }
 
-    private fun search(searchData: SearchData, placeholder: TreeViewAdapter.Placeholder) {
-        this.searchData = searchData
+    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+        this.filterCriteria = filterCriteria
 
-        treeViewAdapter.setFilterCriteria(searchData, placeholder)
+        treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
     }
 
     private fun setGroupMenuItemVisibility() {
@@ -999,14 +999,14 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable,
-            searchData: SearchData,
+            filterCriteria: TreeViewAdapter.FilterCriteria,
     ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
                 compositeDisposable,
-                searchData
+                filterCriteria
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

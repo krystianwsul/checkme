@@ -7,10 +7,10 @@ import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
@@ -18,7 +18,7 @@ import com.krystianwsul.common.locker.LockerManager
 const val PAGE_SIZE = 20
 
 fun DomainFactory.getSearchInstancesData(
-        searchData: SearchData,
+        searchCriteria: SearchCriteria,
         page: Int,
 ): DomainResult<SearchInstancesViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
@@ -35,7 +35,7 @@ fun DomainFactory.getSearchInstancesData(
                     null,
                     null,
                     now,
-                    searchData,
+                    searchCriteria,
                     filterVisible = !debugMode
             ).takeAndHasMore(desiredCount)
 
@@ -44,9 +44,13 @@ fun DomainFactory.getSearchInstancesData(
 
                 val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-                val childrenQuery = if (task.matchesQueryData(searchData)) SearchData() else searchData
+                /*
+                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+                 */
+                val childSearchCriteria = if (task.matchesQuery(searchCriteria.query)) null else searchCriteria
 
-                val children = getChildInstanceDatas(it, now, childrenQuery)
+                val children = getChildInstanceDatas(it, now, childSearchCriteria)
 
                 val instanceData = GroupListDataWrapper.InstanceData(
                         it.done,
@@ -79,9 +83,9 @@ fun DomainFactory.getSearchInstancesData(
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
 
             val taskDatas = getUnscheduledTasks(now)
-                    .filterQuery(searchData)
+                    .filterQuery(searchCriteria.query)
                     .map { (task, filterResult) ->
-                        val childQuery = if (filterResult == FilterResult.MATCHES) SearchData() else searchData
+                        val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
                         GroupListDataWrapper.TaskData(
                                 task.taskKey,
@@ -107,7 +111,7 @@ fun DomainFactory.getSearchInstancesData(
 
             cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
-            SearchInstancesViewModel.Data(dataWrapper, hasMore, searchData)
+            SearchInstancesViewModel.Data(dataWrapper, hasMore, searchCriteria)
         }
     }
 }

@@ -111,7 +111,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     override val instanceSearch by lazy {
         binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
-                .searchData
+                .filterCriteria
     }
 
     private lateinit var binding: ActivityShowInstanceBinding

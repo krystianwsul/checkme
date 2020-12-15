@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -14,7 +14,7 @@ class Instance<T : ProjectType> private constructor(
         val project: Project<T>,
         val task: Task<T>,
         private var data: Data<T>,
-) {
+) : Assignable {
 
     companion object {
 
@@ -499,7 +499,7 @@ class Instance<T : ProjectType> private constructor(
         }
     }
 
-    fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
+    override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
         if (!isRootInstance(now)) return listOf()
 
         return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
@@ -508,18 +508,6 @@ class Instance<T : ProjectType> private constructor(
                 .orEmpty()
                 .let(project::getAssignedTo)
                 .map { it.value }
-    }
-
-    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
-            getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
-
-    fun matchesQueryData(queryData: QueryData, now: ExactTimeStamp.Local, myUser: MyUser): Boolean {
-        if (!task.matchesQuery(queryData.query)) return false
-
-        if (queryData.showAssigned) return true
-        if (!isAssignedToMe(now, myUser)) return false
-
-        return true
     }
 
     private sealed class Data<T : ProjectType> {

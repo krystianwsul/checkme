@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getSearchInstancesData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.utils.SearchData
+import com.krystianwsul.common.criteria.SearchCriteria
 
 class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>() {
 
@@ -12,13 +12,13 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
     override val domainListener = object : DomainListener<Data>() {
 
         override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(
-                parameters.query,
+                parameters.searchCriteria,
                 parameters.page
         )
     }
 
-    fun start(searchData: SearchData, page: Int) {
-        val newParameters = Parameters(searchData, page)
+    fun start(searchCriteria: SearchCriteria, page: Int) {
+        val newParameters = Parameters(searchCriteria, page)
 
         if (parameters != newParameters) {
             parameters = newParameters
@@ -32,8 +32,8 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
     data class Data(
             val groupListDataWrapper: GroupListDataWrapper,
             val showLoader: Boolean,
-            val searchData: SearchData,
+            val searchCriteria: SearchCriteria,
     ) : DomainData()
 
-    private data class Parameters(val query: SearchData = SearchData(), val page: Int = 0)
+    private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria(), val page: Int = 0)
 }

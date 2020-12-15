@@ -41,11 +41,11 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
@@ -135,22 +135,22 @@ class MainActivity :
 
     private val showDeleted = BehaviorRelay.create<Boolean>()
 
-    private val searchDataObservable by lazy {
+    private val filterCriteriaObservable by lazy {
         Observables.combineLatest(
                 binding.mainSearchText.textChanges(),
                 showDeleted
         )
-                .map { SearchData(it.first.toString().normalized(), it.second) }
+                .map { TreeViewAdapter.FilterCriteria(it.first.toString().normalized(), it.second) }
                 .replay(1)
                 .apply { createDisposable += connect() }!!
     }
 
     override val taskSearch by lazy {
-        Observables.combineLatest(tabSearchStateRelay, searchDataObservable) { tabSearchState, searchData ->
+        Observables.combineLatest(tabSearchStateRelay, filterCriteriaObservable) { tabSearchState, filterCriteria ->
             if ((tabSearchState as? TabSearchState.Tasks)?.isSearching == true)
-                searchData
+                filterCriteria
             else
-                SearchData()
+                TreeViewAdapter.FilterCriteria()
         }
     }
 
@@ -193,7 +193,8 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Preferences.showAssignedObservable.map { SearchData(showAssigned = it) }
+        override val instanceSearch =
+                Preferences.showAssignedObservable.map { TreeViewAdapter.FilterCriteria(showAssignedToOthers = it) }
 
         override val subtaskDialogResult = subtaskDialogResultDays
 
@@ -305,7 +306,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.just(SearchData())
+            override val instanceSearch = Observable.just(TreeViewAdapter.FilterCriteria())
 
             override val subtaskDialogResult = subtaskDialogResultSearch
 
@@ -606,7 +607,7 @@ class MainActivity :
         searchInstancesViewModel.apply {
             val instanceSearch = Observables.combineLatest(
                     tabSearchStateRelay,
-                    searchDataObservable
+                    filterCriteriaObservable
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
                     NullableWrapper(searchData)
@@ -620,7 +621,7 @@ class MainActivity :
                     instanceSearch.filterNotNull()
                             .map { it.query }
                             .distinctUntilChanged()
-                            .map { SearchData(it) },
+                            .map { SearchCriteria(it) },
                     binding.mainSearchGroupListFragment
                             .progressShown
                             .doOnNext { searchPage += 1 }
@@ -636,7 +637,7 @@ class MainActivity :
                         it.immediate,
                         it.groupListDataWrapper,
                         it.showLoader,
-                        it.searchData
+                        TreeViewAdapter.FilterCriteria.fromSearchCriteria(it.searchCriteria)
                 ))
             }
                     .map { }

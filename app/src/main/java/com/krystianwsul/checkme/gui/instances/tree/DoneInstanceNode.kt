@@ -20,8 +20,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
-import com.krystianwsul.checkme.gui.utils.SearchData
-import com.krystianwsul.checkme.gui.utils.orEmpty
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -201,6 +199,8 @@ class DoneInstanceNode(
 
     override fun normalize() = instanceData.normalize()
 
-    override fun matches(filterCriteria: Any) =
-            ModelNode.MatchResult.fromBoolean(instanceData.matchesQueryData((filterCriteria as? SearchData).orEmpty()))
+    override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+            instanceData.matchesFilterParams(filterParams)
+
+    override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 }

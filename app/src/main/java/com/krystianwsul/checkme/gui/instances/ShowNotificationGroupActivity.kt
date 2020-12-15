@@ -67,7 +67,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
     override val instanceSearch by lazy {
         binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
-                .searchData
+                .filterCriteria
     }
 
     private var data: ShowNotificationGroupViewModel.Data? = null

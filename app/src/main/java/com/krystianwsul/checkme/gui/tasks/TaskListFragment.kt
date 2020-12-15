@@ -42,10 +42,11 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.QueryDataMatch
+import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
+import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
@@ -188,7 +189,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var searchData = SearchData()
+    private var filterCriteria = TreeViewAdapter.FilterCriteria()
 
     private val listener get() = activity as Listener
 
@@ -247,7 +248,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(expandedTaskIds!!.isNotEmpty())
             }
 
-            searchData = getParcelable(KEY_SEARCH_DATA)!!
+            filterCriteria = getParcelable(KEY_SEARCH_DATA)!!
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
 
@@ -336,7 +337,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
 
-                search(searchData, it)
+                search(filterCriteria, it)
             }
         }
 
@@ -406,7 +407,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedTaskKeys))
             }
 
-            putParcelable(KEY_SEARCH_DATA, searchData)
+            putParcelable(KEY_SEARCH_DATA, filterCriteria)
 
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
@@ -463,9 +464,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(searchData: SearchData, placeholder: TreeViewAdapter.Placeholder) {
-        this.searchData = searchData
-        treeViewAdapter.setFilterCriteria(searchData, placeholder)
+    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+        this.filterCriteria = filterCriteria
+        treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
         updateFabVisibility("search")
     }
 
@@ -748,12 +749,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun normalize() = childTaskData.normalize()
 
-            override fun matches(filterCriteria: Any) =
-                    ModelNode.MatchResult.fromBoolean(childTaskData.matchesSearch(filterCriteria as? SearchData))
+            override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+                    childTaskData.matchesFilterParams(filterParams)
 
-            override fun parentHierarchyMatches(filterCriteria: Any) =
-                    super.parentHierarchyMatches(filterCriteria)
-                            && childTaskData.showIfParentShown(filterCriteria as? SearchData)
+            override fun matchesQuery(query: String) =
+                    ModelNode.MatchResult.fromBoolean(childTaskData.matchesQuery(query))
         }
     }
 
@@ -794,7 +794,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,
-    ) : Comparable<ChildTaskData>, QueryDataMatch {
+    ) : Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
@@ -805,29 +805,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             normalizedName
             normalizedNote
         }
-
-        fun matchesSearch(searchData: SearchData?): Boolean {
-            if (searchData == null) return isVisible
-
-            if (!searchData.showDeleted && !isVisible) return false
-
-            if (matchesQueryData(searchData)) return true
-
-            return false
-        }
-
-        fun showIfParentShown(searchData: SearchData?): Boolean {
-            if (searchData == null) return isVisible
-
-            if (!searchData.showDeleted && !isVisible) return false
-
-            return true
-        }
     }
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<SearchData>
+        val taskSearch: Observable<TreeViewAdapter.FilterCriteria>
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

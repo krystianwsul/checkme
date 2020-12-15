@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.criteria.QueryData
-import com.krystianwsul.common.criteria.QueryMatch
+import com.krystianwsul.common.criteria.Assignable
+import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
@@ -23,7 +23,7 @@ class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>,
-) : Current, CurrentOffset, QueryMatch {
+) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     companion object {
 
@@ -1042,7 +1042,7 @@ class Task<T : ProjectType>(
         existingInstances.values.forEach { it.fixOffsets() }
     }
 
-    fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
+    override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
         val currentScheduleIntervals = getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
 
         return if (currentScheduleIntervals.isEmpty()) {
@@ -1055,11 +1055,6 @@ class Task<T : ProjectType>(
                     .map { it.value }
         }
     }
-
-    fun isAssignedToMe(now: ExactTimeStamp.Local, myUser: MyUser) =
-            getAssignedTo(now).let { it.isEmpty() || it.any { it.id == myUser.userKey } }
-
-    fun matchesQueryData(queryData: QueryData) = matchesQuery(queryData.query)
 
     interface ScheduleTextFactory {
 

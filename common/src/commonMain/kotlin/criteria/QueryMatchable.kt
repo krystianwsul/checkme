@@ -1,6 +1,6 @@
 package com.krystianwsul.common.criteria
 
-interface QueryMatch {
+interface QueryMatchable {
 
     val normalizedName: String
     val normalizedNote: String?

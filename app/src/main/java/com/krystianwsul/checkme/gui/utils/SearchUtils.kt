@@ -15,15 +15,15 @@ import io.reactivex.rxkotlin.Observables
 @CheckResult
 fun observeEmptySearchState(
         initialized: Observable<Unit>,
-        searchDataObservable: Observable<SearchData>,
+        filterCriteriaObservable: Observable<TreeViewAdapter.FilterCriteria>,
         treeViewAdapter: () -> TreeViewAdapter<*>,
-        search: (SearchData, TreeViewAdapter.Placeholder) -> Unit,
+        search: (TreeViewAdapter.FilterCriteria, TreeViewAdapter.Placeholder) -> Unit,
         recyclerView: RecyclerView,
         progressView: View,
         emptyTextLayout: LinearLayout,
         immediate: () -> Boolean,
         emptyTextId: () -> Int?,
-) = Observables.combineLatest(initialized, searchDataObservable).subscribe { (_, searchData) ->
+) = Observables.combineLatest(initialized, filterCriteriaObservable).subscribe { (_, searchData) ->
     val emptyBefore = treeViewAdapter().displayedNodes.isEmpty()
     treeViewAdapter().updateDisplayedNodes { search(searchData, it) }
 

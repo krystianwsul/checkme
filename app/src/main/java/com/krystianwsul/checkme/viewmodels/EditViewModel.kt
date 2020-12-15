@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
-import com.krystianwsul.common.criteria.QueryMatch
+import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -295,7 +295,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val projectId: ProjectKey.Shared?,
             val isRootTaskGroup: Boolean,
             val projectUsers: Map<UserKey, UserData>,
-    ) : QueryMatch {
+    ) : QueryMatchable {
 
         override val normalizedName by lazy { name.normalized() }
         override val normalizedNote by lazy { note?.normalized() }

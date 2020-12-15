@@ -50,7 +50,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     override val taskSearch by lazy {
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
-                .searchData
+                .filterCriteria
     }
 
     private val receiver = object : BroadcastReceiver() {

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
@@ -316,13 +316,13 @@ abstract class Project<T : ProjectType>(
                 .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
-    data class QueryParams(val queryData: QueryData, val myUser: MyUser)
+    data class SearchData(val searchCriteria: SearchCriteria, val myUser: MyUser)
 
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            queryParams: QueryParams? = null,
+            searchData: SearchData? = null,
             filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
@@ -330,11 +330,7 @@ abstract class Project<T : ProjectType>(
         throwIfInterrupted()
 
         val filteredTasks = tasks.asSequence()
-                .let { sequence ->
-                    queryParams?.let {
-                        sequence.filterQuery(it.queryData).map { it.first }
-                    } ?: sequence
-                }
+                .filterQuery(searchData?.searchCriteria?.query).map { it.first }
                 .toList()
 
         val instanceSequences = filteredTasks.map { task ->
@@ -346,10 +342,12 @@ abstract class Project<T : ProjectType>(
                     now,
                     onlyRoot = true
             )
-                    .let { sequence ->
-                        queryParams?.let {
-                            sequence.filterQuery(it.queryData, now, it.myUser).map { it.first }
-                        } ?: sequence
+                    .let {
+                        if (searchData == null) {
+                            it
+                        } else {
+                            it.filterSearchCriteria(searchData.searchCriteria, now, searchData.myUser)
+                        }
                     }
 
             if (filterVisible) {

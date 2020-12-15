@@ -1,46 +1,50 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
-fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(queryData: QueryData) = if (queryData.query.isNotEmpty()) {
-    fun filterQuery(task: Task<out T>): FilterResult {
+fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (query.isNullOrEmpty()) {
+    map { it to FilterResult.MATCHES }
+} else {
+    fun childHierarchyMatches(task: Task<out T>): FilterResult {
+        throwIfInterrupted()
+        if (task.matchesQuery(query)) return FilterResult.MATCHES
+
         throwIfInterrupted()
 
-        if (task.matchesQueryData(queryData)) return FilterResult.MATCHES
-
-        if (task.childHierarchyIntervals.any { filterQuery(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH })
+        if (
+                task.childHierarchyIntervals.any {
+                    childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
+                }
+        ) {
             return FilterResult.CHILD_MATCHES
+        }
 
         return FilterResult.DOESNT_MATCH
     }
 
-    map { it to filterQuery(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
-} else {
-    map { it to FilterResult.MATCHES }
+    map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
 }
 
-fun <T : ProjectType> Sequence<Instance<out T>>.filterQuery(
-        queryData: QueryData,
+fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
+        searchCriteria: SearchCriteria,
         now: ExactTimeStamp.Local,
         myUser: MyUser,
-) = if (queryData.query.isNotEmpty() || !queryData.showAssigned) {
-    fun filterQuery(instance: Instance<out T>): FilterResult {
+) = if (searchCriteria.isEmpty) {
+    this
+} else {
+    fun childHierarchyMatches(instance: Instance<out T>): Boolean {
         throwIfInterrupted()
 
-        if (instance.matchesQueryData(queryData, now, myUser)) return FilterResult.MATCHES
+        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false
 
-        if (instance.getChildInstances(now).any { filterQuery(it.first) != FilterResult.DOESNT_MATCH })
-            return FilterResult.CHILD_MATCHES
-
-        return FilterResult.DOESNT_MATCH
+        if (instance.task.matchesQuery(searchCriteria.query)) return true
+        return instance.getChildInstances(now).any { childHierarchyMatches(it.first) }
     }
 
-    map { it to filterQuery(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
-} else {
-    map { it to FilterResult.MATCHES }
+    filter(::childHierarchyMatches)
 }
 
 enum class FilterResult {

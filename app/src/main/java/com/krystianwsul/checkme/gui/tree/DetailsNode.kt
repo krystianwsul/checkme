@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.utils.normalized
@@ -115,13 +114,9 @@ class DetailsNode(
         normalizedNote
     }
 
-    override fun matches(filterCriteria: Any) = ModelNode.MatchResult.fromBoolean(matchesHelper(filterCriteria))
+    override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(matchesHelper(query))
 
-    private fun matchesHelper(filterCriteria: Any?): Boolean {
-        if (filterCriteria !is SearchData) return true
-
-        val query = filterCriteria.query
-
+    private fun matchesHelper(query: String): Boolean {
         if (query.isEmpty()) return true
 
         return normalizedNote?.contains(query) == true

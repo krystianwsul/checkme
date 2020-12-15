@@ -19,12 +19,11 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.criteria.QueryData
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
@@ -514,14 +513,14 @@ class DomainFactory(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
-            queryData: QueryData? = null,
+            searchCriteria: SearchCriteria? = null,
             filterVisible: Boolean = true,
     ): Sequence<Instance<*>> {
-        val queryParams = queryData?.let { Project.QueryParams(it, myUserFactory.user) }
+        val searchData = searchCriteria?.let { Project.SearchData(it, myUserFactory.user) }
 
         val instanceSequences = projectsFactory.projects
                 .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, queryParams, filterVisible) }
+                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible) }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -533,7 +532,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
-            query: SearchData = SearchData(),
+            searchCriteria: SearchCriteria? = null,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
                 .mapNotNull { (childInstance, _) ->
@@ -541,9 +540,13 @@ class DomainFactory(
 
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-                    val childTaskMatches = childTask.matchesQueryData(query)
+                    val childTaskMatches = searchCriteria?.let { childTask.matchesQuery(it.query) } ?: true
 
-                    val childrenQuery = if (childTaskMatches) SearchData() else query
+                    /*
+                    We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+                    can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+                     */
+                    val childrenQuery = if (childTaskMatches) null else searchCriteria
 
                     val children = getChildInstanceDatas(childInstance, now, childrenQuery)
 

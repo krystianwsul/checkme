@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import com.krystianwsul.checkme.gui.utils.SearchData
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -56,7 +55,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private val initializeDisposable = CompositeDisposable()
 
-    private var query: String = ""
+    private var filterCriteria = TreeViewAdapter.FilterCriteria()
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
@@ -71,7 +70,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 check(expandedParentKeys!!.isNotEmpty())
             }
 
-            query = getString(QUERY_KEY)!!
+            filterCriteria = getParcelable(QUERY_KEY)!!
         }
 
         binding = FragmentParentPickerBinding.inflate(layoutInflater)
@@ -134,7 +133,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
 
         initializeDisposable += searchChanges.subscribe { query ->
-            treeViewAdapter!!.updateDisplayedNodes { search(query, it) }
+            treeViewAdapter!!.updateDisplayedNodes { search(TreeViewAdapter.FilterCriteria(query), it) }
         }
     }
 
@@ -169,7 +168,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedParentKeys))
         }
 
-        outState.putString(QUERY_KEY, query)
+        outState.putParcelable(QUERY_KEY, filterCriteria)
     }
 
     override fun onDestroyView() {
@@ -180,10 +179,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(query: String, placeholder: TreeViewAdapter.Placeholder) {
-        this.query = query
+    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+        this.filterCriteria = filterCriteria
 
-        treeViewAdapter!!.setFilterCriteria(SearchData(query), placeholder)
+        treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
     }
 
     private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :
@@ -196,7 +195,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 this,
                 null,
                 viewCreatedDisposable,
-                SearchData(query)
+                filterCriteria
         )
 
         override val taskAdapter = this
@@ -357,18 +356,15 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun matches(filterCriteria: Any): ModelNode.MatchResult {
-                val searchData = filterCriteria as? SearchData
+            override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams): Boolean {
+                check(!filterParams.showDeleted)
+                check(filterParams.showAssignedToOthers)
 
-                return if (searchData == null) {
-                    ModelNode.MatchResult.MATCHES
-                } else {
-                    check(!searchData.showDeleted)
-                    check(searchData.showAssigned)
-
-                    ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery(searchData.query))
-                }
+                return true
             }
+
+            override fun matchesQuery(query: String) =
+                    ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery(query))
         }
     }
 

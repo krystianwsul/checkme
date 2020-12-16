@@ -76,7 +76,6 @@ class MainActivity :
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
-        private const val KEY_SHOW_DELETED = "showDeleted"
         private const val KEY_DATE = "date"
         private const val KEY_SEARCH_PAGE = "searchPage"
 
@@ -132,14 +131,14 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val showDeleted = BehaviorRelay.create<Boolean>()
-
     private val filterCriteriaObservable by lazy {
         Observables.combineLatest(
                 binding.mainSearchInclude
                         .toolbar
                         .textChanges(),
-                showDeleted
+                binding.mainSearchInclude
+                        .toolbar
+                        .showDeletedObservable
         )
                 .map { TreeViewAdapter.FilterCriteria(it.first.toString().normalized(), it.second) }
                 .replay(1)
@@ -396,9 +395,6 @@ class MainActivity :
                     Pair(it.timeRange, it.position) to it.state
                 }.toMutableMap()
 
-                check(containsKey(KEY_SHOW_DELETED))
-                showDeleted.accept(getBoolean(KEY_SHOW_DELETED))
-
                 date = getParcelable(KEY_DATE)!!
 
                 searchPage = savedInstanceState.getInt(KEY_SEARCH_PAGE)
@@ -424,8 +420,6 @@ class MainActivity :
                 }
                 else -> overrideTabSearchState = null
             }
-
-            showDeleted.accept(false)
 
             date = Date.today()
         }
@@ -483,25 +477,7 @@ class MainActivity :
 
         binding.mainSearchInclude
                 .toolbar
-                .apply {
-                    menuInflater.inflate(R.menu.main_activity_search, menu)
-
-                    setOnMenuItemClickListener {
-                        when (it) {
-                            R.id.actionSearchClose -> text = null
-                            R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
-                            else -> throw IllegalArgumentException()
-                        }
-                    }
-
-                    setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
-
-                    setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
-
-                    createDisposable += showDeleted.subscribe {
-                        menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
-                    }
-                }
+                .setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
@@ -828,8 +804,6 @@ class MainActivity :
                     ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) })
             )
 
-            putBoolean(KEY_SHOW_DELETED, showDeleted.value!!)
-
             putParcelable(KEY_DATE, date)
 
             putInt(KEY_SEARCH_PAGE, searchPage)
@@ -873,9 +847,7 @@ class MainActivity :
 
         binding.mainSearchInclude
                 .toolbar
-                .menu
-                .findItem(R.id.actionSearchShowDeleted)
-                .isVisible = tabSearchState.showShowDeleted
+                .setShowDeletedVisible(tabSearchState.showShowDeleted)
 
         hideViews += listOf(
                 binding.mainSearchGroupListFragment,

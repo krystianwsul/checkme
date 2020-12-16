@@ -56,7 +56,6 @@ class CollapseAppBarLayout : AppBarLayout {
     val menu get() = binding.toolbar.menu!!
 
     private val searchingRelay = BehaviorRelay.createDefault(false)
-    private val showDeleted = BehaviorRelay.createDefault(false)
 
     val isSearching get() = searchingRelay.value!!
 
@@ -73,21 +72,7 @@ class CollapseAppBarLayout : AppBarLayout {
     init {
         binding.searchInclude
                 .toolbar
-                .apply {
-                    inflateMenu(R.menu.main_activity_search)
-
-                    setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
-
-                    setOnMenuItemClickListener {
-                        when (it) {
-                            R.id.actionSearchClose -> text = null
-                            R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
-                            else -> throw IllegalArgumentException()
-                        }
-                    }
-
-                    setNavigationOnClickListener { closeSearch() }
-                }
+                .setNavigationOnClickListener { closeSearch() }
 
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
@@ -95,21 +80,11 @@ class CollapseAppBarLayout : AppBarLayout {
     fun hideShowDeleted() {
         binding.searchInclude
                 .toolbar
-                .menu
-                .findItem(R.id.actionSearchShowDeleted)
-                .isVisible = false
+                .setShowDeletedVisible(false)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
-        attachedToWindowDisposable += showDeleted.subscribe {
-            binding.searchInclude
-                    .toolbar
-                    .menu
-                    .findItem(R.id.actionSearchShowDeleted)
-                    .isChecked = it
-        }
 
         searchingRelay.flatMap {
             if (it) {
@@ -117,8 +92,10 @@ class CollapseAppBarLayout : AppBarLayout {
                         binding.searchInclude
                                 .toolbar
                                 .textChanges(),
-                        showDeleted
-                ) { searchText, showDeleted ->
+                        binding.searchInclude
+                                .toolbar
+                                .showDeletedObservable
+                ) { searchText, showDeleted -> // todo search
                     TreeViewAdapter.FilterCriteria(searchText.toString().normalized(), showDeleted)
                 }
             } else {
@@ -134,7 +111,6 @@ class CollapseAppBarLayout : AppBarLayout {
 
         super.onDetachedFromWindow()
     }
-
 
     private val textWidth by lazy {
         val screenWidth = resources.displayMetrics.widthPixels
@@ -291,8 +267,6 @@ class CollapseAppBarLayout : AppBarLayout {
             binding.searchInclude
                     .toolbar
                     .text = state.filterCriteria.query
-
-            showDeleted.accept(state.filterCriteria.showDeleted)
 
             searchingRelay.accept(state.isSearching)
 

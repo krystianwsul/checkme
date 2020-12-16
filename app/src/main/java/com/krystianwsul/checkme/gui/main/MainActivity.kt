@@ -146,12 +146,19 @@ class MainActivity :
     }
 
     override val taskSearch by lazy {
-        Observables.combineLatest(tabSearchStateRelay, filterCriteriaObservable) { tabSearchState, filterCriteria ->
-            if ((tabSearchState as? TabSearchState.Tasks)?.isSearching == true)
-                filterCriteria
-            else
-                TreeViewAdapter.FilterCriteria()
-        }
+        tabSearchStateRelay.switchMap {
+            if (it is TabSearchState.Tasks) {
+                if (it.isSearching) {
+                    filterCriteriaObservable
+                } else {
+                    Preferences.showAssignedObservable.map {
+                        TreeViewAdapter.FilterCriteria(showAssignedToOthers = it)
+                    }
+                }
+            } else {
+                Observable.never()
+            }
+        }!!
     }
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->

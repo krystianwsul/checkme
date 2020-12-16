@@ -33,9 +33,10 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
     fun closeKeyboard() = inputMethodManager.hideSoftInputFromWindow(binding.searchText.windowToken, 0)
 
-    fun showKeyboard() = inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
-
-    fun requestSearchFocus() = binding.searchText.requestFocus()
+    fun requestSearchFocus() {
+        binding.searchText.requestFocus()
+        inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
+    }
 
     fun setOnMenuItemClickListener(listener: (Int) -> Unit) = binding.searchToolbar.setOnMenuItemClickListener {
         listener(it.itemId)

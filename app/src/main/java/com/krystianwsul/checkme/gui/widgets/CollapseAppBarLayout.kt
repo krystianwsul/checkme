@@ -10,7 +10,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.annotation.MenuRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
@@ -55,10 +54,6 @@ class CollapseAppBarLayout : AppBarLayout {
     private val textLayout: StaticLayout? get() = collapsingTextHelper.getPrivateField("textLayout")
 
     val menu get() = binding.toolbar.menu!!
-
-    private val inputMethodManager by lazy {
-        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    }
 
     private val searchingRelay = BehaviorRelay.createDefault(false)
     private val showDeleted = BehaviorRelay.createDefault(false)
@@ -280,10 +275,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
         binding.searchInclude
                 .toolbar
-                .apply {
-                    requestSearchFocus()
-                    showKeyboard()
-                }
+                .requestSearchFocus()
     }
 
     override fun onSaveInstanceState(): Parcelable = SavedState(

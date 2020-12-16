@@ -419,9 +419,7 @@ class MainActivity :
                             .toolbar
                             .apply {
                                 visibility = View.VISIBLE
-
                                 requestSearchFocus()
-                                showKeyboard()
                             }
                 }
                 else -> overrideTabSearchState = null
@@ -470,11 +468,9 @@ class MainActivity :
                                     duration = MyBottomBar.duration
                             )
 
-                            binding.mainSearchInclude.toolbar
-                                    .apply {
-                                        requestSearchFocus()
-                                        showKeyboard()
-                                    }
+                            binding.mainSearchInclude
+                                    .toolbar
+                                    .requestSearchFocus()
                         }
                         R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                         else -> throw IllegalArgumentException()

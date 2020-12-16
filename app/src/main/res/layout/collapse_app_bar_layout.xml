@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.appbar.CollapsingToolbarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbarCollapseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,30 +32,10 @@
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:layout_collapseMode="pin" />
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/searchToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        android:visibility="gone"
-        app:layout_collapseMode="pin">
-
-        <EditText
-            android:id="@+id/searchToolbarText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/search"
-            android:imeOptions="actionSearch"
-            android:importantForAutofill="no"
-            android:inputType="text"
-            android:singleLine="true"
-            android:textColor="@color/textPrimaryWhite"
-            android:textColorHint="@color/textDisabledWhite"
-            tools:targetApi="o" />
-
-    </androidx.appcompat.widget.Toolbar>
+    <include
+        android:id="@+id/searchToolbarInclude"
+        layout="@layout/toolbar_search_outer"
+        app:layout_collapseMode="pin" />
 
     <com.krystianwsul.checkme.gui.widgets.ToolbarProgress
         android:layout_width="match_parent"

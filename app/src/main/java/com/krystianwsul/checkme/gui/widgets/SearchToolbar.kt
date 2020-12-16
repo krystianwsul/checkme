@@ -21,7 +21,7 @@ class SearchToolbar : Toolbar {
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
-    var text
+    var text: String?
         get() = binding.searchToolbarText
                 .text
                 .toString()
@@ -32,6 +32,8 @@ class SearchToolbar : Toolbar {
     fun textChanges() = binding.searchToolbarText.textChanges()
 
     fun closeKeyboard() = inputMethodManager.hideSoftInputFromWindow(binding.searchToolbarText.windowToken, 0)
+
+    fun showKeyboard() = inputMethodManager.showSoftInput(binding.searchToolbarText, InputMethodManager.SHOW_IMPLICIT)
 
     fun requestSearchFocus() = binding.searchToolbarText.requestFocus()
 }

@@ -33,7 +33,7 @@
         app:layout_collapseMode="pin" />
 
     <include
-        android:id="@+id/searchToolbarInclude"
+        android:id="@+id/searchInclude"
         layout="@layout/toolbar_search_outer"
         app:layout_collapseMode="pin" />
 

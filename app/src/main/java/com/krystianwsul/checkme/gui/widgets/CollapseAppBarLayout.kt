@@ -76,7 +76,7 @@ class CollapseAppBarLayout : AppBarLayout {
     private val binding = CollapseAppBarLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
     init {
-        binding.searchToolbarInclude
+        binding.searchInclude
                 .toolbar
                 .apply {
                     inflateMenu(R.menu.main_activity_search)
@@ -100,7 +100,7 @@ class CollapseAppBarLayout : AppBarLayout {
     }
 
     fun hideShowDeleted() {
-        binding.searchToolbarInclude
+        binding.searchInclude
                 .toolbar
                 .menu
                 .findItem(R.id.actionSearchShowDeleted)
@@ -111,7 +111,7 @@ class CollapseAppBarLayout : AppBarLayout {
         super.onAttachedToWindow()
 
         attachedToWindowDisposable += showDeleted.subscribe {
-            binding.searchToolbarInclude
+            binding.searchInclude
                     .toolbar
                     .menu
                     .findItem(R.id.actionSearchShowDeleted)
@@ -121,7 +121,7 @@ class CollapseAppBarLayout : AppBarLayout {
         searchingRelay.flatMap {
             if (it) {
                 Observables.combineLatest(
-                        binding.searchToolbarInclude
+                        binding.searchInclude
                                 .toolbar
                                 .textChanges(),
                         showDeleted
@@ -236,7 +236,7 @@ class CollapseAppBarLayout : AppBarLayout {
     fun closeSearch() {
         expand(true)
 
-        binding.searchToolbarInclude
+        binding.searchInclude
                 .toolbar
                 .apply {
                     check(isVisible)
@@ -245,7 +245,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
                     text = ""
 
-                    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+                    closeKeyboard()
                 }
 
         searchingRelay.accept(false)
@@ -278,14 +278,13 @@ class CollapseAppBarLayout : AppBarLayout {
 
         collapse(true)
 
-        animateVisibility(listOf(binding.searchToolbarInclude.toolbar), listOf(), duration = MyBottomBar.duration)
+        animateVisibility(listOf(binding.searchInclude.toolbar), listOf(), duration = MyBottomBar.duration)
 
-        binding.searchToolbarInclude
+        binding.searchInclude
                 .toolbar
                 .apply {
                     requestSearchFocus()
-
-                    inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    showKeyboard()
                 }
     }
 
@@ -299,7 +298,7 @@ class CollapseAppBarLayout : AppBarLayout {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
 
-            binding.searchToolbarInclude
+            binding.searchInclude
                     .toolbar
                     .text = state.filterCriteria.query
 
@@ -308,14 +307,16 @@ class CollapseAppBarLayout : AppBarLayout {
             searchingRelay.accept(state.isSearching)
 
             if (state.isSearching) {
-                binding.searchToolbarInclude
+                binding.searchInclude
                         .toolbar
                         .isVisible = true
 
                 binding.toolbarCollapseLayout.title = null
                 binding.toolbarCollapseText.isVisible = false
 
-                binding.searchToolbarInclude.toolbar.requestSearchFocus()
+                binding.searchInclude
+                        .toolbar
+                        .requestSearchFocus()
             }
         } else {
             super.onRestoreInstanceState(state)

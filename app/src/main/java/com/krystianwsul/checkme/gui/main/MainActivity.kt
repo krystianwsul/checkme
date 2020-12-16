@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
@@ -137,7 +136,9 @@ class MainActivity :
 
     private val filterCriteriaObservable by lazy {
         Observables.combineLatest(
-                binding.mainSearchText.textChanges(),
+                binding.mainSearchInclude
+                        .toolbar
+                        .textChanges(),
                 showDeleted
         )
                 .map { TreeViewAdapter.FilterCriteria(it.first.toString().normalized(), it.second) }
@@ -284,15 +285,19 @@ class MainActivity :
     }
 
     private fun closeSearch() {
-        binding.mainSearchToolbar.apply {
-            check(visibility == View.VISIBLE)
+        binding.mainSearchInclude
+                .toolbar
+                .apply {
+                    check(visibility == View.VISIBLE)
 
-            animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
-        }
+                    animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
-        binding.mainSearchText.text = null
+                    binding.mainSearchInclude
+                            .toolbar
+                            .text = ""
 
-        hideKeyboard()
+                    hideKeyboard()
+                }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -377,8 +382,12 @@ class MainActivity :
                 debug = getBoolean(DEBUG_KEY)
 
                 if (containsKey(SEARCH_KEY)) {
-                    binding.mainSearchToolbar.visibility = View.VISIBLE
-                    binding.mainSearchText.setText(getString(SEARCH_KEY))
+                    binding.mainSearchInclude
+                            .toolbar
+                            .apply {
+                                visibility = View.VISIBLE
+                                text = getString(SEARCH_KEY)
+                            }
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
@@ -406,15 +415,14 @@ class MainActivity :
                     else
                         TabSearchState.Tasks(true)
 
-                    binding.mainSearchToolbar.visibility = View.VISIBLE
-                    binding.mainSearchText.apply {
-                        requestFocus()
+                    binding.mainSearchInclude
+                            .toolbar
+                            .apply {
+                                visibility = View.VISIBLE
 
-                        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(
-                                this,
-                                InputMethodManager.SHOW_IMPLICIT
-                        )
-                    }
+                                requestSearchFocus()
+                                showKeyboard()
+                            }
                 }
                 else -> overrideTabSearchState = null
             }
@@ -457,16 +465,16 @@ class MainActivity :
                             setTabSearchState(tabSearchStateRelay.value!!.startSearch())
 
                             animateVisibility(
-                                    listOf(binding.mainSearchToolbar),
+                                    listOf(binding.mainSearchInclude.toolbar),
                                     listOf(),
                                     duration = MyBottomBar.duration
                             )
 
-                            binding.mainSearchText.apply {
-                                requestFocus()
-
-                                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-                            }
+                            binding.mainSearchInclude.toolbar
+                                    .apply {
+                                        requestSearchFocus()
+                                        showKeyboard()
+                                    }
                         }
                         R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                         else -> throw IllegalArgumentException()
@@ -477,27 +485,29 @@ class MainActivity :
             }
         }
 
-        binding.mainSearchToolbar.apply {
-            menuInflater.inflate(R.menu.main_activity_search, menu)
+        binding.mainSearchInclude
+                .toolbar
+                .apply {
+                    menuInflater.inflate(R.menu.main_activity_search, menu)
 
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.actionSearchClose -> binding.mainSearchText.text = null
-                    R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
-                    else -> throw IllegalArgumentException()
+                    setOnMenuItemClickListener { item ->
+                        when (item.itemId) {
+                            R.id.actionSearchClose -> text = null
+                            R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
+                            else -> throw IllegalArgumentException()
+                        }
+
+                        true
+                    }
+
+                    setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
+
+                    setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+
+                    createDisposable += showDeleted.subscribe {
+                        menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
+                    }
                 }
-
-                true
-            }
-
-            setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
-
-            setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
-
-            createDisposable += showDeleted.subscribe {
-                menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
-            }
-        }
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
@@ -810,7 +820,8 @@ class MainActivity :
             putParcelable(KEY_TAB_SEARCH_STATE, tabSearchStateRelay.value!!)
             putBoolean(DEBUG_KEY, debug)
 
-            if (tabSearchStateRelay.value!!.isSearching) putString(SEARCH_KEY, binding.mainSearchText.text.toString())
+            if (tabSearchStateRelay.value!!.isSearching)
+                putString(SEARCH_KEY, binding.mainSearchInclude.toolbar.text)
 
             putBoolean(CALENDAR_KEY, calendarOpen)
 
@@ -866,7 +877,9 @@ class MainActivity :
 
         showViews += currentTabLayout
 
-        binding.mainSearchToolbar.menu
+        binding.mainSearchInclude
+                .toolbar
+                .menu
                 .findItem(R.id.actionSearchShowDeleted)
                 .isVisible = tabSearchState.showShowDeleted
 
@@ -1043,7 +1056,7 @@ class MainActivity :
     }
 
     override fun onBackPressed() {
-        if (binding.mainSearchToolbar.visibility == View.VISIBLE)
+        if (binding.mainSearchInclude.toolbar.visibility == View.VISIBLE)
             setTabSearchState(tabSearchStateRelay.value!!.closeSearch())
         else
             super.onBackPressed()
@@ -1068,7 +1081,8 @@ class MainActivity :
 
         override fun getItemCount() = Integer.MAX_VALUE
 
-        override fun onCreateViewHolder(parent: ViewGroup, position: Int) = Holder(DayFragment(this@MainActivity))
+        override fun onCreateViewHolder(parent: ViewGroup, position: Int) =
+                Holder(DayFragment(this@MainActivity))
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
             val maxPosition = position + 10

@@ -83,14 +83,12 @@ class CollapseAppBarLayout : AppBarLayout {
 
                     setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
-                            R.id.actionSearchClose -> text = ""
+                    setOnMenuItemClickListener {
+                        when (it) {
+                            R.id.actionSearchClose -> text = null
                             R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
                             else -> throw IllegalArgumentException()
                         }
-
-                        true
                     }
 
                     setNavigationOnClickListener { closeSearch() }

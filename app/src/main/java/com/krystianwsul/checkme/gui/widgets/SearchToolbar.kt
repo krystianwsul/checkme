@@ -4,15 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.widget.Toolbar
+import android.widget.FrameLayout
+import androidx.annotation.DrawableRes
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
 
-class SearchToolbar : Toolbar {
-
-    @JvmOverloads
-    constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+class SearchToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
+        FrameLayout(context, attrs, defStyleAttr) {
 
     private val binding =
             ToolbarSearchInnerBinding.inflate(LayoutInflater.from(context), this, true)
@@ -22,18 +20,30 @@ class SearchToolbar : Toolbar {
     }
 
     var text: String?
-        get() = binding.searchToolbarText
+        get() = binding.searchText
                 .text
                 .toString()
         set(value) {
-            binding.searchToolbarText.setText(value)
+            binding.searchText.setText(value)
         }
 
-    fun textChanges() = binding.searchToolbarText.textChanges()
+    val menu get() = binding.searchToolbar.menu
 
-    fun closeKeyboard() = inputMethodManager.hideSoftInputFromWindow(binding.searchToolbarText.windowToken, 0)
+    fun textChanges() = binding.searchText.textChanges()
 
-    fun showKeyboard() = inputMethodManager.showSoftInput(binding.searchToolbarText, InputMethodManager.SHOW_IMPLICIT)
+    fun closeKeyboard() = inputMethodManager.hideSoftInputFromWindow(binding.searchText.windowToken, 0)
 
-    fun requestSearchFocus() = binding.searchToolbarText.requestFocus()
+    fun showKeyboard() = inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
+
+    fun requestSearchFocus() = binding.searchText.requestFocus()
+
+    fun setOnMenuItemClickListener(listener: (Int) -> Unit) = binding.searchToolbar.setOnMenuItemClickListener {
+        listener(it.itemId)
+        true
+    }
+
+    fun setNavigationIcon(@DrawableRes resId: Int) = binding.searchToolbar.setNavigationIcon(resId)
+
+    fun setNavigationOnClickListener(listener: () -> Unit) =
+            binding.searchToolbar.setNavigationOnClickListener { listener() }
 }

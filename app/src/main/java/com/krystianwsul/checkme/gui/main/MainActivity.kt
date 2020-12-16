@@ -490,14 +490,12 @@ class MainActivity :
                 .apply {
                     menuInflater.inflate(R.menu.main_activity_search, menu)
 
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
+                    setOnMenuItemClickListener {
+                        when (it) {
                             R.id.actionSearchClose -> text = null
                             R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
                             else -> throw IllegalArgumentException()
                         }
-
-                        true
                     }
 
                     setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)

@@ -23,13 +23,9 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
-import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -59,7 +55,17 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    val filterCriteria = BehaviorRelay.create<TreeViewAdapter.FilterCriteria>()
+    val filterCriteria by lazy {
+        searchingRelay.switchMap {
+            if (it) {
+                binding.searchInclude
+                        .toolbar
+                        .filterCriteriaObservable
+            } else {
+                Observable.just(TreeViewAdapter.FilterCriteria())
+            }
+        }!!
+    }
 
     private val attachedToWindowDisposable = CompositeDisposable()
 
@@ -81,29 +87,6 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.searchInclude
                 .toolbar
                 .setShowDeletedVisible(false)
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-
-        searchingRelay.flatMap {
-            if (it) {
-                Observables.combineLatest(
-                        binding.searchInclude
-                                .toolbar
-                                .textChanges(),
-                        binding.searchInclude
-                                .toolbar
-                                .showDeletedObservable
-                ) { searchText, showDeleted -> // todo search
-                    TreeViewAdapter.FilterCriteria(searchText.toString().normalized(), showDeleted)
-                }
-            } else {
-                Observable.just(TreeViewAdapter.FilterCriteria())
-            }
-        }
-                .subscribe(filterCriteria)
-                .addTo(attachedToWindowDisposable)
     }
 
     override fun onDetachedFromWindow() {
@@ -212,9 +195,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
                     animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
-                    text = ""
-
-                    closeKeyboard()
+                    clearSearch()
                 }
 
         searchingRelay.accept(false)
@@ -254,19 +235,11 @@ class CollapseAppBarLayout : AppBarLayout {
                 .requestSearchFocus()
     }
 
-    override fun onSaveInstanceState(): Parcelable = SavedState(
-            super.onSaveInstanceState(),
-            this@CollapseAppBarLayout.filterCriteria.getCurrentValue(),
-            this@CollapseAppBarLayout.isSearching
-    )
+    override fun onSaveInstanceState(): Parcelable = SavedState(super.onSaveInstanceState(), isSearching)
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
-
-            binding.searchInclude
-                    .toolbar
-                    .text = state.filterCriteria.query
 
             searchingRelay.accept(state.isSearching)
 
@@ -301,27 +274,19 @@ class CollapseAppBarLayout : AppBarLayout {
             }
         }
 
-        var filterCriteria: TreeViewAdapter.FilterCriteria
         var isSearching: Boolean
 
         constructor(source: Parcel) : super(source) {
-            filterCriteria = source.readParcelable(SavedState::class.java.classLoader)!!
             isSearching = source.readInt() == 1
         }
 
-        constructor(
-                superState: Parcelable?,
-                filterCriteria: TreeViewAdapter.FilterCriteria,
-                isSearching: Boolean,
-        ) : super(superState) {
-            this.filterCriteria = filterCriteria
+        constructor(superState: Parcelable?, isSearching: Boolean) : super(superState) {
             this.isSearching = isSearching
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
 
-            out.writeParcelable(filterCriteria, 0)
             out.writeInt(if (isSearching) 1 else 0)
         }
     }

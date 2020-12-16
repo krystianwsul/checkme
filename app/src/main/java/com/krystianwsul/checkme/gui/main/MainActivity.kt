@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -73,11 +72,11 @@ class MainActivity :
 
         private const val KEY_TAB_SEARCH_STATE = "tabSearchState"
         private const val DEBUG_KEY = "debug"
-        private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
         private const val KEY_DATE = "date"
         private const val KEY_SEARCH_PAGE = "searchPage"
+        private const val KEY_SEARCHING = "searching"
 
         private const val DRAWER_TAG = "drawer"
 
@@ -132,17 +131,9 @@ class MainActivity :
     private var actionMode: ActionMode? = null
 
     private val filterCriteriaObservable by lazy {
-        Observables.combineLatest(
-                binding.mainSearchInclude
-                        .toolbar
-                        .textChanges(),
-                binding.mainSearchInclude
-                        .toolbar
-                        .showDeletedObservable
-        )
-                .map { TreeViewAdapter.FilterCriteria(it.first.toString().normalized(), it.second) }
-                .replay(1)
-                .apply { createDisposable += connect() }!!
+        binding.mainSearchInclude
+                .toolbar
+                .filterCriteriaObservable
     }
 
     override val taskSearch by lazy {
@@ -298,11 +289,7 @@ class MainActivity :
 
                     animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
-                    binding.mainSearchInclude
-                            .toolbar
-                            .text = ""
-
-                    hideKeyboard()
+                    clearSearch()
                 }
     }
 
@@ -387,13 +374,10 @@ class MainActivity :
                 check(containsKey(DEBUG_KEY))
                 debug = getBoolean(DEBUG_KEY)
 
-                if (containsKey(SEARCH_KEY)) {
+                if (getBoolean(KEY_SEARCHING)) {
                     binding.mainSearchInclude
                             .toolbar
-                            .apply {
-                                visibility = View.VISIBLE
-                                text = getString(SEARCH_KEY)
-                            }
+                            .visibility = View.VISIBLE
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
@@ -797,8 +781,7 @@ class MainActivity :
             putParcelable(KEY_TAB_SEARCH_STATE, tabSearchStateRelay.value!!)
             putBoolean(DEBUG_KEY, debug)
 
-            if (tabSearchStateRelay.value!!.isSearching)
-                putString(SEARCH_KEY, binding.mainSearchInclude.toolbar.text)
+            putBoolean(KEY_SEARCHING, tabSearchStateRelay.value!!.isSearching)
 
             putBoolean(CALENDAR_KEY, calendarOpen)
 

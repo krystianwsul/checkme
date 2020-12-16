@@ -11,7 +11,10 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
+import com.krystianwsul.common.utils.normalized
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.plusAssign
 
 class SearchToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
@@ -24,16 +27,27 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
-    var text: String?
-        get() = binding.searchText
-                .text
-                .toString()
-        set(value) {
-            binding.searchText.setText(value)
-        }
-
     private val showDeletedRelay = BehaviorRelay.createDefault(false)
-    val showDeletedObservable = showDeletedRelay.distinctUntilChanged()!!
+
+    val filterCriteriaObservable by lazy {
+        Observables.combineLatest(
+                showDeletedRelay,
+                binding.searchText
+                        .textChanges()
+                        .map { it.toString() }
+                        .distinctUntilChanged()
+                        .map { it.normalized() }
+        )
+                .map { (showDeleted, query) ->
+                    TreeViewAdapter.FilterCriteria(
+                            query,
+                            TreeViewAdapter.FilterCriteria.FilterParams(showDeleted)
+                    )
+                }
+                .distinctUntilChanged()
+                .replay(1)
+                .apply { attachedToWindowDisposable += connect() }!!
+    }
 
     private val attachedToWindowDisposable = CompositeDisposable()
 
@@ -58,7 +72,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        attachedToWindowDisposable += showDeletedObservable.subscribe {
+        attachedToWindowDisposable += showDeletedRelay.subscribe {
             binding.searchToolbar
                     .menu
                     .findItem(R.id.actionSearchShowDeleted)
@@ -72,10 +86,6 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         super.onDetachedFromWindow()
     }
 
-    fun textChanges() = binding.searchText.textChanges()
-
-    fun closeKeyboard() = inputMethodManager.hideSoftInputFromWindow(binding.searchText.windowToken, 0)
-
     fun requestSearchFocus() {
         binding.searchText.requestFocus()
         inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
@@ -84,23 +94,35 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     fun setNavigationOnClickListener(listener: () -> Unit) =
             binding.searchToolbar.setNavigationOnClickListener { listener() }
 
-    override fun onSaveInstanceState(): Parcelable = SavedState(super.onSaveInstanceState(), showDeletedRelay.value!!)
+    override fun onSaveInstanceState(): Parcelable = SavedState(
+            super.onSaveInstanceState(),
+            showDeletedRelay.value!!,
+            binding.searchText
+                    .text
+                    .toString()
+    )
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
 
             showDeletedRelay.accept(state.showDeleted)
+            binding.searchText.setText(state.query)
         } else {
             super.onRestoreInstanceState(state)
         }
     }
 
-    fun setShowDeletedVisible(isVisible: Boolean) {
+    fun setShowDeletedVisible(isVisible: Boolean) { // todo assigned add option
         binding.searchToolbar
                 .menu
                 .findItem(R.id.actionSearchShowDeleted)
                 .isVisible = isVisible
+    }
+
+    fun clearSearch() {
+        binding.searchText.text = null
+        inputMethodManager.hideSoftInputFromWindow(binding.searchText.windowToken, 0)
     }
 
     private class SavedState : BaseSavedState {
@@ -118,19 +140,23 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         }
 
         var showDeleted: Boolean
+        var query: String
 
         constructor(source: Parcel) : super(source) {
             showDeleted = source.readInt() == 1
+            query = source.readString()!!
         }
 
-        constructor(superState: Parcelable?, showDeleted: Boolean) : super(superState) {
+        constructor(superState: Parcelable?, showDeleted: Boolean, query: String) : super(superState) {
             this.showDeleted = showDeleted
+            this.query = query
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
 
             out.writeInt(if (showDeleted) 1 else 0)
+            out.writeString(query)
         }
     }
 }

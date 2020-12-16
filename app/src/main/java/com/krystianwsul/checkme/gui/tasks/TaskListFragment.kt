@@ -796,6 +796,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val isAssignedToMe: Boolean,
     ) : Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
 
+        override val isDeleted = !current
+
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

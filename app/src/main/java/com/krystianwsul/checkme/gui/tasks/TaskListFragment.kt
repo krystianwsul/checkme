@@ -752,7 +752,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
                     childTaskData.matchesFilterParams(filterParams)
 
-            override fun matchesQuery(query: String) =
+            override fun getMatchResult(query: String) =
                     ModelNode.MatchResult.fromBoolean(childTaskData.matchesQuery(query))
         }
     }
@@ -798,12 +798,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 
-        override val normalizedName by lazy { name.normalized() }
-        override val normalizedNote by lazy { note?.normalized() }
+        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         fun normalize() {
-            normalizedName
-            normalizedNote
+            normalizedFields
         }
     }
 

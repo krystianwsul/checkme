@@ -469,7 +469,7 @@ class NotDoneGroupNode(
     override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
             instanceDatas.any { it.matchesFilterParams(filterParams) }
 
-    override fun matchesQuery(query: String) =
+    override fun getMatchResult(query: String) =
             ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
 
     override fun ordinalDesc() = if (singleInstance()) {
@@ -684,7 +684,7 @@ class NotDoneGroupNode(
         override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
                 instanceData.matchesFilterParams(filterParams)
 
-        override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
+        override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 
         data class Id(val instanceKey: InstanceKey)
     }

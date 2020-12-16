@@ -34,8 +34,7 @@ data class GroupListDataWrapper(
             check(name.isNotEmpty())
         }
 
-        override val normalizedName by lazy { name.normalized() }
-        override val normalizedNote by lazy { note?.normalized() }
+        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         override val taskCurrent = true
         override val taskVisible = true
@@ -68,8 +67,7 @@ data class GroupListDataWrapper(
 
         lateinit var instanceDataParent: InstanceDataParent
 
-        override val normalizedName by lazy { name.normalized() }
-        override val normalizedNote by lazy { note?.normalized() }
+        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         val colorEnabled = taskCurrent && isAssignedToMe
 
@@ -90,8 +88,7 @@ data class GroupListDataWrapper(
         override val childSelectedDatas get() = children.values
 
         fun normalize() {
-            normalizedName
-            normalizedNote
+            normalizedFields
         }
     }
 

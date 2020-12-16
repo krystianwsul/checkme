@@ -36,7 +36,7 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) = true
 
-    fun matchesQuery(query: String) = MatchResult.ALWAYS_VISIBLE
+    fun getMatchResult(query: String) = MatchResult.ALWAYS_VISIBLE
 
     fun ordinalDesc(): String? = null
 

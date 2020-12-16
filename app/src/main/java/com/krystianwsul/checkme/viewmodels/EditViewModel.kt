@@ -297,12 +297,10 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val projectUsers: Map<UserKey, UserData>,
     ) : QueryMatchable {
 
-        override val normalizedName by lazy { name.normalized() }
-        override val normalizedNote by lazy { note?.normalized() }
+        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         fun normalize() {
-            normalizedName
-            normalizedNote
+            normalizedFields
         }
     }
 

@@ -279,7 +279,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (!modelNode.matchesFilterParams(treeViewAdapter.filterCriteria.filterParams)) return false
 
-        val matchResult = modelNode.matchesQuery(treeViewAdapter.filterCriteria.query)
+        val matchResult = modelNode.getMatchResult(treeViewAdapter.filterCriteria.query)
 
         when (matchResult) {
             ModelNode.MatchResult.ALWAYS_VISIBLE -> {
@@ -299,7 +299,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     }
 
     private fun matchesQuery(query: String) =
-            modelNode.matchesQuery(query) == ModelNode.MatchResult.MATCHES
+            modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
 
     private fun parentHierarchyMatchesQuery(): Boolean {
         return if (parent is TreeNode<T>) {

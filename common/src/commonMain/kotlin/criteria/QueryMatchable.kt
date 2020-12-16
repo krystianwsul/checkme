@@ -2,15 +2,11 @@ package com.krystianwsul.common.criteria
 
 interface QueryMatchable {
 
-    val normalizedName: String
-    val normalizedNote: String?
+    val normalizedFields: List<String>
 
     fun matchesQuery(query: String): Boolean {
         if (query.isEmpty()) return true
 
-        if (normalizedName.contains(query)) return true
-        if (normalizedNote?.contains(query) == true) return true
-
-        return false
+        return normalizedFields.any { it.contains(query) }
     }
 }

@@ -118,11 +118,8 @@ class Task<T : ProjectType>(
             taskRecord.ordinal = value
         }
 
-    private val normalizedNameDelegate = invalidatableLazy { name.normalized() }
-    private val normalizedNoteDelegate = invalidatableLazy { note?.normalized() }
-
-    override val normalizedName by normalizedNameDelegate
-    override val normalizedNote by normalizedNoteDelegate
+    private val normalizedFieldsDelegate = invalidatableLazy { listOfNotNull(name, note).map { it.normalized() } }
+    override val normalizedFields by normalizedFieldsDelegate
 
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
@@ -584,8 +581,7 @@ class Task<T : ProjectType>(
         taskRecord.name = name
         taskRecord.note = note
 
-        normalizedNameDelegate.invalidate()
-        normalizedNoteDelegate.invalidate()
+        normalizedFieldsDelegate.invalidate()
     }
 
     private fun addSchedules(

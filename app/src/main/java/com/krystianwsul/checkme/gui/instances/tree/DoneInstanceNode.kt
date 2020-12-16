@@ -202,5 +202,5 @@ class DoneInstanceNode(
     override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
             instanceData.matchesFilterParams(filterParams)
 
-    override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
+    override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 }

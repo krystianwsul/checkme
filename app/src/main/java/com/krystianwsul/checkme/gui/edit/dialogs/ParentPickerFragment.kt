@@ -363,7 +363,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return true
             }
 
-            override fun matchesQuery(query: String) =
+            override fun getMatchResult(query: String) =
                     ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery(query))
         }
     }

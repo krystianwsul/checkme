@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -22,7 +23,7 @@ class DetailsNode(
         private val note: String?,
         override val parentNode: ModelNode<AbstractHolder>?,
         indentation: Int,
-) : AbstractModelNode(), IndentationModelNode {
+) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -39,7 +40,7 @@ class DetailsNode(
 
     data class Id(val id: Any)
 
-    private val normalizedNote by lazy { note?.normalized() }
+    override val normalizedFields by lazy { listOfNotNull(note?.normalized()) }
 
     override val disableRipple = true
 
@@ -111,16 +112,10 @@ class DetailsNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
 
     override fun normalize() {
-        normalizedNote
+        normalizedFields
     }
 
-    override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(matchesHelper(query))
-
-    private fun matchesHelper(query: String): Boolean {
-        if (query.isEmpty()) return true
-
-        return normalizedNote?.contains(query) == true
-    }
+    override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(matchesQuery(query))
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

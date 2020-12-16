@@ -142,5 +142,5 @@ class TaskNode(
     override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
             taskData.matchesFilterParams(filterParams)
 
-    override fun matchesQuery(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))
+    override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))
 }

@@ -94,7 +94,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    hideShowDeleted()
+                    setMenuOptions(false, true)
 
                     inflateMenu(R.menu.show_task_menu_top)
                     setOnMenuItemClickListener {

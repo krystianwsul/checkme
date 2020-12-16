@@ -129,7 +129,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    hideShowDeleted()
+                    setMenuOptions(false, false)
 
                     inflateMenu(R.menu.show_instance_menu_top)
 

@@ -9,10 +9,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.plusAssign
@@ -28,21 +30,20 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     private val showDeletedRelay = BehaviorRelay.createDefault(false)
+    private val showAssignedToOthersRelay = BehaviorRelay.createDefault(Preferences.showAssigned)
 
     val filterCriteriaObservable by lazy {
         Observables.combineLatest(
-                showDeletedRelay,
                 binding.searchText
                         .textChanges()
                         .map { it.toString() }
                         .distinctUntilChanged()
-                        .map { it.normalized() }
+                        .map { it.normalized() },
+                showDeletedRelay,
+                showAssignedToOthersRelay,
         )
-                .map { (showDeleted, query) ->
-                    TreeViewAdapter.FilterCriteria(
-                            query,
-                            TreeViewAdapter.FilterCriteria.FilterParams(showDeleted)
-                    )
+                .map { (query, showDeleted, showAssignedToOthers) ->
+                    TreeViewAdapter.FilterCriteria(query, showDeleted, showAssignedToOthers)
                 }
                 .distinctUntilChanged()
                 .replay(1)
@@ -58,9 +59,12 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
             setOnMenuItemClickListener {
+                fun BehaviorRelay<Boolean>.toggle() = accept(!value!!)
+
                 when (it.itemId) {
                     R.id.actionSearchClose -> binding.searchText.text = null
-                    R.id.actionSearchShowDeleted -> showDeletedRelay.accept(!showDeletedRelay.value!!)
+                    R.id.actionSearchShowDeleted -> showDeletedRelay.toggle()
+                    R.id.actionSearchShowAssigned -> showAssignedToOthersRelay.toggle()
                     else -> throw IllegalArgumentException()
                 }
 
@@ -72,12 +76,17 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        attachedToWindowDisposable += showDeletedRelay.subscribe {
-            binding.searchToolbar
-                    .menu
-                    .findItem(R.id.actionSearchShowDeleted)
-                    .isChecked = it
-        }
+        binding.searchToolbar
+                .menu
+                .apply {
+                    attachedToWindowDisposable += showDeletedRelay.subscribe {
+                        findItem(R.id.actionSearchShowDeleted).isChecked = it
+                    }
+
+                    attachedToWindowDisposable += showAssignedToOthersRelay.subscribe {
+                        findItem(R.id.actionSearchShowAssigned).isChecked = it
+                    }
+                }
     }
 
     override fun onDetachedFromWindow() {
@@ -96,28 +105,28 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
     override fun onSaveInstanceState(): Parcelable = SavedState(
             super.onSaveInstanceState(),
-            showDeletedRelay.value!!,
-            binding.searchText
-                    .text
-                    .toString()
+            filterCriteriaObservable.getCurrentValue()
     )
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
 
-            showDeletedRelay.accept(state.showDeleted)
-            binding.searchText.setText(state.query)
+            binding.searchText.setText(state.filterCriteria.query)
+            showDeletedRelay.accept(state.filterCriteria.showDeleted)
+            showAssignedToOthersRelay.accept(state.filterCriteria.showAssignedToOthers)
         } else {
             super.onRestoreInstanceState(state)
         }
     }
 
-    fun setShowDeletedVisible(isVisible: Boolean) { // todo assigned add option
+    fun setMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
         binding.searchToolbar
                 .menu
-                .findItem(R.id.actionSearchShowDeleted)
-                .isVisible = isVisible
+                .apply {
+                    findItem(R.id.actionSearchShowDeleted).isVisible = showDeleted
+                    findItem(R.id.actionSearchShowAssigned).isVisible = showAssignedToOthers
+                }
     }
 
     fun clearSearch() {
@@ -139,24 +148,20 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             }
         }
 
-        var showDeleted: Boolean
-        var query: String
+        var filterCriteria: TreeViewAdapter.FilterCriteria
 
         constructor(source: Parcel) : super(source) {
-            showDeleted = source.readInt() == 1
-            query = source.readString()!!
+            filterCriteria = source.readParcelable(TreeViewAdapter.FilterCriteria::class.java.classLoader)!!
         }
 
-        constructor(superState: Parcelable?, showDeleted: Boolean, query: String) : super(superState) {
-            this.showDeleted = showDeleted
-            this.query = query
+        constructor(superState: Parcelable?, filterCriteria: TreeViewAdapter.FilterCriteria) : super(superState) {
+            this.filterCriteria = filterCriteria
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
 
-            out.writeInt(if (showDeleted) 1 else 0)
-            out.writeString(query)
+            out.writeParcelable(filterCriteria, 0)
         }
     }
 }

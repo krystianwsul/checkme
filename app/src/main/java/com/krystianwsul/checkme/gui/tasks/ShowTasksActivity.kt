@@ -77,7 +77,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    if (parameters.copying) hideShowDeleted()
+                    if (parameters.copying) setMenuOptions(false, false)
 
                     setText(getString(parameters.title), null, null, true)
 

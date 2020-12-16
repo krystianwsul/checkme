@@ -83,10 +83,10 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
-    fun hideShowDeleted() {
+    fun setMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
         binding.searchInclude
                 .toolbar
-                .setShowDeletedVisible(false)
+                .setMenuOptions(showDeleted, showAssignedToOthers)
     }
 
     override fun onDetachedFromWindow() {

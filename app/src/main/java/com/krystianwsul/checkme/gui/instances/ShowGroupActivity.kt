@@ -99,7 +99,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    hideShowDeleted()
+                    setMenuOptions(false, true)
 
                     inflateMenu(R.menu.show_task_menu_top)
 

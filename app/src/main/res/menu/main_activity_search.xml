@@ -17,4 +17,11 @@
         android:checkable="true"
         android:title="@string/showRemoved" />
 
+    <item
+        android:id="@+id/actionSearchShowAssigned"
+        android:title="@string/showAssignedTo"
+        android:orderInCategory="700"
+        app:showAsAction="never"
+        android:checkable="true" />
+
 </menu>

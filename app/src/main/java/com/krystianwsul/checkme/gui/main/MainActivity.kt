@@ -837,7 +837,7 @@ class MainActivity :
 
         binding.mainSearchInclude
                 .toolbar
-                .setShowDeletedVisible(tabSearchState.showShowDeleted)
+                .setMenuOptions(tabSearchState.showShowDeleted, true)
 
         hideViews += listOf(
                 binding.mainSearchGroupListFragment,

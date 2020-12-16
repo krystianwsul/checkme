@@ -541,7 +541,6 @@ class MainActivity :
                 .addTo(createDisposable)
 
         binding.mainCalendar.apply {
-
             minDate = DateTime.now().millis
             setOnDateChangeListener { _, year, month, dayOfMonth ->
                 val date = LocalDate(year, month + 1, dayOfMonth)
@@ -590,9 +589,8 @@ class MainActivity :
 
             val searchParameters = Observables.combineLatest(
                     instanceSearch.filterNotNull()
-                            .map { it.query }
                             .distinctUntilChanged()
-                            .map { SearchCriteria(it) },
+                            .map { SearchCriteria(it.query, it.showAssignedToOthers) },
                     binding.mainSearchGroupListFragment
                             .progressShown
                             .doOnNext { searchPage += 1 }

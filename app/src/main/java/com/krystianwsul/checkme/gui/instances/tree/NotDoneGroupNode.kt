@@ -190,7 +190,13 @@ class NotDoneGroupNode(
             if (treeNode.isExpanded) {
                 MultiLineNameData.Invisible
             } else {
-                MultiLineNameData.Visible(instanceDatas.sorted().joinToString(", ") { it.name })
+                MultiLineNameData.Visible(
+                        treeNode.allChildren
+                                .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
+                                .map { it.modelNode as NotDoneInstanceNode }
+                                .sorted()
+                                .joinToString(", ") { it.instanceData.name }
+                )
             }
         }
 

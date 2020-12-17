@@ -131,10 +131,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .apply {
                     setSearchMenuOptions(false, false)
 
-                    configureMenu(R.menu.show_instance_menu_top) { itemId ->
+                    configureMenu(R.menu.show_instance_menu_top, R.id.instanceMenuSearch) { itemId ->
                         data!!.also {
                             when (itemId) {
-                                R.id.instanceMenuSearch -> startSearch()
                                 R.id.instanceMenuNotify -> {
                                     check(!it.done)
                                     check(it.instanceDateTime.timeStamp <= TimeStamp.now)

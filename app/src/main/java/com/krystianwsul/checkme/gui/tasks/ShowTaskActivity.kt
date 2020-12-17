@@ -92,14 +92,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         binding.showTaskToolbarCollapseInclude
                 .collapseAppBarLayout
-                .apply {
-                    configureMenu(R.menu.show_task_menu_top) {
-                        when (it) {
-                            R.id.actionShowTaskSearch -> startSearch()
-                            else -> throw IllegalArgumentException()
-                        }
-                    }
-                }
+                .configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
 
         updateTopMenu()
 

@@ -9,6 +9,7 @@ import android.text.StaticLayout
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import androidx.annotation.IdRes
 import androidx.annotation.MenuRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.isVisible
@@ -176,7 +177,7 @@ class CollapseAppBarLayout : AppBarLayout {
     }
 
     private var first = true
-    fun configureMenu(@MenuRes menuId: Int, listener: (Int) -> Unit) {
+    fun configureMenu(@MenuRes menuId: Int, @IdRes searchItemId: Int, listener: ((Int) -> Unit)? = null) {
         check(first)
 
         first = false
@@ -185,7 +186,10 @@ class CollapseAppBarLayout : AppBarLayout {
             inflateMenu(menuId)
 
             setOnMenuItemClickListener {
-                listener(it.itemId)
+                when (val itemId = it.itemId) {
+                    searchItemId -> startSearch()
+                    else -> listener?.invoke(itemId) ?: throw IllegalArgumentException()
+                }
 
                 true
             }
@@ -230,7 +234,7 @@ class CollapseAppBarLayout : AppBarLayout {
         animateHeight(hideText, false, titleHack = titleHack)
     }
 
-    fun startSearch() {
+    private fun startSearch() {
         searchingRelay.accept(true)
 
         collapse(true)

@@ -81,12 +81,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
                     setText(getString(parameters.title), null, null, true)
 
-                    configureMenu(R.menu.show_task_menu_top) {
-                        when (it) {
-                            R.id.actionShowTaskSearch -> startSearch()
-                            else -> throw IllegalArgumentException()
-                        }
-                    }
+                    configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
                 }
 
         updateTopMenu()

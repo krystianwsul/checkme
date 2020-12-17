@@ -101,11 +101,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 .apply {
                     setMenuOptions(false, true)
 
-                    inflateMenu(R.menu.show_task_menu_top)
+                    inflateMenu(R.menu.show_group_menu_top)
 
                     setOnMenuItemClickListener {
                         when (it.itemId) {
-                            R.id.actionShowTaskSearch -> startSearch()
+                            R.id.actionShowGroupSearch -> startSearch()
                             else -> throw IllegalArgumentException()
                         }
                     }
@@ -129,7 +129,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .menu
-                .findItem(R.id.actionShowTaskSearch)
+                .findItem(R.id.actionShowGroupSearch)
                 .isVisible = !data?.groupListDataWrapper
                 ?.instanceDatas
                 .isNullOrEmpty()

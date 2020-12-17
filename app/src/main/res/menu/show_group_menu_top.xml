@@ -11,11 +11,13 @@
         app:showAsAction="always"
         android:visible="false"
         tools:ignore="AlwaysShowAction" />
+
     <item
         android:id="@+id/actionShowGroupAssigned"
         android:title="@string/showAssignedTo"
         android:orderInCategory="700"
         app:showAsAction="never"
-        android:checkable="true" />
+        android:checkable="true"
+        android:visible="false" />
 
 </menu>

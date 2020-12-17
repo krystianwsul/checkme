@@ -118,13 +118,17 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateTopMenu() {
+        val hasItems = !data?.groupListDataWrapper
+                ?.instanceDatas
+                .isNullOrEmpty()
+
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .menu
-                .findItem(R.id.actionShowGroupSearch)
-                .isVisible = !data?.groupListDataWrapper
-                ?.instanceDatas
-                .isNullOrEmpty()
+                .apply {
+                    findItem(R.id.actionShowGroupSearch).isVisible = hasItems
+                    findItem(R.id.actionShowGroupAssigned).isVisible = hasItems
+                }
     }
 
     override fun onStart() {

@@ -17,6 +17,7 @@ import androidx.core.view.updateLayoutParams
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.CollapsingTextHelper
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.CollapseAppBarLayoutBinding
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
@@ -25,6 +26,7 @@ import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -54,8 +56,6 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    private val normalFilterCriteria = BehaviorRelay.createDefault(TreeViewAdapter.FilterCriteria())
-
     val filterCriteria by lazy {
         searchingRelay.switchMap {
             if (it) {
@@ -63,7 +63,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         .toolbar
                         .filterCriteriaObservable
             } else {
-                normalFilterCriteria
+                Preferences.showAssignedObservable.map { TreeViewAdapter.FilterCriteria(showAssignedToOthers = it) }
             }
         }!!
     }
@@ -177,7 +177,12 @@ class CollapseAppBarLayout : AppBarLayout {
     }
 
     private var first = true
-    fun configureMenu(@MenuRes menuId: Int, @IdRes searchItemId: Int, listener: ((Int) -> Unit)? = null) {
+    fun configureMenu(
+            @MenuRes menuId: Int,
+            @IdRes searchItemId: Int,
+            @IdRes showAssignedToOthersId: Int? = null,
+            listener: ((Int) -> Unit)? = null,
+    ) {
         check(first)
 
         first = false
@@ -185,9 +190,16 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbar.apply {
             inflateMenu(menuId)
 
+            showAssignedToOthersId?.let {
+                Preferences.showAssignedObservable
+                        .subscribe { menu.findItem(showAssignedToOthersId).isChecked = it }
+                        .addTo(attachedToWindowDisposable)
+            }
+
             setOnMenuItemClickListener {
                 when (val itemId = it.itemId) {
                     searchItemId -> startSearch()
+                    showAssignedToOthersId -> Preferences.showAssigned = !Preferences.showAssigned
                     else -> listener?.invoke(itemId) ?: throw IllegalArgumentException()
                 }
 

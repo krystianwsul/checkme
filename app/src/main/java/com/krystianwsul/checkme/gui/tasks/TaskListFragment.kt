@@ -464,10 +464,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
         this.filterCriteria = filterCriteria
-        treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
         updateFabVisibility("search")
+
+        if (placeholder != null) {
+            check(this::treeViewAdapter.isInitialized)
+            treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
+        } else {
+            check(!this::treeViewAdapter.isInitialized)
+        }
     }
 
     override fun onDestroyView() {

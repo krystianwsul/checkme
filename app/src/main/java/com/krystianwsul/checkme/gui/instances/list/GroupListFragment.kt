@@ -777,10 +777,15 @@ class GroupListFragment @JvmOverloads constructor(
         initializedRelay.accept(Unit)
     }
 
-    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
         this.filterCriteria = filterCriteria
 
-        treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
+        if (placeholder != null) {
+            check(treeViewAdapterInitialized)
+            treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
+        } else {
+            check(!treeViewAdapterInitialized)
+        }
     }
 
     private fun setGroupMenuItemVisibility() {

@@ -94,11 +94,10 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setMenuOptions(false, true)
+                    setSearchMenuOptions(false, true)
 
-                    inflateMenu(R.menu.show_task_menu_top)
-                    setOnMenuItemClickListener {
-                        when (it.itemId) {
+                    configureMenu(R.menu.show_task_menu_top) {
+                        when (it) {
                             R.id.actionShowTaskSearch -> startSearch()
                             else -> throw IllegalArgumentException()
                         }

@@ -99,12 +99,10 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setMenuOptions(false, true)
+                    setSearchMenuOptions(false, true)
 
-                    inflateMenu(R.menu.show_group_menu_top)
-
-                    setOnMenuItemClickListener {
-                        when (it.itemId) {
+                    configureMenu(R.menu.show_group_menu_top) {
+                        when (it) {
                             R.id.actionShowGroupSearch -> startSearch()
                             else -> throw IllegalArgumentException()
                         }

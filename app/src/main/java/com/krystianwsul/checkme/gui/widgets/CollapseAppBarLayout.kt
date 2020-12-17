@@ -8,7 +8,6 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import androidx.annotation.MenuRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -24,7 +23,6 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlin.math.abs
@@ -55,6 +53,8 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
+    private val normalFilterCriteria = BehaviorRelay.createDefault(TreeViewAdapter.FilterCriteria())
+
     val filterCriteria by lazy {
         searchingRelay.switchMap {
             if (it) {
@@ -62,7 +62,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         .toolbar
                         .filterCriteriaObservable
             } else {
-                Observable.just(TreeViewAdapter.FilterCriteria())
+                normalFilterCriteria
             }
         }!!
     }
@@ -83,7 +83,7 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
-    fun setMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
+    fun setSearchMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
         binding.searchInclude
                 .toolbar
                 .setMenuOptions(showDeleted, showAssignedToOthers)
@@ -175,13 +175,20 @@ class CollapseAppBarLayout : AppBarLayout {
         }
     }
 
-    fun inflateMenu(@MenuRes resId: Int) = binding.toolbar.inflateMenu(resId)
+    private var first = true
+    fun configureMenu(@MenuRes menuId: Int, listener: (Int) -> Unit) {
+        check(first)
 
-    fun setOnMenuItemClickListener(listener: (MenuItem) -> Unit) {
-        binding.toolbar.setOnMenuItemClickListener {
-            listener(it)
+        first = false
 
-            true
+        binding.toolbar.apply {
+            inflateMenu(menuId)
+
+            setOnMenuItemClickListener {
+                listener(it.itemId)
+
+                true
+            }
         }
     }
 

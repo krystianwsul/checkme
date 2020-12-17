@@ -129,13 +129,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setMenuOptions(false, false)
+                    setSearchMenuOptions(false, false)
 
-                    inflateMenu(R.menu.show_instance_menu_top)
-
-                    setOnMenuItemClickListener { item ->
+                    configureMenu(R.menu.show_instance_menu_top) { itemId ->
                         data!!.also {
-                            when (item.itemId) {
+                            when (itemId) {
                                 R.id.instanceMenuSearch -> startSearch()
                                 R.id.instanceMenuNotify -> {
                                     check(!it.done)

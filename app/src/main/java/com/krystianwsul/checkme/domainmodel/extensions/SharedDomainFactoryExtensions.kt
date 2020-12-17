@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
@@ -253,6 +254,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
                     childTask.note,
                     childTask.getImage(deviceDbInfo),
                     childTask.isAssignedToMe(now, myUserFactory.user),
+                    childTask.getProjectInfo(now),
             )
         }
         .toList()

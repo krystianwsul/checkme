@@ -95,6 +95,7 @@ fun DomainFactory.getSearchInstancesData(
                                 task.note,
                                 task.getImage(deviceDbInfo),
                                 task.isAssignedToMe(now, myUserFactory.user),
+                                task.getProjectInfo(now),
                         )
                     }
                     .toList()

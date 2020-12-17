@@ -28,6 +28,7 @@ data class GroupListDataWrapper(
             override val note: String?,
             val imageState: ImageState?,
             override val isAssignedToMe: Boolean,
+            val projectInfo: DetailsNode.ProjectInfo?,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
         init {

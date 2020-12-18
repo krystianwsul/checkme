@@ -590,9 +590,16 @@ class GroupListFragment @JvmOverloads constructor(
 
         activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = this::onEditInstances
 
+        val filterCriteriaObservable = parametersRelay.switchMap {
+            when (it) {
+                is GroupListParameters.Search -> Observable.just(it.filterCriteria)
+                else -> listener.instanceSearch
+            }
+        }
+
         attachedToWindowDisposable += observeEmptySearchState(
                 initializedRelay,
-                listener.instanceSearch,
+                filterCriteriaObservable,
                 { treeViewAdapter },
                 ::search,
                 binding.groupListRecycler,
@@ -712,6 +719,8 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
+        (parameters as? GroupListParameters.Search)?.let { filterCriteria = it.filterCriteria }
+
         if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
 
@@ -732,11 +741,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
 
-                search(filterCriteria, placeholder)
-
-                (parameters as? GroupListParameters.Search)?.let {
-                    treeViewAdapter.updateSearchExpansion(it.filterCriteria, placeholder)
-                }
+                treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
             }
         } else {
             val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, filterCriteria)

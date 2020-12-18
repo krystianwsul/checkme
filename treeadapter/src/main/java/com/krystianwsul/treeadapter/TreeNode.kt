@@ -397,7 +397,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         if (expanded) expanded = false
     }
 
-    fun expandMatching(query: String, placeholder: TreeViewAdapter.Placeholder) {
+    fun expandMatching(query: String) {
         checkChildTreeNodesSet()
 
         if (!visible()) return
@@ -406,7 +406,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (childHierarchyMatchesQuery(query)) expanded = true
 
-        childTreeNodes.forEach { it.expandMatching(query, placeholder) }
+        childTreeNodes.forEach { it.expandMatching(query) }
     }
 
     private fun checkChildTreeNodesSet() {

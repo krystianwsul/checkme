@@ -189,8 +189,8 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         treeNodesRelay.value!!.forEach { it.collapseAll() }
     }
 
-    fun expandMatching(query: String, placeholder: TreeViewAdapter.Placeholder) {
-        treeNodesRelay.value!!.forEach { it.expandMatching(query, placeholder) }
+    fun expandMatching(query: String) {
+        treeNodesRelay.value!!.forEach { it.expandMatching(query) }
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

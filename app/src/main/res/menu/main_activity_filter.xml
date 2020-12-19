@@ -48,6 +48,13 @@
     <group android:id="@+id/mainAssignedGroup">
 
         <item
+            android:id="@+id/actionMainShowDeleted"
+            android:title="@string/showRemoved"
+            android:orderInCategory="650"
+            app:showAsAction="never"
+            android:checkable="true" />
+
+        <item
             android:id="@+id/actionMainAssigned"
             android:title="@string/showAssignedTo"
             android:orderInCategory="700"

@@ -143,9 +143,7 @@ class MainActivity :
                 if (it.isSearching) {
                     filterCriteriaObservable
                 } else {
-                    Preferences.showAssignedObservable.map {
-                        FilterCriteria.Full(showAssignedToOthers = it)
-                    }
+                    Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
                 }
             } else {
                 Observable.never()
@@ -427,10 +425,12 @@ class MainActivity :
         ).map { Triple(it.first, it.second, binding.mainActivityToolbar.menu.findItem(it.first)) }
 
         binding.mainActivityToolbar.apply {
-            val assignedItem = menu.findItem(R.id.actionMainAssigned)
+            Preferences.showDeletedObservable
+                    .subscribe { menu.findItem(R.id.actionMainShowDeleted).isChecked = it }
+                    .addTo(createDisposable)
 
             Preferences.showAssignedObservable
-                    .subscribe { assignedItem.isChecked = it }
+                    .subscribe { menu.findItem(R.id.actionMainAssigned).isChecked = it }
                     .addTo(createDisposable)
 
             setOnMenuItemClickListener { item ->
@@ -459,6 +459,7 @@ class MainActivity :
                                     .toolbar
                                     .requestSearchFocus()
                         }
+                        R.id.actionMainShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
                         R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                         else -> throw IllegalArgumentException()
                     }
@@ -592,7 +593,7 @@ class MainActivity :
             val searchParameters = Observables.combineLatest(
                     instanceSearch.filterNotNull()
                             .distinctUntilChanged()
-                            .map { SearchCriteria(it.query, it.showAssignedToOthers) },
+                            .map { SearchCriteria(it.query, it.filterParams.showAssignedToOthers) },
                     binding.mainSearchGroupListFragment
                             .progressShown
                             .doOnNext { searchPage += 1 }
@@ -769,6 +770,7 @@ class MainActivity :
         binding.mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
                 menu.setGroupVisible(R.id.actionMainFilter, tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
+                menu.findItem(R.id.actionMainShowDeleted).isVisible = tabSearchState.tab.showDeleted
                 menu.findItem(R.id.actionMainAssigned).isVisible = tabSearchState.tab.showAssignedTo
             }
         }
@@ -1164,10 +1166,12 @@ class MainActivity :
         INSTANCES {
 
             override val elevated = false
+            override val showDeleted = false
             override val showAssignedTo = true
         },
         TASKS {
 
+            override val showDeleted = true
             override val showAssignedTo = true
         },
         PROJECTS,
@@ -1177,6 +1181,7 @@ class MainActivity :
         ABOUT;
 
         open val elevated = true
+        open val showDeleted = false
         open val showAssignedTo = false
     }
 

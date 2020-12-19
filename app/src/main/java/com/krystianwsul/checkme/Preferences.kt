@@ -144,7 +144,11 @@ object Preferences : FactoryProvider.Preferences {
     }.distinctUntilChanged()!!
 
     init {
-        showAssignedObservable.skip(0)
+        showDeletedObservable.skip(1)
+                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
+                .ignore()
+
+        showAssignedObservable.skip(1)
                 .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
                 .ignore()
     }

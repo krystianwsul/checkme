@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import com.jakewharton.rxbinding3.widget.textChanges
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
@@ -17,6 +16,7 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
 class SearchToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
@@ -29,9 +29,6 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
-    private val showDeletedRelay = BehaviorRelay.createDefault(false)
-    private val showAssignedToOthersRelay = BehaviorRelay.createDefault(Preferences.showAssigned)
-
     val filterCriteriaObservable by lazy {
         Observables.combineLatest(
                 binding.searchText
@@ -39,12 +36,9 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                         .map { it.toString() }
                         .distinctUntilChanged()
                         .map { it.normalized() },
-                showDeletedRelay,
-                showAssignedToOthersRelay,
+                Preferences.filterParamsObservable,
         )
-                .map { (query, showDeleted, showAssignedToOthers) ->
-                    FilterCriteria.Full(query, showDeleted, showAssignedToOthers)
-                }
+                .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }
                 .distinctUntilChanged()
                 .replay(1)
                 .apply { attachedToWindowDisposable += connect() }!!
@@ -59,12 +53,10 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
             setOnMenuItemClickListener {
-                fun BehaviorRelay<Boolean>.toggle() = accept(!value!!)
-
                 when (it.itemId) {
                     R.id.actionSearchClose -> binding.searchText.text = null
-                    R.id.actionSearchShowDeleted -> showDeletedRelay.toggle()
-                    R.id.actionSearchShowAssigned -> showAssignedToOthersRelay.toggle()
+                    R.id.actionSearchShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
+                    R.id.actionSearchShowAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                     else -> throw IllegalArgumentException()
                 }
 
@@ -79,13 +71,17 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         binding.searchToolbar
                 .menu
                 .apply {
-                    attachedToWindowDisposable += showDeletedRelay.subscribe {
-                        findItem(R.id.actionSearchShowDeleted).isChecked = it
-                    }
+                    Preferences.showDeletedObservable
+                            .subscribe {
+                                findItem(R.id.actionSearchShowDeleted).isChecked = it
+                            }
+                            .addTo(attachedToWindowDisposable)
 
-                    attachedToWindowDisposable += showAssignedToOthersRelay.subscribe {
-                        findItem(R.id.actionSearchShowAssigned).isChecked = it
-                    }
+                    Preferences.showAssignedObservable
+                            .subscribe {
+                                findItem(R.id.actionSearchShowAssigned).isChecked = it
+                            }
+                            .addTo(attachedToWindowDisposable)
                 }
     }
 
@@ -105,16 +101,14 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
     override fun onSaveInstanceState(): Parcelable = SavedState(
             super.onSaveInstanceState(),
-            filterCriteriaObservable.getCurrentValue()
+            filterCriteriaObservable.getCurrentValue().query
     )
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
 
-            binding.searchText.setText(state.filterCriteria.query)
-            showDeletedRelay.accept(state.filterCriteria.showDeleted)
-            showAssignedToOthersRelay.accept(state.filterCriteria.showAssignedToOthers)
+            binding.searchText.setText(state.query)
         } else {
             super.onRestoreInstanceState(state)
         }
@@ -148,20 +142,20 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             }
         }
 
-        var filterCriteria: FilterCriteria.Full
+        var query: String
 
         constructor(source: Parcel) : super(source) {
-            filterCriteria = source.readParcelable(FilterCriteria::class.java.classLoader)!!
+            query = source.readString()!!
         }
 
-        constructor(superState: Parcelable?, filterCriteria: FilterCriteria.Full) : super(superState) {
-            this.filterCriteria = filterCriteria
+        constructor(superState: Parcelable?, query: String) : super(superState) {
+            this.query = query
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
             super.writeToParcel(out, flags)
 
-            out.writeParcelable(filterCriteria, 0)
+            out.writeString(query)
         }
     }
 }

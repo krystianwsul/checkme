@@ -22,9 +22,6 @@ sealed class FilterCriteria : Parcelable {
                 showAssignedToOthers: Boolean = true,
         ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
 
-        val showDeleted get() = filterParams.showDeleted
-        val showAssignedToOthers get() = filterParams.showAssignedToOthers
-
         @Parcelize
         data class FilterParams(
                 val showDeleted: Boolean = false,

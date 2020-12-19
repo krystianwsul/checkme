@@ -10,6 +10,8 @@ import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
+import io.reactivex.rxkotlin.Observables
 import org.joda.time.LocalDateTime
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
@@ -30,6 +32,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
     private const val KEY_TIME_RANGE = "timeRange"
+    private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
@@ -125,9 +128,20 @@ object Preferences : FactoryProvider.Preferences {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
     }
 
+    private var showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
+    var showDeleted by showDeletedProperty
+    val showDeletedObservable = showDeletedProperty.observable.distinctUntilChanged()!!
+
     private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
     var showAssigned by showAssignedProperty
     val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
+
+    val filterParamsObservable = Observables.combineLatest(
+            showDeletedObservable,
+            showAssignedObservable
+    ) { showDeleted, showAssignedToOthers ->
+        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers)
+    }.distinctUntilChanged()!!
 
     init {
         showAssignedObservable.skip(0)

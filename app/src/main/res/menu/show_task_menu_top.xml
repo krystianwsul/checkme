@@ -12,4 +12,11 @@
         android:visible="false"
         tools:ignore="AlwaysShowAction" />
 
+    <item
+        android:id="@+id/actionTaskShowDeleted"
+        android:title="@string/showRemoved"
+        android:orderInCategory="700"
+        app:showAsAction="never"
+        android:checkable="true" />
+
 </menu>

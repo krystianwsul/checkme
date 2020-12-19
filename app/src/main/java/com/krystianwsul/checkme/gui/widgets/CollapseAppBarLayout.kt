@@ -63,7 +63,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         .toolbar
                         .filterCriteriaObservable
             } else {
-                Preferences.showAssignedObservable.map { FilterCriteria.Full(showAssignedToOthers = it) }
+                Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
             }
         }!!
     }
@@ -180,6 +180,7 @@ class CollapseAppBarLayout : AppBarLayout {
     fun configureMenu(
             @MenuRes menuId: Int,
             @IdRes searchItemId: Int,
+            @IdRes showDeletedId: Int? = null,
             @IdRes showAssignedToOthersId: Int? = null,
             listener: ((Int) -> Unit)? = null,
     ) {
@@ -190,6 +191,12 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbar.apply {
             inflateMenu(menuId)
 
+            showDeletedId?.let {
+                Preferences.showDeletedObservable
+                        .subscribe { menu.findItem(showDeletedId).isChecked = it }
+                        .addTo(attachedToWindowDisposable)
+            }
+
             showAssignedToOthersId?.let {
                 Preferences.showAssignedObservable
                         .subscribe { menu.findItem(showAssignedToOthersId).isChecked = it }
@@ -199,6 +206,7 @@ class CollapseAppBarLayout : AppBarLayout {
             setOnMenuItemClickListener {
                 when (val itemId = it.itemId) {
                     searchItemId -> startSearch()
+                    showDeletedId -> Preferences.showDeleted = !Preferences.showDeleted
                     showAssignedToOthersId -> Preferences.showAssigned = !Preferences.showAssigned
                     else -> listener?.invoke(itemId) ?: throw IllegalArgumentException()
                 }

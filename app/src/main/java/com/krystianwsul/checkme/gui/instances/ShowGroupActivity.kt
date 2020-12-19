@@ -103,7 +103,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 .collapseAppBarLayout
                 .apply {
                     setSearchMenuOptions(false, true)
-                    configureMenu(R.menu.show_group_menu_top, R.id.actionShowGroupSearch, R.id.actionShowGroupAssigned)
+                    configureMenu(
+                            R.menu.show_group_menu_top,
+                            R.id.actionShowGroupSearch,
+                            showAssignedToOthersId = R.id.actionShowGroupAssigned
+                    )
                 }
 
         updateTopMenu()

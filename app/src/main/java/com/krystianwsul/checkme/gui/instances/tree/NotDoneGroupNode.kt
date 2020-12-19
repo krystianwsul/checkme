@@ -472,7 +472,7 @@ class NotDoneGroupNode(
 
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
-    override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+    override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
             instanceDatas.any { it.matchesFilterParams(filterParams) }
 
     override fun getMatchResult(query: String) =
@@ -687,7 +687,7 @@ class NotDoneGroupNode(
 
         override fun normalize() = instanceData.normalize()
 
-        override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+        override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                 instanceData.matchesFilterParams(filterParams)
 
         override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))

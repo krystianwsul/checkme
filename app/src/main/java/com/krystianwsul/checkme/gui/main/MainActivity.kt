@@ -47,6 +47,7 @@ import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
@@ -143,7 +144,7 @@ class MainActivity :
                     filterCriteriaObservable
                 } else {
                     Preferences.showAssignedObservable.map {
-                        TreeViewAdapter.FilterCriteria(showAssignedToOthers = it)
+                        FilterCriteria.Full(showAssignedToOthers = it)
                     }
                 }
             } else {
@@ -191,8 +192,9 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch =
-                Preferences.showAssignedObservable.map { TreeViewAdapter.FilterCriteria(showAssignedToOthers = it) }
+        override val instanceSearch = Preferences.showAssignedObservable.map<FilterCriteria> {
+            FilterCriteria.Full(showAssignedToOthers = it)
+        }
 
         override val subtaskDialogResult = subtaskDialogResultDays
 
@@ -304,7 +306,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.just(TreeViewAdapter.FilterCriteria())
+            override val instanceSearch = Observable.never<FilterCriteria>()
 
             override val subtaskDialogResult = subtaskDialogResultSearch
 
@@ -606,7 +608,7 @@ class MainActivity :
                         it.immediate,
                         it.groupListDataWrapper,
                         it.showLoader,
-                        TreeViewAdapter.FilterCriteria.fromSearchCriteria(it.searchCriteria)
+                        FilterCriteria.ExpandOnly(it.searchCriteria)
                 ))
             }
                     .map { }

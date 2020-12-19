@@ -7,12 +7,13 @@ import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 
 interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
-    val instanceSearch: Observable<TreeViewAdapter.FilterCriteria>
+    val instanceSearch: Observable<FilterCriteria>
 
     val subtaskDialogResult: Observable<SubtaskDialogFragment.Result> get() = Observable.never()
 

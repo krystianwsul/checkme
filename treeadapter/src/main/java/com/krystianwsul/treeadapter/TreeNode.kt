@@ -277,24 +277,28 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
 
-        if (!modelNode.matchesFilterParams(treeViewAdapter.filterCriteria.filterParams)) return false
+        fun checkVisibleWhenEmpty() = modelNode.isVisibleWhenEmpty || childTreeNodes.any { it.canBeShown() }
 
-        val matchResult = modelNode.getMatchResult(treeViewAdapter.filterCriteria.query)
+        return when (val filterCriteria = treeViewAdapter.filterCriteria) {
+            is FilterCriteria.Full -> {
+                if (!modelNode.matchesFilterParams(filterCriteria.filterParams)) return false
 
-        when (matchResult) {
-            ModelNode.MatchResult.ALWAYS_VISIBLE -> {
-                return modelNode.isVisibleWhenEmpty || childTreeNodes.any { it.canBeShown() }
+                when (modelNode.getMatchResult(filterCriteria.query)) {
+                    ModelNode.MatchResult.ALWAYS_VISIBLE -> checkVisibleWhenEmpty()
+                    ModelNode.MatchResult.MATCHES -> {
+                        check(modelNode.isVisibleWhenEmpty)
+
+                        true
+                    }
+                    ModelNode.MatchResult.DOESNT_MATCH -> {
+                        check(modelNode.isVisibleWhenEmpty)
+
+                        parentHierarchyMatchesQuery() || childHierarchyMatchesQuery(filterCriteria.query)
+                    }
+                }
+
             }
-            ModelNode.MatchResult.MATCHES -> {
-                check(modelNode.isVisibleWhenEmpty)
-
-                return true
-            }
-            ModelNode.MatchResult.DOESNT_MATCH -> {
-                check(modelNode.isVisibleWhenEmpty)
-
-                return parentHierarchyMatchesQuery() || childHierarchyMatchesQuery(treeViewAdapter.filterCriteria.query)
-            }
+            is FilterCriteria.ExpandOnly, FilterCriteria.None -> checkVisibleWhenEmpty()
         }
     }
 

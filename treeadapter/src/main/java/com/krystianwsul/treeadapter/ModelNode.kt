@@ -34,7 +34,7 @@ interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     fun normalize() = Unit
 
-    fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) = true
+    fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = true
 
     fun getMatchResult(query: String) = MatchResult.ALWAYS_VISIBLE
 

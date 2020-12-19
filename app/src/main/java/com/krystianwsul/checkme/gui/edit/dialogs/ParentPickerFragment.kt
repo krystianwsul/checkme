@@ -55,7 +55,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private val initializeDisposable = CompositeDisposable()
 
-    private var filterCriteria = TreeViewAdapter.FilterCriteria()
+    private var filterCriteria = FilterCriteria.Full()
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
@@ -133,7 +133,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
 
         initializeDisposable += searchChanges.subscribe { query ->
-            treeViewAdapter!!.updateDisplayedNodes { search(TreeViewAdapter.FilterCriteria(query), it) }
+            treeViewAdapter!!.updateDisplayedNodes { search(FilterCriteria.Full(query), it) }
         }
     }
 
@@ -179,7 +179,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: FilterCriteria.Full, placeholder: TreeViewAdapter.Placeholder) {
         this.filterCriteria = filterCriteria
 
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
@@ -356,7 +356,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = parentTreeData.normalize()
 
-            override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams): Boolean {
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean {
                 check(!filterParams.showDeleted)
                 check(filterParams.showAssignedToOthers)
 

@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
@@ -63,7 +63,7 @@ class CollapseAppBarLayout : AppBarLayout {
                         .toolbar
                         .filterCriteriaObservable
             } else {
-                Preferences.showAssignedObservable.map { TreeViewAdapter.FilterCriteria(showAssignedToOthers = it) }
+                Preferences.showAssignedObservable.map { FilterCriteria.Full(showAssignedToOthers = it) }
             }
         }!!
     }

@@ -30,7 +30,9 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.plusAssign
 import java.io.Serializable
 
@@ -112,6 +114,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
                 .filterCriteria
+                .cast<FilterCriteria>()
     }
 
     private lateinit var binding: ActivityShowInstanceBinding

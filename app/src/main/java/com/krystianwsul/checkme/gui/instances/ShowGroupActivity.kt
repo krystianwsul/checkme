@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.plusAssign
 import java.io.Serializable
 
@@ -71,6 +73,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .filterCriteria
+                .cast<FilterCriteria>()
     }
 
     private var data: ShowGroupViewModel.Data? = null

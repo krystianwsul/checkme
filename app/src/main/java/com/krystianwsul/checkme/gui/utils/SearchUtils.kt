@@ -8,6 +8,7 @@ import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Observables
@@ -15,9 +16,9 @@ import io.reactivex.rxkotlin.Observables
 @CheckResult
 fun observeEmptySearchState(
         initializedObservable: Observable<Unit>,
-        filterCriteriaObservable: Observable<TreeViewAdapter.FilterCriteria>,
+        filterCriteriaObservable: Observable<FilterCriteria>,
         treeViewAdapter: () -> TreeViewAdapter<*>,
-        search: (TreeViewAdapter.FilterCriteria, TreeViewAdapter.Placeholder?) -> Unit,
+        search: (FilterCriteria, TreeViewAdapter.Placeholder?) -> Unit,
         recyclerView: RecyclerView,
         progressView: View,
         emptyTextLayout: LinearLayout,

@@ -54,6 +54,7 @@ import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
+import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.plusAssign
 import java.io.Serializable
 import java.util.*
@@ -189,7 +190,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var filterCriteria = TreeViewAdapter.FilterCriteria()
+    private var filterCriteria: FilterCriteria = FilterCriteria.None
 
     private val listener get() = activity as Listener
 
@@ -264,7 +265,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         viewCreatedDisposable += observeEmptySearchState(
                 initializedRelay,
-                listener.taskSearch,
+                listener.taskSearch.cast(),
                 { treeViewAdapter },
                 ::search,
                 binding.taskListRecycler,
@@ -464,7 +465,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
+    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
         this.filterCriteria = filterCriteria
         updateFabVisibility("search")
 
@@ -744,7 +745,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override fun normalize() = childTaskData.normalize()
 
-            override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                     childTaskData.matchesFilterParams(filterParams)
 
             override fun getMatchResult(query: String) =
@@ -804,7 +805,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<TreeViewAdapter.FilterCriteria>
+        val taskSearch: Observable<FilterCriteria.Full>
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -199,7 +200,7 @@ class DoneInstanceNode(
 
     override fun normalize() = instanceData.normalize()
 
-    override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+    override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
             instanceData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))

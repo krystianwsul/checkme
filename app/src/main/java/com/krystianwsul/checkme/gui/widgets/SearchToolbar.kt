@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
 import com.krystianwsul.common.utils.normalized
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
@@ -43,7 +43,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                 showAssignedToOthersRelay,
         )
                 .map { (query, showDeleted, showAssignedToOthers) ->
-                    TreeViewAdapter.FilterCriteria(query, showDeleted, showAssignedToOthers)
+                    FilterCriteria.Full(query, showDeleted, showAssignedToOthers)
                 }
                 .distinctUntilChanged()
                 .replay(1)
@@ -148,13 +148,13 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             }
         }
 
-        var filterCriteria: TreeViewAdapter.FilterCriteria
+        var filterCriteria: FilterCriteria.Full
 
         constructor(source: Parcel) : super(source) {
-            filterCriteria = source.readParcelable(TreeViewAdapter.FilterCriteria::class.java.classLoader)!!
+            filterCriteria = source.readParcelable(FilterCriteria::class.java.classLoader)!!
         }
 
-        constructor(superState: Parcelable?, filterCriteria: TreeViewAdapter.FilterCriteria) : super(superState) {
+        constructor(superState: Parcelable?, filterCriteria: FilterCriteria.Full) : super(superState) {
             this.filterCriteria = filterCriteria
         }
 

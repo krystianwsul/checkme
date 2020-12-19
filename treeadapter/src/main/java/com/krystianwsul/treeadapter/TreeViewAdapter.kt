@@ -1,6 +1,5 @@
 package com.krystianwsul.treeadapter
 
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,6 @@ import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.common.criteria.SearchCriteria
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -17,13 +15,12 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
-import kotlinx.parcelize.Parcelize
 
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val padding: Pair<Int, Int>?,
         private val compositeDisposable: CompositeDisposable,
-        initialFilterCriteria: FilterCriteria = FilterCriteria(),
+        initialFilterCriteria: FilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
     companion object {
@@ -277,33 +274,4 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         }
     }
 
-    @Parcelize
-    data class FilterCriteria(
-            val query: String = "",
-            val filterParams: FilterParams = FilterParams(),
-    ) : Parcelable {
-
-        companion object {
-
-            fun fromSearchCriteria(searchCriteria: SearchCriteria) =
-                    searchCriteria.run { FilterCriteria(query, showAssignedToOthers = showAssignedToOthers) }
-        }
-
-        constructor(
-                query: String = "",
-                showDeleted: Boolean = false,
-                showAssignedToOthers: Boolean = true,
-        ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
-
-        val showDeleted get() = filterParams.showDeleted
-        val showAssignedToOthers get() = filterParams.showAssignedToOthers
-
-        val expandMatches get() = query.isNotEmpty()
-
-        @Parcelize
-        data class FilterParams(
-                val showDeleted: Boolean = false,
-                val showAssignedToOthers: Boolean = true,
-        ) : Parcelable
-    }
 }

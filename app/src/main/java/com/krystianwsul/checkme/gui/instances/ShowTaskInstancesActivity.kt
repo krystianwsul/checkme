@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
@@ -71,7 +72,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var page = 0
 
-    override val instanceSearch = Observable.just(TreeViewAdapter.FilterCriteria())
+    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding

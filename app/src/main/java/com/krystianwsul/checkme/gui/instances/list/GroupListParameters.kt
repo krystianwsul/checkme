@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.FilterCriteria
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
 
@@ -61,7 +61,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             override val showProgress: Boolean,
-            val filterCriteria: TreeViewAdapter.FilterCriteria,
+            val filterCriteria: FilterCriteria,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false

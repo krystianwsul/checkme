@@ -18,10 +18,10 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class TaskNode(
         override val indentation: Int,
@@ -172,7 +172,7 @@ class TaskNode(
 
     override val thumbnail = taskData.imageState
 
-    override fun matchesFilterParams(filterParams: TreeViewAdapter.FilterCriteria.FilterParams) =
+    override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
             taskData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))

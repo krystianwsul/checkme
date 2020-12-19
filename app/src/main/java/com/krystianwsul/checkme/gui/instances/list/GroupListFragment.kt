@@ -43,10 +43,7 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.ActionModeCallback
-import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeNodeCollection
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -502,7 +499,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val initializedRelay = BehaviorRelay.create<Unit>()
 
-    private var filterCriteria = TreeViewAdapter.FilterCriteria()
+    private var filterCriteria: FilterCriteria = FilterCriteria.None
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
 
@@ -782,7 +779,7 @@ class GroupListFragment @JvmOverloads constructor(
         initializedRelay.accept(Unit)
     }
 
-    private fun search(filterCriteria: TreeViewAdapter.FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
+    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
         this.filterCriteria = filterCriteria
 
         if (placeholder != null) {
@@ -1002,7 +999,7 @@ class GroupListFragment @JvmOverloads constructor(
     class GroupAdapter(
             val groupListFragment: GroupListFragment,
             compositeDisposable: CompositeDisposable,
-            filterCriteria: TreeViewAdapter.FilterCriteria,
+            filterCriteria: FilterCriteria,
     ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(

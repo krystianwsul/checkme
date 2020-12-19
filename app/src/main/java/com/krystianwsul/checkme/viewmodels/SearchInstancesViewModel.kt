@@ -35,5 +35,5 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
             val searchCriteria: SearchCriteria,
     ) : DomainData()
 
-    private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria(), val page: Int = 0)
+    private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria.empty, val page: Int = 0)
 }

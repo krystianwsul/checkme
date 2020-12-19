@@ -81,7 +81,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
                     setText(getString(parameters.title), null, null, true)
 
-                    configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
+                    configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch, R.id.actionTaskShowDeleted)
                 }
 
         updateTopMenu()

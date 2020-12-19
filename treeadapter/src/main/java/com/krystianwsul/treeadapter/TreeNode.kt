@@ -281,7 +281,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
 
         return when (val filterCriteria = treeViewAdapter.filterCriteria) {
             is FilterCriteria.Full -> {
-                if (!modelNode.matchesFilterParams(filterCriteria.filterParams)) return false
+                if (!matchesFilterParams(filterCriteria.filterParams)) return false
 
                 when (modelNode.getMatchResult(filterCriteria.query)) {
                     ModelNode.MatchResult.ALWAYS_VISIBLE -> checkVisibleWhenEmpty()
@@ -293,7 +293,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
                     ModelNode.MatchResult.DOESNT_MATCH -> {
                         check(modelNode.isVisibleWhenEmpty)
 
-                        parentHierarchyMatchesQuery() || childHierarchyMatchesQuery(filterCriteria.query)
+                        parentHierarchyMatchesQuery() || childHierarchyMatchesFilterCriteria(filterCriteria)
                     }
                 }
 
@@ -305,12 +305,22 @@ class TreeNode<T : RecyclerView.ViewHolder>(
     private fun matchesQuery(query: String) =
             modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
 
+    private fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+            modelNode.matchesFilterParams(filterParams)
+
+    private fun matchesFilterCriteria(filterCriteria: FilterCriteria.Full) =
+            matchesFilterParams(filterCriteria.filterParams) && matchesQuery(filterCriteria.query)
+
     private fun parentHierarchyMatchesQuery(): Boolean {
         return if (parent is TreeNode<T>) {
             parent.matchesQuery(treeViewAdapter.filterCriteria.query) || parent.parentHierarchyMatchesQuery()
         } else {
             false
         }
+    }
+
+    private fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
+        it.matchesFilterCriteria(filterCriteria) || it.childHierarchyMatchesFilterCriteria(filterCriteria)
     }
 
     private fun childHierarchyMatchesQuery(query: String): Boolean =

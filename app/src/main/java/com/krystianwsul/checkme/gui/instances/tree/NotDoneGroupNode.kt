@@ -184,7 +184,7 @@ class NotDoneGroupNode(
         get() = if (singleInstance()) {
             MultiLineNameData.Visible(
                     singleInstanceData.name,
-                    if (singleInstanceData.colorEnabled) R.color.textPrimary else R.color.textDisabled
+                    if (singleInstanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
             )
         } else {
             if (treeNode.isExpanded) {
@@ -209,7 +209,7 @@ class NotDoneGroupNode(
             } else {
                 Pair(
                         singleInstanceData.displayText!!,
-                        if (singleInstanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled
+                        if (singleInstanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
                 )
             }
         } else {
@@ -532,7 +532,7 @@ class NotDoneGroupNode(
                 }
 
                 return text?.let {
-                    Pair(it, if (instanceData.colorEnabled) R.color.textSecondary else R.color.textDisabled)
+                    Pair(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
                 }
             }
         }
@@ -629,7 +629,7 @@ class NotDoneGroupNode(
         override val name
             get() = MultiLineNameData.Visible(
                     instanceData.name,
-                    if (instanceData.colorEnabled) R.color.textPrimary else R.color.textDisabled
+                    if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
             )
 
         override val children get() = getChildrenText(treeNode, instanceData)

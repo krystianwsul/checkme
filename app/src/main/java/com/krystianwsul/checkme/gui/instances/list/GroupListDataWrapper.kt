@@ -70,8 +70,6 @@ data class GroupListDataWrapper(
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
-        val colorEnabled = taskCurrent && isAssignedToMe
-
         init {
             check(name.isNotEmpty())
         }

@@ -706,6 +706,12 @@ class DomainFactory(
                         results.irrelevantExistingInstances
                                 .sortedBy { it.scheduleDateTime }
                                 .forEach { Log.e("asdf", "irrelevant instance: $it") }
+
+                        results.irrelevantSchedules
+                                .sortedBy { it.startExactTimeStamp }
+                                .forEach {
+                                    Log.e("asdf", "irrelevant schedule, schedule: $it, task: ${it.rootTask}")
+                                }
                     }
 
             throw Exception("Irrelevant.setIrrelevant write prevented")

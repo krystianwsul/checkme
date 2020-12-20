@@ -113,9 +113,16 @@ object Irrelevant {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false
                     } else {
-                        schedule.oldestVisible
+                        val oldestVisibleExactTimeStamp = schedule.oldestVisible
                                 .date
-                                ?.let { it.toMidnightExactTimeStamp() > schedule.endExactTimeStamp!! } == true
+                                ?.toMidnightExactTimeStamp()
+
+                        val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+
+                        if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                            oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
+                        else
+                            false
                     }
                 }
 

@@ -120,6 +120,8 @@ class SingleSchedule<T : ProjectType>(
             set(value) {
                 singleScheduleRecord.endTimeOffset = value
             }
+
+        override fun delete() = singleScheduleRecord.delete()
     }
 
     val group = singleScheduleRecord.group

@@ -66,7 +66,7 @@ abstract class RemoteRecord(create: Boolean) {
         update?.put(key, obj)
     }
 
-    fun delete() {
+    open fun delete() {
         check(!shouldDelete)
         check(update != null)
 

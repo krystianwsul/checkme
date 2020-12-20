@@ -76,7 +76,7 @@ dependencies {
     testImplementation "org.powermock:powermock-module-junit4-rule:$powermockVersion"
     testImplementation "org.powermock:powermock-api-mockito2:$powermockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powermockVersion"
-    testImplementation 'io.mockk:mockk:1.10.3'
+    testImplementation 'io.mockk:mockk:1.10.3-jdk8'
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"

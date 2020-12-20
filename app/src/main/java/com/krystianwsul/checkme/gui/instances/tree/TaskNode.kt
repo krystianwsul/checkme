@@ -68,18 +68,10 @@ class TaskNode(
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
     val expandedTaskKeys: List<TaskKey>
-        get() = if (taskNodes.isEmpty()) {
-            check(!expanded())
-
+        get() = if (expanded())
+            listOf(taskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
+        else
             listOf()
-        } else {
-            mutableListOf<TaskKey>().apply {
-                if (expanded())
-                    add(taskData.taskKey)
-
-                addAll(taskNodes.flatMap { it.expandedTaskKeys })
-            }
-        }
 
     override val delegates by lazy {
         listOf(

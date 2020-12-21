@@ -120,7 +120,6 @@ fun DomainFactory.getCreateTaskData(
 }
 
 fun DomainFactory.createScheduleRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -155,7 +154,7 @@ fun DomainFactory.createScheduleRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -167,7 +166,6 @@ fun DomainFactory.createScheduleRootTask(
 }
 
 fun DomainFactory.createChildTask(
-        dataId: Int,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
@@ -197,7 +195,7 @@ fun DomainFactory.createChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(childTask.project)
 
@@ -209,7 +207,6 @@ fun DomainFactory.createChildTask(
 }
 
 fun DomainFactory.createRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         note: String?,
@@ -240,7 +237,7 @@ fun DomainFactory.createRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -252,7 +249,6 @@ fun DomainFactory.createRootTask(
 }
 
 fun DomainFactory.updateScheduleTask(
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -303,7 +299,7 @@ fun DomainFactory.updateScheduleTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -315,7 +311,6 @@ fun DomainFactory.updateScheduleTask(
 }
 
 fun DomainFactory.updateChildTask(
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -378,7 +373,7 @@ fun DomainFactory.updateChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project) // todo image on server, purge images after this call
 
@@ -390,7 +385,6 @@ fun DomainFactory.updateChildTask(
 }
 
 fun DomainFactory.updateRootTask(
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -423,7 +417,7 @@ fun DomainFactory.updateRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -435,8 +429,6 @@ fun DomainFactory.updateRootTask(
 }
 
 fun DomainFactory.createScheduleJoinRootTask(
-        now: ExactTimeStamp.Local,
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -446,6 +438,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -479,7 +472,7 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(newParentTask.project)
 
@@ -491,7 +484,6 @@ fun DomainFactory.createScheduleJoinRootTask(
 }
 
 fun DomainFactory.createJoinChildTask(
-        dataId: Int,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
@@ -531,7 +523,7 @@ fun DomainFactory.createJoinChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(childTask.project)
 
@@ -543,7 +535,6 @@ fun DomainFactory.createJoinChildTask(
 }
 
 fun DomainFactory.createJoinRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -584,7 +575,7 @@ fun DomainFactory.createJoinRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(newParentTask.project)
 

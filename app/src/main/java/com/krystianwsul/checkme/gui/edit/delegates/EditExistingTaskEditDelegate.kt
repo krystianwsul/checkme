@@ -63,7 +63,6 @@ class EditExistingTaskEditDelegate(
         check(createParameters.allReminders)
 
         return DomainFactory.instance.updateScheduleTask(
-                data.dataId,
                 SaveService.Source.GUI,
                 parameters.taskKey,
                 createParameters.name,
@@ -76,7 +75,6 @@ class EditExistingTaskEditDelegate(
 
     override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
         return DomainFactory.instance.updateChildTask(
-                data.dataId,
                 SaveService.Source.GUI,
                 parameters.taskKey,
                 createParameters.name,
@@ -95,7 +93,6 @@ class EditExistingTaskEditDelegate(
         check(createParameters.allReminders)
 
         return DomainFactory.instance.updateRootTask(
-                data.dataId,
                 SaveService.Source.GUI,
                 parameters.taskKey,
                 createParameters.name,

@@ -148,7 +148,6 @@ class DomainFactoryTest {
     @Test
     fun testCreatingTask() {
         domainFactory.createScheduleRootTask(
-                0,
                 SaveService.Source.SERVICE,
                 "task",
                 listOf(ScheduleData.Single(Date(2020, 12, 20), TimePair(HourMinute(20, 0)))),
@@ -176,7 +175,6 @@ class DomainFactoryTest {
 
         val taskName1 = "task1"
         val taskKey1 = domainFactory.createScheduleRootTask(
-                0,
                 SaveService.Source.SERVICE,
                 taskName1,
                 scheduleDatas,
@@ -190,7 +188,6 @@ class DomainFactoryTest {
 
         val taskName2 = "task2"
         val taskKey2 = domainFactory.createChildTask(
-                0,
                 SaveService.Source.SERVICE,
                 taskKey1,
                 taskName2,
@@ -209,7 +206,6 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.updateScheduleTask(
-                0,
                 SaveService.Source.SERVICE,
                 taskKey2,
                 taskName2,
@@ -225,7 +221,6 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.updateChildTask(
-                0,
                 SaveService.Source.SERVICE,
                 taskKey1,
                 taskName1,

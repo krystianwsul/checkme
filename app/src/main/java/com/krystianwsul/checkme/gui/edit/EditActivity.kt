@@ -509,8 +509,7 @@ class EditActivity : NavBarActivity() {
 
         val taskKey = delegate.createTask(createParameters)
 
-        if (andOpen)
-            startActivity(ShowTaskActivity.newIntent(taskKey))
+        if (andOpen) startActivity(ShowTaskActivity.newIntent(taskKey))
 
         setResult(
                 Activity.RESULT_OK,

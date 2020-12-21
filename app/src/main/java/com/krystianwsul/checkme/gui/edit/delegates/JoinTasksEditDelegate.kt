@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTas
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -76,8 +75,6 @@ class JoinTasksEditDelegate(
     ): TaskKey {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
-                        ExactTimeStamp.Local.now,
-                        data.dataId,
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
@@ -98,7 +95,6 @@ class JoinTasksEditDelegate(
 
         return DomainFactory.instance
                 .createJoinChildTask(
-                        data.dataId,
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
@@ -120,7 +116,6 @@ class JoinTasksEditDelegate(
 
         return DomainFactory.instance
                 .createJoinRootTask(
-                        data.dataId,
                         SaveService.Source.GUI,
                         createParameters.name,
                         parameters.taskKeys,

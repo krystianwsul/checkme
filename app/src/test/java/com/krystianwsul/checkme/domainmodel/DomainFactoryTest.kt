@@ -3,8 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
-import com.krystianwsul.checkme.domainmodel.extensions.getMainData
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -24,6 +23,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
+import com.soywiz.klock.hours
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -36,6 +36,8 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 class DomainFactoryTest {
+
+    // remember to add overloads to pass in "now" for testing complex scenarios
 
     companion object {
 
@@ -72,7 +74,7 @@ class DomainFactoryTest {
 
     private val domainFactoryStartTime = ExactTimeStamp.Local(
             Date(2020, 12, 20),
-            HourMinute(19, 0).toHourMilli(),
+            HourMinute(19, 0),
     )
 
     private val compositeDisposable = CompositeDisposable()
@@ -88,10 +90,18 @@ class DomainFactoryTest {
 
         val databaseWrapper = mockk<DatabaseWrapper> {
             var taskId = 0
-            every { getPrivateTaskRecordId(any()) } returns "taskId" + ++taskId
+            every { getPrivateTaskRecordId(any()) } answers { "taskId" + ++taskId }
 
             var scheduleId = 0
-            every { getPrivateScheduleRecordId(any(), any()) } returns "scheduleId" + ++scheduleId
+            every { getPrivateScheduleRecordId(any(), any()) } answers { "scheduleId" + ++scheduleId }
+
+            var noScheduleOrParentId = 0
+            every { newPrivateNoScheduleOrParentRecordId(any(), any()) } answers {
+                "noScheduleOrParentId" + ++noScheduleOrParentId
+            }
+
+            var taskHierarchyId = 0
+            every { getPrivateTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
         }
 
         val projectsFactory = ProjectsFactory(
@@ -155,5 +165,79 @@ class DomainFactoryTest {
                         .single()
                         .name
         )
+    }
+
+    @Test
+    fun testCircularDependencyInChildIntervals() {
+        val date = Date(2020, 12, 21)
+        var now = ExactTimeStamp.Local(date, HourMinute(0, 0))
+
+        val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(10, 0))))
+
+        val taskName1 = "task1"
+        val taskKey1 = domainFactory.createScheduleRootTask(
+                0,
+                SaveService.Source.SERVICE,
+                taskName1,
+                scheduleDatas,
+                null,
+                null,
+                null,
+                now = now,
+        )
+
+        now += 1.hours
+
+        val taskName2 = "task2"
+        val taskKey2 = domainFactory.createChildTask(
+                0,
+                SaveService.Source.SERVICE,
+                taskKey1,
+                taskName2,
+                null,
+                null,
+                now = now
+        )
+
+        fun getInstanceDatas() = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+
+        assertEquals(taskKey1, getInstanceDatas().single().taskKey)
+        assertEquals(taskKey2, getInstanceDatas().single().children.values.single().taskKey)
+
+        now += 1.hours
+
+        domainFactory.updateScheduleTask(
+                0,
+                SaveService.Source.SERVICE,
+                taskKey2,
+                taskName2,
+                scheduleDatas,
+                null,
+                null,
+                null,
+                now,
+        )
+
+        assertEquals(2, getInstanceDatas().size)
+
+        now += 1.hours
+
+        domainFactory.updateChildTask(
+                0,
+                SaveService.Source.SERVICE,
+                taskKey1,
+                taskName1,
+                taskKey2,
+                null,
+                null,
+                null,
+                true,
+                now,
+        )
+
+        assertEquals(taskKey2, getInstanceDatas().single().taskKey)
+        assertEquals(taskKey1, getInstanceDatas().single().children.values.single().taskKey)
     }
 }

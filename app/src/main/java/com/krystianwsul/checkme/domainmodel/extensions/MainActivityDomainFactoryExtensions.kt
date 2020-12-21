@@ -16,10 +16,8 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 
-fun DomainFactory.getMainData(): MainViewModel.Data = DomainFactory.syncOnDomain {
+fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now) = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getMainData")
-
-    val now = ExactTimeStamp.Local.now
 
     val childTaskDatas = getTasks().map {
         val hierarchyDateTime = it.getHierarchyExactTimeStamp(now)

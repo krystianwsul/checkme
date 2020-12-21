@@ -1,6 +1,7 @@
 package com.krystianwsul.common.time
 
 import com.soywiz.klock.DateTimeTz
+import com.soywiz.klock.TimeSpan
 import com.soywiz.klock.TimezoneOffset
 
 sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
@@ -33,6 +34,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
                 hourMilli.milli
         ).let { it - it.localOffset.time })
 
+        constructor(date: Date, hourMinute: HourMinute) : this(date, hourMinute.toHourMilli())
+
         private fun toDateTimeTzLocal() = toDateTimeSoy().local
 
         fun toTimeStamp() = TimeStamp.fromMillis(long)
@@ -53,6 +56,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
         fun toOffset(offset: Double? = null) = offset?.let { Offset.fromOffset(long, offset) } ?: offsetExactTimeStamp
 
         fun toOffset(referenceOffset: Offset) = Offset.fromOffset(long, referenceOffset.offset)
+
+        operator fun plus(timeSpan: TimeSpan) = Local(long + timeSpan.millisecondsLong)
     }
 
     data class Offset(

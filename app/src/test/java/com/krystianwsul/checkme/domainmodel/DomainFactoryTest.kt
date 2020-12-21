@@ -29,45 +29,61 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.spyk
 import io.reactivex.disposables.CompositeDisposable
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class DomainFactoryTest {
 
-    @Before
-    fun before() {
-        MyApplication.sharedPreferences = mockk(relaxed = true)
-        MyApplication.context = mockk(relaxed = true)
+    companion object {
 
-        mockkObject(Preferences)
-        every { Preferences.tickLog } returns mockk(relaxed = true)
-        every { Preferences.shortcuts = any() } returns Unit
+        private val deviceDbInfo = DeviceDbInfo(
+                DeviceInfo(
+                        spyk(UserInfo("email", "name", "uid")) {
+                            every { key } returns UserKey("key")
+                        },
+                        "token",
+                ),
+                "uuid",
+        )
 
-        mockkObject(MyCrashlytics)
-        every { MyCrashlytics.log(any()) } returns Unit
+        @BeforeClass
+        @JvmStatic
+        fun beforeClass() {
+            MyApplication.sharedPreferences = mockk(relaxed = true)
+            MyApplication.context = mockk(relaxed = true)
 
-        mockkObject(NotificationWrapper)
-        every { NotificationWrapper.instance } returns mockk(relaxed = true)
+            mockkObject(Preferences)
+            every { Preferences.tickLog } returns mockk(relaxed = true)
+            every { Preferences.shortcuts = any() } returns Unit
 
-        mockkObject(BackendNotifier)
-        every { BackendNotifier.notify(any(), any(), any()) } returns Unit
+            mockkObject(MyCrashlytics)
+            every { MyCrashlytics.log(any()) } returns Unit
+
+            mockkObject(NotificationWrapper)
+            every { NotificationWrapper.instance } returns mockk(relaxed = true)
+
+            mockkObject(BackendNotifier)
+            every { BackendNotifier.notify(any(), any(), any()) } returns Unit
+        }
     }
 
-    @Test
-    fun testCreatingTask() {
-        val now = ExactTimeStamp.Local(Date(2020, 12, 20), HourMinute(19, 0).toHourMilli())
+    private val domainFactoryStartTime = ExactTimeStamp.Local(
+            Date(2020, 12, 20),
+            HourMinute(19, 0).toHourMilli(),
+    )
 
+    private val compositeDisposable = CompositeDisposable()
+    private lateinit var domainFactory: DomainFactory
+
+    @Before
+    fun before() {
         val myUserFactory = mockk<MyUserFactory> {
             every { isSaved } returns false
             every { save(any()) } returns Unit
             every { user } returns mockk(relaxed = true)
-        }
-
-        val compositeDisposable = CompositeDisposable()
-
-        val userInfo = spyk(UserInfo("email", "name", "uid")) {
-            every { key } returns UserKey("key")
         }
 
         val databaseWrapper = mockk<DatabaseWrapper> {
@@ -78,8 +94,6 @@ class DomainFactoryTest {
             every { getPrivateScheduleRecordId(any(), any()) } returns "scheduleId" + ++scheduleId
         }
 
-        val deviceDbInfo = DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid")
-
         val projectsFactory = ProjectsFactory(
                 mockk(),
                 mockk(relaxed = true),
@@ -87,14 +101,14 @@ class DomainFactoryTest {
                         mockk(relaxed = true),
                         PrivateProjectRecord(
                                 databaseWrapper,
-                                userInfo,
-                                PrivateProjectJson(startTime = now.long, startTimeOffset = now.offset)
+                                deviceDbInfo.userInfo,
+                                PrivateProjectJson(startTime = domainFactoryStartTime.long, startTimeOffset = domainFactoryStartTime.offset)
                         ),
                         mapOf()
                 ),
                 mockk(relaxed = true),
                 SharedProjectsLoader.InitialProjectsEvent(listOf()),
-                now,
+                domainFactoryStartTime,
                 mockk(relaxed = true),
                 compositeDisposable,
         ) { deviceDbInfo }
@@ -104,17 +118,25 @@ class DomainFactoryTest {
             every { save(any()) } returns Unit
         }
 
-        val domainFactory = DomainFactory(
+        domainFactory = DomainFactory(
                 mockk(relaxed = true),
                 myUserFactory,
                 projectsFactory,
                 friendsFactory,
                 deviceDbInfo,
-                now,
-                now,
+                domainFactoryStartTime,
+                domainFactoryStartTime,
                 compositeDisposable,
         )
+    }
 
+    @After
+    fun after() {
+        compositeDisposable.clear()
+    }
+
+    @Test
+    fun testCreatingTask() {
         domainFactory.createScheduleRootTask(
                 0,
                 SaveService.Source.SERVICE,

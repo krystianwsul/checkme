@@ -57,7 +57,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    protected val notificationManager by lazy { MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 

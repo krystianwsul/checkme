@@ -232,6 +232,9 @@ class DomainFactoryTest {
                 now,
         )
 
+        domainFactory.getTaskForce(taskKey1).invalidateIntervals()
+        domainFactory.getTaskForce(taskKey2).invalidateIntervals()
+
         assertEquals(taskKey2, getInstanceDatas().single().taskKey)
         assertEquals(taskKey1, getInstanceDatas().single().children.values.single().taskKey)
     }

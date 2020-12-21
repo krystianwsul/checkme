@@ -75,7 +75,18 @@ class Task<T : ProjectType>(
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
-    private val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
+    private var isBuildingIntervals = false
+
+    private val intervalsProperty = invalidatableLazyCallbacks {
+        if (isBuildingIntervals) throw IllegalStateException()
+        isBuildingIntervals = true
+
+        try {
+            IntervalBuilder.build(this)
+        } finally {
+            isBuildingIntervals = false
+        }
+    }
     private val intervals by intervalsProperty
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {
@@ -982,6 +993,8 @@ class Task<T : ProjectType>(
     }
 
     fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+        val intervals = intervals
+
         try {
             return intervals.single {
                 it.containsExactTimeStamp(exactTimeStamp)

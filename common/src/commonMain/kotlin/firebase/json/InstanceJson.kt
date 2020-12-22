@@ -11,6 +11,7 @@ data class InstanceJson @JvmOverloads constructor(
         var instanceTime: String? = null,
         var hidden: Boolean = false,
         var parentJson: ParentJson? = null,
+        var noParent: Boolean = false,
 ) {
 
     @Serializable

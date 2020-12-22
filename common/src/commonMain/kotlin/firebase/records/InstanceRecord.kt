@@ -138,4 +138,6 @@ abstract class InstanceRecord<T : ProjectType>(
                 newValue?.let { InstanceJson.ParentJson(it.taskKey.taskId, scheduleKeyToString(it.scheduleKey)) }
         )
     }
+
+    var noParent by Committer(createObject::noParent)
 }

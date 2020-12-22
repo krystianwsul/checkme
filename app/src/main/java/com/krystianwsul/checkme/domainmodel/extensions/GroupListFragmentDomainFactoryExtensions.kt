@@ -22,7 +22,7 @@ fun DomainFactory.setInstancesDone(
 
     instances.forEach { it.setDone(localFactory, done, now) }
 
-    val remoteProjects = instances.map { it.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet()
 
     updateNotifications(now)
 
@@ -51,7 +51,7 @@ fun DomainFactory.undoSetInstancesDateTime(
         }
     }
 
-    val projects = instances.map { it.project }.toSet()
+    val projects = instances.map { it.task.project }.toSet()
 
     updateNotifications(now)
 

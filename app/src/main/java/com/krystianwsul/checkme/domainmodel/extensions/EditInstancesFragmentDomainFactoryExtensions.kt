@@ -84,7 +84,7 @@ fun DomainFactory.setInstancesDateTime(
         )
     }
 
-    val projects = instances.map { it.project }.toSet()
+    val projects = instances.map { it.task.project }.toSet()
 
     updateNotifications(now)
 

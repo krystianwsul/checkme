@@ -10,11 +10,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance<T : ProjectType> private constructor(
-        val project: Project<T>,
-        val task: Task<T>,
-        private var data: Data<T>,
-) : Assignable {
+class Instance<T : ProjectType> private constructor(val task: Task<T>, private var data: Data<T>) : Assignable {
 
     companion object {
 
@@ -95,7 +91,7 @@ class Instance<T : ProjectType> private constructor(
 
     @Suppress("UNCHECKED_CAST")
     val instanceCustomTimeKey
-    get() = (instanceTime as? Time.Custom<T>)?.key
+        get() = (instanceTime as? Time.Custom<T>)?.key
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
@@ -123,17 +119,8 @@ class Instance<T : ProjectType> private constructor(
         doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
     }
 
-    constructor(
-            project: Project<T>,
-            task: Task<T>,
-            instanceRecord: InstanceRecord<T>,
-    ) : this(project, task, Data.Real(project, instanceRecord))
-
-    constructor(
-            project: Project<T>,
-            task: Task<T>,
-            scheduleDateTime: DateTime,
-    ) : this(project, task, Data.Virtual(scheduleDateTime))
+    constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
+    constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
 
     fun exists() = (data is Data.Real)
 
@@ -149,7 +136,8 @@ class Instance<T : ProjectType> private constructor(
                 no idea why this sortedBy is necessary, but apparently something else is sorting the
                 other branch of the if statement
              */
-            project.getTaskHierarchiesByParentTaskKey(taskKey)
+            task.project
+                    .getTaskHierarchiesByParentTaskKey(taskKey)
                     .asSequence()
                     .filter { it.isParentGroupTask(now) }
                     .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
@@ -309,61 +297,68 @@ class Instance<T : ProjectType> private constructor(
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
-        val parentInstanceData = if (data.parentInstanceKey != null) {
-            data.parentInstanceKey?.let {
-                val parentInstance = project.getTaskForce(it.taskKey.taskId).getInstance(
-                        DateTime(
-                                it.scheduleKey.scheduleDate,
-                                project.getTime(it.scheduleKey.scheduleTimePair)
+        val parentInstanceData = when (val parentState = data.parentState) {
+            ParentState.NoParent -> null
+            is ParentState.Parent -> {
+                val (parentTaskKey, parentScheduleKey) = parentState.instanceKey
+
+                val parentInstance = task.project
+                        .getTaskForce(parentTaskKey.taskId)
+                        .getInstance(
+                                DateTime(
+                                        parentScheduleKey.scheduleDate,
+                                        task.project.getTime(parentScheduleKey.scheduleTimePair)
+                                )
                         )
-                )
 
                 // todo group maybe isRepeatingGroup can be reused later
                 ParentInstanceData(parentInstance, false, null)
             }
-        } else {
-            val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+            ParentState.Unset -> {
+                val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
-            val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
-                    .asSequence()
-                    .filter { it.currentOffset(hierarchyExactTimeStamp) }
-                    .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
-                    .toList()
+                val groupMatches = task.project
+                        .getTaskHierarchiesByChildTaskKey(taskKey)
+                        .asSequence()
+                        .filter { it.currentOffset(hierarchyExactTimeStamp) }
+                        .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
+                        .toList()
 
-            val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
-                val groupMatch = groupMatches.single()
-                val parentTask = groupMatch.parentTask
-                val intervalType = task.getInterval(hierarchyExactTimeStamp).type
+                val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
+                    val groupMatch = groupMatches.single()
+                    val parentTask = groupMatch.parentTask
+                    val intervalType = task.getInterval(hierarchyExactTimeStamp).type
 
-                Triple(
-                        parentTask,
-                        (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
-                        groupMatch
-                )
-            } else {
-                Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
-            }
+                    Triple(
+                            parentTask,
+                            (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
+                            groupMatch
+                    )
+                } else {
+                    Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
+                }
 
-            if (parentTask == null) {
-                null
-            } else {
-                check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
+                if (parentTask == null) {
+                    null
+                } else {
+                    check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
 
-                /**
-                 * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
-                 * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
-                 * for now.  There would be a discrepancy when accessing an instance in a different way
-                 * (ShowTaskInstancesActivity is the only one that comes to mind).
-                 *
-                 * I think a parent is truly eligible if:
-                 * 1. It, or any instance in the hierarchy above it, exists
-                 * 2. The root instance matches a schedule
-                 *
-                 * Yet another reason to consider checking if task.getInstances() contains the instance.
-                 */
-                return parentTask.getInstance(scheduleDateTime)
-                        .takeIf { it.isReachableFromMainScreen(now) }
-                        ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+                    /**
+                     * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
+                     * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
+                     * for now.  There would be a discrepancy when accessing an instance in a different way
+                     * (ShowTaskInstancesActivity is the only one that comes to mind).
+                     *
+                     * I think a parent is truly eligible if:
+                     * 1. It, or any instance in the hierarchy above it, exists
+                     * 2. The root instance matches a schedule
+                     *
+                     * Yet another reason to consider checking if task.getInstances() contains the instance.
+                     */
+                    parentTask.getInstance(scheduleDateTime)
+                            .takeIf { it.isReachableFromMainScreen(now) }
+                            ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+                }
             }
         }
 
@@ -382,7 +377,7 @@ class Instance<T : ProjectType> private constructor(
 
     fun getParentName(now: ExactTimeStamp.Local) = getParentInstance(now)?.instance
             ?.name
-            ?: project.name
+            ?: task.project.name
 
     fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
@@ -422,20 +417,22 @@ class Instance<T : ProjectType> private constructor(
         createInstanceHierarchy(now).instanceRecord.let {
             it.instanceDate = dateTime.date
 
-            it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
-                @Suppress("UNCHECKED_CAST")
-                when (it) {
-                    is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
-                    is Time.Normal -> JsonTime.Normal(it.hourMinute)
-                }
-            }
+            it.instanceJsonTime = task.project
+                    .getOrCopyTime(ownerKey, dateTime.time)
+                    .let {
+                        @Suppress("UNCHECKED_CAST")
+                        when (it) {
+                            is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
+                            is Time.Normal -> JsonTime.Normal(it.hourMinute)
+                        }
+                    }
         }
 
         shownHolder.forceShown(shownFactory).notified = false
     }
 
     private fun createInstanceRecord() = Data.Real(
-            project,
+            task,
             task.createRemoteInstanceRecord(this)
     ).also {
         data = it
@@ -477,7 +474,7 @@ class Instance<T : ProjectType> private constructor(
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
         return if (shared != null) {
-            val sharedCustomTime = project.getCustomTime(shared.customTimeId) as SharedCustomTime
+            val sharedCustomTime = task.project.getCustomTime(shared.customTimeId) as SharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
                 val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
@@ -520,7 +517,7 @@ class Instance<T : ProjectType> private constructor(
                 .distinct()
                 .singleOrEmpty()
                 .orEmpty()
-                .let(project::getAssignedTo)
+                .let(task.project::getAssignedTo)
                 .map { it.value }
     }
 
@@ -543,14 +540,14 @@ class Instance<T : ProjectType> private constructor(
 
         abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
 
-        abstract val parentInstanceKey: InstanceKey?
+        abstract val parentState: ParentState
 
         class Real<T : ProjectType>(
-                private val project: Project<T>,
+                private val task: Task<T>,
                 val instanceRecord: InstanceRecord<T>,
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId<T>) = project.getCustomTime(customTimeId)
+            fun getCustomTime(customTimeId: CustomTimeId<T>) = task.project.getCustomTime(customTimeId)
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
@@ -582,7 +579,7 @@ class Instance<T : ProjectType> private constructor(
 
             override val customTimeKey
                 get() = instanceRecord.instanceJsonTime?.let {
-                    (it as? JsonTime.Custom)?.let { Pair(project.projectKey, it.id) }
+                    (it as? JsonTime.Custom)?.let { Pair(task.project.projectKey, it.id) }
                 }
 
             override val scheduleCustomTimeKey
@@ -590,10 +587,31 @@ class Instance<T : ProjectType> private constructor(
                         .scheduleTimePair
                         .customTimeKey
 
-            override var parentInstanceKey: InstanceKey?
-                get() = instanceRecord.parentInstanceKey
+            override var parentState: ParentState
+                get() {
+                    val parentInstanceKey = instanceRecord.parentInstanceKey
+
+                    return when {
+                        instanceRecord.noParent -> ParentState.NoParent
+                        parentInstanceKey != null -> ParentState.Parent(parentInstanceKey)
+                        else -> ParentState.Unset
+                    }
+                }
                 set(value) {
-                    instanceRecord.parentInstanceKey = value
+                    when (value) {
+                        ParentState.Unset -> {
+                            instanceRecord.noParent = false
+                            instanceRecord.parentInstanceKey = null
+                        }
+                        ParentState.NoParent -> {
+                            instanceRecord.noParent = true
+                            instanceRecord.parentInstanceKey = null
+                        }
+                        is ParentState.Parent -> {
+                            instanceRecord.noParent = false
+                            instanceRecord.parentInstanceKey = value.instanceKey
+                        }
+                    }
                 }
         }
 
@@ -616,7 +634,7 @@ class Instance<T : ProjectType> private constructor(
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
 
-            override val parentInstanceKey: InstanceKey? = null
+            override val parentState = ParentState.Unset
         }
     }
 
@@ -675,5 +693,12 @@ class Instance<T : ProjectType> private constructor(
                     minute
             )
         }
+    }
+
+    sealed class ParentState {
+
+        object Unset : ParentState()
+        object NoParent : ParentState()
+        data class Parent(val instanceKey: InstanceKey) : ParentState()
     }
 }

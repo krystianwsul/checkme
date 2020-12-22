@@ -39,7 +39,7 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
 
     save(0, source)
 
-    notifyCloud(instance.project)
+    notifyCloud(instance.task.project)
 }
 
 fun DomainFactory.setInstanceNotificationDone(
@@ -61,7 +61,7 @@ fun DomainFactory.setInstanceNotificationDone(
 
     save(0, source)
 
-    notifyCloud(instance.project)
+    notifyCloud(instance.task.project)
 }
 
 fun DomainFactory.setInstancesNotified(

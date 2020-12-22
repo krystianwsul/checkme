@@ -107,7 +107,7 @@ class Task<T : ProjectType>(
             .values
             .toMutableList<InstanceRecord<T>>()
             .apply { addAll(rootInstanceManager.records) }
-            .map { Instance(project, this, it) }
+            .map { Instance(this, it) }
             .toMutableList()
             .associateBy { it.scheduleKey }
             .toMutableMap()
@@ -952,7 +952,7 @@ class Task<T : ProjectType>(
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         if (!generatedInstances.containsKey(instanceKey))
-            generatedInstances[instanceKey] = Instance(project, this, scheduleDateTime)
+            generatedInstances[instanceKey] = Instance(this, scheduleDateTime)
 
         return generatedInstances[instanceKey]
                 ?: throw InstanceKeyNotFoundException("instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(", \n"))

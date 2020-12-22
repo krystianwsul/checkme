@@ -142,7 +142,7 @@ fun DomainFactory.setInstancesAddHourActivity(
 
     save(dataId, source)
 
-    val remoteProjects = instances.map { it.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet()
 
     notifyCloud(remoteProjects)
 
@@ -173,7 +173,7 @@ fun DomainFactory.undoInstancesAddHour(
 
     save(dataId, source)
 
-    val remoteProjects = pairs.map { it.first.project }.toSet()
+    val remoteProjects = pairs.map { it.first.task.project }.toSet()
 
     notifyCloud(remoteProjects)
 }
@@ -197,7 +197,7 @@ fun DomainFactory.setInstanceDone(
 
     save(notificationType, source)
 
-    notifyCloud(instance.project)
+    notifyCloud(instance.task.project)
 
     instance.done
 }

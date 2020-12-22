@@ -97,8 +97,13 @@ abstract class Project<T : ProjectType>(
             oldTask: Task<*>,
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp.Local,
-    ): Task<T> {
-        val instanceDatas = instances.map { it to getInstanceJson(deviceDbInfo.key, it) }
+            newProjectKey: ProjectKey<*>,
+    ): Pair<Task<T>, List<(Map<String, String>) -> Any?>> {
+        val instanceDatas = instances.map { oldInstance ->
+            val (newInstance, updater) = getInstanceJson(deviceDbInfo.key, oldInstance, newProjectKey)
+
+            Triple(oldInstance, newInstance, updater)
+        }
 
         val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
             mutableMapOf()
@@ -136,7 +141,7 @@ abstract class Project<T : ProjectType>(
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }
 
-        return newTask
+        return newTask to instanceDatas.map { it.third }
     }
 
     protected abstract fun getOrCreateCustomTime(
@@ -160,7 +165,11 @@ abstract class Project<T : ProjectType>(
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
     }
 
-    private fun getInstanceJson(ownerKey: UserKey, instance: Instance<*>): InstanceJson {
+    private fun getInstanceJson(
+            ownerKey: UserKey,
+            instance: Instance<*>,
+            newProjectKey: ProjectKey<*>,
+    ): Pair<InstanceJson, (Map<String, String>) -> Any?> {
         val done = instance.doneOffset
 
         val instanceDate = instance.instanceDate
@@ -179,7 +188,27 @@ abstract class Project<T : ProjectType>(
             is Time.Normal -> newInstanceTime.hourMinute.toJson()
         }
 
-        return InstanceJson(done?.long, done?.offset, instanceDate.toJson(), instanceTimeString)
+        val parentState = instance.parentState
+
+        val instanceJson = InstanceJson(
+                done?.long,
+                done?.offset,
+                instanceDate.toJson(),
+                instanceTimeString,
+                parentJson = parentState.parentInstanceKey?.let(InstanceJson::ParentJson),
+                noParent = parentState.noParent,
+        )
+
+        val updater = { taskKeyMap: Map<String, String> ->
+            parentState.parentInstanceKey?.let { oldKey ->
+                val newTaskId = taskKeyMap.getValue(oldKey.taskKey.taskId)
+                val newTaskKey = TaskKey(newProjectKey, newTaskId)
+
+                instanceJson.parentJson = InstanceJson.ParentJson(InstanceKey(newTaskKey, oldKey.scheduleKey))
+            }
+        }
+
+        return instanceJson to updater
     }
 
     fun <V : TaskHierarchy<*>> copyTaskHierarchy(
@@ -286,8 +315,7 @@ abstract class Project<T : ProjectType>(
             remoteToRemoteConversion: RemoteToRemoteConversion<T>,
             startTask: Task<T>,
     ) {
-        if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
-            return
+        if (remoteToRemoteConversion.startTasks.containsKey(startTask.id)) return
 
         remoteToRemoteConversion.startTasks[startTask.id] = Pair(
                 startTask,

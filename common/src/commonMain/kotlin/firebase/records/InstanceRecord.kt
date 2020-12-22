@@ -135,7 +135,7 @@ abstract class InstanceRecord<T : ProjectType>(
     ) { _, _, newValue ->
         setProperty(
                 createObject::parentJson,
-                newValue?.let { InstanceJson.ParentJson(it.taskKey.taskId, scheduleKeyToString(it.scheduleKey)) }
+                newValue?.let(InstanceJson::ParentJson)
         )
     }
 

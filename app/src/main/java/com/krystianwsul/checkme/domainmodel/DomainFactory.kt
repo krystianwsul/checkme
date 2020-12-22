@@ -597,9 +597,19 @@ class DomainFactory(
 
         val newProject = projectsFactory.getProjectForce(projectId)
 
+        val allUpdaters = mutableListOf<(Map<String, String>) -> Any?>()
+
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            val task = newProject.copyTask(deviceDbInfo, pair.first, pair.second, now)
+            val (task, updaters) = newProject.copyTask(
+                    deviceDbInfo,
+                    pair.first,
+                    pair.second,
+                    now,
+                    newProject.projectKey
+            )
+
             remoteToRemoteConversion.endTasks[pair.first.id] = task
+            allUpdaters += updaters
         }
 
         for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
@@ -621,10 +631,7 @@ class DomainFactory(
         val endData = Task.EndData(now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            pair.second.forEach {
-                if (!it.hidden)
-                    it.hide(now)
-            }
+            pair.second.forEach { if (!it.hidden) it.hide(now) }
 
             // I think this might no longer be necessary, since setEndData doesn't recurse on children
             if (pair.first.endData != null)
@@ -632,6 +639,10 @@ class DomainFactory(
             else
                 pair.first.setEndData(endData)
         }
+
+        val taskKeyMap = remoteToRemoteConversion.endTasks.mapValues { it.value.taskKey.taskId }
+
+        allUpdaters.forEach { it(taskKeyMap) }
 
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }

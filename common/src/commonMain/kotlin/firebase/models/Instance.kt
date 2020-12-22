@@ -113,6 +113,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private val hierarchyExactTimeStampEndRange by hierarchyExactTimeStampEndRangeProperty
 
+    val parentState get() = data.parentState
+
     init {
         task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
@@ -300,7 +302,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
             is ParentState.Parent -> {
-                val (parentTaskKey, parentScheduleKey) = parentState.instanceKey
+                val (parentTaskKey, parentScheduleKey) = parentState.parentInstanceKey
 
                 val parentInstance = task.project
                         .getTaskForce(parentTaskKey.taskId)
@@ -609,7 +611,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                         }
                         is ParentState.Parent -> {
                             instanceRecord.noParent = false
-                            instanceRecord.parentInstanceKey = value.instanceKey
+                            instanceRecord.parentInstanceKey = value.parentInstanceKey
                         }
                     }
                 }
@@ -697,8 +699,24 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     sealed class ParentState {
 
-        object Unset : ParentState()
-        object NoParent : ParentState()
-        data class Parent(val instanceKey: InstanceKey) : ParentState()
+        abstract val noParent: Boolean
+        abstract val parentInstanceKey: InstanceKey?
+
+        object Unset : ParentState() {
+
+            override val noParent = false
+            override val parentInstanceKey: InstanceKey? = null
+        }
+
+        object NoParent : ParentState() {
+
+            override val noParent = true
+            override val parentInstanceKey: InstanceKey? = null
+        }
+
+        data class Parent(override val parentInstanceKey: InstanceKey) : ParentState() {
+
+            override val noParent = false
+        }
     }
 }

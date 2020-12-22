@@ -31,7 +31,5 @@ open class SingleScheduleRecord<T : ProjectType>(
 
     open val originalDate get() = date
 
-    val group = singleScheduleJson.group
-
     override fun deleteFromParent() = check(taskRecord.singleScheduleRecords.remove(id) == this)
 }

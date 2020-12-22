@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
-import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -130,57 +129,35 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
         instanceLocker?.childInstances?.let { return it }
 
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
         val scheduleDateTime = scheduleDateTime
 
-        val childInstances = if (task.isGroupTask(now)) {
-            /*
-                no idea why this sortedBy is necessary, but apparently something else is sorting the
-                other branch of the if statement
-             */
-            task.project
-                    .getTaskHierarchiesByParentTaskKey(taskKey)
-                    .asSequence()
-                    .filter { it.isParentGroupTask(now) }
-                    .filter { it.notDeletedOffset(hierarchyExactTimeStamp) }
-                    .filter { it.childTask.notDeletedOffset(hierarchyExactTimeStamp) }
-                    .toList()
-                    .map {
-                        val childInstance = it.childTask.getInstance(scheduleDateTime)
-                        check(childInstance.getParentInstance(now)?.instance?.instanceKey == instanceKey)
+        val childInstances = task.childHierarchyIntervals
+                .asSequence()
+                .filter {
+                    val taskHierarchy = it.taskHierarchy
+                    val childTask = taskHierarchy.childTask
+                    val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
 
-                        Pair(childInstance, it)
-                    }
-        } else {
-            task.childHierarchyIntervals
-                    .asSequence()
-                    .filter {
-                        val taskHierarchy = it.taskHierarchy
-                        val childTask = taskHierarchy.childTask
-                        val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
+                    it.notDeletedOffset(childHierarchyExactTimeStamp)
+                            && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
+                            && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
+                }
+                .map { it.taskHierarchy }
+                .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
+                .filter {
+                    it.first
+                            .getParentInstance(now)
+                            ?.instance
+                            ?.instanceKey == instanceKey
+                }
+                .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
+                .values
+                .toList()
+                .filter { !it.first.isInvisibleBecauseOfEndData(now) }
 
-                        it.notDeletedOffset(childHierarchyExactTimeStamp)
-                                && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
-                                && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
-                    }
-                    .map { it.taskHierarchy }
-                    .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
-                    .filter {
-                        it.first
-                                .getParentInstance(now)
-                                ?.instance
-                                ?.instanceKey == instanceKey
-                    }
-                    .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
-                    .values
-                    .toList()
-        }
+        instanceLocker?.childInstances = childInstances
 
-        val filteredChildInstances = childInstances.filter { !it.first.isInvisibleBecauseOfEndData(now) }
-
-        instanceLocker?.childInstances = filteredChildInstances
-
-        return filteredChildInstances
+        return childInstances
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local): Pair<ExactTimeStamp, String> {
@@ -319,26 +296,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             ParentState.Unset -> {
                 val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
-                val groupMatches = task.project
-                        .getTaskHierarchiesByChildTaskKey(taskKey)
-                        .asSequence()
-                        .filter { it.currentOffset(hierarchyExactTimeStamp) }
-                        .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
-                        .toList()
-
-                val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
-                    val groupMatch = groupMatches.single()
-                    val parentTask = groupMatch.parentTask
-                    val intervalType = task.getInterval(hierarchyExactTimeStamp).type
-
-                    Triple(
-                            parentTask,
-                            (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
-                            groupMatch
-                    )
-                } else {
-                    Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
-                }
+                val parentTask = task.getParentTask(hierarchyExactTimeStamp)
 
                 if (parentTask == null) {
                     null
@@ -359,7 +317,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      */
                     parentTask.getInstance(scheduleDateTime)
                             .takeIf { it.isReachableFromMainScreen(now) }
-                            ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+                            ?.let { ParentInstanceData(it, false, null) }
                 }
             }
         }

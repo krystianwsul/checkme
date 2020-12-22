@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.interval
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.firebase.models.TaskParentEntry
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
 sealed class Type<T : ProjectType> {
@@ -18,17 +17,8 @@ sealed class Type<T : ProjectType> {
 
         override fun matches(taskHierarchy: TaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
 
-        fun getHierarchyInterval(interval: Interval<T>, exactTimeStamp: ExactTimeStamp): HierarchyInterval<T> {
-            if (parentTaskHierarchy.isParentGroupTask(exactTimeStamp)) {
-                /*
-                I'm allowing this inconsistency because the only place this should be relevant is
-                for tasks that are children of a group task.
-                 */
-                check(interval is Interval.Current)
-                check(parentTaskHierarchy.startExactTimeStampOffset >= interval.startExactTimeStampOffset)
-            } else {
-                check(parentTaskHierarchy.startExactTimeStampOffset == interval.startExactTimeStampOffset)
-            }
+        fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
+            check(parentTaskHierarchy.startExactTimeStampOffset == interval.startExactTimeStampOffset)
 
             parentTaskHierarchy.endExactTimeStampOffset?.let {
                 val intervalEndExactTimeStamp = interval.endExactTimeStampOffset

@@ -21,7 +21,6 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             customTimeId: String?,
             hour: Int?,
             minute: Int?,
-            group: Boolean,
             assignedTo: Set<String>,
     ): SingleScheduleJson<T>
 
@@ -99,7 +98,6 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 customTimeId: String?,
                 hour: Int?,
                 minute: Int?,
-                group: Boolean,
                 assignedTo: Set<String>,
         ): SingleScheduleJson<ProjectType.Private> {
             check(assignedTo.isEmpty())
@@ -115,7 +113,6 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                     customTimeId,
                     hour,
                     minute,
-                    group
             )
         }
 
@@ -259,7 +256,6 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 customTimeId: String?,
                 hour: Int?,
                 minute: Int?,
-                group: Boolean,
                 assignedTo: Set<String>,
         ) = SharedSingleScheduleJson(
                 startTime,
@@ -272,7 +268,6 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 customTimeId,
                 hour,
                 minute,
-                group,
                 assignedTo.toMap()
         )
 

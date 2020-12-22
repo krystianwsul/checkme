@@ -16,5 +16,4 @@ data class PrivateSingleScheduleJson @JvmOverloads constructor(
         override val customTimeId: String? = null,
         override val hour: Int? = null,
         override val minute: Int? = null,
-        override val group: Boolean = false,
 ) : SingleScheduleJson<ProjectType.Private>

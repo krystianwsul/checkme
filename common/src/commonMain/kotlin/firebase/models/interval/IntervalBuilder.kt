@@ -14,22 +14,14 @@ object IntervalBuilder {
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
-        val now = ExactTimeStamp.Local.now
-
         val schedules = task.schedules.toMutableList()
-
-        val groupParentTaskHierarchies = task.parentTaskHierarchies
-                .filter { it.isParentGroupTask(now) }
-                .toMutableList()
-
-        val normalParentTaskHierarchies = (task.parentTaskHierarchies - groupParentTaskHierarchies).toMutableList()
-
+        val parentTaskHierarchies = task.parentTaskHierarchies.toMutableList()
         val noScheduleOrParents = task.noScheduleOrParents.toMutableList()
 
         fun getNextTypeBuilder(): TypeBuilder<T>? {
             val nextSchedule = schedules.minByOrNull { it.startExactTimeStampOffset }?.let { TypeBuilder.Schedule(it) }
 
-            val nextParentTaskHierarchy = normalParentTaskHierarchies.minByOrNull {
+            val nextParentTaskHierarchy = parentTaskHierarchies.minByOrNull {
                 it.startExactTimeStampOffset
             }?.let { TypeBuilder.Parent(it) }
 
@@ -44,7 +36,7 @@ object IntervalBuilder {
             ).minByOrNull { it.startExactTimeStampOffset }?.also {
                 when (it) {
                     is TypeBuilder.NoScheduleOrParent -> noScheduleOrParents.remove(it.noScheduleOrParent)
-                    is TypeBuilder.Parent -> normalParentTaskHierarchies.remove(it.parentTaskHierarchy)
+                    is TypeBuilder.Parent -> parentTaskHierarchies.remove(it.parentTaskHierarchy)
                     is TypeBuilder.Schedule -> schedules.remove(it.schedule)
                 }
             }
@@ -53,22 +45,8 @@ object IntervalBuilder {
         val taskStartExactTimeStampOffset = task.startExactTimeStampOffset
         val taskEndExactTimeStampOffset = task.endExactTimeStampOffset
 
-        fun getCurrentPlaceholder(startExactTimeStampOffset: ExactTimeStamp.Offset): Interval.Current<T> {
-            /*
-                since the only way for a task to not have a NoScheduleOrParentRecord is
-                    1. it's been garbage collected, so it's really a moot point, and
-                    2. the task was created directly as a child of a group task,
-                I think group task hierarchies are relevant only to avoid displaying #2
-                children as unscheduled root tasks, which is what I fix here.
-             */
-
-            val type = groupParentTaskHierarchies.filter { it.current(now) }
-                    .maxByOrNull { it.startExactTimeStampOffset }
-                    ?.let { Type.Child(it) }
-                    ?: Type.NoSchedule()
-
-            return Interval.Current(type, startExactTimeStampOffset)
-        }
+        fun getCurrentPlaceholder(startExactTimeStampOffset: ExactTimeStamp.Offset) =
+                Interval.Current<T>(Type.NoSchedule(), startExactTimeStampOffset)
 
         var typeBuilder = getNextTypeBuilder()
         if (typeBuilder == null) {

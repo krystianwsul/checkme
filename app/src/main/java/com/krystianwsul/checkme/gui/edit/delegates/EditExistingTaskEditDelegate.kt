@@ -44,17 +44,6 @@ class EditExistingTaskEditDelegate(
         return initialProject == finalProject
     }
 
-    override fun showAllRemindersDialog(): Boolean? {
-        if (!data.showAllInstancesDialog)
-            return null
-
-        val parent = parentScheduleManager.parent
-        if (parent?.isRootTaskGroup != true)
-            return null
-
-        return false
-    }
-
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,

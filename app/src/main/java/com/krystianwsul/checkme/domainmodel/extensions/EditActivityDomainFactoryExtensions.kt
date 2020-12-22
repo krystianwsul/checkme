@@ -278,14 +278,6 @@ fun DomainFactory.updateScheduleTask(
         endAllCurrentTaskHierarchies(now)
         endAllCurrentNoScheduleOrParents(now)
 
-        if (isGroupTask(now)) {
-            project.getTaskHierarchiesByParentTaskKey(taskKey).forEach {
-                it.childTask.invalidateParentTaskHierarchies()
-            }
-
-            invalidateChildTaskHierarchies()
-        }
-
         updateSchedules(
                 ownerKey,
                 localFactory,
@@ -600,18 +592,15 @@ private fun DomainFactory.getParentTreeDatas(
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
-                val isGroupTask = it.isGroupTask(now)
-
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, isGroupTask),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         null,
-                        isGroupTask,
-                        mapOf()
+                        mapOf(),
                 )
 
                 taskParentKey to parentTreeData
@@ -633,8 +622,7 @@ private fun DomainFactory.getParentTreeDatas(
                         null,
                         EditViewModel.SortKey.ProjectSortKey(it.projectKey),
                         it.projectKey,
-                        false,
-                        it.users.toUserDatas()
+                        it.users.toUserDatas(),
                 )
 
                 projectParentKey to parentTreeData
@@ -655,18 +643,15 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
-                val isGroupTask = it.isGroupTask(now)
-
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, isGroupTask),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         (it.project as? SharedProject)?.projectKey,
-                        isGroupTask,
-                        mapOf()
+                        mapOf(),
                 )
 
                 taskParentKey to parentTreeData
@@ -737,7 +722,6 @@ private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp.Local,
         parentTask: Task<*>,
         excludedTaskKeys: Set<TaskKey>,
-        isRootGroupTask: Boolean, // this is valid only as long as getChildTaskHierarchies(groups = false)
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()
@@ -748,14 +732,13 @@ private fun DomainFactory.getTaskListChildTaskDatas(
 
                     val parentTreeData = EditViewModel.ParentTreeData(
                             childTask.name,
-                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys, isRootGroupTask),
+                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
                             EditViewModel.ParentKey.Task(childTask.taskKey),
                             childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
                             childTask.note,
                             EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
                             (childTask.project as? SharedProject)?.projectKey,
-                            isRootGroupTask,
-                            mapOf()
+                            mapOf(),
                     )
 
                     taskParentKey to parentTreeData

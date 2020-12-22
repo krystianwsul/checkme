@@ -84,10 +84,7 @@ class Task<T : ProjectType>(
 
     val scheduleIntervals by scheduleIntervalsProperty
 
-    val parentHierarchyIntervals
-        get() = intervals.mapNotNull {
-            (it.type as? Type.Child)?.getHierarchyInterval(it, ExactTimeStamp.Local.now)
-        }
+    val parentHierarchyIntervals get() = intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }
 
     val noScheduleOrParentIntervals
         get() = intervals.mapNotNull {
@@ -175,24 +172,12 @@ class Task<T : ProjectType>(
 
         taskUndoData?.taskKeys?.add(taskKey)
 
-        val group = isGroupTask(now)
-
         getCurrentScheduleIntervals(now).forEach {
             it.requireCurrentOffset(now)
 
             taskUndoData?.scheduleIds?.add(it.schedule.scheduleId)
 
             it.schedule.setEndExactTimeStamp(now.toOffset())
-        }
-
-        if (group) {
-            val remainingTaskHierarchies = project.getTaskHierarchiesByParentTaskKey(taskKey).filter {
-                it.notDeleted(now)
-            }
-
-            taskUndoData?.taskHierarchyKeys?.addAll(remainingTaskHierarchies.map { it.taskHierarchyKey })
-
-            remainingTaskHierarchies.forEach { it.setEndExactTimeStamp(now) }
         }
 
         if (!recursive) {
@@ -209,24 +194,6 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(endData)
     }
 
-    fun getGroupScheduleDateTime(exactTimeStamp: ExactTimeStamp): DateTime? {
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(exactTimeStamp)
-
-        val groupSingleSchedules = getCurrentScheduleIntervals(hierarchyExactTimeStamp).asSequence()
-                .map { it.schedule }
-                .filterIsInstance<SingleSchedule<*>>()
-                .filter { it.group }
-                .toList()
-
-        return if (groupSingleSchedules.isEmpty()) {
-            null
-        } else {
-            groupSingleSchedules.single().originalDateTime
-        }
-    }
-
-    fun isGroupTask(exactTimeStamp: ExactTimeStamp) = getGroupScheduleDateTime(exactTimeStamp) != null
-
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = parentTaskHierarchies.filter {
         it.currentOffset(now)
     }.forEach { it.setEndExactTimeStamp(now) }
@@ -241,7 +208,7 @@ class Task<T : ProjectType>(
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireCurrentOffset(exactTimeStamp)
 
-        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it, exactTimeStamp) }
+        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
@@ -478,7 +445,6 @@ class Task<T : ProjectType>(
 
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
-            groups: Boolean = false,
             currentByHierarchy: Boolean = false,
     ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
@@ -496,12 +462,6 @@ class Task<T : ProjectType>(
         }
                 .map { it.taskHierarchy }
                 .toMutableSet()
-
-        if (groups && isGroupTask(exactTimeStamp)) {
-            taskHierarchies += project.getTaskHierarchiesByParentTaskKey(taskKey).filter {
-                it.currentOffset(exactTimeStamp)
-            }
-        }
 
         return taskHierarchies.sortedBy { it.childTask.ordinal }
     }
@@ -660,7 +620,7 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp.Local,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             assignedTo: Set<UserKey>,
-            allReminders: Boolean = true,
+            allReminders: Boolean = true, // todo groups
     ) {
         if (!allReminders) check(scheduleDatas.single().first is ScheduleData.Single)
 
@@ -685,7 +645,6 @@ class Task<T : ProjectType>(
                                     customTimeId?.value,
                                     hour,
                                     minute,
-                                    !allReminders,
                                     assignedToKeys,
                             )
                     )
@@ -790,9 +749,6 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp.Local,
             schedules: List<Schedule<*>>,
     ) {
-        val hasGroupSchedule = schedules.any { it is SingleSchedule<*> && it.group }
-        if (hasGroupSchedule) check(schedules.size == 1)
-
         for (schedule in schedules) {
             val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
@@ -818,7 +774,6 @@ class Task<T : ProjectType>(
                                     customTimeId?.value,
                                     hour,
                                     minute,
-                                    schedule.group,
                                     assignedTo
                             )
                     )
@@ -981,7 +936,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> { // todo groups
         val intervals = intervals
 
         try {

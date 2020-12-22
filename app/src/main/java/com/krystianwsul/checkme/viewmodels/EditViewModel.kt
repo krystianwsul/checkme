@@ -293,7 +293,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val note: String?,
             val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
-            val isRootTaskGroup: Boolean,
             val projectUsers: Map<UserKey, UserData>,
     ) : QueryMatchable {
 

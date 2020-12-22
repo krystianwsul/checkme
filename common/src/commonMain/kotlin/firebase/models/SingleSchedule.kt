@@ -123,6 +123,4 @@ class SingleSchedule<T : ProjectType>(
 
         override fun delete() = singleScheduleRecord.delete()
     }
-
-    val group = singleScheduleRecord.group
 }

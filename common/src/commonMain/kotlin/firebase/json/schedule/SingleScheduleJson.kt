@@ -7,6 +7,4 @@ interface SingleScheduleJson<T : ProjectType> : ScheduleJson<T> {
     val year: Int
     val month: Int
     val day: Int
-
-    val group: Boolean
 }

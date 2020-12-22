@@ -660,7 +660,6 @@ class DomainFactory(
             now: ExactTimeStamp.Local,
             alwaysShow: Boolean,
             parentHierarchyExactTimeStamp: ExactTimeStamp,
-            groups: Boolean = false, // todo groups
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
                 .map { taskHierarchy ->
@@ -677,7 +676,6 @@ class DomainFactory(
                                     now,
                                     alwaysShow,
                                     childHierarchyExactTimeStamp,
-                                    groups
                             ),
                             childTask.note,
                             childTask.taskKey,

@@ -30,7 +30,6 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
                                 now,
                                 false,
                                 hierarchyExactTimeStamp,
-                                true
                         ),
                         task.note,
                         task.taskKey,

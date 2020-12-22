@@ -33,7 +33,6 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
                                 now,
                                 false,
                                 hierarchyExactTimeStamp,
-                                groups = true
                         ),
                         task.note,
                         task.taskKey,

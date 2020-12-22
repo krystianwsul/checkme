@@ -309,48 +309,62 @@ class Instance<T : ProjectType> private constructor(
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+        val parentInstanceData = if (data.parentInstanceKey != null) {
+            data.parentInstanceKey?.let {
+                val parentInstance = project.getTaskForce(it.taskKey.taskId).getInstance(
+                        DateTime(
+                                it.scheduleKey.scheduleDate,
+                                project.getTime(it.scheduleKey.scheduleTimePair)
+                        )
+                )
 
-        val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
-                .asSequence()
-                .filter { it.currentOffset(hierarchyExactTimeStamp) }
-                .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
-                .toList()
-
-        val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
-            val groupMatch = groupMatches.single()
-            val parentTask = groupMatch.parentTask
-            val intervalType = task.getInterval(hierarchyExactTimeStamp).type
-
-            Triple(
-                    parentTask,
-                    (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
-                    groupMatch
-            )
+                // todo group maybe isRepeatingGroup can be reused later
+                ParentInstanceData(parentInstance, false, null)
+            }
         } else {
-            Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
-        }
+            val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
-        val parentInstanceData = if (parentTask == null) {
-            null
-        } else {
-            check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
+            val groupMatches = project.getTaskHierarchiesByChildTaskKey(taskKey)
+                    .asSequence()
+                    .filter { it.currentOffset(hierarchyExactTimeStamp) }
+                    .filter { it.parentTask.getGroupScheduleDateTime(now) == scheduleDateTime }
+                    .toList()
 
-            /**
-             * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
-             * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
-             * for now.  There would be a discrepancy when accessing an instance in a different way
-             * (ShowTaskInstancesActivity is the only one that comes to mind).
-             *
-             * I think a parent is truly eligible if:
-             * 1. It, or any instance in the hierarchy above it, exists
-             * 2. The root instance matches a schedule
-             *
-             * Yet another reason to consider checking if task.getInstances() contains the instance.
-             */
-            return parentTask.getInstance(scheduleDateTime)
-                    .takeIf { it.isReachableFromMainScreen(now) }
-                    ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+            val (parentTask, isRepeatingGroup, parentTaskHierarchy) = if (groupMatches.isNotEmpty()) {
+                val groupMatch = groupMatches.single()
+                val parentTask = groupMatch.parentTask
+                val intervalType = task.getInterval(hierarchyExactTimeStamp).type
+
+                Triple(
+                        parentTask,
+                        (intervalType !is Type.Child || intervalType.parentTaskHierarchy.parentTask != parentTask),
+                        groupMatch
+                )
+            } else {
+                Triple(task.getParentTask(hierarchyExactTimeStamp), false, null)
+            }
+
+            if (parentTask == null) {
+                null
+            } else {
+                check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
+
+                /**
+                 * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
+                 * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
+                 * for now.  There would be a discrepancy when accessing an instance in a different way
+                 * (ShowTaskInstancesActivity is the only one that comes to mind).
+                 *
+                 * I think a parent is truly eligible if:
+                 * 1. It, or any instance in the hierarchy above it, exists
+                 * 2. The root instance matches a schedule
+                 *
+                 * Yet another reason to consider checking if task.getInstances() contains the instance.
+                 */
+                return parentTask.getInstance(scheduleDateTime)
+                        .takeIf { it.isReachableFromMainScreen(now) }
+                        ?.let { ParentInstanceData(it, isRepeatingGroup, parentTaskHierarchy) }
+            }
         }
 
         instanceLocker?.parentInstanceWrapper = NullableWrapper(parentInstanceData)
@@ -529,6 +543,8 @@ class Instance<T : ProjectType> private constructor(
 
         abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
 
+        abstract val parentInstanceKey: InstanceKey?
+
         class Real<T : ProjectType>(
                 private val project: Project<T>,
                 val instanceRecord: InstanceRecord<T>,
@@ -573,6 +589,12 @@ class Instance<T : ProjectType> private constructor(
                 get() = instanceRecord.scheduleKey
                         .scheduleTimePair
                         .customTimeKey
+
+            override var parentInstanceKey: InstanceKey?
+                get() = instanceRecord.parentInstanceKey
+                set(value) {
+                    instanceRecord.parentInstanceKey = value
+                }
         }
 
         class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() {
@@ -593,6 +615,8 @@ class Instance<T : ProjectType> private constructor(
             override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>? = null
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
+
+            override val parentInstanceKey: InstanceKey? = null
         }
     }
 

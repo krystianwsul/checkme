@@ -16,6 +16,7 @@ import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.throwIfInterrupted
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
@@ -140,7 +141,7 @@ abstract class Project<T : ProjectType>(
 
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom<*>
+            customTime: Time.Custom<*>,
     ): Time.Custom<T>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
@@ -153,7 +154,7 @@ abstract class Project<T : ProjectType>(
     @Suppress("UNCHECKED_CAST")
     fun getOrCopyAndDestructureTime(
             ownerKey: UserKey,
-            time: Time
+            time: Time,
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
         is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId<T>, null, null)
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
@@ -275,6 +276,10 @@ abstract class Project<T : ProjectType>(
     abstract fun getCustomTime(customTimeId: CustomTimeId<*>): Time.Custom<T>
     abstract fun getCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
+
+    fun getTime(timePair: TimePair) = timePair.customTimeKey
+            ?.let { getCustomTime(it.customTimeId) }
+            ?: Time.Normal(timePair.hourMinute!!)
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp.Local,

@@ -481,6 +481,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 .map { it.value }
     }
 
+    fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
+        if (parentState == newParentState) return
+
+        createInstanceHierarchy(now).parentState = newParentState
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

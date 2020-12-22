@@ -20,7 +20,7 @@ import com.krystianwsul.common.utils.*
 
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
-        parentTaskKeyHint: TaskKey?
+        parentTaskKeyHint: TaskKey?,
 ): EditViewModel.Data = syncOnDomain {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
@@ -34,13 +34,13 @@ fun DomainFactory.getCreateTaskData(
 
     fun checkHintPresent(
             task: EditViewModel.ParentKey.Task,
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
+            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
     ): Boolean = parentTreeDatas.containsKey(task) || parentTreeDatas.any {
         checkHintPresent(task, it.value.parentTreeDatas)
     }
 
     fun checkHintPresent(
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>
+            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
     ) = parentTaskKeyHint?.let {
         checkHintPresent(EditViewModel.ParentKey.Task(it), parentTreeDatas)
     } ?: true
@@ -455,7 +455,6 @@ fun DomainFactory.createScheduleJoinRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            allReminders,
             ordinal,
             assignedTo = sharedProjectParameters.nonNullAssignedTo
     )
@@ -482,7 +481,7 @@ fun DomainFactory.createJoinChildTask(
         joinTaskKeys: List<TaskKey>,
         note: String?,
         imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>
+        removeInstanceKeys: List<InstanceKey>,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createJoinChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -696,26 +695,39 @@ private fun DomainFactory.joinTasks(
     newParentTask.requireCurrent(now)
     check(joinTasks.size > 1)
 
-    for (joinTask in joinTasks) {
-        joinTask.requireCurrent(now)
+    if (allReminders) {
+        for (joinTask in joinTasks) {
+            joinTask.requireCurrent(now)
 
-        if (allReminders) {
             joinTask.endAllCurrentTaskHierarchies(now)
             joinTask.endAllCurrentSchedules(now)
             joinTask.endAllCurrentNoScheduleOrParents(now)
+
+            newParentTask.addChild(joinTask, now)
         }
 
-        newParentTask.addChild(joinTask, now)
-    }
+        removeInstanceKeys.map(::getInstance)
+                .filter {
+                    it.getParentInstance(now)
+                            ?.instance
+                            ?.task != newParentTask
+                            && it.isVisible(now, true)
+                }
+                .forEach { it.hide(now) }
+    } else {
+        val parentInstanceKey = newParentTask.getInstances(
+                null,
+                null,
+                now,
+        )
+                .single()
+                .instanceKey
 
-    removeInstanceKeys.map(::getInstance)
-            .filter {
-                it.getParentInstance(now)
-                        ?.instance
-                        ?.task != newParentTask
-                        && it.isVisible(now, true)
-            }
-            .forEach { it.hide(now) }
+        // todo group there's probably a neater way to do this
+        removeInstanceKeys.forEach {
+            getInstance(it).setParentState(Instance.ParentState.Parent(parentInstanceKey), now)
+        }
+    }
 }
 
 private fun DomainFactory.getTaskListChildTaskDatas(

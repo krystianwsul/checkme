@@ -620,10 +620,7 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp.Local,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             assignedTo: Set<UserKey>,
-            allReminders: Boolean = true, // todo groups
     ) {
-        if (!allReminders) check(scheduleDatas.single().first is ScheduleData.Single)
-
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
         for ((scheduleData, time) in scheduleDatas) {
@@ -936,7 +933,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> { // todo groups
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         val intervals = intervals
 
         try {

@@ -178,7 +178,6 @@ class ProjectsFactory(
             projectId: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
-            allReminders: Boolean = true,
             ordinal: Double? = null,
             assignedTo: Set<UserKey> = setOf(),
     ): Task<*> {
@@ -190,7 +189,7 @@ class ProjectsFactory(
                 imageUuid,
                 deviceDbInfo,
                 ordinal,
-        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, allReminders) }
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo) }
     }
 
     fun createNoScheduleOrParentTask(

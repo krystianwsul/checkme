@@ -49,7 +49,7 @@ abstract class ScheduleRecord<T : ProjectType>(
     open val timePair by lazy {
         scheduleJson.run {
             customTimeId?.let {
-                TimePair(taskRecord.getCustomTimeKey(it))
+                TimePair(taskRecord.projectRecord.getCustomTimeKey(it))
             } ?: TimePair(HourMinute(hour!!, minute!!))
         }
     }

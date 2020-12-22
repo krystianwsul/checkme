@@ -6,10 +6,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.*
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
@@ -117,7 +114,7 @@ abstract class InstanceRecord<T : ProjectType>(
                 if (hourMinuteRegex.find(it) != null)
                     JsonTime.Normal<T>(HourMinute.fromJson(it))
                 else
-                    JsonTime.Custom(taskRecord.getCustomTimeId(it))
+                    JsonTime.Custom(taskRecord.projectRecord.getCustomTimeId(it))
             }
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
@@ -127,4 +124,18 @@ abstract class InstanceRecord<T : ProjectType>(
     var hidden by Committer(createObject::hidden)
 
     val instanceKey by lazy { InstanceKey(taskRecord.taskKey, scheduleKey) }
+
+    var parentInstanceKey: InstanceKey? by observable(
+            createObject.parentJson?.let {
+                InstanceKey(
+                        TaskKey(taskRecord.projectRecord.projectKey, it.taskId),
+                        stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey).first
+                )
+            }
+    ) { _, _, newValue ->
+        setProperty(
+                createObject::parentJson,
+                newValue?.let { InstanceJson.ParentJson(it.taskKey.taskId, scheduleKeyToString(it.scheduleKey)) }
+        )
+    }
 }

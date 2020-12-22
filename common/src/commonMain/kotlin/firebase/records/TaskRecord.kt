@@ -261,10 +261,6 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
     }
 
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
-
-    fun getCustomTimeId(id: String) = projectRecord.getCustomTimeId(id)
-    fun getCustomTimeKey(id: String) = projectRecord.getCustomTimeKey(id)
-
     fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)
 
     private class MalformedTaskException(message: String) : Exception(message)

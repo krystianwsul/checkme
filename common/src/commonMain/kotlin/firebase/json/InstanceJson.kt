@@ -9,5 +9,13 @@ data class InstanceJson @JvmOverloads constructor(
         var doneOffset: Double? = null,
         var instanceDate: String? = null,
         var instanceTime: String? = null,
-        var hidden: Boolean = false
-)
+        var hidden: Boolean = false,
+        var parentJson: ParentJson? = null,
+) {
+
+    @Serializable
+    data class ParentJson @JvmOverloads constructor(
+            val taskId: String = "",
+            val scheduleKey: String = "",
+    )
+}

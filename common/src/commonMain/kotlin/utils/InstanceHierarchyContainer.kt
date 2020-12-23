@@ -13,7 +13,6 @@ class InstanceHierarchyContainer<T : ProjectType>(private val project: Project<T
     private val childToParent = mutableMapOf<InstanceKey, InstanceKey>()
     private val parentToChildren = mutableMapOf<InstanceKey, MutableSet<InstanceKey>>()
 
-    // todo group remember to remove entries from here on 1. parentState change, 2. delete/removeFromParent
     fun addChild(child: Instance<T>) {
         check(child.exists())
 
@@ -32,6 +31,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val project: Project<T
         childrenSet += childKey
     }
 
+    // todo group remember to remove entries from here on delete/removeFromParent
     fun removeChild(child: Instance<T>) {
         check(child.exists())
 

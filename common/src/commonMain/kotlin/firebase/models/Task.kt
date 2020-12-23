@@ -20,7 +20,6 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.*
 
 class Task<T : ProjectType>(
-        // todo groups check each constructor call to see if it needs to run instance magic afterwards
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
         val rootInstanceManager: RootInstanceManager<T>,

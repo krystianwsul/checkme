@@ -41,6 +41,7 @@ fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
         if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false
 
         if (instance.task.matchesQuery(searchCriteria.query)) return true
+
         return instance.getChildInstances(now).any { childHierarchyMatches(it.first) }
     }
 

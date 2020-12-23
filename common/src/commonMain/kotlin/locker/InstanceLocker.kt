@@ -9,7 +9,7 @@ class InstanceLocker<T : ProjectType>(private val taskLocker: TaskLocker<T>) {
 
     val now get() = taskLocker.now
 
-    var childInstances: List<Pair<Instance<T>, TaskHierarchy<T>>>? = null
+    var childInstances: List<Pair<Instance<T>, TaskHierarchy<T>?>>? = null
 
     var parentInstanceWrapper: NullableWrapper<Instance.ParentInstanceData<T>>? = null
 

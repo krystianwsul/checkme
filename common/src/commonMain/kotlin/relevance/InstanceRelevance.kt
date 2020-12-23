@@ -46,33 +46,22 @@ class InstanceRelevance(val instance: Instance<*>) {
             )
         }
 
-        val childPairs = instance.getChildInstances(now)
-
         // set child instances relevant
-        childPairs.map { (instance, _) ->
-            val instanceKey = instance.instanceKey
+        instance.getChildInstances(now)
+                .map { (instance, _) ->
+                    val instanceKey = instance.instanceKey
 
-            if (!instanceRelevances.containsKey(instanceKey))
-                instanceRelevances[instanceKey] = InstanceRelevance(instance)
+                    if (!instanceRelevances.containsKey(instanceKey))
+                        instanceRelevances[instanceKey] = InstanceRelevance(instance)
 
-            instanceRelevances.getValue(instanceKey)
-        }
+                    instanceRelevances.getValue(instanceKey)
+                }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
-
-        // set child hierarchies relevant (not redundant, needed for group tasks)
-        childPairs.forEach { (_, taskHierarchy) ->
-            taskHierarchyRelevances.getValue(taskHierarchy.taskHierarchyKey).setRelevant(
-                    taskRelevances,
-                    taskHierarchyRelevances,
-                    instanceRelevances,
-                    now
-            )
-        }
     }
 
     fun setRemoteRelevant(
             remoteCustomTimeRelevances: Map<CustomTimeKey<*>, RemoteCustomTimeRelevance>,
-            remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>
+            remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>,
     ) {
         check(relevant)
 

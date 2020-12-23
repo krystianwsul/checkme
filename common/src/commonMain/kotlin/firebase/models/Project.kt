@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.throwIfInterrupted
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
@@ -54,6 +55,19 @@ abstract class Project<T : ProjectType>(
     val taskHierarchies get() = taskHierarchyContainer.all
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
+
+    lateinit var instanceHierarchyContainer: InstanceHierarchyContainer
+        private set
+
+    protected fun initInstanceHierarchyContainer() {// todo group remove on instance delete
+        tasks.asSequence()
+                .flatMap { it.existingInstances.values }
+                .forEach { childInstance ->
+                    childInstance.parentState
+                            .parentInstanceKey
+                            ?.let { instanceHierarchyContainer.add(it, childInstance.instanceKey) }
+                }
+    }
 
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
@@ -416,6 +430,13 @@ abstract class Project<T : ProjectType>(
     ): Task<T>
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
+
+    fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey.taskId).getInstance(
+            DateTime(
+                    instanceKey.scheduleKey.scheduleDate,
+                    getTime(instanceKey.scheduleKey.scheduleTimePair)
+            )
+    )
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")

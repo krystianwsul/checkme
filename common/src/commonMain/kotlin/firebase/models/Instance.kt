@@ -125,13 +125,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp.Local): List<Pair<Instance<T>, TaskHierarchy<T>>> {
+    fun getChildInstances(now: ExactTimeStamp.Local): List<Pair<Instance<T>, TaskHierarchy<T>?>> {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
         instanceLocker?.childInstances?.let { return it }
 
         val scheduleDateTime = scheduleDateTime
 
-        val childInstances = task.childHierarchyIntervals
+        val taskHierarchyChildInstances = task.childHierarchyIntervals
                 .asSequence()
                 .filter {
                     val taskHierarchy = it.taskHierarchy
@@ -150,10 +150,16 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             ?.instance
                             ?.instanceKey == instanceKey
                 }
-                .associateBy { it.first.instanceKey } // I think this is weeding out duplicates
-                .values
-                .toList()
                 .filter { !it.first.isInvisibleBecauseOfEndData(now) }
+                .associateBy { it.first.instanceKey }
+
+        val instanceHierarchyChildInstances = task.project
+                .instanceHierarchyContainer
+                .getByParent(instanceKey)
+                .map { task.project.getInstance(it) }
+                .associate { it.instanceKey to Pair(it, null) }
+
+        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).values.toList()
 
         instanceLocker?.childInstances = childInstances
 
@@ -279,16 +285,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
             is ParentState.Parent -> {
-                val (parentTaskKey, parentScheduleKey) = parentState.parentInstanceKey
-
-                val parentInstance = task.project
-                        .getTaskForce(parentTaskKey.taskId)
-                        .getInstance(
-                                DateTime(
-                                        parentScheduleKey.scheduleDate,
-                                        task.project.getTime(parentScheduleKey.scheduleTimePair)
-                                )
-                        )
+                val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
 
                 // todo group maybe isRepeatingGroup can be reused later
                 ParentInstanceData(parentInstance, false, null)

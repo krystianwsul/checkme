@@ -50,6 +50,8 @@ class PrivateProject(
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
+
+        initInstanceHierarchyContainer()
     }
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): PrivateCustomTime {

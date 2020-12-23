@@ -58,6 +58,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
         fun toOffset(referenceOffset: Offset) = Offset.fromOffset(long, referenceOffset.offset)
 
         operator fun plus(timeSpan: TimeSpan) = Local(long + timeSpan.millisecondsLong)
+
+        override fun details() = super.toString() + ", " + toString()
     }
 
     data class Offset(
@@ -100,15 +102,17 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
             return compare(this, otherOffset)
         }
+
+        override fun details() = super.toString() + ", " + toString()
     }
-
-    fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
-
-    fun toDateTimeTz() = toDateTimeSoy().toOffset(TimezoneOffset(offset))
 
     abstract val date: Date
 
     abstract val hourMilli: HourMilli
 
-    override fun toString() = "$date $hourMilli"
+    fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
+
+    fun toDateTimeTz() = toDateTimeSoy().toOffset(TimezoneOffset(offset))
+
+    abstract fun details(): String
 }

@@ -723,7 +723,6 @@ private fun DomainFactory.joinTasks(
                 .single()
                 .instanceKey
 
-        // todo group there's probably a neater way to do this
         removeInstanceKeys.forEach {
             getInstance(it).setParentState(Instance.ParentState.Parent(parentInstanceKey), now)
         }

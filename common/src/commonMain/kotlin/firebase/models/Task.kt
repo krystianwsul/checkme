@@ -304,7 +304,7 @@ class Task<T : ProjectType>(
 
     // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
     ): Sequence<Instance<out T>> {
@@ -328,12 +328,13 @@ class Task<T : ProjectType>(
      customTimes, for example.
      */
     fun getScheduleDateTimes(
-            startExactTimeStamp: ExactTimeStamp.Offset,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean = false,
             checkOldestVisible: Boolean = true,
     ): Sequence<List<Pair<DateTime, ScheduleInterval<T>>>> {
-        if (endExactTimeStamp?.let { startExactTimeStamp > it } == true) return sequenceOf()
+        if (endExactTimeStamp != null && startExactTimeStamp != null && endExactTimeStamp < startExactTimeStamp)
+            return sequenceOf()
 
         val scheduleResults = scheduleIntervals.map { scheduleInterval ->
             scheduleInterval.getDateTimesInRange(
@@ -358,23 +359,19 @@ class Task<T : ProjectType>(
     }
 
     fun getInstances(
-            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
-            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            startExactTimeStamp: ExactTimeStamp.Offset?,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false,
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        // todo group I don't think these actually accomplish anything, given that schedules have their own ranges
-        val startExactTimeStamp = listOfNotNull(givenStartExactTimeStamp, startExactTimeStampOffset).maxOrNull()!!
-        val endExactTimeStamp = listOfNotNull(givenEndExactTimeStamp, endExactTimeStampOffset).minOrNull()
-
         val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
 
         instanceSequences += getExistingInstances(
-                givenStartExactTimeStamp,
-                givenEndExactTimeStamp,
+                startExactTimeStamp,
+                endExactTimeStamp,
                 now,
                 bySchedule,
                 onlyRoot
@@ -382,14 +379,14 @@ class Task<T : ProjectType>(
 
         if (!onlyRoot) {
             instanceSequences += getParentInstances(
-                    givenStartExactTimeStamp,
-                    givenEndExactTimeStamp,
+                    startExactTimeStamp,
+                    endExactTimeStamp,
                     now,
                     bySchedule
             )
         }
 
-        instanceSequences += getVirtualParentInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+        instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp, now)
 
         instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
 
@@ -930,7 +927,7 @@ class Task<T : ProjectType>(
 
     private val generatedInstances = mutableMapOf<InstanceKey, Instance<T>>()
 
-    fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
+    private fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         if (!generatedInstances.containsKey(instanceKey))

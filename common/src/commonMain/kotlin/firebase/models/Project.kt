@@ -56,6 +56,14 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
+    protected fun initializeInstanceHierarchyContainers() {
+        tasks.forEach {
+            it.existingInstances
+                    .values
+                    .forEach { it.addVirtualParents() }
+        }
+    }
+
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
     abstract fun createChildTask(
@@ -310,6 +318,9 @@ abstract class Project<T : ProjectType>(
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }
             ?: Time.Normal(timePair.hourMinute!!)
+
+    fun getDateTime(scheduleKey: ScheduleKey) =
+            DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp.Local,

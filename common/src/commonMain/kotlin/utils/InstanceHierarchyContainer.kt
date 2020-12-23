@@ -11,21 +11,19 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
                 (parentState as Instance.ParentState.Parent).parentInstanceKey
     }
 
-    private val childInstanceKeyToParentInstanceKey = mutableMapOf<InstanceKey, InstanceKey>()
-    private val parentInstanceKeyToChildInstanceKeys = mutableMapOf<InstanceKey, MutableSet<InstanceKey>>()
+    private val parentScheduleKeyToChildInstanceKeys = mutableMapOf<ScheduleKey, MutableSet<InstanceKey>>()
 
     fun addChildInstance(childInstance: Instance<T>) {
         check(childInstance.exists())
 
         val childInstanceKey = childInstance.instanceKey
-        check(!childInstanceKeyToParentInstanceKey.containsKey(childInstanceKey))
 
         val parentInstanceKey = childInstance.parentInstanceKey()
         check(parentInstanceKey.taskKey == task.taskKey)
 
-        childInstanceKeyToParentInstanceKey[childInstanceKey] = parentInstanceKey
+        val childInstanceKeys =
+                parentScheduleKeyToChildInstanceKeys.getOrPut(parentInstanceKey.scheduleKey) { mutableSetOf() }
 
-        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys.getOrPut(parentInstanceKey) { mutableSetOf() }
         check(!childInstanceKeys.contains(childInstanceKey))
 
         childInstanceKeys += childInstanceKey
@@ -37,27 +35,30 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
         check(childInstance.exists())
 
         val childInstanceKey = childInstance.instanceKey
-        check(childInstanceKeyToParentInstanceKey.containsKey(childInstanceKey))
 
         val parentInstanceKey = childInstance.parentInstanceKey()
         check(parentInstanceKey.taskKey == task.taskKey)
 
-        check(childInstanceKeyToParentInstanceKey.remove(childInstanceKey) == parentInstanceKey)
-
-        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys.getValue(parentInstanceKey)
+        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys.getValue(parentInstanceKey.scheduleKey)
         check(childInstanceKeys.contains(childInstanceKey))
 
-        childInstanceKeys -= childInstanceKey
+        if (childInstanceKeys.size == 1) {
+            parentScheduleKeyToChildInstanceKeys.remove(parentInstanceKey.scheduleKey)
+        } else {
+            childInstanceKeys -= childInstanceKey
+        }
     }
 
     fun getChildInstances(parentInstanceKey: InstanceKey): List<Instance<T>> {
         check(parentInstanceKey.taskKey == task.taskKey)
 
-        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys[parentInstanceKey] ?: setOf()
+        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey] ?: setOf()
 
         return childInstanceKeys.map(task.project::getInstance).onEach {
             check(it.exists())
             check(it.parentInstanceKey() == parentInstanceKey)
         }
     }
+
+    fun getParentScheduleKeys(): Set<ScheduleKey> = parentScheduleKeyToChildInstanceKeys.keys
 }

@@ -114,19 +114,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val parentState get() = data.parentState
 
-    private fun InstanceKey.getInstanceHierarchyContainer() = task.project
-            .getTaskForce(taskKey.taskId)
-            .instanceHierarchyContainer
-
     init {
         task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-
-        // todo groups but remember about recurrency, for when I'm implementing that
-        parentState.parentInstanceKey
-                ?.getInstanceHierarchyContainer()
-                ?.addChildInstance(this)
     }
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
@@ -489,15 +480,27 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
         if (parentState == newParentState) return
 
-        parentState.parentInstanceKey
-                ?.getInstanceHierarchyContainer()
-                ?.removeChildInstance(this)
-
+        removeVirtualParents()
         createInstanceHierarchy(now).parentState = newParentState
+        addVirtualParents()
+    }
 
-        newParentState.parentInstanceKey
-                ?.getInstanceHierarchyContainer()
-                ?.addChildInstance(this)
+    fun addVirtualParents() {
+        parentState.parentInstanceKey?.let {
+            val parentTask = task.project.getTaskForce(it.taskKey.taskId)
+
+            parentTask.instanceHierarchyContainer.addChildInstance(this)
+            parentTask.getInstance(task.project.getDateTime(it.scheduleKey)).addVirtualParents()
+        }
+    }
+
+    private fun removeVirtualParents() {
+        parentState.parentInstanceKey?.let {
+            val parentTask = task.project.getTaskForce(it.taskKey.taskId)
+
+            parentTask.instanceHierarchyContainer.removeChildInstance(this)
+            parentTask.getInstance(task.project.getDateTime(it.scheduleKey)).removeVirtualParents()
+        }
     }
 
     private sealed class Data<T : ProjectType> {

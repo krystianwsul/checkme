@@ -453,6 +453,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
+    // todo groups wtf is this for?
     fun isRepeatingGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.isRepeatingGroup ?: false
 
     fun onTaskEndChanged() {

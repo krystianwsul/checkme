@@ -315,21 +315,17 @@ class IrrelevantTest {
         val parentInstance = parentTask.getPastRootInstances(now).single()
         assertEquals(2, parentInstance.getChildInstances(now).size)
 
-        val child1Instance = parentInstance.getChildInstances(now)
-                .single {
-                    it.first
-                            .instanceKey
-                            .taskKey
-                            .taskId == child1TaskId
-                }.first
+        val child1Instance = parentInstance.getChildInstances(now).single {
+            it.instanceKey
+                    .taskKey
+                    .taskId == child1TaskId
+        }
 
-        val child2Instance = parentInstance.getChildInstances(now)
-                .single {
-                    it.first
-                            .instanceKey
-                            .taskKey
-                            .taskId == child2TaskId
-                }.first
+        val child2Instance = parentInstance.getChildInstances(now).single {
+            it.instanceKey
+                    .taskKey
+                    .taskId == child2TaskId
+        }
 
         child1Instance.setDone(shownFactory, true, now)
 
@@ -341,7 +337,7 @@ class IrrelevantTest {
         now = ExactTimeStamp.Local(day1, hour4)
 
         assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
-        assertTrue(parentInstance.getChildInstances(now).single().first == child1Instance)
+        assertTrue(parentInstance.getChildInstances(now).single() == child1Instance)
 
         now = ExactTimeStamp.Local(day2, hour5)
 

@@ -48,7 +48,7 @@ class InstanceRelevance(val instance: Instance<*>) {
 
         // set child instances relevant
         instance.getChildInstances(now)
-                .map { (instance, _) ->
+                .map { instance ->
                     val instanceKey = instance.instanceKey
 
                     if (!instanceRelevances.containsKey(instanceKey))

@@ -535,7 +535,7 @@ class DomainFactory(
             searchCriteria: SearchCriteria? = null,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
-                .mapNotNull { (childInstance, _) ->
+                .mapNotNull { childInstance ->
                     val childTask = childInstance.task
 
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null

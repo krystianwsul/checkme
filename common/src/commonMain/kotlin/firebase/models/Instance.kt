@@ -125,7 +125,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp.Local): List<Pair<Instance<T>, TaskHierarchy<T>?>> {
+    fun getChildInstances(now: ExactTimeStamp.Local): List<Instance<T>> {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
         instanceLocker?.childInstances?.let { return it }
 
@@ -142,23 +142,25 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
                             && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
                 }
-                .map { it.taskHierarchy }
-                .map { Pair(it.childTask.getInstance(scheduleDateTime), it) }
+                .map {
+                    it.taskHierarchy
+                            .childTask
+                            .getInstance(scheduleDateTime)
+                }
                 .filter {
-                    it.first
-                            .getParentInstance(now)
+                    // todo no wonder the algorithm for children is fucked up, since I'm almost guessing up until this step
+                    it.getParentInstance(now)
                             ?.instance
                             ?.instanceKey == instanceKey
                 }
-                .filter { !it.first.isInvisibleBecauseOfEndData(now) }
-                .associateBy { it.first.instanceKey }
+                .filter { !it.isInvisibleBecauseOfEndData(now) }
+                .toList()
 
         val instanceHierarchyChildInstances = task.project
                 .instanceHierarchyContainer
                 .getByParentKey(instanceKey)
-                .associate { it.instanceKey to Pair(it, null) }
 
-        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).values.toList()
+        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
 
         instanceLocker?.childInstances = childInstances
 

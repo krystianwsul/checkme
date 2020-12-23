@@ -59,7 +59,9 @@ abstract class Project<T : ProjectType>(
     lateinit var instanceHierarchyContainer: InstanceHierarchyContainer<T>
         private set
 
-    protected fun initInstanceHierarchyContainer() {// todo group remove on instance delete
+    protected fun initInstanceHierarchyContainer() {
+        instanceHierarchyContainer = InstanceHierarchyContainer(this)
+
         tasks.asSequence()
                 .flatMap { it.existingInstances.values }
                 .forEach { childInstance ->
@@ -320,7 +322,7 @@ abstract class Project<T : ProjectType>(
     abstract fun getCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
 
-    fun getTime(timePair: TimePair) = timePair.customTimeKey
+    private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }
             ?: Time.Normal(timePair.hourMinute!!)
 

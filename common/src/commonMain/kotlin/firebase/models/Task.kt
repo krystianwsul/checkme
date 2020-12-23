@@ -328,7 +328,6 @@ class Task<T : ProjectType>(
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
                     .mapNotNull {
                         it.getChildInstances(now)
-                                .map { it.first }
                                 .singleOrNull { it.taskKey == taskKey }
                                 ?.takeIf { !it.exists() }
                     }

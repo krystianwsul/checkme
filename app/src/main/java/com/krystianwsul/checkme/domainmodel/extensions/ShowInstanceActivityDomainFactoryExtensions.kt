@@ -92,7 +92,7 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instance.getChildInstances(now).map { (childInstance, _) ->
+    val instanceDatas = instance.getChildInstances(now).map { childInstance ->
         val childTask = childInstance.task
 
         val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null

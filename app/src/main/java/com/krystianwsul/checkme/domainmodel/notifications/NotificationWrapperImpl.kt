@@ -248,9 +248,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp.Local) = instance.getChildInstances(now)
             .asSequence()
-            .filter { it.first.done == null }
-            .sortedBy { it.second.childTask.ordinal }
-            .map { it.first.name }
+            .filter { it.done == null }
+            .sortedBy { it.task.ordinal }
+            .map { it.name }
             .toList()
 
     protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES

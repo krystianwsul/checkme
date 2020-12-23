@@ -252,7 +252,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (parentInstance != null) {
             return parentInstance.instance.isVisible(now, hack24)
         } else {
-            if (!exists() && !matchesSchedule()) return false
+            if (!exists() && !matchesSchedule() && !isVirtualParentInstance()) return false
 
             val done = done ?: return true
 
@@ -264,6 +264,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             return done > cutoff
         }
     }
+
+    private fun isVirtualParentInstance() = task.instanceHierarchyContainer
+            .getParentScheduleKeys()
+            .contains(scheduleKey)
 
     // This is a misnomer, don't get any ideas
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance

@@ -248,21 +248,24 @@ class Task<T : ProjectType>(
         return _existingInstances.values
                 .asSequence()
                 .run { if (onlyRoot) filter { it.isRootInstance(now) } else this }
-                .map { it to it.getSequenceDate(bySchedule) }
-                .filter { (_, dateTime) ->
-                    throwIfInterrupted()
-
-                    val exactTimeStamp = dateTime.toLocalExactTimeStamp()
-
-                    if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
-
-                    if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
-
-                    true
-                }
-                .sortedBy { it.second }
-                .map { it.first }
+                .map { it.getSequenceDate(bySchedule) to it }
+                .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
     }
+
+    private fun <T> Sequence<Pair<DateTime, T>>.filterByDateTime(
+            startExactTimeStamp: ExactTimeStamp.Offset?,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+    ) = filter {
+        throwIfInterrupted()
+
+        val exactTimeStamp = it.first.toLocalExactTimeStamp()
+
+        if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
+
+        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
+
+        true
+    }.sortedBy { it.first }.map { it.second }
 
     // contains only generated instances
     private fun getParentInstances(
@@ -286,6 +289,20 @@ class Task<T : ProjectType>(
     }
 
     // contains only generated, root instances
+    private fun getVirtualParentInstances(
+            startExactTimeStamp: ExactTimeStamp.Offset?,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
+    ): Sequence<Instance<out T>> {
+        return instanceHierarchyContainer.getParentScheduleKeys()
+                .map(project::getDateTime)
+                .asSequence()
+                .map { it to getInstance(it) }
+                .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
+                .filter { !it.exists() && it.isRootInstance(now) }
+    }
+
+    // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp.Offset,
             endExactTimeStamp: ExactTimeStamp.Offset?,
@@ -293,13 +310,16 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
+        val virtualParentScheduleKeys = instanceHierarchyContainer.getParentScheduleKeys()
+
         return scheduleSequence.flatMap {
             throwIfInterrupted()
 
-            it.map { it.first }
+            it.asSequence().map { it.first }
                     .distinct()
+                    .filter { ScheduleKey(it) !in virtualParentScheduleKeys }
                     .map(::getInstance)
-                    .filter { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
+                    .filter { !it.exists() && it.isRootInstance(now) } // I don't know if the root part is necessary, now that group tasks are removed
         }
     }
 
@@ -346,6 +366,7 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
+        // todo group I don't think these actually accomplish anything, given that schedules have their own ranges
         val startExactTimeStamp = listOfNotNull(givenStartExactTimeStamp, startExactTimeStampOffset).maxOrNull()!!
         val endExactTimeStamp = listOfNotNull(givenEndExactTimeStamp, endExactTimeStampOffset).minOrNull()
 
@@ -359,8 +380,6 @@ class Task<T : ProjectType>(
                 onlyRoot
         )
 
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
-
         if (!onlyRoot) {
             instanceSequences += getParentInstances(
                     givenStartExactTimeStamp,
@@ -369,6 +388,10 @@ class Task<T : ProjectType>(
                     bySchedule
             )
         }
+
+        instanceSequences += getVirtualParentInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
+
+        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
 
         return combineInstanceSequences(instanceSequences, bySchedule)
     }

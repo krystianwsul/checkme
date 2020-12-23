@@ -7,53 +7,52 @@ class InstanceHierarchyContainer<T : ProjectType>(private val project: Project<T
 
     companion object {
 
-        fun <T : ProjectType> Instance<T>.parentKey() = (parentState as Instance.ParentState.Parent).parentInstanceKey
+        fun <T : ProjectType> Instance<T>.parentInstanceKey() =
+                (parentState as Instance.ParentState.Parent).parentInstanceKey
     }
 
-    private val childToParent = mutableMapOf<InstanceKey, InstanceKey>()
-    private val parentToChildren = mutableMapOf<InstanceKey, MutableSet<InstanceKey>>()
+    private val childInstanceKeyToParentInstanceKey = mutableMapOf<InstanceKey, InstanceKey>()
+    private val parentInstanceKeyToChildInstanceKeys = mutableMapOf<InstanceKey, MutableSet<InstanceKey>>()
 
-    fun addChild(child: Instance<T>) {
-        check(child.exists())
+    fun addChildInstance(childInstance: Instance<T>) {
+        check(childInstance.exists())
 
-        val childKey = child.instanceKey
-        check(!childToParent.containsKey(childKey))
+        val childInstanceKey = childInstance.instanceKey
+        check(!childInstanceKeyToParentInstanceKey.containsKey(childInstanceKey))
 
-        val parentKey = child.parentKey()
+        val parentInstanceKey = childInstance.parentInstanceKey()
 
-        childToParent[childKey] = parentKey
+        childInstanceKeyToParentInstanceKey[childInstanceKey] = parentInstanceKey
 
-        if (!parentToChildren.containsKey(parentKey)) parentToChildren[parentKey] = mutableSetOf()
+        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys.getOrPut(parentInstanceKey) { mutableSetOf() }
+        check(!childInstanceKeys.contains(childInstanceKey))
 
-        val childrenSet = parentToChildren.getValue(parentKey)
-        check(!childrenSet.contains(childKey))
-
-        childrenSet += childKey
+        childInstanceKeys += childInstanceKey
     }
 
     // todo group remember to remove entries from here on delete/removeFromParent
-    fun removeChild(child: Instance<T>) {
-        check(child.exists())
+    fun removeChildInstance(childInstance: Instance<T>) {
+        check(childInstance.exists())
 
-        val childKey = child.instanceKey
-        check(childToParent.containsKey(childKey))
+        val childInstanceKey = childInstance.instanceKey
+        check(childInstanceKeyToParentInstanceKey.containsKey(childInstanceKey))
 
-        val parentKey = child.parentKey()
+        val parentInstanceKey = childInstance.parentInstanceKey()
 
-        check(childToParent.remove(childKey) == parentKey)
+        check(childInstanceKeyToParentInstanceKey.remove(childInstanceKey) == parentInstanceKey)
 
-        val childrenSet = parentToChildren.getValue(parentKey)
-        check(childrenSet.contains(childKey))
+        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys.getValue(parentInstanceKey)
+        check(childInstanceKeys.contains(childInstanceKey))
 
-        childrenSet -= childKey
+        childInstanceKeys -= childInstanceKey
     }
 
-    fun getByParentKey(parentKey: InstanceKey): List<Instance<T>> {
-        val childKeys = parentToChildren[parentKey] ?: setOf()
+    fun getChildInstances(parentInstanceKey: InstanceKey): List<Instance<T>> {
+        val childInstanceKeys = parentInstanceKeyToChildInstanceKeys[parentInstanceKey] ?: setOf()
 
-        return childKeys.map(project::getInstance).onEach {
+        return childInstanceKeys.map(project::getInstance).onEach {
             check(it.exists())
-            check(it.parentKey() == parentKey)
+            check(it.parentInstanceKey() == parentInstanceKey)
         }
     }
 }

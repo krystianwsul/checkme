@@ -77,6 +77,12 @@ fun DomainFactory.setTaskEndTimeStamps(
                 .toLocalExactTimeStamp()
     }
 
+    /**
+     * todo this is incorrect, but I don't know what to change it to.  Pretty sure it depends on how the activity was
+     * launched (main screen, search with all instances visible set in debug mode, taskInstancesActivity, etc.  But
+     * not matter what the method, the ShowInstanceViewModel.Data.exists field should be replaced along with any changes
+     * to this
+     */
     val visible = task.notDeleted(now) ||
             (instance.done != null || instanceExactTimeStamp <= now) ||
             (!deleteInstances && instance.exists())

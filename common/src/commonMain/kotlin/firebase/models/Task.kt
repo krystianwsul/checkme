@@ -982,6 +982,8 @@ class Task<T : ProjectType>(
     }
 
     fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+        val intervals = intervals
+
         try {
             return intervals.single {
                 it.containsExactTimeStamp(exactTimeStamp)

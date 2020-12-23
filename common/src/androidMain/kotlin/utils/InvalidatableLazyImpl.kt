@@ -14,6 +14,8 @@ actual open class InvalidatableLazyImpl<T> actual constructor(
     private var _value: Any? = UNINITIALIZED_VALUE
     private val lock = lock ?: this
 
+    private var initializing = false
+
     actual open fun invalidate() {
         _value = UNINITIALIZED_VALUE
     }
@@ -26,13 +28,15 @@ actual open class InvalidatableLazyImpl<T> actual constructor(
             }
 
             return synchronized(lock) {
-                val v2 = _value
-                if (v2 !== UNINITIALIZED_VALUE) {
-                    v2 as T
-                } else {
+                if (initializing) throw IllegalStateException()
+                initializing = true
+
+                try {
                     val typedValue = initializer()
                     _value = typedValue
                     typedValue
+                } finally {
+                    initializing = false
                 }
             }
         }

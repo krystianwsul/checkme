@@ -120,7 +120,6 @@ fun DomainFactory.getCreateTaskData(
 }
 
 fun DomainFactory.createScheduleRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -128,11 +127,10 @@ fun DomainFactory.createScheduleRootTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
-
-    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -156,7 +154,7 @@ fun DomainFactory.createScheduleRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -168,18 +166,16 @@ fun DomainFactory.createScheduleRootTask(
 }
 
 fun DomainFactory.createChildTask(
-        dataId: Int,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
         note: String?,
         imagePath: Pair<String, Uri>?,
-        copyTaskKey: TaskKey? = null
+        copyTaskKey: TaskKey? = null,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
-
-    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
 
@@ -199,7 +195,7 @@ fun DomainFactory.createChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(childTask.project)
 
@@ -211,20 +207,18 @@ fun DomainFactory.createChildTask(
 }
 
 fun DomainFactory.createRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         note: String?,
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val finalProjectId = sharedProjectKey ?: defaultProjectId
 
@@ -243,7 +237,7 @@ fun DomainFactory.createRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -255,7 +249,6 @@ fun DomainFactory.createRootTask(
 }
 
 fun DomainFactory.updateScheduleTask(
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -263,14 +256,13 @@ fun DomainFactory.updateScheduleTask(
         note: String?,
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -307,7 +299,7 @@ fun DomainFactory.updateScheduleTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -319,8 +311,6 @@ fun DomainFactory.updateScheduleTask(
 }
 
 fun DomainFactory.updateChildTask(
-        now: ExactTimeStamp.Local,
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -329,6 +319,7 @@ fun DomainFactory.updateChildTask(
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         removeInstanceKey: InstanceKey?,
         allReminders: Boolean,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -342,6 +333,16 @@ fun DomainFactory.updateChildTask(
     newParentTask.requireCurrent(now)
 
     task.setName(name, note)
+
+    tailrec fun Task<*>.hasAncestor(taskKey: TaskKey): Boolean {
+        val parentTask = getParentTask(now) ?: return false
+
+        if (parentTask.taskKey == taskKey) return true
+
+        return parentTask.hasAncestor(taskKey)
+    }
+
+    check(!newParentTask.hasAncestor(taskKey))
 
     if (task.getParentTask(now) != newParentTask) {
         if (allReminders) task.endAllCurrentTaskHierarchies(now)
@@ -372,7 +373,7 @@ fun DomainFactory.updateChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project) // todo image on server, purge images after this call
 
@@ -384,20 +385,18 @@ fun DomainFactory.updateChildTask(
 }
 
 fun DomainFactory.updateRootTask(
-        dataId: Int,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
         note: String?,
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
@@ -418,7 +417,7 @@ fun DomainFactory.updateRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(task.project)
 
@@ -430,8 +429,6 @@ fun DomainFactory.updateRootTask(
 }
 
 fun DomainFactory.createScheduleJoinRootTask(
-        now: ExactTimeStamp.Local,
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -441,6 +438,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -474,7 +472,7 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(newParentTask.project)
 
@@ -486,7 +484,6 @@ fun DomainFactory.createScheduleJoinRootTask(
 }
 
 fun DomainFactory.createJoinChildTask(
-        dataId: Int,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
@@ -526,7 +523,7 @@ fun DomainFactory.createJoinChildTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(childTask.project)
 
@@ -538,7 +535,6 @@ fun DomainFactory.createJoinChildTask(
 }
 
 fun DomainFactory.createJoinRootTask(
-        dataId: Int,
         source: SaveService.Source,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -579,7 +575,7 @@ fun DomainFactory.createJoinRootTask(
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(null, source)
 
     notifyCloud(newParentTask.project)
 

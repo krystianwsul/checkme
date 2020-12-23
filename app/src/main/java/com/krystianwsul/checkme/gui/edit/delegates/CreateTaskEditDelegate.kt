@@ -104,7 +104,6 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createScheduleRootTask(
-                        data.dataId,
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
@@ -124,7 +123,6 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createChildTask(
-                        data.dataId,
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
@@ -144,7 +142,6 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createRootTask(
-                        data.dataId,
                         SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,

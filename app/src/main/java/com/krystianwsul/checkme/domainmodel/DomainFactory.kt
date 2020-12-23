@@ -296,7 +296,7 @@ class DomainFactory(
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
 
         val maxShortcuts =
-                ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.instance) - 4
+                ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.context) - 4
         if (maxShortcuts <= 0)
             return
 

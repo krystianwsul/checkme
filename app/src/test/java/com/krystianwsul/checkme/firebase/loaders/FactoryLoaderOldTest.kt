@@ -145,6 +145,10 @@ class FactoryLoaderOldTest {
     private class TestPreferences : FactoryProvider.Preferences {
 
         override var tab = 0
+
+        override var addDefaultReminder: Boolean
+            get() = TODO("Not yet implemented")
+            set(value) {}
     }
 
     private class TestFactoryProvider : FactoryProvider {

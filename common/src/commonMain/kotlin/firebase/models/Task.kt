@@ -264,6 +264,45 @@ class Task<T : ProjectType>(
                 .map { it.first }
     }
 
+    // contains only generated instances
+    private fun getParentInstances(
+            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
+            bySchedule: Boolean,
+    ): Sequence<Instance<out T>> {
+        val instanceSequences = parentHierarchyIntervals.map {
+            it.taskHierarchy
+                    .parentTask
+                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
+                    .mapNotNull {
+                        it.getChildInstances(now)
+                                .singleOrNull { it.taskKey == taskKey }
+                                ?.takeIf { !it.exists() }
+                    }
+        }
+
+        return combineInstanceSequences(instanceSequences, bySchedule)
+    }
+
+    // contains only generated, root instances
+    private fun getScheduleInstances(
+            startExactTimeStamp: ExactTimeStamp.Offset,
+            endExactTimeStamp: ExactTimeStamp.Offset?,
+            now: ExactTimeStamp.Local,
+    ): Sequence<Instance<out T>> {
+        val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
+
+        return scheduleSequence.flatMap {
+            throwIfInterrupted()
+
+            it.map { it.first }
+                    .distinct()
+                    .map(::getInstance)
+                    .filter { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
+        }
+    }
+
     /*
      Note: this groups by the DateTime's Date and HourMinute, not strict equality.  A list may have pairs with various
      customTimes, for example.
@@ -296,45 +335,6 @@ class Task<T : ProjectType>(
                     .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
                     .map { it.first }
         }
-    }
-
-    // contains only generated instances
-    private fun getScheduleInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-    ): Sequence<Instance<out T>> {
-        val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
-
-        return scheduleSequence.flatMap {
-            throwIfInterrupted()
-
-            it.map { it.first }
-                    .distinct()
-                    .map(::getInstance)
-                    .filter { !it.exists() && it.isRootInstance(now) } // needed because of group tasks
-        }
-    }
-
-    // contains only generated instances
-    private fun getParentInstances(
-            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
-            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-            bySchedule: Boolean,
-    ): Sequence<Instance<out T>> {
-        val instanceSequences = parentHierarchyIntervals.map {
-            it.taskHierarchy
-                    .parentTask
-                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
-                    .mapNotNull {
-                        it.getChildInstances(now)
-                                .singleOrNull { it.taskKey == taskKey }
-                                ?.takeIf { !it.exists() }
-                    }
-        }
-
-        return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
     fun getInstances(

@@ -51,7 +51,8 @@ class PrivateProject(
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
 
-        initInstanceHierarchyContainer()
+        initInstanceHierarchyContainer() // todo group wait a minute! can't I just do this when initializing the instance?
+        // todo groups but remember to add todo about recurrency, for when I'm implementing that
     }
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): PrivateCustomTime {

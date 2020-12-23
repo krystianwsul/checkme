@@ -644,6 +644,13 @@ class DomainFactory(
 
         allUpdaters.forEach { it(taskKeyMap) }
 
+        remoteToRemoteConversion.endTasks.forEach {
+            it.value
+                    .existingInstances
+                    .values
+                    .forEach { it.addVirtualParents() }
+        }
+
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }
 

@@ -54,7 +54,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.task.ordinal,
                 it.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
-                it.isRepeatingGroupChild(now),
+                it.isGroupChild(now),
                 it.isAssignedToMe(now, myUserFactory.user),
                 it.getProjectInfo(now),
         )

@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.models.FilterResult
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.time.*
@@ -101,9 +102,11 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
     val now = ExactTimeStamp.Local.now
 
     instanceKeys.forEach {
-        getInstance(it).getParentInstance(now)!!
-                .taskHierarchy!!
-                .setEndExactTimeStamp(now)
+        getInstance(it).let {
+            check(it.parentState is Instance.ParentState.Parent)
+
+            it.setParentState(Instance.ParentState.Unset, now)
+        }
     }
 
     updateNotifications(now)

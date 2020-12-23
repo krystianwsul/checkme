@@ -553,7 +553,7 @@ class DomainFactory(
                                 childTask.ordinal,
                                 childInstance.getNotificationShown(localFactory),
                                 childTask.getImage(deviceDbInfo),
-                                childInstance.isRepeatingGroupChild(now),
+                                childInstance.isGroupChild(now),
                                 childInstance.isAssignedToMe(now, myUserFactory.user),
                                 childInstance.getProjectInfo(now),
                         )

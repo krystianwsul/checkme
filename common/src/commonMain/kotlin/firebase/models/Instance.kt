@@ -275,11 +275,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
 
-    data class ParentInstanceData<T : ProjectType>(
-            val instance: Instance<T>,
-            val isRepeatingGroup: Boolean,
-            val taskHierarchy: TaskHierarchy<T>?,
-    )
+    data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
 
     fun getParentInstance(now: ExactTimeStamp.Local): ParentInstanceData<T>? {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
@@ -291,8 +287,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             is ParentState.Parent -> {
                 val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
 
-                // todo group maybe isRepeatingGroup can be reused later
-                ParentInstanceData(parentInstance, false, null)
+                ParentInstanceData(parentInstance, true)
             }
             ParentState.Unset -> {
                 val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
@@ -318,7 +313,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      */
                     parentTask.getInstance(scheduleDateTime)
                             .takeIf { it.isValidlyCreatedHierarchy(now) }
-                            ?.let { ParentInstanceData(it, false, null) }
+                            ?.let { ParentInstanceData(it, false) }
                 }
             }
         }
@@ -453,8 +448,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    // todo groups wtf is this for?
-    fun isRepeatingGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.isRepeatingGroup ?: false
+    fun isGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.viaParentState ?: false
 
     fun onTaskEndChanged() {
         hierarchyExactTimeStampEndRangeProperty.invalidate()

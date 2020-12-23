@@ -51,7 +51,7 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
             instance.getNotificationShown(localFactory),
             displayText,
             task.taskKey,
-            instance.isRepeatingGroupChild(now)
+            instance.isGroupChild(now)
     )
 }
 
@@ -123,7 +123,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.ordinal,
                 childInstance.getNotificationShown(localFactory),
                 childTask.getImage(deviceDbInfo),
-                childInstance.isRepeatingGroupChild(now),
+                childInstance.isGroupChild(now),
                 childInstance.isAssignedToMe(now, myUserFactory.user),
                 childInstance.getProjectInfo(now),
         )

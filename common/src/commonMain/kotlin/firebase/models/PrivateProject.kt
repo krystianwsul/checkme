@@ -51,7 +51,6 @@ class PrivateProject(
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
 
-        // todo groups think about where else this needs to be called
         initializeInstanceHierarchyContainers()
     }
 

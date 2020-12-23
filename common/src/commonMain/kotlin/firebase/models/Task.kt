@@ -553,6 +553,10 @@ class Task<T : ProjectType>(
     ) = project.createChildTask(this, now, name, note, image, ordinal)
 
     fun delete() {
+        existingInstances.values
+                .toMutableList()
+                .forEach { it.delete() }
+
         schedules.toMutableList().forEach { it.delete() }
 
         project.deleteTask(this)

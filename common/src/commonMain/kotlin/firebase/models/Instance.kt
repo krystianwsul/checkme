@@ -423,6 +423,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun delete() {
         check(data is Data.Real<*>)
 
+        removeVirtualParents()
+
         task.deleteInstance(this)
 
         (data as Data.Real<*>).instanceRecord.delete()

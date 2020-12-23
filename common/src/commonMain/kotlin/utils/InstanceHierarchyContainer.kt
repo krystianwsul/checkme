@@ -29,8 +29,6 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
         childInstanceKeys += childInstanceKey
     }
 
-    // todo group remember to remove entries from here on delete/removeFromParent
-    // todo group also remember to remove across parent tasks, when deleting whole task
     fun removeChildInstance(childInstance: Instance<T>) {
         check(childInstance.exists())
 

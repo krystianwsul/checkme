@@ -643,6 +643,8 @@ class Task<T : ProjectType>(
         return (existingInstance ?: generateInstance(scheduleDateTime))
     }
 
+    fun getInstance(scheduleKey: ScheduleKey) = getInstance(project.getDateTime(scheduleKey))
+
     fun createSchedules(
             ownerKey: UserKey,
             now: ExactTimeStamp.Local,

@@ -486,28 +486,13 @@ class DomainFactory(
 
     // internal
 
-    private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) =
-            projectsFactory.getExistingInstanceIfPresent(instanceKey)
-
     override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private) =
             projectsFactory.sharedProjects
                     .values
                     .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }
 
-    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance<*> {
-        return projectsFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime)
-    }
-
-    fun getInstance(instanceKey: InstanceKey): Instance<*> {
-        getExistingInstanceIfPresent(instanceKey)?.let { return it }
-
-        val dateTime = DateTime(
-                instanceKey.scheduleKey.scheduleDate,
-                getTime(instanceKey.scheduleKey.scheduleTimePair)
-        )
-
-        return generateInstance(instanceKey.taskKey, dateTime)
-    }
+    fun getInstance(instanceKey: InstanceKey) =
+            projectsFactory.getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
 
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,

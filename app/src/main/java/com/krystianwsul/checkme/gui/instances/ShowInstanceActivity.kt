@@ -72,7 +72,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private var selectAllVisible = false
 
-    private lateinit var showInstanceViewModel: ShowInstanceViewModel
+    private val showInstanceViewModel by lazy { getViewModel<ShowInstanceViewModel>() }
 
     override val snackbarParent get() = binding.showInstanceCoordinator
 
@@ -200,7 +200,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         if (savedInstanceState == null) setInstanceNotified()
 
-        showInstanceViewModel = getViewModel<ShowInstanceViewModel>().apply {
+        showInstanceViewModel.apply {
             start(instanceKey)
 
             createDisposable += data.subscribe { onLoadFinished(it) }

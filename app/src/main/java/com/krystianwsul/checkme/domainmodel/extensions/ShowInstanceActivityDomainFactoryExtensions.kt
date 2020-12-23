@@ -77,8 +77,9 @@ fun DomainFactory.setTaskEndTimeStamps(
                 .toLocalExactTimeStamp()
     }
 
-    val visible =
-            task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
+    val visible = task.notDeleted(now) ||
+            (instance.done != null || instanceExactTimeStamp <= now) ||
+            (!deleteInstances && instance.exists())
 
     Pair(taskUndoData, visible)
 }

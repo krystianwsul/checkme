@@ -56,8 +56,6 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
-
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
     abstract fun createChildTask(

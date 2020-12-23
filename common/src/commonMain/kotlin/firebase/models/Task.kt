@@ -118,6 +118,8 @@ class Task<T : ProjectType>(
     private val normalizedFieldsDelegate = invalidatableLazy { listOfNotNull(name, note).map { it.normalized() } }
     override val normalizedFields by normalizedFieldsDelegate
 
+    val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
+
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean): Boolean {

@@ -114,9 +114,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val parentState get() = data.parentState
 
-    private val instanceHierarchyContainer by lazy {
-        task.project.instanceHierarchyContainer
-    }
+    private fun InstanceKey.getInstanceHierarchyContainer() = task.project
+            .getTaskForce(taskKey.taskId)
+            .instanceHierarchyContainer
 
     init {
         task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
@@ -124,7 +124,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
 
         // todo groups but remember about recurrency, for when I'm implementing that
-        parentState.parentInstanceKey?.let { instanceHierarchyContainer.addChildInstance(this) }
+        parentState.parentInstanceKey
+                ?.getInstanceHierarchyContainer()
+                ?.addChildInstance(this)
     }
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
@@ -163,9 +165,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 .filter { !it.isInvisibleBecauseOfEndData(now) }
                 .toList()
 
-        val instanceHierarchyChildInstances = task.project
-                .instanceHierarchyContainer
-                .getChildInstances(instanceKey)
+        val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
 
         val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
 
@@ -489,9 +489,15 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
         if (parentState == newParentState) return
 
-        parentState.parentInstanceKey?.let { instanceHierarchyContainer.removeChildInstance(this) }
+        parentState.parentInstanceKey
+                ?.getInstanceHierarchyContainer()
+                ?.removeChildInstance(this)
+
         createInstanceHierarchy(now).parentState = newParentState
-        newParentState.parentInstanceKey?.let { instanceHierarchyContainer.addChildInstance(this) }
+
+        newParentState.parentInstanceKey
+                ?.getInstanceHierarchyContainer()
+                ?.addChildInstance(this)
     }
 
     private sealed class Data<T : ProjectType> {

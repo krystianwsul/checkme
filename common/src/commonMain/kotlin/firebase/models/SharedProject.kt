@@ -60,8 +60,6 @@ class SharedProject(
                 .values
                 .map { TaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
-
-        initInstanceHierarchyContainer()
     }
 
     private fun addUser(rootUser: RootUser) {

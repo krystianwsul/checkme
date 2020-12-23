@@ -56,20 +56,7 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    lateinit var instanceHierarchyContainer: InstanceHierarchyContainer<T>
-        private set
-
-    protected fun initInstanceHierarchyContainer() {
-        instanceHierarchyContainer = InstanceHierarchyContainer(this)
-
-        tasks.asSequence()
-                .flatMap { it.existingInstances.values }
-                .forEach { childInstance ->
-                    childInstance.parentState
-                            .parentInstanceKey
-                            ?.let { instanceHierarchyContainer.addChild(childInstance) }
-                }
-    }
+    val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
 
     protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 

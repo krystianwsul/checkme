@@ -32,6 +32,22 @@ class InstanceHierarchyContainer<T : ProjectType>(private val project: Project<T
         childrenSet += childKey
     }
 
+    fun removeChild(child: Instance<T>) {
+        check(child.exists())
+
+        val childKey = child.instanceKey
+        check(childToParent.containsKey(childKey))
+
+        val parentKey = child.parentKey()
+
+        check(childToParent.remove(childKey) == parentKey)
+
+        val childrenSet = parentToChildren.getValue(parentKey)
+        check(childrenSet.contains(childKey))
+
+        childrenSet -= childKey
+    }
+
     fun getByParentKey(parentKey: InstanceKey): List<Instance<T>> {
         val childKeys = parentToChildren[parentKey] ?: setOf()
 

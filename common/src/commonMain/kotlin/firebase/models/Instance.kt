@@ -114,10 +114,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val parentState get() = data.parentState
 
+    private val instanceHierarchyContainer by lazy {
+        task.project.instanceHierarchyContainer
+    }
+
     init {
         task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+
+        // todo groups but remember about recurrency, for when I'm implementing that
+        parentState.parentInstanceKey?.let { instanceHierarchyContainer.addChild(this) }
     }
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
@@ -482,7 +489,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
         if (parentState == newParentState) return
 
+        parentState.parentInstanceKey?.let { instanceHierarchyContainer.removeChild(this) }
         createInstanceHierarchy(now).parentState = newParentState
+        newParentState.parentInstanceKey?.let { instanceHierarchyContainer.addChild(this) }
     }
 
     private sealed class Data<T : ProjectType> {

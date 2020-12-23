@@ -81,7 +81,7 @@ object IntervalBuilder {
             return listOf(interval)
         } else {
             check(typeBuilder.startExactTimeStampOffset >= taskStartExactTimeStampOffset) {
-                "IntervalBuilder $task check 1: ${typeBuilder!!.startExactTimeStampOffset} >= $taskStartExactTimeStampOffset"
+                "IntervalBuilder $task check 1: ${typeBuilder!!.startExactTimeStampOffset.details()} >= ${taskStartExactTimeStampOffset.details()}"
             }
 
             val endedIntervals = mutableListOf<Interval.Ended<T>>()

@@ -252,7 +252,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (parentInstance != null) {
             return parentInstance.instance.isVisible(now, hack24)
         } else {
-            if (!exists() && !matchesSchedule() && !isVirtualParentInstance()) return false
+            if (!isValidlyCreated()) return false
 
             val done = done ?: return true
 
@@ -272,7 +272,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     // This is a misnomer, don't get any ideas
     private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
             ?.isReachableFromMainScreen(now)
-            ?: (exists() || matchesSchedule())
+            ?: isValidlyCreated()
+
+    private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
 
     data class ParentInstanceData<T : ProjectType>(
             val instance: Instance<T>,

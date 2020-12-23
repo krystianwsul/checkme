@@ -48,7 +48,6 @@ fun DomainFactory.getShowTaskInstancesData(
                 task.isVisible(now, false),
                 it.isRootInstance(now),
                 isRootTask,
-                it.exists(),
                 it.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,

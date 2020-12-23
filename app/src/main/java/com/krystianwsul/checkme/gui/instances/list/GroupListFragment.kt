@@ -110,16 +110,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             return instanceDatas.toSet()
         }
-
-        fun recursiveExists(instanceData: GroupListDataWrapper.InstanceData) {
-            instanceData.exists = true
-
-            if (instanceData.instanceDataParent is GroupListDataWrapper.InstanceData) {
-                recursiveExists(instanceData.instanceDataParent as GroupListDataWrapper.InstanceData)
-            } else {
-                check(instanceData.instanceDataParent is GroupListDataWrapper)
-            }
-        }
     }
 
     val activity get() = context as AbstractActivity
@@ -279,8 +269,6 @@ class GroupListFragment @JvmOverloads constructor(
                                     it.instanceDatas.forEach {
                                         it.done = done
 
-                                        recursiveExists(it)
-
                                         nodeCollection.dividerNode.add(it, placeholder)
                                     }
                                 } else {
@@ -291,8 +279,6 @@ class GroupListFragment @JvmOverloads constructor(
                             } else {
                                 val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
                                 instanceData.done = done
-
-                                recursiveExists(instanceData)
 
                                 it.removeFromParent(placeholder)
 
@@ -318,8 +304,6 @@ class GroupListFragment @JvmOverloads constructor(
                         treeNode.modelNode.let {
                             val instanceData = (it as DoneInstanceNode).instanceData
                             instanceData.done = null
-
-                            recursiveExists(instanceData)
 
                             it.removeFromParent(placeholder)
 

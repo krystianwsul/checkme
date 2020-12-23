@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
@@ -263,8 +262,6 @@ class NotDoneGroupNode(
                                 .treeViewAdapter
                                 .updateDisplayedNodes {
                                     singleInstanceData.done = updateDone()!!
-
-                                    GroupListFragment.recursiveExists(singleInstanceData)
 
                                     nodeCollection.dividerNode.add(singleInstanceData, it)
 
@@ -654,8 +651,6 @@ class NotDoneGroupNode(
                                         instanceKey,
                                         true
                                 )!!
-
-                                GroupListFragment.recursiveExists(instanceData)
 
                                 parentNotDoneGroupNode.remove(this, it)
 

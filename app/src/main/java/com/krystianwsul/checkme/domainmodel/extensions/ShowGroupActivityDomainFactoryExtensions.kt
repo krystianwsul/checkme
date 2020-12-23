@@ -66,7 +66,6 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
                 task.isVisible(now, false),
                 instance.isRootInstance(now),
                 isRootTask,
-                instance.exists(),
                 instance.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,

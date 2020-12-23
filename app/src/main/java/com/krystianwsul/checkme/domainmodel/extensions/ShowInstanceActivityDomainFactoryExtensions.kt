@@ -110,7 +110,6 @@ private fun DomainFactory.getGroupListData(
                 childTask.isVisible(now, false),
                 childInstance.isRootInstance(now),
                 isRootTask,
-                childInstance.exists(),
                 childInstance.getCreateTaskTimePair(ownerKey),
                 childTask.note,
                 children,

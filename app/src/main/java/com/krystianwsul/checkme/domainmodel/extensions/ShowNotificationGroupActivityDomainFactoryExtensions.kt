@@ -43,7 +43,6 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
                 task.isVisible(now, false),
                 instance.isRootInstance(now),
                 isRootTask,
-                instance.exists(),
                 instance.getCreateTaskTimePair(ownerKey),
                 task.note,
                 children,

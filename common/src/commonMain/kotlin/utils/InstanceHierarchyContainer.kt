@@ -1,25 +1,43 @@
 package com.krystianwsul.common.utils
 
-class InstanceHierarchyContainer {
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Project
+
+class InstanceHierarchyContainer<T : ProjectType>(private val project: Project<T>) {
+
+    companion object {
+
+        fun <T : ProjectType> Instance<T>.parentKey() = (parentState as Instance.ParentState.Parent).parentInstanceKey
+    }
 
     private val childToParent = mutableMapOf<InstanceKey, InstanceKey>()
     private val parentToChildren = mutableMapOf<InstanceKey, MutableSet<InstanceKey>>()
 
-    // todo group accept instances instead of keys where possible, do sanity checks like .exists()
     // todo group remember to remove entries from here on 1. parentState change, 2. delete/removeFromParent
-    fun add(parent: InstanceKey, child: InstanceKey) {
-        check(!childToParent.containsKey(child))
+    fun addChild(child: Instance<T>) {
+        check(child.exists())
 
-        childToParent[child] = parent
+        val childKey = child.instanceKey
+        check(!childToParent.containsKey(childKey))
 
-        if (!parentToChildren.containsKey(parent)) parentToChildren[parent] = mutableSetOf()
+        val parentKey = child.parentKey()
 
-        val childrenSet = parentToChildren.getValue(parent)
-        check(!childrenSet.contains(child))
+        childToParent[childKey] = parentKey
 
-        childrenSet += child
+        if (!parentToChildren.containsKey(parentKey)) parentToChildren[parentKey] = mutableSetOf()
+
+        val childrenSet = parentToChildren.getValue(parentKey)
+        check(!childrenSet.contains(childKey))
+
+        childrenSet += childKey
     }
 
-    // todo group return instances instead of keys where possible, do sanity checks like .exists()
-    fun getByParent(parent: InstanceKey) = parentToChildren[parent] ?: setOf()
+    fun getByParentKey(parentKey: InstanceKey): List<Instance<T>> {
+        val childKeys = parentToChildren[parentKey] ?: setOf()
+
+        return childKeys.map(project::getInstance).onEach {
+            check(it.exists())
+            check(it.parentKey() == parentKey)
+        }
+    }
 }

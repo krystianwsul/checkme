@@ -56,7 +56,7 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    lateinit var instanceHierarchyContainer: InstanceHierarchyContainer
+    lateinit var instanceHierarchyContainer: InstanceHierarchyContainer<T>
         private set
 
     protected fun initInstanceHierarchyContainer() {// todo group remove on instance delete
@@ -65,7 +65,7 @@ abstract class Project<T : ProjectType>(
                 .forEach { childInstance ->
                     childInstance.parentState
                             .parentInstanceKey
-                            ?.let { instanceHierarchyContainer.add(it, childInstance.instanceKey) }
+                            ?.let { instanceHierarchyContainer.addChild(childInstance) }
                 }
     }
 

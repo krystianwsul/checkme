@@ -155,8 +155,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         val instanceHierarchyChildInstances = task.project
                 .instanceHierarchyContainer
-                .getByParent(instanceKey)
-                .map { task.project.getInstance(it) }
+                .getByParentKey(instanceKey)
                 .associate { it.instanceKey to Pair(it, null) }
 
         val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).values.toList()

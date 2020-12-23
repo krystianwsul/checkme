@@ -269,9 +269,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             .getParentScheduleKeys()
             .contains(scheduleKey)
 
-    // This is a misnomer, don't get any ideas
-    private fun isReachableFromMainScreen(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
-            ?.isReachableFromMainScreen(now)
+    private fun isValidlyCreatedHierarchy(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
+            ?.isValidlyCreatedHierarchy(now)
             ?: isValidlyCreated()
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
@@ -318,7 +317,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      * Yet another reason to consider checking if task.getInstances() contains the instance.
                      */
                     parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.isReachableFromMainScreen(now) }
+                            .takeIf { it.isValidlyCreatedHierarchy(now) }
                             ?.let { ParentInstanceData(it, false, null) }
                 }
             }

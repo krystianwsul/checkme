@@ -282,7 +282,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             ParentState.Unset -> {
                 val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
-                // todo parent shouldn't I be getting the parent at the instance's scheduleTime?
                 val parentTask = task.getParentTask(hierarchyExactTimeStamp)
 
                 if (parentTask == null) {

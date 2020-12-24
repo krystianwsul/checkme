@@ -20,8 +20,8 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
 
-        versionCode 285
-        versionName "0.44.1"
+        versionCode 286
+        versionName "0.45.0"
     }
     buildTypes {
         release {

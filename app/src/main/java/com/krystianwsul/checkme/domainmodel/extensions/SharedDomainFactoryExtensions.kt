@@ -186,11 +186,10 @@ fun DomainFactory.setInstanceDone(
         source: SaveService.Source,
         instanceKey: InstanceKey,
         done: Boolean,
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): ExactTimeStamp.Local? = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
-
-    val now = ExactTimeStamp.Local.now
 
     val instance = getInstance(instanceKey)
 

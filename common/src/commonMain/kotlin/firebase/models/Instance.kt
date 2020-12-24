@@ -133,27 +133,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         val taskHierarchyChildInstances = task.childHierarchyIntervals
                 .asSequence()
-                .filter {
-                    val taskHierarchy = it.taskHierarchy
-                    val childTask = taskHierarchy.childTask
-                    val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(now)
-
-                    it.notDeletedOffset(childHierarchyExactTimeStamp)
-                            && taskHierarchy.notDeletedOffset(childHierarchyExactTimeStamp)
-                            && childTask.notDeletedOffset(childHierarchyExactTimeStamp)
-                }
                 .map {
                     it.taskHierarchy
                             .childTask
                             .getInstance(scheduleDateTime)
                 }
+                .filter { !it.isInvisibleBecauseOfEndData(now) }
                 .filter {
-                    // todo no wonder the algorithm for children is fucked up, since I'm almost guessing up until this step
                     it.getParentInstance(now)
                             ?.instance
                             ?.instanceKey == instanceKey
                 }
-                .filter { !it.isInvisibleBecauseOfEndData(now) }
                 .toList()
 
         val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
@@ -292,6 +282,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             ParentState.Unset -> {
                 val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
+                // todo parent shouldn't I be getting the parent at the instance's scheduleTime?
                 val parentTask = task.getParentTask(hierarchyExactTimeStamp)
 
                 if (parentTask == null) {

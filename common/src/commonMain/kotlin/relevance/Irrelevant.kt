@@ -95,7 +95,10 @@ object Irrelevant {
                 val schedule = scheduleInterval.schedule
 
                 val result = if (schedule is SingleSchedule<*>) {
-                    !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    !schedule.getInstance(it).isVisible(
+                            now,
+                            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
+                    )
                 } else {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false

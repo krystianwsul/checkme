@@ -348,8 +348,7 @@ fun DomainFactory.updateChildTask(
     }
 
     val imageUuid = imagePath?.value?.let { newUuid() }
-    if (imagePath != null)
-        task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+    if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
     removeInstanceKey?.let {
         val instance = getInstance(it)

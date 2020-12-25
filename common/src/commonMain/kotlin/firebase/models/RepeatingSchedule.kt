@@ -146,7 +146,12 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                     scheduleInterval,
                     null,
                     null
-            ).any { task.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = hack24)) }
+            ).any {
+                task.getInstance(it).isVisible(
+                        now,
+                        Instance.VisibilityOptions(hack24 = hack24)
+                )
+            }
         } ?: true
     }
 
@@ -161,7 +166,10 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
         val oldestVisible = listOf(
                 pastRootInstances.filter {
-                    !it.exists() && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    !it.exists() && it.isVisible(
+                            now,
+                            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
+                    )
                 }
                         .map { it.scheduleDate }
                         .toList(),

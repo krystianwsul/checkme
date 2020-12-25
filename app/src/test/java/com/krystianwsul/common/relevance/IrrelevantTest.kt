@@ -208,7 +208,11 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour3)
 
-        assertFalse(task.getPastRootInstances(now).single().isVisible(now, true))
+        assertFalse(
+                task.getPastRootInstances(now)
+                        .single()
+                        .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+        )
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
 
         Irrelevant.setIrrelevant(projectParent, project, now)
@@ -319,12 +323,6 @@ class IrrelevantTest {
             it.instanceKey
                     .taskKey
                     .taskId == child1TaskId
-        }
-
-        val child2Instance = parentInstance.getChildInstances(now).single {
-            it.instanceKey
-                    .taskKey
-                    .taskId == child2TaskId
         }
 
         child1Instance.setDone(shownFactory, true, now)

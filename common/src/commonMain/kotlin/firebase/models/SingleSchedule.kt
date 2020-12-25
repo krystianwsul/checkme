@@ -23,8 +23,6 @@ class SingleSchedule<T : ProjectType>(
 
     private val dateTime get() = DateTime(date, time)
 
-    val originalDateTime get() = DateTime(scheduleRecord.originalDate, scheduleRecord.originalTimePair.toTime())
-
     override val scheduleType get() = ScheduleType.SINGLE
 
     private val originalScheduleDateTime
@@ -66,7 +64,10 @@ class SingleSchedule<T : ProjectType>(
         scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
 
-        return getInstance(task).isVisible(now, Instance.VisibilityOptions(hack24 = hack24))
+        return getInstance(task).isVisible(
+                now,
+                Instance.VisibilityOptions(hack24 = hack24)
+        )
     }
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true

@@ -219,11 +219,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
-    data class VisibilityOptions(
-            val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
-            val ignoreHidden: Boolean = false,
-    )
-
     fun isVisible(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
@@ -243,6 +238,19 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
             task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
 
+    data class VisibilityOptions(
+            val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
+            val ignoreHidden: Boolean = false,
+            val assumeChildOfVisibleParent: Boolean = false,
+            val assumeRoot: Boolean = false,
+    ) {
+
+        init {
+            check(!(hack24 && assumeChildOfVisibleParent))
+            check(!(assumeChildOfVisibleParent && assumeRoot))
+        }
+    }
+
     private fun isVisibleHelper(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
         if (!visibilityOptions.ignoreHidden && data.hidden) return false
 
@@ -250,11 +258,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         val parentInstance = getParentInstance(now)
 
-        if (parentInstance != null) {
-            return parentInstance.instance.isVisible(now, visibilityOptions)
-        } else {
+        fun checkVisibilityForRoot(): Boolean {
             if (!isValidlyCreated()) return false
-
             val done = done ?: return true
 
             val cutoff = if (visibilityOptions.hack24)
@@ -263,6 +268,21 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 now
 
             return done > cutoff
+        }
+
+        return when {
+            visibilityOptions.assumeChildOfVisibleParent -> {
+                checkNotNull(parentInstance)
+
+                true
+            }
+            visibilityOptions.assumeRoot -> {
+                check(parentInstance == null)
+
+                checkVisibilityForRoot()
+            }
+            parentInstance != null -> parentInstance.instance.isVisible(now, visibilityOptions)
+            else -> checkVisibilityForRoot()
         }
     }
 

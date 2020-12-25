@@ -48,7 +48,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -782,11 +781,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val children: List<ChildTaskData>,
             val note: String?,
             val taskKey: TaskKey,
-            val taskHierarchyKey: TaskHierarchyKey?,
             val imageState: ImageState?,
             val current: Boolean,
             val isNotDeletedOrDone: Boolean,
-            val alwaysShow: Boolean,
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,

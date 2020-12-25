@@ -290,15 +290,15 @@ class DomainFactory(
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
-                .filter { it.second?.isVisible(now, false) == true }
+                .filter { it.second?.canAddSubtask(now) == true }
                 .map { Pair(it.first, it.second!!) }
 
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
 
         val maxShortcuts =
                 ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.context) - 4
-        if (maxShortcuts <= 0)
-            return
+
+        if (maxShortcuts <= 0) return
 
         val shortcutDatas = shortcutTasks.sortedBy { it.first }
                 .takeLast(maxShortcuts)
@@ -650,7 +650,6 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
             parentTask: Task<*>,
             now: ExactTimeStamp.Local,
-            alwaysShow: Boolean,
             parentHierarchyExactTimeStamp: ExactTimeStamp,
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
@@ -666,16 +665,13 @@ class DomainFactory(
                             getTaskListChildTaskDatas(
                                     childTask,
                                     now,
-                                    alwaysShow,
                                     childHierarchyExactTimeStamp,
                             ),
                             childTask.note,
                             childTask.taskKey,
-                            taskHierarchy.taskHierarchyKey,
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
                             childTask.isVisible(now, false),
-                            alwaysShow,
                             childTask.ordinal,
                             childTask.getProjectInfo(now),
                             childTask.isAssignedToMe(now, myUserFactory.user),

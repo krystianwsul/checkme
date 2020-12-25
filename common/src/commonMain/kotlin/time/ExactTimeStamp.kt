@@ -59,7 +59,7 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         operator fun plus(timeSpan: TimeSpan) = Local(long + timeSpan.millisecondsLong)
 
-        override fun details() = super.toString() + ", " + toString()
+        override fun details() = "Local(long = $long, offset = $offset)" + ", " + toString()
     }
 
     data class Offset(
@@ -103,7 +103,7 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
             return compare(this, otherOffset)
         }
 
-        override fun details() = super.toString() + ", " + toString()
+        override fun details() = "Offset(long = $long, offset = $offset), " + toString()
     }
 
     abstract val date: Date

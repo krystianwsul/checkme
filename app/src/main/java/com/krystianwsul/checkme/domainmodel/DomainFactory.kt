@@ -671,7 +671,7 @@ class DomainFactory(
                             childTask.taskKey,
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
-                            childTask.isVisible(now, false),
+                            childTask.isNotDeletedOrDone(now),
                             childTask.ordinal,
                             childTask.getProjectInfo(now),
                             childTask.isAssignedToMe(now, myUserFactory.user),

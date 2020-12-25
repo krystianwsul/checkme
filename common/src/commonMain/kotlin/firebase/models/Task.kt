@@ -127,6 +127,8 @@ class Task<T : ProjectType>(
     // todo visibility
     fun canAddSubtask(now: ExactTimeStamp.Local) = isVisible(now, false)
 
+    fun isNotDeletedOrDone(now: ExactTimeStamp.Local) = isVisible(now, false)
+
     // todo visibility this can't possibly be correct
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean): Boolean {
         if (!current(now)) return false

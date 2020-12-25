@@ -37,7 +37,7 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
                         task.taskKey,
                         task.getImage(deviceDbInfo),
                         task.current(now),
-                        task.isVisible(now, false),
+                        task.isNotDeletedOrDone(now),
                         task.ordinal,
                         task.getProjectInfo(now),
                         task.isAssignedToMe(now, myUserFactory.user),

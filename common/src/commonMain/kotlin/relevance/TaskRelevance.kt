@@ -19,8 +19,7 @@ class TaskRelevance(val task: Task<*>) {
             instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
             now: ExactTimeStamp.Local,
     ) {
-        if (relevant)
-            return
+        if (relevant) return
 
         relevant = true
 
@@ -57,7 +56,7 @@ class TaskRelevance(val task: Task<*>) {
             }
         }
 
-        // mark instances relevant
+        // mark instances relevant.  Probably irrelevant due to setting all existing instances relevant in main function
         task.getPastRootInstances(now)
                 .asSequence()
                 .filter { it.filterOldestVisible(now) }

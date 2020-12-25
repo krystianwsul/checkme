@@ -58,7 +58,7 @@ object Irrelevant {
         rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
-                .filter { it.isRootInstance(now) && it.isVisible(now, true) }
+                .filter { it.isVisible(now, true) } // this probably makes the recursive set in tasks redundant
                 .map { instanceRelevances.getValue(it.instanceKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
@@ -82,19 +82,6 @@ object Irrelevant {
 
         val relevantExistingInstances = relevantInstances.filter { it.exists() }
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances
-
-        val visibleIrrelevantExistingInstances = irrelevantExistingInstances.filter { it.isVisible(now, true) }
-        if (visibleIrrelevantExistingInstances.isNotEmpty()) {
-            throw VisibleIrrelevantExistingInstancesException(visibleIrrelevantExistingInstances.joinToString(", ") {
-                it.instanceKey.toString() +
-                        ", name: " +
-                        it.name +
-                        ", parent: " +
-                        it.getParentName(now) +
-                        ", parent exists: " +
-                        it.getParentInstance(now)?.instance?.exists()
-            })
-        }
 
         val irrelevantSchedules = mutableListOf<Schedule<*>>()
         val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent<*>>()
@@ -197,7 +184,6 @@ object Irrelevant {
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
-    private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
     data class Result(
             val irrelevantExistingInstances: Collection<Instance<*>>,

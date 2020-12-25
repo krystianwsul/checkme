@@ -58,7 +58,7 @@ object Irrelevant {
         rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
-                .filter { it.isVisible(now, true) } // this probably makes the recursive set in tasks redundant
+                .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) } // this probably makes the recursive set in tasks redundant
                 .map { instanceRelevances.getValue(it.instanceKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
@@ -95,7 +95,7 @@ object Irrelevant {
                 val schedule = scheduleInterval.schedule
 
                 val result = if (schedule is SingleSchedule<*>) {
-                    !schedule.getInstance(it).isVisible(now, true)
+                    !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                 } else {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false

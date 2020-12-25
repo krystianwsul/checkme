@@ -12,6 +12,5 @@ class InstanceLocker<T : ProjectType>(private val taskLocker: TaskLocker<T>) {
 
     var parentInstanceWrapper: NullableWrapper<Instance.ParentInstanceData<T>>? = null
 
-    var isVisibleHack: Boolean? = null
-    var isVisibleNoHack: Boolean? = null
+    val isVisible: MutableMap<Instance.VisibilityOptions, Boolean> = mutableMapOf()
 }

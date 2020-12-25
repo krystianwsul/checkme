@@ -357,7 +357,7 @@ fun DomainFactory.updateChildTask(
         if (instance.getParentInstance(now)
                         ?.instance
                         ?.task != newParentTask
-                && instance.isVisible(now, true)
+                && instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
         ) {
             instance.hide(now)
         }
@@ -711,7 +711,7 @@ private fun DomainFactory.joinTasks(
                     it.getParentInstance(now)
                             ?.instance
                             ?.task != newParentTask
-                            && it.isVisible(now, true)
+                            && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
                 }
                 .forEach { it.hide(now) }
     } else {

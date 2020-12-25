@@ -399,7 +399,7 @@ abstract class Project<T : ProjectType>(
                 instances.filter { instance ->
                     throwIfInterrupted()
 
-                    instance.isVisible(now, true)
+                    instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
                 }
             } else {
                 instances

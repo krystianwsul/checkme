@@ -66,7 +66,7 @@ class SingleSchedule<T : ProjectType>(
         scheduleInterval.requireCurrentOffset(now)
         requireCurrent(now)
 
-        return getInstance(task).isVisible(now, hack24)
+        return getInstance(task).isVisible(now, Instance.VisibilityOptions(hack24 = hack24))
     }
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true

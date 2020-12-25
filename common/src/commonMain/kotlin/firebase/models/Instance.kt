@@ -219,23 +219,21 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
 
-    fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean = false): Boolean {
+    data class VisibilityOptions(
+            val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
+            val ignoreHidden: Boolean = false,
+    )
+
+    fun isVisible(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
-        instanceLocker?.let {
-            val cachedIsVisible = if (hack24) it.isVisibleHack else it.isVisibleNoHack
+        instanceLocker?.isVisible
+                ?.get(visibilityOptions)
+                ?.let { return it }
 
-            cachedIsVisible?.let { return it }
-        }
+        val isVisible = isVisibleHelper(now, visibilityOptions)
 
-        val isVisible = isVisibleHelper(now, hack24, ignoreHidden)
-
-        instanceLocker?.let {
-            if (hack24)
-                it.isVisibleHack = isVisible
-            else
-                it.isVisibleNoHack = isVisible
-        }
+        instanceLocker?.isVisible?.put(visibilityOptions, isVisible)
 
         return isVisible
     }
@@ -245,21 +243,21 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
             task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
 
-    private fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean, ignoreHidden: Boolean): Boolean {
-        if (!ignoreHidden && data.hidden) return false
+    private fun isVisibleHelper(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
+        if (!visibilityOptions.ignoreHidden && data.hidden) return false
 
         if (isInvisibleBecauseOfEndData(now)) return false
 
         val parentInstance = getParentInstance(now)
 
         if (parentInstance != null) {
-            return parentInstance.instance.isVisible(now, hack24)
+            return parentInstance.instance.isVisible(now, visibilityOptions)
         } else {
             if (!isValidlyCreated()) return false
 
             val done = done ?: return true
 
-            val cutoff = if (hack24)
+            val cutoff = if (visibilityOptions.hack24)
                 ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
             else
                 now

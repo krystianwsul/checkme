@@ -44,11 +44,14 @@ class TaskRelevance(val task: Task<*>) {
             val oldestVisibles = getOldestVisibles()
 
             return if (oldestVisibles.isEmpty()) {
-                isVisible(now, true)
+                isVisible(now, Instance.VisibilityOptions(hack24 = true))
             } else {
                 oldestVisibles.map {
                     when (it) {
-                        Schedule.OldestVisible.Single -> isVisible(now, true, ignoreHidden = ignoreHidden)
+                        Schedule.OldestVisible.Single -> isVisible(
+                                now,
+                                Instance.VisibilityOptions(hack24 = true, ignoreHidden = ignoreHidden)
+                        )
                         Schedule.OldestVisible.RepeatingNull -> true
                         is Schedule.OldestVisible.RepeatingNonNull -> scheduleDate >= it.date
                     }

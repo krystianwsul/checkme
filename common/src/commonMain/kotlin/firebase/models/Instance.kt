@@ -114,14 +114,38 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val parentState get() = data.parentState
 
-    init {
-        task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+    private val matchingScheduleIntervalsProperty = invalidatableLazy {
+        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
+
+        task.getScheduleDateTimes(
+                exactTimeStamp,
+                exactTimeStamp.plusOne(),
+                originalDateTime = true,
+                checkOldestVisible = false
+        ).toList()
     }
+    private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
     constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
+
+    init {
+        addLazyCallbacks()
+    }
+
+    private fun addLazyCallbacks() {
+        task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
+    }
+
+    private fun removeLazyCallbacks() {
+        task.endDataProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        doneOffsetProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
+        task.scheduleIntervalsProperty.removeCallback(matchingScheduleIntervalsProperty::invalidate)
+    }
 
     fun exists() = (data is Data.Real)
 
@@ -174,17 +198,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         return createInstanceRecord()
     }
-
-    private val matchingScheduleIntervals by invalidatableLazy {
-        val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
-
-        task.getScheduleDateTimes(
-                exactTimeStamp,
-                exactTimeStamp.plusOne(),
-                originalDateTime = true,
-                checkOldestVisible = false
-        ).toList()
-    }.addTo(task.scheduleIntervalsProperty)
 
     // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
@@ -408,6 +421,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun delete() {
         check(data is Data.Real<*>)
+
+        removeLazyCallbacks()
 
         removeVirtualParents()
 

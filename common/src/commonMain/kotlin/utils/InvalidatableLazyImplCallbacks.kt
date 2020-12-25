@@ -14,6 +14,11 @@ class InvalidatableLazyImplCallbacks<T>(initializer: () -> T) : InvalidatableLaz
     }
 
     fun addCallback(callback: () -> Unit) = callbacks.add(WeakReference(callback))
+
+    fun removeCallback(callback: () -> Unit) {
+        val item = callbacks.single { it.get() == callback }
+        callbacks.remove(item)
+    }
 }
 
 fun <T> invalidatableLazyCallbacks(initializer: () -> T) = InvalidatableLazyImplCallbacks(initializer)

@@ -14,18 +14,15 @@ interface CurrentOffset {
     fun currentOffset(exactTimeStamp: ExactTimeStamp) = afterStartOffset(exactTimeStamp) && notDeletedOffset(exactTimeStamp)
 
     fun requireNotDeletedOffset(exactTimeStamp: ExactTimeStamp) {
-        if (!notDeletedOffset(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (!notDeletedOffset(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     fun requireCurrentOffset(exactTimeStamp: ExactTimeStamp) {
-        if (!currentOffset(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (!currentOffset(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     fun requireNotCurrentOffset(exactTimeStamp: ExactTimeStamp) {
-        if (currentOffset(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (currentOffset(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     private fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw Current.TimeException(

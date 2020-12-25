@@ -370,9 +370,9 @@ class IrrelevantTest {
 
         assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
         assertTrue(
-                parentInstance.getChildInstances(now)
-                        .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                        .single() == child1Instance
+                parentInstance.getChildInstances(now).single {
+                    it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+                } == child1Instance
         )
 
         now = ExactTimeStamp.Local(day2, hour5)

@@ -14,18 +14,15 @@ interface Current {
     fun current(exactTimeStamp: ExactTimeStamp.Local) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
 
     fun requireNotDeleted(exactTimeStamp: ExactTimeStamp.Local) {
-        if (!notDeleted(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (!notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     fun requireCurrent(exactTimeStamp: ExactTimeStamp.Local) {
-        if (!current(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (!current(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     fun requireNotCurrent(exactTimeStamp: ExactTimeStamp.Local) {
-        if (current(exactTimeStamp))
-            throwTime(exactTimeStamp)
+        if (current(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
     private fun throwTime(exactTimeStamp: ExactTimeStamp.Local): Nothing = throw TimeException(

@@ -80,8 +80,7 @@ class Task<T : ProjectType>(
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {
         intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
-    }.apply { intervalsProperty.addCallback { invalidate() } }
-
+    }.apply { addTo(intervalsProperty) }
     val scheduleIntervals by scheduleIntervalsProperty
 
     val parentHierarchyIntervals get() = intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }

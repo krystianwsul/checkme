@@ -135,8 +135,8 @@ class Task<T : ProjectType>(
         return false
     }// bo inheritance i testy
 
-    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task<T> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
-            ?: this
+    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task<T> =
+            getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> {
         requireCurrentOffset(exactTimeStamp)
@@ -360,30 +360,40 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
-
-        instanceSequences += getExistingInstances(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                now,
-                bySchedule,
-                onlyRoot
-        )
-
-        if (!onlyRoot) {
-            instanceSequences += getParentInstances(
+        return if (!notDeleted(now) && endData!!.deleteInstances) {
+            getExistingInstances(
                     startExactTimeStamp,
                     endExactTimeStamp,
                     now,
-                    bySchedule
+                    bySchedule,
+                    onlyRoot
+            ).filter { it.done != null }
+        } else {
+            val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
+
+            instanceSequences += getExistingInstances(
+                    startExactTimeStamp,
+                    endExactTimeStamp,
+                    now,
+                    bySchedule,
+                    onlyRoot
             )
+
+            if (!onlyRoot) {
+                instanceSequences += getParentInstances(
+                        startExactTimeStamp,
+                        endExactTimeStamp,
+                        now,
+                        bySchedule
+                )
+            }
+
+            instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp, now)
+
+            instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
+
+            return combineInstanceSequences(instanceSequences, bySchedule)
         }
-
-        instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp, now)
-
-        instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
-
-        return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
     fun getNextAlarm(now: ExactTimeStamp.Local, myUser: MyUser): TimeStamp? {

@@ -705,12 +705,12 @@ class DomainFactory(
 
                         results.irrelevantExistingInstances
                                 .sortedBy { it.scheduleDateTime }
-                                .forEach { Log.e("asdf", "irrelevant instance: $it") }
+                                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
 
                         results.irrelevantSchedules
                                 .sortedBy { it.startExactTimeStamp }
                                 .forEach {
-                                    Log.e("asdf", "irrelevant schedule, schedule: $it, task: ${it.rootTask}")
+                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.rootTask}")
                                 }
                     }
 

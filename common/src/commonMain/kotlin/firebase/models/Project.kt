@@ -387,6 +387,7 @@ abstract class Project<T : ProjectType>(
                     now,
                     onlyRoot = true
             )
+                    .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true, assumeRoot = true)) }
                     .let {
                         if (searchData == null) {
                             it

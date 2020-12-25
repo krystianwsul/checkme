@@ -162,7 +162,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             .childTask
                             .getInstance(scheduleDateTime)
                 }
-                .filter { !it.isInvisibleBecauseOfEndData(now) }
                 .filter {
                     it.getParentInstance(now)
                             ?.instance

@@ -59,7 +59,7 @@ fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
-        instanceKey: InstanceKey
+        instanceKey: InstanceKey,
 ): Pair<TaskUndoData, Boolean> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -99,39 +99,41 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instance.getChildInstances(now).map { childInstance ->
-        val childTask = childInstance.task
+    val instanceDatas = instance.getChildInstances(now)
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+            .map { childInstance ->
+                val childTask = childInstance.task
 
-        val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+                val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-        val children = getChildInstanceDatas(childInstance, now)
+                val children = getChildInstanceDatas(childInstance, now)
 
-        val instanceData = GroupListDataWrapper.InstanceData(
-                childInstance.done,
-                childInstance.instanceKey,
-                null,
-                childInstance.name,
-                childInstance.instanceDateTime.timeStamp,
-                childInstance.instanceDateTime,
-                childTask.current(now),
-                childTask.isVisible(now, false),
-                childInstance.isRootInstance(now),
-                isRootTask,
-                childInstance.getCreateTaskTimePair(ownerKey),
-                childTask.note,
-                children,
-                childTask.ordinal,
-                childInstance.getNotificationShown(localFactory),
-                childTask.getImage(deviceDbInfo),
-                childInstance.isGroupChild(now),
-                childInstance.isAssignedToMe(now, myUserFactory.user),
-                childInstance.getProjectInfo(now),
-        )
+                val instanceData = GroupListDataWrapper.InstanceData(
+                        childInstance.done,
+                        childInstance.instanceKey,
+                        null,
+                        childInstance.name,
+                        childInstance.instanceDateTime.timeStamp,
+                        childInstance.instanceDateTime,
+                        childTask.current(now),
+                        childTask.isVisible(now, false),
+                        childInstance.isRootInstance(now),
+                        isRootTask,
+                        childInstance.getCreateTaskTimePair(ownerKey),
+                        childTask.note,
+                        children,
+                        childTask.ordinal,
+                        childInstance.getNotificationShown(localFactory),
+                        childTask.getImage(deviceDbInfo),
+                        childInstance.isGroupChild(now),
+                        childInstance.isAssignedToMe(now, myUserFactory.user),
+                        childInstance.getProjectInfo(now),
+                )
 
-        children.values.forEach { it.instanceDataParent = instanceData }
+                children.values.forEach { it.instanceDataParent = instanceData }
 
-        instanceData
-    }
+                instanceData
+            }
 
     val dataWrapper = GroupListDataWrapper(
             customTimeDatas,

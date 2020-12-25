@@ -48,6 +48,7 @@ class InstanceRelevance(val instance: Instance<*>) {
 
         // set child instances relevant
         instance.getChildInstances(now)
+                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                 .map { instance ->
                     val instanceKey = instance.instanceKey
 

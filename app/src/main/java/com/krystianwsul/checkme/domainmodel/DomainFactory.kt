@@ -520,6 +520,7 @@ class DomainFactory(
             searchCriteria: SearchCriteria? = null,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
+                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                 .mapNotNull { childInstance ->
                     val childTask = childInstance.task
 

@@ -249,6 +249,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp.Local) = instance.getChildInstances(now)
             .asSequence()
             .filter { it.done == null }
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
             .sortedBy { it.task.ordinal }
             .map { it.name }
             .toList()

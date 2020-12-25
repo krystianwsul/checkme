@@ -42,7 +42,9 @@ fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
 
         if (instance.task.matchesQuery(searchCriteria.query)) return true
 
-        return instance.getChildInstances(now).any(::childHierarchyMatches)
+        return instance.getChildInstances(now)
+                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                .any(::childHierarchyMatches)
     }
 
     filter(::childHierarchyMatches)

@@ -230,14 +230,6 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun getPastRootInstances(now: ExactTimeStamp.Local) = getInstances(
-            null,
-            now.toOffset().plusOne(),
-            now,
-            bySchedule = true,
-            onlyRoot = true
-    )
-
     private fun getExistingInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
@@ -278,6 +270,7 @@ class Task<T : ProjectType>(
             it.taskHierarchy
                     .parentTask
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
+                    .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                     .mapNotNull {
                         it.getChildInstances(now)
                                 .singleOrNull { it.taskKey == taskKey }

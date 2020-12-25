@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
@@ -32,7 +33,9 @@ fun DomainFactory.getShowTaskInstancesData(
             null,
             null,
             now
-    ).takeAndHasMore(desiredCount)
+    )
+            .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
+            .takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)

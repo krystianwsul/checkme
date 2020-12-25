@@ -63,21 +63,6 @@ class TaskRelevance(val task: Task<*>) {
             }
         }
 
-        // mark instances relevant.  Probably irrelevant due to setting all existing instances relevant in main function
-        task.getPastRootInstances(now)
-                .asSequence()
-                .filter { it.filterOldestVisible(now) }
-                .map { instance ->
-                    val instanceKey = instance.instanceKey
-
-                    if (!instanceRelevances.containsKey(instanceKey))
-                        instanceRelevances[instanceKey] = InstanceRelevance(instance)
-
-                    instanceRelevances.getValue(instanceKey)
-                }
-                .toList()
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
-
         task.existingInstances
                 .values
                 .filter { it.isRootInstance(now) && it.filterOldestVisible(now, true) }

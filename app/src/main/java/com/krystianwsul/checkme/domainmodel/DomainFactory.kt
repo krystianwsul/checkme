@@ -545,7 +545,7 @@ class DomainFactory(
                                 childInstance.instanceDateTime.timeStamp,
                                 childInstance.instanceDateTime,
                                 childTask.current(now),
-                                childTask.isVisible(now, false),
+                                childTask.canAddSubtask(now),
                                 childInstance.isRootInstance(now),
                                 isRootTask,
                                 childInstance.getCreateTaskTimePair(ownerKey),

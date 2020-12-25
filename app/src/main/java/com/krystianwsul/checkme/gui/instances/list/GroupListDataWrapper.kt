@@ -38,7 +38,7 @@ data class GroupListDataWrapper(
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         override val taskCurrent = true
-        override val taskVisible = true
+        override val canAddSubtask = true
 
         override val childSelectedDatas get() = children
     }
@@ -50,8 +50,8 @@ data class GroupListDataWrapper(
             override val name: String,
             val instanceTimeStamp: TimeStamp,
             val instanceDateTime: DateTime,
-            override var taskCurrent: Boolean,
-            override val taskVisible: Boolean,
+            override val taskCurrent: Boolean,
+            override val canAddSubtask: Boolean,
             val isRootInstance: Boolean,
             var isRootTask: Boolean?,
             val createTaskTimePair: TimePair,
@@ -93,7 +93,7 @@ data class GroupListDataWrapper(
     interface SelectedData {
 
         val taskCurrent: Boolean
-        val taskVisible: Boolean
+        val canAddSubtask: Boolean
         val taskKey: TaskKey
         val name: String
         val note: String?

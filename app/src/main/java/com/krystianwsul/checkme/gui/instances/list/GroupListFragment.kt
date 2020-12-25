@@ -830,7 +830,7 @@ class GroupListFragment @JvmOverloads constructor(
                 if (singleSelectedData != null) {
                     val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData
 
-                    val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.taskVisible
+                    val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.canAddSubtask
 
                     val canAddToTime = parameters.fabActionMode.showTime
                             && instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true

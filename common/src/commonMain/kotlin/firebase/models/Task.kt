@@ -121,6 +121,12 @@ class Task<T : ProjectType>(
 
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
+    // todo visibility
+    fun notDeletedOrDone(now: ExactTimeStamp.Local, hack24: Boolean) = !isVisible(now, hack24)
+
+    // todo visibility
+    fun canAddSubtask(now: ExactTimeStamp.Local) = isVisible(now, false)
+
     // todo visibility this can't possibly be correct
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean): Boolean {
         if (!current(now)) return false

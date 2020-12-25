@@ -48,7 +48,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.instanceDateTime.timeStamp,
                 it.instanceDateTime,
                 task.current(now),
-                task.isVisible(now, false),
+                task.canAddSubtask(now),
                 it.isRootInstance(now),
                 isRootTask,
                 it.getCreateTaskTimePair(ownerKey),

@@ -116,7 +116,7 @@ private fun DomainFactory.getGroupListData(
                         childInstance.instanceDateTime.timeStamp,
                         childInstance.instanceDateTime,
                         childTask.current(now),
-                        childTask.isVisible(now, false),
+                        childTask.canAddSubtask(now),
                         childInstance.isRootInstance(now),
                         isRootTask,
                         childInstance.getCreateTaskTimePair(ownerKey),
@@ -137,7 +137,7 @@ private fun DomainFactory.getGroupListData(
 
     val dataWrapper = GroupListDataWrapper(
             customTimeDatas,
-            task.isVisible(now, false),
+            task.canAddSubtask(now),
             listOf(),
             task.note,
             instanceDatas,

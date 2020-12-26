@@ -28,12 +28,12 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var done: Boolean,
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
-            val exists: Boolean,
             val groupListDataWrapper: GroupListDataWrapper,
             var notificationShown: Boolean,
             val displayText: String,
             val taskKey: TaskKey,
             val isRecurringGroupChild: Boolean,
+            val isVisible: Boolean,
     ) : DomainData() {
 
         init {

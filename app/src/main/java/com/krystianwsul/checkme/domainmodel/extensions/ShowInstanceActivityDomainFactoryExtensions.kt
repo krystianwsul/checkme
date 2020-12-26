@@ -46,12 +46,12 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
             instance.done != null,
             task.current(now),
             parentInstance == null,
-            instance.exists(),
             getGroupListData(instance, task, now),
             instance.getNotificationShown(localFactory),
             displayText,
             task.taskKey,
-            instance.isGroupChild(now)
+            instance.isGroupChild(now),
+            debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
     )
 }
 
@@ -68,26 +68,7 @@ fun DomainFactory.setTaskEndTimeStamps(
 
     val taskUndoData = setTaskEndTimeStamps(source, taskKeys, deleteInstances, now)
 
-    val instance = getInstance(instanceKey)
-    val task = instance.task
-
-    val instanceExactTimeStamp by lazy {
-        instance.instanceDateTime
-                .timeStamp
-                .toLocalExactTimeStamp()
-    }
-
-    /**
-     * todo visibility (comment no longer current): this is incorrect, but I don't know what to change it to.  Pretty sure it depends on how the activity was
-     * launched (main screen, search with all instances visible set in debug mode, taskInstancesActivity, etc.  But
-     * not matter what the method, the ShowInstanceViewModel.Data.exists field should be replaced along with any changes
-     * to this
-     */
-    val visible = task.notDeleted(now) ||
-            (instance.done != null || instanceExactTimeStamp <= now) ||
-            (!deleteInstances && instance.exists())
-
-    Pair(taskUndoData, visible)
+    Pair(taskUndoData, debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)))
 }
 
 private fun DomainFactory.getGroupListData(

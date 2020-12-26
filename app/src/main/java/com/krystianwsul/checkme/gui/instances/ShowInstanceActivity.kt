@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -309,6 +308,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
+        if (!data.isVisible) {
+            finish()
+            return
+        }
+
         val immediate = data.immediate
 
         binding.showInstanceToolbarCollapseInclude
@@ -420,18 +424,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                 val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
-                instanceKey = instanceKey.scheduleKey.run {
-                    InstanceKey(
-                            taskKey,
-                            scheduleDate,
-                            scheduleTimePair.run { TimePair(customTimeKey, hourMinute) }
-                    )
-                }
-            } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
-                if (!this.data!!.exists) {
-                    finish()
-                    return
-                }
+                instanceKey = instanceKey.copy(taskKey = taskKey)
             }
 
             showInstanceViewModel.start(instanceKey)

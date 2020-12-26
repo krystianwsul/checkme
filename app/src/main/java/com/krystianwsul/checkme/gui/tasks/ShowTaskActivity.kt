@@ -35,7 +35,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         const val TASK_KEY_KEY = "taskKey"
 
         const val REQUEST_EDIT_TASK = 1
-        const val RESULT_DELETE = 65
 
         private const val TAG_REMOVE_INSTANCES = "removeInstances"
 
@@ -61,8 +60,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                 taskKeys as Set<TaskKey>,
                 removeInstances
         )
-
-        setResult(RESULT_DELETE)
 
         finish()
 

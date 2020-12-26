@@ -527,6 +527,20 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
+    fun canAddSubtask(now: ExactTimeStamp.Local): Boolean {
+        // can't add to deleted tasks
+        if (!task.current(now)) return false
+
+        // can't add to done instances
+        if (done?.let { it <= now } == true) return false
+
+        // obviously we can't add instances to an invisible instance.
+        if (!isVisible(now, VisibilityOptions())) return false
+
+        // if it's a child, we also shouldn't add instances if the parent is done
+        return getParentInstance(now)?.instance?.canAddSubtask(now) ?: true
+    }
+
     private sealed class Data<T : ProjectType> {
 
         abstract val scheduleDate: Date

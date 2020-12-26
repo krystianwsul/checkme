@@ -441,7 +441,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     (it.modelNode as TaskAdapter.TaskWrapper).childTaskData
                 }
 
-                if (childTaskData?.isNotDeletedOrDone == true) {
+                if (childTaskData?.canAddSubtask == true) {
                     show()
 
                     edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
@@ -671,7 +671,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
-            private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.isNotDeletedOrDone }
+            private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.canAddSubtask }
 
             override val children
                 get() = TaskNode.getTaskChildren(treeNode, childTaskData.note) {
@@ -783,13 +783,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKey: TaskKey,
             val imageState: ImageState?,
             val current: Boolean,
-            val isNotDeletedOrDone: Boolean,
+            val canAddSubtask: Boolean,
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,
     ) : Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
 
-        override val isDeleted = !isNotDeletedOrDone
+        override val isDeleted = !canAddSubtask
 
         override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
 

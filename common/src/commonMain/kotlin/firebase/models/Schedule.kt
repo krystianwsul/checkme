@@ -70,6 +70,14 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             hack24: Boolean,
     ): Boolean
 
+    fun isUnlimited(): Boolean {
+        if (endExactTimeStamp == null) return true
+
+        return isUnlimitedHelper()
+    }
+
+    protected abstract fun isUnlimitedHelper(): Boolean
+
     abstract fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean
 
     fun delete() {

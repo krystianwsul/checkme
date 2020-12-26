@@ -70,6 +70,8 @@ class SingleSchedule<T : ProjectType>(
         )
     }
 
+    override fun isUnlimitedHelper() = false
+
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
 
     override val oldestVisible = OldestVisible.Single

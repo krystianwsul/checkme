@@ -18,6 +18,12 @@ class ScheduleInterval<T : ProjectType>(
             hack24: Boolean,
     ) = schedule.isVisible(this, task, now, hack24)
 
+    fun isUnlimited(): Boolean {
+        if (endExactTimeStampOffset == null) return true
+
+        return schedule.isUnlimited()
+    }
+
     fun getDateTimesInRange(
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,

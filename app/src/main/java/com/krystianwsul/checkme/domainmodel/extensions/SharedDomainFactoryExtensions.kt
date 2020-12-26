@@ -230,12 +230,8 @@ fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) =
     save(0, source)
 }
 
-fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) = getTasks().filter {
-    it.current(now)
-            && it.isVisible(now, true)
-            && it.isRootTask(now)
-            && it.getCurrentScheduleIntervals(now).isEmpty()
-}
+fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
+        getTasks().filter { it.current(now) && it.isUnscheduled(now) }
 
 fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task<*>,

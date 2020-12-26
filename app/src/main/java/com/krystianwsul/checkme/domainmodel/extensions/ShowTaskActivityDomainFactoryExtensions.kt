@@ -32,7 +32,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                         childTask.taskKey,
                         childTask.getImage(deviceDbInfo),
                         childTask.current(now),
-                        childTask.isNotDeletedOrDone(now),
+                        childTask.canAddSubtask(now),
                         childTask.ordinal,
                         childTask.getProjectInfo(now),
                         childTask.isAssignedToMe(now, myUserFactory.user),
@@ -57,7 +57,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
             TaskListFragment.TaskData(
                     childTaskDatas.toMutableList(),
                     task.note,
-                    task.isNotDeletedOrDone(now),
+                    task.canAddSubtask(now),
                     task.getProjectInfo(now),
             ),
             task.getImage(deviceDbInfo),

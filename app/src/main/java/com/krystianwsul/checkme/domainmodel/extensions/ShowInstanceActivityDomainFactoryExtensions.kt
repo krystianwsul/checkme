@@ -137,7 +137,7 @@ private fun DomainFactory.getGroupListData(
 
     val dataWrapper = GroupListDataWrapper(
             customTimeDatas,
-            task.canAddSubtask(now),
+            instance.canAddSubtask(now),
             listOf(),
             task.note,
             instanceDatas,

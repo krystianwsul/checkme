@@ -155,6 +155,8 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         } ?: true
     }
 
+    override fun isUnlimitedHelper() = until == null
+
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local) {
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,

@@ -34,7 +34,7 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
                         task.taskKey,
                         task.getImage(deviceDbInfo),
                         task.current(now),
-                        task.isNotDeletedOrDone(now),
+                        task.canAddSubtask(now),
                         task.ordinal,
                         task.getProjectInfo(now),
                         task.isAssignedToMe(now, myUserFactory.user),

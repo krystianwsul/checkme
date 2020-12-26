@@ -121,13 +121,24 @@ class Task<T : ProjectType>(
 
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
-    // todo visibility
-    fun notDeletedOrDone(now: ExactTimeStamp.Local, hack24: Boolean) = !isVisible(now, hack24)
+    // todo visibility consider adding params like for Instance.isVisible
+    fun canAddSubtask(now: ExactTimeStamp.Local): Boolean {
+        // can't add to deleted tasks
+        if (!current(now)) return false
 
-    // todo visibility
-    fun canAddSubtask(now: ExactTimeStamp.Local) = isVisible(now, false)
+        // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
+        // for that will be difficult, though.
 
-    fun isNotDeletedOrDone(now: ExactTimeStamp.Local) = isVisible(now, false)
+        // if it's in the unscheduled tasks list, we can add a subtask
+        if (isUnscheduled(now)) return true
+
+        // By now, we're assuming the task is current.  So if the current root task's schedules are unlimited, we can go
+        // ahead and assume a future instance can be added to.
+        if (getRootTask(now).getCurrentScheduleIntervals(now).any { it.isUnlimited() }) return true
+
+        // ... and if not, we can just use getInstances() and check all of them.
+        return getInstances(null, null, now).any { it.canAddSubtask(now) }
+    }
 
     // todo visibility this can't possibly be correct
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean): Boolean {
@@ -970,6 +981,8 @@ class Task<T : ProjectType>(
             parentTask.name.takeIf { showParent }
         }
     }
+
+    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is NoScheduleOrParent<*>
 
     private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         val intervals = intervals

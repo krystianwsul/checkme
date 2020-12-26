@@ -129,12 +129,14 @@ class Task<T : ProjectType>(
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
+        val rootTask = getRootTask(now)
+
         // if it's in the unscheduled tasks list, we can add a subtask
-        if (isUnscheduled(now)) return true
+        if (rootTask.isUnscheduled(now)) return true
 
         // By now, we're assuming the task is current.  So if the current root task's schedules are unlimited, we can go
         // ahead and assume a future instance can be added to.
-        if (getRootTask(now).getCurrentScheduleIntervals(now).any { it.isUnlimited() }) return true
+        if (rootTask.getCurrentScheduleIntervals(now).any { it.isUnlimited() }) return true
 
         // ... and if not, we can just use getInstances() and check all of them.
         return getInstances(null, null, now).any { it.canAddSubtask(now) }
@@ -982,7 +984,7 @@ class Task<T : ProjectType>(
         }
     }
 
-    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is NoScheduleOrParent<*>
+    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
     private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         val intervals = intervals

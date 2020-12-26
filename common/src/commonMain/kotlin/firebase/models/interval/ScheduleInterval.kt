@@ -19,7 +19,7 @@ class ScheduleInterval<T : ProjectType>(
     ) = schedule.isVisible(this, task, now, hack24)
 
     fun isUnlimited(): Boolean {
-        if (endExactTimeStampOffset == null) return true
+        if (endExactTimeStampOffset != null) return false
 
         return schedule.isUnlimited()
     }

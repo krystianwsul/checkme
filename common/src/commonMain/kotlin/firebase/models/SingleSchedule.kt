@@ -70,7 +70,7 @@ class SingleSchedule<T : ProjectType>(
         )
     }
 
-    override fun isUnlimitedHelper() = false
+    override fun isUnlimited() = false
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
 

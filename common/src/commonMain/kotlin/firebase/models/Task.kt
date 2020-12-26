@@ -364,10 +364,11 @@ class Task<T : ProjectType>(
             now: ExactTimeStamp.Local,
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false,
+            filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
         throwIfInterrupted()
 
-        return if (!notDeleted(now) && endData!!.deleteInstances) {
+        return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
             getExistingInstances(
                     startExactTimeStamp,
                     endExactTimeStamp,

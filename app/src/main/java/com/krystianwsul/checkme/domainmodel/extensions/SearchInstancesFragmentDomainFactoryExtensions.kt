@@ -50,7 +50,7 @@ fun DomainFactory.getSearchInstancesData(
                  */
                 val childSearchCriteria = if (task.matchesQuery(searchCriteria.query)) null else searchCriteria
 
-                val children = getChildInstanceDatas(it, now, childSearchCriteria)
+                val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
 
                 val instanceData = GroupListDataWrapper.InstanceData(
                         it.done,

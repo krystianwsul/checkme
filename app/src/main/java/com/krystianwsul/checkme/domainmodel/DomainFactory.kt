@@ -223,9 +223,7 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    var debugMode by observable(false) { _, _, _ ->
-        domainListenerManager.notify(NotificationType.All)
-    }
+    var debugMode by observable(false) { _, _, _ -> domainListenerManager.notify(NotificationType.All) }
 
     private fun updateIsSaved() {
         val oldSaved = isSaved.value!!
@@ -518,9 +516,12 @@ class DomainFactory(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
             searchCriteria: SearchCriteria? = null,
+            filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
         return instance.getChildInstances(now)
-                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                .filter {
+                    !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+                }
                 .mapNotNull { childInstance ->
                     val childTask = childInstance.task
 
@@ -534,7 +535,7 @@ class DomainFactory(
                      */
                     val childrenQuery = if (childTaskMatches) null else searchCriteria
 
-                    val children = getChildInstanceDatas(childInstance, now, childrenQuery)
+                    val children = getChildInstanceDatas(childInstance, now, childrenQuery, filterVisible)
 
                     if (childTaskMatches || children.isNotEmpty()) {
                         val instanceData = GroupListDataWrapper.InstanceData(

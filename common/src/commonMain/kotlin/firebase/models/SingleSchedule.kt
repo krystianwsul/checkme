@@ -55,21 +55,6 @@ class SingleSchedule<T : ProjectType>(
         return sequenceOf(originalScheduleDateTime)
     }
 
-    override fun isVisible(
-            scheduleInterval: ScheduleInterval<T>,
-            task: Task<T>,
-            now: ExactTimeStamp.Local,
-            hack24: Boolean,
-    ): Boolean {
-        scheduleInterval.requireCurrentOffset(now)
-        requireCurrent(now)
-
-        return getInstance(task).isVisible(
-                now,
-                Instance.VisibilityOptions(hack24 = hack24)
-        )
-    }
-
     override fun isUnlimited() = false
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true

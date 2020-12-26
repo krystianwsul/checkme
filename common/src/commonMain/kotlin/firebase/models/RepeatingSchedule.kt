@@ -132,29 +132,6 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     protected abstract fun containsDate(date: Date): Boolean
 
-    override fun isVisible(
-            scheduleInterval: ScheduleInterval<T>,
-            task: Task<T>,
-            now: ExactTimeStamp.Local,
-            hack24: Boolean,
-    ): Boolean {
-        scheduleInterval.requireCurrentOffset(now)
-        requireCurrent(now)
-
-        return until?.let {
-            getDateTimesInRange(
-                    scheduleInterval,
-                    null,
-                    null
-            ).any {
-                task.getInstance(it).isVisible(
-                        now,
-                        Instance.VisibilityOptions(hack24 = hack24)
-                )
-            }
-        } ?: true
-    }
-
     override fun isUnlimited(): Boolean {
         if (endExactTimeStamp != null) return false
 

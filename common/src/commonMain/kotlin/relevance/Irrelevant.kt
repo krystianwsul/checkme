@@ -68,8 +68,11 @@ object Irrelevant {
         val irrelevantTasks = tasks - relevantTasks
 
         val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
-        if (visibleIrrelevantTasks.isNotEmpty())
-            throw VisibleIrrelevantTasksException(visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() })
+        if (visibleIrrelevantTasks.isNotEmpty()) {
+            throw VisibleIrrelevantTasksException(
+                    visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() }
+            )
+        }
 
         val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
         val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }

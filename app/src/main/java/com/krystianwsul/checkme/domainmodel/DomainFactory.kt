@@ -290,7 +290,7 @@ class DomainFactory(
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
-                .filter { it.second?.canAddSubtask(now) == true }
+                .filter { it.second?.isVisible(now) == true }
                 .map { Pair(it.first, it.second!!) }
 
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
@@ -671,7 +671,7 @@ class DomainFactory(
                             childTask.taskKey,
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
-                            childTask.canAddSubtask(now),
+                            childTask.isVisible(now),
                             childTask.ordinal,
                             childTask.getProjectInfo(now),
                             childTask.isAssignedToMe(now, myUserFactory.user),

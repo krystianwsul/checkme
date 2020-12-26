@@ -116,7 +116,7 @@ private fun DomainFactory.getGroupListData(
                         childInstance.instanceDateTime.timeStamp,
                         childInstance.instanceDateTime,
                         childTask.current(now),
-                        childTask.canAddSubtask(now),
+                        childTask.isVisible(now),
                         childInstance.isRootInstance(now),
                         isRootTask,
                         childInstance.getCreateTaskTimePair(ownerKey),

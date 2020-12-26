@@ -121,8 +121,8 @@ class Task<T : ProjectType>(
 
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
-    // todo visibility consider adding params like for Instance.isVisible
-    fun canAddSubtask(now: ExactTimeStamp.Local): Boolean {
+    // hack24 = false -> basically, is it possible to add a subtask
+    fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {
         // can't add to deleted tasks
         if (!current(now)) return false
 
@@ -139,22 +139,8 @@ class Task<T : ProjectType>(
         if (rootTask.getCurrentScheduleIntervals(now).any { it.isUnlimited() }) return true
 
         // ... and if not, we can just use getInstances() and check all of them.
-        return getInstances(null, null, now).any { it.canAddSubtask(now) }
+        return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
     }
-
-    // todo visibility this can't possibly be correct
-    fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean): Boolean {
-        if (!current(now)) return false
-
-        val rootTask = getRootTask(now)
-        val schedules = rootTask.getCurrentScheduleIntervals(now)
-
-        if (schedules.isEmpty()) return true
-
-        if (schedules.any { it.isVisible(this, now, hack24) }) return true
-
-        return false
-    }// bo inheritance i testy
 
     private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task<T> =
             getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this

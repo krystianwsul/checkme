@@ -674,12 +674,12 @@ private fun Task<*>.showAsParent(
     if (excludedTaskKeys.contains(taskKey)) return false
 
     if (includedTaskKeys.contains(taskKey)) {
-        check(isVisible(now, true)) // exception for editing task that's child of done task
+        check(this.isVisible(now, true)) // exception for editing task that's child of done task
 
         return true
     }
 
-    if (!canAddSubtask(now)) return false
+    if (!isVisible(now)) return false
 
     return true
 }

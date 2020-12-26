@@ -586,13 +586,14 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += projectsFactory.privateProject
             .tasks
             .asSequence()
+            .filter { it.isRootTask(now) }
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, includedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
@@ -637,13 +638,14 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     return project.tasks
             .asSequence()
+            .filter { it.isRootTask(now) }
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, includedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
@@ -669,17 +671,15 @@ private fun Task<*>.showAsParent(
         return false
     }
 
-    if (!isRootTask(now)) return false
-
     if (excludedTaskKeys.contains(taskKey)) return false
 
-    if (includedTaskKeys.contains(taskKey)) { // todo this doesn't account for a parent that isn't a root instance
-        check(isVisible(now, true))
+    if (includedTaskKeys.contains(taskKey)) {
+        check(isVisible(now, true)) // exception for editing task that's child of done task
 
         return true
     }
 
-    if (!isVisible(now, false)) return false
+    if (!canAddSubtask(now)) return false
 
     return true
 }
@@ -732,17 +732,18 @@ private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp.Local,
         parentTask: Task<*>,
         excludedTaskKeys: Set<TaskKey>,
+        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()
-                .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
-                .associate {
-                    val childTask = it.childTask
-                    val taskParentKey = EditViewModel.ParentKey.Task(it.childTaskKey)
+                .map { it.childTask }
+                .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+                .associate { childTask ->
+                    val taskParentKey = EditViewModel.ParentKey.Task(childTask.taskKey)
 
                     val parentTreeData = EditViewModel.ParentTreeData(
                             childTask.name,
-                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
+                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys, includedTaskKeys),
                             EditViewModel.ParentKey.Task(childTask.taskKey),
                             childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
                             childTask.note,

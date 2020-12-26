@@ -48,9 +48,7 @@ object Preferences : FactoryProvider.Preferences {
     private fun <T> preferenceObservable(
             initial: SharedPreferences.() -> T,
             write: SharedPreferences.Editor.(T) -> Unit,
-    ) = observable(sharedPreferences.initial()) { _, _, newValue ->
-        sharedPreferences.edit { write(newValue) }
-    }
+    ) = observable(sharedPreferences.initial()) { _, _, newValue -> sharedPreferences.edit { write(newValue) } }
 
     override var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
 
@@ -69,9 +67,7 @@ object Preferences : FactoryProvider.Preferences {
 
     var shortcuts: Map<TaskKey, LocalDateTime> by observable(
             deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString) ?: mapOf()
-    ) { _, _, newValue ->
-        shortcutString = serialize(HashMap(newValue))
-    }
+    ) { _, _, newValue -> shortcutString = serialize(HashMap(newValue)) }
 
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
 

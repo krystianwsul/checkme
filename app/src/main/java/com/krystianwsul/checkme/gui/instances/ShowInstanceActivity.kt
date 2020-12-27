@@ -369,7 +369,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             )
                         }
                         R.id.instance_menu_show_task -> {
-                            showInstanceViewModel.stop()
+                            showInstanceViewModel.stop() // todo copy
 
                             startActivityForResult(
                                     ShowTaskActivity.newIntent(instanceKey.taskKey),
@@ -379,7 +379,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_edit_task -> {
                             check(it.taskCurrent)
 
-                            showInstanceViewModel.stop()
+                            showInstanceViewModel.stop() // todo copy
 
                             startActivityForResult(
                                     EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)),

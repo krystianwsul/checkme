@@ -586,8 +586,8 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += projectsFactory.privateProject
             .tasks
             .asSequence()
-            .filter { it.isRootTask(now) }
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+            .filter { it.isRootTask(now) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
@@ -638,8 +638,8 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     return project.tasks
             .asSequence()
-            .filter { it.isRootTask(now) }
             .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+            .filter { it.isRootTask(now) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 

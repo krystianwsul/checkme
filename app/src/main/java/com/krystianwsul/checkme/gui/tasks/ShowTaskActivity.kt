@@ -131,7 +131,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
             if (resultCode == Activity.RESULT_OK) {
                 check(data!!.hasExtra(TASK_KEY_KEY))
 
-                taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
+                taskKey = data.getParcelableExtra(TASK_KEY_KEY)!! // todo copy
 
                 setResult(Activity.RESULT_OK, Intent().apply {
                     putExtra(TASK_KEY_KEY, taskKey as Parcelable)
@@ -224,7 +224,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.task_menu_edit -> {
-                        showTaskViewModel.stop()
+                        showTaskViewModel.stop() // todo copy
 
                         startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(taskKey)), REQUEST_EDIT_TASK)
                     }

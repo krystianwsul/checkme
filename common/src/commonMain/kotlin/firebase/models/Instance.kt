@@ -332,7 +332,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      * Yet another reason to consider checking if task.getInstances() contains the instance.
                      */
                     parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.isValidlyCreatedHierarchy(now) }
+                            .takeIf { it.doneOffset?.let { it > hierarchyExactTimeStamp } != false }
+                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
                             ?.let { ParentInstanceData(it, false) }
                 }
             }

@@ -218,4 +218,63 @@ class DomainFactoryTest {
         assertEquals(1, getTodayInstanceDatas(now).single { it.taskKey == parentTask1Key }.children.size)
         assertEquals(2, getTodayInstanceDatas(now).single { it.taskKey == parentTask2Key }.children.size)
     }
+
+    @Test
+    fun testSettingParentInstanceDoneLocksList() {
+        val date = Date(2020, 12, 27)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val parenTaskKey = domainFactory.createScheduleRootTask(
+                SaveService.Source.SERVICE,
+                "parentTask",
+                listOf(
+                        ScheduleData.Single(date, TimePair(HourMinute(3, 0))),
+                        ScheduleData.Single(date, TimePair(HourMinute(4, 0)))
+                ),
+                null,
+                null,
+                null,
+                null,
+                now
+        )
+
+        val firstInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+
+        assertEquals(2, firstInstanceDatas.size)
+
+        val instanceKey1 = firstInstanceDatas[0].instanceKey
+
+        now += 1.hours
+
+        domainFactory.setInstanceDone(
+                DomainListenerManager.NotificationType.All,
+                SaveService.Source.SERVICE,
+                instanceKey1,
+                true,
+                now
+        )
+
+        now += 1.hours
+
+        domainFactory.createChildTask(
+                SaveService.Source.SERVICE,
+                parenTaskKey,
+                "childTask",
+                null,
+                null,
+                null,
+                now,
+        )
+
+        val secondInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+
+        assertEquals(2, secondInstanceDatas.size)
+        assertEquals(0, secondInstanceDatas[0].children.size)
+        assertEquals(1, secondInstanceDatas[1].children.size)
+    }
 }

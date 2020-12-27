@@ -225,6 +225,8 @@ class DomainFactory(
 
     var debugMode by observable(false) { _, _, _ -> domainListenerManager.notify(NotificationType.All) }
 
+    val copiedTaskKeys = mutableMapOf<TaskKey, TaskKey>()
+
     private fun updateIsSaved() {
         val oldSaved = isSaved.value!!
         val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
@@ -595,6 +597,7 @@ class DomainFactory(
             )
 
             remoteToRemoteConversion.endTasks[pair.first.id] = task
+            remoteToRemoteConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
             allUpdaters += updaters
         }
 
@@ -636,6 +639,8 @@ class DomainFactory(
                     .values
                     .forEach { it.addVirtualParents() }
         }
+
+        copiedTaskKeys.putAll(remoteToRemoteConversion.copiedTaskKeys)
 
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }

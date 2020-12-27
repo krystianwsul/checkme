@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.tasks
 
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -33,8 +32,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     companion object {
 
         const val TASK_KEY_KEY = "taskKey"
-
-        const val REQUEST_EDIT_TASK = 1
 
         private const val TAG_REMOVE_INSTANCES = "removeInstances"
 
@@ -124,26 +121,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         super.onDestroy()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_EDIT_TASK) {
-            if (resultCode == Activity.RESULT_OK) {
-                check(data!!.hasExtra(TASK_KEY_KEY))
-
-                taskKey = data.getParcelableExtra(TASK_KEY_KEY)!! // todo copy
-
-                setResult(Activity.RESULT_OK, Intent().apply {
-                    putExtra(TASK_KEY_KEY, taskKey as Parcelable)
-                })
-            }
-
-            showTaskViewModel.start(taskKey)
-        }
-    }
-
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
+        taskKey = data.newTaskKey
 
         val immediate = data.immediate
 
@@ -168,13 +148,17 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
+        val hasChildren = !data?.taskData
+                ?.childTaskDatas
+                .isNullOrEmpty()
+
         binding.showTaskToolbarCollapseInclude
                 .collapseAppBarLayout
                 .menu
-                .findItem(R.id.actionShowTaskSearch)
-                .isVisible = !data?.taskData
-                ?.childTaskDatas
-                .isNullOrEmpty()
+                .apply {
+                    findItem(R.id.actionShowTaskSearch).isVisible = hasChildren
+                    findItem(R.id.actionTaskShowDeleted).isVisible = hasChildren
+                }
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = binding.showTaskToolbarCollapseInclude
@@ -223,11 +207,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.task_menu_edit -> {
-                        showTaskViewModel.stop() // todo copy
-
-                        startActivityForResult(EditActivity.getParametersIntent(EditParameters.Edit(taskKey)), REQUEST_EDIT_TASK)
-                    }
+                    R.id.task_menu_edit -> startActivity(EditActivity.getParametersIntent(EditParameters.Edit(taskKey)))
                     R.id.task_menu_share -> {
                         check(data != null)
 

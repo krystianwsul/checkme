@@ -34,6 +34,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val taskKey: TaskKey,
             val isRecurringGroupChild: Boolean,
             val isVisible: Boolean,
+            val newInstanceKey: InstanceKey,
     ) : DomainData() {
 
         init {

@@ -15,8 +15,12 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 
-fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
+
+    val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
+            ?.let { requestInstanceKey.copy(taskKey = it) }
+            ?: requestInstanceKey
 
     val task = getTaskForce(instanceKey.taskKey)
 
@@ -51,7 +55,8 @@ fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceVie
             displayText,
             task.taskKey,
             instance.isGroupChild(now),
-            debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+            debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
+            instanceKey,
     )
 }
 

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances
 
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -193,7 +192,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.groupListFragment.setFab(bottomBinding.bottomFab)
 
         check(intent.hasExtra(INSTANCE_KEY))
-        instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
+        instanceKey = (savedInstanceState ?: intent.extras!!).getParcelable(INSTANCE_KEY)!!
 
         cancelNotification()
 
@@ -307,6 +306,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
+        this.instanceKey = data.newInstanceKey
 
         if (!data.isVisible) {
             finish()
@@ -368,23 +368,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     it.name + if (shareData.isEmpty()) "" else "\n" + shareData
                             )
                         }
-                        R.id.instance_menu_show_task -> {
-                            showInstanceViewModel.stop() // todo copy
-
-                            startActivityForResult(
-                                    ShowTaskActivity.newIntent(instanceKey.taskKey),
-                                    ShowTaskActivity.REQUEST_EDIT_TASK
-                            )
-                        }
+                        R.id.instance_menu_show_task -> startActivity(ShowTaskActivity.newIntent(instanceKey.taskKey))
                         R.id.instance_menu_edit_task -> {
                             check(it.taskCurrent)
 
-                            showInstanceViewModel.stop() // todo copy
-
-                            startActivityForResult(
-                                    EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)),
-                                    ShowTaskActivity.REQUEST_EDIT_TASK
-                            )
+                            startActivity(EditActivity.getParametersIntent(EditParameters.Edit(instanceKey)))
                         }
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
@@ -415,20 +403,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
 
-        if (requestCode == ShowTaskActivity.REQUEST_EDIT_TASK) {
-            if (resultCode == Activity.RESULT_OK) {
-                check(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
-
-                val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-
-                instanceKey = instanceKey.copy(taskKey = taskKey)
-            }
-
-            showInstanceViewModel.start(instanceKey)
-        }
+        outState.putParcelable(INSTANCE_KEY, instanceKey)
     }
 
     override fun onDestroy() {

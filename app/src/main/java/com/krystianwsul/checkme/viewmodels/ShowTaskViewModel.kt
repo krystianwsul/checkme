@@ -26,7 +26,8 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
             val collapseText: String?,
             val taskData: TaskListFragment.TaskData,
             val imageData: ImageState?,
-            val current: Boolean
+            val current: Boolean,
+            val newTaskKey: TaskKey,
     ) : DomainData() {
 
         init {

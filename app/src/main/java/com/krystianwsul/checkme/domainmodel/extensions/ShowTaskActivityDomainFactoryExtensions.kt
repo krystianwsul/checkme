@@ -10,8 +10,10 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getShowTaskData")
+
+    val taskKey = copiedTaskKeys[requestTaskKey] ?: requestTaskKey
 
     val now = ExactTimeStamp.Local.now
 
@@ -61,6 +63,7 @@ fun DomainFactory.getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data = sy
                     task.getProjectInfo(now),
             ),
             task.getImage(deviceDbInfo),
-            task.current(now)
+            task.current(now),
+            taskKey,
     )
 }

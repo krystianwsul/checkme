@@ -246,39 +246,16 @@ class NotDoneGroupNode(
                 CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    val newDone = singleInstanceData.done == null
-
-                    fun updateDone() = DomainFactory.instance.setInstanceDone(
-                            DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                    fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
+                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                             SaveService.Source.GUI,
                             instanceKey,
-                            newDone
+                            done
                     )
 
-                    if (nodeCollection.useDoneNode) {
-                        check(newDone)
+                    setDone(true)
 
-                        groupAdapter.treeNodeCollection
-                                .treeViewAdapter
-                                .updateDisplayedNodes {
-                                    singleInstanceData.done = updateDone()!!
-
-                                    nodeCollection.dividerNode.add(singleInstanceData, it)
-
-                                    notDoneGroupCollection.remove(this, it)
-                                }
-                    } else {
-                        updateDone()
-                    }
-
-                    groupListFragment.listener.showSnackbarDone(1) {
-                        DomainFactory.instance.setInstanceDone(
-                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                SaveService.Source.GUI,
-                                instanceKey,
-                                !newDone
-                        )
-                    }
+                    groupListFragment.listener.showSnackbarDone(1) { setDone(false) }
                 }
             }
         } else {

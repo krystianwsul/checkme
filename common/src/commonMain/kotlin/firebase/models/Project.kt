@@ -83,7 +83,8 @@ abstract class Project<T : ProjectType>(
         val taskHierarchyJson = TaskHierarchyJson(
                 parentTask.id,
                 childTask.id,
-                now.long
+                now.long,
+                now.offset
         )
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)

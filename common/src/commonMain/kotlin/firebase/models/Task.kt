@@ -995,7 +995,7 @@ class Task<T : ProjectType>(
 
     fun setNoScheduleOrParent(now: ExactTimeStamp.Local) {
         val noScheduleOrParentRecord =
-                taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(now.long))
+                taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(now.long, now.offset))
         check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
 
         noScheduleOrParentsMap[noScheduleOrParentRecord.id] =

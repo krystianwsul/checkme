@@ -41,11 +41,12 @@ class MyApplication : Application() {
         lateinit var instance: MyApplication
             private set
 
-        // for unit tests
         @SuppressLint("StaticFieldLeak")
-        lateinit var context: Context
+        var _context: Context? = null
+        val context get() = _context!!
 
-        lateinit var sharedPreferences: SharedPreferences
+        var _sharedPreferences: SharedPreferences? = null
+        val sharedPreferences get() = _sharedPreferences!!
     }
 
     val googleSignInClient by lazy { getClient() }
@@ -60,8 +61,8 @@ class MyApplication : Application() {
         super.onCreate()
 
         instance = this
-        context = this
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        _context = this
+        _sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         MyCrashlytics.init()
 

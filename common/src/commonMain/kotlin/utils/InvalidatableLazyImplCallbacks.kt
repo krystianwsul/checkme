@@ -2,22 +2,18 @@ package com.krystianwsul.common.utils
 
 class InvalidatableLazyImplCallbacks<T>(initializer: () -> T) : InvalidatableLazyImpl<T>(initializer) {
 
-    private val callbacks = mutableSetOf<WeakReference<() -> Unit>>()
+    private val callbacks = mutableSetOf<() -> Unit>()
 
     override fun invalidate() {
         super.invalidate()
 
-        val remove = callbacks.filter { it.get() == null }
-        callbacks.removeAll(remove)
-
-        callbacks.forEach { it.get()!!() }
+        callbacks.forEach { it() }
     }
 
-    fun addCallback(callback: () -> Unit) = callbacks.add(WeakReference(callback))
+    fun addCallback(callback: () -> Unit) = callbacks.add(callback)
 
     fun removeCallback(callback: () -> Unit) {
-        val item = callbacks.single { it.get() == callback }
-        callbacks.remove(item)
+        check(callbacks.remove(callback))
     }
 }
 

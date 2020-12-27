@@ -24,16 +24,10 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
 import com.soywiz.klock.hours
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.spyk
+import io.mockk.*
 import io.reactivex.disposables.CompositeDisposable
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 class DomainFactoryTest {
 
@@ -54,8 +48,8 @@ class DomainFactoryTest {
         @BeforeClass
         @JvmStatic
         fun beforeClass() {
-            MyApplication.sharedPreferences = mockk(relaxed = true)
-            MyApplication.context = mockk(relaxed = true)
+            MyApplication._sharedPreferences = mockk(relaxed = true)
+            MyApplication._context = mockk(relaxed = true)
 
             mockkObject(Preferences)
             every { Preferences.tickLog } returns mockk(relaxed = true)
@@ -69,6 +63,21 @@ class DomainFactoryTest {
 
             mockkObject(BackendNotifier)
             every { BackendNotifier.notify(any(), any(), any()) } returns Unit
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun afterClass() {
+            MyApplication._sharedPreferences = null
+            MyApplication._context = null
+
+            unmockkObject(Preferences)
+
+            unmockkObject(MyCrashlytics)
+
+            unmockkObject(NotificationWrapper)
+
+            unmockkObject(BackendNotifier)
         }
     }
 

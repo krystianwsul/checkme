@@ -7,7 +7,7 @@ class InvalidatableLazyImplCallbacks<T>(initializer: () -> T) : InvalidatableLaz
     override fun invalidate() {
         super.invalidate()
 
-        callbacks.forEach { it() }
+        callbacks.toMutableList().forEach { it() }
     }
 
     fun addCallback(callback: () -> Unit) = callbacks.add(callback)

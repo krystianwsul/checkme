@@ -118,6 +118,108 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
+    data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
+
+    private fun removeParentInstanceDataCallback() {
+        if (parentInstanceDataProperty.isInitialized()) {
+            parentInstanceData?.instance
+                    ?.doneOffsetProperty
+                    ?.removeCallback(::invalidateParentInstanceData)
+        }
+    }
+
+    private fun invalidateParentInstanceData() {
+        removeParentInstanceDataCallback()
+
+        parentInstanceDataProperty.invalidate()
+    }
+
+    private val parentInstanceDataProperty = invalidatableLazy {
+        val parentInstanceData = when (val parentState = data.parentState) {
+            ParentState.NoParent -> null
+            is ParentState.Parent -> {
+                val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
+
+                ParentInstanceData(parentInstance, true)
+            }
+            ParentState.Unset -> {
+                /**
+                 * 1. timestamp should be no oldest than the task start
+                 * 2. timestamp should be no newer than task end
+                 * 3. timestamp should be no newer than this instance's done
+                 * 4. barring all else, use task's most recent interval
+                 *
+                 * So, assuming we can't mark the instance as done before its corresponding task is created, we can
+                 * change this to:
+                 *
+                 * 1. if done is set, get interval for that time.
+                 * 2. else, use most recent interval (also, add utility method for this in task)
+                 */
+
+                val interval = done?.let { task.getInterval(it) } ?: task.getMostRecentInterval()
+
+                val parentTask = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)
+                        ?.taskHierarchy
+                        ?.parentTask
+
+                if (parentTask == null) {
+                    null
+                } else {
+                    /**
+                     * we also check if the parent task is done before all this went down, to prevent adding to finished
+                     * lists.  So, we should compare that "done" against when the interval started - as in, did the interval
+                     * first get added, or did the parent first get marked as done?
+                     *
+                     * Not sure which type of inequality to use here, but I don't think it really matters outside of
+                     * tests.
+                     *
+                     * todo hierarchy: The isValidlyCreateHierarchy test will change soon.  As soon as I build out the
+                     * mechanism for forcing these parent instances into existence, the check will be applicable only
+                     * for non-existent child instances, I think.
+                     *
+                     * todo hierarchy: But before that, I'll need to re-think isValidlyCreatedHierarchy anyway, to come
+                     * up with a method that doesn't need `now`.  I'm leaving the old notes below, for now.
+                     *
+                     * I think this logic is flawed for using `doneOffset`, in that the candidate instance should be
+                     * considered the parent, but the child instance invisible.  The goal is for the child to not be
+                     * visible anywhere, but I don't know if this makes a difference in practice, given the current
+                     * logic elsewhere.
+                     */
+
+                    parentTask.getInstance(scheduleDateTime)
+                            .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
+                            ?.takeIf { it.isValidlyCreatedHierarchy() }
+                            ?.let { ParentInstanceData(it, false) }
+
+                    /**
+                     * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
+                     * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
+                     * for now.  There would be a discrepancy when accessing an instance in a different way
+                     * (ShowTaskInstancesActivity is the only one that comes to mind).
+                     *
+                     * I think a parent is truly eligible if:
+                     * 1. It, or any instance in the hierarchy above it, exists
+                     * 2. The root instance matches a schedule
+                     *
+                     * Yet another reason to consider checking if task.getInstances() contains the instance.
+                     */
+
+                    /*
+                    parentTask.getInstance(scheduleDateTime)
+                            .takeIf { it.doneOffset?.let { it > hierarchyExactTimeStamp } != false }
+                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
+                            ?.let { ParentInstanceData(it, false) }
+                     */
+                }
+            }
+        }
+
+        parentInstanceData?.also {
+            it.instance.doneOffsetProperty.addCallback(::invalidateParentInstanceData)
+        }
+    }
+    val parentInstanceData by parentInstanceDataProperty
+
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
     constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
 
@@ -127,10 +229,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun addLazyCallbacks() {
         task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
+        task.intervalsProperty.addCallback(::invalidateParentInstanceData)
     }
 
     private fun removeLazyCallbacks() {
         task.scheduleIntervalsProperty.removeCallback(matchingScheduleIntervalsProperty::invalidate)
+        task.intervalsProperty.removeCallback(::invalidateParentInstanceData)
+
+        removeParentInstanceDataCallback()
     }
 
     fun exists() = (data is Data.Real)
@@ -149,7 +255,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             .getInstance(scheduleDateTime)
                 }
                 .filter {
-                    it.getParentInstance()
+                    it.parentInstanceData
                             ?.instance
                             ?.instanceKey == instanceKey
                 }
@@ -164,14 +270,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return childInstances
     }
 
-    fun isRootInstance() = getParentInstance() == null
+    fun isRootInstance() = parentInstanceData == null
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
 
     private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<T> {
         (data as? Data.Real)?.let { return it }
 
-        getParentInstance()?.instance?.createInstanceHierarchy(now)
+        parentInstanceData?.instance?.createInstanceHierarchy(now)
 
         return createInstanceRecord()
     }
@@ -233,8 +339,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         if (isInvisibleBecauseOfEndData(now)) return false
 
-        val parentInstance = getParentInstance()
-
         fun checkVisibilityForRoot(): Boolean {
             if (!isValidlyCreated()) return false
             val done = done ?: return true
@@ -247,18 +351,20 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             return done > cutoff
         }
 
+        val parentInstanceData = parentInstanceData
+
         return when {
             visibilityOptions.assumeChildOfVisibleParent -> {
-                checkNotNull(parentInstance)
+                checkNotNull(parentInstanceData)
 
                 true
             }
             visibilityOptions.assumeRoot -> {
-                check(parentInstance == null)
+                check(parentInstanceData == null)
 
                 checkVisibilityForRoot()
             }
-            parentInstance != null -> parentInstance.instance.isVisible(now, visibilityOptions)
+            parentInstanceData != null -> parentInstanceData.instance.isVisible(now, visibilityOptions)
             else -> checkVisibilityForRoot()
         }
     }
@@ -267,97 +373,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             .getParentScheduleKeys()
             .contains(scheduleKey)
 
-    private fun isValidlyCreatedHierarchy(): Boolean = getParentInstance()?.instance
+    private fun isValidlyCreatedHierarchy(): Boolean = parentInstanceData?.instance
             ?.isValidlyCreatedHierarchy()
             ?: isValidlyCreated()
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
-
-    data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
-
-    fun getParentInstance(): ParentInstanceData<T>? {
-        val instanceLocker = getInstanceLocker()
-
-        instanceLocker?.parentInstanceWrapper?.let { return it.value }
-
-        val parentInstanceData = when (val parentState = data.parentState) {
-            ParentState.NoParent -> null
-            is ParentState.Parent -> {
-                val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
-
-                ParentInstanceData(parentInstance, true)
-            }
-            ParentState.Unset -> {
-                /**
-                 * 1. timestamp should be no oldest than the task start
-                 * 2. timestamp should be no newer than task end
-                 * 3. timestamp should be no newer than this instance's done
-                 * 4. barring all else, use task's most recent interval
-                 *
-                 * So, assuming we can't mark the instance as done before its corresponding task is created, we can
-                 * change this to:
-                 *
-                 * 1. if done is set, get interval for that time.
-                 * 2. else, use most recent interval (also, add utility method for this in task)
-                 */
-
-                val interval = done?.let { task.getInterval(it) } ?: task.getMostRecentInterval()
-
-                val parentTask = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)
-                        ?.taskHierarchy
-                        ?.parentTask
-
-                if (parentTask == null) {
-                    null
-                } else {
-                    /**
-                     * we also check if the parent task is done before all this went down, to prevent adding to finished
-                     * lists.  So, we should compare that "done" against when the interval started - as in, did the interval
-                     * first get added, or did the parent first get marked as done?
-                     *
-                     * Not sure which type of inequality to use here, but I don't think it really matters outside of
-                     * tests.
-                     *
-                     * todo hierarchy: The isValidlyCreateHierarchy test will change soon.  As soon as I build out the
-                     * mechanism for forcing these parent instances into existence, the check will be applicable only
-                     * for non-existent child instances, I think.
-                     *
-                     * todo hierarchy: But before that, I'll need to re-think isValidlyCreatedHierarchy anyway, to come
-                     * up with a method that doesn't need `now`.  I'm leaving the old notes below, for now.
-                     */
-
-                    parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
-                            ?.takeIf { it.isValidlyCreatedHierarchy() }
-                            ?.let { ParentInstanceData(it, false) }
-
-                    /**
-                     * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
-                     * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
-                     * for now.  There would be a discrepancy when accessing an instance in a different way
-                     * (ShowTaskInstancesActivity is the only one that comes to mind).
-                     *
-                     * I think a parent is truly eligible if:
-                     * 1. It, or any instance in the hierarchy above it, exists
-                     * 2. The root instance matches a schedule
-                     *
-                     * Yet another reason to consider checking if task.getInstances() contains the instance.
-                     */
-
-                    /*
-                    parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.doneOffset?.let { it > hierarchyExactTimeStamp } != false }
-                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
-                            ?.let { ParentInstanceData(it, false) }
-                     */
-                }
-            }
-        }
-
-        instanceLocker?.parentInstanceWrapper = NullableWrapper(parentInstanceData)
-
-        return parentInstanceData
-    }
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
 
@@ -367,7 +387,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         createInstanceHierarchy(now).instanceRecord.hidden = true
     }
 
-    fun getParentName() = getParentInstance()?.instance
+    fun getParentName() = parentInstanceData?.instance
             ?.name
             ?: task.project.name
 
@@ -486,7 +506,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    fun isGroupChild() = getParentInstance()?.viaParentState ?: false
+    fun isGroupChild() = parentInstanceData?.viaParentState ?: false
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
 
@@ -547,7 +567,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (!isVisible(now, VisibilityOptions(hack24 = hack24))) return false
 
         // if it's a child, we also shouldn't add instances if the parent is done
-        return getParentInstance()?.instance
+        return parentInstanceData?.instance
                 ?.canAddSubtask(now, hack24)
                 ?: true
     }

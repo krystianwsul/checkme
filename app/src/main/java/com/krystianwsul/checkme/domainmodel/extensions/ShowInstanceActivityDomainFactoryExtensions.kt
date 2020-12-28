@@ -28,7 +28,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
     val instance = getInstance(instanceKey)
     val instanceDateTime = instance.instanceDateTime
-    val parentInstance = instance.getParentInstance()
+    val parentInstance = instance.parentInstanceData
 
     var displayText = listOfNotNull(
             instance.getParentName().takeIf { it.isNotEmpty() },

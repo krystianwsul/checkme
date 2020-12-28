@@ -75,7 +75,7 @@ class Task<T : ProjectType>(
     private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
-    private val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
+    val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     private val intervals by intervalsProperty
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {

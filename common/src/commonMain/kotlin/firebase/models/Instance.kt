@@ -120,20 +120,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
 
-    private fun removeParentInstanceDataCallback() {
-        if (parentInstanceDataProperty.isInitialized()) {
-            parentInstanceData?.instance
-                    ?.doneOffsetProperty
-                    ?.removeCallback(::invalidateParentInstanceData)
-        }
-    }
-
-    private fun invalidateParentInstanceData() {
-        removeParentInstanceDataCallback()
-
-        parentInstanceDataProperty.invalidate()
-    }
-
     private val parentInstanceDataProperty = invalidatableLazy {
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
@@ -215,9 +201,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
 
         parentInstanceData?.also {
-            it.instance.doneOffsetProperty.addCallback(::invalidateParentInstanceData)
+            it.instance
+                    .doneOffsetProperty
+                    .addCallback(::invalidateParentInstanceData)
         }
     }
+
     val parentInstanceData by parentInstanceDataProperty
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
@@ -225,6 +214,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     init {
         addLazyCallbacks()
+
+        doneOffsetProperty.addCallback(::invalidateParentInstanceData)
     }
 
     private fun addLazyCallbacks() {
@@ -236,7 +227,25 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         task.scheduleIntervalsProperty.removeCallback(matchingScheduleIntervalsProperty::invalidate)
         task.intervalsProperty.removeCallback(::invalidateParentInstanceData)
 
-        removeParentInstanceDataCallback()
+        tearDownParentInstanceData()
+    }
+
+    private fun tearDownParentInstanceData() {
+        if (parentInstanceDataProperty.isInitialized()) {
+            removeVirtualParents()
+
+            parentInstanceData?.instance
+                    ?.doneOffsetProperty
+                    ?.removeCallback(::invalidateParentInstanceData)
+        }
+    }
+
+    private fun invalidateParentInstanceData() {
+        tearDownParentInstanceData()
+
+        parentInstanceDataProperty.invalidate()
+
+        addVirtualParents()
     }
 
     fun exists() = (data is Data.Real)
@@ -477,7 +486,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         removeLazyCallbacks()
 
-        removeVirtualParents()
+        tearDownParentInstanceData()
 
         task.deleteInstance(this)
 
@@ -536,26 +545,30 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
         if (parentState == newParentState) return
 
-        removeVirtualParents()
         createInstanceHierarchy(now).parentState = newParentState
-        addVirtualParents()
+
+        invalidateParentInstanceData()
     }
 
     fun addVirtualParents() {
-        parentState.parentInstanceKey?.let {
-            val parentTask = task.project.getTaskForce(it.taskKey.taskId)
+        if (exists()) {
+            parentInstanceData?.instance?.let { parentInstance ->
+                val parentTask = parentInstance.task
 
-            parentTask.instanceHierarchyContainer.addChildInstance(this)
-            parentTask.getInstance(task.project.getDateTime(it.scheduleKey)).addVirtualParents()
+                parentTask.instanceHierarchyContainer.addChildInstance(this)
+                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).addVirtualParents()
+            }
         }
     }
 
     private fun removeVirtualParents() {
-        parentState.parentInstanceKey?.let {
-            val parentTask = task.project.getTaskForce(it.taskKey.taskId)
+        if (parentInstanceDataProperty.isInitialized() && exists()) {
+            parentInstanceData?.instance?.let { parentInstance ->
+                val parentTask = parentInstance.task
 
-            parentTask.instanceHierarchyContainer.removeChildInstance(this)
-            parentTask.getInstance(task.project.getDateTime(it.scheduleKey)).removeVirtualParents()
+                parentTask.instanceHierarchyContainer.removeChildInstance(this)
+                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).removeVirtualParents()
+            }
         }
     }
 

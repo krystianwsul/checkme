@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.hours
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
@@ -276,5 +276,82 @@ class DomainFactoryTest {
         assertEquals(2, secondInstanceDatas.size)
         assertEquals(0, secondInstanceDatas[0].children.size)
         assertEquals(1, secondInstanceDatas[1].children.size)
+    }
+
+    @Test
+    fun testClearingParentWorks() {
+        val date = Date(2020, 12, 28)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val task1Key = domainFactory.createScheduleRootTask(
+                SaveService.Source.SERVICE,
+                "task1",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
+                null,
+                null,
+                null,
+                null,
+                now,
+        )
+
+        assertEquals(
+                1,
+                domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                        .groupListDataWrapper
+                        .instanceDatas
+                        .size
+        )
+
+        now += 1.hours
+
+        val task2Key = domainFactory.createChildTask(
+                SaveService.Source.SERVICE,
+                task1Key,
+                "task2",
+                null,
+                null,
+                null,
+                now
+        )
+
+        val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .let {
+                    assertEquals(1, it.size)
+                    assertEquals(1, it[0].children.size)
+
+                    it[0].children
+                            .values
+                            .single()
+                            .instanceKey
+                }
+
+        val instance = domainFactory.getInstance(instanceKey)
+        assertNotNull(instance.parentInstanceData)
+
+        now += 1.hours
+
+        domainFactory.updateScheduleTask(
+                SaveService.Source.SERVICE,
+                task2Key,
+                "task2",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
+                null,
+                null,
+                null,
+                now
+        )
+
+        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .let {
+                    assertEquals(2, it.size)
+                    assertEquals(0, it[0].children.size)
+                    assertEquals(0, it[1].children.size)
+                }
+
+        assertNull(instance.parentInstanceData)
     }
 }

@@ -319,7 +319,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                  * So, assuming we can't mark the instance as done before its corresponding task is created, we can
                  * change this to:
                  *
-                 * 1. if sone is set, get interval for that time.
+                 * 1. if done is set, get interval for that time.
                  * 2. else, use most recent interval (also, add utility method for this in task)
                  */
 

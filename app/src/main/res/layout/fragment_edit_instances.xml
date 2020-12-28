@@ -26,6 +26,25 @@
             android:visibility="invisible">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/editInstanceParentLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/parentTask"
+                app:errorEnabled="true"
+                app:hintAnimationEnabled="false"
+                style="@style/MySpinner">
+
+                <AutoCompleteTextView
+                    android:id="@+id/editInstanceParentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/MySpinnerText"
+                    tools:ignore="LabelFor"
+                    android:singleLine="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/editInstanceDateLayout"
                 style="@style/MySpinner"
                 android:layout_width="match_parent"

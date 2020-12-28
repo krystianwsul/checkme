@@ -159,13 +159,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      * Not sure which type of inequality to use here, but I don't think it really matters outside of
                      * tests.
                      *
-                     * todo hierarchy: The isValidlyCreateHierarchy test will change soon.  As soon as I build out the
-                     * mechanism for forcing these parent instances into existence, the check will be applicable only
-                     * for non-existent child instances, I think.
-                     *
-                     * todo hierarchy: But before that, I'll need to re-think isValidlyCreatedHierarchy anyway, to come
-                     * up with a method that doesn't need `now`.  I'm leaving the old notes below, for now.
-                     *
                      * I think this logic is flawed for using `doneOffset`, in that the candidate instance should be
                      * considered the parent, but the child instance invisible.  The goal is for the child to not be
                      * visible anywhere, but I don't know if this makes a difference in practice, given the current
@@ -176,26 +169,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
                             ?.takeIf { it.isValidlyCreatedHierarchy() }
                             ?.let { ParentInstanceData(it, false) }
-
-                    /**
-                     * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
-                     * slightly different issue than being reachable from the main screen.  But I'll leave well enough alone
-                     * for now.  There would be a discrepancy when accessing an instance in a different way
-                     * (ShowTaskInstancesActivity is the only one that comes to mind).
-                     *
-                     * I think a parent is truly eligible if:
-                     * 1. It, or any instance in the hierarchy above it, exists
-                     * 2. The root instance matches a schedule
-                     *
-                     * Yet another reason to consider checking if task.getInstances() contains the instance.
-                     */
-
-                    /*
-                    parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.doneOffset?.let { it > hierarchyExactTimeStamp } != false }
-                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
-                            ?.let { ParentInstanceData(it, false) }
-                     */
                 }
             }
         }
@@ -282,14 +255,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun isRootInstance() = parentInstanceData == null
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
-
-    private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<T> {
-        (data as? Data.Real)?.let { return it }
-
-        parentInstanceData?.instance?.createInstanceHierarchy(now)
-
-        return createInstanceRecord()
-    }
 
     // this does not account for whether or not this is a rootInstance
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval<T>> {
@@ -390,10 +355,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
 
-    fun hide(now: ExactTimeStamp.Local) {
+    fun hide() {
         check(!data.hidden)
 
-        createInstanceHierarchy(now).instanceRecord.hidden = true
+        createInstanceRecord().instanceRecord.hidden = true
     }
 
     fun getParentName() = parentInstanceData?.instance
@@ -429,13 +394,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             shownFactory: ShownFactory,
             ownerKey: UserKey,
             dateTime: DateTime,
-            now: ExactTimeStamp.Local,
     ) {
         check(isRootInstance())
 
         if (dateTime == instanceDateTime) return
 
-        createInstanceHierarchy(now).instanceRecord.let {
+        createInstanceRecord().instanceRecord.let {
             it.instanceDate = dateTime.date
 
             it.instanceJsonTime = task.project
@@ -452,19 +416,22 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         shownHolder.forceShown(shownFactory).notified = false
     }
 
-    private fun createInstanceRecord() = Data.Real(
-            task,
-            task.createRemoteInstanceRecord(this)
-    ).also {
-        data = it
+    private fun createInstanceRecord(): Data.Real<T> {
+        if (data !is Data.Real<T>) {
+            data = Data.Real(
+                    task,
+                    task.createRemoteInstanceRecord(this)
+            )
 
-        doneProperty.invalidate()
-        doneOffsetProperty.invalidate()
+            addVirtualParents()
+        }
+
+        return data as Data.Real<T>
     }
 
     fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp.Local) {
         if (done) {
-            createInstanceHierarchy(now).instanceRecord.let {
+            createInstanceRecord().instanceRecord.let {
                 it.done = now.long
                 it.doneOffset = now.offset
             }
@@ -542,10 +509,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 .map { it.value }
     }
 
-    fun setParentState(newParentState: ParentState, now: ExactTimeStamp.Local) {
+    fun setParentState(newParentState: ParentState) {
         if (parentState == newParentState) return
 
-        createInstanceHierarchy(now).parentState = newParentState
+        createInstanceRecord().parentState = newParentState
 
         invalidateParentInstanceData()
     }

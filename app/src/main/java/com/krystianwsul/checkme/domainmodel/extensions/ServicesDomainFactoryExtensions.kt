@@ -31,7 +31,6 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
             localFactory,
             ownerKey,
             DateTime(date, Time.Normal(hourMinute)),
-            now
     )
     instance.setNotificationShown(localFactory, false)
 

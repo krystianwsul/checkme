@@ -105,7 +105,7 @@ fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: Lis
         getInstance(it).let {
             check(it.parentState is Instance.ParentState.Parent)
 
-            it.setParentState(Instance.ParentState.Unset, now)
+            it.setParentState(Instance.ParentState.Unset)
         }
     }
 
@@ -137,7 +137,6 @@ fun DomainFactory.setInstancesAddHourActivity(
                 localFactory,
                 ownerKey,
                 DateTime(date, Time.Normal(hourMinute)),
-                now
         )
     }
 
@@ -162,21 +161,15 @@ fun DomainFactory.undoInstancesAddHour(
 
     val now = ExactTimeStamp.Local.now
 
-    val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
-        Pair(
-                getInstance(instanceKey), instanceDateTime
-        )
-    }
-
-    pairs.forEach { (instance, instanceDateTime) ->
-        instance.setInstanceDateTime(localFactory, ownerKey, instanceDateTime, now)
+    val instances = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
+        getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, instanceDateTime) }
     }
 
     updateNotifications(now)
 
     save(dataId, source)
 
-    val remoteProjects = pairs.map { it.first.task.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet()
 
     notifyCloud(remoteProjects)
 }

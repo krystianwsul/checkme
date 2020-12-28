@@ -620,7 +620,7 @@ class DomainFactory(
         val endData = Task.EndData(now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            pair.second.forEach { if (!it.hidden) it.hide(now) }
+            pair.second.forEach { if (!it.hidden) it.hide() }
 
             // I think this might no longer be necessary, since setEndData doesn't recurse on children
             if (pair.first.endData != null)

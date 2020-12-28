@@ -100,7 +100,7 @@ class IrrelevantTest {
                 onlyRoot = true
         ).single()
 
-        instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)), now)
+        instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)))
 
         // 3: after second reminder, remove schedule, then set reminder done
 

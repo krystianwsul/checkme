@@ -80,7 +80,6 @@ fun DomainFactory.setInstancesDateTime(
                 localFactory,
                 ownerKey,
                 DateTime(instanceDate, getTime(instanceTimePair)),
-                now
         )
     }
 

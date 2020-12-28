@@ -459,7 +459,6 @@ class Task<T : ProjectType>(
                     shownFactory,
                     ownerKey,
                     singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                    now
             )
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }

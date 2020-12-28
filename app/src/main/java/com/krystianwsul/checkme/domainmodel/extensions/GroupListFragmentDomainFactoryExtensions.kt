@@ -46,9 +46,7 @@ fun DomainFactory.undoSetInstancesDateTime(
     val now = ExactTimeStamp.Local.now
 
     val instances = editInstancesUndoData.data.map { (instanceKey, dateTime) ->
-        getInstance(instanceKey).apply {
-            setInstanceDateTime(localFactory, ownerKey, dateTime, now)
-        }
+        getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, dateTime) }
     }
 
     val projects = instances.map { it.task.project }.toSet()

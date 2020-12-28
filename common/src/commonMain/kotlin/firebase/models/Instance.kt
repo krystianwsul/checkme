@@ -310,6 +310,19 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 ParentInstanceData(parentInstance, true)
             }
             ParentState.Unset -> {
+                /**
+                 * 1. timestamp should be no oldest than the task start
+                 * 2. timestamp should be no newer than task end
+                 * 3. timestamp should be no newer than this instance's done
+                 * 4. barring all else, use task's most recent interval
+                 *
+                 * So, assuming we can't mark the instance as done before its corresponding task is created, we can
+                 * change this to:
+                 *
+                 * 1. if sone is set, get interval for that time.
+                 * 2. else, use most recent interval (also, add utility method for this in task)
+                 */
+
                 val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
                 val parentTask = task.getParentTask(hierarchyExactTimeStamp)

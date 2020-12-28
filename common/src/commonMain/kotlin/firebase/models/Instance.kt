@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -323,14 +324,35 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                  * 2. else, use most recent interval (also, add utility method for this in task)
                  */
 
-                val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+                val interval = done?.let { task.getInterval(it) } ?: task.getMostRecentInterval()
 
-                val parentTask = task.getParentTask(hierarchyExactTimeStamp)
+                val parentTask = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)
+                        ?.taskHierarchy
+                        ?.parentTask
 
                 if (parentTask == null) {
                     null
                 } else {
-                    check(parentTask.notDeletedOffset(hierarchyExactTimeStamp))
+                    /**
+                     * we also check if the parent task is done before all this went down, to prevent adding to finished
+                     * lists.  So, we should compare that "done" against when the interval started - as in, did the interval
+                     * first get added, or did the parent first get marked as done?
+                     *
+                     * Not sure which type of inequality to use here, but I don't think it really matters outside of
+                     * tests.
+                     *
+                     * todo hierarchy: The isValidlyCreateHierarchy test will change soon.  As soon as I build out the
+                     * mechanism for forcing these parent instances into existence, the check will be applicable only
+                     * for non-existent child instances, I think.
+                     *
+                     * todo hierarchy: But before that, I'll need to re-think isValidlyCreatedHierarchy anyway, to come
+                     * up with a method that doesn't need `now`.  I'm leaving the old notes below, for now.
+                     */
+
+                    parentTask.getInstance(scheduleDateTime)
+                            .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
+                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
+                            ?.let { ParentInstanceData(it, false) }
 
                     /**
                      * todo I think this should also factor in whether or not an instance in the hierarchy exists, which is a
@@ -344,10 +366,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                      *
                      * Yet another reason to consider checking if task.getInstances() contains the instance.
                      */
+
+                    /*
                     parentTask.getInstance(scheduleDateTime)
                             .takeIf { it.doneOffset?.let { it > hierarchyExactTimeStamp } != false }
                             ?.takeIf { it.isValidlyCreatedHierarchy(now) }
                             ?.let { ParentInstanceData(it, false) }
+                     */
                 }
             }
         }

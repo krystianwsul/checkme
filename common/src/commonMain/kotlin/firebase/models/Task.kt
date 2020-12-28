@@ -973,7 +973,7 @@ class Task<T : ProjectType>(
 
     fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         val intervals = intervals
 
         try {
@@ -990,6 +990,8 @@ class Task<T : ProjectType>(
             )
         }
     }
+
+    fun getMostRecentInterval() = intervals.last()
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 

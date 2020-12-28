@@ -46,14 +46,13 @@ data class GroupListDataWrapper(
     data class InstanceData(
             var done: ExactTimeStamp.Local?,
             val instanceKey: InstanceKey,
-            var displayText: String?,
+            val displayText: String?,
             override val name: String,
             val instanceTimeStamp: TimeStamp,
             val instanceDateTime: DateTime,
             override val taskCurrent: Boolean,
             override val canAddSubtask: Boolean,
             val isRootInstance: Boolean,
-            var isRootTask: Boolean?,
             val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
@@ -100,11 +99,11 @@ data class GroupListDataWrapper(
         val childSelectedDatas: Collection<SelectedData>
     }
 
-    data class CustomTimeData(val Name: String, val HourMinutes: SortedMap<DayOfWeek, HourMinute>) {
+    data class CustomTimeData(val name: String, val hourMinutes: SortedMap<DayOfWeek, HourMinute>) {
 
         init {
-            check(Name.isNotEmpty())
-            check(HourMinutes.size == 7)
+            check(name.isNotEmpty())
+            check(hourMinutes.size == 7)
         }
     }
 }

@@ -217,7 +217,7 @@ class NotDoneGroupNode(
             val date = exactTimeStamp.date
             val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
 
-            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.Name
+            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name
                     ?: hourMinute.toString()
 
             val text = date.getDisplayText() + ", " + timeText
@@ -291,7 +291,7 @@ class NotDoneGroupNode(
         })
     }
 
-    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.customTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
+    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] === hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))

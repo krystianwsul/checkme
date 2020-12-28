@@ -25,8 +25,8 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
     data class Data(
             val name: String,
             val instanceDateTime: DateTime,
-            var done: Boolean,
-            var taskCurrent: Boolean,
+            val done: Boolean,
+            val taskCurrent: Boolean,
             val isRootInstance: Boolean,
             val groupListDataWrapper: GroupListDataWrapper,
             var notificationShown: Boolean,

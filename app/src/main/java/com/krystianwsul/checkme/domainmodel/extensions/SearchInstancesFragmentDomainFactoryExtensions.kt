@@ -42,8 +42,6 @@ fun DomainFactory.getSearchInstancesData(
             val instanceDatas = instances.map {
                 val task = it.task
 
-                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
                 /*
                 We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
                 can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
@@ -62,7 +60,6 @@ fun DomainFactory.getSearchInstancesData(
                         task.current(now),
                         it.canAddSubtask(now),
                         it.isRootInstance(),
-                        isRootTask,
                         it.getCreateTaskTimePair(ownerKey),
                         task.note,
                         children,

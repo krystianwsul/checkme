@@ -527,8 +527,6 @@ class DomainFactory(
                 .mapNotNull { childInstance ->
                     val childTask = childInstance.task
 
-                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
-
                     val childTaskMatches = searchCriteria?.let { childTask.matchesQuery(it.query) } ?: true
 
                     /*
@@ -550,7 +548,6 @@ class DomainFactory(
                                 childTask.current(now),
                                 childInstance.canAddSubtask(now),
                                 childInstance.isRootInstance(),
-                                isRootTask,
                                 childInstance.getCreateTaskTimePair(ownerKey),
                                 childTask.note,
                                 children,

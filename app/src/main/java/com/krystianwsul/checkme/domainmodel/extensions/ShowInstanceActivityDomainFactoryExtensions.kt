@@ -90,8 +90,6 @@ private fun DomainFactory.getGroupListData(
             .map { childInstance ->
                 val childTask = childInstance.task
 
-                val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
-
                 val children = getChildInstanceDatas(childInstance, now)
 
                 val instanceData = GroupListDataWrapper.InstanceData(
@@ -104,7 +102,6 @@ private fun DomainFactory.getGroupListData(
                         childTask.current(now),
                         childTask.isVisible(now),
                         childInstance.isRootInstance(),
-                        isRootTask,
                         childInstance.getCreateTaskTimePair(ownerKey),
                         childTask.note,
                         children,

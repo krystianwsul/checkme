@@ -104,15 +104,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
-    private val hierarchyExactTimeStampEndRangeProperty = invalidatableLazy {
-        listOfNotNull(
-                task.endExactTimeStampOffset?.let { Pair(it.minusOne(), "task end") },
-                doneOffset?.let { Pair(it.minusOne(), "done") }
-        ).minByOrNull { it.first }
-    }
-
-    private val hierarchyExactTimeStampEndRange by hierarchyExactTimeStampEndRangeProperty
-
     val parentState get() = data.parentState
 
     private val matchingScheduleIntervalsProperty = invalidatableLazy {
@@ -135,23 +126,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     private fun addLazyCallbacks() {
-        task.endDataProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneOffsetProperty.addCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
     }
 
     private fun removeLazyCallbacks() {
-        task.endDataProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
-        doneOffsetProperty.removeCallback(hierarchyExactTimeStampEndRangeProperty::invalidate)
         task.scheduleIntervalsProperty.removeCallback(matchingScheduleIntervalsProperty::invalidate)
     }
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp.Local): List<Instance<T>> {
-        val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
+    fun getChildInstances(): List<Instance<T>> {
+        val instanceLocker = getInstanceLocker()
         instanceLocker?.childInstances?.let { return it }
 
         val scheduleDateTime = scheduleDateTime
@@ -164,7 +149,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             .getInstance(scheduleDateTime)
                 }
                 .filter {
-                    it.getParentInstance(now)
+                    it.getParentInstance()
                             ?.instance
                             ?.instanceKey == instanceKey
                 }
@@ -179,22 +164,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return childInstances
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp.Local): Pair<ExactTimeStamp, String> {
-        if (now < task.startExactTimeStampOffset) return task.startExactTimeStampOffset to "task start"
+    fun isRootInstance() = getParentInstance() == null
 
-        hierarchyExactTimeStampEndRange?.let { if (now > it.first) return it }
-
-        return now to "now"
-    }
-
-    fun isRootInstance(now: ExactTimeStamp.Local) = getParentInstance(now) == null
-
-    fun getDisplayData(now: ExactTimeStamp.Local) = if (isRootInstance(now)) instanceDateTime else null
+    fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
 
     private fun createInstanceHierarchy(now: ExactTimeStamp.Local): Data.Real<T> {
         (data as? Data.Real)?.let { return it }
 
-        getParentInstance(now)?.instance?.createInstanceHierarchy(now)
+        getParentInstance()?.instance?.createInstanceHierarchy(now)
 
         return createInstanceRecord()
     }
@@ -256,7 +233,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         if (isInvisibleBecauseOfEndData(now)) return false
 
-        val parentInstance = getParentInstance(now)
+        val parentInstance = getParentInstance()
 
         fun checkVisibilityForRoot(): Boolean {
             if (!isValidlyCreated()) return false
@@ -290,16 +267,16 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             .getParentScheduleKeys()
             .contains(scheduleKey)
 
-    private fun isValidlyCreatedHierarchy(now: ExactTimeStamp.Local): Boolean = getParentInstance(now)?.instance
-            ?.isValidlyCreatedHierarchy(now)
+    private fun isValidlyCreatedHierarchy(): Boolean = getParentInstance()?.instance
+            ?.isValidlyCreatedHierarchy()
             ?: isValidlyCreated()
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
 
     data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
 
-    fun getParentInstance(now: ExactTimeStamp.Local): ParentInstanceData<T>? {
-        val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
+    fun getParentInstance(): ParentInstanceData<T>? {
+        val instanceLocker = getInstanceLocker()
 
         instanceLocker?.parentInstanceWrapper?.let { return it.value }
 
@@ -351,7 +328,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
                     parentTask.getInstance(scheduleDateTime)
                             .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
-                            ?.takeIf { it.isValidlyCreatedHierarchy(now) }
+                            ?.takeIf { it.isValidlyCreatedHierarchy() }
                             ?.let { ParentInstanceData(it, false) }
 
                     /**
@@ -390,7 +367,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         createInstanceHierarchy(now).instanceRecord.hidden = true
     }
 
-    fun getParentName(now: ExactTimeStamp.Local) = getParentInstance(now)?.instance
+    fun getParentName() = getParentInstance()?.instance
             ?.name
             ?: task.project.name
 
@@ -425,7 +402,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             dateTime: DateTime,
             now: ExactTimeStamp.Local,
     ) {
-        check(isRootInstance(now))
+        check(isRootInstance())
 
         if (dateTime == instanceDateTime) return
 
@@ -509,11 +486,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    fun isGroupChild(now: ExactTimeStamp.Local) = getParentInstance(now)?.viaParentState ?: false
-
-    fun onTaskEndChanged() {
-        hierarchyExactTimeStampEndRangeProperty.invalidate()
-    }
+    fun isGroupChild() = getParentInstance()?.viaParentState ?: false
 
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
 
@@ -530,7 +503,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
-        if (!isRootInstance(now)) return listOf()
+        if (!isRootInstance()) return listOf()
 
         return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
                 .distinct()
@@ -574,7 +547,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (!isVisible(now, VisibilityOptions(hack24 = hack24))) return false
 
         // if it's a child, we also shouldn't add instances if the parent is done
-        return getParentInstance(now)?.instance
+        return getParentInstance()?.instance
                 ?.canAddSubtask(now, hack24)
                 ?: true
     }

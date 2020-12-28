@@ -246,7 +246,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp.Local) = instance.getChildInstances(now)
+    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp.Local) = instance.getChildInstances()
             .asSequence()
             .filter { it.done == null }
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }

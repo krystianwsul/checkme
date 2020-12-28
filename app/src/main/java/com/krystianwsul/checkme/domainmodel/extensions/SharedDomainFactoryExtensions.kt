@@ -84,7 +84,7 @@ fun DomainFactory.setInstancesNotNotified(
         check(instance.done == null)
         check(instance.instanceDateTime.timeStamp.toLocalExactTimeStamp() <= now)
         check(!instance.getNotificationShown(localFactory))
-        check(instance.isRootInstance(now))
+        check(instance.isRootInstance())
 
         instance.setNotified(localFactory, false)
         instance.setNotificationShown(localFactory, false)

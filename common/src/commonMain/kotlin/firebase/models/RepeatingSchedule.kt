@@ -145,7 +145,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
                 now.toOffset().plusOne()
         ).toList()
 
-        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance(now) }
+        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance() }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter {

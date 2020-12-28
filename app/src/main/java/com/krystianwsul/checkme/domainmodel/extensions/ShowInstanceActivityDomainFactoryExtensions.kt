@@ -28,11 +28,11 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
     val instance = getInstance(instanceKey)
     val instanceDateTime = instance.instanceDateTime
-    val parentInstance = instance.getParentInstance(now)
+    val parentInstance = instance.getParentInstance()
 
     var displayText = listOfNotNull(
-            instance.getParentName(now).takeIf { it.isNotEmpty() },
-            instanceDateTime.takeIf { instance.isRootInstance(now) }?.getDisplayText(),
+            instance.getParentName().takeIf { it.isNotEmpty() },
+            instanceDateTime.takeIf { instance.isRootInstance() }?.getDisplayText(),
     ).joinToString("\n\n")
 
     if (debugMode) {
@@ -54,7 +54,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
             instance.getNotificationShown(localFactory),
             displayText,
             task.taskKey,
-            instance.isGroupChild(now),
+            instance.isGroupChild(),
             debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
             instanceKey,
     )
@@ -85,7 +85,7 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instance.getChildInstances(now)
+    val instanceDatas = instance.getChildInstances()
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
             .map { childInstance ->
                 val childTask = childInstance.task
@@ -103,7 +103,7 @@ private fun DomainFactory.getGroupListData(
                         childInstance.instanceDateTime,
                         childTask.current(now),
                         childTask.isVisible(now),
-                        childInstance.isRootInstance(now),
+                        childInstance.isRootInstance(),
                         isRootTask,
                         childInstance.getCreateTaskTimePair(ownerKey),
                         childTask.note,
@@ -111,7 +111,7 @@ private fun DomainFactory.getGroupListData(
                         childTask.ordinal,
                         childInstance.getNotificationShown(localFactory),
                         childTask.getImage(deviceDbInfo),
-                        childInstance.isGroupChild(now),
+                        childInstance.isGroupChild(),
                         childInstance.isAssignedToMe(now, myUserFactory.user),
                         childInstance.getProjectInfo(now),
                 )

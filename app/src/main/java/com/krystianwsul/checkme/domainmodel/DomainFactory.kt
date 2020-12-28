@@ -520,7 +520,7 @@ class DomainFactory(
             searchCriteria: SearchCriteria? = null,
             filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
-        return instance.getChildInstances(now)
+        return instance.getChildInstances()
                 .filter {
                     !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
                 }
@@ -549,7 +549,7 @@ class DomainFactory(
                                 childInstance.instanceDateTime,
                                 childTask.current(now),
                                 childInstance.canAddSubtask(now),
-                                childInstance.isRootInstance(now),
+                                childInstance.isRootInstance(),
                                 isRootTask,
                                 childInstance.getCreateTaskTimePair(ownerKey),
                                 childTask.note,
@@ -557,7 +557,7 @@ class DomainFactory(
                                 childTask.ordinal,
                                 childInstance.getNotificationShown(localFactory),
                                 childTask.getImage(deviceDbInfo),
-                                childInstance.isGroupChild(now),
+                                childInstance.isGroupChild(),
                                 childInstance.isAssignedToMe(now, myUserFactory.user),
                                 childInstance.getProjectInfo(now),
                         )

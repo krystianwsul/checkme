@@ -18,7 +18,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map { getInstance(it) }
-            .filter { it.isRootInstance(now) }
+            .filter { it.isRootInstance() }
             .sortedBy { it.instanceDateTime }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
@@ -35,13 +35,13 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         val instanceData = GroupListDataWrapper.InstanceData(
                 instance.done,
                 instance.instanceKey,
-                instance.getDisplayData(now)?.getDisplayText(),
+                instance.getDisplayData()?.getDisplayText(),
                 instance.name,
                 instance.instanceDateTime.timeStamp,
                 instance.instanceDateTime,
                 task.current(now),
                 instance.canAddSubtask(now),
-                instance.isRootInstance(now),
+                instance.isRootInstance(),
                 isRootTask,
                 instance.getCreateTaskTimePair(ownerKey),
                 task.note,
@@ -49,7 +49,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
                 instance.task.ordinal,
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
-                instance.isGroupChild(now),
+                instance.isGroupChild(),
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )

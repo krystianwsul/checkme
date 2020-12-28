@@ -351,9 +351,9 @@ class IrrelevantTest {
                 bySchedule = true,
                 onlyRoot = true
         ).single()
-        assertEquals(2, parentInstance.getChildInstances(now).size)
+        assertEquals(2, parentInstance.getChildInstances().size)
 
-        val child1Instance = parentInstance.getChildInstances(now).single {
+        val child1Instance = parentInstance.getChildInstances().single {
             it.instanceKey
                     .taskKey
                     .taskId == child1TaskId
@@ -370,7 +370,7 @@ class IrrelevantTest {
 
         assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
         assertTrue(
-                parentInstance.getChildInstances(now).single {
+                parentInstance.getChildInstances().single {
                     it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
                 } == child1Instance
         )

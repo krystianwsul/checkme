@@ -240,13 +240,12 @@ class Task<T : ProjectType>(
     private fun getExistingInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
             bySchedule: Boolean,
             onlyRoot: Boolean,
     ): Sequence<Instance<T>> {
         return _existingInstances.values
                 .asSequence()
-                .run { if (onlyRoot) filter { it.isRootInstance(now) } else this }
+                .run { if (onlyRoot) filter { it.isRootInstance() } else this }
                 .map { it.getSequenceDate(bySchedule) to it }
                 .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
     }
@@ -279,7 +278,7 @@ class Task<T : ProjectType>(
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
                     .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                     .mapNotNull {
-                        it.getChildInstances(now)
+                        it.getChildInstances()
                                 .singleOrNull { it.taskKey == taskKey }
                                 ?.takeIf { !it.exists() }
                     }
@@ -292,21 +291,19 @@ class Task<T : ProjectType>(
     private fun getVirtualParentInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
     ): Sequence<Instance<out T>> {
         return instanceHierarchyContainer.getParentScheduleKeys()
                 .map(project::getDateTime)
                 .asSequence()
                 .map { it to getInstance(it) }
                 .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
-                .filter { !it.exists() && it.isRootInstance(now) }
+                .filter { !it.exists() && it.isRootInstance() }
     }
 
     // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
     ): Sequence<Instance<out T>> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
@@ -319,7 +316,7 @@ class Task<T : ProjectType>(
                     .distinct()
                     .filter { ScheduleKey(it) !in virtualParentScheduleKeys }
                     .map(::getInstance)
-                    .filter { !it.exists() && it.isRootInstance(now) } // I don't know if the root part is necessary, now that group tasks are removed
+                    .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
         }
     }
 
@@ -372,7 +369,6 @@ class Task<T : ProjectType>(
             getExistingInstances(
                     startExactTimeStamp,
                     endExactTimeStamp,
-                    now,
                     bySchedule,
                     onlyRoot
             ).filter { it.done != null }
@@ -382,7 +378,6 @@ class Task<T : ProjectType>(
             instanceSequences += getExistingInstances(
                     startExactTimeStamp,
                     endExactTimeStamp,
-                    now,
                     bySchedule,
                     onlyRoot
             )
@@ -396,9 +391,9 @@ class Task<T : ProjectType>(
                 )
             }
 
-            instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp, now)
+            instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp)
 
-            instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp, now)
+            instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 
             return combineInstanceSequences(instanceSequences, bySchedule)
         }
@@ -548,8 +543,6 @@ class Task<T : ProjectType>(
         }
 
         endDataProperty.invalidate()
-
-        (existingInstances + generatedInstances).values.forEach { it.onTaskEndChanged() }
     }
 
     fun createChildTask(

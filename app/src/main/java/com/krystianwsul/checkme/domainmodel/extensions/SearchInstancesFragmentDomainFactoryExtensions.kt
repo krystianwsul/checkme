@@ -61,7 +61,7 @@ fun DomainFactory.getSearchInstancesData(
                         it.instanceDateTime,
                         task.current(now),
                         it.canAddSubtask(now),
-                        it.isRootInstance(now),
+                        it.isRootInstance(),
                         isRootTask,
                         it.getCreateTaskTimePair(ownerKey),
                         task.note,
@@ -69,7 +69,7 @@ fun DomainFactory.getSearchInstancesData(
                         it.task.ordinal,
                         it.getNotificationShown(localFactory),
                         task.getImage(deviceDbInfo),
-                        it.isGroupChild(now),
+                        it.isGroupChild(),
                         it.isAssignedToMe(now, myUserFactory.user),
                         it.getProjectInfo(now),
                 )

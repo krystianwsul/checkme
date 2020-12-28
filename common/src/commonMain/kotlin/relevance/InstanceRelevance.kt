@@ -30,9 +30,8 @@ class InstanceRelevance(val instance: Instance<*>) {
         )
 
         // set parent instance relevant
-        if (!instance.isRootInstance(now)) {
-            val (parentInstance, _) = instance.getParentInstance(now)!!
-
+        val parentInstance = instance.getParentInstance()?.instance
+        if (parentInstance != null) {
             val parentInstanceKey = parentInstance.instanceKey
 
             if (!instanceRelevances.containsKey(parentInstanceKey))
@@ -47,7 +46,7 @@ class InstanceRelevance(val instance: Instance<*>) {
         }
 
         // set child instances relevant
-        instance.getChildInstances(now)
+        instance.getChildInstances()
                 .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                 .map { instance ->
                     val instanceKey = instance.instanceKey

@@ -49,8 +49,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private lateinit var searchChanges: Observable<String>
 
-    private var taskDatas: Map<EditViewModel.ParentKey, EntryData>? = null
-    lateinit var listener: Listener
+    lateinit var delegate: Delegate
 
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
     private var expandedParentKeys: List<Parcelable>? = null
@@ -84,19 +83,18 @@ class ParentPickerFragment : AbstractDialogFragment() {
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
                 .setView(binding.root)
                 .setPositiveButton(R.string.add_task) { _, _ ->
-                    listener.onNewParent(binding.parentPickerSearch.text?.toString())
+                    delegate.onNewParent(binding.parentPickerSearch.text?.toString())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY))
-                        setNeutralButton(R.string.delete) { _, _ -> listener.onTaskDeleted() }
+                        setNeutralButton(R.string.delete) { _, _ -> delegate.onTaskDeleted() }
                 }
                 .create()
     }
 
-    fun initialize(taskDatas: Map<EditViewModel.ParentKey, EntryData>, listener: Listener) {
-        this.taskDatas = taskDatas
-        this.listener = listener
+    fun initialize(delegate: Delegate) {
+        this.delegate = delegate
 
         if (bindingProperty.isSet) initialize()
     }
@@ -106,11 +104,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
-        if (taskDatas != null) initialize()
+        if (this::delegate.isInitialized) initialize()
     }
 
     private fun initialize() {
-        checkNotNull(taskDatas)
         check(activity != null)
 
         initializeDisposable.clear()
@@ -121,11 +118,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
             treeViewAdapter!!.updateDisplayedNodes {
-                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
+                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(delegate.entryDatas, expandedParentKeys)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(taskDatas!!, expandedParentKeys)
+            taskAdapter.initialize(delegate.entryDatas, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.parentPickerRecycler.apply {
@@ -208,7 +205,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             private set
 
         fun initialize(
-                taskDatas: Map<EditViewModel.ParentKey, EntryData>,
+                entryDatas: Collection<EntryData>,
                 expandedParentKeys: List<Parcelable>?,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -219,7 +216,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             val treeNodes = ArrayList<TreeNode<AbstractHolder>>()
 
-            for (parentTreeData in taskDatas.values) {
+            for (parentTreeData in entryDatas) {
                 val taskWrapper = TaskWrapper(0, this, parentTreeData, null)
 
                 treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedParentKeys))
@@ -343,7 +340,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 parentPickerFragment.dismiss()
 
-                parentPickerFragment.listener.onTaskSelected(entryData)
+                parentPickerFragment.delegate.onTaskSelected(entryData)
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
@@ -373,7 +370,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val taskAdapter: TaskAdapter
     }
 
-    interface Listener {
+    interface Delegate {
+
+        val entryDatas: Collection<EntryData>
 
         fun onTaskSelected(entryData: EntryData)
 

@@ -112,7 +112,9 @@ class EditActivity : NavBarActivity() {
 
     private val discardDialogListener = this::finish
 
-    private val parentFragmentListener = object : ParentPickerFragment.Listener {
+    private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
+
+        override val entryDatas get() = delegate.parentTreeDatas.values
 
         override fun onTaskSelected(entryData: ParentPickerFragment.EntryData) {
             delegate.parentScheduleManager.parent = entryData as EditViewModel.ParentTreeData
@@ -408,7 +410,7 @@ class EditActivity : NavBarActivity() {
             note = delegate.initialNote
         }
 
-        tryGetFragment<ParentPickerFragment>(PARENT_PICKER_FRAGMENT_TAG)?.initialize(delegate.parentTreeDatas, parentFragmentListener)
+        tryGetFragment<ParentPickerFragment>(PARENT_PICKER_FRAGMENT_TAG)?.initialize(parentFragmentDelegate)
 
         invalidateOptionsMenu()
 
@@ -706,7 +708,7 @@ class EditActivity : NavBarActivity() {
                         setFixedOnClickListener {
                             ParentPickerFragment.newInstance(parent != null).let {
                                 it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(activity.delegate.parentTreeDatas, activity.parentFragmentListener)
+                                it.initialize(activity.parentFragmentDelegate)
                             }
                         }
                     }

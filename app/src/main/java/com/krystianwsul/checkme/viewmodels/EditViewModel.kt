@@ -6,8 +6,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
-import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -285,19 +285,22 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
     )
 
     data class ParentTreeData(
-            val name: String,
+            override val name: String,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val parentKey: ParentKey,
-            val scheduleText: String?,
-            val note: String?,
-            val sortKey: SortKey,
+            override val details: String?,
+            override val note: String?,
+            override val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
             val projectUsers: Map<UserKey, UserData>,
-    ) : QueryMatchable {
+    ) : ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
-        fun normalize() {
+        override val entryKey = parentKey
+        override val childEntryDatas = parentTreeDatas.values
+
+        override fun normalize() {
             normalizedFields
         }
     }

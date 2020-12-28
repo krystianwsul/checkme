@@ -4,6 +4,7 @@ package com.krystianwsul.checkme.gui.edit.dialogs
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.MotionEvent
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +26,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
@@ -47,11 +49,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private lateinit var searchChanges: Observable<String>
 
-    private var taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>? = null
+    private var taskDatas: Map<EditViewModel.ParentKey, EntryData>? = null
     lateinit var listener: Listener
 
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
-    private var expandedParentKeys: List<EditViewModel.ParentKey>? = null
+    private var expandedParentKeys: List<Parcelable>? = null
 
     private val initializeDisposable = CompositeDisposable()
 
@@ -92,7 +94,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 .create()
     }
 
-    fun initialize(taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>, listener: Listener) {
+    fun initialize(taskDatas: Map<EditViewModel.ParentKey, EntryData>, listener: Listener) {
         this.taskDatas = taskDatas
         this.listener = listener
 
@@ -206,8 +208,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             private set
 
         fun initialize(
-                taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-                expandedParentKeys: List<EditViewModel.ParentKey>?,
+                taskDatas: Map<EditViewModel.ParentKey, EntryData>,
+                expandedParentKeys: List<Parcelable>?,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -238,7 +240,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         private inner class TaskWrapper(
                 override val indentation: Int,
                 private val taskParent: TaskParent,
-                val parentTreeData: EditViewModel.ParentTreeData,
+                val entryData: EntryData,
                 override val parentNode: ModelNode<AbstractHolder>?,
         ) : AbstractModelNode(), TaskParent, MultiLineModelNode, IndentationModelNode {
 
@@ -247,7 +249,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val holderType = HolderType.DIALOG
 
-            override val id = parentTreeData.parentKey
+            override val id = entryData.entryKey
 
             private lateinit var taskWrappers: MutableList<TaskWrapper>
 
@@ -255,14 +257,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             private val parentFragment get() = taskAdapter.parentPickerFragment
 
-            val expandedParentKeys: List<EditViewModel.ParentKey>
+            val expandedParentKeys: List<Parcelable>
                 get() {
-                    val expandedParentKeys = ArrayList<EditViewModel.ParentKey>()
+                    val expandedParentKeys = ArrayList<Parcelable>()
 
                     val treeNode = this.treeNode
 
                     if (treeNode.isExpanded) {
-                        expandedParentKeys.add(parentTreeData.parentKey)
+                        expandedParentKeys.add(entryData.entryKey)
 
                         expandedParentKeys.addAll(taskWrappers.flatMap { it.expandedParentKeys })
                     }
@@ -289,12 +291,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             fun initialize(
                     nodeContainer: NodeContainer<AbstractHolder>,
-                    expandedParentKeys: List<EditViewModel.ParentKey>?,
+                    expandedParentKeys: List<Parcelable>?,
             ): TreeNode<AbstractHolder> {
                 var expanded = false
                 if (expandedParentKeys != null) {
                     check(expandedParentKeys.isNotEmpty())
-                    expanded = expandedParentKeys.contains(parentTreeData.parentKey)
+                    expanded = expandedParentKeys.contains(entryData.entryKey)
                 }
 
                 treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -303,7 +305,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 val treeNodes = ArrayList<TreeNode<AbstractHolder>>()
 
-                for (parentTreeData in parentTreeData.parentTreeDatas.values) {
+                for (parentTreeData in entryData.childEntryDatas) {
                     val taskWrapper = TaskWrapper(indentation + 1, this, parentTreeData, this)
 
                     treeNodes.add(taskWrapper.initialize(treeNode, expandedParentKeys))
@@ -316,13 +318,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = MultiLineNameData.Visible(parentTreeData.name)
+            override val name get() = MultiLineNameData.Visible(entryData.name)
 
             override val details: Pair<String, Int>?
-                get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {
-                    null
-                } else {
-                    Pair(parentTreeData.scheduleText, R.color.textSecondary)
+                get() = entryData.details.let {
+                    if (it.isNullOrEmpty()) null else Pair(it, R.color.textSecondary)
                 }
 
             override val children: Pair<String, Int>?
@@ -332,8 +332,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
                             ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
                             ?.map { it.modelNode as TaskAdapter.TaskWrapper }
                             ?.takeIf { it.isNotEmpty() }
-                            ?.joinToString(", ") { it.parentTreeData.name }
-                            ?: parentTreeData.note.takeIf { !it.isNullOrEmpty() }
+                            ?.joinToString(", ") { it.entryData.name }
+                            ?: entryData.note.takeIf { !it.isNullOrEmpty() }
 
                     return text?.let { Pair(it, R.color.textSecondary) }
                 }
@@ -343,18 +343,18 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 parentPickerFragment.dismiss()
 
-                parentPickerFragment.listener.onTaskSelected(parentTreeData)
+                parentPickerFragment.listener.onTaskSelected(entryData)
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
-                var comparison = parentTreeData.sortKey.compareTo((other as TaskWrapper).parentTreeData.sortKey)
+                var comparison = entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
                 if (indentation == 0)
                     comparison = -comparison
 
                 return comparison
             }
 
-            override fun normalize() = parentTreeData.normalize()
+            override fun normalize() = entryData.normalize()
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean {
                 check(!filterParams.showDeleted)
@@ -364,7 +364,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             }
 
             override fun getMatchResult(query: String) =
-                    ModelNode.MatchResult.fromBoolean(parentTreeData.matchesQuery(query))
+                    ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
         }
     }
 
@@ -375,10 +375,22 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     interface Listener {
 
-        fun onTaskSelected(parentTreeData: EditViewModel.ParentTreeData)
+        fun onTaskSelected(entryData: EntryData)
 
         fun onTaskDeleted()
 
         fun onNewParent(nameHint: String?)
+    }
+
+    interface EntryData : QueryMatchable {
+
+        val name: String
+        val childEntryDatas: Collection<EntryData>
+        val entryKey: Parcelable
+        val details: String?
+        val note: String?
+        val sortKey: EditViewModel.SortKey
+
+        fun normalize()
     }
 }

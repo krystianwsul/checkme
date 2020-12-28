@@ -114,8 +114,8 @@ class EditActivity : NavBarActivity() {
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
-        override fun onTaskSelected(parentTreeData: EditViewModel.ParentTreeData) {
-            delegate.parentScheduleManager.parent = parentTreeData
+        override fun onTaskSelected(entryData: ParentPickerFragment.EntryData) {
+            delegate.parentScheduleManager.parent = entryData as EditViewModel.ParentTreeData
         }
 
         override fun onTaskDeleted() {

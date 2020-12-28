@@ -29,13 +29,10 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
         instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(
                 instance.instanceDateTime,
-                instance.name,
                 instance.done != null
         )
 
-        (instance.instanceTime as? Time.Custom<*>)?.let {
-            currentCustomTimes[it.key] = it
-        }
+        (instance.instanceTime as? Time.Custom<*>)?.let { currentCustomTimes[it.key] = it }
     }
 
     val customTimeDatas = currentCustomTimes.mapValues {
@@ -48,11 +45,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    val showHour = instanceDatas.values.all {
-        it.instanceDateTime.timeStamp.toLocalExactTimeStamp() < now
-    }
-
-    EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
+    EditInstancesViewModel.Data(instanceDatas, customTimeDatas)
 }
 
 fun DomainFactory.setInstancesDateTime(

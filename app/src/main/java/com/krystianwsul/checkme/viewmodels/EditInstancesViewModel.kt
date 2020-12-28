@@ -29,24 +29,20 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
     data class Data(
             val instanceDatas: Map<InstanceKey, InstanceData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-            val showHour: Boolean) : DomainData() {
+    ) : DomainData() {
 
         init {
             check(instanceDatas.isNotEmpty())
         }
     }
 
-    data class InstanceData(val instanceDateTime: DateTime, val name: String, val done: Boolean) {
-
-        init {
-            check(name.isNotEmpty())
-        }
-    }
+    data class InstanceData(val instanceDateTime: DateTime, val done: Boolean)
 
     data class CustomTimeData(
             val customTimeKey: CustomTimeKey<*>,
             val name: String,
-            val hourMinutes: SortedMap<DayOfWeek, HourMinute>) {
+            val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
+    ) {
 
         init {
             check(name.isNotEmpty())

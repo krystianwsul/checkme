@@ -280,7 +280,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val parentKey: ParentKey?,
             val scheduleDataWrappers: List<ScheduleDataWrapper>?,
             val note: String?,
-            val projectName: String?,
             val imageState: ImageState?,
             val assignedTo: Set<UserKey>,
     )

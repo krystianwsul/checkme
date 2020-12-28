@@ -85,7 +85,6 @@ fun DomainFactory.getCreateTaskData(
                 parentKey,
                 scheduleDataWrappers,
                 task.note,
-                task.project.name,
                 task.getImage(deviceDbInfo),
                 task.project
                         .getAssignedTo(assignedTo)

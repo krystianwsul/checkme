@@ -152,7 +152,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply { start(instanceKeys) }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentEditInstancesBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+            FragmentEditInstancesBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -257,14 +258,20 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         updateDateText()
 
-        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener = timePickerDialogFragmentListener
+        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener =
+                timePickerDialogFragmentListener
 
         binding.editInstanceTime.setFixedOnClickListener {
             val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date.dayOfWeek] }
-                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date.dayOfWeek] + ")") }
+                    .map {
+                        TimeDialogFragment.CustomTimeData(
+                                it.customTimeKey,
+                                it.name + " (" + it.hourMinutes[date.dayOfWeek] + ")"
+                        )
+                    }
             )
 
             TimeDialogFragment.newInstance(customTimeDatas).also {
@@ -339,8 +346,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
         checkNotNull(timePairPersist)
 
-        if (resultCode == Activity.RESULT_OK)
-            timePairPersist!!.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+        if (resultCode == Activity.RESULT_OK) {
+            timePairPersist!!.customTimeKey =
+                    data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+        }
     }
 
     override fun onDestroyView() {

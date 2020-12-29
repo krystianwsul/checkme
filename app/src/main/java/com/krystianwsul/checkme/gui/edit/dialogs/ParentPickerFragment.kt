@@ -43,9 +43,13 @@ class ParentPickerFragment : AbstractDialogFragment() {
         private const val QUERY_KEY = "query"
 
         private const val SHOW_DELETE_KEY = "showDelete"
+        private const val KEY_SHOW_ADD = "showAdd"
 
-        fun newInstance(showDelete: Boolean) = ParentPickerFragment().apply {
-            arguments = Bundle().apply { putBoolean(SHOW_DELETE_KEY, showDelete) }
+        fun newInstance(showDelete: Boolean, showAdd: Boolean) = ParentPickerFragment().apply {
+            arguments = Bundle().apply {
+                putBoolean(SHOW_DELETE_KEY, showDelete)
+                putBoolean(KEY_SHOW_ADD, showAdd)
+            }
         }
     }
 
@@ -65,8 +69,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(requireArguments().containsKey(SHOW_DELETE_KEY))
-
         savedInstanceState?.apply {
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
                 expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
@@ -84,14 +86,17 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
                 .setView(binding.root)
-                .setPositiveButton(R.string.add_task) { _, _ ->
-                    delegateRelay.value!!.onNewEntry(binding.parentPickerSearch.text?.toString())
-                }
-                .setNegativeButton(android.R.string.cancel, null)
                 .apply {
+                    if (requireArguments().getBoolean(KEY_SHOW_ADD)) {
+                        setPositiveButton(R.string.add_task) { _, _ ->
+                            delegateRelay.value!!.onNewEntry(binding.parentPickerSearch.text?.toString())
+                        }
+                    }
+
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY))
                         setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onEntryDeleted() }
                 }
+                .setNegativeButton(android.R.string.cancel, null)
                 .create()
     }
 

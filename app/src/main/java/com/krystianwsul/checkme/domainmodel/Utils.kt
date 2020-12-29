@@ -2,19 +2,16 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.DetailsNode
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainResult
-import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.UserKey
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
@@ -58,36 +55,4 @@ fun Instance<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectIn
 
         null
     }
-}
-
-fun Instance<*>.toGroupListData(
-        now: ExactTimeStamp.Local,
-        ownerKey: UserKey,
-        children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
-        localFactory: LocalFactory,
-        deviceDbInfo: DeviceDbInfo,
-        user: MyUser,
-): GroupListDataWrapper.InstanceData {
-    val isRootInstance = isRootInstance()
-
-    return GroupListDataWrapper.InstanceData(
-            done,
-            instanceKey,
-            if (isRootInstance) instanceDateTime.getDisplayText() else null,
-            name,
-            instanceDateTime.timeStamp,
-            instanceDateTime,
-            task.current(now),
-            canAddSubtask(now),
-            isRootInstance(),
-            getCreateTaskTimePair(ownerKey),
-            task.note,
-            children,
-            task.ordinal,
-            getNotificationShown(localFactory),
-            task.getImage(deviceDbInfo),
-            isGroupChild(),
-            isAssignedToMe(now, user),
-            getProjectInfo(now),
-    )
 }

@@ -1,8 +1,11 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
@@ -46,14 +49,7 @@ fun DomainFactory.getSearchInstancesData(
 
                 val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
 
-                it.toGroupListData(
-                        now,
-                        ownerKey,
-                        children,
-                        localFactory,
-                        deviceDbInfo,
-                        myUserFactory.user,
-                )
+                it.toGroupListData(now, children)
             }
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)

@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -514,6 +515,34 @@ class DomainFactory(
             .customTimes
             .filter { it.current(now) }
 
+    fun Instance<*>.toGroupListData(
+            now: ExactTimeStamp.Local,
+            children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
+    ): GroupListDataWrapper.InstanceData {
+        val isRootInstance = isRootInstance()
+
+        return GroupListDataWrapper.InstanceData(
+                done,
+                instanceKey,
+                if (isRootInstance) instanceDateTime.getDisplayText() else null,
+                name,
+                instanceDateTime.timeStamp,
+                instanceDateTime,
+                task.current(now),
+                canAddSubtask(now),
+                isRootInstance(),
+                getCreateTaskTimePair(ownerKey),
+                task.note,
+                children,
+                task.ordinal,
+                getNotificationShown(localFactory),
+                task.getImage(deviceDbInfo),
+                isGroupChild(),
+                isAssignedToMe(now, myUserFactory.user),
+                getProjectInfo(now),
+        )
+    }
+
     fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
@@ -538,14 +567,7 @@ class DomainFactory(
                     val children = getChildInstanceDatas(childInstance, now, childrenQuery, filterVisible)
 
                     if (childTaskMatches || children.isNotEmpty()) {
-                        childInstance.instanceKey to childInstance.toGroupListData(
-                                now,
-                                ownerKey,
-                                children,
-                                localFactory,
-                                deviceDbInfo,
-                                myUserFactory.user,
-                        )
+                        childInstance.instanceKey to childInstance.toGroupListData(now, children)
                     } else {
                         null
                     }

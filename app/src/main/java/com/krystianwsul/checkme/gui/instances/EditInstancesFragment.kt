@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -26,7 +25,10 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePairPersist
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxkotlin.addTo
@@ -64,7 +66,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val broadcastReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            if (this@EditInstancesFragment::data.isInitialized) updateError()
+            if (this@EditInstancesFragment::data.isInitialized) updateFields()
         }
     }
 
@@ -72,10 +74,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
             state.timePairPersist.customTimeKey = customTimeKey
-
-            updateTimeText()
-
-            updateError()
+            updateFields()
         }
 
         override fun onOtherSelected() {
@@ -93,13 +92,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
         state.timePairPersist.setHourMinute(hourMinute)
-        updateTimeText()
-        updateError()
+        updateFields()
     }
 
     private val materialDatePickerListener = { date: Date ->
         state.date = date
-        updateDateText()
+        updateFields()
     }
 
     private lateinit var editInstancesViewModel: EditInstancesViewModel
@@ -168,7 +166,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         requireActivity().registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
-        if (this::data.isInitialized) updateError()
+        if (this::data.isInitialized) updateFields()
     }
 
     override fun onPause() {
@@ -198,7 +196,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        updateDateText()
+        updateFields()
 
         tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener =
                 timePickerDialogFragmentListener
@@ -225,26 +223,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         tryGetFragment<TimeDialogFragment>(TIME_DIALOG_FRAGMENT_TAG)?.timeDialogListener = timeDialogListener
     }
 
-    private fun updateDateText() {
-        binding.editInstanceDate.setText(state.date.getDisplayText())
-
-        updateTimeText()
-        updateError()
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateTimeText() {
-        if (state.timePairPersist.customTimeKey != null) {
-            binding.editInstanceTime.setText(
-                    data.customTimeDatas
-                            .getValue(state.timePairPersist.customTimeKey!!)
-                            .run { name + " (" + hourMinutes.getValue(state.date.dayOfWeek) + ")" }
-            )
-        } else {
-            binding.editInstanceTime.setText(state.timePairPersist.hourMinute.toString())
-        }
-    }
-
     private val isValidDate get() = if (this::data.isInitialized) state.date >= Date.today() else false
 
     //cached data doesn't contain new custom time
@@ -268,7 +246,19 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-    private fun updateError() {
+    private fun updateFields() {
+        binding.editInstanceDate.setText(state.date.getDisplayText())
+
+        if (state.timePairPersist.customTimeKey != null) {
+            binding.editInstanceTime.setText(
+                    data.customTimeDatas
+                            .getValue(state.timePairPersist.customTimeKey!!)
+                            .run { name + " (" + hourMinutes.getValue(state.date.dayOfWeek) + ")" }
+            )
+        } else {
+            binding.editInstanceTime.setText(state.timePairPersist.hourMinute.toString())
+        }
+
         val (dateError, timeError) = if (isValidDate) {
             null to if (isValidDateTime) null else getString(R.string.error_time)
         } else {

@@ -27,7 +27,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -402,8 +401,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val entryKey: Parcelable
         val details: String?
         val note: String?
-        val sortKey: EditViewModel.SortKey
+        val sortKey: SortKey
 
         fun normalize()
     }
+
+    interface SortKey : Comparable<SortKey>
 }

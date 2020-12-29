@@ -4,8 +4,8 @@ import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.normalized
 
@@ -34,7 +34,7 @@ class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewMode
     }
 
     data class Data(
-            val groupListDataWrapper: GroupListDataWrapper,
+            val instanceEntryDatas: List<InstanceEntryData>,
             val showLoader: Boolean,
             val searchCriteria: SearchCriteria,
     ) : DomainData()
@@ -45,7 +45,7 @@ class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewMode
             override val entryKey: Parcelable,
             override val details: String?,
             override val note: String?,
-            override val sortKey: EditViewModel.SortKey,
+            override val sortKey: SortKey,
             val instanceTimeStamp: TimeStamp,
             var ordinal: Double,
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
@@ -65,4 +65,9 @@ class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewMode
     }
 
     private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria.empty, val page: Int = 0)
+
+    data class SortKey(val startExactTimeStamp: ExactTimeStamp.Local) : ParentPickerFragment.SortKey {
+
+        override fun compareTo(other: ParentPickerFragment.SortKey): Int = compareTo(other as SortKey)
+    }
 }

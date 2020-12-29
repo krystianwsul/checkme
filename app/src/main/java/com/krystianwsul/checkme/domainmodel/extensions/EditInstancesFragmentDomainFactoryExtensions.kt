@@ -4,16 +4,12 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.InstancesEditSearchViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.firebase.models.FilterResult
-import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -99,67 +95,26 @@ fun DomainFactory.getEditInstancesSearchData(
 ): DomainResult<InstancesEditSearchViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
-    val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
-
     LockerManager.setLocker { now ->
         getDomainResultInterrupting {
-            val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
-                GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
-            }
-
-            val (instances, hasMore) = getRootInstances(
-                    null,
-                    null,
+            val (instanceEntryDatas, hasMore) = searchInstances<InstancesEditSearchViewModel.InstanceEntryData>(
                     now,
                     searchCriteria,
-                    filterVisible = !debugMode
-            ).takeAndHasMore(desiredCount)
-
-            val instanceDatas = instances.map {
-                val task = it.task
-
-                /*
-                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                 */
-                val childSearchCriteria = if (task.matchesQuery(searchCriteria.query)) null else searchCriteria
-
-                val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
-
-                instanceToGroupListData(it, now, children)
+                    page,
+            ) { instance, _, children ->
+                InstancesEditSearchViewModel.InstanceEntryData(
+                        instance.name,
+                        children.values,
+                        instance.instanceKey,
+                        if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
+                        instance.task.note,
+                        InstancesEditSearchViewModel.SortKey(instance.task.startExactTimeStamp),
+                        instance.instanceDateTime.timeStamp,
+                        instance.task.ordinal,
+                )
             }
 
-            val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
-
-            val taskDatas = getUnscheduledTasks(now)
-                    .filterQuery(searchCriteria.query)
-                    .map { (task, filterResult) ->
-                        val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
-
-                        GroupListDataWrapper.TaskData(
-                                task.taskKey,
-                                task.name,
-                                getGroupListChildTaskDatas(task, now, childQuery),
-                                task.startExactTimeStamp,
-                                task.note,
-                                task.getImage(deviceDbInfo),
-                                task.isAssignedToMe(now, myUserFactory.user),
-                                task.getProjectInfo(now),
-                        )
-                    }
-                    .toList()
-
-            val dataWrapper = GroupListDataWrapper(
-                    customTimeDatas,
-                    null,
-                    taskDatas,
-                    null,
-                    cappedInstanceDatas,
-                    null,
-                    null
-            )
-
-            InstancesEditSearchViewModel.Data(dataWrapper, hasMore, searchCriteria)
+            InstancesEditSearchViewModel.Data(instanceEntryDatas, hasMore, searchCriteria)
         }
     }
 }

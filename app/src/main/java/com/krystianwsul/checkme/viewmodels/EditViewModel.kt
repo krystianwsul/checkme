@@ -314,13 +314,12 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
         data class Task(val taskKey: TaskKey) : ParentKey()
     }
 
-    sealed class SortKey : Comparable<SortKey> {
+    sealed class SortKey : ParentPickerFragment.SortKey {
 
         data class ProjectSortKey(private val projectId: ProjectKey.Shared) : SortKey() {
 
-            override fun compareTo(other: SortKey): Int {
-                if (other is TaskSortKey)
-                    return 1
+            override fun compareTo(other: ParentPickerFragment.SortKey): Int {
+                if (other is TaskSortKey) return 1
 
                 val projectSortKey = other as ProjectSortKey
 
@@ -330,9 +329,8 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
 
         data class TaskSortKey(private val startExactTimeStamp: ExactTimeStamp.Local) : SortKey() {
 
-            override fun compareTo(other: SortKey): Int {
-                if (other is ProjectSortKey)
-                    return -1
+            override fun compareTo(other: ParentPickerFragment.SortKey): Int {
+                if (other is ProjectSortKey) return -1
 
                 val taskSortKey = other as TaskSortKey
 

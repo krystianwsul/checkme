@@ -98,7 +98,7 @@ fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,
         page: Int,
 ): DomainResult<InstancesEditSearchViewModel.Data> = syncOnDomain {
-    MyCrashlytics.log("DomainFactory.getSearchInstancesEditData")
+    MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
     val desiredCount = (page + 1) * PAGE_SIZE
 
@@ -127,7 +127,7 @@ fun DomainFactory.getEditInstancesSearchData(
 
                 val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
 
-                val instanceData = GroupListDataWrapper.InstanceData(
+                GroupListDataWrapper.InstanceData(
                         it.done,
                         it.instanceKey,
                         it.instanceDateTime.getDisplayText(),
@@ -147,10 +147,6 @@ fun DomainFactory.getEditInstancesSearchData(
                         it.isAssignedToMe(now, myUserFactory.user),
                         it.getProjectInfo(now),
                 )
-
-                children.values.forEach { it.instanceDataParent = instanceData }
-
-                instanceData
             }
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
@@ -182,8 +178,6 @@ fun DomainFactory.getEditInstancesSearchData(
                     null,
                     null
             )
-
-            cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
             InstancesEditSearchViewModel.Data(dataWrapper, hasMore, searchCriteria)
         }

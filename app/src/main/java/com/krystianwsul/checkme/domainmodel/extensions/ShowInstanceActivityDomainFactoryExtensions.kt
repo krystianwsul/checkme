@@ -92,7 +92,7 @@ private fun DomainFactory.getGroupListData(
 
                 val children = getChildInstanceDatas(childInstance, now)
 
-                val instanceData = GroupListDataWrapper.InstanceData(
+                GroupListDataWrapper.InstanceData(
                         childInstance.done,
                         childInstance.instanceKey,
                         null,
@@ -112,10 +112,6 @@ private fun DomainFactory.getGroupListData(
                         childInstance.isAssignedToMe(now, myUserFactory.user),
                         childInstance.getProjectInfo(now),
                 )
-
-                children.values.forEach { it.instanceDataParent = instanceData }
-
-                instanceData
             }
 
     val dataWrapper = GroupListDataWrapper(
@@ -127,8 +123,6 @@ private fun DomainFactory.getGroupListData(
             task.getImage(deviceDbInfo),
             instance.getProjectInfo(now)
     )
-
-    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
     return dataWrapper
 }

@@ -53,7 +53,7 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
 
         val children = getChildInstanceDatas(instance, now)
 
-        val instanceData = GroupListDataWrapper.InstanceData(
+        GroupListDataWrapper.InstanceData(
                 instance.done,
                 instance.instanceKey,
                 null,
@@ -73,10 +73,6 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )
-
-        children.values.forEach { it.instanceDataParent = instanceData }
-
-        instanceData
     }
 
     val dataWrapper = GroupListDataWrapper(
@@ -88,8 +84,6 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
             null,
             null
     )
-
-    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
     return dataWrapper
 }

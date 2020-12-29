@@ -38,7 +38,7 @@ fun DomainFactory.getShowTaskInstancesData(
     val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)
 
-        val instanceData = GroupListDataWrapper.InstanceData(
+        GroupListDataWrapper.InstanceData(
                 it.done,
                 it.instanceKey,
                 it.instanceDateTime.getDisplayText(),
@@ -58,10 +58,6 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.isAssignedToMe(now, myUserFactory.user),
                 it.getProjectInfo(now),
         )
-
-        children.values.forEach { it.instanceDataParent = instanceData }
-
-        instanceData
     }
 
     val dataWrapper = GroupListDataWrapper(
@@ -73,8 +69,6 @@ fun DomainFactory.getShowTaskInstancesData(
             null,
             null
     )
-
-    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
     ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
 }

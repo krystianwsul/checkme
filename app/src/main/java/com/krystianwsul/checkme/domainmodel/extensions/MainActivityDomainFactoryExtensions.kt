@@ -134,7 +134,7 @@ fun DomainFactory.getGroupListData(
 
         val children = getChildInstanceDatas(instance, now)
 
-        val instanceData = GroupListDataWrapper.InstanceData(
+        GroupListDataWrapper.InstanceData(
                 instance.done,
                 instance.instanceKey,
                 instance.getDisplayData()?.getDisplayText(),
@@ -154,10 +154,6 @@ fun DomainFactory.getGroupListData(
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )
-
-        children.values.forEach { it.instanceDataParent = instanceData }
-
-        instanceData
     }
 
     val dataWrapper = GroupListDataWrapper(
@@ -169,8 +165,6 @@ fun DomainFactory.getGroupListData(
             null,
             null
     )
-
-    instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
     DayViewModel.DayData(dataWrapper)
 }

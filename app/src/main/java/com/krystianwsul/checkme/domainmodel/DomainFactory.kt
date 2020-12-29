@@ -538,7 +538,7 @@ class DomainFactory(
                     val children = getChildInstanceDatas(childInstance, now, childrenQuery, filterVisible)
 
                     if (childTaskMatches || children.isNotEmpty()) {
-                        val instanceData = GroupListDataWrapper.InstanceData(
+                        childInstance.instanceKey to GroupListDataWrapper.InstanceData(
                                 childInstance.done,
                                 childInstance.instanceKey,
                                 null,
@@ -558,9 +558,6 @@ class DomainFactory(
                                 childInstance.isAssignedToMe(now, myUserFactory.user),
                                 childInstance.getProjectInfo(now),
                         )
-
-                        children.values.forEach { it.instanceDataParent = instanceData }
-                        childInstance.instanceKey to instanceData
                     } else {
                         null
                     }

@@ -18,7 +18,7 @@ data class GroupListDataWrapper(
         val instanceDatas: List<InstanceData>,
         val imageData: ImageState?,
         val projectInfo: DetailsNode.ProjectInfo?,
-) : InstanceDataParent {
+) {
 
     data class TaskData(
             override val taskKey: TaskKey,
@@ -62,9 +62,7 @@ data class GroupListDataWrapper(
             val isRecurringGroupChild: Boolean,
             override val isAssignedToMe: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,
-    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
-
-        lateinit var instanceDataParent: InstanceDataParent
+    ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 

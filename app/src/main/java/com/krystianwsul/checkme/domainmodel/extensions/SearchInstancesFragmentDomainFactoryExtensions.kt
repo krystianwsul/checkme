@@ -50,7 +50,7 @@ fun DomainFactory.getSearchInstancesData(
 
                 val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
 
-                val instanceData = GroupListDataWrapper.InstanceData(
+                GroupListDataWrapper.InstanceData(
                         it.done,
                         it.instanceKey,
                         it.instanceDateTime.getDisplayText(),
@@ -70,10 +70,6 @@ fun DomainFactory.getSearchInstancesData(
                         it.isAssignedToMe(now, myUserFactory.user),
                         it.getProjectInfo(now),
                 )
-
-                children.values.forEach { it.instanceDataParent = instanceData }
-
-                instanceData
             }
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
@@ -105,8 +101,6 @@ fun DomainFactory.getSearchInstancesData(
                     null,
                     null
             )
-
-            cappedInstanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
             SearchInstancesViewModel.Data(dataWrapper, hasMore, searchCriteria)
         }

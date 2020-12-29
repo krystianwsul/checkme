@@ -515,40 +515,42 @@ class DomainFactory(
             .customTimes
             .filter { it.current(now) }
 
-    fun Instance<*>.toGroupListData(
+    fun instanceToGroupListData(
+            instance: Instance<*>,
             now: ExactTimeStamp.Local,
             children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
     ): GroupListDataWrapper.InstanceData {
-        val isRootInstance = isRootInstance()
+        val isRootInstance = instance.isRootInstance()
 
         return GroupListDataWrapper.InstanceData(
-                done,
-                instanceKey,
-                if (isRootInstance) instanceDateTime.getDisplayText() else null,
-                name,
-                instanceDateTime.timeStamp,
-                instanceDateTime,
-                task.current(now),
-                canAddSubtask(now),
-                isRootInstance(),
-                getCreateTaskTimePair(ownerKey),
-                task.note,
+                instance.done,
+                instance.instanceKey,
+                if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
+                instance.name,
+                instance.instanceDateTime.timeStamp,
+                instance.instanceDateTime,
+                instance.task.current(now),
+                instance.canAddSubtask(now),
+                instance.isRootInstance(),
+                instance.getCreateTaskTimePair(ownerKey),
+                instance.task.note,
                 children,
-                task.ordinal,
-                getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
-                isGroupChild(),
-                isAssignedToMe(now, myUserFactory.user),
-                getProjectInfo(now),
+                instance.task.ordinal,
+                instance.getNotificationShown(localFactory),
+                instance.task.getImage(deviceDbInfo),
+                instance.isGroupChild(),
+                instance.isAssignedToMe(now, myUserFactory.user),
+                instance.getProjectInfo(now),
         )
     }
 
-    fun getChildInstanceDatas(
+    fun <T> getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
+            mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
             searchCriteria: SearchCriteria? = null,
             filterVisible: Boolean = true,
-    ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> {
+    ): MutableMap<InstanceKey, T> {
         return instance.getChildInstances()
                 .filter {
                     !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
@@ -564,10 +566,10 @@ class DomainFactory(
                      */
                     val childrenQuery = if (childTaskMatches) null else searchCriteria
 
-                    val children = getChildInstanceDatas(childInstance, now, childrenQuery, filterVisible)
+                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
                     if (childTaskMatches || children.isNotEmpty()) {
-                        childInstance.instanceKey to childInstance.toGroupListData(now, children)
+                        childInstance.instanceKey to mapper(childInstance, now, children)
                     } else {
                         null
                     }
@@ -575,6 +577,14 @@ class DomainFactory(
                 .toMap()
                 .toMutableMap()
     }
+
+    fun getChildInstanceDatas(
+            instance: Instance<*>,
+            now: ExactTimeStamp.Local,
+            searchCriteria: SearchCriteria? = null,
+            filterVisible: Boolean = true,
+    ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
+            getChildInstanceDatas(instance, now, ::instanceToGroupListData, searchCriteria, filterVisible)
 
     val ownerKey get() = myUserFactory.user.userKey
 

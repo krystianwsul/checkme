@@ -49,7 +49,7 @@ fun DomainFactory.getSearchInstancesData(
 
                 val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
 
-                it.toGroupListData(now, children)
+                instanceToGroupListData(it, now, children)
             }
 
             val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)

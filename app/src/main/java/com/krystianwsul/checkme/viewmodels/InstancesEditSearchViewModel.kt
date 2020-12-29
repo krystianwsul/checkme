@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchDat
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.normalized
 
 class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewModel.Data>() {
@@ -45,12 +46,21 @@ class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewMode
             override val details: String?,
             override val note: String?,
             override val sortKey: EditViewModel.SortKey,
-    ) : ParentPickerFragment.EntryData {
+            val instanceTimeStamp: TimeStamp,
+            var ordinal: Double,
+    ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         override fun normalize() {
             normalizedFields
+        }
+
+        override fun compareTo(other: InstanceEntryData): Int {
+            val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
+            if (timeStampComparison != 0) return timeStampComparison
+
+            return ordinal.compareTo(other.ordinal)
         }
     }
 

@@ -72,8 +72,7 @@ data class GroupListDataWrapper(
 
         override fun compareTo(other: InstanceData): Int {
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
-            if (timeStampComparison != 0)
-                return timeStampComparison
+            if (timeStampComparison != 0) return timeStampComparison
 
             return ordinal.compareTo(other.ordinal)
         }

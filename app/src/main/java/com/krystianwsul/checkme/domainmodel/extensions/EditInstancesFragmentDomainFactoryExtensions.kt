@@ -20,13 +20,16 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         it.key
     }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
 
-    val dateTime = instanceKeys.map {
-        getInstance(it).let {
-            check(it.done == null)
+    val instances = instanceKeys.map(::getInstance)
+    check(instances.all { it.done == null })
 
-            it.instanceDateTime
-        }
-    }.minOrNull()!!
+    val parentInstanceData = instances.mapNotNull { it.parentInstanceData?.instance }
+            .groupBy { it }
+            .map { it.key to it.value.size }
+            .maxByOrNull { it.second }
+            ?.let { (instance, _) -> EditInstancesViewModel.ParentInstanceData(instance.instanceKey, instance.name) }
+
+    val dateTime = instances.map { it.instanceDateTime }.minOrNull()!!
 
     val customTimeDatas = currentCustomTimes.mapValues {
         it.value.let {
@@ -38,7 +41,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    EditInstancesViewModel.Data(instanceKeys.toSet(), dateTime, customTimeDatas)
+    EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
 }
 
 fun DomainFactory.setInstancesDateTime(

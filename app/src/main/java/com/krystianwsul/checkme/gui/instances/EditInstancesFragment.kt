@@ -14,7 +14,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
-import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
@@ -175,7 +174,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             val editInstancesUndoData = DomainFactory.instance.setInstancesDateTime(
                     data!!.dataId,
                     SaveService.Source.GUI,
-                    data!!.instanceDatas.keys,
+                    data!!.instanceKeys,
                     date,
                     timePairPersist!!.timePair
             )
@@ -226,13 +225,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private fun onLoadFinished(data: EditInstancesViewModel.Data) {
         this.data = data
 
-        if (data.instanceDatas.any { it.value.done }) {
-            AbstractActivity.setSnackbar { snackbarListener -> snackbarListener.showInstanceMarkedDone() }
-
-            dialog!!.cancel()
-            return
-        }
-
         binding.editInstanceLayout.visibility = View.VISIBLE
 
         if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(DATE_KEY))) {
@@ -240,17 +232,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             check(timePairPersist == null)
             check(initialTimePair == null)
             check(initialDate == null)
-            check(data.instanceDatas.isNotEmpty())
 
             first = false
 
-            val dateTime = data.instanceDatas
-                    .values
-                    .map { it.instanceDateTime }
-                    .minOrNull()!!
-
-            date = dateTime.date
-            timePairPersist = TimePairPersist(dateTime.time.timePair)
+            date = data.dateTime.date
+            timePairPersist = TimePairPersist(data.dateTime.time.timePair)
 
             initialTimePair = timePairPersist!!.timePair
             initialDate = date

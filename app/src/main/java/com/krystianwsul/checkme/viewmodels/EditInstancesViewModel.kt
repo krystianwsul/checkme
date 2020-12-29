@@ -27,14 +27,10 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
     }
 
     data class Data(
-            val instanceDatas: Map<InstanceKey, InstanceData>,
+            val instanceKeys: Set<InstanceKey>,
+            val dateTime: DateTime,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-    ) : DomainData() {
-
-        init {
-            check(instanceDatas.isNotEmpty())
-        }
-    }
+    ) : DomainData()
 
     data class InstanceData(val instanceDateTime: DateTime, val done: Boolean)
 

@@ -26,15 +26,16 @@ import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.tryGetFragment
+import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
-import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -106,6 +107,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
+    private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
     var listener: ((DomainFactory.EditInstancesUndoData) -> Unit)? = null
 
@@ -114,8 +116,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val parentPickerDelegate = object : ParentPickerFragment.Delegate {
 
-        override val entryDatasObservable: Observable<out Collection<ParentPickerFragment.EntryData>>
-            get() = Observable.just(listOf())
+        override val entryDatasObservable by lazy { editInstancesSearchViewModel.data.map { it.instanceEntryDatas } }
 
         override fun onNewEntry(nameHint: String?) {
             TODO("Not yet implemented")
@@ -143,6 +144,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(instanceKeys.isNotEmpty())
 
         editInstancesViewModel.start(instanceKeys)
+
+        editInstancesSearchViewModel.start(SearchCriteria.empty, 0)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =

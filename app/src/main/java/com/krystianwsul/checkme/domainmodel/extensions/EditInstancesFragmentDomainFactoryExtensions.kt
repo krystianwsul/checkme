@@ -7,8 +7,8 @@ import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
+import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
-import com.krystianwsul.checkme.viewmodels.InstancesEditSearchViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -92,29 +92,29 @@ fun DomainFactory.setInstancesDateTime(
 fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,
         page: Int,
-): DomainResult<InstancesEditSearchViewModel.Data> = syncOnDomain {
+): DomainResult<EditInstancesSearchViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
     LockerManager.setLocker { now ->
         getDomainResultInterrupting {
-            val (instanceEntryDatas, hasMore) = searchInstances<InstancesEditSearchViewModel.InstanceEntryData>(
+            val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
                     now,
                     searchCriteria,
                     page,
             ) { instance, _, children ->
-                InstancesEditSearchViewModel.InstanceEntryData(
+                EditInstancesSearchViewModel.InstanceEntryData(
                         instance.name,
                         children.values,
                         instance.instanceKey,
                         if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
                         instance.task.note,
-                        InstancesEditSearchViewModel.SortKey(instance.task.startExactTimeStamp),
+                        EditInstancesSearchViewModel.SortKey(instance.task.startExactTimeStamp),
                         instance.instanceDateTime.timeStamp,
                         instance.task.ordinal,
                 )
             }
 
-            InstancesEditSearchViewModel.Data(instanceEntryDatas, hasMore, searchCriteria)
+            EditInstancesSearchViewModel.Data(instanceEntryDatas, hasMore, searchCriteria)
         }
     }
 }

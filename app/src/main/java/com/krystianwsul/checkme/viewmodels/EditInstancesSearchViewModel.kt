@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.normalized
 
-class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewModel.Data>() {
+class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewModel.Data>() {
 
     private var parameters = Parameters()
 
@@ -68,6 +68,7 @@ class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewMode
 
     data class SortKey(val startExactTimeStamp: ExactTimeStamp.Local) : ParentPickerFragment.SortKey {
 
-        override fun compareTo(other: ParentPickerFragment.SortKey): Int = compareTo(other as SortKey)
+        override fun compareTo(other: ParentPickerFragment.SortKey): Int =
+                startExactTimeStamp.compareTo((other as SortKey).startExactTimeStamp)
     }
 }

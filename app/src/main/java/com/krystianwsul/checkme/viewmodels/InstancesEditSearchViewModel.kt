@@ -2,19 +2,19 @@ package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.getSearchInstancesEditData
+import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.normalized
 
-class SearchInstancesEditViewModel : DomainViewModel<SearchInstancesEditViewModel.Data>() {
+class InstancesEditSearchViewModel : DomainViewModel<InstancesEditSearchViewModel.Data>() {
 
     private var parameters = Parameters()
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getSearchInstancesEditData(
+        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getEditInstancesSearchData(
                 parameters.searchCriteria,
                 parameters.page
         )

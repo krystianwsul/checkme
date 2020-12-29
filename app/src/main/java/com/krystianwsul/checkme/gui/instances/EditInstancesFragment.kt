@@ -105,7 +105,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
     }
 
-    private lateinit var editInstancesViewModel: EditInstancesViewModel
+    private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
 
     var listener: ((DomainFactory.EditInstancesUndoData) -> Unit)? = null
 
@@ -142,7 +142,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         val instanceKeys = requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!
         check(instanceKeys.isNotEmpty())
 
-        editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply { start(instanceKeys) }
+        editInstancesViewModel.start(instanceKeys)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =

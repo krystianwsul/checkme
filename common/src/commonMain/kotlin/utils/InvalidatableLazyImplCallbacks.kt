@@ -10,7 +10,7 @@ class InvalidatableLazyImplCallbacks<T>(initializer: () -> T) : InvalidatableLaz
         callbacks.toMutableList().forEach { it() }
     }
 
-    fun addCallback(callback: () -> Unit) = callbacks.add(callback)
+    fun addCallback(callback: () -> Unit) = callback.also { callbacks.add(it) }
 
     fun removeCallback(callback: () -> Unit) {
         check(callbacks.remove(callback))

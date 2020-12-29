@@ -120,6 +120,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
 
+    private var doneCallback: (() -> Unit)? = null
+
     private val parentInstanceDataProperty = invalidatableLazy {
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
@@ -174,7 +176,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
 
         parentInstanceData?.also {
-            it.instance
+            doneCallback = it.instance
                     .doneOffsetProperty
                     .addCallback(::invalidateParentInstanceData)
         }
@@ -191,14 +193,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         doneOffsetProperty.addCallback(::invalidateParentInstanceData)
     }
 
+    private lateinit var schedulesCallback: () -> Unit // this is because of how JS handles method references
+    private lateinit var intervalsCallback: () -> Unit
+
     private fun addLazyCallbacks() {
-        task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
-        task.intervalsProperty.addCallback(::invalidateParentInstanceData)
+        schedulesCallback = task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
+        intervalsCallback = task.intervalsProperty.addCallback(::invalidateParentInstanceData)
     }
 
     private fun removeLazyCallbacks() {
-        task.scheduleIntervalsProperty.removeCallback(matchingScheduleIntervalsProperty::invalidate)
-        task.intervalsProperty.removeCallback(::invalidateParentInstanceData)
+        task.scheduleIntervalsProperty.removeCallback(schedulesCallback)
+        task.intervalsProperty.removeCallback(intervalsCallback)
 
         tearDownParentInstanceData()
     }
@@ -207,9 +212,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (parentInstanceDataProperty.isInitialized()) {
             removeVirtualParents()
 
-            parentInstanceData?.instance
-                    ?.doneOffsetProperty
-                    ?.removeCallback(::invalidateParentInstanceData)
+            doneCallback?.let {
+                parentInstanceData!!.instance
+                        .doneOffsetProperty
+                        .removeCallback(it)
+
+                doneCallback = null
+            }
         }
     }
 

@@ -98,9 +98,13 @@ object Irrelevant {
                 val schedule = scheduleInterval.schedule
 
                 val result = if (schedule is SingleSchedule<*>) {
+                    /**
+                     * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                     * relevant, since removing it would make the task unscheduled.
+                     */
                     !schedule.getInstance(it).isVisible(
                             now,
-                            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
+                            Instance.VisibilityOptions(hack24 = true)
                     )
                 } else {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {

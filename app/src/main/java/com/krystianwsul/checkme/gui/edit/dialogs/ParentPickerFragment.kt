@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
@@ -31,6 +32,7 @@ import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
 class ParentPickerFragment : AbstractDialogFragment() {
@@ -49,7 +51,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private lateinit var searchChanges: Observable<String>
 
-    lateinit var delegate: Delegate
+    private val delegateRelay = BehaviorRelay.create<Delegate>()
 
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
     private var expandedParentKeys: List<Parcelable>? = null
@@ -83,31 +85,29 @@ class ParentPickerFragment : AbstractDialogFragment() {
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
                 .setView(binding.root)
                 .setPositiveButton(R.string.add_task) { _, _ ->
-                    delegate.onNewParent(binding.parentPickerSearch.text?.toString())
+                    delegateRelay.value!!.onNewParent(binding.parentPickerSearch.text?.toString())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY))
-                        setNeutralButton(R.string.delete) { _, _ -> delegate.onTaskDeleted() }
+                        setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onTaskDeleted() }
                 }
                 .create()
     }
 
-    fun initialize(delegate: Delegate) {
-        this.delegate = delegate
-
-        if (bindingProperty.isSet) initialize()
-    }
+    fun initialize(delegate: Delegate) = delegateRelay.accept(delegate)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
-        if (this::delegate.isInitialized) initialize()
+        delegateRelay.switchMap { it.entryDatasObservable }
+                .subscribe { initialize(it) }
+                .addTo(viewCreatedDisposable)
     }
 
-    private fun initialize() {
+    private fun initialize(entryDatas: Collection<EntryData>) {
         check(activity != null)
 
         initializeDisposable.clear()
@@ -118,11 +118,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
             treeViewAdapter!!.updateDisplayedNodes {
-                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(delegate.entryDatas, expandedParentKeys)
+                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(entryDatas, expandedParentKeys)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(delegate.entryDatas, expandedParentKeys)
+            taskAdapter.initialize(entryDatas, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.parentPickerRecycler.apply {
@@ -340,7 +340,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 parentPickerFragment.dismiss()
 
-                parentPickerFragment.delegate.onTaskSelected(entryData)
+                parentPickerFragment.delegateRelay
+                        .value!!
+                        .onTaskSelected(entryData)
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
@@ -372,7 +374,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     interface Delegate {
 
-        val entryDatas: Collection<EntryData>
+        val entryDatasObservable: Observable<out Collection<EntryData>>
 
         fun onTaskSelected(entryData: EntryData)
 

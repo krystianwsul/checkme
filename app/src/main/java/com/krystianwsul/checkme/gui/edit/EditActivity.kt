@@ -702,7 +702,11 @@ class EditActivity : NavBarActivity() {
                         setText(parent?.name)
 
                         setFixedOnClickListener {
-                            ParentPickerFragment.newInstance(parent != null, true).let {
+                            ParentPickerFragment.newInstance(
+                                    parent != null,
+                                    true,
+                                    R.string.parent_dialog_title_task
+                            ).let {
                                 it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
                                 it.initialize(activity.parentFragmentDelegate)
                             }

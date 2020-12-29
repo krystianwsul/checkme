@@ -6,6 +6,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.MotionEvent
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -44,11 +45,17 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private const val SHOW_DELETE_KEY = "showDelete"
         private const val KEY_SHOW_ADD = "showAdd"
+        private const val KEY_TITLE_RES = "titleRes"
 
-        fun newInstance(showDelete: Boolean, showAdd: Boolean) = ParentPickerFragment().apply {
+        fun newInstance(
+                showDelete: Boolean,
+                showAdd: Boolean,
+                @StringRes titleRes: Int,
+        ) = ParentPickerFragment().apply {
             arguments = Bundle().apply {
                 putBoolean(SHOW_DELETE_KEY, showDelete)
                 putBoolean(KEY_SHOW_ADD, showAdd)
+                putInt(KEY_TITLE_RES, titleRes)
             }
         }
     }
@@ -84,7 +91,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 .textChanges()
                 .map { it.toString().normalized() }
 
-        return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
+        return MaterialAlertDialogBuilder(requireContext()).setTitle(requireArguments().getInt(KEY_TITLE_RES))
                 .setView(binding.root)
                 .apply {
                     if (requireArguments().getBoolean(KEY_SHOW_ADD)) {

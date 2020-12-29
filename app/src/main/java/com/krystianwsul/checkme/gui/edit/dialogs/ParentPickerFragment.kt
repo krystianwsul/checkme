@@ -85,12 +85,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
                 .setView(binding.root)
                 .setPositiveButton(R.string.add_task) { _, _ ->
-                    delegateRelay.value!!.onNewParent(binding.parentPickerSearch.text?.toString())
+                    delegateRelay.value!!.onNewEntry(binding.parentPickerSearch.text?.toString())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
                     if (requireArguments().getBoolean(SHOW_DELETE_KEY))
-                        setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onTaskDeleted() }
+                        setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onEntryDeleted() }
                 }
                 .create()
     }
@@ -342,7 +342,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 parentPickerFragment.delegateRelay
                         .value!!
-                        .onTaskSelected(entryData)
+                        .onEntrySelected(entryData)
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
@@ -376,11 +376,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val entryDatasObservable: Observable<out Collection<EntryData>>
 
-        fun onTaskSelected(entryData: EntryData)
+        fun onEntrySelected(entryData: EntryData)
 
-        fun onTaskDeleted()
+        fun onEntryDeleted()
 
-        fun onNewParent(nameHint: String?)
+        fun onNewEntry(nameHint: String?)
     }
 
     interface EntryData : QueryMatchable {

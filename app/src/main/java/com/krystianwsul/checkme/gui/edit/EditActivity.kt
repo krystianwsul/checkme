@@ -116,15 +116,15 @@ class EditActivity : NavBarActivity() {
 
         override val entryDatasObservable get() = Observable.just(delegate.parentTreeDatas.values)
 
-        override fun onTaskSelected(entryData: ParentPickerFragment.EntryData) {
+        override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             delegate.parentScheduleManager.parent = entryData as EditViewModel.ParentTreeData
         }
 
-        override fun onTaskDeleted() {
+        override fun onEntryDeleted() {
             delegate.parentScheduleManager.parent = null
         }
 
-        override fun onNewParent(nameHint: String?) = startActivityForResult(
+        override fun onNewEntry(nameHint: String?) = startActivityForResult(
                 getParametersIntent(EditParameters.Create(
                         null,
                         delegate.parentScheduleManager.run {
@@ -678,8 +678,6 @@ class EditActivity : NavBarActivity() {
                             hint = activity.getString(R.string.parentTask)
                             error = null
                             isHintAnimationEnabled = false
-
-                            onTimeChanged(activity, holder)
 
                             addOneShotGlobalLayoutListener {
                                 isHintAnimationEnabled = true

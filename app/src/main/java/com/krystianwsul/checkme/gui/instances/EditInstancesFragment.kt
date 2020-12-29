@@ -10,6 +10,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -17,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
+import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -31,6 +33,7 @@ import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -46,6 +49,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private const val DATE_FRAGMENT_TAG = "dateFragment"
         private const val TIME_FRAGMENT_TAG = "timeFragment"
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
+        private const val TAG_PARENT_PICKER = "parentPicker"
 
         fun newInstance(instanceKeys: List<InstanceKey>) = EditInstancesFragment().apply {
             check(instanceKeys.isNotEmpty())
@@ -107,6 +111,24 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
 
+    private val parentPickerDelegate = object : ParentPickerFragment.Delegate {
+
+        override val entryDatasObservable: Observable<out Collection<ParentPickerFragment.EntryData>>
+            get() = Observable.just(listOf())
+
+        override fun onNewEntry(nameHint: String?) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onEntryDeleted() {
+            TODO("Not yet implemented")
+        }
+
+        override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
+            TODO("Not yet implemented")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -127,6 +149,15 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.editInstanceParentText.setFixedOnClickListener {
+            ParentPickerFragment.newInstance(data.parentInstanceData != null).let {
+                it.show(requireActivity().supportFragmentManager, TAG_PARENT_PICKER)
+                it.initialize(parentPickerDelegate)
+            }
+        }
+
+        tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
 
         binding.editInstanceDate.setFixedOnClickListener {
             newMaterialDatePicker(state.date).let {
@@ -247,6 +278,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
     private fun updateFields() {
+        binding.editInstanceParentLayout.endIconMode = if (data.parentInstanceData != null)
+            TextInputLayout.END_ICON_CLEAR_TEXT
+        else
+            TextInputLayout.END_ICON_DROPDOWN_MENU
+
         binding.editInstanceParentText.setText(state.parentInstanceData?.name)
 
         binding.editInstanceDate.setText(state.date.getDisplayText())

@@ -247,6 +247,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
     private fun updateFields() {
+        binding.editInstanceParentText.setText(state.parentInstanceData?.name)
+
         binding.editInstanceDate.setText(state.date.getDisplayText())
 
         if (state.timePairPersist.customTimeKey != null) {

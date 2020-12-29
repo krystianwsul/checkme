@@ -538,25 +538,13 @@ class DomainFactory(
                     val children = getChildInstanceDatas(childInstance, now, childrenQuery, filterVisible)
 
                     if (childTaskMatches || children.isNotEmpty()) {
-                        childInstance.instanceKey to GroupListDataWrapper.InstanceData(
-                                childInstance.done,
-                                childInstance.instanceKey,
-                                null,
-                                childInstance.name,
-                                childInstance.instanceDateTime.timeStamp,
-                                childInstance.instanceDateTime,
-                                childTask.current(now),
-                                childInstance.canAddSubtask(now),
-                                childInstance.isRootInstance(),
-                                childInstance.getCreateTaskTimePair(ownerKey),
-                                childTask.note,
+                        childInstance.instanceKey to childInstance.toGroupListData(
+                                now,
+                                ownerKey,
                                 children,
-                                childTask.ordinal,
-                                childInstance.getNotificationShown(localFactory),
-                                childTask.getImage(deviceDbInfo),
-                                childInstance.isGroupChild(),
-                                childInstance.isAssignedToMe(now, myUserFactory.user),
-                                childInstance.getProjectInfo(now),
+                                localFactory,
+                                deviceDbInfo,
+                                myUserFactory.user,
                         )
                     } else {
                         null

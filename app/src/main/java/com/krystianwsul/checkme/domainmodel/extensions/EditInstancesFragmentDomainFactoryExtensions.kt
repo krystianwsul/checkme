@@ -24,7 +24,6 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     for (instanceKey in instanceKeys) {
         val instance = getInstance(instanceKey)
-        check(instance.isRootInstance())
         check(instance.done == null)
 
         instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(

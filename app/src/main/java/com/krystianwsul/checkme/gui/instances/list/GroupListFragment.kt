@@ -185,7 +185,6 @@ class GroupListFragment @JvmOverloads constructor(
                     check(selectedDatas.isNotEmpty())
 
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-                    check(instanceDatas.all { it.isRootInstance })
 
                     EditInstancesFragment.newInstance(instanceDatas.map { it.instanceKey })
                             .also { it.listener = this@GroupListFragment::onEditInstances }
@@ -389,7 +388,7 @@ class GroupListFragment @JvmOverloads constructor(
                     },
                     R.id.actionGroupHour to showHour(selectedDatas),
                     R.id.action_group_edit_instance to selectedDatas.all {
-                        it is GroupListDataWrapper.InstanceData && it.isRootInstance && it.done == null
+                        it is GroupListDataWrapper.InstanceData && it.done == null
                     },
                     R.id.action_group_mark_done to selectedDatas.all {
                         it is GroupListDataWrapper.InstanceData && it.done == null

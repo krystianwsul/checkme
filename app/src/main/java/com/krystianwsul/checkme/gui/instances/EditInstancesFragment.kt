@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
@@ -150,13 +151,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.editInstanceParentText.setFixedOnClickListener {
-            ParentPickerFragment.newInstance(data.parentInstanceData != null).let {
-                it.show(requireActivity().supportFragmentManager, TAG_PARENT_PICKER)
-                it.initialize(parentPickerDelegate)
-            }
-        }
-
         tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
 
         binding.editInstanceDate.setFixedOnClickListener {
@@ -229,6 +223,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         updateFields()
 
+        binding.editInstanceParentLayout.apply {
+            addOneShotGlobalLayoutListener { isHintAnimationEnabled = true }
+        }
+
         tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener =
                 timePickerDialogFragmentListener
 
@@ -278,12 +276,28 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
     private fun updateFields() {
-        binding.editInstanceParentLayout.endIconMode = if (data.parentInstanceData != null)
+        binding.editInstanceParentLayout.endIconMode = if (state.parentInstanceData != null)
             TextInputLayout.END_ICON_CLEAR_TEXT
         else
             TextInputLayout.END_ICON_DROPDOWN_MENU
 
         binding.editInstanceParentText.setText(state.parentInstanceData?.name)
+
+        binding.editInstanceParentLayout.isEndIconVisible = true
+
+        binding.editInstanceParentText.setFixedOnClickListener {
+            ParentPickerFragment.newInstance(data.parentInstanceData != null).let {
+                it.show(requireActivity().supportFragmentManager, TAG_PARENT_PICKER)
+                it.initialize(parentPickerDelegate)
+            }
+        }
+
+        if (state.parentInstanceData != null) {
+            binding.editInstanceParentLayout.setEndIconOnClickListener {
+                state.parentInstanceData = null
+                updateFields()
+            }
+        }
 
         binding.editInstanceDate.setText(state.date.getDisplayText())
 

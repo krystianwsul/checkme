@@ -679,9 +679,7 @@ class EditActivity : NavBarActivity() {
                             error = null
                             isHintAnimationEnabled = false
 
-                            addOneShotGlobalLayoutListener {
-                                isHintAnimationEnabled = true
-                            }
+                            addOneShotGlobalLayoutListener { isHintAnimationEnabled = true }
                         }
                     }
 

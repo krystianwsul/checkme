@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
@@ -14,15 +13,11 @@ import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
 
-const val PAGE_SIZE = 20
-
 fun DomainFactory.getSearchInstancesData(
         searchCriteria: SearchCriteria,
         page: Int,
 ): DomainResult<SearchInstancesViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
-
-    val desiredCount = (page + 1) * PAGE_SIZE
 
     LockerManager.setLocker { now ->
         getDomainResultInterrupting {
@@ -30,29 +25,12 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val (instances, hasMore) = getRootInstances(
-                    null,
-                    null,
+            val (cappedInstanceDatas, hasMore) = searchInstances(
                     now,
                     searchCriteria,
-                    filterVisible = !debugMode
-            ).takeAndHasMore(desiredCount)
-
-            val instanceDatas = instances.map {
-                val task = it.task
-
-                /*
-                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                 */
-                val childSearchCriteria = if (task.matchesQuery(searchCriteria.query)) null else searchCriteria
-
-                val children = getChildInstanceDatas(it, now, childSearchCriteria, !debugMode)
-
-                instanceToGroupListData(it, now, children)
-            }
-
-            val cappedInstanceDatas = instanceDatas.sorted().take(desiredCount)
+                    page,
+                    ::instanceToGroupListData
+            )
 
             val taskDatas = getUnscheduledTasks(now)
                     .filterQuery(searchCriteria.query)

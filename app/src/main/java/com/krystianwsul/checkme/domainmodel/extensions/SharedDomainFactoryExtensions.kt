@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
@@ -22,10 +23,12 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
+const val SEARCH_PAGE_SIZE = 20
+
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
-        deleteInstances: Boolean
+        deleteInstances: Boolean,
 ): TaskUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -249,3 +252,36 @@ fun DomainFactory.getGroupListChildTaskDatas(
             )
         }
         .toList()
+
+fun <T : Comparable<T>> DomainFactory.searchInstances(
+        now: ExactTimeStamp.Local,
+        searchCriteria: SearchCriteria,
+        page: Int,
+        mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+): Pair<List<T>, Boolean> = syncOnDomain {
+    val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
+
+    val (instances, hasMore) = getRootInstances(
+            null,
+            null,
+            now,
+            searchCriteria,
+            filterVisible = !debugMode
+    ).takeAndHasMore(desiredCount)
+
+    val instanceDatas = instances.map {
+        val task = it.task
+
+        /*
+        We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+        can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+         */
+        val childSearchCriteria = if (task.matchesQuery(searchCriteria.query)) null else searchCriteria
+
+        val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
+
+        mapper(it, now, children)
+    }
+
+    instanceDatas.sorted().take(desiredCount) to hasMore
+}

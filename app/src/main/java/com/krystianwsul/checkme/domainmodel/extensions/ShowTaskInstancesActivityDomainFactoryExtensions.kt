@@ -25,7 +25,7 @@ fun DomainFactory.getShowTaskInstancesData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val desiredCount = (page + 1) * PAGE_SIZE
+    val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
     val (instances, hasMore) = task.getInstances(
             null,

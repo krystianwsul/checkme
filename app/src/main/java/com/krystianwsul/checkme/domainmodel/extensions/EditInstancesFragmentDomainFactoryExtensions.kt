@@ -99,7 +99,7 @@ fun DomainFactory.getEditInstancesSearchData(
 ): DomainResult<InstancesEditSearchViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
-    val desiredCount = (page + 1) * PAGE_SIZE
+    val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
     LockerManager.setLocker { now ->
         getDomainResultInterrupting {

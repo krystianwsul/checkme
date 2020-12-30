@@ -155,10 +155,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
 
-            override fun onEntryDeleted() = throw UnsupportedOperationException()
+            override fun onEntryDeleted() {
+                state.parentInstanceData = null
+                updateFields()
+            }
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-                TODO("Not yet implemented")
+                state.parentInstanceData = (entryData as EditInstancesSearchViewModel.InstanceEntryData).run {
+                    EditInstancesViewModel.ParentInstanceData(instanceKey, name)
+                }
+
+                updateFields()
             }
 
             override fun onSearch(query: String) = queryRelay.accept(query)

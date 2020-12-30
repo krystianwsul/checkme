@@ -111,6 +111,7 @@ fun DomainFactory.getEditInstancesSearchData(
                         instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, task.ordinal) },
                         instance.instanceDateTime.timeStamp,
                         instance.task.ordinal,
+                        instance.instanceKey,
                 )
             }
 

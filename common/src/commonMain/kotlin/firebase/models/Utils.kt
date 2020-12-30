@@ -42,6 +42,8 @@ fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
 
         if (!searchCriteria.showDone && instance.done != null) return false
 
+        if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
+
         if (instance.task.matchesQuery(searchCriteria.query)) return true
 
         return instance.getChildInstances()

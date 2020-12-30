@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.utils
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -20,10 +21,11 @@ fun <T : DomainData> connectInstanceSearch(
         viewModel: DomainViewModel<T>,
         setAdapterData: (data: T) -> Unit,
         startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit,
+        excludedInstanceKeys: Set<InstanceKey>,
 ) {
     val searchParameters = Observables.combineLatest(
             filterCriteriaObservable.distinctUntilChanged().map {
-                SearchCriteria(it.query, it.filterParams.showAssignedToOthers, showDone)
+                SearchCriteria(it.query, it.filterParams.showAssignedToOthers, showDone, excludedInstanceKeys)
             },
             onProgressShownObservable.doOnNext { setPage(getPage() + 1) }
                     .startWith(Unit)

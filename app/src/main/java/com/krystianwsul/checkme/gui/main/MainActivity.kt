@@ -607,7 +607,8 @@ class MainActivity :
                                 FilterCriteria.ExpandOnly(it.searchCriteria)
                         ))
                     },
-                    this::start
+                    this::start,
+                    setOf()
             )
         }
 

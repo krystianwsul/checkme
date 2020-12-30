@@ -119,6 +119,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
 
+    private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!! }
+
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {
 
@@ -146,9 +148,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                                     it.showLoader
                             ))
                         },
-                        { searchCriteria, page -> editInstancesSearchViewModel.start(searchCriteria, page) }
+                        { searchCriteria, page -> editInstancesSearchViewModel.start(searchCriteria, page) },
+                        instanceKeys.toSet(),
                 )
-
             }
 
             override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
@@ -174,7 +176,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             state = savedInstanceState.getParcelable(KEY_STATE)!!
         }
 
-        val instanceKeys = requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!
         check(instanceKeys.isNotEmpty())
 
         editInstancesViewModel.start(instanceKeys)

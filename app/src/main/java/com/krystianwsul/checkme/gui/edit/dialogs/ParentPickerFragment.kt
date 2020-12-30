@@ -31,7 +31,7 @@ import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
@@ -65,8 +65,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
     private var expandedParentKeys: List<Parcelable>? = null
-
-    private val initializeDisposable = CompositeDisposable()
 
     private var filterCriteria = FilterCriteria.Full()
 
@@ -116,12 +114,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
         delegateRelay.switchMap { it.entryDatasObservable }
                 .subscribe { initialize(it) }
                 .addTo(viewCreatedDisposable)
+
+        delegateRelay.switchMap { it.filterCriteriaObservable }
+                .distinctUntilChanged()
+                .subscribe { filterCriteria -> treeViewAdapter!!.updateDisplayedNodes { search(filterCriteria, it) } }
+                .addTo(viewCreatedDisposable)
+
+        viewCreatedDisposable += Observables.combineLatest(
+                delegateRelay,
+                searchChanges
+        ).subscribe { (delegate, query) -> delegate.onSearch(query) }
     }
 
     private fun initialize(entryDatas: Collection<EntryData>) {
         check(activity != null)
-
-        initializeDisposable.clear()
 
         if (treeViewAdapter != null) {
             val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
@@ -140,10 +146,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 adapter = treeViewAdapter
                 itemAnimator = CustomItemAnimator()
             }
-        }
-
-        initializeDisposable += searchChanges.subscribe { query ->
-            treeViewAdapter!!.updateDisplayedNodes { search(FilterCriteria.Full(query), it) }
         }
     }
 
@@ -182,8 +184,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     override fun onDestroyView() {
-        initializeDisposable.clear()
-
         bindingProperty.reset()
 
         super.onDestroyView()
@@ -387,11 +387,15 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val entryDatasObservable: Observable<out Collection<EntryData>>
 
+        val filterCriteriaObservable: Observable<FilterCriteria.Full>
+
         fun onEntrySelected(entryData: EntryData)
 
         fun onEntryDeleted()
 
         fun onNewEntry(nameHint: String?)
+
+        fun onSearch(query: String)
     }
 
     interface EntryData : QueryMatchable {

@@ -45,6 +45,7 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
@@ -116,6 +117,10 @@ class EditActivity : NavBarActivity() {
 
         override val entryDatasObservable get() = Observable.just(delegate.parentTreeDatas.values)
 
+        private val queryRelay = BehaviorRelay.create<String>()
+
+        override val filterCriteriaObservable = queryRelay.distinctUntilChanged().map { FilterCriteria.Full(it) }
+
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             delegate.parentScheduleManager.parent = entryData as EditViewModel.ParentTreeData
         }
@@ -138,6 +143,8 @@ class EditActivity : NavBarActivity() {
                 )),
                 REQUEST_CREATE_PARENT
         )
+
+        override fun onSearch(query: String) = queryRelay.accept(query)
     }
 
     private var note: String? = null

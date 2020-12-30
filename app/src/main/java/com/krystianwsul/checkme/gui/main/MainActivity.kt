@@ -592,6 +592,7 @@ class MainActivity :
 
             connectInstanceSearch(
                     instanceSearch.filterNotNull(),
+                    true,
                     { searchPage },
                     { searchPage = it },
                     binding.mainSearchGroupListFragment.progressShown,

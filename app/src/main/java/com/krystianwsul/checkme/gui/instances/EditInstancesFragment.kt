@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
@@ -129,11 +128,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
 
             init {
-                val filterCriteria = queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) } // todo search add not done
                 val onProgressShown = Observable.never<Unit>() // todo search
 
                 connectInstanceSearch(
-                        filterCriteria,
+                        queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) },
+                        false,
                         { state.page },
                         { state.page = it },
                         onProgressShown,
@@ -179,8 +178,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(instanceKeys.isNotEmpty())
 
         editInstancesViewModel.start(instanceKeys)
-
-        editInstancesSearchViewModel.start(SearchCriteria.empty, 0)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =

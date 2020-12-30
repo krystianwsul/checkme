@@ -12,6 +12,7 @@ import io.reactivex.rxkotlin.plusAssign
 
 fun <T : DomainData> connectInstanceSearch(
         filterCriteriaObservable: Observable<FilterCriteria.Full>,
+        showDone: Boolean,
         getPage: () -> Int,
         setPage: (Int) -> Unit,
         onProgressShownObservable: Observable<Unit>,
@@ -22,7 +23,7 @@ fun <T : DomainData> connectInstanceSearch(
 ) {
     val searchParameters = Observables.combineLatest(
             filterCriteriaObservable.distinctUntilChanged().map {
-                SearchCriteria(it.query, it.filterParams.showAssignedToOthers)
+                SearchCriteria(it.query, it.filterParams.showAssignedToOthers, showDone)
             },
             onProgressShownObservable.doOnNext { setPage(getPage() + 1) }
                     .startWith(Unit)

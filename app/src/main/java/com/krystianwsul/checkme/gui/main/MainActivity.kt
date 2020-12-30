@@ -40,11 +40,11 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -590,33 +590,24 @@ class MainActivity :
                 }
             }
 
-            val searchParameters = Observables.combineLatest(
-                    instanceSearch.filterNotNull()
-                            .distinctUntilChanged()
-                            .map { SearchCriteria(it.query, it.filterParams.showAssignedToOthers) },
-                    binding.mainSearchGroupListFragment
-                            .progressShown
-                            .doOnNext { searchPage += 1 }
-                            .startWith(Unit)
-                            .map { searchPage }
+            connectInstanceSearch(
+                    instanceSearch.filterNotNull(),
+                    { searchPage },
+                    { searchPage = it },
+                    binding.mainSearchGroupListFragment.progressShown,
+                    createDisposable,
+                    searchInstancesViewModel,
+                    {
+                        binding.mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
+                                it.dataId,
+                                it.immediate,
+                                it.groupListDataWrapper,
+                                it.showLoader,
+                                FilterCriteria.ExpandOnly(it.searchCriteria)
+                        ))
+                    },
+                    this::start
             )
-                    .replay(1)
-                    .apply { createDisposable += connect() }
-
-            data.doOnNext {
-                binding.mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
-                        it.dataId,
-                        it.immediate,
-                        it.groupListDataWrapper,
-                        it.showLoader,
-                        FilterCriteria.ExpandOnly(it.searchCriteria)
-                ))
-            }
-                    .map { }
-                    .startWith(Unit)
-                    .switchMap { searchParameters }
-                    .subscribe { start(it.first, it.second) }
-                    .addTo(createDisposable)
         }
 
         binding.mainDaysPager.addOneShotGlobalLayoutListener {

@@ -51,9 +51,11 @@ fun <T : ProjectType> combineInstanceSequences(
         bySchedule: Boolean = false
 ): Sequence<Instance<out T>> {
     return combineSequences(instanceSequences) {
-        val finalPair = it.mapIndexed { index, instance -> instance?.getSequenceDate(bySchedule) to index }
+        val finalPair = it.mapIndexed { index, instance ->
+            instance?.let { Pair(it.getSequenceDate(bySchedule), it.task.ordinal) } to index
+        }
                 .filter { it.first != null }
-                .minByOrNull { it.first!! }!!
+                .minWithOrNull(compareBy({ it.first!!.first }, { it.first!!.second }))!!
 
         finalPair.second
     }

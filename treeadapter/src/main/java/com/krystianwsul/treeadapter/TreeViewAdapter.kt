@@ -257,7 +257,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     private class PaddingHolder(view: View, private val progressId: Int) : RecyclerView.ViewHolder(view) {
 
         fun showProgress(showProgress: Boolean) {
-            itemView.findViewById<View>(progressId).visibility = if (showProgress) View.VISIBLE else View.GONE
+            itemView.findViewById<View>(progressId).visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
         }
     }
 

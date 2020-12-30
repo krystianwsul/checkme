@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.normalized
 
@@ -66,9 +65,12 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
 
     private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria.empty, val page: Int = 0)
 
-    data class SortKey(val startExactTimeStamp: ExactTimeStamp.Local) : ParentPickerFragment.SortKey {
+    data class SortKey(
+            val instanceTimeStamp: TimeStamp,
+            val ordinal: Double,
+    ) : ParentPickerFragment.SortKey {
 
-        override fun compareTo(other: ParentPickerFragment.SortKey): Int =
-                startExactTimeStamp.compareTo((other as SortKey).startExactTimeStamp)
+        override fun compareTo(other: ParentPickerFragment.SortKey) =
+                compareValuesBy(this, other, { instanceTimeStamp }, { ordinal })
     }
 }

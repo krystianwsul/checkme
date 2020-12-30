@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
@@ -127,15 +128,15 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
 
-            init {
-                val onProgressShown = Observable.never<Unit>() // todo search
+            private val progressShownRelay = PublishRelay.create<Unit>()
 
+            init {
                 connectInstanceSearch(
                         queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) },
                         false,
                         { state.page },
                         { state.page = it },
-                        onProgressShown,
+                        progressShownRelay,
                         viewCreatedDisposable,
                         editInstancesSearchViewModel,
                         {
@@ -150,19 +151,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             }
 
-            override fun onNewEntry(nameHint: String?) {
-                TODO("Not yet implemented")
-            }
+            override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
 
-            override fun onEntryDeleted() {
-                TODO("Not yet implemented")
-            }
+            override fun onEntryDeleted() = throw UnsupportedOperationException()
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
                 TODO("Not yet implemented")
             }
 
             override fun onSearch(query: String) = queryRelay.accept(query)
+
+            override fun onPaddingShown() = progressShownRelay.accept(Unit)
         }
     }
 

@@ -9,7 +9,9 @@ import android.view.MotionEvent
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -124,6 +126,21 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 delegateRelay,
                 searchChanges
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
+
+        delegateRelay.switchMap { delegate ->
+            binding.parentPickerRecycler
+                    .scrollStateChanges()
+                    .filter { it == RecyclerView.SCROLL_STATE_IDLE }
+                    .filter {
+                        val progressPosition = treeViewAdapter!!.itemCount - 1
+                        val lastVisiblePosition = (binding.parentPickerRecycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+
+                        treeViewAdapter!!.showProgress && (progressPosition == lastVisiblePosition)
+                    }
+                    .map { delegate }!!
+        }
+                .subscribe { it.onPaddingShown() }
+                .addTo(viewCreatedDisposable)
     }
 
     private fun initialize(adapterData: AdapterData) {
@@ -406,6 +423,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
         fun onNewEntry(nameHint: String?)
 
         fun onSearch(query: String)
+
+        fun onPaddingShown()
     }
 
     data class AdapterData(

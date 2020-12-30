@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -21,6 +22,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
+import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
@@ -117,29 +119,51 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
 
-    private val parentPickerDelegate = object : ParentPickerFragment.Delegate {
+    private val parentPickerDelegate by lazy {
+        object : ParentPickerFragment.Delegate {
 
-        private val queryRelay = BehaviorRelay.createDefault("")
+            private val queryRelay = BehaviorRelay.createDefault("")
 
-        override val adapterDataObservable by lazy {
-            editInstancesSearchViewModel.data.map { ParentPickerFragment.AdapterData(it.instanceEntryDatas) }
+            override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
+
+            override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
+
+            init {
+                val filterCriteria = queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) } // todo search add not done
+                val onProgressShown = Observable.never<Unit>() // todo search
+
+                connectInstanceSearch(
+                        filterCriteria,
+                        { state.page },
+                        { state.page = it },
+                        onProgressShown,
+                        viewCreatedDisposable,
+                        editInstancesSearchViewModel,
+                        { // todo search progress
+                            adapterDataObservable.accept(ParentPickerFragment.AdapterData(
+                                    it.instanceEntryDatas,
+                                    FilterCriteria.ExpandOnly(it.searchCriteria.query)
+                            ))
+                        },
+                        { searchCriteria, page -> editInstancesSearchViewModel.start(searchCriteria, page) }
+                )
+
+            }
+
+            override fun onNewEntry(nameHint: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onEntryDeleted() {
+                TODO("Not yet implemented")
+            }
+
+            override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSearch(query: String) = queryRelay.accept(query)
         }
-
-        override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
-
-        override fun onNewEntry(nameHint: String?) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onEntryDeleted() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-            TODO("Not yet implemented")
-        }
-
-        override fun onSearch(query: String) = queryRelay.accept(query)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,8 +188,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
 
         binding.editInstanceDate.setFixedOnClickListener {
             newMaterialDatePicker(state.date).let {
@@ -198,6 +220,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         editInstancesViewModel.data
                 .subscribe(this::onLoadFinished)
                 .addTo(viewCreatedDisposable)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        childFragmentManager.fragments
+
+        tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
     }
 
     override fun onResume() {
@@ -305,7 +335,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     false,
                     R.string.parent_dialog_title_instance
             ).let {
-                it.show(requireActivity().supportFragmentManager, TAG_PARENT_PICKER)
+                it.show(childFragmentManager, TAG_PARENT_PICKER)
                 it.initialize(parentPickerDelegate)
             }
         }
@@ -361,5 +391,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             var parentInstanceData: EditInstancesViewModel.ParentInstanceData?,
             var date: Date,
             var timePairPersist: TimePairPersist,
+            var page: Int = 0,
     ) : Parcelable
 }

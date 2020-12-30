@@ -9,19 +9,14 @@ import android.view.MotionEvent
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
 import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.AbstractModelNode
-import com.krystianwsul.checkme.gui.tree.BaseAdapter
-import com.krystianwsul.checkme.gui.tree.HolderType
+import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
@@ -128,16 +123,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
-            binding.parentPickerRecycler
-                    .scrollStateChanges()
-                    .filter { it == RecyclerView.SCROLL_STATE_IDLE }
-                    .filter {
-                        val progressPosition = treeViewAdapter!!.itemCount - 1
-                        val lastVisiblePosition = (binding.parentPickerRecycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
-
-                        treeViewAdapter!!.showProgress && (progressPosition == lastVisiblePosition)
-                    }
-                    .map { delegate }!!
+            getProgressShownObservable(binding.parentPickerRecycler) { treeViewAdapter!! }.map { delegate }!!
         }
                 .subscribe { it.onPaddingShown() }
                 .addTo(viewCreatedDisposable)

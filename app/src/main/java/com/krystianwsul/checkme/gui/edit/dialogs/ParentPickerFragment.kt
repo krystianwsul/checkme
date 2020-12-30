@@ -137,7 +137,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             treeViewAdapter!!.updateDisplayedNodes { placeholder ->
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
                         adapterData.entryDatas,
-                        expandedParentKeys
+                        expandedParentKeys,
+                        adapterData.showProgress
                 )
 
                 adapterData.filterCriteria?.let { treeViewAdapter!!.setFilterCriteria(it, placeholder) }
@@ -146,7 +147,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             adapterData.filterCriteria?.let { filterCriteria = it }
 
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(adapterData.entryDatas, expandedParentKeys)
+            taskAdapter.initialize(adapterData.entryDatas, expandedParentKeys, adapterData.showProgress)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.parentPickerRecycler.apply {
@@ -225,10 +226,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
         fun initialize(
                 entryDatas: Collection<EntryData>,
                 expandedParentKeys: List<Parcelable>?,
+                showProgress: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
+            treeViewAdapter.showProgress = showProgress
 
             taskWrappers = ArrayList()
 
@@ -405,7 +408,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
         fun onSearch(query: String)
     }
 
-    data class AdapterData(val entryDatas: Collection<EntryData>, val filterCriteria: FilterCriteria.ExpandOnly? = null)
+    data class AdapterData(
+            val entryDatas: Collection<EntryData>,
+            val filterCriteria: FilterCriteria.ExpandOnly? = null,
+            val showProgress: Boolean = false,
+    )
 
     interface EntryData : QueryMatchable {
 

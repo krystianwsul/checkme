@@ -138,10 +138,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         onProgressShown,
                         viewCreatedDisposable,
                         editInstancesSearchViewModel,
-                        { // todo search progress
+                        {
                             adapterDataObservable.accept(ParentPickerFragment.AdapterData(
                                     it.instanceEntryDatas,
-                                    FilterCriteria.ExpandOnly(it.searchCriteria.query)
+                                    FilterCriteria.ExpandOnly(it.searchCriteria.query),
+                                    it.showLoader
                             ))
                         },
                         { searchCriteria, page -> editInstancesSearchViewModel.start(searchCriteria, page) }

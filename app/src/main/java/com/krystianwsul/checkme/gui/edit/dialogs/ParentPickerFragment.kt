@@ -66,7 +66,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
     private var expandedParentKeys: List<Parcelable>? = null
 
-    private var filterCriteria = FilterCriteria.Full()
+    private var filterCriteria: FilterCriteria = FilterCriteria.Full()
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
@@ -111,8 +111,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
-        delegateRelay.switchMap { it.entryDatasObservable }
-                .subscribe { initialize(it) }
+        delegateRelay.switchMap { it.adapterDataObservable }
+                .subscribe(::initialize)
                 .addTo(viewCreatedDisposable)
 
         delegateRelay.switchMap { it.filterCriteriaObservable }
@@ -126,7 +126,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
     }
 
-    private fun initialize(entryDatas: Collection<EntryData>) {
+    private fun initialize(adapterData: AdapterData) {
         check(activity != null)
 
         if (treeViewAdapter != null) {
@@ -134,12 +134,19 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter!!.updateDisplayedNodes {
-                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(entryDatas, expandedParentKeys)
+            treeViewAdapter!!.updateDisplayedNodes { placeholder ->
+                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
+                        adapterData.entryDatas,
+                        expandedParentKeys
+                )
+
+                adapterData.filterCriteria?.let { treeViewAdapter!!.setFilterCriteria(it, placeholder) }
             }
         } else {
+            adapterData.filterCriteria?.let { filterCriteria = it }
+
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(entryDatas, expandedParentKeys)
+            taskAdapter.initialize(adapterData.entryDatas, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.parentPickerRecycler.apply {
@@ -385,7 +392,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     interface Delegate {
 
-        val entryDatasObservable: Observable<out Collection<EntryData>>
+        val adapterDataObservable: Observable<AdapterData>
 
         val filterCriteriaObservable: Observable<FilterCriteria.Full>
 
@@ -397,6 +404,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         fun onSearch(query: String)
     }
+
+    data class AdapterData(val entryDatas: Collection<EntryData>, val filterCriteria: FilterCriteria.ExpandOnly? = null)
 
     interface EntryData : QueryMatchable {
 

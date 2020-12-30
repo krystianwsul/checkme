@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.textfield.TextInputLayout
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -36,6 +37,8 @@ import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.treeadapter.FilterCriteria
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.util.*
@@ -116,7 +119,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val parentPickerDelegate = object : ParentPickerFragment.Delegate {
 
-        override val entryDatasObservable by lazy { editInstancesSearchViewModel.data.map { it.instanceEntryDatas } }
+        private val queryRelay = BehaviorRelay.createDefault("")
+
+        override val adapterDataObservable by lazy {
+            editInstancesSearchViewModel.data.map { ParentPickerFragment.AdapterData(it.instanceEntryDatas) }
+        }
+
+        override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
 
         override fun onNewEntry(nameHint: String?) {
             TODO("Not yet implemented")
@@ -129,6 +138,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             TODO("Not yet implemented")
         }
+
+        override fun onSearch(query: String) = queryRelay.accept(query)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

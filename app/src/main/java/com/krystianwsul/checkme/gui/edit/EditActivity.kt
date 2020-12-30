@@ -115,7 +115,9 @@ class EditActivity : NavBarActivity() {
 
     private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
 
-        override val entryDatasObservable get() = Observable.just(delegate.parentTreeDatas.values)
+        override val adapterDataObservable
+            get() =
+                Observable.just(ParentPickerFragment.AdapterData(delegate.parentTreeDatas.values))
 
         private val queryRelay = BehaviorRelay.create<String>()
 

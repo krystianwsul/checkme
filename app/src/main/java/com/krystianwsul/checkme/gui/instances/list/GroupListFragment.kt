@@ -987,7 +987,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
-                Pair(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
                 compositeDisposable,
                 filterCriteria
         )

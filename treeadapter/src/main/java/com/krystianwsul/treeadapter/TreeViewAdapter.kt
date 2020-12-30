@@ -3,6 +3,8 @@ package com.krystianwsul.treeadapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +20,7 @@ import io.reactivex.schedulers.Schedulers
 
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
-        private val padding: Pair<Int, Int>?,
+        private val paddingData: PaddingData,
         private val compositeDisposable: CompositeDisposable,
         initialFilterCriteria: FilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
@@ -44,12 +46,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     val updates = PublishRelay.create<Unit>()
 
     var showProgress = false
-        set(value) {
-            if (value)
-                checkNotNull(padding)
 
-            field = value
-        }
+    private val showPadding get() = !paddingData.hideWithoutProgress || showProgress
 
     private val normalizeRelay = BehaviorRelay.create<Unit>()
 
@@ -74,7 +72,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         normalizeRelay.accept(Unit)
     }
 
-    override fun getItemCount() = displayedNodes.size + if (padding != null) 1 else 0
+    override fun getItemCount() = displayedNodes.size + if (showPadding) 1 else 0
 
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
         check(!updating)
@@ -82,8 +80,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val oldStates = displayedNodes.map { it.state }
         val oldShowProgress = showProgress
         val oldFilterCriteria = filterCriteria
-
-        val showPadding = padding != null
+        val oldShowPadding = showPadding
 
         updating = true
 
@@ -106,18 +103,16 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
         val newStates = displayedNodes.map { it.state }
         val newShowProgress = showProgress
+        val newShowPadding = showPadding
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             private fun paddingComparison(oldItemPosition: Int, newItemPosition: Int): Boolean? {
-                val oldIsPadding = showPadding && oldItemPosition == oldStates.size
-                val newIsPadding = showPadding && newItemPosition == newStates.size
+                val oldIsPadding = oldShowPadding && oldItemPosition == oldStates.size
+                val newIsPadding = newShowPadding && newItemPosition == newStates.size
 
-                if (oldIsPadding && newIsPadding)
-                    return true
-
-                if (oldIsPadding != newIsPadding)
-                    return false
+                if (oldIsPadding && newIsPadding) return true
+                if (oldIsPadding != newIsPadding) return false
 
                 return null
             }
@@ -178,11 +173,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_PADDING) {
-            checkNotNull(padding)
+            check(showPadding)
 
             PaddingHolder(
-                    LayoutInflater.from(parent.context).inflate(padding.first, parent, false)!!,
-                    padding.second
+                    LayoutInflater.from(parent.context).inflate(paddingData.layoutId, parent, false)!!,
+                    paddingData.viewId
             )
         } else {
             treeModelAdapter.onCreateViewHolder(parent, viewType)
@@ -196,7 +191,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             treeNodeCollection!!.getNode(position).onBindViewHolder(holder)
         } else {
             check(position == displayedSize)
-            checkNotNull(padding)
+            check(showPadding)
             check(position == itemCount - 1)
 
             (holder as PaddingHolder).showProgress(showProgress)
@@ -219,7 +214,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return if (padding != null && position == displayedNodes.size)
+        return if (showPadding && position == displayedNodes.size)
             TYPE_PADDING
         else
             treeNodeCollection!!.getItemViewType(position)
@@ -274,4 +269,9 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         }
     }
 
+    data class PaddingData(
+            @LayoutRes val layoutId: Int,
+            @IdRes val viewId: Int,
+            val hideWithoutProgress: Boolean = false,
+    )
 }

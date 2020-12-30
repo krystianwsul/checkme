@@ -35,7 +35,8 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                         .textChanges()
                         .map { it.toString() }
                         .distinctUntilChanged()
-                        .map { it.normalized() },
+                        .map { it.normalized() }
+                        .distinctUntilChanged(),
                 Preferences.filterParamsObservable,
         )
                 .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }

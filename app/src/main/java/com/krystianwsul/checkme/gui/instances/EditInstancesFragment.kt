@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,7 +11,10 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.textfield.TextInputLayout
+import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.Preferences
@@ -26,10 +30,8 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.SerializableUnit
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -225,6 +227,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         editInstancesViewModel.data
                 .subscribe(this::onLoadFinished)
                 .addTo(viewCreatedDisposable)
+
+        binding.editInstanceSetScheduleText
+                .clicks()
+                .subscribe {
+                    state.parentInstanceData = null
+                    updateFields()
+                }
+                .addTo(viewCreatedDisposable)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -324,6 +334,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
+    private var first = true
+
     private fun updateFields() {
         binding.editInstanceParentLayout.endIconMode = if (state.parentInstanceData != null)
             TextInputLayout.END_ICON_CLEAR_TEXT
@@ -374,6 +386,40 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceTimeLayout.error = timeError
 
         binding.editInstanceSave.isEnabled = isValidDateTime
+
+        val show: View
+        val hide: View
+        if (state.parentInstanceData != null) {
+            show = binding.editInstanceSetScheduleLayout
+            hide = binding.editInstanceScheduleContainer
+        } else {
+            hide = binding.editInstanceSetScheduleLayout
+            show = binding.editInstanceScheduleContainer
+        }
+        animateVisibility(show, hide, immediate = first)
+
+        if (!first) {
+            binding.editInstanceScheduleFrame.apply {
+                cancelAnimations()
+
+                val widthSpec = View.MeasureSpec.makeMeasureSpec(
+                        binding.editInstanceScheduleFrame.width,
+                        View.MeasureSpec.EXACTLY
+                )
+                val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                show.measure(widthSpec, heightSpec)
+
+                ValueAnimator.ofInt(height, show.measuredHeight).apply {
+                    duration = context.resources.getInteger(android.R.integer.config_longAnimTime).toLong()
+
+                    addUpdateListener {
+                        updateLayoutParams<LinearLayout.LayoutParams> { height = it.animatedValue as Int }
+                    }
+                }.start()
+            }
+        }
+
+        first = false
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -29,7 +29,7 @@
                 android:id="@+id/editInstanceParentLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/parentTask"
+                android:hint="@string/addToReminder"
                 app:errorEnabled="true"
                 app:hintAnimationEnabled="false"
                 style="@style/MySpinner">
@@ -44,40 +44,73 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editInstanceDateLayout"
-                style="@style/MySpinner"
+            <FrameLayout
+                android:id="@+id/editInstanceScheduleFrame"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:errorEnabled="true"
-                app:hintEnabled="false">
+                android:layout_height="wrap_content">
 
-                <AutoCompleteTextView
-                    android:id="@+id/editInstanceDate"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/editInstanceSetScheduleLayout"
+                    style="@style/MySpinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/MySpinnerText"
-                    tools:ignore="LabelFor" />
+                    app:errorEnabled="true"
+                    android:hint="@string/setTime">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <AutoCompleteTextView
+                        android:id="@+id/editInstanceSetScheduleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editInstanceTimeLayout"
-                style="@style/MySpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="18dp"
-                app:errorEnabled="true"
-                app:hintEnabled="false">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <AutoCompleteTextView
-                    android:id="@+id/editInstanceTime"
+                <LinearLayout
+                    android:id="@+id/editInstanceScheduleContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/MySpinnerText"
-                    tools:ignore="LabelFor" />
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/editInstanceDateLayout"
+                        style="@style/MySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:errorEnabled="true"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/editInstanceDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/editInstanceTimeLayout"
+                        style="@style/MySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="18dp"
+                        app:errorEnabled="true"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/editInstanceTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+            </FrameLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/editInstanceSave"

@@ -131,4 +131,6 @@
     <string name="assignTask">Przydziel zadanie</string>
     <string name="assignedTo">Przydzielone do:</string>
     <string name="showAssignedTo">Pokaż przydzielone innym</string>
+    <string name="addToReminder">Dodaj do przypomnienia</string>
+    <string name="setTime">Ustaw czas</string>
 </resources>

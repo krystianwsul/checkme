@@ -53,11 +53,18 @@ object ImageManager {
     @Synchronized
     fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
+    @Synchronized
+    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task<*>>, callback: () -> Unit) {
+        largeIconDownloader.prefetch(deviceDbInfo, tasks, callback)
+        bigPictureDownloader.prefetch(deviceDbInfo, tasks, callback)
+    }
+
     private class Downloader(
             private val width: Int,
             private val height: Int,
             dirSuffix: String,
-            private val circle: Boolean) {
+            private val circle: Boolean,
+    ) {
 
         private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 

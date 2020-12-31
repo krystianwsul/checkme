@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -288,6 +289,8 @@ class DomainFactory(
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
+        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) { updateNotifications(ExactTimeStamp.Local.now) }
+
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
                 .filter { it.second?.isVisible(now) == true }

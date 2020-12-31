@@ -385,7 +385,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceDateLayout.error = dateError
         binding.editInstanceTimeLayout.error = timeError
 
-        binding.editInstanceSave.isEnabled = isValidDateTime
+        binding.editInstanceSave.isEnabled = isValidDateTime || state.parentInstanceData != null
 
         val show: View
         val hide: View

@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -29,7 +30,19 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
     val instances = instanceKeys.map(::getInstance)
     check(instances.all { it.done == null })
 
-    val parentInstanceData = instances.mapNotNull { it.parentInstanceData?.instance }
+    fun Instance<*>.hierarchyContainsKeys(): Boolean {
+        if (instanceKey in instanceKeys) return true
+
+        return parentInstanceData?.instance
+                ?.hierarchyContainsKeys()
+                ?: false
+    }
+
+    val parentInstanceData = instances.mapNotNull {
+        it.parentInstanceData
+                ?.instance
+                ?.takeUnless { it.hierarchyContainsKeys() }
+    }
             .groupBy { it }
             .map { it.key to it.value.size }
             .maxByOrNull { it.second }

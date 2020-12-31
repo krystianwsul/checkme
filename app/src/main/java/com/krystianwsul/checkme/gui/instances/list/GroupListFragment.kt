@@ -204,32 +204,29 @@ class GroupListFragment @JvmOverloads constructor(
                     listener.deleteTasks(taskKeys.toSet())
                 }
                 R.id.action_group_join -> {
-                    val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
-                    check(taskKeys.size > 1)
-
-                    if (parameters is GroupListParameters.InstanceKey) {
-                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(
-                                taskKeys,
-                                EditActivity.Hint.Task((parameters as GroupListParameters.InstanceKey).instanceKey.taskKey)
-                        )))
-                    } else {
-                        val instanceDatas = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
-
-                        val scheduleHint = instanceDatas.minByOrNull { it.instanceTimeStamp }?.let {
-                            val date = it.instanceTimeStamp.date
-                            val timePair = it.createTaskTimePair
-
-                            EditActivity.Hint.Schedule(date, timePair)
+                    val joinables = selectedDatas.map {
+                        when (it) {
+                            is GroupListDataWrapper.TaskData -> EditParameters.Join.Joinable.Task(it.taskKey)
+                            is GroupListDataWrapper.InstanceData ->
+                                EditParameters.Join.Joinable.Instance(it.instanceKey)
+                            else -> throw IllegalArgumentException()
                         }
-
-                        val removeInstanceKeys = instanceDatas.map { it.instanceKey }
-
-                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(
-                                taskKeys,
-                                scheduleHint,
-                                removeInstanceKeys
-                        )))
                     }
+
+                    val hint = if (parameters is GroupListParameters.InstanceKey) {
+                        EditActivity.Hint.Task((parameters as GroupListParameters.InstanceKey).instanceKey.taskKey)
+                    } else {
+                        selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
+                                .minByOrNull { it.instanceTimeStamp }
+                                ?.let {
+                                    val date = it.instanceTimeStamp.date
+                                    val timePair = it.createTaskTimePair
+
+                                    EditActivity.Hint.Schedule(date, timePair)
+                                }
+                    }
+
+                    activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(joinables, hint)))
                 }
                 R.id.action_group_mark_done -> {
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }

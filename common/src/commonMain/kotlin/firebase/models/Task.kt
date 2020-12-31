@@ -1002,15 +1002,14 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
-    fun hasMultipleFutureInstancesWithUnsetParent(now: ExactTimeStamp.Local) = getInstances(
+    fun hasInstancesWithUnsetParent(now: ExactTimeStamp.Local, excludeInstanceKey: InstanceKey?) = getInstances(
             now.toOffset(),
             null,
             now,
             bySchedule = true
     ).filter { it.parentState == Instance.ParentState.Unset }
-            .take(2)
-            .toList()
-            .size > 1
+            .filter { it.instanceKey != excludeInstanceKey }
+            .firstOrNull() != null
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

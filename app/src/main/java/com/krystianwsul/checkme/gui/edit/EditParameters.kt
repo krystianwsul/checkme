@@ -74,20 +74,35 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Join(
-            val taskKeys: List<TaskKey>,
-            val hint: EditActivity.Hint? = null,
-            val removeInstanceKeys: List<InstanceKey> = listOf()
-    ) : EditParameters() {
+    class Join(val joinables: List<Joinable>, val hint: EditActivity.Hint? = null) : EditParameters() {
 
         init {
-            check(taskKeys.size > 1)
+            check(joinables.size > 1)
         }
 
         override fun startViewModel(viewModel: EditViewModel) = viewModel.start(
-                EditViewModel.StartParameters.Join(taskKeys),
+                EditViewModel.StartParameters.Join(joinables),
                 (hint as? EditActivity.Hint.Task)?.taskKey
         )
+
+        sealed class Joinable : Parcelable {
+
+            abstract val taskKey: TaskKey
+
+            abstract val instanceKey: InstanceKey?
+
+            @Parcelize
+            data class Task(override val taskKey: TaskKey) : Joinable() {
+
+                override val instanceKey: InstanceKey? get() = null
+            }
+
+            @Parcelize
+            data class Instance(override val instanceKey: InstanceKey) : Joinable() {
+
+                override val taskKey: TaskKey get() = instanceKey.taskKey
+            }
+        }
     }
 
     @Parcelize

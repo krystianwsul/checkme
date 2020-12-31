@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
@@ -102,12 +103,11 @@ fun DomainFactory.getCreateTaskData(
     }
 
     val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinTaskKeys.run {
-            // todo search what I actually want, is to check if there are any instances *apart from the one passed in* that can be altered
-            map { it.projectKey }.distinct().size == 1 && any { getTaskForce(it).hasMultipleFutureInstancesWithUnsetParent(now) }
+        is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
+            map { it.taskKey.projectKey }.distinct().size == 1 && any { getTaskForce(it.taskKey).hasInstancesWithUnsetParent(now, it.instanceKey) }
         }
-        is EditViewModel.StartParameters.Task -> getTaskForce(startParameters.taskKey).hasMultipleFutureInstancesWithUnsetParent(now)
-        is EditViewModel.StartParameters.Create -> false
+        is EditViewModel.StartParameters.Task -> null
+        is EditViewModel.StartParameters.Create -> null
     }
 
     EditViewModel.Data(
@@ -423,11 +423,10 @@ fun DomainFactory.createScheduleJoinRootTask(
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
-        joinTaskKeys: List<TaskKey>,
+        joinables: List<EditParameters.Join.Joinable>,
         note: String?,
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
-        removeInstanceKeys: List<InstanceKey>,
         allReminders: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): TaskKey = syncOnDomain {
@@ -436,11 +435,23 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
-    check(joinTaskKeys.size > 1)
+    check(joinables.size > 1)
 
     val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
 
-    val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
+    val joinableTaskKeys = joinables.map { it.taskKey }
+
+    val joinTasks = if (allReminders) {
+        joinableTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
+    } else {
+        check(
+                joinableTaskKeys.map { it.projectKey }
+                        .distinct()
+                        .single() == finalProjectId
+        )
+
+        joinableTaskKeys.map { getTaskForce(it) }
+    }
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
@@ -458,7 +469,10 @@ fun DomainFactory.createScheduleJoinRootTask(
             assignedTo = sharedProjectParameters.nonNullAssignedTo
     )
 
-    joinTasks(newParentTask, joinTasks, now, removeInstanceKeys, allReminders)
+    if (allReminders)
+        joinTasks(newParentTask, joinTasks, now, joinables.mapNotNull { it.instanceKey })
+    else
+        joinJoinables(newParentTask, joinables, now)
 
     updateNotifications(now)
 
@@ -684,48 +698,68 @@ private fun Task<*>.showAsParent(
     return true
 }
 
+private fun DomainFactory.joinJoinables(
+        newParentTask: Task<*>,
+        joinables: List<EditParameters.Join.Joinable>,
+        now: ExactTimeStamp.Local,
+) {
+    check(joinables.map { it.taskKey.projectKey }.distinct().size == 1)
+
+    val parentInstanceKey = newParentTask.getInstances(
+            null,
+            null,
+            now,
+    )
+            .single()
+            .instanceKey
+
+    joinables.forEach { joinable ->
+        val task = getTaskForce(joinable.taskKey)
+
+        fun addChildToParent() = addChildToParent(task, newParentTask, now)
+
+        when (joinable) {
+            is EditParameters.Join.Joinable.Task -> addChildToParent()
+            is EditParameters.Join.Joinable.Instance -> {
+                if (task.hasInstancesWithUnsetParent(now, joinable.instanceKey)) {
+                    getInstance(joinable.instanceKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
+                } else {
+                    addChildToParent()
+                }
+            }
+        }
+    }
+}
+
+private fun addChildToParent(childTask: Task<*>, parentTask: Task<*>, now: ExactTimeStamp.Local) {
+    childTask.requireCurrent(now)
+
+    childTask.endAllCurrentTaskHierarchies(now)
+    childTask.endAllCurrentSchedules(now)
+    childTask.endAllCurrentNoScheduleOrParents(now)
+
+    parentTask.addChild(childTask, now)
+}
+
 private fun DomainFactory.joinTasks(
         newParentTask: Task<*>,
         joinTasks: List<Task<*>>,
         now: ExactTimeStamp.Local,
         removeInstanceKeys: List<InstanceKey>,
-        allReminders: Boolean = true,
 ) {
     newParentTask.requireCurrent(now)
     check(joinTasks.size > 1)
 
-    if (allReminders) {
-        for (joinTask in joinTasks) {
-            joinTask.requireCurrent(now)
+    joinTasks.forEach { addChildToParent(it, newParentTask, now) }
 
-            joinTask.endAllCurrentTaskHierarchies(now)
-            joinTask.endAllCurrentSchedules(now)
-            joinTask.endAllCurrentNoScheduleOrParents(now)
-
-            newParentTask.addChild(joinTask, now)
-        }
-
-        removeInstanceKeys.map(::getInstance)
-                .filter {
-                    it.parentInstanceData
-                            ?.instance
-                            ?.task != newParentTask
-                            && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-                }
-                .forEach { it.hide() }
-    } else {
-        // todo search check same project
-        // todo search unscheduled tasks
-        val parentInstanceKey = newParentTask.getInstances(
-                null,
-                null,
-                now,
-        )
-                .single()
-                .instanceKey
-
-        removeInstanceKeys.forEach { getInstance(it).setParentState(Instance.ParentState.Parent(parentInstanceKey)) }
-    }
+    removeInstanceKeys.map(::getInstance)
+            .filter {
+                it.parentInstanceData
+                        ?.instance
+                        ?.task != newParentTask
+                        && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+            }
+            .forEach { it.hide() }
 }
 
 private fun DomainFactory.getTaskListChildTaskDatas(

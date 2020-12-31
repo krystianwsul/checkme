@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.common.firebase.models.ImageState
@@ -266,7 +267,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
             val defaultReminder: Boolean,
-            val showAllInstancesDialog: Boolean
+            val showAllInstancesDialog: Boolean?,
     ) : DomainData()
 
     data class CustomTimeData(
@@ -353,9 +354,9 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             override val excludedTaskKeys = setOf(taskKey)
         }
 
-        class Join(val joinTaskKeys: List<TaskKey>) : StartParameters() {
+        class Join(val joinables: List<EditParameters.Join.Joinable>) : StartParameters() {
 
-            override val excludedTaskKeys = joinTaskKeys.toSet()
+            override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
         }
     }
 

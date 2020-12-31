@@ -24,21 +24,22 @@ class JoinTasksEditDelegate(
     override val scheduleHint = parameters.hint?.toScheduleHint()
     override val showSaveAndOpen = false
 
+    private val taskKeys = parameters.joinables.map { it.taskKey }
+    private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
+
     private fun initialStateGetter(): ParentScheduleState {
-        val (initialParentKey, schedule) = parameters.run {
-            if (hint is EditActivity.Hint.Task) {
-                Pair(hint.toParentKey(), null)
-            } else {
-                Pair(
-                        taskKeys.map { it.projectKey }
-                                .distinct()
-                                .singleOrNull()
-                                ?.let {
-                                    (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                                },
-                        firstScheduleEntry.takeIf { data.defaultReminder }
-                )
-            }
+        val (initialParentKey, schedule) = if (parameters.hint is EditActivity.Hint.Task) {
+            Pair(parameters.hint.toParentKey(), null)
+        } else {
+            Pair(
+                    taskKeys.map { it.projectKey }
+                            .distinct()
+                            .singleOrNull()
+                            ?.let {
+                                (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
+                            },
+                    firstScheduleEntry.takeIf { data.defaultReminder }
+            )
         }
 
         return ParentScheduleState(
@@ -55,7 +56,7 @@ class JoinTasksEditDelegate(
     )
 
     override fun showAllRemindersDialog(): Boolean? {
-        if (!data.showAllInstancesDialog) return null
+        if (!data.showAllInstancesDialog!!) return null
 
         val schedule = parentScheduleManager.schedules
                 .singleOrNull()
@@ -77,13 +78,12 @@ class JoinTasksEditDelegate(
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
-                        parameters.taskKeys,
+                        parameters.joinables,
                         createParameters.note,
                         sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        parameters.removeInstanceKeys,
                         createParameters.allReminders
                 )
                 .also { EditActivity.createdTaskKey = it }
@@ -97,12 +97,12 @@ class JoinTasksEditDelegate(
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
-                        parameters.taskKeys,
+                        taskKeys,
                         createParameters.note,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        parameters.removeInstanceKeys
+                        instanceKeys
                 )
                 .also { EditActivity.createdTaskKey = it }
     }
@@ -117,13 +117,13 @@ class JoinTasksEditDelegate(
                 .createJoinRootTask(
                         SaveService.Source.GUI,
                         createParameters.name,
-                        parameters.taskKeys,
+                        taskKeys,
                         createParameters.note,
                         sharedProjectKey,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        parameters.removeInstanceKeys
+                        instanceKeys
                 )
                 .also { EditActivity.createdTaskKey = it }
     }

@@ -118,7 +118,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             when (itemId) {
                 R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
                 R.id.action_task_edit -> startActivity(EditActivity.getParametersIntent(EditParameters.Edit(childTaskDatas.single().taskKey)))
-                R.id.action_task_join -> startActivity(EditActivity.getParametersIntent(EditParameters.Join(taskKeys, hint())))
+                R.id.action_task_join -> startActivity(EditActivity.getParametersIntent(EditParameters.Join(
+                        taskKeys.map(EditParameters.Join.Joinable::Task),
+                        hint()
+                )))
                 R.id.action_task_delete -> {
                     checkNotNull(data)
 

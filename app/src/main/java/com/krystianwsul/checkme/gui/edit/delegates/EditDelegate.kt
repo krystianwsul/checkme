@@ -209,7 +209,11 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
     }
 
-    open fun showAllRemindersDialog(): Boolean? = null // null = no, true/false = plural
+    open fun showAllRemindersDialog(): Boolean? { // null = no, true/false = plural
+        check(data.showAllInstancesDialog == null)
+
+        return null
+    }
 
     fun setParentTask(taskKey: TaskKey) {
         check(tmpParentTaskKey == null)

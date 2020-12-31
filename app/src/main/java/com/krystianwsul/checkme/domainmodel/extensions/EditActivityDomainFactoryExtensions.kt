@@ -102,10 +102,11 @@ fun DomainFactory.getCreateTaskData(
     }
 
     val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinTaskKeys.any {
-            getTaskForce(it).hasFutureReminders(now)
+        is EditViewModel.StartParameters.Join -> startParameters.joinTaskKeys.run {
+            // todo search what I actually want, is to check if there are any instances *apart from the one passed in* that can be altered
+            map { it.projectKey }.distinct().size == 1 && any { getTaskForce(it).hasMultipleFutureInstancesWithUnsetParent(now) }
         }
-        is EditViewModel.StartParameters.Task -> getTaskForce(startParameters.taskKey).hasFutureReminders(now)
+        is EditViewModel.StartParameters.Task -> getTaskForce(startParameters.taskKey).hasMultipleFutureInstancesWithUnsetParent(now)
         is EditViewModel.StartParameters.Create -> false
     }
 
@@ -713,6 +714,8 @@ private fun DomainFactory.joinTasks(
                 }
                 .forEach { it.hide() }
     } else {
+        // todo search check same project
+        // todo search unscheduled tasks
         val parentInstanceKey = newParentTask.getInstances(
                 null,
                 null,

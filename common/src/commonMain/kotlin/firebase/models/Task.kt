@@ -30,7 +30,7 @@ class Task<T : ProjectType>(
         var USE_ROOT_INSTANCES = false
     }
 
-    val endDataProperty = invalidatableLazyCallbacks {
+    private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
             EndData(
                     ExactTimeStamp.Local(it.time),
@@ -1002,11 +1002,15 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
-    // maybe this should also handle multiple single schedules?
-    fun hasFutureReminders(now: ExactTimeStamp.Local) = current(now)
-            && getRootTask(now).getCurrentScheduleIntervals(now).any {
-        it.schedule is RepeatingSchedule<*>
-    }
+    fun hasMultipleFutureInstancesWithUnsetParent(now: ExactTimeStamp.Local) = getInstances(
+            now.toOffset(),
+            null,
+            now,
+            bySchedule = true
+    ).filter { it.parentState == Instance.ParentState.Unset }
+            .take(2)
+            .toList()
+            .size > 1
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

@@ -551,31 +551,32 @@ class DomainFactory(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
             mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
-            searchCriteria: SearchCriteria? = null,
+            searchCriteria: SearchCriteria = SearchCriteria.empty,
             filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, T> {
         return instance.getChildInstances()
+                .asSequence()
                 .filter {
                     !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
                 }
+                .filterSearchCriteria(searchCriteria, now, myUserFactory.user)
                 .mapNotNull { childInstance ->
                     val childTask = childInstance.task
 
-                    val childTaskMatches = searchCriteria?.let { childTask.matchesQuery(it.query) } ?: true
+                    val childTaskMatches = childTask.matchesQuery(searchCriteria.query)
 
                     /*
                     We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
                     can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
                      */
-                    val childrenQuery = if (childTaskMatches) null else searchCriteria
+                    val childrenQuery = if (childTaskMatches) searchCriteria.copy(query = "") else searchCriteria
 
                     val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
-                    if (childTaskMatches || children.isNotEmpty()) {
+                    if (childTaskMatches || children.isNotEmpty())
                         childInstance.instanceKey to mapper(childInstance, now, children)
-                    } else {
+                    else
                         null
-                    }
                 }
                 .toMap()
                 .toMutableMap()
@@ -584,7 +585,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
             instance: Instance<*>,
             now: ExactTimeStamp.Local,
-            searchCriteria: SearchCriteria? = null,
+            searchCriteria: SearchCriteria = SearchCriteria.empty,
             filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
             getChildInstanceDatas(instance, now, ::instanceToGroupListData, searchCriteria, filterVisible)

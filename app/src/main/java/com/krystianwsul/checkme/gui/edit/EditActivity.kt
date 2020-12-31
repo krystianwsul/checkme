@@ -147,6 +147,8 @@ class EditActivity : NavBarActivity() {
         )
 
         override fun onSearch(query: String) = queryRelay.accept(query)
+
+        override fun onPaddingShown() = throw IllegalStateException()
     }
 
     private var note: String? = null

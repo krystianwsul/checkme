@@ -7,4 +7,6 @@ import com.krystianwsul.common.utils.CurrentOffset
 interface TaskParentEntry : Current, CurrentOffset {
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp)
+
+    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local)
 }

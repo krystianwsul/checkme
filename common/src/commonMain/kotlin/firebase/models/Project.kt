@@ -79,7 +79,7 @@ abstract class Project<T : ProjectType>(
             parentTask: Task<T>,
             childTask: Task<T>,
             now: ExactTimeStamp.Local,
-    ) {
+    ): TaskHierarchyKey {
         val taskHierarchyJson = TaskHierarchyJson(
                 parentTask.id,
                 childTask.id,
@@ -93,6 +93,8 @@ abstract class Project<T : ProjectType>(
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()
+
+        return taskHierarchy.taskHierarchyKey
     }
 
     protected abstract fun copyTaskRecord(

@@ -46,7 +46,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
         rootTask.invalidateIntervals()
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
+    override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         scheduleRecord.endTime = null

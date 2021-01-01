@@ -21,9 +21,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
@@ -118,7 +118,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
     private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
-    var listener: ((EditInstancesUndoData) -> Unit)? = null
+    var listener: ((UndoData, Int) -> Unit)? = null
 
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
@@ -224,7 +224,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             dismiss()
 
-            listener?.invoke(editInstancesUndoData)
+            listener?.invoke(editInstancesUndoData, data.instanceKeys.size)
         }
 
         binding.editInstanceCancel.setOnClickListener { requireDialog().cancel() }

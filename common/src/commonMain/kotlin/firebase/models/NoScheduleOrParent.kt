@@ -33,6 +33,15 @@ class NoScheduleOrParent<T : ProjectType>(
         task.invalidateIntervals()
     }
 
+    override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
+        requireNotCurrent(now)
+
+        noScheduleOrParentRecord.endTime = null
+        noScheduleOrParentRecord.endTimeOffset = null
+
+        task.invalidateIntervals()
+    }
+
     fun delete() {
         task.deleteNoScheduleOrParent(this)
         noScheduleOrParentRecord.delete()

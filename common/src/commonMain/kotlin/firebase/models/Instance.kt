@@ -372,6 +372,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         createInstanceRecord().instanceRecord.hidden = true
     }
 
+    fun unhide() {
+        check(data.hidden)
+
+        (data as Data.Real<T>).instanceRecord.hidden = false
+    }
+
     fun getParentName() = parentInstanceData?.instance
             ?.name
             ?: task.project.name

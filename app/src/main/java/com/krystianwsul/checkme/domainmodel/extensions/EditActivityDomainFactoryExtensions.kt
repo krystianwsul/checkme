@@ -716,15 +716,17 @@ private fun DomainFactory.joinJoinables(
     joinables.forEach { joinable ->
         val task = getTaskForce(joinable.taskKey)
 
-        fun addChildToParent() = addChildToParent(task, newParentTask, now)
+        fun addChildToParent(instance: Instance<*>? = null) = addChildToParent(task, newParentTask, now, instance)
 
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
             is EditParameters.Join.Joinable.Instance -> {
+                val instance = task.getInstance(joinable.instanceKey.scheduleKey)
+
                 if (task.hasInstancesWithUnsetParent(now, joinable.instanceKey)) {
                     getInstance(joinable.instanceKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
                 } else {
-                    addChildToParent()
+                    addChildToParent(instance)
                 }
             }
         }

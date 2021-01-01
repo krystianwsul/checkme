@@ -47,7 +47,7 @@ class TaskHierarchy<T : ProjectType>(
         invalidateTasks()
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
+    override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         taskHierarchyRecord.endTime = null

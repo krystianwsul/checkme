@@ -203,16 +203,17 @@ class Task<T : ProjectType>(
         setMyEndExactTimeStamp(endData)
     }
 
-    fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = parentTaskHierarchies.filter {
-        it.currentOffset(now)
-    }.forEach { it.setEndExactTimeStamp(now) }
+    fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = parentTaskHierarchies.filter { it.currentOffset(now) }
+            .onEach { it.setEndExactTimeStamp(now) }
+            .map { it.taskHierarchyKey }
 
-    fun endAllCurrentSchedules(now: ExactTimeStamp.Local) =
-            schedules.filter { it.currentOffset(now) }.forEach { it.setEndExactTimeStamp(now.toOffset()) }
+    fun endAllCurrentSchedules(now: ExactTimeStamp.Local) = schedules.filter { it.currentOffset(now) }
+            .onEach { it.setEndExactTimeStamp(now.toOffset()) }
+            .map { it.scheduleId }
 
-    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter {
-        it.currentOffset(now)
-    }.forEach { it.setEndExactTimeStamp(now.toOffset()) }
+    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
+            .onEach { it.setEndExactTimeStamp(now.toOffset()) }
+            .map { it.id }
 
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
         requireCurrentOffset(exactTimeStamp)
@@ -579,9 +580,9 @@ class Task<T : ProjectType>(
             assignedTo: Set<UserKey>,
     ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo)
 
-    fun addChild(childTask: Task<*>, now: ExactTimeStamp.Local) {
+    fun addChild(childTask: Task<*>, now: ExactTimeStamp.Local): TaskHierarchyKey {
         @Suppress("UNCHECKED_CAST")
-        project.createTaskHierarchy(this, childTask as Task<T>, now)
+        return project.createTaskHierarchy(this, childTask as Task<T>, now)
     }
 
     fun deleteSchedule(schedule: Schedule<T>) {

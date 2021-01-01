@@ -4,8 +4,8 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
@@ -65,71 +65,44 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
     EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
 }
 
+private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, DateTimePair?>>) : UndoData {
+
+    override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
+        val pairs = data.map { getInstance(it.first) to it.second?.let(::getDateTime) }
+
+        pairs.forEach { (instance, dateTime) -> instance.setInstanceDateTime(localFactory, ownerKey, dateTime) }
+
+        pairs.map { it.first.task.project }.toSet()
+    }
+}
+
 fun DomainFactory.setInstancesDateTime(
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): EditInstancesUndoData = syncOnDomain {
+): UndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    val now = ExactTimeStamp.Local.now
-
-    editInstances(source, instanceKeys, now) { instances ->
-        instances.forEach {
-            it.setInstanceDateTime(
-                    localFactory,
-                    ownerKey,
-                    DateTime(instanceDate, getTime(instanceTimePair)),
-            )
-        }
-    }
-}
-
-fun DomainFactory.setInstancesParent(
-        source: SaveService.Source,
-        instanceKeys: Set<InstanceKey>,
-        parentInstanceKey: InstanceKey,
-): EditInstancesUndoData = syncOnDomain {
-    MyCrashlytics.log("DomainFactory.setInstancesParent")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
-
-    val now = ExactTimeStamp.Local.now
-
-    editInstances(source, instanceKeys, now) { instances ->
-        val parentTask = getTaskForce(parentInstanceKey.taskKey)
-
-        instances.forEach {
-            if (it.task.hasInstancesWithUnsetParent(now, it.instanceKey))
-                it.setParentState(Instance.ParentState.Parent(parentInstanceKey))
-            else
-            // todo search undo
-                addChildToParent(it.task, parentTask, now)
-        }
-    }
-}
-
-private fun DomainFactory.editInstances(
-        source: SaveService.Source,
-        instanceKeys: Set<InstanceKey>,
-        now: ExactTimeStamp.Local,
-        applyChange: (List<Instance<*>>) -> Unit,
-): EditInstancesUndoData = syncOnDomain {
     check(instanceKeys.isNotEmpty())
+
+    val now = ExactTimeStamp.Local.now
+
 
     val instances = instanceKeys.map(this::getInstance)
 
-    val editInstancesUndoData = EditInstancesUndoData(
-            instances.map {
-                Pair(
-                        it.instanceKey,
-                        EditInstancesUndoData.Anchor(it.parentState, it.recordInstanceDateTime?.toDateTimePair())
-                )
-            }
+    val editInstancesUndoData = SetInstancesDateTimeUndoData(
+            instances.map { it.instanceKey to it.recordInstanceDateTime?.toDateTimePair() }
     )
 
-    applyChange(instances)
+    instances.forEach {
+        it.setInstanceDateTime(
+                localFactory,
+                ownerKey,
+                DateTime(instanceDate, getTime(instanceTimePair)),
+        )
+    }
 
     val projects = instances.map { it.task.project }.toSet()
 
@@ -140,6 +113,66 @@ private fun DomainFactory.editInstances(
     notifyCloud(projects)
 
     editInstancesUndoData
+}
+
+private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
+
+    override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
+            undoDatas.flatMap { it.undo(domainFactory, now) }.toSet()
+}
+
+private class SetInstanceParentUndoData(
+        private val instanceKey: InstanceKey,
+        private val parentState: Instance.ParentState,
+) : UndoData {
+
+    override fun undo(
+            domainFactory: DomainFactory,
+            now: ExactTimeStamp.Local,
+    ) = domainFactory.getInstance(instanceKey).let {
+        it.setParentState(parentState)
+
+        setOf(it.task.project)
+    }
+}
+
+fun DomainFactory.setInstancesParent(
+        source: SaveService.Source,
+        instanceKeys: Set<InstanceKey>,
+        parentInstanceKey: InstanceKey,
+): UndoData = syncOnDomain {
+    MyCrashlytics.log("DomainFactory.setInstancesParent")
+    if (projectsFactory.isSaved) throw SavedFactoryException()
+
+    val now = ExactTimeStamp.Local.now
+
+    check(instanceKeys.isNotEmpty())
+
+    val instances = instanceKeys.map(this::getInstance)
+
+    val parentTask = getTaskForce(parentInstanceKey.taskKey)
+
+    val undoDatas = instances.map {
+        if (it.task.hasInstancesWithUnsetParent(now, it.instanceKey)) { // todo search also check for parent
+            val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
+
+            it.setParentState(Instance.ParentState.Parent(parentInstanceKey))
+
+            undoData
+        } else {
+            addChildToParent(it.task, parentTask, now)
+        }
+    }
+
+    val projects = instances.map { it.task.project }.toSet()
+
+    updateNotifications(now)
+
+    save(DomainListenerManager.NotificationType.All, source)
+
+    notifyCloud(projects)
+
+    ListUndoData(undoDatas)
 }
 
 fun DomainFactory.getEditInstancesSearchData(

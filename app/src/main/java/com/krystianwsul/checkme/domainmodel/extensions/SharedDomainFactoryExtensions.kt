@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
@@ -20,6 +21,8 @@ import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
@@ -287,12 +290,84 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     instanceDatas.sorted().take(desiredCount) to hasMore
 }
 
-fun addChildToParent(childTask: Task<*>, parentTask: Task<*>, now: ExactTimeStamp.Local) {
+private class AddChildToParentUndoData(
+        val taskKey: TaskKey,
+        val taskHierarchyKeys: List<TaskHierarchyKey>,
+        val scheduleIds: List<ScheduleId>,
+        val noScheduleOrParentsIds: List<String>,
+        val deleteTaskHierarchyKey: TaskHierarchyKey,
+        val unhideInstanceKey: InstanceKey?,
+) : UndoData {
+
+    override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
+        val task = getTaskForce(taskKey)
+
+        unhideInstanceKey?.let(::getInstance)?.unhide()
+
+        task.parentTaskHierarchies.single { it.taskHierarchyKey == deleteTaskHierarchyKey }.delete()
+
+        noScheduleOrParentsIds.map { noScheduleOrParentsId ->
+            task.noScheduleOrParents.single { it.id == noScheduleOrParentsId }
+        }.forEach { it.clearEndExactTimeStamp(now) }
+
+        scheduleIds.map { scheduleId ->
+            task.schedules.single { it.scheduleId == scheduleId }
+        }.forEach { it.clearEndExactTimeStamp(now) }
+
+        taskHierarchyKeys.map { taskHierarchyKey ->
+            task.parentTaskHierarchies.single { it.taskHierarchyKey == taskHierarchyKey }
+        }.forEach { it.clearEndExactTimeStamp(now) }
+
+        setOf(task.project)
+    }
+}
+
+fun addChildToParent(
+        childTask: Task<*>,
+        parentTask: Task<*>,
+        now: ExactTimeStamp.Local,
+        hideInstance: Instance<*>? = null,
+): UndoData {
     childTask.requireCurrent(now)
 
-    childTask.endAllCurrentTaskHierarchies(now)
-    childTask.endAllCurrentSchedules(now)
-    childTask.endAllCurrentNoScheduleOrParents(now)
+    val taskHierarchyKeys = childTask.endAllCurrentTaskHierarchies(now)
+    val scheduleIds = childTask.endAllCurrentSchedules(now)
+    val noScheduleOrParentsIds = childTask.endAllCurrentNoScheduleOrParents(now)
 
-    parentTask.addChild(childTask, now)
+    val deleteTaskHierarchyKey = parentTask.addChild(childTask, now)
+
+    val unhideInstanceKey = hideInstance?.takeIf {
+        it.parentInstanceData
+                ?.instance
+                ?.task != parentTask &&
+                it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+    }?.let {
+        it.hide()
+
+        it.instanceKey
+    }
+
+    return AddChildToParentUndoData(
+            childTask.taskKey,
+            taskHierarchyKeys,
+            scheduleIds,
+            noScheduleOrParentsIds,
+            deleteTaskHierarchyKey,
+            unhideInstanceKey,
+    )
+}
+
+fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnDomain {
+    MyCrashlytics.log("DomainFactory.undo")
+    if (isSaved.value!!) throw SavedFactoryException()
+
+    val now = ExactTimeStamp.Local.now
+
+    val projects = undoData.undo(this, now)
+
+    updateNotifications(now)
+
+    save(DomainListenerManager.NotificationType.All, source)
+
+    notifyCloud(projects)
 }

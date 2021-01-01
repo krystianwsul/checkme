@@ -134,10 +134,6 @@ class Task<T : ProjectType>(
         // if it's in the unscheduled tasks list, we can add a subtask
         if (rootTask.isUnscheduled(now)) return true
 
-        // By now, we're assuming the task is current.  So if the current root task's schedules are unlimited, we can go
-        // ahead and assume a future instance can be added to.
-        if (rootTask.getCurrentScheduleIntervals(now).any { it.isUnlimited() }) return true
-
         // ... and if not, we can just use getInstances() and check all of them.
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
     }
@@ -1003,14 +999,13 @@ class Task<T : ProjectType>(
             .filterIsInstance<Interval.Ended<T>>()
             .forEach { it.correctEndExactTimeStamps() }
 
-    fun hasInstancesWithUnsetParent(now: ExactTimeStamp.Local, excludeInstanceKey: InstanceKey?) = getInstances(
-            now.toOffset(),
+    fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?) = getInstances(
+            null,
             null,
             now,
-            bySchedule = true
-    ).filter { it.parentState == Instance.ParentState.Unset }
-            .filter { it.instanceKey != excludeInstanceKey }
-            .firstOrNull() != null
+    ).filter { it.instanceKey != instanceKey }
+            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+            .any()
 
     override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

@@ -63,8 +63,6 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
             checkOldestVisible: Boolean = true,
     ): Sequence<DateTime>
 
-    abstract fun isUnlimited(): Boolean
-
     abstract fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean
 
     fun delete() {

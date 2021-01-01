@@ -132,12 +132,6 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     protected abstract fun containsDate(date: Date): Boolean
 
-    override fun isUnlimited(): Boolean {
-        if (endExactTimeStamp != null) return false
-
-        return until == null
-    }
-
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local) {
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,

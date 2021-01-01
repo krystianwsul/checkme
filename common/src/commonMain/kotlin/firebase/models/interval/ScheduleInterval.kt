@@ -11,12 +11,6 @@ class ScheduleInterval<T : ProjectType>(
         val schedule: Schedule<T>,
 ) : CurrentOffset {
 
-    fun isUnlimited(): Boolean {
-        if (endExactTimeStampOffset != null) return false
-
-        return schedule.isUnlimited()
-    }
-
     fun getDateTimesInRange(
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,

@@ -55,8 +55,6 @@ class SingleSchedule<T : ProjectType>(
         return sequenceOf(originalScheduleDateTime)
     }
 
-    override fun isUnlimited() = false
-
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
 
     override val oldestVisible = OldestVisible.Single

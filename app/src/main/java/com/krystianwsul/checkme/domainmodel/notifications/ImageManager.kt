@@ -26,23 +26,29 @@ object ImageManager {
 
     private const val LARGE_ICON_SIZE = 256
 
-    private val largeIconDownloader = Downloader(
-            LARGE_ICON_SIZE,
-            LARGE_ICON_SIZE,
-            "largeIcons",
-            true)
+    private val largeIconDownloader by lazy {
+        Downloader(
+                LARGE_ICON_SIZE,
+                LARGE_ICON_SIZE,
+                "largeIcons",
+                true
+        )
+    }
 
-    private val bigPictureDownloader = Downloader(
-            Resources.getSystem()
-                    .displayMetrics
-                    .widthPixels,
-            MyApplication.instance
-                    .dpToPx(256)
-                    .toInt(),
-            "bigPictures",
-            false)
+    private val bigPictureDownloader by lazy {
+        Downloader(
+                Resources.getSystem()
+                        .displayMetrics
+                        .widthPixels,
+                MyApplication.context
+                        .dpToPx(256)
+                        .toInt(),
+                "bigPictures",
+                false
+        )
+    }
 
-    private val downloaders = listOf(largeIconDownloader, bigPictureDownloader)
+    private val downloaders by lazy { listOf(largeIconDownloader, bigPictureDownloader) }
 
     @Synchronized
     fun init() = downloaders.forEach { it.init() }

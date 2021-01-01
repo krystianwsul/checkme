@@ -152,8 +152,10 @@ fun DomainFactory.setInstancesParent(
 
     val parentTask = getTaskForce(parentInstanceKey.taskKey)
 
+    val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
+
     val undoDatas = instances.map {
-        if (it.task.hasInstancesWithUnsetParent(now, it.instanceKey)) { // todo search also check for parent
+        if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
             val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
             it.setParentState(Instance.ParentState.Parent(parentInstanceKey))

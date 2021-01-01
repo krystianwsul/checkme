@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -84,6 +85,9 @@ class DomainFactoryRule : TestRule {
 
         mockkObject(BackendNotifier)
         every { BackendNotifier.notify(any(), any(), any()) } returns Unit
+
+        mockkObject(ImageManager)
+        every { ImageManager.prefetch(any(), any(), any()) } returns Unit
     }
 
     private fun before() {

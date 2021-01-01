@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -104,7 +105,18 @@ fun DomainFactory.getCreateTaskData(
 
     val showAllInstancesDialog = when (startParameters) {
         is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { it.taskKey.projectKey }.distinct().size == 1 && any { getTaskForce(it.taskKey).hasInstancesWithUnsetParent(now, it.instanceKey) }
+            map { it.taskKey.projectKey }.distinct().size == 1 && any {
+                getTaskForce(it.taskKey).let { task ->
+                    if (it.instanceKey != null) {
+                        task.hasOtherVisibleInstances(now, it.instanceKey)
+                    } else {
+                        task.getInstances(null, null, now)
+                                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                                .takeAndHasMore(1)
+                                .second
+                    }
+                }
+            }
         }
         is EditViewModel.StartParameters.Task -> null
         is EditViewModel.StartParameters.Create -> null
@@ -713,6 +725,8 @@ private fun DomainFactory.joinJoinables(
             .single()
             .instanceKey
 
+    val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
+
     joinables.forEach { joinable ->
         val task = getTaskForce(joinable.taskKey)
 
@@ -723,7 +737,7 @@ private fun DomainFactory.joinJoinables(
             is EditParameters.Join.Joinable.Instance -> {
                 val instance = task.getInstance(joinable.instanceKey.scheduleKey)
 
-                if (task.hasInstancesWithUnsetParent(now, joinable.instanceKey)) {
+                if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
                     getInstance(joinable.instanceKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
                 } else {
                     addChildToParent(instance)

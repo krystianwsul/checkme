@@ -110,9 +110,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
     override val treeNodeCollection = this
 
-    fun selectAll(placeholder: TreeViewAdapter.Placeholder) = treeNodesRelay.value
-            ?.forEach { it.selectAll(placeholder) }
-            ?: throw SetTreeNodesNotCalledException()
+    fun selectAll(placeholder: TreeViewAdapter.Placeholder) = displayedNodes.forEach { it.select(placeholder) }
 
     override val indentation = 0
 

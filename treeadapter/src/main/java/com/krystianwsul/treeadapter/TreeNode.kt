@@ -233,22 +233,16 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         }
     }
 
-    fun selectAll(placeholder: TreeViewAdapter.Placeholder) {
+    fun select(placeholder: TreeViewAdapter.Placeholder) {
         checkChildTreeNodesSet()
 
-        if (modelNode.isSelectable) {
-            check(modelNode.isVisibleDuringActionMode)
+        if (!modelNode.isSelectable) return
 
-            selected = true
+        check(modelNode.isVisibleDuringActionMode)
 
-            treeViewAdapter.incrementSelected(placeholder)
-        }
+        selected = true
 
-        if (expanded) {
-            check(childTreeNodes.isNotEmpty())
-
-            childTreeNodes.forEach { it.selectAll(placeholder) }
-        }
+        treeViewAdapter.incrementSelected(placeholder)
     }
 
     override val displayedNodes: List<TreeNode<T>>

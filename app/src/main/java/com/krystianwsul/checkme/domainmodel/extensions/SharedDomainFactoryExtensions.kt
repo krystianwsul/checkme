@@ -286,3 +286,13 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
 
     instanceDatas.sorted().take(desiredCount) to hasMore
 }
+
+fun addChildToParent(childTask: Task<*>, parentTask: Task<*>, now: ExactTimeStamp.Local) {
+    childTask.requireCurrent(now)
+
+    childTask.endAllCurrentTaskHierarchies(now)
+    childTask.endAllCurrentSchedules(now)
+    childTask.endAllCurrentNoScheduleOrParents(now)
+
+    parentTask.addChild(childTask, now)
+}

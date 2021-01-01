@@ -731,16 +731,6 @@ private fun DomainFactory.joinJoinables(
     }
 }
 
-private fun addChildToParent(childTask: Task<*>, parentTask: Task<*>, now: ExactTimeStamp.Local) {
-    childTask.requireCurrent(now)
-
-    childTask.endAllCurrentTaskHierarchies(now)
-    childTask.endAllCurrentSchedules(now)
-    childTask.endAllCurrentNoScheduleOrParents(now)
-
-    parentTask.addChild(childTask, now)
-}
-
 private fun DomainFactory.joinTasks(
         newParentTask: Task<*>,
         joinTasks: List<Task<*>>,

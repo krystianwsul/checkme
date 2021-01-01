@@ -150,7 +150,6 @@ fun DomainFactory.getGroupListData(
                 instance.task.ordinal,
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
-                instance.isGroupChild(),
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )

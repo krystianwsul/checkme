@@ -101,25 +101,6 @@ fun DomainFactory.setInstancesNotNotified(
     save(dataId, source)
 }
 
-fun DomainFactory.removeFromParent(source: SaveService.Source, instanceKeys: List<InstanceKey>) = syncOnDomain {
-    MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
-
-    val now = ExactTimeStamp.Local.now
-
-    instanceKeys.forEach {
-        getInstance(it).let {
-            check(it.parentState is Instance.ParentState.Parent)
-
-            it.setParentState(Instance.ParentState.Unset)
-        }
-    }
-
-    updateNotifications(now)
-
-    save(0, source)
-}
-
 fun DomainFactory.setInstancesAddHourActivity(
         dataId: Int,
         source: SaveService.Source,
@@ -337,9 +318,7 @@ fun addChildToParent(
     val deleteTaskHierarchyKey = parentTask.addChild(childTask, now)
 
     val unhideInstanceKey = hideInstance?.takeIf {
-        it.parentInstanceData
-                ?.instance
-                ?.task != parentTask &&
+        it.parentInstance?.task != parentTask &&
                 it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
     }?.let {
         it.hide()

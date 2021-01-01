@@ -27,12 +27,11 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val instanceDateTime: DateTime,
             val done: Boolean,
             val taskCurrent: Boolean,
-            val isRootInstance: Boolean,
+            val isRootInstance: Boolean, // todo search is neede?
             val groupListDataWrapper: GroupListDataWrapper,
             var notificationShown: Boolean,
             val displayText: String,
             val taskKey: TaskKey,
-            val isRecurringGroupChild: Boolean,
             val isVisible: Boolean,
             val newInstanceKey: InstanceKey,
     ) : DomainData() {

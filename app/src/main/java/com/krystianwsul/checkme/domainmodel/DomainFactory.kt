@@ -541,7 +541,6 @@ class DomainFactory(
                 instance.task.ordinal,
                 instance.getNotificationShown(localFactory),
                 instance.task.getImage(deviceDbInfo),
-                instance.isGroupChild(),
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )

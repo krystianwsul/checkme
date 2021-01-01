@@ -35,15 +35,11 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
     fun Instance<*>.hierarchyContainsKeys(): Boolean {
         if (instanceKey in instanceKeys) return true
 
-        return parentInstanceData?.instance
-                ?.hierarchyContainsKeys()
-                ?: false
+        return parentInstance?.hierarchyContainsKeys() ?: false
     }
 
     val parentInstanceData = instances.mapNotNull {
-        it.parentInstanceData
-                ?.instance
-                ?.takeUnless { it.hierarchyContainsKeys() }
+        it.parentInstance?.takeUnless { it.hierarchyContainsKeys() }
     }
             .groupBy { it }
             .map { it.key to it.value.size }

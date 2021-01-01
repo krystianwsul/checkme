@@ -120,17 +120,15 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
-    data class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val viaParentState: Boolean)
-
     private var doneCallback: (() -> Unit)? = null
 
-    private val parentInstanceDataProperty = invalidatableLazy {
+    private val parentInstanceProperty = invalidatableLazy {
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
             is ParentState.Parent -> {
                 val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
 
-                ParentInstanceData(parentInstance, true)
+                parentInstance
             }
             ParentState.Unset -> {
                 /**
@@ -172,19 +170,16 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     parentTask.getInstance(scheduleDateTime)
                             .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
                             ?.takeIf { it.isValidlyCreatedHierarchy() }
-                            ?.let { ParentInstanceData(it, false) }
                 }
             }
         }
 
         parentInstanceData?.also {
-            doneCallback = it.instance
-                    .doneOffsetProperty
-                    .addCallback(::invalidateParentInstanceData)
+            doneCallback = it.doneOffsetProperty.addCallback(::invalidateParentInstanceData)
         }
     }
 
-    val parentInstanceData by parentInstanceDataProperty
+    val parentInstance by parentInstanceProperty
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
     constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
@@ -211,13 +206,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     private fun tearDownParentInstanceData() {
-        if (parentInstanceDataProperty.isInitialized()) {
+        if (parentInstanceProperty.isInitialized()) {
             removeVirtualParents()
 
             doneCallback?.let {
-                parentInstanceData!!.instance
-                        .doneOffsetProperty
-                        .removeCallback(it)
+                parentInstance!!.doneOffsetProperty.removeCallback(it)
 
                 doneCallback = null
             }
@@ -227,7 +220,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private fun invalidateParentInstanceData() {
         tearDownParentInstanceData()
 
-        parentInstanceDataProperty.invalidate()
+        parentInstanceProperty.invalidate()
 
         addVirtualParents()
     }
@@ -247,11 +240,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             .childTask
                             .getInstance(scheduleDateTime)
                 }
-                .filter {
-                    it.parentInstanceData
-                            ?.instance
-                            ?.instanceKey == instanceKey
-                }
+                .filter { it.parentInstance?.instanceKey == instanceKey }
                 .toList()
 
         val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
@@ -263,7 +252,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return childInstances
     }
 
-    fun isRootInstance() = parentInstanceData == null
+    fun isRootInstance() = parentInstance == null
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
 
@@ -336,20 +325,20 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             return done > cutoff
         }
 
-        val parentInstanceData = parentInstanceData
+        val parentInstance = parentInstance
 
         return when {
             visibilityOptions.assumeChildOfVisibleParent -> {
-                checkNotNull(parentInstanceData)
+                checkNotNull(parentInstance)
 
                 true
             }
             visibilityOptions.assumeRoot -> {
-                check(parentInstanceData == null)
+                check(parentInstance == null)
 
                 checkVisibilityForRoot()
             }
-            parentInstanceData != null -> parentInstanceData.instance.isVisible(now, visibilityOptions)
+            parentInstance != null -> parentInstance.isVisible(now, visibilityOptions)
             else -> checkVisibilityForRoot()
         }
     }
@@ -358,9 +347,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             .getParentScheduleKeys()
             .contains(scheduleKey)
 
-    private fun isValidlyCreatedHierarchy(): Boolean = parentInstanceData?.instance
-            ?.isValidlyCreatedHierarchy()
-            ?: isValidlyCreated()
+    private fun isValidlyCreatedHierarchy(): Boolean = parentInstance?.isValidlyCreatedHierarchy() ?: isValidlyCreated()
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
 
@@ -378,9 +365,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         (data as Data.Real<T>).instanceRecord.hidden = false
     }
 
-    fun getParentName() = parentInstanceData?.instance
-            ?.name
-            ?: task.project.name
+    fun getParentName() = parentInstance?.name ?: task.project.name
 
     fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
@@ -499,8 +484,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    fun isGroupChild() = parentInstanceData?.viaParentState ?: false
-
     fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
 
     fun fixOffsets() {
@@ -536,7 +519,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun addVirtualParents() {
         if (exists()) {
-            parentInstanceData?.instance?.let { parentInstance ->
+            parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.addChildInstance(this)
@@ -546,8 +529,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     private fun removeVirtualParents() {
-        if (parentInstanceDataProperty.isInitialized() && exists()) {
-            parentInstanceData?.instance?.let { parentInstance ->
+        if (parentInstanceProperty.isInitialized() && exists()) {
+            parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.removeChildInstance(this)
@@ -564,9 +547,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (!isVisible(now, VisibilityOptions(hack24 = hack24))) return false
 
         // if it's a child, we also shouldn't add instances if the parent is done
-        return parentInstanceData?.instance
-                ?.canAddSubtask(now, hack24)
-                ?: true
+        return parentInstance?.canAddSubtask(now, hack24) ?: true
     }
 
     private sealed class Data<T : ProjectType> {

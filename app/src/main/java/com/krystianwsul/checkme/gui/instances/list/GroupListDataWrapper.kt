@@ -52,14 +52,13 @@ data class GroupListDataWrapper(
             val instanceDateTime: DateTime,
             override val taskCurrent: Boolean,
             override val canAddSubtask: Boolean,
-            val isRootInstance: Boolean,
+            val isRootInstance: Boolean, // todo search needed?
             val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             var ordinal: Double,
             var notificationShown: Boolean,
             val imageState: ImageState?,
-            val isRecurringGroupChild: Boolean,
             override val isAssignedToMe: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {

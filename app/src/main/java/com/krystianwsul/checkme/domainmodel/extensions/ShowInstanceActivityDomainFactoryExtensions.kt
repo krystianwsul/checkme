@@ -28,7 +28,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
     val instance = getInstance(instanceKey)
     val instanceDateTime = instance.instanceDateTime
-    val parentInstance = instance.parentInstanceData
+    val parentInstance = instance.parentInstance
 
     var displayText = listOfNotNull(
             instance.getParentName().takeIf { it.isNotEmpty() },
@@ -54,7 +54,6 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
             instance.getNotificationShown(localFactory),
             displayText,
             task.taskKey,
-            instance.isGroupChild(),
             debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
             instanceKey,
     )
@@ -108,7 +107,6 @@ private fun DomainFactory.getGroupListData(
                         childTask.ordinal,
                         childInstance.getNotificationShown(localFactory),
                         childTask.getImage(deviceDbInfo),
-                        childInstance.isGroupChild(),
                         childInstance.isAssignedToMe(now, myUserFactory.user),
                         childInstance.getProjectInfo(now),
                 )

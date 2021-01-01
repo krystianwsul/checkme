@@ -365,9 +365,7 @@ fun DomainFactory.updateChildTask(
     removeInstanceKey?.let {
         val instance = getInstance(it)
 
-        if (instance.parentInstanceData
-                        ?.instance
-                        ?.task != newParentTask
+        if (instance.parentInstance?.task != newParentTask
                 && instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
         ) {
             instance.hide()
@@ -760,9 +758,7 @@ private fun DomainFactory.joinTasks(
 
     removeInstanceKeys.map(::getInstance)
             .filter {
-                it.parentInstanceData
-                        ?.instance
-                        ?.task != newParentTask
+                it.parentInstance?.task != newParentTask
                         && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
             }
             .forEach { it.hide() }

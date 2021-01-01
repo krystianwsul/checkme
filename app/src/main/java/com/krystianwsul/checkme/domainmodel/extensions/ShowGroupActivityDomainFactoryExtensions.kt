@@ -69,7 +69,6 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
                 task.ordinal,
                 instance.getNotificationShown(localFactory),
                 task.getImage(deviceDbInfo),
-                instance.isGroupChild(),
                 instance.isAssignedToMe(now, myUserFactory.user),
                 instance.getProjectInfo(now),
         )

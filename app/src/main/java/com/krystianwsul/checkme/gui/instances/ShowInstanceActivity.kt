@@ -175,11 +175,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 }
                                 R.id.instanceMenuCheck -> if (!it.done) setDone(true)
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)
-                                R.id.instanceMenuRemoveFromParent -> {
-                                    check(it.isRecurringGroupChild)
-
-                                    DomainFactory.instance.removeFromParent(SaveService.Source.GUI, listOf(instanceKey))
-                                }
                             }
                         }
                     }
@@ -221,14 +216,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                     findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
                             ?.instanceDatas
                             .isNullOrEmpty()
-                    findItem(R.id.instanceMenuEditInstance).isVisible = data?.run { !done && isRootInstance } == true
+                    findItem(R.id.instanceMenuEditInstance).isVisible = data?.done == false
                     findItem(R.id.instanceMenuNotify).isVisible = data?.run {
                         !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown
                     } == true
                     findItem(R.id.instanceMenuHour).isVisible = showHour()
                     findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
                     findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
-                    findItem(R.id.instanceMenuRemoveFromParent).isVisible = data?.isRecurringGroupChild == true
                 }
     }
 

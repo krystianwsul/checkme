@@ -12,9 +12,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
 
         val childInstanceKey = childInstance.instanceKey
 
-        val parentInstanceKey = childInstance.parentInstanceData!!
-                .instance
-                .instanceKey
+        val parentInstanceKey = childInstance.parentInstance!!.instanceKey
         check(parentInstanceKey.taskKey == task.taskKey)
 
         val childInstanceKeys =
@@ -28,9 +26,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
 
         val childInstanceKey = childInstance.instanceKey
 
-        val parentInstanceKey = childInstance.parentInstanceData!!
-                .instance
-                .instanceKey
+        val parentInstanceKey = childInstance.parentInstance!!.instanceKey
         check(parentInstanceKey.taskKey == task.taskKey)
 
         val childInstanceKeys = parentScheduleKeyToChildInstanceKeys.getValue(parentInstanceKey.scheduleKey)
@@ -50,7 +46,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
 
         return childInstanceKeys.map(task.project::getInstance).onEach {
             check(it.exists())
-            check(it.parentInstanceData!!.instance.instanceKey == parentInstanceKey)
+            check(it.parentInstance!!.instanceKey == parentInstanceKey)
         }
     }
 

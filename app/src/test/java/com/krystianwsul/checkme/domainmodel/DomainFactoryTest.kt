@@ -328,7 +328,7 @@ class DomainFactoryTest {
                 }
 
         val instance = domainFactory.getInstance(instanceKey)
-        assertNotNull(instance.parentInstanceData)
+        assertNotNull(instance.parentInstance)
 
         now += 1.hours
 
@@ -352,6 +352,6 @@ class DomainFactoryTest {
                     assertEquals(0, it[1].children.size)
                 }
 
-        assertNull(instance.parentInstanceData)
+        assertNull(instance.parentInstance)
     }
 }

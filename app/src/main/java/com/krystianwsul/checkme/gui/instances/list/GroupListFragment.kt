@@ -324,14 +324,6 @@ class GroupListFragment @JvmOverloads constructor(
                     instanceDatas.forEach { it.notificationShown = true }
                 }
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
-                R.id.actionGroupRemoveFromParent -> {
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-                    check(instanceDatas.all { it.isRecurringGroupChild })
-
-                    val instanceKeys = instanceDatas.map { it.instanceKey }
-
-                    DomainFactory.instance.removeFromParent(SaveService.Source.GUI, instanceKeys)
-                }
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
                 else -> throw UnsupportedOperationException()
             }
@@ -382,10 +374,7 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_mark_not_done to selectedDatas.all {
                         it is GroupListDataWrapper.InstanceData && it.done != null
                     },
-                    R.id.actionGroupRemoveFromParent to selectedDatas.all {
-                        it is GroupListDataWrapper.InstanceData && it.isRecurringGroupChild
-                    },
-                    R.id.actionGroupCopyTask to selectedDatas.all { it.taskCurrent }
+                    R.id.actionGroupCopyTask to selectedDatas.all { it.taskCurrent },
             )
 
             if (selectedDatas.size == 1) {

@@ -983,9 +983,9 @@ class DomainFactory(
             ?.let { projectsFactory.getCustomTime(it) }
             ?: Time.Normal(timePair.hourMinute!!)
 
-    class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
+    fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
 
-    class EditInstancesUndoData(val data: List<Pair<InstanceKey, DateTime>>)
+    class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
     class ReadTimes(start: ExactTimeStamp.Local, read: ExactTimeStamp.Local, stop: ExactTimeStamp.Local) {
 

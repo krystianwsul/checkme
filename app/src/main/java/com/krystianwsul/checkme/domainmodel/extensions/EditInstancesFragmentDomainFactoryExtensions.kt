@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -64,38 +66,65 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 }
 
 fun DomainFactory.setInstancesDateTime(
-        dataId: Int,
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
-        instanceTimePair: TimePair
-): DomainFactory.EditInstancesUndoData = syncOnDomain {
+        instanceTimePair: TimePair,
+): EditInstancesUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
+    editInstances(source, instanceKeys) { instances ->
+        instances.forEach {
+            it.setInstanceDateTime(
+                    localFactory,
+                    ownerKey,
+                    DateTime(instanceDate, getTime(instanceTimePair)),
+            )
+        }
+    }
+}
+
+fun DomainFactory.setInstancesParent(
+        source: SaveService.Source,
+        instanceKeys: Set<InstanceKey>,
+        parentInstanceKey: InstanceKey,
+): EditInstancesUndoData = syncOnDomain {
+    MyCrashlytics.log("DomainFactory.setInstancesParent")
+    if (projectsFactory.isSaved) throw SavedFactoryException()
+
+    editInstances(source, instanceKeys) { instances ->
+        instances.forEach { it.setParentState(Instance.ParentState.Parent(parentInstanceKey)) }
+    }
+}
+
+private fun DomainFactory.editInstances(
+        source: SaveService.Source,
+        instanceKeys: Set<InstanceKey>,
+        applyChange: (List<Instance<*>>) -> Unit,
+): EditInstancesUndoData = syncOnDomain {
     check(instanceKeys.isNotEmpty())
 
     val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map(this::getInstance)
 
-    val editInstancesUndoData = DomainFactory.EditInstancesUndoData(
-            instances.map { it.instanceKey to it.instanceDateTime }
+    val editInstancesUndoData = EditInstancesUndoData(
+            instances.map {
+                Pair(
+                        it.instanceKey,
+                        EditInstancesUndoData.Anchor(it.parentState, it.recordInstanceDateTime?.toDateTimePair())
+                )
+            }
     )
 
-    instances.forEach {
-        it.setInstanceDateTime(
-                localFactory,
-                ownerKey,
-                DateTime(instanceDate, getTime(instanceTimePair)),
-        )
-    }
+    applyChange(instances)
 
     val projects = instances.map { it.task.project }.toSet()
 
     updateNotifications(now)
 
-    save(dataId, source)
+    save(DomainListenerManager.NotificationType.All, source)
 
     notifyCloud(projects)
 

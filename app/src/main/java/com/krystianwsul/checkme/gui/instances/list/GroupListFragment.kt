@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -956,7 +957,7 @@ class GroupListFragment @JvmOverloads constructor(
                 ?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
     }
 
-    private fun onEditInstances(editInstancesUndoData: DomainFactory.EditInstancesUndoData) {
+    private fun onEditInstances(editInstancesUndoData: EditInstancesUndoData) {
         selectionCallback.actionMode!!.finish()
 
         listener.showSnackbarHour(editInstancesUndoData.data.size) {

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -36,7 +37,7 @@ fun DomainFactory.setInstancesDone(
 fun DomainFactory.undoSetInstancesDateTime(
         dataId: Int,
         source: SaveService.Source,
-        editInstancesUndoData: DomainFactory.EditInstancesUndoData
+        editInstancesUndoData: EditInstancesUndoData,
 ) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.undoSetInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -45,8 +46,11 @@ fun DomainFactory.undoSetInstancesDateTime(
 
     val now = ExactTimeStamp.Local.now
 
-    val instances = editInstancesUndoData.data.map { (instanceKey, dateTime) ->
-        getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, dateTime) }
+    val instances = editInstancesUndoData.data.map { (instanceKey, anchor) ->
+        getInstance(instanceKey).apply {
+            setParentState(anchor.parentState)
+            setInstanceDateTime(localFactory, ownerKey, anchor.dateTimePair?.let(::getDateTime))
+        }
     }
 
     val projects = instances.map { it.task.project }.toSet()

@@ -21,7 +21,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.EditInstancesUndoData
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
@@ -116,7 +118,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
     private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
-    var listener: ((DomainFactory.EditInstancesUndoData) -> Unit)? = null
+    var listener: ((EditInstancesUndoData) -> Unit)? = null
 
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
@@ -209,13 +211,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            val editInstancesUndoData = DomainFactory.instance.setInstancesDateTime(
-                    data.dataId,
-                    SaveService.Source.GUI,
-                    data.instanceKeys,
-                    state.date,
-                    state.timePairPersist.timePair
-            )
+            val editInstancesUndoData = DomainFactory.instance.run {
+                state.parentInstanceData
+                        ?.let { setInstancesParent(SaveService.Source.GUI, data.instanceKeys, it.instanceKey) }
+                        ?: setInstancesDateTime(
+                                SaveService.Source.GUI,
+                                data.instanceKeys,
+                                state.date,
+                                state.timePairPersist.timePair
+                        )
+            }
 
             dismiss()
 

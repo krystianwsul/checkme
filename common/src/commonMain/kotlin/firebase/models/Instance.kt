@@ -75,6 +75,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     val instanceTime get() = data.instanceTime
     val instanceDateTime get() = DateTime(instanceDate, instanceTime)
 
+    val recordInstanceDateTime get() = data.recordInstanceDateTime
+
     val taskKey by lazy { task.taskKey }
 
     private val doneProperty = invalidatableLazyCallbacks { data.done?.let { ExactTimeStamp.Local(it) } }
@@ -402,24 +404,24 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setInstanceDateTime(
             shownFactory: ShownFactory,
             ownerKey: UserKey,
-            dateTime: DateTime,
+            dateTime: DateTime?,
     ) {
-        check(isRootInstance())
-
-        if (dateTime == instanceDateTime) return
+        if (dateTime == recordInstanceDateTime) return
 
         createInstanceRecord().instanceRecord.let {
-            it.instanceDate = dateTime.date
+            it.instanceDate = dateTime?.date
 
-            it.instanceJsonTime = task.project
-                    .getOrCopyTime(ownerKey, dateTime.time)
-                    .let {
-                        @Suppress("UNCHECKED_CAST")
-                        when (it) {
-                            is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
-                            is Time.Normal -> JsonTime.Normal(it.hourMinute)
+            it.instanceJsonTime = dateTime?.time?.let {
+                task.project
+                        .getOrCopyTime(ownerKey, it)
+                        .let {
+                            @Suppress("UNCHECKED_CAST")
+                            when (it) {
+                                is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
+                                is Time.Normal -> JsonTime.Normal(it.hourMinute)
+                            }
                         }
-                    }
+            }
         }
 
         shownHolder.forceShown(shownFactory).notified = false
@@ -569,6 +571,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         abstract val scheduleTime: Time
         abstract val instanceTime: Time
 
+        abstract val recordInstanceDateTime: DateTime?
+
         abstract val done: Long?
         abstract val doneOffset: Double?
 
@@ -595,19 +599,34 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val scheduleTime
                 get() = instanceRecord.run {
-                    scheduleCustomTimeId?.let { getCustomTime(it) }
-                            ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
+                    scheduleCustomTimeId?.let { getCustomTime(it) } ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
                 }
 
-            override val instanceTime
-                get() = instanceRecord.instanceJsonTime
-                        ?.let {
-                            when (it) {
-                                is JsonTime.Custom -> getCustomTime(it.id)
-                                is JsonTime.Normal -> Time.Normal(it.hourMinute)
-                            }
-                        }
-                        ?: scheduleTime
+            private val recordInstanceTime: Time?
+                get() = instanceRecord.instanceJsonTime?.let {
+                    when (it) {
+                        is JsonTime.Custom -> getCustomTime(it.id)
+                        is JsonTime.Normal -> Time.Normal(it.hourMinute)
+                    }
+                }
+
+            override val instanceTime get() = recordInstanceTime ?: scheduleTime
+
+            override val recordInstanceDateTime: DateTime?
+                get() {
+                    val date = instanceRecord.instanceDate
+                    val time = recordInstanceTime
+
+                    return if (date != null) {
+                        checkNotNull(time)
+
+                        DateTime(date, time)
+                    } else {
+                        check(time == null)
+
+                        return null
+                    }
+                }
 
             override val done get() = instanceRecord.done
             override val doneOffset get() = instanceRecord.doneOffset
@@ -675,6 +694,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
 
             override val parentState = ParentState.Unset
+
+            override val recordInstanceDateTime: DateTime? = null
         }
     }
 

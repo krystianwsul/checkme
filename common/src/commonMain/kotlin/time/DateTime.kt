@@ -26,4 +26,6 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
     fun toLocalExactTimeStamp() = timeStamp.toLocalExactTimeStamp()
 
     fun toDateTimeSoy() = timeStamp.toDateTimeSoy()
+
+    fun toDateTimePair() = DateTimePair(date, time.timePair)
 }

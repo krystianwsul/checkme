@@ -105,7 +105,7 @@ abstract class InstanceRecord<T : ProjectType>(
             ?.let { Date.fromJson(it) }
 
     var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
-        setProperty(createObject::instanceDate, value!!.toJson())
+        setProperty(createObject::instanceDate, value?.toJson())
     }
 
     @Suppress("RemoveExplicitTypeArguments")

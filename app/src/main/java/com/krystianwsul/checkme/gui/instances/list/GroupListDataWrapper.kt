@@ -52,7 +52,7 @@ data class GroupListDataWrapper(
             val instanceDateTime: DateTime,
             override val taskCurrent: Boolean,
             override val canAddSubtask: Boolean,
-            val isRootInstance: Boolean, // todo search needed?
+            val isRootInstance: Boolean,
             val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,

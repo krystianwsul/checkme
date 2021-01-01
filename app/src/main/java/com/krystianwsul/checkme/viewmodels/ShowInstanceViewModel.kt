@@ -27,7 +27,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val instanceDateTime: DateTime,
             val done: Boolean,
             val taskCurrent: Boolean,
-            val isRootInstance: Boolean, // todo search is neede?
+            val isRootInstance: Boolean,
             val groupListDataWrapper: GroupListDataWrapper,
             var notificationShown: Boolean,
             val displayText: String,

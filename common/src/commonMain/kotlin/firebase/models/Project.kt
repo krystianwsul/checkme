@@ -23,6 +23,7 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper<T>,
         val assignedToHelper: AssignedToHelper<T>,
+        protected val newRootInstanceManager: (taskRecord: TaskRecord<T>) -> RootInstanceManager<T>,
 ) : Current {
 
     abstract val projectRecord: ProjectRecord<T>
@@ -63,8 +64,6 @@ abstract class Project<T : ProjectType>(
                     .forEach { it.addVirtualParents() }
         }
     }
-
-    protected abstract fun newRootInstanceManager(taskRecord: TaskRecord<T>): RootInstanceManager<T>
 
     abstract fun createChildTask(
             parentTask: Task<T>,

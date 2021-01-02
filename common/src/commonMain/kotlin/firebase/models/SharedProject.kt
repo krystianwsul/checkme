@@ -19,8 +19,8 @@ import com.krystianwsul.common.utils.*
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
-        private val _newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
-) : Project<ProjectType.Shared>(CopyScheduleHelper.Shared, AssignedToHelper.Shared) {
+        newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
+) : Project<ProjectType.Shared>(CopyScheduleHelper.Shared, AssignedToHelper.Shared, newRootInstanceManager) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -49,7 +49,7 @@ class SharedProject(
         _tasks = projectRecord.taskRecords
                 .values
                 .map {
-                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
+                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: newRootInstanceManager(it)
 
                     Task(this, it, rootInstanceManager)
                 }
@@ -175,8 +175,6 @@ class SharedProject(
             else -> throw IllegalArgumentException()
         } ?: copy()
     }
-
-    override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Shared>) = _newRootInstanceManager(taskRecord)
 
     override fun createChildTask(
             parentTask: Task<ProjectType.Shared>,

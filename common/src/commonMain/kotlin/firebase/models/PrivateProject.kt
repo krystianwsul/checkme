@@ -17,8 +17,8 @@ import com.krystianwsul.common.utils.*
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
-        private val _newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
-) : Project<ProjectType.Private>(CopyScheduleHelper.Private, AssignedToHelper.Private) {
+        newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
+) : Project<ProjectType.Private>(CopyScheduleHelper.Private, AssignedToHelper.Private, newRootInstanceManager) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -39,7 +39,7 @@ class PrivateProject(
         _tasks = projectRecord.taskRecords
                 .values
                 .map {
-                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: _newRootInstanceManager(it)
+                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: newRootInstanceManager(it)
 
                     Task(this, it, rootInstanceManager)
                 }
@@ -110,8 +110,6 @@ class PrivateProject(
         }
         else -> throw IllegalArgumentException()
     }
-
-    override fun newRootInstanceManager(taskRecord: TaskRecord<ProjectType.Private>) = _newRootInstanceManager(taskRecord)
 
     override fun createChildTask(
             parentTask: Task<ProjectType.Private>,

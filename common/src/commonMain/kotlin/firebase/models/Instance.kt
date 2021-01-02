@@ -524,6 +524,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun setParentState(newParentState: ParentState) {
         if (parentState == newParentState) return
 
+        newParentState.parentInstanceKey?.let { check(it.taskKey.projectKey == task.project.projectKey) }
+
         createInstanceRecord().parentState = newParentState
 
         invalidateParentInstanceData()

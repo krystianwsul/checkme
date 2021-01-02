@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxbinding3.view.clicks
@@ -213,6 +214,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceSave.setOnClickListener {
             check(isValidDate)
             check(isValidDateTime)
+            check(projectKey != null || state.parentInstanceData == null)
 
             editInstancesViewModel.stop()
 
@@ -245,6 +247,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     updateFields()
                 }
                 .addTo(viewCreatedDisposable)
+
+        binding.editInstanceParentLayout.isVisible = projectKey != null
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

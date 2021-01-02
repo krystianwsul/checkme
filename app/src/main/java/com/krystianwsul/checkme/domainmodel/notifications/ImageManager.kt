@@ -24,7 +24,7 @@ import kotlin.math.roundToInt
 
 object ImageManager {
 
-    private const val LARGE_ICON_SIZE = android.R.dimen.notification_large_icon_width
+    private val LARGE_ICON_SIZE by lazy { MyApplication.context.dpToPx(64).roundToInt() }
 
     private val BIG_PICTURE_WIDTH by lazy { MyApplication.context.dpToPx(450).roundToInt() }
     private val BIG_PICTURE_HEIGHT by lazy { BIG_PICTURE_WIDTH / 2 }

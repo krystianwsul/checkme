@@ -123,6 +123,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private var doneCallback: (() -> Unit)? = null
 
     private val parentInstanceDataProperty = invalidatableLazy {
+        check(doneCallback == null)
+
         val parentInstanceData = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
             is ParentState.Parent -> {
@@ -219,13 +221,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
                 doneCallback = null
             }
+
+            parentInstanceDataProperty.invalidate()
         }
     }
 
     private fun invalidateParentInstanceData() {
         tearDownParentInstanceData()
-
-        parentInstanceDataProperty.invalidate()
 
         addVirtualParents()
     }
@@ -462,8 +464,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         removeLazyCallbacks()
 
-        tearDownParentInstanceData()
-
         task.deleteInstance(this)
 
         (data as Data.Real<*>).instanceRecord.delete()
@@ -526,8 +526,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         invalidateParentInstanceData()
     }
 
+    private var virtualParentsAdded = false
+
     fun addVirtualParents() {
-        if (exists()) {
+        if (!virtualParentsAdded && exists()) {
             parentInstanceData?.instance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
@@ -535,10 +537,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).addVirtualParents()
             }
         }
+
+        virtualParentsAdded = true
     }
 
     private fun removeVirtualParents() {
-        if (parentInstanceDataProperty.isInitialized() && exists()) {
+        if (virtualParentsAdded && exists() && parentInstanceDataProperty.isInitialized()) {
             parentInstanceData?.instance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
@@ -546,6 +550,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).removeVirtualParents()
             }
         }
+
+        virtualParentsAdded = false
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

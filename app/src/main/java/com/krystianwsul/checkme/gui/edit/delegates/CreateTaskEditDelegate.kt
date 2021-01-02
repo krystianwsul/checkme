@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
@@ -93,6 +94,21 @@ class CreateTaskEditDelegate(
                 initialStateGetter,
                 parentLookup
         )
+    }
+
+    override val imageUrl: BehaviorRelay<EditImageState>
+
+    init {
+        val final = when {
+            editImageState?.dontOverwrite == true -> editImageState
+            (parameters as? EditParameters.Share)?.uri != null -> parameters.uri!!
+                    .toString()
+                    .let { EditImageState.Selected(it, it) }
+            editImageState != null -> editImageState
+            else -> EditImageState.None
+        }
+
+        imageUrl = BehaviorRelay.createDefault(final)
     }
 
     override fun createTaskWithSchedule(

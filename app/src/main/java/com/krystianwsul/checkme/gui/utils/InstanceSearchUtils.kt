@@ -23,13 +23,16 @@ fun <T : DomainData> connectInstanceSearch(
         startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit,
         excludedInstanceKeys: Set<InstanceKey>,
 ) {
+    /**
+     * This whole observable flow no longer serves its original purpose, but it happens to trigger searches more or less
+     * when I want it to.
+     */
+
     val searchParameters = Observables.combineLatest(
             filterCriteriaObservable.distinctUntilChanged().map {
                 SearchCriteria(it.query, it.filterParams.showAssignedToOthers, showDone, excludedInstanceKeys)
             },
-            onProgressShownObservable.doOnNext { setPage(getPage() + 1) }
-                    .startWith(Unit)
-                    .map { getPage() }
+            onProgressShownObservable.doOnNext { setPage(getPage() + 1) }.startWith(Unit)
     )
             .replay(1)
             .apply { compositeDisposable += connect() }
@@ -39,6 +42,6 @@ fun <T : DomainData> connectInstanceSearch(
             .map { }
             .startWith(Unit)
             .switchMap { searchParameters }
-            .subscribe { startViewModel(it.first, it.second) }
+            .subscribe { startViewModel(it.first, getPage()) }
             .addTo(compositeDisposable)
 }

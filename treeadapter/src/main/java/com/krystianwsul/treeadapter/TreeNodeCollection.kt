@@ -173,11 +173,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         printOrdinals("setNewItemPosition after")
     }
 
-    fun selectNode(position: Int) {
-        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
-
-        treeViewAdapter.updateDisplayedNodes { treeNodes[position].select(it) }
-    }
+    fun selectNode(position: Int) = treeViewAdapter.updateDisplayedNodes { displayedNodes[position].select(it) }
 
     fun normalize() = treeNodesRelay.value
             ?.forEach { it.normalize() }

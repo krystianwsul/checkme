@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Parcelable
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.InstanceKey
@@ -26,18 +27,22 @@ sealed class EditParameters : Parcelable {
                 intent.action == Intent.ACTION_SEND -> {
                     check(!intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY))
 
-                    check(intent.type == "text/plain")
+                    if (intent.type == "text/plain") {
+                        val nameHint = intent.getStringExtra(Intent.EXTRA_TEXT)
+                        check(!nameHint.isNullOrEmpty())
 
-                    val nameHint = intent.getStringExtra(Intent.EXTRA_TEXT)
-                    check(!nameHint.isNullOrEmpty())
+                        val taskKey = if (intent.hasExtra(KEY_SHORTCUT_ID)) {
+                            TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!)
+                        } else {
+                            null
+                        }
 
-                    val taskKey = if (intent.hasExtra(KEY_SHORTCUT_ID)) {
-                        TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!)
+                        Share.fromText(nameHint, taskKey)
                     } else {
-                        null
-                    }
+                        intent.type!!.startsWith("image/")
 
-                    Share(nameHint, taskKey)
+                        Share.fromUri(intent.getParcelableExtra(Intent.EXTRA_STREAM)!!)
+                    }
                 }
                 intent.hasExtra(KEY_SHORTCUT_ID) -> {
                     check(!intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY))
@@ -127,7 +132,18 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Share(val nameHint: String, val parentTaskKeyHint: TaskKey?) : EditParameters() {
+    class Share private constructor(
+            val nameHint: String? = null,
+            val parentTaskKeyHint: TaskKey? = null,
+            val uri: Uri? = null,
+    ) : EditParameters() {
+
+        companion object {
+
+            fun fromText(nameHint: String, parentTaskKeyHint: TaskKey?) = Share(nameHint, parentTaskKeyHint)
+
+            fun fromUri(uri: Uri) = Share(uri = uri)
+        }
 
         override fun startViewModel(viewModel: EditViewModel) =
                 viewModel.start(parentTaskKeyHint = parentTaskKeyHint)

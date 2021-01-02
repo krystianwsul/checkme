@@ -41,6 +41,7 @@ import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
+import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
@@ -661,21 +662,21 @@ class MainActivity :
         tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_DAYS)?.listener = subtaskDialogResultDays::accept
         tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_SEARCH)?.listener = subtaskDialogResultSearch::accept
 
-        var tabHeight = -1
-
         Observables.combineLatest(
                 tabLayoutVisibleRelay,
-                binding.mainTabLayout
+                binding.mainFrame
                         .onGlobalLayout()
-                        .doOnSuccess { tabHeight = binding.mainTabLayout.height }
+                        .map { binding.mainTabLayout.measureVisibleHeight(binding.mainFrame.height) }
                         .toObservable()
         )
-                .subscribe { (tabLayoutVisibility, _) ->
+                .subscribe { (tabLayoutVisibility, tabHeight) ->
                     check(tabHeight > 0)
 
-                    when (tabLayoutVisibility) {
-                        is TabLayoutVisibility.Visible -> binding.mainTabLayout.animateHeight(0, false)
-                        is TabLayoutVisibility.Gone -> binding.mainTabLayout.animateHeight(-tabHeight, tabLayoutVisibility.initial)
+                    binding.mainTabLayout.apply {
+                        when (tabLayoutVisibility) {
+                            is TabLayoutVisibility.Visible -> animateHeight(0, false)
+                            is TabLayoutVisibility.Gone -> animateHeight(-tabHeight, tabLayoutVisibility.initial)
+                        }
                     }
                 }
                 .addTo(createDisposable)

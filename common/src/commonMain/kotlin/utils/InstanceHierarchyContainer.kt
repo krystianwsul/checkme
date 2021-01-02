@@ -29,7 +29,8 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
         val parentInstanceKey = childInstance.parentInstance!!.instanceKey
         check(parentInstanceKey.taskKey == task.taskKey)
 
-        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys.getValue(parentInstanceKey.scheduleKey)
+        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey]
+                ?: throw ScheduleKeyNotFoundException("instanceKey: $parentInstanceKey")
         check(childInstanceKeys.contains(childInstanceKey))
 
         if (childInstanceKeys.size == 1) {
@@ -51,4 +52,6 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
     }
 
     fun getParentScheduleKeys(): Set<ScheduleKey> = parentScheduleKeyToChildInstanceKeys.keys
+
+    private class ScheduleKeyNotFoundException(message: String) : Exception(message)
 }

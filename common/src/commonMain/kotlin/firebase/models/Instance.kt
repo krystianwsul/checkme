@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -148,30 +149,36 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
                 val interval = done?.let { task.getInterval(it) } ?: task.getMostRecentInterval()
 
-                val parentTask = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)
-                        ?.taskHierarchy
-                        ?.parentTask
+                val parentTaskHierarchy = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)?.taskHierarchy
+                val parentTask = parentTaskHierarchy?.parentTask
 
                 if (parentTask == null) {
                     null
                 } else {
                     /**
                      * we also check if the parent task is done before all this went down, to prevent adding to finished
-                     * lists.  So, we should compare that "done" against when the interval started - as in, did the interval
-                     * first get added, or did the parent first get marked as done?
+                     * lists.  So, we should compare that "done" against when the interval started - as in, did the
+                     * interval first get added, or did the parent first get marked as done?
                      *
-                     * Not sure which type of inequality to use here, but I don't think it really matters outside of
-                     * tests.
+                     * This is already checked in `Instance.getChildInstances`, so the situation shouldn't come up.
+                     * Also, maybe the child instance should be isVisible = false instead.  Hence the error logging.
                      *
-                     * I think this logic is flawed for using `doneOffset`, in that the candidate instance should be
-                     * considered the parent, but the child instance invisible.  The goal is for the child to not be
-                     * visible anywhere, but I don't know if this makes a difference in practice, given the current
-                     * logic elsewhere.
+                     * The part about isValidlyCreatedHierarchy is also just a precaution.  Again, logging.
                      */
 
-                    parentTask.getInstance(scheduleDateTime)
-                            .takeIf { it.doneOffset?.let { it > interval.startExactTimeStampOffset } != false }
-                            ?.takeIf { it.isValidlyCreatedHierarchy() }
+                    val parentInstance = parentTask.getInstance(scheduleDateTime)
+
+                    when {
+                        parentInstance.doneOffset?.let { it > parentTaskHierarchy.startExactTimeStampOffset } == true -> {
+                            ErrorLogger.instance.logException(ParentInstanceException("parent done. child instance: $this, parent instance: $parentInstance, parentInstance.doneOffset: ${parentInstance.doneOffset!!.details()}, taskHierarchy.start: ${parentTaskHierarchy.startExactTimeStampOffset.details()}"))
+                            null
+                        }
+                        !parentInstance.isValidlyCreatedHierarchy() -> {
+                            ErrorLogger.instance.logException(ParentInstanceException("parent invalidly created. child instance: $this, parent instance: $parentInstance"))
+                            null
+                        }
+                        else -> parentInstance
+                    }
                 }
             }
         }
@@ -180,6 +187,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             doneCallback = it.doneOffsetProperty.addCallback(::invalidateParentInstanceData)
         }
     }
+
+    private class ParentInstanceException(message: String) : Exception(message)
 
     val parentInstance by parentInstanceProperty
 
@@ -237,6 +246,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         val taskHierarchyChildInstances = task.childHierarchyIntervals
                 .asSequence()
+                .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
+                    doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+                }
                 .map {
                     it.taskHierarchy
                             .childTask

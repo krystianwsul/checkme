@@ -238,7 +238,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     fun setFilterCriteria(filterCriteria: FilterCriteria, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 
-        if (normalizedObservable.getCurrentValue()) {
+        if (normalizedObservable.getCurrentValue() || filterCriteria.query.isEmpty()) {
             this.filterCriteria = filterCriteria
         } else {
             updatingAfterNormalizationDisposable = normalizedObservable.filter { it }

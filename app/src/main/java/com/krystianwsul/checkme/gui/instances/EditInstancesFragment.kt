@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
+import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
@@ -407,14 +408,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             binding.editInstanceScheduleFrame.apply {
                 cancelAnimations()
 
-                val widthSpec = View.MeasureSpec.makeMeasureSpec(
-                        binding.editInstanceScheduleFrame.width,
-                        View.MeasureSpec.EXACTLY
-                )
-                val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-                show.measure(widthSpec, heightSpec)
-
-                ValueAnimator.ofInt(height, show.measuredHeight).apply {
+                ValueAnimator.ofInt(height, show.measureVisibleHeight(binding.editInstanceScheduleFrame.width)).apply {
                     duration = context.resources.getInteger(android.R.integer.config_longAnimTime).toLong()
 
                     addUpdateListener {

@@ -169,7 +169,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     val parentInstance = parentTask.getInstance(scheduleDateTime)
 
                     when {
-                        parentInstance.doneOffset?.let { it > parentTaskHierarchy.startExactTimeStampOffset } == true -> {
+                        parentInstance.doneOffset?.let { it < parentTaskHierarchy.startExactTimeStampOffset } == true -> {
                             ErrorLogger.instance.logException(ParentInstanceException("parent done. child instance: $this, parent instance: $parentInstance, parentInstance.doneOffset: ${parentInstance.doneOffset!!.details()}, taskHierarchy.start: ${parentTaskHierarchy.startExactTimeStampOffset.details()}"))
                             null
                         }
@@ -365,7 +365,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
 
-    override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime instance time: $instanceDateTime, done: $done"
+    override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
 
     fun hide() {
         check(!data.hidden)

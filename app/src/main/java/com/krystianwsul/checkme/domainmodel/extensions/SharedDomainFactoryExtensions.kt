@@ -20,10 +20,7 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ScheduleId
-import com.krystianwsul.common.utils.TaskHierarchyKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
@@ -241,6 +238,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria,
         page: Int,
+        projectKey: ProjectKey<*>?,
         mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
 ): Pair<List<T>, Boolean> = syncOnDomain {
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
@@ -250,7 +248,8 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
             null,
             now,
             searchCriteria,
-            filterVisible = !debugMode
+            filterVisible = !debugMode,
+            projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {

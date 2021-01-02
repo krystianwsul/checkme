@@ -29,7 +29,8 @@ fun DomainFactory.getSearchInstancesData(
                     now,
                     searchCriteria,
                     page,
-                    ::instanceToGroupListData
+                    null,
+                    ::instanceToGroupListData,
             )
 
             val taskDatas = getUnscheduledTasks(now)

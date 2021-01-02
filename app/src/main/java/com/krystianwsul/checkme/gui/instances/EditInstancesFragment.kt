@@ -126,6 +126,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!! }
 
+    private val projectKey by lazy { instanceKeys.map { it.taskKey.projectKey }.distinct().singleOrNull() }
+
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {
 
@@ -153,7 +155,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                                     it.showLoader
                             ))
                         },
-                        { searchCriteria, page -> editInstancesSearchViewModel.start(searchCriteria, page) },
+                        { searchCriteria, page ->
+                            editInstancesSearchViewModel.start(projectKey!!, searchCriteria, page)
+                        },
                         instanceKeys.toSet(),
                 )
             }

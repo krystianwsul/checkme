@@ -504,12 +504,16 @@ class DomainFactory(
             now: ExactTimeStamp.Local,
             searchCriteria: SearchCriteria? = null,
             filterVisible: Boolean = true,
+            projectKey: ProjectKey<*>? = null,
     ): Sequence<Instance<*>> {
         val searchData = searchCriteria?.let { Project.SearchData(it, myUserFactory.user) }
 
-        val instanceSequences = projectsFactory.projects
-                .values
-                .map { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible) }
+        val projects =
+                projectKey?.let { listOf(projectsFactory.getProjectForce(it)) } ?: projectsFactory.projects.values
+
+        val instanceSequences = projects.map {
+            it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible)
+        }
 
         return combineInstanceSequences(instanceSequences)
     }

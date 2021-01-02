@@ -17,6 +17,7 @@ import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 
 fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
@@ -176,6 +177,7 @@ fun DomainFactory.setInstancesParent(
 fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,
         page: Int,
+        projectKey: ProjectKey<*>?,
 ): DomainResult<EditInstancesSearchViewModel.Data> = syncOnDomain {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
@@ -185,6 +187,7 @@ fun DomainFactory.getEditInstancesSearchData(
                     now,
                     searchCriteria,
                     page,
+                    projectKey,
             ) { instance, _, children ->
                 EditInstancesSearchViewModel.InstanceEntryData(
                         instance.name,

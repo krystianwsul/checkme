@@ -217,7 +217,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 doneCallback = null
             }
 
-            parentInstanceDataProperty.invalidate()
+            parentInstanceProperty.invalidate()
         }
     }
 

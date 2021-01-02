@@ -3,7 +3,6 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -21,10 +20,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import java.io.File
+import kotlin.math.roundToInt
 
 object ImageManager {
 
-    private const val LARGE_ICON_SIZE = 256
+    private const val LARGE_ICON_SIZE = android.R.dimen.notification_large_icon_width
+
+    private val BIG_PICTURE_WIDTH by lazy { MyApplication.context.dpToPx(450).roundToInt() }
+    private val BIG_PICTURE_HEIGHT by lazy { BIG_PICTURE_WIDTH / 2 }
 
     private val largeIconDownloader by lazy {
         Downloader(
@@ -37,12 +40,8 @@ object ImageManager {
 
     private val bigPictureDownloader by lazy {
         Downloader(
-                Resources.getSystem()
-                        .displayMetrics
-                        .widthPixels,
-                MyApplication.context
-                        .dpToPx(256)
-                        .toInt(),
+                BIG_PICTURE_WIDTH,
+                BIG_PICTURE_HEIGHT,
                 "bigPictures",
                 false
         )

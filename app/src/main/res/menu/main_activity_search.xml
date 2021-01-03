@@ -8,7 +8,8 @@
         android:orderInCategory="200"
         android:icon="@drawable/ic_close_white_24dp"
         app:showAsAction="always"
-        tools:ignore="AlwaysShowAction,MenuTitle" />
+        tools:ignore="AlwaysShowAction"
+        android:title="@string/search" />
 
     <item
         android:id="@+id/actionSearchShowDeleted"

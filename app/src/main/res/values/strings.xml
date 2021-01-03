@@ -130,4 +130,5 @@
     <string name="showAssignedTo">Show assigned to others</string>
     <string name="addToReminder">Add to reminder</string>
     <string name="setTime">Set time</string>
+    <string name="showCalendar">Show calendar</string>
 </resources>

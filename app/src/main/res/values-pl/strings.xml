@@ -129,4 +129,5 @@
     <string name="showAssignedTo">Pokaż przydzielone innym</string>
     <string name="addToReminder">Dodaj do przypomnienia</string>
     <string name="setTime">Ustaw czas</string>
+    <string name="showCalendar">Pokaż kalendarz</string>
 </resources>

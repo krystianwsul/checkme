@@ -56,5 +56,4 @@
         android:icon="@drawable/ic_baseline_open_in_browser_24"
         app:showAsAction="ifRoom" />
 
-
 </menu>

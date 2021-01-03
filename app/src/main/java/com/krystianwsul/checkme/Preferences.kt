@@ -34,6 +34,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_TIME_RANGE = "timeRange"
     private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
+    private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -148,6 +149,10 @@ object Preferences : FactoryProvider.Preferences {
                 .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
                 .ignore()
     }
+
+    fun getTooltipShown(name: String) = sharedPreferences.getBoolean(KEY_TOOLTIP_SHOWN + name, false)
+
+    fun setTooltipShown(name: String) = sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + name, true) }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

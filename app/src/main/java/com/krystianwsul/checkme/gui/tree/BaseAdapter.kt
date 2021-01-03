@@ -3,8 +3,11 @@ package com.krystianwsul.checkme.gui.tree
 import android.view.ViewGroup
 import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNodeCollection
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseAdapter : TreeModelAdapter<AbstractHolder> {
+
+    abstract val compositeDisposable: CompositeDisposable
 
     protected abstract val treeNodeCollection: TreeNodeCollection<AbstractHolder>
 

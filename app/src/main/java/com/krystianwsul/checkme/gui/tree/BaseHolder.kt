@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 
 interface BaseHolder {
@@ -11,6 +12,7 @@ interface BaseHolder {
     val holderPosition: Int
 
     fun Observable<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }!!
+    fun Single<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }
 
     fun onViewAttachedToWindow() = Unit
 

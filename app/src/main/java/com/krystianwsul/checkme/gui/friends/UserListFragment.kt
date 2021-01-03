@@ -311,6 +311,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
+        override val compositeDisposable = viewCreatedDisposable
+
         fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
             checkNotNull(data)
 

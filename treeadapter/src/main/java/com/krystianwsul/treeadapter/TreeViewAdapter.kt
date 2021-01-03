@@ -142,8 +142,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             override fun onInserted(position: Int, count: Int) {
                 notifyItemRangeInserted(position, count)
 
-                if (position == 0)
-                    treeModelAdapter.scrollToTop()
+                if (position == 0) treeModelAdapter.scrollToTop()
             }
 
             override fun onRemoved(position: Int, count: Int) {
@@ -153,8 +152,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             override fun onMoved(fromPosition: Int, toPosition: Int) {
                 notifyItemMoved(fromPosition, toPosition)
 
-                if (toPosition == 0)
-                    treeModelAdapter.scrollToTop()
+                if (toPosition == 0) treeModelAdapter.scrollToTop()
             }
 
             override fun onChanged(position: Int, count: Int, payload: Any?) {

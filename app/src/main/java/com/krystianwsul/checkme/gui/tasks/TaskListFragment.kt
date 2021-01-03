@@ -504,6 +504,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
+        override val compositeDisposable = viewCreatedDisposable
+
         override val taskAdapter = this
 
         val expandedTaskKeys get() = taskWrappers.flatMap { it.expandedTaskKeys }

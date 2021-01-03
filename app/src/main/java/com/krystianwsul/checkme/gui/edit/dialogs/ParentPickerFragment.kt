@@ -144,7 +144,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         } else {
             adapterData.filterCriteria?.let { filterCriteria = it }
 
-            val taskAdapter = TaskAdapter(this)
+            val taskAdapter = TaskAdapter()
             taskAdapter.initialize(adapterData.entryDatas, expandedParentKeys, adapterData.showProgress)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
@@ -201,11 +201,13 @@ class ParentPickerFragment : AbstractDialogFragment() {
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
     }
 
-    private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) :
+    private inner class TaskAdapter :
             BaseAdapter(),
             TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
+
+        override val compositeDisposable = viewCreatedDisposable
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
@@ -270,8 +272,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
             private lateinit var taskWrappers: MutableList<TaskWrapper>
 
             override val taskAdapter get() = taskParent.taskAdapter
-
-            private val parentFragment get() = taskAdapter.parentPickerFragment
 
             val expandedParentKeys: List<Parcelable>
                 get() {
@@ -355,13 +355,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 }
 
             override fun onClick(holder: AbstractHolder) {
-                val parentPickerFragment = parentFragment
+                this@ParentPickerFragment.dismiss()
 
-                parentPickerFragment.dismiss()
-
-                parentPickerFragment.delegateRelay
-                        .value!!
-                        .onEntrySelected(entryData)
+                delegateRelay.value!!.onEntrySelected(entryData)
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {

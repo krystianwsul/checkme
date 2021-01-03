@@ -24,7 +24,6 @@
     <string name="mark_done">Mark done</string>
     <string name="mark_not_done">Mark not done</string>
     <string name="name_hint">Name</string>
-    <string name="time_dialog_title">Pick a time</string>
     <string name="edit_task">Edit task</string>
     <string name="delete_task">Remove task</string>
     <string name="error_date">Date is in the past</string>
@@ -36,16 +35,16 @@
     <string name="tasks_empty_root">Add a task by clicking the plus at the bottom.</string>
     <string name="empty_child">Make a list by clicking the plus at the bottom.</string>
     <string name="empty_disabled">You can\'t add anything here, because the task has been removed.</string>
-    <string name="parent_dialog_title_task">Pick a task</string>
+    <string name="parent_dialog_title_task">Pick a project or task</string>
     <string name="parent_dialog_title_instance">Pick a reminder</string>
     <string name="add">Add a new time</string>
-    <string name="parentTask">Parent</string>
+    <string name="parentTask">Add to project or task</string>
     <string name="share">Share</string>
     <string name="sendTo">Send to:</string>
     <string name="nameError">Enter a name</string>
     <string name="add_task">Add task</string>
     <string name="noReminder">No reminders</string>
-    <string name="addReminder">Add a reminder</string>
+    <string name="addReminder">Add reminder</string>
     <string name="selectAll">Select all</string>
     <string name="note">Note</string>
     <string name="monthDay">day</string>

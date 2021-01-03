@@ -37,7 +37,6 @@ class TimeDialogFragment : AbstractDialogFragment() {
         val adapter = ArrayAdapter(requireContext(), R.layout.row_time, R.id.timeRowText, names)
 
         return MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.time_dialog_title)
                 .setAdapter(adapter) { _, which ->
                     check(which < names.size)
                     check(which < customTimeDatas.size + 2)

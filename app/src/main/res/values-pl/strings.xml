@@ -24,7 +24,6 @@
     <string name="mark_done">Oznacz jako zrobione</string>
     <string name="mark_not_done">Oznacz jako nie zrobione</string>
     <string name="name_hint">Nazwa</string>
-    <string name="time_dialog_title">Wybierz czas</string>
     <string name="edit_task">Edytuj zadanie</string>
     <string name="delete_task">Usuń zadanie</string>
     <string name="error_date">Data jest w przeszłości</string>
@@ -36,10 +35,10 @@
     <string name="tasks_empty_root">Dodaj zadanie klikając w plusa na dole.</string>
     <string name="empty_child">Utwórz listę klikając w plusa na dole.</string>
     <string name="empty_disabled">Nie możesz tu nic dodać, bo zadanie zostało usunięte.</string>
-    <string name="parent_dialog_title_task">Wybierz zadanie</string>
+    <string name="parent_dialog_title_task">Wybierz projekt albo zadanie</string>
     <string name="parent_dialog_title_instance">Wybierz przypomnienie</string>
     <string name="add">Dodaj nowy czas</string>
-    <string name="parentTask">Należy do</string>
+    <string name="parentTask">Dodaj do projektu lub zadania</string>
     <string name="share">Udostępnij</string>
     <string name="sendTo">Prześlij do:</string>
     <string name="nameError">Wprowadź nazwę</string>

@@ -35,8 +35,6 @@
     <string name="tasks_empty_root">Dodaj zadanie klikając w plusa na dole.</string>
     <string name="empty_child">Utwórz listę klikając w plusa na dole.</string>
     <string name="empty_disabled">Nie możesz tu nic dodać, bo zadanie zostało usunięte.</string>
-    <string name="parent_dialog_title_task">Wybierz projekt albo zadanie</string>
-    <string name="parent_dialog_title_instance">Wybierz przypomnienie</string>
     <string name="add">Dodaj nowy czas</string>
     <string name="parentTask">Dodaj do projektu lub zadania</string>
     <string name="share">Udostępnij</string>

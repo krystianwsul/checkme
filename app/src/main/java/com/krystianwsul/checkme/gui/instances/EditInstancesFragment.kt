@@ -361,11 +361,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceParentLayout.isEndIconVisible = true
 
         binding.editInstanceParentText.setFixedOnClickListener {
-            ParentPickerFragment.newInstance(
-                    data.parentInstanceData != null,
-                    false,
-                    R.string.parent_dialog_title_instance
-            ).let {
+            ParentPickerFragment.newInstance(data.parentInstanceData != null, false).let {
                 it.show(childFragmentManager, TAG_PARENT_PICKER)
                 it.initialize(parentPickerDelegate)
             }

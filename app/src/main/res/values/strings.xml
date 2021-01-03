@@ -35,8 +35,6 @@
     <string name="tasks_empty_root">Add a task by clicking the plus at the bottom.</string>
     <string name="empty_child">Make a list by clicking the plus at the bottom.</string>
     <string name="empty_disabled">You can\'t add anything here, because the task has been removed.</string>
-    <string name="parent_dialog_title_task">Pick a project or task</string>
-    <string name="parent_dialog_title_instance">Pick a reminder</string>
     <string name="add">Add a new time</string>
     <string name="parentTask">Add to project or task</string>
     <string name="share">Share</string>

@@ -2,11 +2,9 @@ package com.krystianwsul.checkme
 
 import android.content.Context
 import android.util.Log
-import com.krystianwsul.checkme.utils.dpToPx
 import com.skydoves.balloon.Balloon
 import com.skydoves.balloon.BalloonAnimation
 import com.skydoves.balloon.createBalloon
-import kotlin.math.roundToInt
 
 object TooltipManager {
 
@@ -25,9 +23,9 @@ object TooltipManager {
             dismissWhenClicked = true
             dismissWhenTouchOutside = true
 
-            setHeight(context.dpToPx(24).roundToInt())
-            setPaddingLeft(context.dpToPx(8).roundToInt())
-            setPaddingRight(context.dpToPx(8).roundToInt())
+            setHeight(32 + 23) // plus arrow
+            setPaddingLeft(16)
+            setPaddingRight(16)
 
             setBalloonAnimation(BalloonAnimation.FADE)
 

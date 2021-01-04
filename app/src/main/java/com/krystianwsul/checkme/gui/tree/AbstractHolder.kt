@@ -45,13 +45,14 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
                 .mapTreeNode()
                 .doOnDispose { balloon?.dismiss() }
                 .subscribeBy {
-                    if (it.modelNode.isSelectable) {
+                    if (it.modelNode.isSelectable) { // todo tooltip check if actionMode ever triggered through long press (not select all)
                         balloon = TooltipManager.tryCreateBalloon(
                                 rowSeparator.context,
                                 TooltipManager.Type.PRESS_TO_SELECT
                         ) {
                             setText("Press and hold to select this item.") // todo tooltip resource
                             setArrowOrientation(ArrowOrientation.TOP)
+                            setArrowPosition(0.1f)
                         }?.apply { showAlignBottom(itemView) }
                     }
                 }

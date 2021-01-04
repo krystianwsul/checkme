@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
@@ -46,6 +47,12 @@ class DebugFragment : AbstractFragment() {
                     }
                 }
                 .addTo(viewCreatedDisposable)
+
+        binding.debugTooltips.setOnClickListener {
+            TooltipManager.Type
+                    .values()
+                    .forEach { Preferences.setTooltipShown(it, false) }
+        }
 
         binding.debugTick.setOnClickListener { Ticker.tick("DebugFragment") }
 

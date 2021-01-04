@@ -121,12 +121,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
-    private var doneCallback: (() -> Unit)? = null
+    private class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val doneCallback: () -> Unit)
 
     private val parentInstanceProperty = invalidatableLazy {
-        check(doneCallback == null)
-
-        val parentInstanceData = when (val parentState = data.parentState) {
+        val parentInstance = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
             is ParentState.Parent -> {
                 val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
@@ -183,14 +181,15 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             }
         }
 
-        parentInstanceData?.also {
-            doneCallback = it.doneOffsetProperty.addCallback(::invalidateParentInstanceData)
+        parentInstance?.let {
+            ParentInstanceData(it, it.doneOffsetProperty.addCallback(::invalidateParentInstanceData))
         }
     }
 
     private class ParentInstanceException(message: String) : Exception(message)
 
-    val parentInstance by parentInstanceProperty
+    private val parentInstanceData by parentInstanceProperty
+    val parentInstance get() = parentInstanceData?.instance
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
     constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
@@ -220,10 +219,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         if (parentInstanceProperty.isInitialized()) {
             removeVirtualParents()
 
-            doneCallback?.let {
-                parentInstance!!.doneOffsetProperty.removeCallback(it)
-
-                doneCallback = null
+            parentInstanceData?.apply {
+                instance.doneOffsetProperty.removeCallback(doneCallback)
             }
 
             parentInstanceProperty.invalidate()

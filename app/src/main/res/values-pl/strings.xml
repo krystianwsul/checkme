@@ -130,4 +130,5 @@
     <string name="addToReminder">Dodaj do przypomnienia</string>
     <string name="setTime">Ustaw czas</string>
     <string name="showCalendar">Pokaż kalendarz</string>
+    <string name="tooltip_press_to_select">Dotknij and przytrzymaj żeby zaznaczyć tą pozycję.</string>
 </resources>

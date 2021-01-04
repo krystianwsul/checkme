@@ -12,10 +12,10 @@ object TooltipManager {
 
     fun tryCreateBalloon(context: Context, type: Type, block: Balloon.Builder.() -> Unit): Balloon? {
         if (tooltipVisible) return null
-        if (Preferences.getTooltipShown(type.name)) return null
+        if (Preferences.getTooltipShown(type)) return null
 
         tooltipVisible = true
-        //Preferences.setTooltipShown(type.name) todo tooltip
+        Preferences.setTooltipShown(type)
 
         return createBalloon(context) {
             block()

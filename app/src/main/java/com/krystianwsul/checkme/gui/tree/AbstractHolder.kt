@@ -4,6 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.skydoves.balloon.ArrowOrientation
 import com.skydoves.balloon.Balloon
@@ -45,12 +46,12 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
                 .mapTreeNode()
                 .doOnDispose { balloon?.dismiss() }
                 .subscribeBy {
-                    if (it.modelNode.isSelectable) { // todo tooltip check if actionMode ever triggered through long press (not select all)
+                    if (it.modelNode.isSelectable) {
                         balloon = TooltipManager.tryCreateBalloon(
                                 rowSeparator.context,
                                 TooltipManager.Type.PRESS_TO_SELECT
                         ) {
-                            setText("Press and hold to select this item.") // todo tooltip resource
+                            setTextResource(R.string.tooltip_press_to_select)
                             setArrowOrientation(ArrowOrientation.TOP)
                             setArrowPosition(0.1f)
                         }?.apply { showAlignBottom(itemView) }

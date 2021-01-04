@@ -150,9 +150,11 @@ object Preferences : FactoryProvider.Preferences {
                 .ignore()
     }
 
-    fun getTooltipShown(name: String) = sharedPreferences.getBoolean(KEY_TOOLTIP_SHOWN + name, false)
+    fun getTooltipShown(type: TooltipManager.Type) =
+            sharedPreferences.getBoolean(KEY_TOOLTIP_SHOWN + type, false)
 
-    fun setTooltipShown(name: String) = sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + name, true) }
+    fun setTooltipShown(type: TooltipManager.Type) =
+            sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + type, true) }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

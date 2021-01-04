@@ -35,6 +35,7 @@ abstract class AbstractActivity : AppCompatActivity() {
     }
 
     protected val createDisposable = CompositeDisposable()
+    protected val startDisposable = CompositeDisposable()
     private val resumeDisposable = CompositeDisposable()
 
     val started = BehaviorRelay.createDefault(false)
@@ -93,6 +94,8 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     override fun onStop() {
         MyCrashlytics.logMethod(this)
+
+        startDisposable.clear()
 
         started.accept(false)
 

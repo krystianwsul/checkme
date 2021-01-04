@@ -20,10 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.ActivityMainBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -50,7 +47,11 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.skydoves.balloon.ArrowConstraints
+import com.skydoves.balloon.ArrowOrientation
 import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
@@ -61,6 +62,7 @@ import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.io.Serializable
+import java.util.concurrent.TimeUnit
 
 class MainActivity :
         AbstractActivity(),
@@ -698,8 +700,21 @@ class MainActivity :
     override fun onStart() {
         super.onStart()
 
-        if (tabSearchStateRelay.value!!.tab == Tab.TASKS)
-            taskListFragment.checkCreatedTaskKey()
+        if (tabSearchStateRelay.value!!.tab == Tab.TASKS) taskListFragment.checkCreatedTaskKey()
+
+        Single.just(Unit)
+                .delay(5, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy {
+                    findViewById<View>(R.id.actionMainCalendar)?.let {
+                        TooltipManager.tryCreateBalloon(this, TooltipManager.Type.PRESS_MENU_TOOLTIP) {
+                            setTextResource(R.string.tooltip_press_menu_tooltip)
+                            setArrowOrientation(ArrowOrientation.TOP)
+                            setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
+                        }?.apply { showAlignBottom(it) }
+                    }
+                }
+                .addTo(startDisposable)
     }
 
     override fun initBottomBar() {

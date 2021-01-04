@@ -132,4 +132,5 @@
     <string name="setTime">Set time</string>
     <string name="showCalendar">Show calendar</string>
     <string name="tooltip_press_to_select">Press and hold to select this item.</string>
+    <string name="tooltip_press_menu_tooltip">Wondering what a menu item does? Press and hold to show a hint.</string>
 </resources>

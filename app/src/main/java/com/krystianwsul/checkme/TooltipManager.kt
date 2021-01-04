@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme
 
 import android.content.Context
-import android.util.Log
 import com.skydoves.balloon.Balloon
 import com.skydoves.balloon.BalloonAnimation
 import com.skydoves.balloon.createBalloon
@@ -23,7 +22,8 @@ object TooltipManager {
             dismissWhenClicked = true
             dismissWhenTouchOutside = true
 
-            setHeight(32 + 23) // plus arrow
+            setPaddingTop(8)
+            setPaddingBottom(8)
             setPaddingLeft(16)
             setPaddingRight(16)
 
@@ -31,7 +31,6 @@ object TooltipManager {
 
             setOnBalloonDismissListener {
                 check(tooltipVisible)
-                Log.e("asdf", "magic dismiss")
 
                 tooltipVisible = false
             }
@@ -40,6 +39,7 @@ object TooltipManager {
 
     enum class Type {
 
-        PRESS_TO_SELECT
+        PRESS_TO_SELECT,
+        PRESS_MENU_TOOLTIP
     }
 }

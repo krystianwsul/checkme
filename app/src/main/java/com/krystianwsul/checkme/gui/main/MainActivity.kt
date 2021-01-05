@@ -706,12 +706,17 @@ class MainActivity :
                 .delay(5, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy {
-                    findViewById<View>(R.id.actionMainCalendar)?.let {
-                        TooltipManager.tryCreateBalloon(this, TooltipManager.Type.PRESS_MENU_TOOLTIP) {
-                            setTextResource(R.string.tooltip_press_menu_tooltip)
-                            setArrowOrientation(ArrowOrientation.TOP)
-                            setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
-                        }?.apply { showAlignBottom(it) }
+                    findViewById<View>(R.id.actionMainCalendar)?.let { view ->
+                        TooltipManager.tryCreateBalloon(
+                                this,
+                                TooltipManager.Type.PRESS_MENU_TOOLTIP,
+                                {
+                                    setTextResource(R.string.tooltip_press_menu_tooltip)
+                                    setArrowOrientation(ArrowOrientation.TOP)
+                                    setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
+                                },
+                                { showAlignBottom(view) }
+                        )
                     }
                 }
                 .addTo(startDisposable)

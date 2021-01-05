@@ -625,12 +625,14 @@ class GroupListFragment @JvmOverloads constructor(
                             recyclerView.findViewHolderForAdapterPosition(position)?.itemView?.let { view ->
                                 balloon = TooltipManager.tryCreateBalloon(
                                         context,
-                                        TooltipManager.Type.PRESS_DRAG
-                                ) {
-                                    setTextResource(R.string.tooltip_press_drag)
-                                    setArrowOrientation(ArrowOrientation.TOP)
-                                    setArrowPosition(0.1f)
-                                }?.apply { showAlignBottom(view) }
+                                        TooltipManager.Type.PRESS_DRAG,
+                                        {
+                                            setTextResource(R.string.tooltip_press_drag)
+                                            setArrowOrientation(ArrowOrientation.TOP)
+                                            setArrowPosition(0.1f)
+                                        },
+                                        { showAlignBottom(view) },
+                                )
                             }
                         }
                     }

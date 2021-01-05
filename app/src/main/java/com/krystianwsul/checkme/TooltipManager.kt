@@ -9,7 +9,12 @@ object TooltipManager {
 
     private var tooltipVisible = false
 
-    fun tryCreateBalloon(context: Context, type: Type, block: Balloon.Builder.() -> Unit): Balloon? {
+    fun tryCreateBalloon(
+            context: Context,
+            type: Type,
+            block: Balloon.Builder.() -> Unit,
+            show: Balloon.() -> Unit,
+    ): Balloon? {
         if (tooltipVisible) return null
         if (Preferences.getTooltipShown(type)) return null
 
@@ -34,7 +39,7 @@ object TooltipManager {
 
                 tooltipVisible = false
             }
-        }
+        }.apply(show)
     }
 
     enum class Type {

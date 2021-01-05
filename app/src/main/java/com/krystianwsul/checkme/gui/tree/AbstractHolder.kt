@@ -49,12 +49,14 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
                     if (it.modelNode.isSelectable) {
                         balloon = TooltipManager.tryCreateBalloon(
                                 rowSeparator.context,
-                                TooltipManager.Type.PRESS_TO_SELECT
-                        ) {
-                            setTextResource(R.string.tooltip_press_to_select)
-                            setArrowOrientation(ArrowOrientation.TOP)
-                            setArrowPosition(0.1f)
-                        }?.apply { showAlignBottom(itemView) }
+                                TooltipManager.Type.PRESS_TO_SELECT,
+                                {
+                                    setTextResource(R.string.tooltip_press_to_select)
+                                    setArrowOrientation(ArrowOrientation.TOP)
+                                    setArrowPosition(0.1f)
+                                },
+                                { showAlignBottom(itemView) }
+                        )
                     }
                 }
                 .addTo(compositeDisposable)

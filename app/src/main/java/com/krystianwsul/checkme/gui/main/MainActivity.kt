@@ -21,7 +21,7 @@ import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.*
-import com.krystianwsul.checkme.TooltipManager.subscribeGetBalloon
+import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.ActivityMainBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -702,18 +702,16 @@ class MainActivity :
 
         TooltipManager.fiveSecondDelay()
                 .mapNotNull { findViewById(R.id.actionMainCalendar) }
-                .subscribeGetBalloon { view ->
-                    TooltipManager.tryCreateBalloon(
-                            this,
-                            TooltipManager.Type.PRESS_MENU_TOOLTIP,
-                            {
-                                setTextResource(R.string.tooltip_press_menu_tooltip)
-                                setArrowOrientation(ArrowOrientation.TOP)
-                                setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
-                            },
-                            { showAlignBottom(view) }
-                    )
-                }
+                .subscribeShowBalloon(
+                        this,
+                        TooltipManager.Type.PRESS_MENU_TOOLTIP,
+                        {
+                            setTextResource(R.string.tooltip_press_menu_tooltip)
+                            setArrowOrientation(ArrowOrientation.TOP)
+                            setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
+                        },
+                        { showAlignBottom(it) }
+                )
                 .addTo(startDisposable)
     }
 

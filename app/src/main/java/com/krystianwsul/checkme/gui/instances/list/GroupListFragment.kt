@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
-import com.krystianwsul.checkme.TooltipManager.subscribeGetBalloon
+import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.*
@@ -613,18 +613,16 @@ class GroupListFragment @JvmOverloads constructor(
                     val position = linearLayoutManager.findFirstCompletelyVisibleItemPosition()
                     recyclerView.findViewHolderForAdapterPosition(position)?.itemView
                 }
-                .subscribeGetBalloon { view ->
-                    TooltipManager.tryCreateBalloon(
-                            context,
-                            TooltipManager.Type.PRESS_DRAG,
-                            {
-                                setTextResource(R.string.tooltip_press_drag)
-                                setArrowOrientation(ArrowOrientation.TOP)
-                                setArrowPosition(0.1f)
-                            },
-                            { showAlignBottom(view) },
-                    )
-                }
+                .subscribeShowBalloon(
+                        context,
+                        TooltipManager.Type.PRESS_DRAG,
+                        {
+                            setTextResource(R.string.tooltip_press_drag)
+                            setArrowOrientation(ArrowOrientation.TOP)
+                            setArrowPosition(0.1f)
+                        },
+                        { showAlignBottom(it) },
+                )
                 .addTo(attachedToWindowDisposable)
     }
 

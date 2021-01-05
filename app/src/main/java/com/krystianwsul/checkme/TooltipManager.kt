@@ -14,7 +14,7 @@ object TooltipManager {
 
     private var tooltipVisible = false
 
-    fun tryCreateBalloon(
+    private fun tryCreateBalloon(
             context: Context,
             type: Type,
             block: Balloon.Builder.() -> Unit,
@@ -48,20 +48,17 @@ object TooltipManager {
     }
 
     @CheckResult
-    fun <T> Observable<T>.subscribeGetBalloon(showBalloon: (T) -> Balloon?): Disposable {
-        var balloon: Balloon? = null
-
-        return doOnDispose { balloon?.dismiss() }.subscribe { balloon = showBalloon(it) }
-    }
-
-    @CheckResult
-    fun Observable<*>.subscribeShowBalloon(
+    fun <T : Any> Observable<T>.subscribeShowBalloon(
             context: Context,
             type: Type,
-            block: Balloon.Builder.() -> Unit,
-            show: Balloon.() -> Unit,
+            block: Balloon.Builder.(T) -> Unit,
+            show: Balloon.(T) -> Unit,
     ): Disposable {
-        return subscribeGetBalloon { tryCreateBalloon(context, type, block, show) }
+        var balloon: Balloon? = null
+
+        return doOnDispose { balloon?.dismiss() }.subscribe {
+            balloon = tryCreateBalloon(context, type, { block(it) }, { show(it) })
+        }
     }
 
     @CheckResult

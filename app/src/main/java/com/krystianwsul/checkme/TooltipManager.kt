@@ -40,6 +40,7 @@ object TooltipManager {
     enum class Type {
 
         PRESS_TO_SELECT,
-        PRESS_MENU_TOOLTIP
+        PRESS_MENU_TOOLTIP,
+        PRESS_DRAG
     }
 }

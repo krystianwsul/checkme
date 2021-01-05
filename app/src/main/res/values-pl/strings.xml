@@ -132,4 +132,5 @@
     <string name="showCalendar">Pokaż kalendarz</string>
     <string name="tooltip_press_to_select">Dotknij and przytrzymaj żeby zaznaczyć tą pozycję.</string>
     <string name="tooltip_press_menu_tooltip">Zastanawiasz się, do czego służy pozycja w menu? Przytrzymaj, żeby zobaczyć podpowiedź.</string>
+    <string name="tooltip_press_drag">Dotknij and przytrzymaj żeby zmienić kolejność pozycji.</string>
 </resources>

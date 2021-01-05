@@ -37,7 +37,7 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
                 .subscribe { it.onLongClick(this) }
                 .addTo(compositeDisposable)
 
-        var balloon: Balloon? = null
+        var balloon: Balloon? = null // todo this everywhere else
 
         Observable.just(Unit)
                 .mergeWith(Observable.never()) // hacky way to get dispose to get called on fragment destroyed

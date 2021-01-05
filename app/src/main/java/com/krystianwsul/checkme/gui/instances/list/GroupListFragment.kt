@@ -19,6 +19,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.*
@@ -44,12 +45,18 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
+import com.skydoves.balloon.ArrowOrientation
+import com.skydoves.balloon.Balloon
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.subscribeBy
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class GroupListFragment @JvmOverloads constructor(
         context: Context,
@@ -595,6 +602,38 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     startEditActivity(hint, true)
+                }
+                .addTo(attachedToWindowDisposable)
+
+        var balloon: Balloon? = null
+
+        parametersRelay.switchMapSingle { parameters ->
+            Single.just(Unit)
+                    .delay(5, TimeUnit.SECONDS)
+                    .map { parameters }
+        }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy {
+                    if (
+                            it.draggable &&
+                            it.groupListDataWrapper.taskEditable != false &&
+                            treeViewAdapter.displayedNodes.none { it.isExpanded || it.isSelected } &&
+                            it.groupListDataWrapper.instanceDatas.size > 1
+                    ) {
+                        (recyclerView.layoutManager as LinearLayoutManager).let { layoutManager ->
+                            val position = layoutManager.findFirstCompletelyVisibleItemPosition()
+                            recyclerView.findViewHolderForAdapterPosition(position)?.itemView?.let { view ->
+                                balloon = TooltipManager.tryCreateBalloon(
+                                        context,
+                                        TooltipManager.Type.PRESS_DRAG
+                                ) {
+                                    setTextResource(R.string.tooltip_press_drag)
+                                    setArrowOrientation(ArrowOrientation.TOP)
+                                    setArrowPosition(0.1f)
+                                }?.apply { showAlignBottom(view) }
+                            }
+                        }
+                    }
                 }
                 .addTo(attachedToWindowDisposable)
     }

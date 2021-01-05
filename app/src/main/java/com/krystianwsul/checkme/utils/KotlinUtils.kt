@@ -345,7 +345,7 @@ fun <T> Single<T>.tryGetCurrentValue(): T? {
 
 fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
 
-fun <T : Any, U> Observable<T>.mapNotNull(mapper: (T) -> U?) =
+fun <T : Any, U : Any> Observable<T>.mapNotNull(mapper: (T) -> U?) =
         map { NullableWrapper(mapper(it)) }.filterNotNull()
 
 fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =

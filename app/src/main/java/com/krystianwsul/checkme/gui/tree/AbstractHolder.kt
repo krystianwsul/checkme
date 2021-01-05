@@ -6,15 +6,11 @@ import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
+import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.skydoves.balloon.ArrowOrientation
-import com.skydoves.balloon.Balloon
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.rxkotlin.subscribeBy
-import java.util.concurrent.TimeUnit
 
 abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseHolder {
 
@@ -37,28 +33,18 @@ abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseH
                 .subscribe { it.onLongClick(this) }
                 .addTo(compositeDisposable)
 
-        var balloon: Balloon? = null // todo this everywhere else
-
-        Observable.just(Unit)
-                .mergeWith(Observable.never()) // hacky way to get dispose to get called on fragment destroyed
-                .delay(5, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .mapTreeNode()
-                .doOnDispose { balloon?.dismiss() }
-                .subscribeBy {
-                    if (it.modelNode.isSelectable) {
-                        balloon = TooltipManager.tryCreateBalloon(
-                                rowSeparator.context,
-                                TooltipManager.Type.PRESS_TO_SELECT,
-                                {
-                                    setTextResource(R.string.tooltip_press_to_select)
-                                    setArrowOrientation(ArrowOrientation.TOP)
-                                    setArrowPosition(0.1f)
-                                },
-                                { showAlignBottom(itemView) }
-                        )
-                    }
-                }
+        TooltipManager.fiveSecondDelay()
+                .filter { getTreeNode()?.modelNode?.isSelectable == true }
+                .subscribeShowBalloon(
+                        rowSeparator.context,
+                        TooltipManager.Type.PRESS_TO_SELECT,
+                        {
+                            setTextResource(R.string.tooltip_press_to_select)
+                            setArrowOrientation(ArrowOrientation.TOP)
+                            setArrowPosition(0.1f)
+                        },
+                        { showAlignBottom(itemView) }
+                )
                 .addTo(compositeDisposable)
     }
 

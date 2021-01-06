@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.activity.viewModels
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -25,6 +26,7 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.checkme.viewmodels.FindFriendViewModel
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
@@ -40,6 +42,8 @@ class FindFriendActivity : NavBarActivity() {
 
         fun newIntent(context: Context) = Intent(context, FindFriendActivity::class.java)
     }
+
+    private val viewModel by viewModels<FindFriendViewModel>()
 
     private var loading = false
     private var userPair: Pair<UserKey, UserWrapper>? = null

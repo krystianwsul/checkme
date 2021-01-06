@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.friends
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -31,22 +32,20 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.parcelize.Parcelize
 
 class FindFriendActivity : NavBarActivity() {
 
     companion object {
 
-        private const val KEY_USER_KEY = "userKey"
-        private const val KEY_USER_WRAPPER = "userWrapper"
-        private const val LOADING_KEY = "loading"
+        private const val KEY_STATE = "state"
 
         fun newIntent(context: Context) = Intent(context, FindFriendActivity::class.java)
     }
 
     private val viewModel by viewModels<FindFriendViewModel>()
 
-    private var loading = false
-    private var userPair: Pair<UserKey, UserWrapper>? = null
+    private lateinit var state: State
 
     private var databaseReference: DatabaseReference? = null
     private var valueEventListener: ValueEventListener? = null
@@ -97,30 +96,14 @@ class FindFriendActivity : NavBarActivity() {
         }
 
         binding.findFriendUserLayout.setOnClickListener {
-            check(!loading)
-
-            DomainFactory.instance.addFriend(SaveService.Source.GUI, userPair!!.first, userPair!!.second)
+            (state as State.Found).apply {
+                DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
+            }
 
             finish()
         }
-    }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        savedInstanceState.apply {
-            check(containsKey(LOADING_KEY))
-            loading = getBoolean(LOADING_KEY)
-
-            if (containsKey(KEY_USER_KEY)) {
-                check(containsKey(KEY_USER_WRAPPER))
-
-                val userKey = getParcelable<UserKey>(KEY_USER_KEY)!!
-                val userWrapper = getParcelable<UserWrapper>(KEY_USER_WRAPPER)!!
-
-                userPair = userKey to userWrapper
-            }
-        }
+        state = savedInstanceState?.getParcelable(KEY_STATE) ?: State.None
 
         updateLayout()
     }
@@ -128,11 +111,11 @@ class FindFriendActivity : NavBarActivity() {
     override fun onStart() {
         super.onStart()
 
-        if (loading) loadUser()
+        if (state is State.Loading) loadUser()
     }
 
     private fun loadUser() {
-        check(loading)
+        check(state is State.Loading)
         check(binding.findFriendEmail.text.isNotEmpty())
 
         val key = UserData.getKey(binding.findFriendEmail.text.toString())
@@ -142,14 +125,18 @@ class FindFriendActivity : NavBarActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
-                loading = false
                 valueEventListener = null
                 databaseReference = null
 
                 if (dataSnapshot.exists()) {
-                    userPair = UserKey(dataSnapshot.key!!) to dataSnapshot.getValue(UserWrapper::class.java)!!
+                    state = State.Found(
+                            UserKey(dataSnapshot.key!!),
+                            dataSnapshot.getValue(UserWrapper::class.java)!!
+                    )
                 } else {
                     Snackbar.make(binding.findFriendCoordinator, R.string.userNotFound, Snackbar.LENGTH_SHORT).show()
+
+                    state = State.None
                 }
 
                 updateLayout()
@@ -158,7 +145,8 @@ class FindFriendActivity : NavBarActivity() {
             override fun onCancelled(databaseError: DatabaseError) {
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
-                loading = false
+                state = State.None
+
                 valueEventListener = null
                 databaseReference = null
 
@@ -179,11 +167,9 @@ class FindFriendActivity : NavBarActivity() {
         val hide = mutableListOf<View>()
         val show = mutableListOf<View>()
 
-        when {
-            userPair != null -> {
-                check(!loading)
-
-                userPair!!.second
+        when (val state = state) {
+            is State.Found -> {
+                state.userWrapper
                         .userData
                         .apply {
                             binding.findFriendUserPhoto.loadPhoto(photoUrl)
@@ -196,13 +182,13 @@ class FindFriendActivity : NavBarActivity() {
                 show += binding.findFriendUserLayout
                 hide += binding.findFriendProgress
             }
-            loading -> {
+            State.Loading -> {
                 binding.findFriendEmail.isEnabled = false
 
                 hide += binding.findFriendUserLayout
                 show += binding.findFriendProgress
             }
-            else -> {
+            State.None -> {
                 binding.findFriendEmail.isEnabled = true
 
                 hide += binding.findFriendUserLayout
@@ -216,7 +202,7 @@ class FindFriendActivity : NavBarActivity() {
     override fun onStop() {
         super.onStop()
 
-        if (loading) {
+        if (state is State.Loading) {
             checkNotNull(databaseReference)
             checkNotNull(valueEventListener)
 
@@ -230,24 +216,28 @@ class FindFriendActivity : NavBarActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.run {
-            putBoolean(LOADING_KEY, loading)
-
-            userPair?.let {
-                putParcelable(KEY_USER_KEY, it.first)
-                putParcelable(KEY_USER_WRAPPER, it.second)
-            }
-        }
+        outState.putParcelable(KEY_STATE, state)
     }
 
     private fun startSearch() {
         if (binding.findFriendEmail.text.isEmpty()) return
 
-        loading = true
-        userPair = null
+        state = State.Loading
 
         updateLayout()
 
         loadUser()
+    }
+
+    private sealed class State : Parcelable {
+
+        @Parcelize
+        object None : State()
+
+        @Parcelize
+        object Loading : State()
+
+        @Parcelize
+        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : State()
     }
 }

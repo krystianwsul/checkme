@@ -396,7 +396,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     ) {
         val highPriority = getHighPriority() ?: return
 
-        notificationRelay.accept { notifyGroupHelper(GroupData(instances, now, silent, highPriority)) }
+        val groupData = GroupData(instances, now, silent, highPriority)
+        notificationRelay.accept { notifyGroupHelper(groupData) }
     }
 
     private inner class GroupData(
@@ -405,7 +406,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val silent: Boolean,
             val highPriority: Boolean,
     ) {
-
         val instances = instances.map(::Instance)
 
         inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance<*>) {

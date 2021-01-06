@@ -210,6 +210,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     val emptyTextLayout get() = binding.taskListEmptyTextInclude.emptyTextLayout
 
+    override val scrollDisposable = viewCreatedDisposable
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -258,7 +260,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_REMOVE_INSTANCES)?.listener = deleteInstancesListener
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentTaskListBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+            FragmentTaskListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

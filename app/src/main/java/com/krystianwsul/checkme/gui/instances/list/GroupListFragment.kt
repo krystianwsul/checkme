@@ -468,6 +468,8 @@ class GroupListFragment @JvmOverloads constructor(
 
     val emptyTextLayout get() = binding.groupListEmptyTextInclude.emptyTextLayout
 
+    override val scrollDisposable = attachedToWindowDisposable
+
     private fun getShareData(selectedDatas: Collection<GroupListDataWrapper.SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
@@ -504,7 +506,11 @@ class GroupListFragment @JvmOverloads constructor(
         else -> shareTree.any { inTree(it.children, childTaskData) }
     }
 
-    private fun printTree(lines: MutableList<String>, indentation: Int, selectedData: GroupListDataWrapper.SelectedData) {
+    private fun printTree(
+            lines: MutableList<String>,
+            indentation: Int,
+            selectedData: GroupListDataWrapper.SelectedData,
+    ) {
         lines.add("-".repeat(indentation) + selectedData.name)
         selectedData.note?.let { lines.add("-".repeat(indentation + 1) + it) }
 

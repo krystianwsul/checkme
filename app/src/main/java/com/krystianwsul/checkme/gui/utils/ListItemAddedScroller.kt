@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.gui.utils
 
-import android.os.Handler
-import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -10,6 +8,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import java.util.concurrent.TimeUnit
 
 interface ListItemAddedScroller {
 
@@ -20,6 +24,8 @@ interface ListItemAddedScroller {
     val recyclerView: RecyclerView
 
     val listItemAddedListener: ListItemAddedListener
+
+    val scrollDisposable: CompositeDisposable
 
     fun scrollToPosition(target: Int) {
         val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -75,7 +81,11 @@ interface ListItemAddedScroller {
     }
 
     fun delay(action: () -> Unit) {
-        Handler(Looper.getMainLooper()).postDelayed(action, 500)
+        Single.just(Unit)
+                .delay(500, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy { action() }
+                .addTo(scrollDisposable)
     }
 
     fun checkCreatedTaskKey() {

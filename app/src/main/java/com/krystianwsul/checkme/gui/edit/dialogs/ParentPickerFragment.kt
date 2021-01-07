@@ -207,8 +207,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
-        override val compositeDisposable = viewCreatedDisposable
-
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),

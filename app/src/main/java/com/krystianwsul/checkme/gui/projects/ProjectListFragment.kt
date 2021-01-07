@@ -262,8 +262,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
-        override val compositeDisposable = viewCreatedDisposable
-
         fun initialize(projectDatas: SortedMap<ProjectKey.Shared, ProjectListViewModel.ProjectData>) {
             projectNodes = projectDatas.values
                     .map(::ProjectNode)

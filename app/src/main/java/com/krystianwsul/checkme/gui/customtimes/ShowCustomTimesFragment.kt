@@ -240,8 +240,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
-        override val compositeDisposable = createDisposable
-
         fun initialize() {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)

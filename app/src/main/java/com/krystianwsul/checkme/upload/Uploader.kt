@@ -2,13 +2,17 @@ package com.krystianwsul.checkme.upload
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.core.net.toUri
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
+import com.google.firebase.storage.StorageTask
+import com.google.firebase.storage.UploadTask
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskImageUploaded
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.TaskKey
@@ -18,14 +22,14 @@ import io.reactivex.rxkotlin.Observables
 object Uploader {
 
     private val storage = FirebaseStorage.getInstance()
-        .getReference("taskImages")
-        .child(AndroidDatabaseWrapper.root)
+            .getReference("taskImages")
+            .child(AndroidDatabaseWrapper.root)
 
     fun addUpload(
-        deviceDbInfo: DeviceDbInfo,
-        taskKey: TaskKey,
-        uuid: String,
-        pair: Pair<String, Uri>
+            deviceDbInfo: DeviceDbInfo,
+            taskKey: TaskKey,
+            uuid: String,
+            pair: Pair<String, Uri>,
     ) {
         val task = DomainFactory.instance.getTaskForce(taskKey)
 
@@ -34,57 +38,58 @@ object Uploader {
         val entry = Queue.addEntry(taskKey, uuid, pair.first, pair.second)
 
         storage.child(uuid)
-                .putFile(pair.second)
+                .putFile(Uri.parse(entry.fileUri))
                 .addOnProgressListener {
                     it.uploadSessionUri?.let {
-                        if (entry.sessionUri == null)
-                            entry.sessionUri = it
-                        Queue.write()
+                        if (entry.sessionUri == null) {
+                            entry.sessionUri = it.toString()
+                            Queue.write()
+                        }
                     }
                 }
-                .addOnFailureListener(MyCrashlytics::logException)
-            .addOnSuccessListener {
-                Queue.removeEntry(entry)
-
-                DomainFactory.addFirebaseListener { it.setTaskImageUploaded(SaveService.Source.GUI, taskKey, uuid) }
-            }
+                .addListeners(entry)
     }
 
     @SuppressLint("CheckResult")
     fun resume() {
         Observables.combineLatest(
-            Queue.ready,
-            DomainFactory.instanceRelay
-                .filter { it.value != null }
-                .map { it.value!! }
+                Queue.ready,
+                DomainFactory.instanceRelay.filterNotNull()
         ).observeOn(AndroidSchedulers.mainThread())
-            .subscribe { (_, domainFactory) ->
-                Queue.getEntries()
-                    .toMutableList()
-                    .forEach { entry ->
-                        val task = domainFactory.getTaskIfPresent(entry.taskKey) ?: return@forEach
+                .subscribe { (_, domainFactory) ->
+                    Queue.getEntries()
+                            .toMutableList()
+                            .forEach { entry ->
+                                val task = domainFactory.getTaskIfPresent(entry.taskKey) ?: return@forEach
 
-                        if (task.getImage(domainFactory.deviceDbInfo) != ImageState.Local(entry.uuid))
-                            return@forEach
+                                if (task.getImage(domainFactory.deviceDbInfo) != ImageState.Local(entry.uuid))
+                                    return@forEach
 
-                        storage.child(entry.uuid)
-                                .putFile(
-                                        entry.fileUri,
-                                        StorageMetadata.Builder().build(),
-                                        entry.sessionUri
-                                )
-                                .addOnFailureListener(MyCrashlytics::logException)
-                            .addOnSuccessListener {
-                                Queue.removeEntry(entry)
-
-                                DomainFactory.addFirebaseListener {
-                                    it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
-                                }
+                                storage.child(entry.uuid)
+                                        .putFile(
+                                                entry.fileUri.toUri(),
+                                                StorageMetadata.Builder().build(),
+                                                entry.sessionUri?.toUri(),
+                                        )
+                                        .addListeners(entry)
                             }
-                    }
+                }
+    }
+
+    private fun StorageTask<UploadTask.TaskSnapshot>.addListeners(entry: Queue.Entry) {
+        addOnFailureListener { MyCrashlytics.logException(UploadException("uri: ${entry.fileUri}", it)) }
+
+        addOnSuccessListener {
+            Queue.removeEntry(entry)
+
+            DomainFactory.addFirebaseListener {
+                it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
             }
+        }
     }
 
     fun getReference(uuid: String) = storage.child(uuid)
     fun getPath(imageData: ImageState.Local) = Queue.getPath(imageData.uuid)
+
+    private class UploadException(message: String, cause: Throwable) : Exception(message, cause)
 }

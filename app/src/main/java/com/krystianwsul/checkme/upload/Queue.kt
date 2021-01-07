@@ -34,7 +34,7 @@ object Queue {
     }
 
     fun addEntry(taskKey: TaskKey, uuid: String, path: String, uri: Uri): Entry {
-        val entry = Entry(taskKey, uuid, path, uri, null)
+        val entry = Entry(taskKey, uuid, path, uri.toString(), null)
         entries.add(entry)
         write()
         return entry
@@ -53,6 +53,7 @@ object Queue {
             val taskKey: TaskKey,
             val uuid: String,
             val path: String,
-            val fileUri: Uri,
-            var sessionUri: Uri?)
+            val fileUri: String,
+            var sessionUri: String?,
+    )
 }

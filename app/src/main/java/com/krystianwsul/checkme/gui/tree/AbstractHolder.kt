@@ -10,15 +10,12 @@ import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.skydoves.balloon.ArrowOrientation
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
 
 abstract class AbstractHolder(view: View) : RecyclerView.ViewHolder(view), BaseHolder {
 
     abstract val rowSeparator: View
 
-    final override val compositeDisposable by lazy {
-        CompositeDisposable().also { baseAdapter.compositeDisposable += it }
-    }
+    final override val compositeDisposable = CompositeDisposable()
 
     override val holderPosition get() = adapterPosition
 

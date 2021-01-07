@@ -8,7 +8,7 @@ import com.pacoworks.rxpaper2.RxPaperBook
 
 object Queue {
 
-    private const val KEY = "imageUploadQueue"
+    private const val KEY = "imageUploadQueue2"
 
     private val book = RxPaperBook.with()
 

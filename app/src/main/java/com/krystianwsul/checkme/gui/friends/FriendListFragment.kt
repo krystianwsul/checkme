@@ -37,7 +37,7 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
 class FriendListFragment : AbstractFragment(), FabUser {

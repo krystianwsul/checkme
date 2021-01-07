@@ -4,15 +4,15 @@ import android.annotation.SuppressLint
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Task
-import io.reactivex.BackpressureStrategy
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 @SuppressLint("CheckResult")
 object ShortcutQueue {

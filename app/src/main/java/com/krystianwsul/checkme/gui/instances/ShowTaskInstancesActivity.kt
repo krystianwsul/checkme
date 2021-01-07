@@ -25,8 +25,8 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 import java.io.Serializable
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
@@ -104,7 +104,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             }
                     .switchMap { binding.groupListFragment.progressShown }
                     .doOnNext { page += 1 }
-                    .startWith(Unit)
+                    .startWithItem(Unit)
                     .subscribe { start(taskKey, page) }
                     .addTo(createDisposable)
         }

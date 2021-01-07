@@ -3,7 +3,7 @@ package com.krystianwsul.checkme
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.treeadapter.getCurrentValue
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import java.util.concurrent.TimeUnit
 
 object RemoteConfig {
@@ -22,7 +22,7 @@ object RemoteConfig {
             .switchMapSingle { config.fetchAndActivate().toSingle() }
             .filter { it.value == true }
             .map { }
-            .startWith(Unit)
+            .startWithItem(Unit)
             .map { Values(config) }
             .replay(1)
             .apply { connect() }!!

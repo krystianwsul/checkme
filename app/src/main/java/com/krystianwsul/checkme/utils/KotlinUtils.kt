@@ -44,10 +44,10 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList

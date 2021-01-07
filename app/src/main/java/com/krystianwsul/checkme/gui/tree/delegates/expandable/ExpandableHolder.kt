@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.gui.tree.delegates.expandable
 
 import android.widget.ImageView
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.gui.tree.BaseHolder
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.kotlin.addTo
 
 interface ExpandableHolder : BaseHolder {
 

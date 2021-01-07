@@ -5,9 +5,9 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlin.math.ceil
 
 class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegate {

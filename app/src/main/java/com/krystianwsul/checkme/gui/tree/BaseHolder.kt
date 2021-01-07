@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.gui.tree
 
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 interface BaseHolder {
 

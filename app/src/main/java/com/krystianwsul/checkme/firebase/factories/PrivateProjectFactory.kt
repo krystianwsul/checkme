@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class PrivateProjectFactory(
         projectLoader: ProjectLoader<ProjectType.Private>,

@@ -12,12 +12,12 @@ import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.utils.setNavBarTransparency
 import com.krystianwsul.checkme.utils.isLandscape
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment() {
 

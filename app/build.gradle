@@ -103,16 +103,16 @@ dependencies {
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 
-    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
-    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    implementation "io.reactivex.rxjava2:rxkotlin:$rxKotlinVersion"
+    implementation "io.reactivex.rxjava3:rxandroid:$rxAndroidVersion"
+    implementation "io.reactivex.rxjava3:rxjava:$rxJavaVersion"
+    implementation "io.reactivex.rxjava3:rxkotlin:$rxKotlinVersion"
 
-    implementation "com.jakewharton.rxrelay2:rxrelay:$rxRelayVersion"
+    implementation "com.jakewharton.rxrelay3:rxrelay:$rxRelayVersion"
 
-    implementation 'com.jakewharton.rxbinding3:rxbinding:3.1.0'
-    implementation 'com.jakewharton.rxbinding3:rxbinding-core:3.1.0'
-    implementation 'com.jakewharton.rxbinding3:rxbinding-material:3.1.0'
-    implementation 'com.jakewharton.rxbinding3:rxbinding-recyclerview:3.1.0'
+    implementation "com.jakewharton.rxbinding4:rxbinding:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding4:rxbinding-core:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding4:rxbinding-material:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding4:rxbinding-recyclerview:$rxBindingVersion"
 
     implementation 'com.android.volley:volley:1.1.1'
     implementation "net.danlew:android.joda:$jodaVersion"
@@ -145,12 +145,14 @@ dependencies {
 
     implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 
-    implementation('com.uber.rxdogtag:rxdogtag:1.0.1')
+    implementation('com.uber.rxdogtag2:rxdogtag:2.0.1')
 
     implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
-    implementation "com.badoo.reaktive:rxjava2-interop:$reaktiveVersion"
+    implementation "com.badoo.reaktive:rxjava3-interop:$reaktiveVersion"
 
     implementation 'ca.antonious:materialdaypicker:0.7.2'
 
     implementation "com.github.skydoves:balloon:1.2.9"
+
+    implementation "com.github.akarnokd:rxjava3-bridge:3.0.0"
 }

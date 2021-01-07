@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.gui.base
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.utils.setNavBarTransparency
 import com.krystianwsul.checkme.utils.isLandscape
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class NavBarActivity : AbstractActivity() {
 

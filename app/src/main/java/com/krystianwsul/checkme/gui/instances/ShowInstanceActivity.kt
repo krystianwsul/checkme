@@ -30,8 +30,8 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.cast
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
 class ShowInstanceActivity : AbstractActivity(), GroupListListener {

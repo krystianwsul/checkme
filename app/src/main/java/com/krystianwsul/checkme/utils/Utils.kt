@@ -6,7 +6,7 @@ import android.text.TextUtils
 import com.google.android.gms.tasks.Task
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Single
 import java.util.*
 
 object Utils {
@@ -43,4 +43,4 @@ fun <T> Task<T>.toSingle() = Single.create<NullableWrapper<T>> { subscriber ->
     addOnCompleteListener {
         subscriber.onSuccess(NullableWrapper(it.takeIf { it.isSuccessful }?.result))
     }
-}
+}!!

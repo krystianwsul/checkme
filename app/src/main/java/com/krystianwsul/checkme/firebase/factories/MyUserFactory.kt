@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.badoo.reaktive.rxjavainterop.asRxJava2Observable
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.badoo.reaktive.rxjavainterop.asRxJava3Observable
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
@@ -9,7 +9,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.models.MyUser
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 class MyUserFactory(
         userSnapshot: Snapshot,
@@ -29,16 +29,16 @@ class MyUserFactory(
 
     val sharedProjectKeysObservable = Observable.merge(
             userRelay.map { ChangeType.REMOTE },
-            userRelay.switchMap { it.projectChanges.asRxJava2Observable() }.map { ChangeType.LOCAL }
+            userRelay.switchMap { it.projectChanges.asRxJava3Observable() }.map { ChangeType.LOCAL }
     )
             .map { ChangeWrapper(it, user.projectIds) }
             .distinctUntilChanged()!!
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
-                .asRxJava2Observable()
+                .asRxJava3Observable()
                 .map { ChangeType.LOCAL }
-                .startWith(ChangeType.REMOTE)
+                .startWithItem(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!
 

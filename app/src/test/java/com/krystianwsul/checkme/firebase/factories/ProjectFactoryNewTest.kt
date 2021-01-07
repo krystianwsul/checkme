@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -22,11 +22,11 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
@@ -76,7 +76,7 @@ class ProjectFactoryNewTest {
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
 
-        override val nullableInstance: FactoryProvider.Domain?
+        override val nullableInstance: FactoryProvider.Domain
             get() = TODO("Not yet implemented")
 
         override val preferences: FactoryProvider.Preferences
@@ -118,13 +118,13 @@ class ProjectFactoryNewTest {
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
 
-        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
+        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
-        override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()
+        override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()!!
 
-        override val changeInstancesEvents = PublishRelay.create<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()
+        override val changeInstancesEvents = PublishRelay.create<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()!!
 
-        override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()
+        override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
 
     private val compositeDisposable = CompositeDisposable()

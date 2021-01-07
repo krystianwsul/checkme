@@ -34,7 +34,7 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), FabUser {

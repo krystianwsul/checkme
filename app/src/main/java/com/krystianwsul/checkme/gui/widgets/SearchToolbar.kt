@@ -7,17 +7,17 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
-import com.jakewharton.rxbinding3.widget.textChanges
+import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class SearchToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
         FrameLayout(context, attrs, defStyleAttr) {

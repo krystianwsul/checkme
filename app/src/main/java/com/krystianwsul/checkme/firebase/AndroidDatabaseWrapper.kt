@@ -10,10 +10,11 @@ import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
+import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
@@ -34,7 +35,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     fun getUserDataDatabaseReference(userKey: UserKey) = getUserQuery(userKey)
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
 
-    private fun Query.snapshotChanges() = dataChanges().map<Snapshot>(Snapshot::Impl)!!
+    private fun Query.snapshotChanges() = dataChanges().toV3().map<Snapshot>(Snapshot::Impl)!!
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()

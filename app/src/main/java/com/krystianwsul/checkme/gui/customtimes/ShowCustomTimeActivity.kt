@@ -32,7 +32,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
 class ShowCustomTimeActivity : NavBarActivity() {

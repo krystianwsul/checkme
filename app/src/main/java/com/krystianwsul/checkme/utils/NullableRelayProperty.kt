@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.utils
 
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

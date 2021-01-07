@@ -14,9 +14,9 @@ import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.databinding.FragmentAboutBinding
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 import mehdi.sakout.aboutpage.AboutPage
 import mehdi.sakout.aboutpage.Element
 import java.util.concurrent.TimeUnit

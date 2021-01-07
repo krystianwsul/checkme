@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
         private val parameters: EditParameters.Join,

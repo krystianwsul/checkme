@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.ActivityMainBinding
@@ -50,12 +50,12 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.skydoves.balloon.ArrowConstraints
 import com.skydoves.balloon.ArrowOrientation
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
 import org.joda.time.Days
@@ -103,7 +103,7 @@ class MainActivity :
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val tabSearchStateRelay = BehaviorRelay.create<TabSearchState>()
+    val tabSearchStateRelay = BehaviorRelay.create<TabSearchState>()!!
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -128,7 +128,7 @@ class MainActivity :
 
     private lateinit var states: MutableMap<Pair<Preferences.TimeRange, Int>, Bundle>
 
-    val selectAllRelay = PublishRelay.create<Unit>()
+    val selectAllRelay = PublishRelay.create<Unit>()!!
 
     private var actionMode: ActionMode? = null
 
@@ -352,7 +352,7 @@ class MainActivity :
 
         PagerSnapHelper().attachToRecyclerView(binding.mainDaysPager)
 
-        hostEvents = Observables.combineLatest(
+        hostEvents = Observable.combineLatest(
                 tabSearchStateRelay,
                 daysPosition
         ) { tabSearchState: TabSearchState, position: Int ->
@@ -579,7 +579,7 @@ class MainActivity :
         }
 
         searchInstancesViewModel.apply {
-            val instanceSearch = Observables.combineLatest(
+            val instanceSearch = Observable.combineLatest(
                     tabSearchStateRelay,
                     filterCriteriaObservable
             ) { tabSearchState, searchData ->

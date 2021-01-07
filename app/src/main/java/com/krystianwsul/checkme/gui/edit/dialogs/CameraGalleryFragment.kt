@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
+import com.krystianwsul.checkme.utils.toV3
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 
@@ -58,6 +59,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                                         .size(ScreenSize())
                                         .useInternalStorage()
                                         .usingCamera()
+                                        .toV3()
                         )
 
                     }
@@ -67,6 +69,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                                         .size(ScreenSize())
                                         .useInternalStorage()
                                         .usingGallery()
+                                        .toV3()
                         )
 
                     }

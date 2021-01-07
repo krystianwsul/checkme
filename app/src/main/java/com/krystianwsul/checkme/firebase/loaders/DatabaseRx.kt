@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class DatabaseRx(
         domainDisposable: CompositeDisposable,

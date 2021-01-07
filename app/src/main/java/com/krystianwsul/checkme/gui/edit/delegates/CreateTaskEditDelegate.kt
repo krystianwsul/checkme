@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
         private val parameters: EditParameters,

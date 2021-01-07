@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
 class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {

@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.gui.main.MainActivity.TabSearchState
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.kotlin.addTo
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 

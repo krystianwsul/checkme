@@ -9,9 +9,9 @@ import android.view.MotionEvent
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jakewharton.rxbinding3.view.touches
-import com.jakewharton.rxbinding3.widget.textChanges
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxbinding4.view.touches
+import com.jakewharton.rxbinding4.widget.textChanges
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentParentPickerBinding
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
@@ -26,10 +26,10 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class ParentPickerFragment : AbstractDialogFragment() {
 

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.LinearLayoutCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -17,9 +17,9 @@ import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import java.text.DateFormatSymbols
 import java.util.*
 

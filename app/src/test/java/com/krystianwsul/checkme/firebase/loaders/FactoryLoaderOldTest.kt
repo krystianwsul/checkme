@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -20,10 +20,10 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -125,9 +125,9 @@ class FactoryLoaderOldTest {
 
     private class TestDatabase : FactoryProvider.Database() {
 
-        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
-        val sharedProjectObservable = PublishRelay.create<Snapshot>()
-        val userObservable = PublishRelay.create<Snapshot>()
+        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()!!
+        val sharedProjectObservable = PublishRelay.create<Snapshot>()!!
+        val userObservable = PublishRelay.create<Snapshot>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectObservable.map<Snapshot> { ValueTestSnapshot(it, key.key) }!!
 
@@ -135,7 +135,7 @@ class FactoryLoaderOldTest {
 
         override fun getUserObservable(userKey: UserKey) = userObservable
 
-        override fun getRootInstanceObservable(taskFirebaseKey: String) = Observable.just<Snapshot>(EmptyTestSnapshot())
+        override fun getRootInstanceObservable(taskFirebaseKey: String) = Observable.just<Snapshot>(EmptyTestSnapshot())!!
 
         override fun getNewId(path: String) = "id"
 
@@ -148,7 +148,7 @@ class FactoryLoaderOldTest {
 
         override var addDefaultReminder: Boolean
             get() = TODO("Not yet implemented")
-            set(value) {}
+            set(@Suppress("UNUSED_PARAMETER") value) {}
     }
 
     private class TestFactoryProvider : FactoryProvider {

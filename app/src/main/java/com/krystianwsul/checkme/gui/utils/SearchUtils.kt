@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.Observables
 
 @CheckResult
 fun observeEmptySearchState(
@@ -25,7 +25,7 @@ fun observeEmptySearchState(
         immediate: () -> Boolean,
         emptyTextId: () -> Int?,
 ) = Observables.combineLatest(
-        initializedObservable.map { true }.startWith(false),
+        initializedObservable.map { true }.startWithItem(false),
         filterCriteriaObservable,
 ).subscribe { (isInitialized, searchData) ->
     if (isInitialized) {

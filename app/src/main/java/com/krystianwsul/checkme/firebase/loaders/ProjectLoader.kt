@@ -8,11 +8,11 @@ import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.merge
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType> {
 

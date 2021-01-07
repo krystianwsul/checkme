@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface FriendsProvider {
 

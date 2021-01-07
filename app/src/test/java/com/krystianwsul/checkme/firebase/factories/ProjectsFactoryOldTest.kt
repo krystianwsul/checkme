@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.checkLocal
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
@@ -23,9 +23,9 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

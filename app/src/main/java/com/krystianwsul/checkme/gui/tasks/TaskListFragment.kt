@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentTaskListBinding
@@ -52,9 +52,9 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.cast
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
 

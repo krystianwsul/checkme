@@ -20,7 +20,7 @@ import androidx.core.view.isVisible
 import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentScheduleDialogBinding
 import com.krystianwsul.checkme.domainmodel.ScheduleText

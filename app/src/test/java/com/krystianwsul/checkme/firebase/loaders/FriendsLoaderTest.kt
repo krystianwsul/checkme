@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

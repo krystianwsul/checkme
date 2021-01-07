@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.ErrorLogger
@@ -16,8 +16,8 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Before

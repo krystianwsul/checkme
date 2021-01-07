@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface ParentScheduleManager {
 

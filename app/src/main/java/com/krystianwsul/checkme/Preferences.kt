@@ -2,7 +2,7 @@ package com.krystianwsul.checkme
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
-import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxjava3.core.Observable
 import org.joda.time.LocalDateTime
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
@@ -131,7 +131,7 @@ object Preferences : FactoryProvider.Preferences {
     var showAssigned by showAssignedProperty
     val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
 
-    val filterParamsObservable = Observables.combineLatest(
+    val filterParamsObservable = Observable.combineLatest(
             showDeletedObservable,
             showAssignedObservable
     ) { showDeleted, showAssignedToOthers ->

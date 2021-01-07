@@ -7,7 +7,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityTutorialBinding
@@ -15,8 +15,8 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.TutorialViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class TutorialActivity : NavBarActivity() {
 

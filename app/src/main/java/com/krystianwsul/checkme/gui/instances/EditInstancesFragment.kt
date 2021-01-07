@@ -15,9 +15,9 @@ import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textfield.TextInputLayout
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
@@ -46,8 +46,8 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.util.*
 

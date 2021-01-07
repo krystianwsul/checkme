@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.checkme.viewmodels.EditViewModel
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -20,10 +20,10 @@ import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.plugins.RxJavaPlugins
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -125,9 +125,9 @@ class FactoryLoaderNewTest {
 
     private class TestDatabase(private val myUserKey: UserKey) : FactoryProvider.Database() {
 
-        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
-        val sharedProjectObservable = PublishRelay.create<Snapshot>()
-        val myUserObservable = PublishRelay.create<Snapshot>()
+        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()!!
+        val sharedProjectObservable = PublishRelay.create<Snapshot>()!!
+        val myUserObservable = PublishRelay.create<Snapshot>()!!
 
         private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot>>()
         private val userObservables = mutableMapOf<UserKey, PublishRelay<Snapshot>>()
@@ -135,7 +135,7 @@ class FactoryLoaderNewTest {
         fun acceptInstance(
                 projectId: String,
                 taskId: String,
-                map: Map<String, Map<String, InstanceJson>>
+                map: Map<String, Map<String, InstanceJson>>,
         ) {
             val key = "$projectId-$taskId"
             rootInstanceObservables.getValue(key).accept(ValueTestSnapshot(map, key))
@@ -180,7 +180,7 @@ class FactoryLoaderNewTest {
 
         override var addDefaultReminder: Boolean
             get() = TODO("Not yet implemented")
-            set(value) {}
+            set(@Suppress("UNUSED_PARAMETER") value) {}
     }
 
     private class TestFactoryProvider(myUserKey: UserKey) : FactoryProvider {

@@ -2,9 +2,9 @@ package com.krystianwsul.checkme.utils
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.android.MainThreadDisposable
+import io.reactivex.rxjava3.android.MainThreadDisposable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Observer
 
 fun RecyclerView.pageSelections() = RecyclerViewPagerPageSelectedObservable(this).distinctUntilChanged()!!
 

@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.messaging.FirebaseMessaging
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -24,13 +24,14 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
+import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
-import com.uber.rxdogtag.RxDogTag
-import io.reactivex.Maybe
+import io.reactivex.rxjava3.core.Maybe
 import net.danlew.android.joda.JodaTimeAndroid
+import rxdogtag2.RxDogTag
 import java.io.File
 
 class MyApplication : Application() {
@@ -79,8 +80,9 @@ class MyApplication : Application() {
 
         FirebaseAuth.getInstance()
                 .authStateChanges()
+                .toV3()
                 .map { NullableWrapper(it.currentUser) }
-                .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
+                .startWithItem(NullableWrapper(FirebaseAuth.getInstance().currentUser))
                 .map { NullableWrapper(it.value?.toUserInfo()) }
                 .distinctUntilChanged()
                 .subscribe { userInfoRelay.accept(it) }

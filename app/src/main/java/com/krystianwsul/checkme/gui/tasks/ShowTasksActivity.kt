@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 
 class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {

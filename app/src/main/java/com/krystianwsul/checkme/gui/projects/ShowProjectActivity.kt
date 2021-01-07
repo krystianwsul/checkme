@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListener {
 

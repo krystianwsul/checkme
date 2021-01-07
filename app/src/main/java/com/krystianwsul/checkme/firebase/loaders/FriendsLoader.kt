@@ -5,10 +5,10 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.merge
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FriendsLoader(
         friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,

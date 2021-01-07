@@ -10,8 +10,8 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rxbinding3.view.keys
-import com.jakewharton.rxbinding3.widget.editorActionEvents
+import com.jakewharton.rxbinding4.view.keys
+import com.jakewharton.rxbinding4.widget.editorActionEvents
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.gui.base.NavBarActivity
@@ -19,8 +19,8 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.FindFriendViewModel
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FindFriendActivity : NavBarActivity() {
 

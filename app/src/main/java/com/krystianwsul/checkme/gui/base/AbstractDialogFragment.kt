@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.base
 
 import androidx.appcompat.app.AppCompatDialogFragment
 import com.krystianwsul.checkme.MyCrashlytics
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class AbstractDialogFragment : AppCompatDialogFragment() {
 

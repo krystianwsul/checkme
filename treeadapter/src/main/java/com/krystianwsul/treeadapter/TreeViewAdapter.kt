@@ -8,15 +8,15 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
@@ -43,7 +43,7 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private var updating = false
 
-    val updates = PublishRelay.create<Unit>()
+    val updates = PublishRelay.create<Unit>()!!
 
     var showProgress = false
 
@@ -58,11 +58,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
                     Observable.fromCallable { treeNodeCollection!!.normalize() }
                             .subscribeOn(Schedulers.computation())
                             .map { true }
-                            .startWith(false)
+                            .startWithItem(false)
                             .observeOn(AndroidSchedulers.mainThread())
                 }
     }
-            .startWith(false)
+            .startWithItem(false)
             .replay(1)
             .apply { compositeDisposable += connect() }
 

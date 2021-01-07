@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.gui.tree.delegates.checkable
 import android.view.View
 import android.widget.CheckBox
 import android.widget.FrameLayout
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.gui.tree.BaseHolder
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.merge
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.merge
 
 interface CheckableHolder : BaseHolder {
 

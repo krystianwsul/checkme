@@ -2,9 +2,9 @@ package com.krystianwsul.checkme.gui.tree
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxbinding3.recyclerview.scrollStateChanges
+import com.jakewharton.rxbinding4.recyclerview.scrollStateChanges
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 fun getProgressShownObservable(
         recyclerView: RecyclerView,

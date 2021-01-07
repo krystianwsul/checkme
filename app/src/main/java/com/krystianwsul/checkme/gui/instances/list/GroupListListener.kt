@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 interface GroupListListener : SnackbarListener, ListItemAddedListener {
 

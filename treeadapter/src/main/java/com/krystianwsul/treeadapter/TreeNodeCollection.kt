@@ -1,8 +1,8 @@
 package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxrelay2.BehaviorRelay
-import io.reactivex.Observable
+import com.jakewharton.rxrelay3.BehaviorRelay
+import io.reactivex.rxjava3.core.Observable
 import kotlin.math.ceil
 import kotlin.math.min
 

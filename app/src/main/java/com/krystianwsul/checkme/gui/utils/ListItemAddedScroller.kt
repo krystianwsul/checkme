@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 
 interface ListItemAddedScroller {

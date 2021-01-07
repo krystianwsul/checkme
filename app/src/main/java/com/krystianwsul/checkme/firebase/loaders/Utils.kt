@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 fun <T : Any, U, V> Observable<T>.processChanges(
         keyGetter: (T) -> Set<U>,

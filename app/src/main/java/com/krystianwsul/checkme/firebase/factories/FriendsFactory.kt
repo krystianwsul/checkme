@@ -11,9 +11,9 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.merge
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.merge
 
 class FriendsFactory(
         friendsLoader: FriendsLoader,

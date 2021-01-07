@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.kotlin.addTo
 
 class DebugFragment : AbstractFragment() {
 

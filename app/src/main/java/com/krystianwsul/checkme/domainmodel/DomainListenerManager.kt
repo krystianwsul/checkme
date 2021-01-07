@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.viewmodels.DomainListener
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 class DomainListenerManager {
 

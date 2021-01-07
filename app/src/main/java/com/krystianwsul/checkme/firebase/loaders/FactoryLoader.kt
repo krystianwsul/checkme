@@ -15,13 +15,12 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Singles
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.merge
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
         localFactory: FactoryProvider.Local,
@@ -86,7 +85,7 @@ class FactoryLoader(
                         factoryProvider.sharedProjectsProvider
                 )
 
-                val projectsFactorySingle = Singles.zip(
+                val projectsFactorySingle = Single.zip(
                         privateProjectLoader.initialProjectEvent,
                         sharedProjectsLoader.initialProjectsEvent
                 ) { (changeType, initialPrivateProjectEvent), initialSharedProjectsEvent ->
@@ -115,7 +114,7 @@ class FactoryLoader(
                         .map { FriendsFactory(friendsLoader, it, domainDisposable) }
                         .cacheImmediate()
 
-                val domainFactorySingle = Singles.zip(
+                val domainFactorySingle = Single.zip(
                         userFactorySingle,
                         projectsFactorySingle,
                         friendsFactorySingle

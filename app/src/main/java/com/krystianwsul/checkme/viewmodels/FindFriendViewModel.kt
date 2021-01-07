@@ -18,8 +18,8 @@ import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 
 class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {

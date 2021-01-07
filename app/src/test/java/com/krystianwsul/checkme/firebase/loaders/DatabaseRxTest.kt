@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay2.PublishRelay
-import com.jakewharton.rxrelay2.ReplayRelay
+import com.jakewharton.rxrelay3.PublishRelay
+import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.utils.getCurrentValue
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before

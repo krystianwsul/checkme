@@ -19,8 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.*
@@ -49,14 +49,13 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.merge
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.observable
 
@@ -305,7 +304,7 @@ class EditActivity : NavBarActivity() {
 
         startTicks(timeReceiver)
 
-        Observables.combineLatest(
+        Observable.combineLatest(
                 keyboardInsetRelay,
                 noteHasFocusRelay,
                 noteChanges,

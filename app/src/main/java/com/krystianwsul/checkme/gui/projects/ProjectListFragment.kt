@@ -36,7 +36,7 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
 

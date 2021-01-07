@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import androidx.annotation.StringRes
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
@@ -15,9 +15,9 @@ import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.getCurrentValue
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDisposable: CompositeDisposable) {
 

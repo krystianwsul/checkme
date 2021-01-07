@@ -6,7 +6,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 
 import com.krystianwsul.checkme.MyCrashlytics
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class AbstractFragment : Fragment() {
 

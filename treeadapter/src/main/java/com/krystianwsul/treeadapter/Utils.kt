@@ -1,6 +1,6 @@
 package com.krystianwsul.treeadapter
 
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 fun <T> Observable<T>.tryGetCurrentValue(): T? {
     var value: T? = null

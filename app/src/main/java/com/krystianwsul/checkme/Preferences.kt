@@ -6,6 +6,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
+import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -117,9 +118,6 @@ object Preferences : FactoryProvider.Preferences {
                 .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
                 .ignore()
     }
-
-    @Suppress("unused")
-    private fun Any?.ignore() = Unit
 
     private fun putNotificationLevel(notificationLevel: NotificationLevel) {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }

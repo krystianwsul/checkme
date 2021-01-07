@@ -47,7 +47,6 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import java.io.*
 import java.util.*
@@ -355,7 +354,7 @@ fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
         cache().apply { compositeDisposable += subscribe() }!!
 
 @Suppress("unused")
-fun Disposable.ignore() = Unit
+fun Any?.ignore() = Unit
 
 fun webSearchIntent(query: String) =
         Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)

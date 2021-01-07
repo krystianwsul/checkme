@@ -14,10 +14,7 @@ import com.jakewharton.rxbinding3.view.keys
 import com.jakewharton.rxbinding3.widget.editorActionEvents
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -80,10 +77,7 @@ class FindFriendActivity : NavBarActivity() {
         }
 
         binding.findFriendUserLayout.setOnClickListener {
-            (viewModel.state as FindFriendViewModel.State.Found).apply { // todo friend
-                DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
-            }
-
+            viewModel.addFriend()
             finish()
         }
 

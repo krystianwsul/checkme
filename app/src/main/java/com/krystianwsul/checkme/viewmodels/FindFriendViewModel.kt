@@ -10,7 +10,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -29,7 +32,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val clearedDisposable = CompositeDisposable()
 
     private val stateProperty = NonNullRelayProperty<State>(savedStateHandle[KEY_STATE] ?: State.None)
-    var state by stateProperty // todo friend private
+    private var state by stateProperty
 
     val stateObservable = stateProperty.observable.distinctUntilChanged()!!
 
@@ -50,6 +53,12 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         state = State.Loading(email)
 
         loadUser() // todo friend rx
+    }
+
+    fun addFriend() {
+        (state as State.Found).apply {
+            DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
+        }
     }
 
     private fun loadUser() {

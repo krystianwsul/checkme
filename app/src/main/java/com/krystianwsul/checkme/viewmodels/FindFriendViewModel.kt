@@ -23,6 +23,7 @@ import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -128,14 +129,12 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         Single.fromCallable {
             Contacts.getQuery()
                     .find()
-                    .filter { it.emails.isNotEmpty() }
-                    .flatMap { contact ->
-                        contact.emails.map { Contact(contact.displayName, it.address, contact.photoUri) }
-                    }
+                    .flatMap { it.emails.map { email -> Contact(it.displayName, email.address, it.photoUri) } }
         }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy { it.forEach { Log.e("asdf", "magic $it") } }
+                .addTo(clearedDisposable)
     }
 
     override fun onCleared() {

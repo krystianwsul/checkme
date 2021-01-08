@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -13,7 +14,11 @@ class DatabaseRx(
 
     val observable = databaseObservable.publish()!!
 
-    private val cached = observable.replay(1).apply { disposable += connect() }
+    private val cached = BehaviorRelay.create<Snapshot>()
+
+    init {
+        disposable += observable.subscribe(cached::accept)
+    }
 
     val first = observable.firstOrError()
             .cache()

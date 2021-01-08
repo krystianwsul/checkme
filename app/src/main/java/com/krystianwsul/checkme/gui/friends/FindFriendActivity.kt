@@ -127,7 +127,7 @@ class FindFriendActivity : NavBarActivity() {
                 hide += binding.findFriendProgress
             }
             is FindFriendViewModel.State.Error ->
-                Snackbar.make(binding.findFriendCoordinator, state.stringRes, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, state.stringRes, Snackbar.LENGTH_SHORT).show()
         }.ignore()
 
         animateVisibility(show, hide)

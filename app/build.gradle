@@ -155,4 +155,7 @@ dependencies {
     implementation "com.github.skydoves:balloon:1.2.9"
 
     implementation "com.github.akarnokd:rxjava3-bridge:3.0.0"
+
+    implementation 'com.github.tamir7.contacts:contacts:1.1.7'
+    implementation 'com.tomash:androidcontacts:1.14.0'
 }

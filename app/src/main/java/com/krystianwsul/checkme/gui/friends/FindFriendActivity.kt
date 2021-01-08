@@ -1,14 +1,17 @@
 package com.krystianwsul.checkme.gui.friends
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
+import com.github.tamir7.contacts.Contacts
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding4.view.keys
 import com.jakewharton.rxbinding4.widget.editorActionEvents
@@ -18,9 +21,13 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.FindFriendViewModel
+import com.tbruyelle.rxpermissions2.RxPermissions
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class FindFriendActivity : NavBarActivity() {
 
@@ -80,6 +87,25 @@ class FindFriendActivity : NavBarActivity() {
             viewModel.addFriend()
             finish()
         }
+
+        Contacts.initialize(this)
+
+        data class Contact(val displayName: String, val email: String, val photoUri: String?)
+
+        RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
+                .toV3()
+                .filter { it }
+                .observeOn(Schedulers.io())
+                .map {
+                    Contacts.getQuery()
+                            .find()
+                            .filter { it.emails.isNotEmpty() }
+                            .flatMap { contact -> contact.emails.map { Contact(contact.displayName, it.address, contact.photoUri) } }
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    it.forEach { Log.e("asdf", "magic $it") }
+                }
 
         viewModel.stateObservable
                 .subscribe { updateLayout(it) }

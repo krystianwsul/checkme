@@ -110,7 +110,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
     private val bindingProperty = ResettableProperty<FragmentFriendListBinding>()
     private var binding by bindingProperty
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentFriendListBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+            FragmentFriendListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -184,7 +185,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeViewAdapter.let { outState.putParcelableArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
     }
 
-    private fun updateSelectAll() = (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
+    private fun updateSelectAll() =
+            (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         friendListFab = floatingActionButton

@@ -4,17 +4,21 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.activity.viewModels
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding4.view.keys
 import com.jakewharton.rxbinding4.widget.editorActionEvents
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
+import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
@@ -37,6 +41,8 @@ class FindFriendActivity : NavBarActivity() {
     override val rootView get() = binding.findFriendRoot
 
     private lateinit var binding: ActivityFindFriendBinding
+
+    private val adapter by lazy { Adapter() }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_find_friend, menu)
@@ -79,9 +85,9 @@ class FindFriendActivity : NavBarActivity() {
             }.subscribe()
         }
 
-        binding.findFriendUserLayout.setOnClickListener {
-            viewModel.addFriend()
-            finish()
+        binding.findFriendRecycler.let {
+            it.layoutManager = LinearLayoutManager(this)
+            it.adapter = adapter
         }
 
         RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
@@ -103,28 +109,22 @@ class FindFriendActivity : NavBarActivity() {
             FindFriendViewModel.State.None -> {
                 binding.findFriendEmail.isEnabled = true
 
-                hide += binding.findFriendUserLayout
+                hide += binding.findFriendRecycler
                 hide += binding.findFriendProgress
             }
             is FindFriendViewModel.State.Loading -> {
                 binding.findFriendEmail.isEnabled = false
 
-                hide += binding.findFriendUserLayout
+                hide += binding.findFriendRecycler
                 show += binding.findFriendProgress
             }
             is FindFriendViewModel.State.Found -> {
-                state.userWrapper
-                        .userData
-                        .apply {
-                            binding.findFriendUserPhoto.loadPhoto(photoUrl)
-                            binding.findFriendUserName.text = name
-                            binding.findFriendUserEmail.text = email
-                        }
-
                 binding.findFriendEmail.isEnabled = true
 
-                show += binding.findFriendUserLayout
+                show += binding.findFriendRecycler
                 hide += binding.findFriendProgress
+
+                adapter.submitList(listOf(Item(state)))
             }
             is FindFriendViewModel.State.Error ->
                 Snackbar.make(binding.root, state.stringRes, Snackbar.LENGTH_SHORT).show()
@@ -136,4 +136,44 @@ class FindFriendActivity : NavBarActivity() {
     private fun startSearch() {
         viewModel.startSearch(binding.findFriendEmail.text.toString())
     }
+
+    private inner class Adapter : ListAdapter<Item, Holder>(
+            object : DiffUtil.ItemCallback<Item>() {
+
+                override fun areItemsTheSame(oldItem: Item, newItem: Item) = true
+
+                override fun areContentsTheSame(oldItem: Item, newItem: Item) = oldItem == newItem
+            }
+    ) {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+                Holder(RowListAvatarBinding.inflate(layoutInflater, parent, false))
+
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            holder.binding.apply {
+                getItem(position).state
+                        .userWrapper
+                        .userData
+                        .apply {
+                            root.setOnClickListener {
+                                viewModel.addFriend()
+                                finish()
+                            }
+
+                            rowListAvatarImage.loadPhoto(photoUrl)
+
+                            rowListAvatarName.text = name
+                            rowListAvatarDetails.text = email
+
+                            rowListAvatarChildren.isVisible = false
+
+                            rowListAvatarSeparator.isInvisible = position == itemCount - 1
+                        }
+            }
+        }
+    }
+
+    private class Holder(val binding: RowListAvatarBinding) : RecyclerView.ViewHolder(binding.root)
+
+    private data class Item(val state: FindFriendViewModel.State.Found)
 }

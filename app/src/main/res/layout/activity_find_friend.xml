@@ -56,70 +56,24 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/findFriendRecycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <LinearLayout
-            android:id="@+id/findFriendUserLayout"
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/findFriendProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="16dp"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            android:gravity="center_vertical">
+            android:indeterminate="true" />
 
-            <ImageView
-                android:id="@+id/findFriendUserPhoto"
-                android:layout_width="@dimen/listImage"
-                android:layout_height="@dimen/listImage"
-                android:layout_marginEnd="16dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/findFriendUserName"
-                    android:singleLine="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated" />
-
-                <TextView
-                    android:id="@+id/findFriendUserEmail"
-                    android:singleLine="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/textSecondary"
-                    tools:ignore="Deprecated" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/findFriendProgress"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true" />
-
-        </LinearLayout>
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

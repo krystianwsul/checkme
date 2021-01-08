@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.NonNullRelayProperty
+import com.krystianwsul.checkme.utils.RxQueue
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
@@ -34,10 +34,15 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val clearedDisposable = CompositeDisposable()
 
-    private val stateProperty = NonNullRelayProperty<State>(savedStateHandle[KEY_STATE] ?: State.None)
-    private var state by stateProperty
+    private val stateQueue = RxQueue<State>(savedStateHandle[KEY_STATE] ?: State.None)
 
-    val stateObservable = stateProperty.observable.distinctUntilChanged()!!
+    var state
+        get() = stateQueue.value
+        private set(value) {
+            stateQueue.accept(value)
+        }
+
+    val stateObservable = stateQueue.distinctUntilChanged()!!
 
     init {
         clearedDisposable += stateObservable.subscribe { savedStateHandle[KEY_STATE] = it }
@@ -76,7 +81,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                                 it.getValue(UserWrapper::class.java)!!
                         )
                     } else {
-                        state = State.Error(R.string.userNotFound) // todo friend make queue
+                        state = State.Error(R.string.userNotFound)
                         state = State.None
                     }
                 }

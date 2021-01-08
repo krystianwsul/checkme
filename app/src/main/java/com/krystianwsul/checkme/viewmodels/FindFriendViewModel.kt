@@ -16,7 +16,6 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -47,7 +46,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     init {
         clearedDisposable += stateObservable.subscribe { savedStateHandle[KEY_STATE] = it }
 
-        stateObservable.switchMap { it.nextState }
+        stateObservable.switchMapSingle { it.nextStateSingle }
                 .subscribe(stateQueue::accept)
                 .addTo(clearedDisposable)
     }
@@ -82,7 +81,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     sealed class State : Parcelable {
 
-        open val nextState: Observable<State> = Observable.never()
+        open val nextStateSingle: Single<State> = Single.never()
 
         @Parcelize
         object None : State()
@@ -94,22 +93,27 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                 check(email.isNotEmpty())
             }
 
-            override val nextState
-                get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email)).switchMap {
-                    Log.e("asdf", "magic snapshot")
-                    if (it.exists()) {
-                        Observable.just(Found(UserKey(it.key), it.getValue(UserWrapper::class.java)!!))
-                    } else {
-                        Observable.just(Error(R.string.userNotFound), None)
-                    }
-                }!!
+            override val nextStateSingle
+                get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
+                        .firstOrError()
+                        .map {
+                            Log.e("asdf", "magic snapshot")
+                            if (it.exists()) {
+                                Found(UserKey(it.key), it.getValue(UserWrapper::class.java)!!)
+                            } else {
+                                Error(R.string.userNotFound, None)
+                            }
+                        }!!
         }
 
         @Parcelize
         data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : State()
 
         @Parcelize
-        data class Error(@StringRes val stringRes: Int) : State()
+        data class Error(@StringRes val stringRes: Int, private val nextState: State) : State() {
+
+            override val nextStateSingle get() = Single.just(nextState)!!
+        }
     }
 
     data class Contact(val displayName: String, val email: String, val photoUri: String?)

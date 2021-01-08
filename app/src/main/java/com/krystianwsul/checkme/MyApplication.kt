@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
+import com.github.tamir7.contacts.Contacts
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
@@ -142,6 +143,8 @@ class MyApplication : Application() {
         Uploader.resume()
 
         ImageManager.init()
+
+        Contacts.initialize(this)
     }
 
     private fun clearPaparazzo() {

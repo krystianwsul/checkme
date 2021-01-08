@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.github.tamir7.contacts.Contacts
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -18,8 +20,12 @@ import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
 
 class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -118,6 +124,20 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
     }
 
+    fun fetchContacts() {
+        Single.fromCallable {
+            Contacts.getQuery()
+                    .find()
+                    .filter { it.emails.isNotEmpty() }
+                    .flatMap { contact ->
+                        contact.emails.map { Contact(contact.displayName, it.address, contact.photoUri) }
+                    }
+        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy { it.forEach { Log.e("asdf", "magic $it") } }
+    }
+
     override fun onCleared() {
         clearedDisposable.dispose()
     }
@@ -141,4 +161,6 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         @Parcelize
         data class Error(@StringRes val stringRes: Int) : State()
     }
+
+    data class Contact(val displayName: String, val email: String, val photoUri: String?)
 }

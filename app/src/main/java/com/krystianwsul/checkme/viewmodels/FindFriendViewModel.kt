@@ -16,9 +16,9 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -42,60 +42,25 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             stateQueue.accept(value)
         }
 
-    val stateObservable = stateQueue.distinctUntilChanged()!!
+    val stateObservable = stateQueue.distinctUntilChanged().share()!! // todo friend separate ViewState class
 
     init {
         clearedDisposable += stateObservable.subscribe { savedStateHandle[KEY_STATE] = it }
 
-        if (state is State.Loading) loadUser()
+        stateObservable.switchMap { it.nextState }
+                .subscribe(stateQueue::accept)
+                .addTo(clearedDisposable)
     }
-
-    private var databaseDisposable: Disposable? = null
 
     fun startSearch(email: String) {
         if (email.isEmpty()) return
 
-        disconnect()
-
         state = State.Loading(email)
-
-        loadUser() // todo friend rx
     }
 
     fun addFriend() {
         (state as State.Found).apply {
             DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
-        }
-    }
-
-    private fun loadUser() {
-        val key = UserData.getKey((state as State.Loading).email)
-
-        check(databaseDisposable == null)
-
-        databaseDisposable = AndroidDatabaseWrapper.getUserObservable(key)
-                .subscribe {
-                    if (it.exists()) {
-                        state = State.Found(
-                                UserKey(it.key),
-                                it.getValue(UserWrapper::class.java)!!
-                        )
-                    } else {
-                        state = State.Error(R.string.userNotFound)
-                        state = State.None
-                    }
-                }
-                .addTo(clearedDisposable)
-    }
-
-    private fun disconnect() {
-        if (state is State.Loading) { // todo friend rx
-            checkNotNull(databaseDisposable)
-
-            databaseDisposable!!.dispose()
-            databaseDisposable = null
-        } else {
-            check(databaseDisposable == null)
         }
     }
 
@@ -117,6 +82,8 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     sealed class State : Parcelable {
 
+        open val nextState: Observable<State> = Observable.never()
+
         @Parcelize
         object None : State()
 
@@ -126,6 +93,16 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             init {
                 check(email.isNotEmpty())
             }
+
+            override val nextState
+                get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email)).switchMap {
+                    Log.e("asdf", "magic snapshot")
+                    if (it.exists()) {
+                        Observable.just(Found(UserKey(it.key), it.getValue(UserWrapper::class.java)!!))
+                    } else {
+                        Observable.just(Error(R.string.userNotFound), None)
+                    }
+                }!!
         }
 
         @Parcelize

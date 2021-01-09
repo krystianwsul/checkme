@@ -118,7 +118,7 @@ class FindFriendActivity : NavBarActivity() {
                 show += binding.findFriendRecycler
                 hide += binding.findFriendProgress
 
-                adapter.submitList(state.contacts)
+                adapter.submitList(state.contacts) { binding.findFriendRecycler.smoothScrollToPosition(0) }
             }
             is FindFriendViewModel.ViewState.Error ->
                 Snackbar.make(binding.root, state.stringRes, Snackbar.LENGTH_SHORT).show()

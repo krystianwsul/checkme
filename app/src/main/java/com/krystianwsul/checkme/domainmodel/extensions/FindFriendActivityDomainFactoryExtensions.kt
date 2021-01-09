@@ -4,16 +4,14 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.utils.UserKey
 
-fun DomainFactory.addFriend(
-        source: SaveService.Source,
-        userKey: UserKey,
-        userWrapper: UserWrapper
-) = syncOnDomain {
+fun DomainFactory.addFriend(source: SaveService.Source, userWrapper: UserWrapper) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.addFriend")
     check(!myUserFactory.isSaved)
+
+    val userKey = UserData.getKey(userWrapper.userData.email)
 
     myUserFactory.user.addFriend(userKey)
     friendsFactory.addFriend(userKey, userWrapper)

@@ -9,13 +9,15 @@ import com.krystianwsul.common.utils.toBase64
 data class UserData(
         val email: String = "",
         val name: String = "",
-        val photoUrl: String? = null
+        val photoUrl: String? = null,
 ) : Parcelable {
 
     companion object {
 
-        fun getKey(email: String) = UserKey(email.trim { it <= ' ' }
-                .toLowerCase()
-                .toBase64())
+        fun getKey(email: String) = UserKey(
+                email.trim { it <= ' ' }
+                        .toLowerCase()
+                        .toBase64()
+        )
     }
 }

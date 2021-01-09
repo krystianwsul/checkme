@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,14 +8,10 @@ import com.github.tamir7.contacts.Contacts
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.common.utils.singleOrEmpty
 import com.victorrendina.rxqueue2.QueueRelay
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -165,7 +160,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                                 .find()
                                 .flatMap {
                                     it.emails.map { email ->
-                                        Contact(it.displayName, email.address, it.photoUri, false)
+                                        Contact(it.displayName, email.address, it.photoUri, null)
                                     }
                                 }
                     }
@@ -217,29 +212,23 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                 get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
                         .firstOrError()
                         .map {
-                            Log.e("asdf", "magic snapshot")
-                            if (it.exists()) {
-                                Found(UserKey(it.key), it.getValue(UserWrapper::class.java)!!)
-                            } else {
+                            if (it.exists())
+                                Found(it.getValue(UserWrapper::class.java)!!)
+                            else
                                 Error(R.string.userNotFound, None)
-                            }
                         }!!
         }
 
         @Parcelize
-        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : SearchState() {
+        data class Found(val userWrapper: UserWrapper) : SearchState() {
 
             override val viewState
                 get() =
-                    userWrapper.userData.run { ViewState.Loaded(listOf(Contact(name, email, photoUrl, true))) }
+                    userWrapper.userData.run { ViewState.Loaded(listOf(Contact(name, email, photoUrl, userWrapper))) }
 
             override fun processViewAction(viewAction: ViewAction): SearchState? {
                 return when (viewAction) {
                     is ViewAction.Search -> Loading(viewAction.email)
-                    ViewAction.AddFriend -> {
-                        DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
-                        this
-                    }
                     else -> super.processViewAction(viewAction)
                 }
             }
@@ -259,7 +248,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             val displayName: String,
             val email: String,
             val photoUri: String?,
-            val isUser: Boolean,
+            val userWrapper: UserWrapper?,
     ) : Parcelable
 
     sealed class ViewState {
@@ -278,7 +267,5 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         data class Permissions(val granted: Boolean) : ViewAction()
 
         data class Search(val email: String) : ViewAction()
-
-        object AddFriend : ViewAction()
     }
 }

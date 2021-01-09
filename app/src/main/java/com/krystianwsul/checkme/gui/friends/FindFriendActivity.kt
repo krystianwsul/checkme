@@ -19,7 +19,10 @@ import com.jakewharton.rxbinding4.widget.editorActionEvents
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -155,16 +158,20 @@ class FindFriendActivity : NavBarActivity() {
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
             holder.binding.apply {
-                getItem(position).apply {
+                getItem(position).let { contact ->
                     root.setOnClickListener {
-                        viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.AddFriend)
-                        finish()
+                        if (contact.userWrapper != null) {
+                            DomainFactory.instance.addFriend(SaveService.Source.GUI, contact.userWrapper)
+                            finish()
+                        } else {
+                            // todo friend send invite
+                        }
                     }
 
-                    rowListAvatarImage.loadPhoto(photoUri)
+                    rowListAvatarImage.loadPhoto(contact.photoUri)
 
-                    rowListAvatarName.text = displayName
-                    rowListAvatarDetails.text = email
+                    rowListAvatarName.text = contact.displayName
+                    rowListAvatarDetails.text = contact.email
 
                     rowListAvatarChildren.isVisible = false
 

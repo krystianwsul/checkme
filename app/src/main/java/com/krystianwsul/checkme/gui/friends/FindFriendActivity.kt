@@ -134,7 +134,11 @@ class FindFriendActivity : NavBarActivity() {
     }
 
     private fun startSearch() {
-        viewModel.startSearch(binding.findFriendEmail.text.toString())
+        binding.findFriendEmail
+                .text
+                .toString()
+                .takeIf { it.isNotEmpty() }
+                ?.let { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Search(it)) }
     }
 
     private inner class Adapter : ListAdapter<Item, Holder>(
@@ -156,7 +160,7 @@ class FindFriendActivity : NavBarActivity() {
                         .userData
                         .apply {
                             root.setOnClickListener {
-                                viewModel.addFriend()
+                                viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.AddFriend)
                                 finish()
                             }
 

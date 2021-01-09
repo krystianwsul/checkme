@@ -6,16 +6,19 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.github.tamir7.contacts.Contacts
+import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.addFriend
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.RxQueue
+import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.UserKey
+import com.victorrendina.rxqueue2.QueueRelay
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -34,36 +37,33 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val clearedDisposable = CompositeDisposable()
 
-    private val stateQueue = RxQueue<SearchState>(savedStateHandle[KEY_STATE] ?: SearchState.None)
+    private val stateRelay =
+            BehaviorRelay.createDefault<SearchState>(savedStateHandle[KEY_STATE] ?: SearchState.None)
 
-    private var state
-        get() = stateQueue.value // todo friend need getter?
-        private set(value) {
-            stateQueue.accept(value)
-        }
-
-    private val stateObservable = stateQueue.share()!!
-
-    val viewStateObservable = stateObservable.map { it.viewState }.distinctUntilChanged()!!
+    private val viewStateRelay = QueueRelay.create<ViewState>()
 
     init {
-        clearedDisposable += stateObservable.subscribe { savedStateHandle[KEY_STATE] = it }
-
-        stateObservable.switchMapSingle { it.nextStateSingle }
-                .subscribe(stateQueue::accept)
+        stateRelay.map { it.viewState }
+                .distinctUntilChanged()
+                .subscribe(viewStateRelay::accept)
                 .addTo(clearedDisposable)
     }
 
-    fun startSearch(email: String) {
-        if (email.isEmpty()) return
+    val viewStateObservable = viewStateRelay.toV3()
 
-        state = SearchState.Loading(email)
-    }
+    val viewActionRelay = PublishRelay.create<ViewAction>()!!
 
-    fun addFriend() {
-        (state as SearchState.Found).apply {
-            DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
-        }
+    init {
+        clearedDisposable += stateRelay.subscribe { savedStateHandle[KEY_STATE] = it }
+
+        stateRelay.switchMapSingle { it.nextStateSingle }
+                .subscribe(stateRelay::accept)
+                .addTo(clearedDisposable)
+
+        stateRelay.switchMapSingle { viewActionRelay.firstOrError().map { viewAction -> it to viewAction } }
+                .map { (state, viewAction) -> state.processViewAction(viewAction) }
+                .subscribe(stateRelay::accept)
+                .addTo(clearedDisposable)
     }
 
     fun fetchContacts() {
@@ -75,18 +75,18 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                     .also {
                         val y = ExactTimeStamp.Local.now
 
-                        Log.e("asdf", "magic contacts time: " + (y.long - x.long))
+                        //Log.e("asdf", "magic contacts time: " + (y.long - x.long))
                     }
         }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy { it.forEach { Log.e("asdf", "magic $it") } }
+                .subscribeBy {
+                    //it.forEach { Log.e("asdf", "magic $it") }
+                }
                 .addTo(clearedDisposable)
     }
 
-    override fun onCleared() {
-        clearedDisposable.dispose()
-    }
+    override fun onCleared() = clearedDisposable.dispose()
 
     private sealed class ContactsState : Parcelable {
 
@@ -109,10 +109,19 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         open val nextStateSingle: Single<SearchState> = Single.never()
 
+        open fun processViewAction(viewAction: ViewAction): SearchState = throw UnsupportedOperationException()
+
         @Parcelize
         object None : SearchState() {
 
             override val viewState get() = ViewState.None
+
+            override fun processViewAction(viewAction: ViewAction): SearchState {
+                return when (viewAction) {
+                    is ViewAction.Search -> Loading(viewAction.email)
+                    else -> super.processViewAction(viewAction)
+                }
+            }
         }
 
         @Parcelize
@@ -141,6 +150,16 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : SearchState() {
 
             override val viewState get() = ViewState.List(userKey, userWrapper)
+
+            override fun processViewAction(viewAction: ViewAction): SearchState {
+                return when (viewAction) {
+                    is ViewAction.Search -> Loading(viewAction.email)
+                    ViewAction.AddFriend -> {
+                        DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
+                        this
+                    }
+                }
+            }
         }
 
         @Parcelize
@@ -164,5 +183,12 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         data class List(val userKey: UserKey, val userWrapper: UserWrapper) : ViewState()
 
         data class Error(@StringRes val stringRes: Int) : ViewState()
+    }
+
+    sealed class ViewAction {
+
+        data class Search(val email: String) : ViewAction()
+
+        object AddFriend : ViewAction()
     }
 }

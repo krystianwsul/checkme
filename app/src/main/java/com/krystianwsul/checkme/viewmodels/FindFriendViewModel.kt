@@ -37,8 +37,9 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val clearedDisposable = CompositeDisposable()
 
-    private val stateRelay =
-            BehaviorRelay.createDefault<SearchState>(savedStateHandle[KEY_STATE] ?: SearchState.None)
+    private val stateRelay = BehaviorRelay.createDefault(
+            savedStateHandle[KEY_STATE] ?: State(ContactsState.Permissions, SearchState.None)
+    )
 
     private val viewStateRelay = QueueRelay.create<ViewState>()
 
@@ -101,6 +102,16 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         @Parcelize
         data class Loaded(val contacts: List<Contact>) : ContactsState()
+    }
+
+    @Parcelize
+    private data class State(val contactsState: ContactsState, val searchState: SearchState) : Parcelable {
+
+        val viewState get() = searchState.viewState
+
+        val nextStateSingle get() = searchState.nextStateSingle.map { State(contactsState, it) }!!
+
+        fun processViewAction(viewAction: ViewAction) = State(contactsState, searchState.processViewAction(viewAction))
     }
 
     private sealed class SearchState : Parcelable {

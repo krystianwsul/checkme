@@ -183,16 +183,29 @@ class TreeViewAdapter<T : TreeHolder>(
         }
     }
 
+    private val attachedHolders = mutableSetOf<TreeHolder>()
+    private var recyclerAttached = false
+
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
-            @Suppress("UNCHECKED_CAST")
-            treeModelAdapter.onViewAttachedToWindow(holder as T)
+        check(recyclerAttached)
+
+        if (holder !is TreeHolder) return
+
+        check(holder !in attachedHolders)
+
+        attachedHolders += holder
+        holder.startRx()
     }
 
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
-            @Suppress("UNCHECKED_CAST")
-            treeModelAdapter.onViewDetachedFromWindow(holder as T)
+        check(recyclerAttached)
+
+        if (holder !is TreeHolder) return
+
+        check(holder in attachedHolders)
+
+        holder.stopRx()
+        attachedHolders -= holder
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -200,6 +213,10 @@ class TreeViewAdapter<T : TreeHolder>(
     }
 
     fun onRecyclerAttachedToWindow() {
+        check(!recyclerAttached)
+
+        recyclerAttached = true
+
         normalizeRelay.switchMap {
             treeNodeCollection!!.nodesObservable
                     .firstOrError()
@@ -213,10 +230,18 @@ class TreeViewAdapter<T : TreeHolder>(
         }
                 .subscribe(normalizedObservable::accept)
                 .addTo(recyclerAttachedToWindowDisposable)
+
+        attachedHolders.forEach { it.startRx() }
     }
 
     fun onRecyclerDetachedFromWindow() {
+        check(recyclerAttached)
+
+        attachedHolders.forEach { it.stopRx() }
+
         recyclerAttachedToWindowDisposable.clear()
+
+        recyclerAttached = false
     }
 
     override fun getItemViewType(position: Int): Int {

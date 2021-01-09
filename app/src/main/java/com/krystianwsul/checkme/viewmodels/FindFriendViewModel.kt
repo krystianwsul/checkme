@@ -149,7 +149,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         @Parcelize
         data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : SearchState() {
 
-            override val viewState get() = ViewState.List(userKey, userWrapper)
+            override val viewState get() = userWrapper.userData.run { ViewState.Loaded(listOf(Contact(name, email, photoUrl))) }
 
             override fun processViewAction(viewAction: ViewAction): SearchState {
                 return when (viewAction) {
@@ -180,7 +180,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         object Loading : ViewState()
 
-        data class List(val userKey: UserKey, val userWrapper: UserWrapper) : ViewState()
+        data class Loaded(val contacts: List<Contact>) : ViewState()
 
         data class Error(@StringRes val stringRes: Int) : ViewState()
     }

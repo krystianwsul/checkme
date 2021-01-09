@@ -35,13 +35,15 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val stateQueue = RxQueue<State>(savedStateHandle[KEY_STATE] ?: State.None)
 
-    var state
-        get() = stateQueue.value
+    private var state
+        get() = stateQueue.value // todo friend need getter?
         private set(value) {
             stateQueue.accept(value)
         }
 
-    val stateObservable = stateQueue.distinctUntilChanged().share()!! // todo friend separate ViewState class
+    private val stateObservable = stateQueue.share()!! // todo friend separate ViewState class
+
+    val viewStateObservable = stateObservable.map { it.viewState }.distinctUntilChanged()!!
 
     init {
         clearedDisposable += stateObservable.subscribe { savedStateHandle[KEY_STATE] = it }
@@ -81,10 +83,15 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     sealed class State : Parcelable {
 
+        abstract val viewState: ViewState
+
         open val nextStateSingle: Single<State> = Single.never()
 
         @Parcelize
-        object None : State()
+        object None : State() {
+
+            override val viewState get() = ViewState.None
+        }
 
         @Parcelize
         data class Loading(val email: String) : State() {
@@ -92,6 +99,8 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             init {
                 check(email.isNotEmpty())
             }
+
+            override val viewState get() = ViewState.Loading
 
             override val nextStateSingle
                 get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
@@ -107,14 +116,30 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
 
         @Parcelize
-        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : State()
+        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : State() {
+
+            override val viewState get() = ViewState.List(userKey, userWrapper)
+        }
 
         @Parcelize
-        data class Error(@StringRes val stringRes: Int, private val nextState: State) : State() {
+        data class Error(@StringRes private val stringRes: Int, private val nextState: State) : State() {
+
+            override val viewState get() = ViewState.Error(stringRes)
 
             override val nextStateSingle get() = Single.just(nextState)!!
         }
     }
 
     data class Contact(val displayName: String, val email: String, val photoUri: String?)
+
+    sealed class ViewState {
+
+        object None : ViewState() // todo friends remove once contacts are added
+
+        object Loading : ViewState()
+
+        data class List(val userKey: UserKey, val userWrapper: UserWrapper) : ViewState()
+
+        data class Error(@StringRes val stringRes: Int) : ViewState()
+    }
 }

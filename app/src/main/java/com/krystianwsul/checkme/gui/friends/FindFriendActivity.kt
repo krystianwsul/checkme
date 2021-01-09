@@ -96,29 +96,29 @@ class FindFriendActivity : NavBarActivity() {
                 .subscribe { viewModel.fetchContacts() }
                 .addTo(createDisposable)
 
-        viewModel.stateObservable
-                .subscribe { updateLayout(it) }
+        viewModel.viewStateObservable
+                .subscribe(::updateLayout)
                 .addTo(createDisposable)
     }
 
-    private fun updateLayout(state: FindFriendViewModel.State) {
+    private fun updateLayout(state: FindFriendViewModel.ViewState) {
         val hide = mutableListOf<View>()
         val show = mutableListOf<View>()
 
         when (state) {
-            FindFriendViewModel.State.None -> {
+            FindFriendViewModel.ViewState.None -> {
                 binding.findFriendEmail.isEnabled = true
 
                 hide += binding.findFriendRecycler
                 hide += binding.findFriendProgress
             }
-            is FindFriendViewModel.State.Loading -> {
+            is FindFriendViewModel.ViewState.Loading -> {
                 binding.findFriendEmail.isEnabled = false
 
                 hide += binding.findFriendRecycler
                 show += binding.findFriendProgress
             }
-            is FindFriendViewModel.State.Found -> {
+            is FindFriendViewModel.ViewState.List -> {
                 binding.findFriendEmail.isEnabled = true
 
                 show += binding.findFriendRecycler
@@ -126,7 +126,7 @@ class FindFriendActivity : NavBarActivity() {
 
                 adapter.submitList(listOf(Item(state)))
             }
-            is FindFriendViewModel.State.Error ->
+            is FindFriendViewModel.ViewState.Error ->
                 Snackbar.make(binding.root, state.stringRes, Snackbar.LENGTH_SHORT).show()
         }.ignore()
 
@@ -175,5 +175,5 @@ class FindFriendActivity : NavBarActivity() {
 
     private class Holder(val binding: RowListAvatarBinding) : RecyclerView.ViewHolder(binding.root)
 
-    private data class Item(val state: FindFriendViewModel.State.Found)
+    private data class Item(val state: FindFriendViewModel.ViewState.List)
 }

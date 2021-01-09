@@ -1,12 +1,11 @@
 package com.krystianwsul.treeadapter
 
-import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import io.reactivex.rxjava3.core.Observable
 import kotlin.math.ceil
 import kotlin.math.min
 
-class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
+class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
     private val treeNodesRelay = BehaviorRelay.create<List<TreeNode<T>>>()
 

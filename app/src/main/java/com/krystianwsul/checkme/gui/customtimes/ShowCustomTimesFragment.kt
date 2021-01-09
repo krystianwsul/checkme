@@ -234,7 +234,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                viewCreatedDisposable
         )
 
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

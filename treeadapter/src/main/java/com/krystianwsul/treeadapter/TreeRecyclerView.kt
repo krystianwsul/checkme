@@ -19,13 +19,19 @@ class TreeRecyclerView : RecyclerView {
         super.setAdapter(adapter)
 
         this.adapter = adapter
+
+        if (isAttachedToWindow) adapter.onRecyclerAttachedToWindow()
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+
+        adapter?.onRecyclerAttachedToWindow()
     }
 
     override fun onDetachedFromWindow() {
+        adapter?.onRecyclerDetachedFromWindow()
+
         super.onDetachedFromWindow()
     }
 }

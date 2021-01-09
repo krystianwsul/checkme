@@ -2,7 +2,7 @@ package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
 
-interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
+interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     val itemViewType: Int
 

@@ -1,8 +1,6 @@
 package com.krystianwsul.treeadapter
 
-import androidx.recyclerview.widget.RecyclerView
-
-interface NodeContainer<T : RecyclerView.ViewHolder> {
+interface NodeContainer<T : TreeHolder> {
 
     val isExpanded: Boolean
 

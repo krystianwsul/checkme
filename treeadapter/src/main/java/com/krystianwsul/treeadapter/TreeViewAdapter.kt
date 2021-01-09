@@ -15,13 +15,11 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class TreeViewAdapter<T : RecyclerView.ViewHolder>(
+class TreeViewAdapter<T : TreeHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val paddingData: PaddingData,
-        private val compositeDisposable: CompositeDisposable,
         initialFilterCriteria: FilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
@@ -51,20 +49,9 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private val normalizeRelay = BehaviorRelay.create<Unit>()
 
-    private val normalizedObservable = normalizeRelay.switchMap {
-        treeNodeCollection!!.nodesObservable
-                .firstOrError()
-                .flatMapObservable {
-                    Observable.fromCallable { treeNodeCollection!!.normalize() }
-                            .subscribeOn(Schedulers.computation())
-                            .map { true }
-                            .startWithItem(false)
-                            .observeOn(AndroidSchedulers.mainThread())
-                }
-    }
-            .startWithItem(false)
-            .replay(1)
-            .apply { compositeDisposable += connect() }
+    private val recyclerAttachedToWindowDisposable = CompositeDisposable()
+
+    private val normalizedObservable = BehaviorRelay.createDefault(false)
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection = treeNodeCollection
@@ -212,6 +199,26 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         check(recyclerView is TreeRecyclerView)
     }
 
+    fun onRecyclerAttachedToWindow() {
+        normalizeRelay.switchMap {
+            treeNodeCollection!!.nodesObservable
+                    .firstOrError()
+                    .flatMapObservable {
+                        Observable.fromCallable { treeNodeCollection!!.normalize() }
+                                .subscribeOn(Schedulers.computation())
+                                .map { true }
+                                .startWithItem(false)
+                                .observeOn(AndroidSchedulers.mainThread())
+                    }
+        }
+                .subscribe(normalizedObservable::accept)
+                .addTo(recyclerAttachedToWindowDisposable)
+    }
+
+    fun onRecyclerDetachedFromWindow() {
+        recyclerAttachedToWindowDisposable.clear()
+    }
+
     override fun getItemViewType(position: Int): Int {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
@@ -244,10 +251,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             this.filterCriteria = filterCriteria
         } else {
             updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
-                    .subscribe {
-                        updateDisplayedNodes { this.filterCriteria = filterCriteria }
-                    }
-                    .addTo(compositeDisposable)
+                    .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
+                    .addTo(recyclerAttachedToWindowDisposable)
         }
     }
 

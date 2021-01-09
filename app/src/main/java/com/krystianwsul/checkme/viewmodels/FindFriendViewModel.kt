@@ -33,7 +33,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val clearedDisposable = CompositeDisposable()
 
-    private val stateQueue = RxQueue<State>(savedStateHandle[KEY_STATE] ?: State.None)
+    private val stateQueue = RxQueue<SearchState>(savedStateHandle[KEY_STATE] ?: SearchState.None)
 
     private var state
         get() = stateQueue.value // todo friend need getter?
@@ -41,7 +41,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             stateQueue.accept(value)
         }
 
-    private val stateObservable = stateQueue.share()!! // todo friend separate ViewState class
+    private val stateObservable = stateQueue.share()!!
 
     val viewStateObservable = stateObservable.map { it.viewState }.distinctUntilChanged()!!
 
@@ -56,11 +56,11 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     fun startSearch(email: String) {
         if (email.isEmpty()) return
 
-        state = State.Loading(email)
+        state = SearchState.Loading(email)
     }
 
     fun addFriend() {
-        (state as State.Found).apply {
+        (state as SearchState.Found).apply {
             DomainFactory.instance.addFriend(SaveService.Source.GUI, userKey, userWrapper)
         }
     }
@@ -81,20 +81,20 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         clearedDisposable.dispose()
     }
 
-    sealed class State : Parcelable {
+    private sealed class SearchState : Parcelable {
 
         abstract val viewState: ViewState
 
-        open val nextStateSingle: Single<State> = Single.never()
+        open val nextStateSingle: Single<SearchState> = Single.never()
 
         @Parcelize
-        object None : State() {
+        object None : SearchState() {
 
             override val viewState get() = ViewState.None
         }
 
         @Parcelize
-        data class Loading(val email: String) : State() {
+        data class Loading(val email: String) : SearchState() {
 
             init {
                 check(email.isNotEmpty())
@@ -116,13 +116,13 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
 
         @Parcelize
-        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : State() {
+        data class Found(val userKey: UserKey, val userWrapper: UserWrapper) : SearchState() {
 
             override val viewState get() = ViewState.List(userKey, userWrapper)
         }
 
         @Parcelize
-        data class Error(@StringRes private val stringRes: Int, private val nextState: State) : State() {
+        data class Error(@StringRes private val stringRes: Int, private val nextState: SearchState) : SearchState() {
 
             override val viewState get() = ViewState.Error(stringRes)
 

@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.RxQueue
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -67,9 +68,15 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     fun fetchContacts() {
         Single.fromCallable {
+            val x = ExactTimeStamp.Local.now
             Contacts.getQuery()
                     .find()
                     .flatMap { it.emails.map { email -> Contact(it.displayName, email.address, it.photoUri) } }
+                    .also {
+                        val y = ExactTimeStamp.Local.now
+
+                        Log.e("asdf", "magic contacts time: " + (y.long - x.long))
+                    }
         }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -79,6 +86,21 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     override fun onCleared() {
         clearedDisposable.dispose()
+    }
+
+    private sealed class ContactsState : Parcelable {
+
+        @Parcelize
+        object Permissions : ContactsState()
+
+        @Parcelize
+        object Denied : ContactsState()
+
+        @Parcelize
+        object Loading : ContactsState()
+
+        @Parcelize
+        data class Loaded(val contacts: List<Contact>) : ContactsState()
     }
 
     private sealed class SearchState : Parcelable {
@@ -130,7 +152,8 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
     }
 
-    data class Contact(val displayName: String, val email: String, val photoUri: String?)
+    @Parcelize
+    data class Contact(val displayName: String, val email: String, val photoUri: String?) : Parcelable
 
     sealed class ViewState {
 

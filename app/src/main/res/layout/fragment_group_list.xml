@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.krystianwsul.treeadapter.TreeRecyclerView
         android:id="@+id/groupListRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

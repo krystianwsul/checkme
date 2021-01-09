@@ -208,6 +208,10 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             treeModelAdapter.onViewDetachedFromWindow(holder as T)
     }
 
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        check(recyclerView is TreeRecyclerView)
+    }
+
     override fun getItemViewType(position: Int): Int {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()

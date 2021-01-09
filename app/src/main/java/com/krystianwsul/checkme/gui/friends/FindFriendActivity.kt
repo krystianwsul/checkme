@@ -90,12 +90,6 @@ class FindFriendActivity : NavBarActivity() {
             it.adapter = adapter
         }
 
-        RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
-                .toV3()
-                .filter { it }
-                .subscribe { viewModel.fetchContacts() }
-                .addTo(createDisposable)
-
         viewModel.viewStateObservable
                 .subscribe(::updateLayout)
                 .addTo(createDisposable)
@@ -105,13 +99,13 @@ class FindFriendActivity : NavBarActivity() {
         val hide = mutableListOf<View>()
         val show = mutableListOf<View>()
 
+        @Suppress("IMPLICIT_CAST_TO_ANY")
         when (state) {
-            FindFriendViewModel.ViewState.None -> {
-                binding.findFriendEmail.isEnabled = true
-
-                hide += binding.findFriendRecycler
-                hide += binding.findFriendProgress
-            }
+            FindFriendViewModel.ViewState.Permissions ->
+                RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
+                        .toV3()
+                        .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Permissions(it)) }
+                        .addTo(createDisposable)
             is FindFriendViewModel.ViewState.Loading -> {
                 binding.findFriendEmail.isEnabled = false
 

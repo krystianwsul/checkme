@@ -76,7 +76,7 @@ class Task<T : ProjectType>(
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
-    private val intervals by intervalsProperty
+    val intervals by intervalsProperty
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {
         intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
@@ -979,8 +979,6 @@ class Task<T : ProjectType>(
             )
         }
     }
-
-    fun getMostRecentInterval() = intervals.last()
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 

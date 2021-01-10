@@ -51,6 +51,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     if (debugMode) {
         collapseText += "\n\nproject key: " + taskKey.projectKey
         collapseText += "\ntask id: " + taskKey.taskId
+        collapseText += "\nstartTime: " + task.startExactTimeStampOffset
     }
 
     ShowTaskViewModel.Data(

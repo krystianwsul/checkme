@@ -61,7 +61,7 @@ abstract class Project<T : ProjectType>(
         tasks.forEach {
             it.existingInstances
                     .values
-                    .forEach { it.addVirtualParents() }
+                    .forEach { it.addToParentInstanceHierarchyContainer() }
         }
     }
 

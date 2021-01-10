@@ -218,7 +218,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun tearDownParentInstanceData() {
         if (parentInstanceProperty.isInitialized()) {
-            removeVirtualParents()
+            removeFromParentInstanceHierarchyContainer()
 
             parentInstanceData?.apply {
                 instance.doneOffsetProperty.removeCallback(doneCallback)
@@ -231,7 +231,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private fun invalidateParentInstanceData() {
         tearDownParentInstanceData()
 
-        addVirtualParents()
+        addToParentInstanceHierarchyContainer()
     }
 
     fun exists() = (data is Data.Real)
@@ -435,7 +435,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     task.createRemoteInstanceRecord(this)
             )
 
-            addVirtualParents()
+            addToParentInstanceHierarchyContainer()
         }
 
         return data as Data.Real<T>
@@ -527,32 +527,30 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         invalidateParentInstanceData()
     }
 
-    private var virtualParentsAdded = false
+    private var addedToParentInstanceHierarchyContainer = false
 
-    fun addVirtualParents() {
-        if (!virtualParentsAdded && exists()) {
+    fun addToParentInstanceHierarchyContainer() {
+        if (!addedToParentInstanceHierarchyContainer && exists()) {
             parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.addChildInstance(this)
-                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).addVirtualParents()
             }
         }
 
-        virtualParentsAdded = true
+        addedToParentInstanceHierarchyContainer = true
     }
 
-    private fun removeVirtualParents() {
-        if (virtualParentsAdded && parentInstanceProperty.isInitialized() && exists()) {
+    private fun removeFromParentInstanceHierarchyContainer() {
+        if (addedToParentInstanceHierarchyContainer && parentInstanceProperty.isInitialized() && exists()) {
             parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.removeChildInstance(this)
-                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).removeVirtualParents()
             }
         }
 
-        virtualParentsAdded = false
+        addedToParentInstanceHierarchyContainer = false
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

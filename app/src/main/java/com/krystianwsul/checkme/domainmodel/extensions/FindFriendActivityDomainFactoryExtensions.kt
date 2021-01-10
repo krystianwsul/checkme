@@ -7,14 +7,20 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 
-fun DomainFactory.addFriend(source: SaveService.Source, userWrapper: UserWrapper) = syncOnDomain {
-    MyCrashlytics.log("DomainFactory.addFriend")
+fun DomainFactory.tryAddFriend(source: SaveService.Source, userWrapper: UserWrapper): Boolean = syncOnDomain {
+    MyCrashlytics.log("DomainFactory.tryAddFriend")
     check(!myUserFactory.isSaved)
 
     val userKey = UserData.getKey(userWrapper.userData.email)
 
-    myUserFactory.user.addFriend(userKey)
-    friendsFactory.addFriend(userKey, userWrapper)
+    if (myUserFactory.user.friends.contains(userKey)) {
+        false
+    } else {
+        myUserFactory.user.addFriend(userKey)
+        friendsFactory.addFriend(userKey, userWrapper)
 
-    save(0, source)
+        save(0, source)
+
+        true
+    }
 }

@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.addFriend
+import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -161,8 +161,23 @@ class FindFriendActivity : NavBarActivity() {
                 getItem(position).let { contact ->
                     root.setOnClickListener {
                         if (contact.userWrapper != null) {
-                            DomainFactory.instance.addFriend(SaveService.Source.GUI, contact.userWrapper)
-                            finish()
+                            val added = DomainFactory.instance.tryAddFriend(SaveService.Source.GUI, contact.userWrapper)
+
+                            if (added) {
+                                setSnackbar { // this isn't working
+                                    it.showText(
+                                            "${contact.displayName} added as friend", // todo friends
+                                            Snackbar.LENGTH_SHORT
+                                    )
+                                }
+                                finish()
+                            } else {
+                                Snackbar.make(
+                                        binding.root,
+                                        "This e-mail address is already in your friends list.", // todo friends
+                                        Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
                         } else {
                             // todo friend send invite
                         }

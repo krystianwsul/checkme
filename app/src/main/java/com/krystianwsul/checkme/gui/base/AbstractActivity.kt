@@ -79,7 +79,7 @@ abstract class AbstractActivity : AppCompatActivity() {
                 anchor.addOneShotGlobalLayoutListener { it.show(this) }
             }
         }
-        snackbarData = null
+        snackbarData = null // shouldn't this be moved into `apply` or `addOneShotGlobalLayoutListener`?
 
         if (tickOnResume) resumeDisposable += tick("AbstractActivity.onResume")
     }

@@ -359,11 +359,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    private fun isVirtualParentInstance() = task.instanceHierarchyContainer
-            .getParentScheduleKeys()
-            .contains(scheduleKey)
-
-    private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
+    private fun isValidlyCreated() = exists() || matchesSchedule()
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
 

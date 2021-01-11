@@ -32,7 +32,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val viewStateRelay = QueueRelay.create<ViewState>() // todo friend this doesn't replay the last value!
 
     init {
-        stateRelay.map { it.viewState }
+        stateRelay.map { it.getViewState() }
                 .distinctUntilChanged()
                 .subscribe(viewStateRelay::accept)
                 .addTo(clearedDisposable)

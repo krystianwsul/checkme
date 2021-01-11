@@ -1,37 +1,36 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
-import com.krystianwsul.common.utils.singleOrEmpty
 import io.reactivex.rxjava3.kotlin.merge
 import kotlinx.parcelize.Parcelize
 
 data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : ViewModelState {
 
-    val viewState: FindFriendViewModel.ViewState
-        get() {
-            val contactsViewState = contactsState.viewState
-            val searchViewState = searchState.viewState
-            val viewStates = listOf(searchViewState, contactsViewState)
-
-            viewStates.filterIsInstance<FindFriendViewModel.ViewState.Error>()
-                    .singleOrEmpty()
-                    ?.let { return it }
-
-            viewStates.filterIsInstance<FindFriendViewModel.ViewState.Permissions>()
-                    .singleOrEmpty()
-                    ?.let { return it }
-
-            viewStates.filterIsInstance<FindFriendViewModel.ViewState.Loading>()
-                    .firstOrNull()
-                    ?.let { return it }
-
-            return viewStates.map { it as FindFriendViewModel.ViewState.Loaded }.let {
-                FindFriendViewModel.ViewState.Loaded(
-                        it.map { it.contacts }
-                                .flatten()
-                                .distinctBy { it.email }
-                )
-            }
+    fun getViewState(): FindFriendViewModel.ViewState {
+        val (searchLoading, userWrapper) = when (searchState) {
+            is SearchState.Initial -> false to null
+            is SearchState.Loading -> true to null
+            is SearchState.Found -> false to searchState.userWrapper
+            is SearchState.Error -> return FindFriendViewModel.ViewState.Error(searchState.stringRes)
         }
+
+        val (contactsLoading, contacts) = when (contactsState) {
+            is ContactsState.Initial -> return FindFriendViewModel.ViewState.Permissions
+            is ContactsState.Waiting -> false to listOf()
+            is ContactsState.Denied -> false to listOf()
+            is ContactsState.Loading -> true to listOf()
+            is ContactsState.Loaded -> false to contactsState.contacts
+        }
+
+        if (searchLoading && contactsLoading) return FindFriendViewModel.ViewState.Loading
+
+        val searchContact = userWrapper?.let {
+            FindFriendViewModel.Contact(it.userData.name, it.userData.email, it.userData.photoUrl, it)
+        }
+
+        return FindFriendViewModel.ViewState.Loaded(
+                (listOfNotNull(searchContact) + contacts).distinctBy { it.email }
+        )
+    }
 
     override val nextStateSingle = listOf(
             contactsState.nextStateSingle.map { FindFriendState(it, searchState) },
@@ -40,11 +39,17 @@ data class FindFriendState(val contactsState: ContactsState, val searchState: Se
             .merge()
             .firstOrError()!!
 
-    override fun toSerializableState() = searchState.toSerializableState()?.let {
-        SerializableState(contactsState.toSerializableState(), it)
+    override fun toSerializableState(): SerializableState? {
+        val contactsSerializableState = contactsState.toSerializableState()
+        val searchSerializableState = searchState.toSerializableState()
+
+        return if (contactsSerializableState != null && searchSerializableState != null)
+            SerializableState(contactsSerializableState, searchSerializableState)
+        else
+            null
     }
 
-    fun processViewAction(viewAction: FindFriendViewModel.ViewAction): FindFriendState {
+    fun processViewAction(viewAction: FindFriendViewModel.ViewAction): FindFriendState { // todo friend fix this before testing
         val nextContactsState = contactsState.processViewAction(viewAction)
         val nextSearchState = searchState.processViewAction(viewAction)
 

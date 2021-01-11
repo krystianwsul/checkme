@@ -10,8 +10,6 @@ import kotlinx.parcelize.Parcelize
 
 sealed class SearchState : ViewModelState {
 
-    abstract val viewState: FindFriendViewModel.ViewState
-
     override val nextStateSingle: Single<SearchState> = Single.never()
 
     abstract override fun toSerializableState(): SerializableState?
@@ -19,8 +17,6 @@ sealed class SearchState : ViewModelState {
     open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? = null
 
     object Initial : SearchState() { // todo friend merge with Found
-
-        override val viewState get() = FindFriendViewModel.ViewState.Loaded(listOf())
 
         override fun toSerializableState() = SerializableState.Idle(null)
 
@@ -38,8 +34,6 @@ sealed class SearchState : ViewModelState {
             check(email.isNotEmpty())
         }
 
-        override val viewState get() = FindFriendViewModel.ViewState.Loading
-
         override fun toSerializableState() = SerializableState.Loading(email)
 
         override val nextStateSingle = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
@@ -54,10 +48,6 @@ sealed class SearchState : ViewModelState {
 
     data class Found(val userWrapper: UserWrapper) : SearchState() {
 
-        override val viewState
-            get() =
-                userWrapper.userData.run { FindFriendViewModel.ViewState.Loaded(listOf(FindFriendViewModel.Contact(name, email, photoUrl, userWrapper))) }
-
         override fun toSerializableState() = SerializableState.Idle(userWrapper)
 
         override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? {
@@ -68,9 +58,7 @@ sealed class SearchState : ViewModelState {
         }
     }
 
-    data class Error(@StringRes private val stringRes: Int, private val nextState: SearchState) : SearchState() {
-
-        override val viewState get() = FindFriendViewModel.ViewState.Error(stringRes)
+    data class Error(@StringRes val stringRes: Int, private val nextState: SearchState) : SearchState() {
 
         override fun toSerializableState(): SerializableState? = null
 

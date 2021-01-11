@@ -8,19 +8,17 @@ import kotlinx.parcelize.Parcelize
 
 sealed class ContactsState : ViewModelState {
 
-    abstract val viewState: FindFriendViewModel.ViewState
+    override val nextStateSingle: Single<out ContactsState> = Single.never()
 
-    override val nextStateSingle: Single<ContactsState> = Single.never()
-
-    abstract override fun toSerializableState(): SerializableState
+    abstract override fun toSerializableState(): SerializableState?
 
     open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState? = null
 
     object Initial : ContactsState() {
 
-        override val viewState get() = FindFriendViewModel.ViewState.Permissions
+        override val nextStateSingle = Single.just(Waiting)!!
 
-        override fun toSerializableState() = SerializableState.Initial
+        override fun toSerializableState(): SerializableState? = null
 
         override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState? {
             return when (viewAction) {
@@ -30,16 +28,17 @@ sealed class ContactsState : ViewModelState {
         }
     }
 
-    object Denied : ContactsState() {
+    object Waiting : ContactsState() {
 
-        override val viewState get() = FindFriendViewModel.ViewState.Loaded(listOf())
+        override fun toSerializableState() = SerializableState.Initial
+    }
+
+    object Denied : ContactsState() {
 
         override fun toSerializableState() = SerializableState.Denied
     }
 
     object Loading : ContactsState() {
-
-        override val viewState get() = FindFriendViewModel.ViewState.Loading
 
         override fun toSerializableState() = SerializableState.Loading
 
@@ -54,13 +53,10 @@ sealed class ContactsState : ViewModelState {
         }
                 .subscribeOn(Schedulers.io())
                 .map(ContactsState::Loaded)
-                .cast(ContactsState::class.java)
                 .observeOn(AndroidSchedulers.mainThread())!!
     }
 
     data class Loaded(val contacts: List<FindFriendViewModel.Contact>) : ContactsState() {
-
-        override val viewState get() = FindFriendViewModel.ViewState.Loaded(contacts)
 
         override fun toSerializableState() = SerializableState.Loaded(contacts)
     }

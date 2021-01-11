@@ -210,7 +210,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),
-                viewCreatedDisposable,
                 filterCriteria
         )
 

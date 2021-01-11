@@ -126,56 +126,57 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private val parentInstanceProperty = invalidatableLazy {
         val parentInstance = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
-            is ParentState.Parent -> {
-                val parentInstance = task.project.getInstance(parentState.parentInstanceKey)
-
-                parentInstance
-            }
+            is ParentState.Parent -> task.project.getInstance(parentState.parentInstanceKey)
             ParentState.Unset -> {
                 /**
-                 * 1. timestamp should be no oldest than the task start
-                 * 2. timestamp should be no newer than task end
-                 * 3. timestamp should be no newer than this instance's done
-                 * 4. barring all else, use task's most recent interval
+                 * The baseline here is getting the interval corresponding to the scheduleDateTime, as in
+                 * interval.start < scheduleDateTime, and interval.end > scheduleDateTime (if present).  But, since we
+                 * want changes in hierarchies to be retroactive, we remove the first condition, which leaves us with,
+                 * if (interval.end != null), interval.end >= child.scheduleDateTime.
                  *
-                 * So, assuming we can't mark the instance as done before its corresponding task is created, we can
-                 * change this to:
+                 * Then, we tack on that changes shouldn't be applied to child instances after they're done, so that
+                 * adds the condition that,
+                 * if (child.done != null), interval.start < child.done
                  *
-                 * 1. if done is set, get interval for that time.
-                 * 2. else, use most recent interval (also, add utility method for this in task)
+                 * -||- for parent.done
                  */
 
-                val interval = done?.let { task.getInterval(it) } ?: task.getMostRecentInterval()
+                val scheduleExactTimeStamp = scheduleDateTime.toLocalExactTimeStamp()
 
-                val parentTaskHierarchy = (interval.type as? Type.Child<T>)?.getHierarchyInterval(interval)?.taskHierarchy
-                val parentTask = parentTaskHierarchy?.parentTask
-
-                if (parentTask == null) {
-                    null
-                } else {
-                    /**
-                     * we also check if the parent task is done before all this went down, to prevent adding to finished
-                     * lists.  So, we should compare that "done" against when the interval started - as in, did the
-                     * interval first get added, or did the parent first get marked as done?
-                     *
-                     * This is already checked in `Instance.getChildInstances`, so the situation shouldn't come up.
-                     * Also, maybe the child instance should be isVisible = false instead.  Hence the error logging.
-                     *
-                     * The part about isValidlyCreatedHierarchy is also just a precaution.  Again, logging.
-                     */
-
-                    val parentInstance = parentTask.getInstance(scheduleDateTime)
-
-                    when {
-                        parentInstance.doneOffset?.let { it < parentTaskHierarchy.startExactTimeStampOffset } == true -> {
-                            ErrorLogger.instance.logException(ParentInstanceException("parent done. child instance: $this, parent instance: $parentInstance, parentInstance.doneOffset: ${parentInstance.doneOffset!!.details()}, taskHierarchy.start: ${parentTaskHierarchy.startExactTimeStampOffset.details()}"))
-                            null
+                val interval = task.intervals
+                        .reversed()
+                        .asSequence()
+                        .filter { interval ->
+                            interval.endExactTimeStampOffset?.let { it >= scheduleExactTimeStamp } != false
                         }
-                        !parentInstance.isValidlyCreatedHierarchy() -> {
-                            ErrorLogger.instance.logException(ParentInstanceException("parent invalidly created. child instance: $this, parent instance: $parentInstance"))
-                            null
+                        .filter { interval -> doneOffset?.let { interval.startExactTimeStampOffset < it } != false }
+                        .filter { interval ->
+                            when (val type = interval.type) {
+                                is Type.Child<T> -> {
+                                    val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
+                                    val parentTask = parentTaskHierarchy.parentTask
+                                    val parentInstance = parentTask.getInstance(scheduleDateTime)
+
+                                    parentInstance.doneOffset?.let {
+                                        interval.startExactTimeStampOffset < it
+                                    } != false
+                                }
+                                is Type.Schedule -> true
+                                is Type.NoSchedule<T> -> true // unexpected
+                            }
                         }
-                        else -> parentInstance
+                        .first()
+
+                when (val type = interval.type) {
+                    is Type.Child<T> -> {
+                        val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
+                        val parentTask = parentTaskHierarchy.parentTask
+                        parentTask.getInstance(scheduleDateTime)
+                    }
+                    is Type.Schedule<T> -> null
+                    is Type.NoSchedule<T> -> {
+                        ErrorLogger.instance.logException(ParentInstanceException("unexpected interval type. child instance: $this, interval $interval"))
+                        null
                     }
                 }
             }
@@ -217,7 +218,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private fun tearDownParentInstanceData() {
         if (parentInstanceProperty.isInitialized()) {
-            removeVirtualParents()
+            removeFromParentInstanceHierarchyContainer()
 
             parentInstanceData?.apply {
                 instance.doneOffsetProperty.removeCallback(doneCallback)
@@ -230,7 +231,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private fun invalidateParentInstanceData() {
         tearDownParentInstanceData()
 
-        addVirtualParents()
+        addToParentInstanceHierarchyContainer()
     }
 
     fun exists() = (data is Data.Real)
@@ -243,6 +244,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         val taskHierarchyChildInstances = task.childHierarchyIntervals
                 .asSequence()
+                /**
+                 * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
+                 * test fails if I remove it.
+                 */
                 .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
                     doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
                 }
@@ -354,13 +359,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
     }
 
-    private fun isVirtualParentInstance() = task.instanceHierarchyContainer
-            .getParentScheduleKeys()
-            .contains(scheduleKey)
-
-    private fun isValidlyCreatedHierarchy(): Boolean = parentInstance?.isValidlyCreatedHierarchy() ?: isValidlyCreated()
-
-    private fun isValidlyCreated() = exists() || matchesSchedule() || isVirtualParentInstance()
+    private fun isValidlyCreated() = exists() || matchesSchedule()
 
     override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
 
@@ -436,7 +435,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     task.createRemoteInstanceRecord(this)
             )
 
-            addVirtualParents()
+            addToParentInstanceHierarchyContainer()
         }
 
         return data as Data.Real<T>
@@ -528,32 +527,30 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         invalidateParentInstanceData()
     }
 
-    private var virtualParentsAdded = false
+    private var addedToParentInstanceHierarchyContainer = false
 
-    fun addVirtualParents() {
-        if (!virtualParentsAdded && exists()) {
+    fun addToParentInstanceHierarchyContainer() {
+        if (!addedToParentInstanceHierarchyContainer && exists()) {
             parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.addChildInstance(this)
-                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).addVirtualParents()
             }
         }
 
-        virtualParentsAdded = true
+        addedToParentInstanceHierarchyContainer = true
     }
 
-    private fun removeVirtualParents() {
-        if (virtualParentsAdded && parentInstanceProperty.isInitialized() && exists()) {
+    private fun removeFromParentInstanceHierarchyContainer() {
+        if (addedToParentInstanceHierarchyContainer && parentInstanceProperty.isInitialized() && exists()) {
             parentInstance?.let { parentInstance ->
                 val parentTask = parentInstance.task
 
                 parentTask.instanceHierarchyContainer.removeChildInstance(this)
-                parentTask.getInstance(task.project.getDateTime(parentInstance.scheduleKey)).removeVirtualParents()
             }
         }
 
-        virtualParentsAdded = false
+        addedToParentInstanceHierarchyContainer = false
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

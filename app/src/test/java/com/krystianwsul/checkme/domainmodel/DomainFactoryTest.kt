@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -353,5 +354,54 @@ class DomainFactoryTest {
                 }
 
         assertNull(instance.parentInstance)
+    }
+
+    @Test
+    fun testInvalidParentAfterJoiningTasks() {
+        val date = Date(2021, 1, 10)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        domainFactory.createScheduleRootTask(
+                SaveService.Source.SERVICE,
+                "childTask1",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
+                null,
+                null,
+                null,
+                null,
+                now,
+        )
+
+        domainFactory.createScheduleRootTask(
+                SaveService.Source.SERVICE,
+                "childTask1",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
+                null,
+                null,
+                null,
+                null,
+                now,
+        )
+
+        assertEquals(2, getTodayInstanceDatas(now).size)
+
+        val childInstanceKeys = getTodayInstanceDatas(now).map { it.instanceKey }
+
+        now += 2.hours // 3AM
+
+        domainFactory.createScheduleJoinRootTask(
+                SaveService.Source.SERVICE,
+                "parentTask",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(4, 0)))),
+                childInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) },
+                null,
+                null,
+                null,
+                true,
+                now
+        )
+
+        assertEquals(1, getTodayInstanceDatas(now).size)
+        assertEquals(2, getTodayInstanceDatas(now).single().children.size)
     }
 }

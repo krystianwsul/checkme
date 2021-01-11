@@ -28,8 +28,8 @@ class ExpandableMultilineHolder(override val baseAdapter: BaseAdapter, binding: 
     override val rowMarginStart = binding.rowListExpandableMultilineMargin
     override val rowSeparator = binding.rowListExpandableMultilineSeparator
 
-    override fun onViewAttachedToWindow() {
-        super<AbstractHolder>.onViewAttachedToWindow()
-        super<ExpandableHolder>.onViewAttachedToWindow()
+    override fun startRx() {
+        super<AbstractHolder>.startRx()
+        super<ExpandableHolder>.startRx()
     }
 }

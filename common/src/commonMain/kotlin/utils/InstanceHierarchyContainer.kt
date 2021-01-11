@@ -17,6 +17,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
 
         val childInstanceKeys =
                 parentScheduleKeyToChildInstanceKeys.getOrPut(parentInstanceKey.scheduleKey) { mutableSetOf() }
+        check(!childInstanceKeys.contains(childInstanceKey))
 
         childInstanceKeys += childInstanceKey
     }
@@ -50,8 +51,6 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
             check(it.parentInstance!!.instanceKey == parentInstanceKey)
         }
     }
-
-    fun getParentScheduleKeys(): Set<ScheduleKey> = parentScheduleKeyToChildInstanceKeys.keys
 
     private class ScheduleKeyNotFoundException(message: String) : Exception(message)
 }

@@ -254,7 +254,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                viewCreatedDisposable
         )
 
         private lateinit var projectNodes: MutableList<ProjectNode>

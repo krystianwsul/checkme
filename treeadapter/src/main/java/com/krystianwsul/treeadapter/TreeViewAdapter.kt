@@ -15,13 +15,11 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class TreeViewAdapter<T : RecyclerView.ViewHolder>(
+class TreeViewAdapter<T : TreeHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
         private val paddingData: PaddingData,
-        private val compositeDisposable: CompositeDisposable,
         initialFilterCriteria: FilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
@@ -51,20 +49,9 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     private val normalizeRelay = BehaviorRelay.create<Unit>()
 
-    private val normalizedObservable = normalizeRelay.switchMap {
-        treeNodeCollection!!.nodesObservable
-                .firstOrError()
-                .flatMapObservable {
-                    Observable.fromCallable { treeNodeCollection!!.normalize() }
-                            .subscribeOn(Schedulers.computation())
-                            .map { true }
-                            .startWithItem(false)
-                            .observeOn(AndroidSchedulers.mainThread())
-                }
-    }
-            .startWithItem(false)
-            .replay(1)
-            .apply { compositeDisposable += connect() }
+    private val recyclerAttachedToWindowDisposable = CompositeDisposable()
+
+    private val normalizedObservable = BehaviorRelay.createDefault(false)
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection = treeNodeCollection
@@ -196,16 +183,65 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         }
     }
 
+    private val attachedHolders = mutableSetOf<TreeHolder>()
+    private var recyclerAttached = false
+
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
-            @Suppress("UNCHECKED_CAST")
-            treeModelAdapter.onViewAttachedToWindow(holder as T)
+        check(recyclerAttached)
+
+        if (holder !is TreeHolder) return
+
+        check(holder !in attachedHolders)
+
+        attachedHolders += holder
+        holder.startRx()
     }
 
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
-            @Suppress("UNCHECKED_CAST")
-            treeModelAdapter.onViewDetachedFromWindow(holder as T)
+        check(recyclerAttached)
+
+        if (holder !is TreeHolder) return
+
+        check(holder in attachedHolders)
+
+        holder.stopRx()
+        attachedHolders -= holder
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        check(recyclerView is TreeRecyclerView)
+    }
+
+    fun onRecyclerAttachedToWindow() {
+        check(!recyclerAttached)
+
+        recyclerAttached = true
+
+        normalizeRelay.switchMap {
+            treeNodeCollection!!.nodesObservable
+                    .firstOrError()
+                    .flatMapObservable {
+                        Observable.fromCallable { treeNodeCollection!!.normalize() }
+                                .subscribeOn(Schedulers.computation())
+                                .map { true }
+                                .startWithItem(false)
+                                .observeOn(AndroidSchedulers.mainThread())
+                    }
+        }
+                .subscribe(normalizedObservable::accept)
+                .addTo(recyclerAttachedToWindowDisposable)
+
+        attachedHolders.forEach { it.startRx() }
+    }
+
+    fun onRecyclerDetachedFromWindow() {
+        check(recyclerAttached)
+
+        attachedHolders.forEach { it.stopRx() }
+
+        recyclerAttachedToWindowDisposable.clear()
+
+        recyclerAttached = false
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -240,10 +276,8 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
             this.filterCriteria = filterCriteria
         } else {
             updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
-                    .subscribe {
-                        updateDisplayedNodes { this.filterCriteria = filterCriteria }
-                    }
-                    .addTo(compositeDisposable)
+                    .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
+                    .addTo(recyclerAttachedToWindowDisposable)
         }
     }
 

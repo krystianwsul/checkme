@@ -61,7 +61,6 @@ class DomainFactoryRule : TestRule {
                 try {
                     base.evaluate()
                 } finally {
-
                     after()
                     afterClass()
                 }

@@ -76,7 +76,7 @@ class Task<T : ProjectType>(
     val parentTaskHierarchies by parentTaskHierarchiesProperty
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
-    private val intervals by intervalsProperty
+    val intervals by intervalsProperty
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {
         intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
@@ -284,19 +284,6 @@ class Task<T : ProjectType>(
         return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
-    // contains only generated, root instances
-    private fun getVirtualParentInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-    ): Sequence<Instance<out T>> {
-        return instanceHierarchyContainer.getParentScheduleKeys()
-                .map(project::getDateTime)
-                .asSequence()
-                .map { it to getInstance(it) }
-                .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
-                .filter { !it.exists() && it.isRootInstance() }
-    }
-
     // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
@@ -304,14 +291,11 @@ class Task<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
-        val virtualParentScheduleKeys = instanceHierarchyContainer.getParentScheduleKeys()
-
         return scheduleSequence.flatMap {
             throwIfInterrupted()
 
             it.asSequence().map { it.first }
                     .distinct()
-                    .filter { ScheduleKey(it) !in virtualParentScheduleKeys }
                     .map(::getInstance)
                     .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
         }
@@ -387,8 +371,6 @@ class Task<T : ProjectType>(
                         bySchedule
                 )
             }
-
-            instanceSequences += getVirtualParentInstances(startExactTimeStamp, endExactTimeStamp)
 
             instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 
@@ -979,8 +961,6 @@ class Task<T : ProjectType>(
             )
         }
     }
-
-    fun getMostRecentInterval() = intervals.last()
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 

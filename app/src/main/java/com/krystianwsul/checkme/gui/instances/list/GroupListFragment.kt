@@ -732,7 +732,7 @@ class GroupListFragment @JvmOverloads constructor(
                 treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
             }
         } else {
-            val groupAdapter = GroupAdapter(this, attachedToWindowDisposable, filterCriteria)
+            val groupAdapter = GroupAdapter(this, filterCriteria)
 
             groupAdapter.initialize(
                     parameters.dataId,
@@ -985,16 +985,14 @@ class GroupListFragment @JvmOverloads constructor(
         listener.showSnackbarHour(count) { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
     }
 
-    class GroupAdapter(
-            val groupListFragment: GroupListFragment,
-            compositeDisposable: CompositeDisposable,
-            filterCriteria: FilterCriteria,
-    ) : BaseAdapter(), NodeCollectionParent, ActionModeCallback by groupListFragment.selectionCallback {
+    class GroupAdapter(val groupListFragment: GroupListFragment, filterCriteria: FilterCriteria) :
+            BaseAdapter(),
+            NodeCollectionParent,
+            ActionModeCallback by groupListFragment.selectionCallback {
 
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                compositeDisposable,
                 filterCriteria
         )
 

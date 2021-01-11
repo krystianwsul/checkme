@@ -305,7 +305,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-                viewCreatedDisposable
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

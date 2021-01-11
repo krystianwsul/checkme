@@ -9,7 +9,7 @@ interface ExpandableHolder : BaseHolder {
 
     val rowExpand: ImageView
 
-    override fun onViewAttachedToWindow() {
+    override fun startRx() {
         rowExpand.clicks()
                 .mapTreeNode()
                 .subscribe { it.onExpandClick() }

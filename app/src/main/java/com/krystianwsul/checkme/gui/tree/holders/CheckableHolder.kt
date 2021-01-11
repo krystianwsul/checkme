@@ -29,9 +29,9 @@ class CheckableHolder(override val baseAdapter: BaseAdapter, binding: RowListChe
     override val rowMarginStart = binding.rowListCheckableMargin
     override val rowSeparator = binding.rowListCheckableSeparator
 
-    override fun onViewAttachedToWindow() {
-        super<AbstractHolder>.onViewAttachedToWindow()
-        super<ExpandableHolder>.onViewAttachedToWindow()
-        super<CheckableHolder>.onViewAttachedToWindow()
+    override fun startRx() {
+        super<AbstractHolder>.startRx()
+        super<ExpandableHolder>.startRx()
+        super<CheckableHolder>.startRx()
     }
 }

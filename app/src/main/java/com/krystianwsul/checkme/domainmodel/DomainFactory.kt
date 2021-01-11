@@ -658,7 +658,7 @@ class DomainFactory(
             it.value
                     .existingInstances
                     .values
-                    .forEach { it.addVirtualParents() }
+                    .forEach { it.addToParentInstanceHierarchyContainer() }
         }
 
         copiedTaskKeys.putAll(remoteToRemoteConversion.copiedTaskKeys)

@@ -42,7 +42,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                 .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }
                 .distinctUntilChanged()
                 .replay(1)
-                .apply { attachedToWindowDisposable += connect() }!!
+                .apply { attachedToWindowDisposable += connect() }!! // this should be hooked up in attachedToWindow
     }
 
     private val attachedToWindowDisposable = CompositeDisposable()

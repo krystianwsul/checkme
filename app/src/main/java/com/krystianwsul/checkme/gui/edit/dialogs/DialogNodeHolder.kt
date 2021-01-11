@@ -20,8 +20,8 @@ class DialogNodeHolder(
     override val rowExpand = rowListDialogBinding.rowListDialogExpand
     override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
 
-    override fun onViewAttachedToWindow() {
-        super<AbstractHolder>.onViewAttachedToWindow()
-        super<ExpandableHolder>.onViewAttachedToWindow()
+    override fun startRx() {
+        super<AbstractHolder>.startRx()
+        super<ExpandableHolder>.startRx()
     }
 }

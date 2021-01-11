@@ -14,7 +14,7 @@ interface CheckableHolder : BaseHolder {
     val rowCheckBox: CheckBox
     val rowMarginStart: View
 
-    override fun onViewAttachedToWindow() {
+    override fun startRx() {
         listOf(
                 rowCheckBoxFrame.clicks().doOnNext { rowCheckBox.toggle() },
                 rowCheckBox.clicks()

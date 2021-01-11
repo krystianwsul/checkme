@@ -3,7 +3,7 @@ package com.krystianwsul.treeadapter
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class TreeNode<T : RecyclerView.ViewHolder>(
+class TreeNode<T : TreeHolder>(
         val modelNode: ModelNode<T>,
         val parent: NodeContainer<T>,
         private var expanded: Boolean,

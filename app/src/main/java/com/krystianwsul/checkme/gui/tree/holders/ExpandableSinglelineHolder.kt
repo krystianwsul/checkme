@@ -17,8 +17,8 @@ class ExpandableSinglelineHolder(
     override val rowExpand = binding.rowListExpandableSingleLineExpand
     override val rowSeparator = binding.rowListExpandableSingleLineSeparator
 
-    override fun onViewAttachedToWindow() {
-        super<AbstractHolder>.onViewAttachedToWindow()
-        super<ExpandableHolder>.onViewAttachedToWindow()
+    override fun startRx() {
+        super<AbstractHolder>.startRx()
+        super<ExpandableHolder>.startRx()
     }
 }

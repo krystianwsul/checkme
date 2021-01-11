@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class State(val contactsState: ContactsState, val searchState: SearchState) : Parcelable {
+data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : Parcelable {
 
     val viewState: FindFriendViewModel.ViewState
         get() {
@@ -35,30 +35,30 @@ data class State(val contactsState: ContactsState, val searchState: SearchState)
             }
         }
 
-    val nextStateSingle: Single<State>
+    val nextStateSingle: Single<FindFriendState>
         get() {
             val nextContactsStateSingle = contactsState.nextStateSingle
             val nextSearchStateSingle = searchState.nextStateSingle
 
             check((nextContactsStateSingle == null) || (nextSearchStateSingle == null))
 
-            return nextContactsStateSingle?.map { State(it, searchState) }
-                    ?: nextSearchStateSingle?.map { State(contactsState, it) }
+            return nextContactsStateSingle?.map { FindFriendState(it, searchState) }
+                    ?: nextSearchStateSingle?.map { FindFriendState(contactsState, it) }
                     ?: Single.never()
         }
 
-    fun processViewAction(viewAction: FindFriendViewModel.ViewAction): State {
+    fun processViewAction(viewAction: FindFriendViewModel.ViewAction): FindFriendState {
         val nextContactsState = contactsState.processViewAction(viewAction)
         val nextSearchState = searchState.processViewAction(viewAction)
 
         return if (nextContactsState != null) {
             check(nextSearchState == null)
 
-            State(nextContactsState, searchState)
+            FindFriendState(nextContactsState, searchState)
         } else {
             checkNotNull(nextSearchState)
 
-            State(contactsState, nextSearchState)
+            FindFriendState(contactsState, nextSearchState)
         }
     }
 }

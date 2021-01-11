@@ -24,7 +24,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val clearedDisposable = CompositeDisposable()
 
     private val stateRelay = BehaviorRelay.createDefault(
-            savedStateHandle[KEY_STATE] ?: State(ContactsState.Permissions, SearchState.None)
+            savedStateHandle[KEY_STATE] ?: FindFriendState(ContactsState.Permissions, SearchState.None)
     )
 
     private val viewStateRelay = QueueRelay.create<ViewState>()

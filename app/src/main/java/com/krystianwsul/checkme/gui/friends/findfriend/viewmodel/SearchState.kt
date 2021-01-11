@@ -15,6 +15,8 @@ sealed class SearchState : Parcelable, ViewModelState { // todo friend remove pa
 
     open val nextStateSingle: Single<SearchState>? = null
 
+    abstract override fun toSerializableState(): SerializableState?
+
     open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? = null
 
     @Parcelize
@@ -76,12 +78,14 @@ sealed class SearchState : Parcelable, ViewModelState { // todo friend remove pa
 
         override val viewState get() = FindFriendViewModel.ViewState.Error(stringRes)
 
-        override fun toSerializableState(): ViewModelState.SerializableState? = null
+        override fun toSerializableState(): SerializableState? = null
 
         override val nextStateSingle get() = Single.just(nextState)!!
     }
 
     sealed class SerializableState : ViewModelState.SerializableState {
+
+        abstract override fun toState(): SearchState
 
         @Parcelize
         data class Loading(val email: String) : SerializableState() {

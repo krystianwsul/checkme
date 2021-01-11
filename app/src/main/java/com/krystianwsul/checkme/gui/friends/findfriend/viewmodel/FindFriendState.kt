@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
-import android.os.Parcelable
 import com.krystianwsul.common.utils.singleOrEmpty
 import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
-data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : Parcelable {
+data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : ViewModelState {
 
     val viewState: FindFriendViewModel.ViewState
         get() {
@@ -47,6 +45,10 @@ data class FindFriendState(val contactsState: ContactsState, val searchState: Se
                     ?: Single.never()
         }
 
+    override fun toSerializableState() = searchState.toSerializableState()?.let {
+        SerializableState(contactsState.toSerializableState(), it)
+    }
+
     fun processViewAction(viewAction: FindFriendViewModel.ViewAction): FindFriendState {
         val nextContactsState = contactsState.processViewAction(viewAction)
         val nextSearchState = searchState.processViewAction(viewAction)
@@ -60,5 +62,14 @@ data class FindFriendState(val contactsState: ContactsState, val searchState: Se
 
             FindFriendState(contactsState, nextSearchState)
         }
+    }
+
+    @Parcelize
+    data class SerializableState(
+            val contactsState: ContactsState.SerializableState,
+            val searchState: SearchState.SerializableState,
+    ) : ViewModelState.SerializableState {
+
+        override fun toState() = FindFriendState(contactsState.toState(), searchState.toState())
     }
 }

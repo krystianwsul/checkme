@@ -6,12 +6,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.victorrendina.rxqueue2.QueueRelay
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 
 class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -24,10 +24,12 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val clearedDisposable = CompositeDisposable()
 
     private val stateRelay = BehaviorRelay.createDefault(
-            savedStateHandle[KEY_STATE] ?: FindFriendState(ContactsState.Permissions, SearchState.Initial)
+            savedStateHandle.get<FindFriendState.SerializableState>(KEY_STATE)
+                    ?.toState()
+                    ?: FindFriendState(ContactsState.Initial, SearchState.Initial)
     )
 
-    private val viewStateRelay = QueueRelay.create<ViewState>()
+    private val viewStateRelay = QueueRelay.create<ViewState>() // todo friend this doesn't replay the last value!
 
     init {
         stateRelay.map { it.viewState }
@@ -41,7 +43,9 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     val viewActionRelay = PublishRelay.create<ViewAction>()!!
 
     init {
-        clearedDisposable += stateRelay.subscribe { savedStateHandle[KEY_STATE] = it }
+        stateRelay.mapNotNull { it.toSerializableState() }
+                .subscribe { savedStateHandle[KEY_STATE] = it }
+                .addTo(clearedDisposable)
 
         stateRelay.switchMapSingle { it.nextStateSingle }
                 .subscribe(stateRelay::accept)

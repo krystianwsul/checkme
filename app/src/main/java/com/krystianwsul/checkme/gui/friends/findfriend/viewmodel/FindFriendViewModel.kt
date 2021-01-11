@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.viewmodels
+package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import android.os.Parcelable
 import androidx.annotation.StringRes
@@ -165,7 +165,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                                 }
                     }
                             .subscribeOn(Schedulers.io())
-                            .map(::Loaded)
+                            .map(ContactsState::Loaded)
                             .cast(ContactsState::class.java)
                             .observeOn(AndroidSchedulers.mainThread())
                 }

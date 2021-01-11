@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.friends
+package com.krystianwsul.checkme.gui.friends.findfriend
 
 import android.Manifest
 import android.content.Context
@@ -22,12 +22,12 @@ import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewModel
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.toV3
-import com.krystianwsul.checkme.viewmodels.FindFriendViewModel
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign

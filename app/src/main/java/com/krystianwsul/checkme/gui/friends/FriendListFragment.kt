@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
+import com.krystianwsul.checkme.gui.friends.findfriend.FindFriendActivity
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder

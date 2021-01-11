@@ -96,7 +96,7 @@
             android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing" />
         <activity
-            android:name=".gui.friends.FindFriendActivity"
+            android:name=".gui.friends.findfriend.FindFriendActivity"
             android:windowSoftInputMode="stateVisible"
             android:theme="@style/AppTheme" />
 

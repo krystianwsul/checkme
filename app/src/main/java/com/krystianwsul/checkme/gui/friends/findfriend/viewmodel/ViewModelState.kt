@@ -4,5 +4,10 @@ import android.os.Parcelable
 
 interface ViewModelState {
 
-    fun toSerializableState(): Parcelable
+    fun toSerializableState(): SerializableState? // null means the state is transient
+
+    interface SerializableState : Parcelable {
+
+        fun toState(): ViewModelState
+    }
 }

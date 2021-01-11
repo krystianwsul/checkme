@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
 
-sealed class SearchState : Parcelable {
+sealed class SearchState : Parcelable, ViewModelState { // todo friend remove parcelable
 
     abstract val viewState: FindFriendViewModel.ViewState
 
@@ -18,9 +18,11 @@ sealed class SearchState : Parcelable {
     open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? = null
 
     @Parcelize
-    object None : SearchState() {
+    object Initial : SearchState() { // todo friend merge with Found
 
         override val viewState get() = FindFriendViewModel.ViewState.Loaded(listOf())
+
+        override fun toSerializableState() = SerializableState.Idle(null)
 
         override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? {
             return when (viewAction) {
@@ -39,6 +41,8 @@ sealed class SearchState : Parcelable {
 
         override val viewState get() = FindFriendViewModel.ViewState.Loading
 
+        override fun toSerializableState() = SerializableState.Loading(email)
+
         override val nextStateSingle
             get() = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
                     .firstOrError()
@@ -46,7 +50,7 @@ sealed class SearchState : Parcelable {
                         if (it.exists())
                             Found(it.getValue(UserWrapper::class.java)!!)
                         else
-                            Error(R.string.userNotFound, None)
+                            Error(R.string.userNotFound, Initial)
                     }!!
     }
 
@@ -56,6 +60,8 @@ sealed class SearchState : Parcelable {
         override val viewState
             get() =
                 userWrapper.userData.run { FindFriendViewModel.ViewState.Loaded(listOf(FindFriendViewModel.Contact(name, email, photoUrl, userWrapper))) }
+
+        override fun toSerializableState() = SerializableState.Idle(userWrapper)
 
         override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? {
             return when (viewAction) {
@@ -70,6 +76,23 @@ sealed class SearchState : Parcelable {
 
         override val viewState get() = FindFriendViewModel.ViewState.Error(stringRes)
 
+        override fun toSerializableState(): ViewModelState.SerializableState? = null
+
         override val nextStateSingle get() = Single.just(nextState)!!
+    }
+
+    sealed class SerializableState : ViewModelState.SerializableState {
+
+        @Parcelize
+        data class Loading(val email: String) : SerializableState() {
+
+            override fun toState() = SearchState.Loading(email)
+        }
+
+        @Parcelize
+        data class Idle(val userWrapper: UserWrapper?) : SerializableState() {
+
+            override fun toState() = userWrapper?.let(::Found) ?: Initial
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import com.krystianwsul.common.utils.singleOrEmpty
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.merge
 import kotlinx.parcelize.Parcelize
 
 data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : ViewModelState {
@@ -33,17 +33,12 @@ data class FindFriendState(val contactsState: ContactsState, val searchState: Se
             }
         }
 
-    val nextStateSingle: Single<FindFriendState>
-        get() {
-            val nextContactsStateSingle = contactsState.nextStateSingle
-            val nextSearchStateSingle = searchState.nextStateSingle
-
-            check((nextContactsStateSingle == null) || (nextSearchStateSingle == null))
-
-            return nextContactsStateSingle?.map { FindFriendState(it, searchState) }
-                    ?: nextSearchStateSingle?.map { FindFriendState(contactsState, it) }
-                    ?: Single.never()
-        }
+    override val nextStateSingle = listOf(
+            contactsState.nextStateSingle.map { FindFriendState(it, searchState) },
+            searchState.nextStateSingle.map { FindFriendState(contactsState, it) },
+    ).map { it.toObservable() }
+            .merge()
+            .firstOrError()!!
 
     override fun toSerializableState() = searchState.toSerializableState()?.let {
         SerializableState(contactsState.toSerializableState(), it)

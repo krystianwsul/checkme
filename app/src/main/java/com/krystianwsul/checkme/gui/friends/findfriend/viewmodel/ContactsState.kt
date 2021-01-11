@@ -10,7 +10,7 @@ sealed class ContactsState : ViewModelState {
 
     abstract val viewState: FindFriendViewModel.ViewState
 
-    open val nextStateSingle: Single<ContactsState>? = null
+    override val nextStateSingle: Single<ContactsState> = Single.never()
 
     abstract override fun toSerializableState(): SerializableState
 
@@ -43,22 +43,19 @@ sealed class ContactsState : ViewModelState {
 
         override fun toSerializableState() = SerializableState.Loading
 
-        override val nextStateSingle: Single<ContactsState>
-            get() {
-                return Single.fromCallable {
-                    Contacts.getQuery()
-                            .find()
-                            .flatMap {
-                                it.emails.map { email ->
-                                    FindFriendViewModel.Contact(it.displayName, email.address, it.photoUri, null)
-                                }
-                            }
-                }
-                        .subscribeOn(Schedulers.io())
-                        .map(ContactsState::Loaded)
-                        .cast(ContactsState::class.java)
-                        .observeOn(AndroidSchedulers.mainThread())
-            }
+        override val nextStateSingle = Single.fromCallable {
+            Contacts.getQuery()
+                    .find()
+                    .flatMap {
+                        it.emails.map { email ->
+                            FindFriendViewModel.Contact(it.displayName, email.address, it.photoUri, null)
+                        }
+                    }
+        }
+                .subscribeOn(Schedulers.io())
+                .map(ContactsState::Loaded)
+                .cast(ContactsState::class.java)
+                .observeOn(AndroidSchedulers.mainThread())!!
     }
 
     data class Loaded(val contacts: List<FindFriendViewModel.Contact>) : ContactsState() {

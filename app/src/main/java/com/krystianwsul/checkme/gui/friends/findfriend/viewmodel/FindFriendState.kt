@@ -8,7 +8,7 @@ data class FindFriendState(
         val contactsState: ContactsState,
         val searchState: SearchState,
         private val query: String,
-) : ViewModelState<FindFriendViewModel.ViewAction> {
+) : ViewModelState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
     fun getViewState(): FindFriendViewModel.ViewState {
         val (searchLoading, userWrappers) = when (searchState) {
@@ -77,8 +77,9 @@ data class FindFriendState(
             private val contactsState: ContactsState.SerializableState,
             private val searchState: SearchState.SerializableState,
             private val query: String,
-    ) : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
+    ) : ViewModelState.SerializableState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
-        override fun toState() = FindFriendState(contactsState.toState(), searchState.toState(), query)
+        override fun toState(viewModel: FindFriendViewModel) =
+                FindFriendState(contactsState.toState(viewModel), searchState.toState(viewModel), query)
     }
 }

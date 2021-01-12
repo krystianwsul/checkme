@@ -1,46 +1,50 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.SearchState.Loaded
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.SearchState.Loading
 import com.krystianwsul.common.firebase.json.UserWrapper
-import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
 
-sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
+sealed class SearchState(viewModel: FindFriendViewModel) :
+        ViewModelState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
-    override val nextStateSingle: Single<out SearchState> = Single.never()
+    override val nextStateSingle = viewModel.usersObservable
+            .firstOrError()
+            .map { Loaded(viewModel, it.children.map { it.getValue(UserWrapper::class.java)!! }) }!!
 
     abstract override fun toSerializableState(): SerializableState?
 
     override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState = this
 
-    object Loading : SearchState() {
+    class Loading(viewModel: FindFriendViewModel) : SearchState(viewModel) {
 
         override fun toSerializableState() = SerializableState.Loading
-
-        override val nextStateSingle = AndroidDatabaseWrapper.getUsersObservable()
-                .firstOrError() // todo friend make observable
-                .map { Loaded(it.children.map { it.getValue(UserWrapper::class.java)!! }) }!!
     }
 
-    data class Loaded(val userWrappers: List<UserWrapper>) : SearchState() {
+    class Loaded(
+            viewModel: FindFriendViewModel,
+            val userWrappers: List<UserWrapper>,
+    ) : SearchState(viewModel) {
 
         override fun toSerializableState() = SerializableState.Loaded(userWrappers)
     }
 
-    sealed class SerializableState : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
+    sealed class SerializableState :
+            ViewModelState.SerializableState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
-        abstract override fun toState(): SearchState
+
+        abstract override fun toState(viewModel: FindFriendViewModel): SearchState
 
         @Parcelize
         object Loading : SerializableState() {
 
-            override fun toState() = SearchState.Loading
+            override fun toState(viewModel: FindFriendViewModel) = Loading(viewModel)
         }
 
         @Parcelize
         data class Loaded(val userWrappers: List<UserWrapper>) : SerializableState() {
 
-            override fun toState() = SearchState.Loaded(userWrappers)
+            override fun toState(viewModel: FindFriendViewModel) = Loaded(viewModel, userWrappers)
         }
     }
 }

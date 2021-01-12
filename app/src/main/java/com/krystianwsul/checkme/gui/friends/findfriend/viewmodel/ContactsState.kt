@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
 
-sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction> {
+sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
     override val nextStateSingle: Single<out ContactsState> = Single.never()
 
@@ -61,26 +61,27 @@ sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction> {
         override fun toSerializableState() = SerializableState.Loaded(contacts)
     }
 
-    sealed class SerializableState : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
+    sealed class SerializableState :
+            ViewModelState.SerializableState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
 
-        abstract override fun toState(): ContactsState
+        abstract override fun toState(viewModel: FindFriendViewModel): ContactsState
 
         @Parcelize
         object Initial : SerializableState() {
 
-            override fun toState() = ContactsState.Initial
+            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Initial
         }
 
         @Parcelize
         object Denied : SerializableState() {
 
-            override fun toState() = ContactsState.Denied
+            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Denied
         }
 
         @Parcelize
         data class Loaded(val contacts: List<FindFriendViewModel.Contact>) : SerializableState() {
 
-            override fun toState() = ContactsState.Loaded(contacts)
+            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Loaded(contacts)
         }
     }
 }

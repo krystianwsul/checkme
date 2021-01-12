@@ -31,7 +31,8 @@ data class FindFriendState(
         }
 
         return FindFriendViewModel.ViewState.Loaded(
-                (listOfNotNull(searchContact) + contacts).distinctBy { it.email }
+                (listOfNotNull(searchContact) + contacts).distinctBy { it.email },
+                searchLoading || contactsLoading
         )
     }
 

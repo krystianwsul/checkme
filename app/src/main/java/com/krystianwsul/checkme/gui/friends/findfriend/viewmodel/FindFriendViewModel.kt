@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -33,11 +32,8 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val viewStateRelay = QueueRelay.create<ViewState>() // todo friend this doesn't replay the last value!
 
     init {
-        stateRelay.subscribe { Log.e("asdf", "magic state $it") }
-
         stateRelay.map { it.getViewState() }
                 .distinctUntilChanged()
-                .doOnNext { Log.e("asdf", "magic viewState $it") }
                 .subscribe(viewStateRelay::accept)
                 .addTo(clearedDisposable)
     }
@@ -55,11 +51,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                 .subscribe(stateRelay::accept)
                 .addTo(clearedDisposable)
 
-        stateRelay.switchMapSingle {
-            viewActionRelay.doOnNext { Log.e("asdf", "magic viewAction $it") }
-                    .firstOrError()
-                    .map { viewAction -> it to viewAction }
-        }
+        stateRelay.switchMapSingle { viewActionRelay.firstOrError().map { viewAction -> it to viewAction } }
                 .map { (state, viewAction) -> state.processViewAction(viewAction) }
                 .subscribe(stateRelay::accept)
                 .addTo(clearedDisposable)
@@ -83,7 +75,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         object Loading : ViewState()
 
-        data class Loaded(val contacts: List<Contact>) : ViewState()
+        data class Loaded(val contacts: List<Contact>, val showProgress: Boolean) : ViewState()
     }
 
     sealed class ViewAction {

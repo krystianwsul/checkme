@@ -16,18 +16,6 @@ sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
 
     override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState = this
 
-    object Initial : SearchState() { // todo friend merge with Found
-
-        override fun toSerializableState() = SerializableState.Idle(null)
-
-        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState {
-            return when (viewAction) {
-                is FindFriendViewModel.ViewAction.Search -> Loading(viewAction.email)
-                else -> super.processViewAction(viewAction)
-            }
-        }
-    }
-
     data class Loading(val email: String) : SearchState() {
 
         init {
@@ -40,13 +28,13 @@ sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
                 .firstOrError()
                 .map {
                     if (it.exists())
-                        Found(it.getValue(UserWrapper::class.java)!!)
+                        Idle(it.getValue(UserWrapper::class.java)!!)
                     else
-                        Error(R.string.userNotFound, Initial)
+                        Error(R.string.userNotFound, Idle(null))
                 }!!
     }
 
-    data class Found(val userWrapper: UserWrapper) : SearchState() {
+    data class Idle(val userWrapper: UserWrapper?) : SearchState() {
 
         override fun toSerializableState() = SerializableState.Idle(userWrapper)
 
@@ -78,7 +66,7 @@ sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
         @Parcelize
         data class Idle(val userWrapper: UserWrapper?) : SerializableState() {
 
-            override fun toState() = userWrapper?.let(::Found) ?: Initial
+            override fun toState() = SearchState.Idle(userWrapper)
         }
     }
 }

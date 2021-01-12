@@ -10,9 +10,8 @@ data class FindFriendState(
 
     fun getViewState(): FindFriendViewModel.ViewState {
         val (searchLoading, userWrapper) = when (searchState) {
-            is SearchState.Initial -> false to null
             is SearchState.Loading -> true to null
-            is SearchState.Found -> false to searchState.userWrapper
+            is SearchState.Idle -> false to searchState.userWrapper
             is SearchState.Error -> return FindFriendViewModel.ViewState.Error(searchState.stringRes)
         }
 

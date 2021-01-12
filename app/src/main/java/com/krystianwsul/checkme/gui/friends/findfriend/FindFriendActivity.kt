@@ -139,7 +139,7 @@ class FindFriendActivity : NavBarActivity() {
                             } else {
                                 Snackbar.make(
                                         binding.root,
-                                        "This e-mail address is already in your friends list.", // todo friends
+                                        "This user is already in your friends list.", // todo friends
                                         Snackbar.LENGTH_SHORT
                                 ).show()
                             }

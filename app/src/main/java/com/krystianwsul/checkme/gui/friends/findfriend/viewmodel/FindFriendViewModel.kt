@@ -25,7 +25,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val clearedDisposable = CompositeDisposable()
 
-    val usersObservable = AndroidDatabaseWrapper.getUsersObservable().publish()
+    val usersObservable = AndroidDatabaseWrapper.getUsersObservable().publish()!!
 
     private val stateRelay = BehaviorRelay.createDefault(
             savedStateHandle.get<FindFriendState.SerializableState>(KEY_STATE)

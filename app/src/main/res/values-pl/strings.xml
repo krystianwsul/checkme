@@ -133,4 +133,6 @@
     <string name="tooltip_press_to_select">Dotknij and przytrzymaj żeby zaznaczyć pozycję.</string>
     <string name="tooltip_press_menu_tooltip">Zastanawiasz się, do czego służy ikona w menu? Przytrzymaj, żeby zobaczyć podpowiedź.</string>
     <string name="tooltip_press_drag">Dotknij and przytrzymaj żeby zmienić kolejność pozycji.</string>
+    <string name="addedUserToFriends">Dodano użytkownika do znajomych</string>
+    <string name="userAlreadyInFriends">Ten użytkownik już jest twoim znajomym.</string>
 </resources>

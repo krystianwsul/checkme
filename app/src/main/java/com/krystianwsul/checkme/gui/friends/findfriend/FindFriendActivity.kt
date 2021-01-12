@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding4.widget.textChanges
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -129,17 +130,14 @@ class FindFriendActivity : NavBarActivity() {
                             val added = DomainFactory.instance.tryAddFriend(SaveService.Source.GUI, contact.userWrapper)
 
                             if (added) {
-                                setSnackbar { // this isn't working
-                                    it.showText(
-                                            "${contact.displayName} added as friend", // todo friends
-                                            Snackbar.LENGTH_SHORT
-                                    )
+                                setSnackbar {
+                                    it.showText(getString(R.string.addedUserToFriends), Snackbar.LENGTH_SHORT)
                                 }
                                 finish()
                             } else {
                                 Snackbar.make(
                                         binding.root,
-                                        "This user is already in your friends list.", // todo friends
+                                        getString(R.string.userAlreadyInFriends),
                                         Snackbar.LENGTH_SHORT
                                 ).show()
                             }

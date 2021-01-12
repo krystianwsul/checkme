@@ -134,4 +134,6 @@
     <string name="tooltip_press_to_select">Press and hold to select an item.</string>
     <string name="tooltip_press_menu_tooltip">Wondering what a menu icon does? Press and hold to show a hint.</string>
     <string name="tooltip_press_drag">Press and hold to rearrange items.</string>
+    <string name="addedUserToFriends">User added to friends.</string>
+    <string name="userAlreadyInFriends">This user is already your friend.</string>
 </resources>

@@ -8,19 +8,19 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
 
-sealed class SearchState : ViewModelState {
+sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
 
     override val nextStateSingle: Single<SearchState> = Single.never()
 
     abstract override fun toSerializableState(): SerializableState?
 
-    open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? = null
+    override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState = this
 
     object Initial : SearchState() { // todo friend merge with Found
 
         override fun toSerializableState() = SerializableState.Idle(null)
 
-        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? {
+        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState {
             return when (viewAction) {
                 is FindFriendViewModel.ViewAction.Search -> Loading(viewAction.email)
                 else -> super.processViewAction(viewAction)
@@ -50,7 +50,7 @@ sealed class SearchState : ViewModelState {
 
         override fun toSerializableState() = SerializableState.Idle(userWrapper)
 
-        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState? {
+        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState {
             return when (viewAction) {
                 is FindFriendViewModel.ViewAction.Search -> Loading(viewAction.email)
                 else -> super.processViewAction(viewAction)
@@ -65,7 +65,7 @@ sealed class SearchState : ViewModelState {
         override val nextStateSingle = Single.just(nextState)!!
     }
 
-    sealed class SerializableState : ViewModelState.SerializableState {
+    sealed class SerializableState : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
 
         abstract override fun toState(): SearchState
 

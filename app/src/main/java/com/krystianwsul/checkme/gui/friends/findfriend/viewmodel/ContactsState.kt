@@ -6,31 +6,31 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
 
-sealed class ContactsState : ViewModelState {
+sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction> {
 
     override val nextStateSingle: Single<out ContactsState> = Single.never()
 
     abstract override fun toSerializableState(): SerializableState?
 
-    open fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState? = null
+    override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState = this
 
     object Initial : ContactsState() {
 
         override val nextStateSingle = Single.just(Waiting)!!
 
         override fun toSerializableState(): SerializableState? = null
-
-        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState? {
-            return when (viewAction) {
-                is FindFriendViewModel.ViewAction.Permissions -> if (viewAction.granted) Loading else Denied
-                else -> super.processViewAction(viewAction)
-            }
-        }
     }
 
     object Waiting : ContactsState() {
 
         override fun toSerializableState() = SerializableState.Initial
+
+        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState {
+            return when (viewAction) {
+                is FindFriendViewModel.ViewAction.Permissions -> if (viewAction.granted) Loading else Denied
+                else -> super.processViewAction(viewAction)
+            }
+        }
     }
 
     object Denied : ContactsState() {
@@ -40,7 +40,7 @@ sealed class ContactsState : ViewModelState {
 
     object Loading : ContactsState() {
 
-        override fun toSerializableState() = SerializableState.Loading
+        override fun toSerializableState() = SerializableState.Initial
 
         override val nextStateSingle = Single.fromCallable {
             Contacts.getQuery()
@@ -61,7 +61,7 @@ sealed class ContactsState : ViewModelState {
         override fun toSerializableState() = SerializableState.Loaded(contacts)
     }
 
-    sealed class SerializableState : ViewModelState.SerializableState {
+    sealed class SerializableState : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
 
         abstract override fun toState(): ContactsState
 
@@ -75,12 +75,6 @@ sealed class ContactsState : ViewModelState {
         object Denied : SerializableState() {
 
             override fun toState() = ContactsState.Denied
-        }
-
-        @Parcelize
-        object Loading : SerializableState() {
-
-            override fun toState() = ContactsState.Loading
         }
 
         @Parcelize

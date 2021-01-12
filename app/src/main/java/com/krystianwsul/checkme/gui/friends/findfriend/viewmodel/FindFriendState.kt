@@ -3,7 +3,10 @@ package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 import io.reactivex.rxjava3.kotlin.merge
 import kotlinx.parcelize.Parcelize
 
-data class FindFriendState(val contactsState: ContactsState, val searchState: SearchState) : ViewModelState {
+data class FindFriendState(
+        val contactsState: ContactsState,
+        val searchState: SearchState,
+) : ViewModelState<FindFriendViewModel.ViewAction> {
 
     fun getViewState(): FindFriendViewModel.ViewState {
         val (searchLoading, userWrapper) = when (searchState) {
@@ -49,26 +52,14 @@ data class FindFriendState(val contactsState: ContactsState, val searchState: Se
             null
     }
 
-    fun processViewAction(viewAction: FindFriendViewModel.ViewAction): FindFriendState { // todo friend fix this before testing
-        val nextContactsState = contactsState.processViewAction(viewAction)
-        val nextSearchState = searchState.processViewAction(viewAction)
-
-        return if (nextContactsState != null) {
-            check(nextSearchState == null)
-
-            FindFriendState(nextContactsState, searchState)
-        } else {
-            checkNotNull(nextSearchState)
-
-            FindFriendState(contactsState, nextSearchState)
-        }
-    }
+    override fun processViewAction(viewAction: FindFriendViewModel.ViewAction) =
+            FindFriendState(contactsState.processViewAction(viewAction), searchState.processViewAction(viewAction))
 
     @Parcelize
     data class SerializableState(
             val contactsState: ContactsState.SerializableState,
             val searchState: SearchState.SerializableState,
-    ) : ViewModelState.SerializableState {
+    ) : ViewModelState.SerializableState<FindFriendViewModel.ViewAction> {
 
         override fun toState() = FindFriendState(contactsState.toState(), searchState.toState())
     }

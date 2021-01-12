@@ -34,7 +34,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     )
 
     init {
-        clearedDisposable += usersObservable.subscribe()
+        clearedDisposable += usersObservable.connect()
     }
 
     private val viewStateRelay = RxQueue<ViewState>()

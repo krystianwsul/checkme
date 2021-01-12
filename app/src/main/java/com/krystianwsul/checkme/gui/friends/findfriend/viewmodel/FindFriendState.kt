@@ -13,16 +13,7 @@ data class FindFriendState(
     fun getViewState(): FindFriendViewModel.ViewState {
         val (searchLoading, userWrappers) = when (searchState) {
             is SearchState.Loading -> true to listOf()
-            is SearchState.Idle -> false to searchState.userWrappers
-            is SearchState.Error -> return FindFriendViewModel.ViewState.Error(searchState.stringRes)
-        }
-
-        val normalizedQuery = query.normalized()
-
-        fun List<FindFriendViewModel.Contact>.filterQuery() = if (normalizedQuery.isEmpty()) {
-            this
-        } else {
-            filter { listOf(it.displayName, it.email).any { it.normalized().contains(normalizedQuery) } }
+            is SearchState.Loaded -> false to searchState.userWrappers
         }
 
         val (contactsLoading, phoneContacts) = when (contactsState) {
@@ -30,7 +21,7 @@ data class FindFriendState(
             is ContactsState.Waiting -> false to listOf()
             is ContactsState.Denied -> false to listOf()
             is ContactsState.Loading -> true to listOf()
-            is ContactsState.Loaded -> false to contactsState.contacts.filterQuery()
+            is ContactsState.Loaded -> false to contactsState.contacts
         }
 
         if (searchLoading && contactsLoading) return FindFriendViewModel.ViewState.Loading
@@ -39,8 +30,15 @@ data class FindFriendState(
             FindFriendViewModel.Contact(it.userData.name, it.userData.email, it.userData.photoUrl, it)
         }
 
+        val normalizedQuery = query.normalized()
+        fun List<FindFriendViewModel.Contact>.filterQuery() = if (normalizedQuery.isEmpty()) {
+            this
+        } else {
+            filter { listOf(it.displayName, it.email).any { it.normalized().contains(normalizedQuery) } }
+        }
+
         return FindFriendViewModel.ViewState.Loaded(
-                (searchContacts + phoneContacts).distinctBy { it.email },
+                (searchContacts + phoneContacts).distinctBy { it.email }.filterQuery(),
                 searchLoading || contactsLoading
         )
     }

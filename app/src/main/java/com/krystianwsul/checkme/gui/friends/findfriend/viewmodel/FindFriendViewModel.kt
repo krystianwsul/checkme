@@ -26,7 +26,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val stateRelay = BehaviorRelay.createDefault(
             savedStateHandle.get<FindFriendState.SerializableState>(KEY_STATE)
                     ?.toState()
-                    ?: FindFriendState(ContactsState.Initial, SearchState.Idle(null), "")
+                    ?: FindFriendState(ContactsState.Initial, SearchState.Idle(listOf()), "")
     )
 
     private val viewStateRelay = RxQueue<ViewState>()

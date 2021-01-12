@@ -11,9 +11,9 @@ data class FindFriendState(
 ) : ViewModelState<FindFriendViewModel.ViewAction> {
 
     fun getViewState(): FindFriendViewModel.ViewState {
-        val (searchLoading, userWrapper) = when (searchState) {
-            is SearchState.Loading -> true to null
-            is SearchState.Idle -> false to searchState.userWrapper
+        val (searchLoading, userWrappers) = when (searchState) {
+            is SearchState.Loading -> true to listOf()
+            is SearchState.Idle -> false to searchState.userWrappers
             is SearchState.Error -> return FindFriendViewModel.ViewState.Error(searchState.stringRes)
         }
 
@@ -25,7 +25,7 @@ data class FindFriendState(
             filter { listOf(it.displayName, it.email).any { it.normalized().contains(normalizedQuery) } }
         }
 
-        val (contactsLoading, contacts) = when (contactsState) {
+        val (contactsLoading, phoneContacts) = when (contactsState) {
             is ContactsState.Initial -> return FindFriendViewModel.ViewState.Permissions
             is ContactsState.Waiting -> false to listOf()
             is ContactsState.Denied -> false to listOf()
@@ -35,12 +35,12 @@ data class FindFriendState(
 
         if (searchLoading && contactsLoading) return FindFriendViewModel.ViewState.Loading
 
-        val searchContact = userWrapper?.let {
+        val searchContacts = userWrappers.map {
             FindFriendViewModel.Contact(it.userData.name, it.userData.email, it.userData.photoUrl, it)
         }
 
         return FindFriendViewModel.ViewState.Loaded(
-                (listOfNotNull(searchContact) + contacts).distinctBy { it.email },
+                (searchContacts + phoneContacts).distinctBy { it.email },
                 searchLoading || contactsLoading
         )
     }

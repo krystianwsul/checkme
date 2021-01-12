@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 import androidx.annotation.StringRes
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import io.reactivex.rxjava3.core.Single
 import kotlinx.parcelize.Parcelize
@@ -24,19 +23,19 @@ sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
 
         override fun toSerializableState() = SerializableState.Loading(email)
 
-        override val nextStateSingle = AndroidDatabaseWrapper.getUserObservable(UserData.getKey(email))
+        override val nextStateSingle = AndroidDatabaseWrapper.searchUserObservable(email)
                 .firstOrError()
                 .map {
                     if (it.exists())
-                        Idle(it.getValue(UserWrapper::class.java)!!)
+                        Idle(it.children.map { it.getValue(UserWrapper::class.java)!! })
                     else
-                        Error(R.string.userNotFound, Idle(null))
+                        Error(R.string.userNotFound, Idle(listOf()))
                 }!!
     }
 
-    data class Idle(val userWrapper: UserWrapper?) : SearchState() {
+    data class Idle(val userWrappers: List<UserWrapper>) : SearchState() {
 
-        override fun toSerializableState() = SerializableState.Idle(userWrapper)
+        override fun toSerializableState() = SerializableState.Idle(userWrappers)
 
         override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): SearchState {
             return when (viewAction) {
@@ -64,9 +63,9 @@ sealed class SearchState : ViewModelState<FindFriendViewModel.ViewAction> {
         }
 
         @Parcelize
-        data class Idle(val userWrapper: UserWrapper?) : SerializableState() {
+        data class Idle(val userWrappers: List<UserWrapper>) : SerializableState() {
 
-            override fun toState() = SearchState.Idle(userWrapper)
+            override fun toState() = SearchState.Idle(userWrappers)
         }
     }
 }

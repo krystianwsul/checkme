@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
@@ -33,6 +34,20 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
+
+    fun searchUserObservable(email: String): Observable<Snapshot> {
+        val trimmedEmail = email.let { it.substring(0, it.length / 3 * 3) }
+
+        val strippedKey = UserData.getKey(trimmedEmail)
+                .key
+                .trimEnd('=')
+
+        return rootReference.child(USERS_KEY)
+                .orderByKey()
+                .startAt(strippedKey)
+                .endAt(strippedKey + "\uf8ff")
+                .snapshotChanges()
+    }
 
     private fun Query.snapshotChanges() = dataChanges().toV3().map<Snapshot>(Snapshot::Impl)!!
 

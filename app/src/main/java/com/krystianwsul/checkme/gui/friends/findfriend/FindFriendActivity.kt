@@ -4,8 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
-import android.view.inputmethod.EditorInfo
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -14,9 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rxbinding4.view.keys
-import com.jakewharton.rxbinding4.widget.editorActionEvents
-import com.krystianwsul.checkme.R
+import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -30,7 +28,6 @@ import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.toV3
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FindFriendActivity : NavBarActivity() {
 
@@ -47,19 +44,6 @@ class FindFriendActivity : NavBarActivity() {
 
     private val adapter by lazy { Adapter() }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_find_friend, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_search -> startSearch()
-            else -> throw UnsupportedOperationException()
-        }
-        return true
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,25 +52,14 @@ class FindFriendActivity : NavBarActivity() {
 
         setSupportActionBar(binding.findFriendToolbar)
 
-        binding.findFriendEmail.apply {
-            createDisposable += editorActionEvents {
-                if (it.actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    startSearch()
-                    true
-                } else {
-                    false
-                }
-            }.subscribe()
-
-            createDisposable += keys {
-                if (it.action == KeyEvent.ACTION_DOWN && it.keyCode == KeyEvent.KEYCODE_ENTER) {
-                    startSearch()
-                    true
-                } else {
-                    false
-                }
-            }.subscribe()
+        binding.findFriendToolbar.run {
+            setContentInsetsAbsolute(contentInsetStart, contentInsetStart)
         }
+
+        binding.findFriendEmail
+                .textChanges()
+                .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Search(it.toString())) }
+                .addTo(createDisposable)
 
         binding.findFriendRecycler.let {
             it.layoutManager = LinearLayoutManager(this)
@@ -128,14 +101,6 @@ class FindFriendActivity : NavBarActivity() {
         }.ignore()
 
         animateVisibility(show, hide)
-    }
-
-    private fun startSearch() {
-        binding.findFriendEmail
-                .text
-                .toString()
-                .takeIf { it.isNotEmpty() }
-                ?.let { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Search(it)) }
     }
 
     private inner class Adapter : ListAdapter<FindFriendViewModel.Contact, Holder>(

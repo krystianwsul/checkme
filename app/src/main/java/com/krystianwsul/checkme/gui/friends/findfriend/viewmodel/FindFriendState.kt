@@ -38,7 +38,9 @@ data class FindFriendState(
         }
 
         return FindFriendViewModel.ViewState.Loaded(
-                (searchContacts + phoneContacts).distinctBy { it.email }.filterQuery(),
+                (searchContacts + phoneContacts).distinctBy { it.email }
+                        .filterQuery()
+                        .sortedBy { it.displayName },
                 searchLoading || contactsLoading
         )
     }

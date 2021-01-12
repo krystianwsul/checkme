@@ -160,5 +160,4 @@ dependencies {
     implementation 'com.tomash:androidcontacts:1.14.0'
 
     implementation "com.jakewharton.rxrelay2:rxrelay:2.1.1"
-    implementation 'com.victorrendina:rxqueue2:2.0.0'
 }

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
+import com.jakewharton.rxrelay3.ReplayRelay
 import io.reactivex.rxjava3.core.Observer
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -12,6 +13,10 @@ class RxQueue<T : Any> : Relay<T>() {
     private val relay = PublishRelay.create<T>()
 
     override fun accept(value: T) {
+        val replayRelay = ReplayRelay.create<T>()
+
+        replayRelay.cleanupBuffer()
+
         if (relay.hasObservers()) {
             when (queue.size) {
                 0 -> queue.add(value)

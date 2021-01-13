@@ -52,7 +52,7 @@
     <string name="signInAs">Zalogowano jako</string>
     <string name="friends">Znajomi</string>
     <string name="friends_empty">Dodaj znajomych klikając w plusa na dole.</string>
-    <string name="email_hint">Email</string>
+    <string name="email_hint">Imię lub adres e-mailowy</string>
     <string name="search">Szukaj</string>
     <string name="connectionError">Wystąpił błąd połączenia.</string>
     <string name="friend_dialog_title">Wybierz znajomego</string>

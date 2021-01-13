@@ -54,7 +54,7 @@
     <string name="friends">Friends</string>
     <string name="debug" translatable="false">Debug</string>
     <string name="friends_empty">Add a friend by clicking the plus at the bottom.</string>
-    <string name="email_hint">Email</string>
+    <string name="email_hint">Name or e-mail address</string>
     <string name="search">Search</string>
     <string name="connectionError">A connection error occurred.</string>
     <string name="friend_dialog_title">Pick a friend</string>

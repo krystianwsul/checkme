@@ -165,17 +165,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                                 is Type.NoSchedule<T> -> true // unexpected
                             }
                         }
-                        .first()
+                        .firstOrNull()
 
-                when (val type = interval.type) {
+                when (val type = interval?.type) {
                     is Type.Child<T> -> {
                         val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
                         val parentTask = parentTaskHierarchy.parentTask
                         parentTask.getInstance(scheduleDateTime)
                     }
                     is Type.Schedule<T> -> null
-                    is Type.NoSchedule<T> -> {
-                        ErrorLogger.instance.logException(ParentInstanceException("unexpected interval type. child instance: $this, interval $interval"))
+                    null, is Type.NoSchedule<T> -> {
+                        ErrorLogger.instance.logException(ParentInstanceException("unexpected interval type. child instance: $this, interval $interval, all intervals: ${task.intervals}"))
                         null
                     }
                 }

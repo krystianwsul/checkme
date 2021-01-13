@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewEvent
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewModel
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.tbruyelle.rxpermissions2.RxPermissions
@@ -72,7 +74,7 @@ class FindFriendActivity : NavBarActivity() {
 
         binding.findFriendEmail
                 .textChanges()
-                .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewEvent.Search(it.toString())) }
+                .subscribe { viewModel.viewActionRelay.accept(FindFriendViewEvent.Search(it.toString())) }
                 .addTo(createDisposable)
 
         binding.findFriendRecycler.let {
@@ -87,24 +89,24 @@ class FindFriendActivity : NavBarActivity() {
         tryGetFragment<ConfirmDialogFragment>(TAG_CONFIRM_DIALOG)?.listener = confirmDialogListener
     }
 
-    private fun updateLayout(state: FindFriendViewModel.ViewState) {
+    private fun updateLayout(state: FindFriendViewState) {
         val hide = mutableListOf<View>()
         val show = mutableListOf<View>()
 
         @Suppress("IMPLICIT_CAST_TO_ANY")
         when (state) {
-            FindFriendViewModel.ViewState.Permissions ->
+            FindFriendViewState.Permissions ->
                 RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
                         .toV3()
-                        .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewEvent.Permissions(it)) }
+                        .subscribe { viewModel.viewActionRelay.accept(FindFriendViewEvent.Permissions(it)) }
                         .addTo(createDisposable)
-            is FindFriendViewModel.ViewState.Loading -> {
+            is FindFriendViewState.Loading -> {
                 binding.findFriendEmail.isEnabled = false
 
                 hide += binding.findFriendRecycler
                 show += binding.findFriendProgress
             }
-            is FindFriendViewModel.ViewState.Loaded -> {
+            is FindFriendViewState.Loaded -> {
                 binding.findFriendEmail.isEnabled = true
 
                 show += binding.findFriendRecycler

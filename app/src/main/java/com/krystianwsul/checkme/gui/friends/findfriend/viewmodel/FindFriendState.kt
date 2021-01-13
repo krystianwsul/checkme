@@ -8,23 +8,23 @@ data class FindFriendState(
         val contactsState: ContactsState,
         val searchState: SearchState,
         private val query: String,
-) : ViewModelState<FindFriendViewModel.ViewEvent, FindFriendViewModel> {
+) : ViewModelState<FindFriendViewEvent, FindFriendViewModel> {
 
-    fun getViewState(): FindFriendViewModel.ViewState {
+    fun getViewState(): FindFriendViewState {
         val (searchLoading, userWrappers) = when (searchState) {
             is SearchState.Loading -> true to listOf()
             is SearchState.Loaded -> false to searchState.userWrappers
         }
 
         val (contactsLoading, phoneContacts) = when (contactsState) {
-            is ContactsState.Initial -> return FindFriendViewModel.ViewState.Permissions
+            is ContactsState.Initial -> return FindFriendViewState.Permissions
             is ContactsState.Waiting -> false to listOf()
             is ContactsState.Denied -> false to listOf()
             is ContactsState.Loading -> true to listOf()
             is ContactsState.Loaded -> false to contactsState.contacts
         }
 
-        if (searchLoading && contactsLoading) return FindFriendViewModel.ViewState.Loading
+        if (searchLoading && contactsLoading) return FindFriendViewState.Loading
 
         val searchContacts = userWrappers.map {
             FindFriendViewModel.Contact(it.userData.name, it.userData.email, it.userData.photoUrl, it)
@@ -37,7 +37,7 @@ data class FindFriendState(
             filter { listOf(it.displayName, it.email).any { it.normalized().contains(normalizedQuery) } }
         }
 
-        return FindFriendViewModel.ViewState.Loaded(
+        return FindFriendViewState.Loaded(
                 (searchContacts + phoneContacts).distinctBy { it.email }
                         .filterQuery()
                         .sortedBy { it.displayName },
@@ -62,8 +62,8 @@ data class FindFriendState(
             null
     }
 
-    override fun processViewAction(viewEvent: FindFriendViewModel.ViewEvent): FindFriendState {
-        val newQuery = (viewEvent as? FindFriendViewModel.ViewEvent.Search)?.email ?: query
+    override fun processViewAction(viewEvent: FindFriendViewEvent): FindFriendState {
+        val newQuery = (viewEvent as? FindFriendViewEvent.Search)?.query ?: query
 
         return FindFriendState(
                 contactsState.processViewAction(viewEvent),
@@ -77,7 +77,7 @@ data class FindFriendState(
             private val contactsState: ContactsState.SerializableState,
             private val searchState: SearchState.SerializableState,
             private val query: String,
-    ) : ViewModelState.SerializableState<FindFriendViewModel.ViewEvent, FindFriendViewModel> {
+    ) : ViewModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
 
         override fun toState(viewModel: FindFriendViewModel) =
                 FindFriendState(contactsState.toState(viewModel), searchState.toState(viewModel), query)

@@ -36,7 +36,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         clearedDisposable += usersObservable.connect()
     }
 
-    private val viewStateRelay = RxQueue<ViewState>()
+    private val viewStateRelay = RxQueue<FindFriendViewState>()
 
     init {
         stateRelay.observeOn(Schedulers.computation())
@@ -49,7 +49,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     val viewStateObservable = viewStateRelay.distinctUntilChanged()!!
 
-    val viewActionRelay = PublishRelay.create<ViewEvent>()!!
+    val viewActionRelay = PublishRelay.create<FindFriendViewEvent>()!!
 
     init {
         stateRelay.mapNotNull { it.toSerializableState() }
@@ -76,19 +76,4 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             val userWrapper: UserWrapper?,
     ) : Parcelable
 
-    sealed class ViewState {
-
-        object Permissions : ViewState()
-
-        object Loading : ViewState()
-
-        data class Loaded(val contacts: List<Contact>, val showProgress: Boolean) : ViewState()
-    }
-
-    sealed class ViewEvent {
-
-        data class Permissions(val granted: Boolean) : ViewEvent()
-
-        data class Search(val email: String) : ViewEvent()
-    }
 }

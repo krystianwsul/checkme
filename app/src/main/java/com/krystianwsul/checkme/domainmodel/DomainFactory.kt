@@ -482,7 +482,11 @@ class DomainFactory(
 
         this.deviceDbInfo = deviceDbInfo
 
-        myUserFactory.user.setToken(deviceDbInfo)
+        myUserFactory.user.apply {
+            name = deviceDbInfo.name
+            setToken(deviceDbInfo)
+        }
+
         projectsFactory.updateDeviceInfo(deviceDbInfo)
 
         save(0, source)

@@ -85,9 +85,10 @@ class SharedProject(
     fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
         check(remoteUsers.containsKey(deviceDbInfo.key))
 
-        val remoteProjectUser = remoteUsers[deviceDbInfo.key]!!
-
-        remoteProjectUser.setToken(deviceDbInfo)
+        remoteUsers.getValue(deviceDbInfo.key).apply {
+            name = deviceDbInfo.name
+            setToken(deviceDbInfo)
+        }
     }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) {

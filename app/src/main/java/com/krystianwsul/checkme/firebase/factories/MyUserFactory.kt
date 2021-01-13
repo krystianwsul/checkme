@@ -47,6 +47,7 @@ class MyUserFactory(
     init {
         setTab()
 
+        user.name = deviceDbInfo.name
         user.setToken(deviceDbInfo)
     }
 

@@ -141,11 +141,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     check(it.isRootInstance)
 
                                     // to ignore double taps
-                                    if (!it.notificationShown) DomainFactory.instance.setInstancesNotNotified(
-                                            0,
-                                            SaveService.Source.GUI,
-                                            listOf(instanceKey)
-                                    )
+                                    if (!it.notificationShown) {
+                                        DomainFactory.instance.setInstancesNotNotified(
+                                                0,
+                                                SaveService.Source.GUI,
+                                                listOf(instanceKey)
+                                        )
+                                    }
                                 }
                                 R.id.instanceMenuHour -> {
                                     check(showHour())

@@ -299,9 +299,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         initialize()
     }
 
-    private fun initialize() {
+    private fun initialize(placeholder: TreeViewAdapter.Placeholder? = null) {
         if (view == null) return
         if (data == null) return
+
+        val showProjects = (filterCriteria as? FilterCriteria.Full)?.filterParams?.showProjects == true
 
         if (this::treeViewAdapter.isInitialized) {
             val selected = treeViewAdapter.selectedNodes
@@ -318,19 +320,25 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter.updateDisplayedNodes {
+            fun initializeTaskAdapter(placeholder: TreeViewAdapter.Placeholder) {
                 (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(
                         data!!.taskData,
                         selectedTaskKeys,
                         expandedTaskIds,
-                        data!!.copying
+                        data!!.copying,
+                        showProjects,
                 )
 
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, false)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
             }
+
+            if (placeholder != null)
+                initializeTaskAdapter(placeholder)
+            else
+                treeViewAdapter.updateDisplayedNodes(::initializeTaskAdapter)
         } else {
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds, data!!.copying)
+            taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds, data!!.copying, showProjects)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.taskListRecycler.apply {
@@ -471,12 +479,21 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
+        fun FilterCriteria.showProjects() = (this as? FilterCriteria.Full)?.filterParams?.showProjects
+
+        val showProjectsChanged = rootTaskData == null &&
+                this.filterCriteria.showProjects() != filterCriteria.showProjects()
+
         this.filterCriteria = filterCriteria
         updateFabVisibility("search")
 
         if (placeholder != null) {
             check(this::treeViewAdapter.isInitialized)
-            treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
+
+            if (showProjectsChanged)
+                initialize(placeholder)
+            else
+                treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
         } else {
             check(!this::treeViewAdapter.isInitialized)
         }
@@ -515,6 +532,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 selectedTaskKeys: List<TaskKey>?,
                 expandedTaskKeys: List<TaskKey>?,
                 copying: Boolean,
+                showProjects: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -523,13 +541,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
             if (taskData.projectInfo != null || !taskData.note.isNullOrEmpty()) {
-                treeNodes += DetailsNode(taskData.projectInfo, taskData.note, null, 0).initialize(treeNodeCollection)
+                treeNodes += DetailsNode(
+                        taskData.projectInfo,
+                        taskData.note,
+                        null,
+                        0
+                ).initialize(treeNodeCollection)
             }
 
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes += ImageNode( // todo create some sort of imageViewerHost, merge code wtih GroupListFragment
+                        treeNodes += ImageNode( // todo create some sort of imageViewerHost, merge code with GroupListFragment
                                 ImageNode.ImageData(
                                         it,
                                         { viewer ->
@@ -550,20 +573,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             taskListFragment.showImage = false
 
-            taskWrappers = mutableListOf()
-            for (childTaskData in taskData.childTaskDatas) {
-                val taskWrapper = TaskWrapper(0, this, childTaskData, copying, null)
+            taskWrappers = taskData.childTaskDatas
+                    .map { TaskWrapper(0, this, it, copying, null) }
+                    .toMutableList()
 
-                treeNodes += taskWrapper.initialize(
-                        selectedTaskKeys,
-                        treeNodeCollection,
-                        expandedTaskKeys
-                )
-
-                taskWrappers.add(taskWrapper)
+            treeNodeCollection.nodes = taskWrappers.map {
+                it.initialize(selectedTaskKeys, treeNodeCollection, expandedTaskKeys)
             }
-
-            treeNodeCollection.nodes = treeNodes
         }
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()

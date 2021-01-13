@@ -42,9 +42,7 @@ object Preferences : FactoryProvider.Preferences {
 
     var lastTick
         get() = sharedPreferences.getLong(LAST_TICK_KEY, -1)
-        set(value) = sharedPreferences.edit()
-                .putLong(LAST_TICK_KEY, value)
-                .apply()
+        set(value) = sharedPreferences.edit { putLong(LAST_TICK_KEY, value) }
 
     val tickLog = Logger(TICK_LOG)
 
@@ -63,9 +61,7 @@ object Preferences : FactoryProvider.Preferences {
     override var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
-        sharedPreferences.edit()
-                .putString(KEY_SHORTCUTS, newValue)
-                .apply()
+        sharedPreferences.edit { putString(KEY_SHORTCUTS, newValue) }
     }
 
     var shortcuts: Map<TaskKey, LocalDateTime> by observable(
@@ -83,19 +79,13 @@ object Preferences : FactoryProvider.Preferences {
     init {
         tokenRelay.distinctUntilChanged()
                 .skip(1)
-                .subscribe {
-                    sharedPreferences.edit()
-                            .putString(TOKEN_KEY, it.value)
-                            .apply()
-                }
+                .subscribe { sharedPreferences.edit { putString(TOKEN_KEY, it.value) } }
                 .ignore()
     }
 
     var token: String?
         get() = tokenRelay.value!!.value
-        set(value) {
-            tokenRelay.accept(NullableWrapper(value))
-        }
+        set(value) = tokenRelay.accept(NullableWrapper(value))
 
     init {
         if (!sharedPreferences.contains(KEY_NOTIFICATION_LEVEL) && sharedPreferences.contains(KEY_SHOW_NOTIFICATIONS)) {
@@ -138,9 +128,10 @@ object Preferences : FactoryProvider.Preferences {
 
     val filterParamsObservable = Observable.combineLatest(
             showDeletedObservable,
-            showAssignedObservable
-    ) { showDeleted, showAssignedToOthers ->
-        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers)
+            showAssignedObservable,
+            showProjectsObservable,
+    ) { showDeleted, showAssignedToOthers, showProjects ->
+        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers, showProjects)
     }.distinctUntilChanged()!!
 
     init {

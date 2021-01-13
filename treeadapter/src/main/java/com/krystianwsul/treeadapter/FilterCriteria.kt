@@ -20,12 +20,14 @@ sealed class FilterCriteria : Parcelable {
                 query: String = "",
                 showDeleted: Boolean = false,
                 showAssignedToOthers: Boolean = true,
-        ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
+                showProjects: Boolean = false,
+        ) : this(query, FilterParams(showDeleted, showAssignedToOthers, showProjects))
 
         @Parcelize
         data class FilterParams(
                 val showDeleted: Boolean = false,
                 val showAssignedToOthers: Boolean = true,
+                val showProjects: Boolean = false,
         ) : Parcelable
     }
 

@@ -4,13 +4,13 @@ import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import io.reactivex.rxjava3.core.Single
 
-interface ViewModelState<ViewAction : Any, VModel : ViewModel> {
+interface ViewModelState<ViewEvent : Any, VModel : ViewModel> {
 
-    val nextStateSingle: Single<out ViewModelState<ViewAction, VModel>> // non-empty only for transient
+    val nextStateSingle: Single<out ViewModelState<ViewEvent, VModel>> // non-empty only for transient
 
-    fun toSerializableState(): SerializableState<ViewAction, VModel>? // null means the state is transient
+    fun toSerializableState(): SerializableState<ViewEvent, VModel>? // null means the state is transient
 
-    fun processViewAction(viewAction: ViewAction): ViewModelState<ViewAction, VModel>
+    fun processViewAction(viewEvent: ViewEvent): ViewModelState<ViewEvent, VModel>
 
     interface SerializableState<ViewAction : Any, VModel : ViewModel> : Parcelable {
 

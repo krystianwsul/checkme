@@ -72,7 +72,7 @@ class FindFriendActivity : NavBarActivity() {
 
         binding.findFriendEmail
                 .textChanges()
-                .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Search(it.toString())) }
+                .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewEvent.Search(it.toString())) }
                 .addTo(createDisposable)
 
         binding.findFriendRecycler.let {
@@ -96,7 +96,7 @@ class FindFriendActivity : NavBarActivity() {
             FindFriendViewModel.ViewState.Permissions ->
                 RxPermissions(this).request(Manifest.permission.READ_CONTACTS)
                         .toV3()
-                        .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewAction.Permissions(it)) }
+                        .subscribe { viewModel.viewActionRelay.accept(FindFriendViewModel.ViewEvent.Permissions(it)) }
                         .addTo(createDisposable)
             is FindFriendViewModel.ViewState.Loading -> {
                 binding.findFriendEmail.isEnabled = false
@@ -112,8 +112,6 @@ class FindFriendActivity : NavBarActivity() {
 
                 adapter.submitList(state.contacts) { binding.findFriendRecycler.smoothScrollToPosition(0) }
             }
-            is FindFriendViewModel.ViewState.Error ->
-                Snackbar.make(binding.root, state.stringRes, Snackbar.LENGTH_SHORT).show()
         }.ignore()
 
         animateVisibility(show, hide)

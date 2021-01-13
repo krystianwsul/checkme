@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import android.os.Parcelable
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
@@ -50,7 +49,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     val viewStateObservable = viewStateRelay.distinctUntilChanged()!!
 
-    val viewActionRelay = PublishRelay.create<ViewAction>()!!
+    val viewActionRelay = PublishRelay.create<ViewEvent>()!!
 
     init {
         stateRelay.mapNotNull { it.toSerializableState() }
@@ -79,8 +78,6 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     sealed class ViewState {
 
-        data class Error(@StringRes val stringRes: Int) : ViewState()
-
         object Permissions : ViewState()
 
         object Loading : ViewState()
@@ -88,10 +85,10 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
         data class Loaded(val contacts: List<Contact>, val showProgress: Boolean) : ViewState()
     }
 
-    sealed class ViewAction {
+    sealed class ViewEvent {
 
-        data class Permissions(val granted: Boolean) : ViewAction()
+        data class Permissions(val granted: Boolean) : ViewEvent()
 
-        data class Search(val email: String) : ViewAction()
+        data class Search(val email: String) : ViewEvent()
     }
 }

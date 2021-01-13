@@ -6,13 +6,13 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
 
-sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
+sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewEvent, FindFriendViewModel> {
 
     override val nextStateSingle: Single<out ContactsState> = Single.never()
 
     abstract override fun toSerializableState(): SerializableState?
 
-    override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState = this
+    override fun processViewAction(viewEvent: FindFriendViewModel.ViewEvent): ContactsState = this
 
     object Initial : ContactsState() {
 
@@ -25,10 +25,10 @@ sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction, Find
 
         override fun toSerializableState() = SerializableState.Initial
 
-        override fun processViewAction(viewAction: FindFriendViewModel.ViewAction): ContactsState {
-            return when (viewAction) {
-                is FindFriendViewModel.ViewAction.Permissions -> if (viewAction.granted) Loading else Denied
-                else -> super.processViewAction(viewAction)
+        override fun processViewAction(viewEvent: FindFriendViewModel.ViewEvent): ContactsState {
+            return when (viewEvent) {
+                is FindFriendViewModel.ViewEvent.Permissions -> if (viewEvent.granted) Loading else Denied
+                else -> super.processViewAction(viewEvent)
             }
         }
     }
@@ -62,7 +62,7 @@ sealed class ContactsState : ViewModelState<FindFriendViewModel.ViewAction, Find
     }
 
     sealed class SerializableState :
-            ViewModelState.SerializableState<FindFriendViewModel.ViewAction, FindFriendViewModel> {
+            ViewModelState.SerializableState<FindFriendViewModel.ViewEvent, FindFriendViewModel> {
 
         abstract override fun toState(viewModel: FindFriendViewModel): ContactsState
 

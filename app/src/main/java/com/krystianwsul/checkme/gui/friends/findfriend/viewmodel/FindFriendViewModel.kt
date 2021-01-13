@@ -61,7 +61,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                 .addTo(clearedDisposable)
 
         stateRelay.switchMapSingle { viewActionRelay.firstOrError().map { viewAction -> it to viewAction } }
-                .map { (state, viewAction) -> state.processViewAction(viewAction) }
+                .map { (state, viewAction) -> state.processViewEvent(viewAction) }
                 .subscribe(stateRelay::accept)
                 .addTo(clearedDisposable)
     }

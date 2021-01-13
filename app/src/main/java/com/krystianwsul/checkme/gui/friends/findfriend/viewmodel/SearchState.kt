@@ -14,7 +14,7 @@ sealed class SearchState(viewModel: FindFriendViewModel) :
 
     abstract override fun toSerializableState(): SerializableState?
 
-    override fun processViewAction(viewEvent: FindFriendViewEvent): SearchState = this
+    override fun processViewEvent(viewEvent: FindFriendViewEvent): SearchState = this
 
     class Loading(viewModel: FindFriendViewModel) : SearchState(viewModel) {
 

@@ -10,7 +10,7 @@ interface ViewModelState<ViewEvent : Any, VModel : ViewModel> {
 
     fun toSerializableState(): SerializableState<ViewEvent, VModel>? // null means the state is transient
 
-    fun processViewAction(viewEvent: ViewEvent): ViewModelState<ViewEvent, VModel>
+    fun processViewEvent(viewEvent: ViewEvent): ViewModelState<ViewEvent, VModel>
 
     interface SerializableState<ViewAction : Any, VModel : ViewModel> : Parcelable {
 

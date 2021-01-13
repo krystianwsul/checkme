@@ -12,23 +12,23 @@ sealed class ContactsState : ViewModelState<FindFriendViewEvent, FindFriendViewM
 
     abstract override fun toSerializableState(): SerializableState?
 
-    override fun processViewAction(viewEvent: FindFriendViewEvent): ContactsState = this
+    override fun processViewEvent(viewEvent: FindFriendViewEvent): ContactsState = this
 
     object Initial : ContactsState() {
 
-        override val nextStateSingle = Single.just(Waiting)!!
+        override val nextStateSingle = Single.just(WaitingForPermissions)!!
 
         override fun toSerializableState(): SerializableState? = null
     }
 
-    object Waiting : ContactsState() {
+    object WaitingForPermissions : ContactsState() {
 
         override fun toSerializableState() = SerializableState.Initial
 
-        override fun processViewAction(viewEvent: FindFriendViewEvent): ContactsState {
+        override fun processViewEvent(viewEvent: FindFriendViewEvent): ContactsState {
             return when (viewEvent) {
                 is FindFriendViewEvent.Permissions -> if (viewEvent.granted) Loading else Denied
-                else -> super.processViewAction(viewEvent)
+                else -> super.processViewEvent(viewEvent)
             }
         }
     }

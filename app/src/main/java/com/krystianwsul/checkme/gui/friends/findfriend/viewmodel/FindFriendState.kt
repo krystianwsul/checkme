@@ -18,7 +18,7 @@ data class FindFriendState(
 
         val (contactsLoading, phoneContacts) = when (contactsState) {
             is ContactsState.Initial -> return FindFriendViewState.Permissions
-            is ContactsState.Waiting -> false to listOf()
+            is ContactsState.WaitingForPermissions -> false to listOf()
             is ContactsState.Denied -> false to listOf()
             is ContactsState.Loading -> true to listOf()
             is ContactsState.Loaded -> false to contactsState.contacts
@@ -62,12 +62,12 @@ data class FindFriendState(
             null
     }
 
-    override fun processViewAction(viewEvent: FindFriendViewEvent): FindFriendState {
+    override fun processViewEvent(viewEvent: FindFriendViewEvent): FindFriendState {
         val newQuery = (viewEvent as? FindFriendViewEvent.Search)?.query ?: query
 
         return FindFriendState(
-                contactsState.processViewAction(viewEvent),
-                searchState.processViewAction(viewEvent),
+                contactsState.processViewEvent(viewEvent),
+                searchState.processViewEvent(viewEvent),
                 newQuery
         )
     }

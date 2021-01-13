@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
 
-sealed class ContactsState : ViewModelState<FindFriendViewEvent, FindFriendViewModel> {
+sealed class ContactsState : ModelState<FindFriendViewEvent, FindFriendViewModel> {
 
     override val nextStateSingle: Single<out ContactsState> = Single.never()
 
@@ -62,7 +62,7 @@ sealed class ContactsState : ViewModelState<FindFriendViewEvent, FindFriendViewM
     }
 
     sealed class SerializableState :
-            ViewModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
+            ModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
 
         abstract override fun toState(viewModel: FindFriendViewModel): ContactsState
 

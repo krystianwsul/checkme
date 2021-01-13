@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import kotlinx.parcelize.Parcelize
 
 sealed class SearchState(viewModel: FindFriendViewModel) :
-        ViewModelState<FindFriendViewEvent, FindFriendViewModel> {
+        ModelState<FindFriendViewEvent, FindFriendViewModel> {
 
     override val nextStateSingle = viewModel.usersObservable
             .firstOrError()
@@ -30,7 +30,7 @@ sealed class SearchState(viewModel: FindFriendViewModel) :
     }
 
     sealed class SerializableState :
-            ViewModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
+            ModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
 
 
         abstract override fun toState(viewModel: FindFriendViewModel): SearchState

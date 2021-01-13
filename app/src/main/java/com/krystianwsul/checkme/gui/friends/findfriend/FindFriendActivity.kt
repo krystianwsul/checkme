@@ -141,6 +141,8 @@ class FindFriendActivity : NavBarActivity() {
             holder.binding.apply {
                 getItem(position).let { contact ->
                     root.setOnClickListener {
+                        hideSoftKeyboard(binding.root)
+
                         if (contact.userWrapper != null) {
                             val added = DomainFactory.instance.tryAddFriend(SaveService.Source.GUI, contact.userWrapper)
 

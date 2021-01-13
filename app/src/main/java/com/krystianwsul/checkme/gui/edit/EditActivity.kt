@@ -110,7 +110,7 @@ class EditActivity : NavBarActivity() {
 
     private var hasDelegate = false
 
-    private val discardDialogListener = this::finish
+    private val discardDialogListener: (Parcelable?) -> Unit = { finish() }
 
     private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
 

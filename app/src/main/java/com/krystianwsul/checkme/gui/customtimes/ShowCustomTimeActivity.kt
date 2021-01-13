@@ -75,7 +75,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     private var savedInstanceState: Bundle? = null
 
-    private val discardDialogListener = this@ShowCustomTimeActivity::finish
+    private val discardDialogListener: (Parcelable?) -> Unit = { finish() }
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute, dayOfWeek: DayOfWeek ->
         check(timeViews.containsKey(dayOfWeek))

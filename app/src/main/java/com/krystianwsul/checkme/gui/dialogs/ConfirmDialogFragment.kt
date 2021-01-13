@@ -19,7 +19,7 @@ class ConfirmDialogFragment : AbstractDialogFragment() {
         }
     }
 
-    lateinit var listener: () -> Unit
+    lateinit var listener: (payload: Parcelable?) -> Unit
 
     private lateinit var parameters: Parameters
 
@@ -29,15 +29,19 @@ class ConfirmDialogFragment : AbstractDialogFragment() {
         parameters = requireArguments().getParcelable(KEY_PARAMETERS)!!
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(parameters.message)
-            .setNegativeButton(android.R.string.cancel) { _, _ -> }
-            .setPositiveButton(parameters.positive) { _, _ -> listener() }
-            .create()
+    override fun onCreateDialog(savedInstanceState: Bundle?) =
+            MaterialAlertDialogBuilder(requireContext()).apply { parameters.title?.let(::setTitle) }
+                    .setMessage(parameters.message)
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                    .setPositiveButton(parameters.positive) { _, _ -> listener(parameters.payload) }
+                    .create()
 
     @Parcelize
     data class Parameters(
             @StringRes val message: Int,
-            @StringRes val positive: Int
+            @StringRes val positive: Int,
+            @StringRes val title: Int? = null,
+            val payload: Parcelable? = null,
     ) : Parcelable {
 
         companion object {

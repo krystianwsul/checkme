@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.viewModels
@@ -21,18 +22,18 @@ import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
+import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewModel
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.ignore
-import com.krystianwsul.checkme.utils.loadPhoto
-import com.krystianwsul.checkme.utils.toV3
+import com.krystianwsul.checkme.utils.*
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxjava3.kotlin.addTo
 
 class FindFriendActivity : NavBarActivity() {
 
     companion object {
+
+        private const val TAG_CONFIRM_DIALOG = "confirmDialog"
 
         fun newIntent(context: Context) = Intent(context, FindFriendActivity::class.java)
     }
@@ -44,6 +45,18 @@ class FindFriendActivity : NavBarActivity() {
     private lateinit var binding: ActivityFindFriendBinding
 
     private val adapter by lazy { Adapter() }
+
+    private val confirmDialogListener: (Parcelable?) -> Unit = { payload ->
+        val contact = payload as FindFriendViewModel.Contact
+
+        startActivity(
+                Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_EMAIL, arrayOf(contact.email))
+                        .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.downloadCheckMeTitle))
+                        .putExtra(Intent.EXTRA_TEXT, getString(R.string.downloadCheckMeLink))
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +83,8 @@ class FindFriendActivity : NavBarActivity() {
         viewModel.viewStateObservable
                 .subscribe(::updateLayout)
                 .addTo(createDisposable)
+
+        tryGetFragment<ConfirmDialogFragment>(TAG_CONFIRM_DIALOG)?.listener = confirmDialogListener
     }
 
     private fun updateLayout(state: FindFriendViewModel.ViewState) {
@@ -142,14 +157,16 @@ class FindFriendActivity : NavBarActivity() {
                                 ).show()
                             }
                         } else {
-                            startActivity(
-                                    Intent(Intent.ACTION_SEND)
-                                            .setType("text/plain")
-                                            .putExtra(Intent.EXTRA_EMAIL, arrayOf(contact.email))
-                                            .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.downloadCheckMeTitle))
-                                            .putExtra(Intent.EXTRA_TEXT, getString(R.string.downloadCheckMeLink))
+                            ConfirmDialogFragment.newInstance(
+                                    ConfirmDialogFragment.Parameters(
+                                            R.string.inviteTitle,
+                                            R.string.share,
+                                            R.string.userNotFound,
+                                            contact
+                                    )
                             )
-
+                                    .apply { listener = confirmDialogListener }
+                                    .show(supportFragmentManager, TAG_CONFIRM_DIALOG)
                         }
                     }
 

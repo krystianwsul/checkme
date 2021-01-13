@@ -222,7 +222,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
-    private fun onConfirm() = finish()
+    @Suppress("UNUSED_PARAMETER")
+    private fun onConfirm(parcelable: Parcelable?) = finish()
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

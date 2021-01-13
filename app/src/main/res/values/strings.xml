@@ -57,7 +57,6 @@
     <string name="email_hint">Email</string>
     <string name="search">Search</string>
     <string name="connectionError">A connection error occurred.</string>
-    <string name="userNotFound">User not found.</string>
     <string name="friend_dialog_title">Pick a friend</string>
     <string name="instanceMarkedDone">This reminder has been marked as done.</string>
     <string name="projects">Projects</string>
@@ -138,4 +137,6 @@
     <string name="userAlreadyInFriends">This user is already your friend.</string>
     <string name="downloadCheckMeTitle">Download Check.me</string>
     <string name="downloadCheckMeLink" translatable="false">https://play.google.com/store/apps/details?id=com.krystianwsul.checkme</string>
+    <string name="inviteTitle">This contact doesn\'t seem to be a Check.me user.  Would you like to share a link with them to download the app?</string>
+    <string name="userNotFound">User not found</string>
 </resources>

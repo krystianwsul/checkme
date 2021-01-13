@@ -47,7 +47,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
     private var savedInstanceState: Bundle? = null
 
-    private val discardDialogListener = this::finish
+    private val discardDialogListener: (Parcelable?) -> Unit = { finish() }
 
     private lateinit var showProjectViewModel: ShowProjectViewModel
 

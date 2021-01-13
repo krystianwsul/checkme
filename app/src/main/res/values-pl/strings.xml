@@ -55,7 +55,6 @@
     <string name="email_hint">Email</string>
     <string name="search">Szukaj</string>
     <string name="connectionError">Wystąpił błąd połączenia.</string>
-    <string name="userNotFound">Nie znaleziono użytkownika.</string>
     <string name="friend_dialog_title">Wybierz znajomego</string>
     <string name="instanceMarkedDone">To przypomnienie zostało oznaczone jako zrobione.</string>
     <string name="projects">Projekty</string>
@@ -136,4 +135,6 @@
     <string name="addedUserToFriends">Dodano użytkownika do znajomych</string>
     <string name="userAlreadyInFriends">Ten użytkownik już jest twoim znajomym.</string>
     <string name="downloadCheckMeTitle">Ściągnij Check.me</string>
+    <string name="inviteTitle">Ta osoba zdaje się nie być użytkownikiem Check.me. Czy chcesz udostępnić jej link do ściągnięcia apki?</string>
+    <string name="userNotFound">Nie znaleziono użytkownika</string>
 </resources>

@@ -34,7 +34,7 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
     }
 
     fun remove(key: T) {
-        checkNotNull(recordPairs.remove(key))
+        recordPairs.remove(key)
     }
 
     protected fun add(key: T, record: U) {

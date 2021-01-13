@@ -84,10 +84,10 @@ class CollapseAppBarLayout : AppBarLayout {
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
-    fun setSearchMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
+    fun setSearchMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean, showProjects: Boolean) {
         binding.searchInclude
                 .toolbar
-                .setMenuOptions(showDeleted, showAssignedToOthers, false)
+                .setMenuOptions(showDeleted, showAssignedToOthers, showProjects)
     }
 
     override fun onDetachedFromWindow() {
@@ -182,6 +182,7 @@ class CollapseAppBarLayout : AppBarLayout {
             @IdRes searchItemId: Int,
             @IdRes showDeletedId: Int? = null,
             @IdRes showAssignedToOthersId: Int? = null,
+            @IdRes showProjects: Int? = null,
             listener: ((Int) -> Unit)? = null,
     ) {
         check(first)
@@ -200,6 +201,12 @@ class CollapseAppBarLayout : AppBarLayout {
             showAssignedToOthersId?.let {
                 Preferences.showAssignedObservable
                         .subscribe { menu.findItem(showAssignedToOthersId).isChecked = it }
+                        .addTo(attachedToWindowDisposable)
+            }
+
+            showProjects?.let {
+                Preferences.showProjectsObservable
+                        .subscribe { menu.findItem(showProjects).isChecked = it }
                         .addTo(attachedToWindowDisposable)
             }
 

@@ -97,7 +97,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setSearchMenuOptions(false, true)
+                    setSearchMenuOptions(false, true, false)
                     configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
                 }
 

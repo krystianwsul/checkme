@@ -19,4 +19,11 @@
         app:showAsAction="never"
         android:checkable="true" />
 
+    <item
+        android:id="@+id/actionTaskShowProjects"
+        android:title="@string/showProjects"
+        android:orderInCategory="800"
+        app:showAsAction="never"
+        android:checkable="true" />
+
 </menu>

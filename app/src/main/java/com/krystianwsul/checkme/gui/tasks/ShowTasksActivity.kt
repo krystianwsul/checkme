@@ -77,11 +77,16 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    if (parameters.copying) setSearchMenuOptions(false, false)
+                    if (parameters.copying) setSearchMenuOptions(false, false, true)
 
                     setText(getString(parameters.title), null, null, true)
 
-                    configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch, R.id.actionTaskShowDeleted)
+                    configureMenu(
+                            R.menu.show_task_menu_top,
+                            R.id.actionShowTaskSearch,
+                            R.id.actionTaskShowDeleted,
+                            R.id.actionTaskShowProjects,
+                    )
                 }
 
         updateTopMenu()
@@ -233,12 +238,17 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
+        val hasTasks = !data?.taskData
+                ?.childTaskDatas
+                .isNullOrEmpty()
+
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
                 .menu
-                .findItem(R.id.actionShowTaskSearch).isVisible = !data?.taskData
-                ?.childTaskDatas
-                .isNullOrEmpty()
+                .apply {
+                    findItem(R.id.actionShowTaskSearch).isVisible = hasTasks
+                    findItem(R.id.actionTaskShowProjects).isVisible = hasTasks
+                }
     }
 
     sealed class Parameters : Parcelable {

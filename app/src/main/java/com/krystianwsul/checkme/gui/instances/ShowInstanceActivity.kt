@@ -130,7 +130,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setSearchMenuOptions(false, false)
+                    setSearchMenuOptions(false, false, false)
 
                     configureMenu(R.menu.show_instance_menu_top, R.id.instanceMenuSearch) { itemId ->
                         data!!.also {

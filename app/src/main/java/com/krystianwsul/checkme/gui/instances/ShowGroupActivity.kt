@@ -102,7 +102,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .apply {
-                    setSearchMenuOptions(false, true)
+                    setSearchMenuOptions(false, true, false)
                     configureMenu(
                             R.menu.show_group_menu_top,
                             R.id.actionShowGroupSearch,

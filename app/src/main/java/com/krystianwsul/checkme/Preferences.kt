@@ -151,6 +151,10 @@ object Preferences : FactoryProvider.Preferences {
         showAssignedObservable.skip(1)
                 .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
                 .ignore()
+
+        showProjectsObservable.skip(1)
+                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }
+                .ignore()
     }
 
     fun getTooltipShown(type: TooltipManager.Type) =

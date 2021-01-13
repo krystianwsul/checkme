@@ -87,7 +87,7 @@ class CollapseAppBarLayout : AppBarLayout {
     fun setSearchMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
         binding.searchInclude
                 .toolbar
-                .setMenuOptions(showDeleted, showAssignedToOthers)
+                .setMenuOptions(showDeleted, showAssignedToOthers, false)
     }
 
     override fun onDetachedFromWindow() {

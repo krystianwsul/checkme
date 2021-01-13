@@ -58,6 +58,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                     R.id.actionSearchClose -> binding.searchText.text = null
                     R.id.actionSearchShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
                     R.id.actionSearchShowAssigned -> Preferences.showAssigned = !Preferences.showAssigned
+                    R.id.actionSearchShowProjects -> Preferences.showProjects = !Preferences.showProjects
                     else -> throw IllegalArgumentException()
                 }
 
@@ -73,15 +74,15 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
                 .menu
                 .apply {
                     Preferences.showDeletedObservable
-                            .subscribe {
-                                findItem(R.id.actionSearchShowDeleted).isChecked = it
-                            }
+                            .subscribe { findItem(R.id.actionSearchShowDeleted).isChecked = it }
                             .addTo(attachedToWindowDisposable)
 
                     Preferences.showAssignedObservable
-                            .subscribe {
-                                findItem(R.id.actionSearchShowAssigned).isChecked = it
-                            }
+                            .subscribe { findItem(R.id.actionSearchShowAssigned).isChecked = it }
+                            .addTo(attachedToWindowDisposable)
+
+                    Preferences.showProjectsObservable
+                            .subscribe { findItem(R.id.actionSearchShowProjects).isChecked = it }
                             .addTo(attachedToWindowDisposable)
                 }
     }
@@ -115,12 +116,13 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    fun setMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean) {
+    fun setMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean, showProjects: Boolean) {
         binding.searchToolbar
                 .menu
                 .apply {
                     findItem(R.id.actionSearchShowDeleted).isVisible = showDeleted
                     findItem(R.id.actionSearchShowAssigned).isVisible = showAssignedToOthers
+                    findItem(R.id.actionSearchShowProjects).isVisible = showProjects
                 }
     }
 

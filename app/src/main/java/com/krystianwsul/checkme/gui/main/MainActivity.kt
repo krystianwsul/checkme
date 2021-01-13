@@ -434,6 +434,10 @@ class MainActivity :
                     .subscribe { menu.findItem(R.id.actionMainAssigned).isChecked = it }
                     .addTo(createDisposable)
 
+            Preferences.showProjectsObservable
+                    .subscribe { menu.findItem(R.id.actionMainShowProjects).isChecked = it }
+                    .addTo(createDisposable)
+
             setOnMenuItemClickListener { item ->
                 val triple = timeRangeTriples.singleOrNull { it.first == item.itemId }
                 if (triple != null) {
@@ -462,6 +466,7 @@ class MainActivity :
                         }
                         R.id.actionMainShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
                         R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
+                        R.id.actionMainShowProjects -> Preferences.showProjects = !Preferences.showProjects
                         else -> throw IllegalArgumentException()
                     }
                 }
@@ -779,6 +784,7 @@ class MainActivity :
                 menu.setGroupVisible(R.id.actionMainFilter, tabSearchStateRelay.value!!.tab == Tab.INSTANCES)
                 menu.findItem(R.id.actionMainShowDeleted).isVisible = tabSearchState.tab.showDeleted
                 menu.findItem(R.id.actionMainAssigned).isVisible = tabSearchState.tab.showAssignedTo
+                menu.findItem(R.id.actionMainShowProjects).isVisible = tabSearchState.tab.showProjects
             }
         }
     }
@@ -846,7 +852,7 @@ class MainActivity :
 
         binding.mainSearchInclude
                 .toolbar
-                .setMenuOptions(tabSearchState.showShowDeleted, true)
+                .setMenuOptions(tabSearchState.tab.showDeleted, true, tabSearchState.tab.showProjects)
 
         hideViews += listOf(
                 binding.mainSearchGroupListFragment,
@@ -1080,8 +1086,6 @@ class MainActivity :
 
         abstract val title: Int
 
-        open val showShowDeleted = false
-
         open fun startSearch(): TabSearchState = throw UnsupportedOperationException()
 
         open fun closeSearch(): TabSearchState = throw UnsupportedOperationException()
@@ -1112,8 +1116,6 @@ class MainActivity :
             override val tab get() = Tab.TASKS
 
             override val title get() = R.string.tasks
-
-            override val showShowDeleted get() = true
 
             override fun startSearch(): TabSearchState {
                 check(!isSearching)
@@ -1180,6 +1182,7 @@ class MainActivity :
 
             override val showDeleted = true
             override val showAssignedTo = true
+            override val showProjects = true
         },
         PROJECTS,
         CUSTOM_TIMES,
@@ -1190,6 +1193,7 @@ class MainActivity :
         open val elevated = true
         open val showDeleted = false
         open val showAssignedTo = false
+        open val showProjects = false
     }
 
     @Parcelize

@@ -36,6 +36,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
+    private const val KEY_SHOW_PROJECTS = "showProjects"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -130,6 +131,10 @@ object Preferences : FactoryProvider.Preferences {
     private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
     var showAssigned by showAssignedProperty
     val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
+
+    private var showProjectsProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_PROJECTS, false))
+    var showProjects by showProjectsProperty
+    val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()!!
 
     val filterParamsObservable = Observable.combineLatest(
             showDeletedObservable,

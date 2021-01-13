@@ -63,6 +63,13 @@
             app:showAsAction="never"
             android:checkable="true" />
 
+        <item
+            android:id="@+id/actionMainShowProjects"
+            android:title="@string/showProjects"
+            android:orderInCategory="800"
+            app:showAsAction="never"
+            android:checkable="true" />
+
     </group>
 
 </menu>

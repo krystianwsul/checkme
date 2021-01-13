@@ -47,7 +47,7 @@ sealed class ContactsState : ModelState<FindFriendViewEvent, FindFriendViewModel
                     .find()
                     .flatMap {
                         it.emails.map { email ->
-                            FindFriendViewModel.Contact(it.displayName, email.address, it.photoUri, null)
+                            FindFriendViewModel.Person(it.displayName, email.address, it.photoUri, null)
                         }
                     }
         }
@@ -56,32 +56,32 @@ sealed class ContactsState : ModelState<FindFriendViewEvent, FindFriendViewModel
                 .observeOn(AndroidSchedulers.mainThread())!!
     }
 
-    data class Loaded(val contacts: List<FindFriendViewModel.Contact>) : ContactsState() {
+    data class Loaded(val people: List<FindFriendViewModel.Person>) : ContactsState() {
 
-        override fun toSerializableState() = SerializableState.Loaded(contacts)
+        override fun toSerializableState() = SerializableState.Loaded(people)
     }
 
     sealed class SerializableState :
             ModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
 
-        abstract override fun toState(viewModel: FindFriendViewModel): ContactsState
+        abstract override fun toModelState(viewModel: FindFriendViewModel): ContactsState
 
         @Parcelize
         object Initial : SerializableState() {
 
-            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Initial
+            override fun toModelState(viewModel: FindFriendViewModel) = ContactsState.Initial
         }
 
         @Parcelize
         object Denied : SerializableState() {
 
-            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Denied
+            override fun toModelState(viewModel: FindFriendViewModel) = ContactsState.Denied
         }
 
         @Parcelize
-        data class Loaded(val contacts: List<FindFriendViewModel.Contact>) : SerializableState() {
+        data class Loaded(val people: List<FindFriendViewModel.Person>) : SerializableState() {
 
-            override fun toState(viewModel: FindFriendViewModel) = ContactsState.Loaded(contacts)
+            override fun toModelState(viewModel: FindFriendViewModel) = ContactsState.Loaded(people)
         }
     }
 }

@@ -49,7 +49,7 @@ class FindFriendActivity : NavBarActivity() {
     private val adapter by lazy { Adapter() }
 
     private val confirmDialogListener: (Parcelable?) -> Unit = { payload ->
-        val contact = payload as FindFriendViewModel.Contact
+        val contact = payload as FindFriendViewModel.Person
 
         startActivity(
                 Intent(Intent.ACTION_SEND)
@@ -112,24 +112,24 @@ class FindFriendActivity : NavBarActivity() {
                 show += binding.findFriendRecycler
                 hide += binding.findFriendProgress
 
-                adapter.submitList(state.contacts) { binding.findFriendRecycler.smoothScrollToPosition(0) }
+                adapter.submitList(state.people) { binding.findFriendRecycler.smoothScrollToPosition(0) }
             }
         }.ignore()
 
         animateVisibility(show, hide)
     }
 
-    private inner class Adapter : ListAdapter<FindFriendViewModel.Contact, Holder>(
-            object : DiffUtil.ItemCallback<FindFriendViewModel.Contact>() {
+    private inner class Adapter : ListAdapter<FindFriendViewModel.Person, Holder>(
+            object : DiffUtil.ItemCallback<FindFriendViewModel.Person>() {
 
                 override fun areItemsTheSame(
-                        oldItem: FindFriendViewModel.Contact,
-                        newItem: FindFriendViewModel.Contact,
+                        oldItem: FindFriendViewModel.Person,
+                        newItem: FindFriendViewModel.Person,
                 ) = oldItem.email == newItem.email
 
                 override fun areContentsTheSame(
-                        oldItem: FindFriendViewModel.Contact,
-                        newItem: FindFriendViewModel.Contact,
+                        oldItem: FindFriendViewModel.Person,
+                        newItem: FindFriendViewModel.Person,
                 ) = oldItem == newItem
             }
     ) {

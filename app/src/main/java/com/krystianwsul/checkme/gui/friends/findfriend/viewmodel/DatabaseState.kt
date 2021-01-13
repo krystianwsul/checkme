@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
-import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.SearchState.Loaded
-import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.SearchState.Loading
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.DatabaseState.Loaded
+import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.DatabaseState.Loading
 import com.krystianwsul.common.firebase.json.UserWrapper
 import kotlinx.parcelize.Parcelize
 
-sealed class SearchState(viewModel: FindFriendViewModel) :
+sealed class DatabaseState(viewModel: FindFriendViewModel) :
         ModelState<FindFriendViewEvent, FindFriendViewModel> {
 
     override val nextStateSingle = viewModel.usersObservable
@@ -14,9 +14,9 @@ sealed class SearchState(viewModel: FindFriendViewModel) :
 
     abstract override fun toSerializableState(): SerializableState?
 
-    override fun processViewEvent(viewEvent: FindFriendViewEvent): SearchState = this
+    override fun processViewEvent(viewEvent: FindFriendViewEvent): DatabaseState = this
 
-    class Loading(viewModel: FindFriendViewModel) : SearchState(viewModel) {
+    class Loading(viewModel: FindFriendViewModel) : DatabaseState(viewModel) {
 
         override fun toSerializableState() = SerializableState.Loading
     }
@@ -24,7 +24,7 @@ sealed class SearchState(viewModel: FindFriendViewModel) :
     class Loaded(
             viewModel: FindFriendViewModel,
             val userWrappers: List<UserWrapper>,
-    ) : SearchState(viewModel) {
+    ) : DatabaseState(viewModel) {
 
         override fun toSerializableState() = SerializableState.Loaded(userWrappers)
     }
@@ -32,19 +32,18 @@ sealed class SearchState(viewModel: FindFriendViewModel) :
     sealed class SerializableState :
             ModelState.SerializableState<FindFriendViewEvent, FindFriendViewModel> {
 
-
-        abstract override fun toState(viewModel: FindFriendViewModel): SearchState
+        abstract override fun toModelState(viewModel: FindFriendViewModel): DatabaseState
 
         @Parcelize
         object Loading : SerializableState() {
 
-            override fun toState(viewModel: FindFriendViewModel) = Loading(viewModel)
+            override fun toModelState(viewModel: FindFriendViewModel) = Loading(viewModel)
         }
 
         @Parcelize
         data class Loaded(val userWrappers: List<UserWrapper>) : SerializableState() {
 
-            override fun toState(viewModel: FindFriendViewModel) = Loaded(viewModel, userWrappers)
+            override fun toModelState(viewModel: FindFriendViewModel) = Loaded(viewModel, userWrappers)
         }
     }
 }

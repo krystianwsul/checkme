@@ -28,8 +28,8 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     private val stateRelay = BehaviorRelay.createDefault(
             savedStateHandle.get<FindFriendState.SerializableState>(KEY_STATE)
-                    ?.toState(this)
-                    ?: FindFriendState(ContactsState.Initial, SearchState.Loading(this), "")
+                    ?.toModelState(this)
+                    ?: FindFriendState(ContactsState.Initial, DatabaseState.Loading(this), "")
     )
 
     init {
@@ -69,7 +69,7 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
     override fun onCleared() = clearedDisposable.dispose()
 
     @Parcelize
-    data class Contact(
+    data class Person(
             val displayName: String,
             val email: String,
             val photoUri: String?,

@@ -7,7 +7,7 @@ sealed class FindFriendViewState {
     object Loading : FindFriendViewState()
 
     data class Loaded(
-            val contacts: List<FindFriendViewModel.Contact>,
+            val people: List<FindFriendViewModel.Person>,
             val showProgress: Boolean,
     ) : FindFriendViewState()
 }

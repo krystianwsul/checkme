@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Single
 
 interface ModelState<ViewEvent : Any, VModel : ViewModel> {
 
-    val nextStateSingle: Single<out ModelState<ViewEvent, VModel>> // non-empty only for transient
+    val nextStateSingle: Single<out ModelState<ViewEvent, VModel>> // non-empty only for transient states
 
     fun toSerializableState(): SerializableState<ViewEvent, VModel>? // null means the state is transient
 
@@ -14,6 +14,6 @@ interface ModelState<ViewEvent : Any, VModel : ViewModel> {
 
     interface SerializableState<ViewAction : Any, VModel : ViewModel> : Parcelable {
 
-        fun toState(viewModel: VModel): ModelState<ViewAction, VModel>
+        fun toModelState(viewModel: VModel): ModelState<ViewAction, VModel>
     }
 }

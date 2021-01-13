@@ -135,4 +135,5 @@
     <string name="tooltip_press_drag">Dotknij and przytrzymaj żeby zmienić kolejność pozycji.</string>
     <string name="addedUserToFriends">Dodano użytkownika do znajomych</string>
     <string name="userAlreadyInFriends">Ten użytkownik już jest twoim znajomym.</string>
+    <string name="downloadCheckMeTitle">Ściągnij Check.me</string>
 </resources>

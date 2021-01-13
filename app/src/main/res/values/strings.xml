@@ -136,4 +136,6 @@
     <string name="tooltip_press_drag">Press and hold to rearrange items.</string>
     <string name="addedUserToFriends">User added to friends.</string>
     <string name="userAlreadyInFriends">This user is already your friend.</string>
+    <string name="downloadCheckMeTitle">Download Check.me</string>
+    <string name="downloadCheckMeLink" translatable="false">https://play.google.com/store/apps/details?id=com.krystianwsul.checkme</string>
 </resources>

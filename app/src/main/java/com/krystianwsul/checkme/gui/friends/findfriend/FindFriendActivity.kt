@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.friends.findfriend
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -144,11 +143,13 @@ class FindFriendActivity : NavBarActivity() {
                             }
                         } else {
                             startActivity(
-                                    Intent(Intent.ACTION_SENDTO).setData(Uri.parse("mailto:"))
+                                    Intent(Intent.ACTION_SEND)
+                                            .setType("text/plain")
                                             .putExtra(Intent.EXTRA_EMAIL, arrayOf(contact.email))
-                                            .putExtra(Intent.EXTRA_SUBJECT, "I'm a subject!")
-                                            .putExtra(Intent.EXTRA_TEXT, "I'm a body!")
+                                            .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.downloadCheckMeTitle))
+                                            .putExtra(Intent.EXTRA_TEXT, getString(R.string.downloadCheckMeLink))
                             )
+
                         }
                     }
 

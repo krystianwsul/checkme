@@ -182,7 +182,7 @@ class CollapseAppBarLayout : AppBarLayout {
             @IdRes searchItemId: Int,
             @IdRes showDeletedId: Int? = null,
             @IdRes showAssignedToOthersId: Int? = null,
-            @IdRes showProjects: Int? = null,
+            @IdRes showProjectsId: Int? = null,
             listener: ((Int) -> Unit)? = null,
     ) {
         check(first)
@@ -204,9 +204,9 @@ class CollapseAppBarLayout : AppBarLayout {
                         .addTo(attachedToWindowDisposable)
             }
 
-            showProjects?.let {
+            showProjectsId?.let {
                 Preferences.showProjectsObservable
-                        .subscribe { menu.findItem(showProjects).isChecked = it }
+                        .subscribe { menu.findItem(showProjectsId).isChecked = it }
                         .addTo(attachedToWindowDisposable)
             }
 
@@ -215,6 +215,7 @@ class CollapseAppBarLayout : AppBarLayout {
                     searchItemId -> startSearch()
                     showDeletedId -> Preferences.showDeleted = !Preferences.showDeleted
                     showAssignedToOthersId -> Preferences.showAssigned = !Preferences.showAssigned
+                    showProjectsId -> Preferences.showProjects = !Preferences.showProjects
                     else -> listener?.invoke(itemId) ?: throw IllegalArgumentException()
                 }
 

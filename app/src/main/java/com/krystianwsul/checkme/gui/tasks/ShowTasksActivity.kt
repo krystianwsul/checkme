@@ -85,7 +85,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                             R.menu.show_task_menu_top,
                             R.id.actionShowTaskSearch,
                             R.id.actionTaskShowDeleted,
-                            R.id.actionTaskShowProjects,
+                            showProjectsId = R.id.actionTaskShowProjects,
                     )
                 }
 

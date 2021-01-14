@@ -352,5 +352,6 @@ fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData
         name,
         childTaskDatas,
         projectKey,
-        endExactTimeStamp == null
+        endExactTimeStamp == null,
+        startExactTimeStamp.long
 )

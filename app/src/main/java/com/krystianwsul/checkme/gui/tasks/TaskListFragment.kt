@@ -382,7 +382,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun getAdapterState() = treeViewAdapter.run {
         AdapterState(
                 selectedNodes.map { (it.modelNode as TaskNode).childTaskData.taskKey }.toSet(),
-                (treeModelAdapter as TaskAdapter).expandedTaskKeys.toSet(),
+                (treeModelAdapter as TaskAdapter).expandedTaskKeys,
         )
     }
 
@@ -493,7 +493,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val taskAdapter = this
 
-        val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }
+        val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }.toSet()
 
         fun initialize(
                 taskData: TaskData,
@@ -546,6 +546,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     .flatMap {
                         fun ChildTaskData.toRootWrapper() = TaskNode(
                                 0,
+                                true,
                                 this@TaskAdapter,
                                 this,
                                 copying,
@@ -566,46 +567,84 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
     }
 
-    private inner class TaskNode(
-            override val indentation: Int,
+    private abstract class Node(
+            private val entryData: EntryData,
             private val nodeParent: NodeParent,
-            val childTaskData: ChildTaskData,
-            private val copying: Boolean,
-            override val parentNode: ModelNode<AbstractHolder>?,
-    ) :
-            AbstractModelNode(),
-            NodeParent,
-            Sortable,
-            MultiLineModelNode,
-            InvisibleCheckboxModelNode,
-            ThumbnailModelNode,
-            IndentationModelNode {
+            private val reverseSortOrder: Boolean,
+    ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode {
 
         override val holderType = HolderType.EXPANDABLE_MULTILINE
 
-        override val id = childTaskData.taskKey
+        override val id = entryData.id
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>
-            private set
+            protected set
 
-        private lateinit var taskNodes: List<TaskNode>
+        protected lateinit var taskNodes: List<TaskNode>
 
         override val taskAdapter get() = nodeParent.taskAdapter
 
-        private val taskListFragment get() = taskAdapter.taskListFragment
+        protected val taskListFragment get() = taskAdapter.taskListFragment
 
-        val expandedTaskKeys: List<TaskKey>
-            get() {
-                if (!treeNode.isExpanded) return listOf()
-
-                return listOf(childTaskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
-            }
+        abstract val expandedTaskKeys: Set<TaskKey>
 
         override val delegates by lazy {
             listOf(
                     ExpandableDelegate(treeNode),
                     MultiLineDelegate(this),
                     InvisibleCheckboxDelegate(this),
+            )
+        }
+
+        override val checkBoxInvisible = false
+
+        protected val disabledOverride = R.color.textDisabled.takeUnless { entryData.canAddSubtask }
+
+        override val name
+            get() =
+                MultiLineNameData.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
+
+        override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is Node) {
+            var comparison = entryData.compareTo(other.entryData)
+            if (taskListFragment.data!!.reverseOrderForTopLevelNodes && reverseSortOrder)
+                comparison = -comparison
+
+            comparison
+        } else {
+            1
+        }
+
+        override fun normalize() = entryData.normalize()
+
+        override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+                entryData.matchesFilterParams(filterParams)
+
+        override fun getMatchResult(query: String) =
+                ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
+    }
+
+    private inner class TaskNode(
+            override val indentation: Int,
+            reverseSortOrder: Boolean,
+            nodeParent: NodeParent,
+            val childTaskData: ChildTaskData,
+            private val copying: Boolean,
+            override val parentNode: ModelNode<AbstractHolder>?,
+    ) :
+            Node(childTaskData, nodeParent, reverseSortOrder),
+            Sortable,
+            ThumbnailModelNode,
+            IndentationModelNode {
+
+        override val expandedTaskKeys: Set<TaskKey>
+            get() {
+                if (!treeNode.isExpanded) return setOf()
+
+                return setOf(childTaskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
+            }
+
+        override val delegates by lazy {
+            super.delegates + listOf(
                     ThumbnailDelegate(this),
                     IndentationDelegate(this)
             )
@@ -618,8 +657,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     thumbnail != null,
                     true
             )
-
-        override val checkBoxInvisible = false
 
         fun initialize(
                 adapterState: AdapterState,
@@ -652,6 +689,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             taskNodes = childTaskData.children.map {
                 TaskNode(
                         indentation + 1,
+                        false,
                         this,
                         it,
                         copying,
@@ -664,8 +702,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return treeNode
         }
 
-        private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.canAddSubtask }
-
         override val children
             get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
                 (it.modelNode as? TaskNode)?.childTaskData?.name
@@ -677,12 +713,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             } else {
                 Pair(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
             }
-
-        override val name
-            get() = MultiLineNameData.Visible(
-                    childTaskData.name,
-                    disabledOverride ?: R.color.textPrimary
-            )
 
         override val isSelectable = !copying
 
@@ -713,16 +743,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val thumbnail = childTaskData.imageState
 
-        override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
-            var comparison = childTaskData.compareTo(other.childTaskData)
-            if (taskListFragment.data!!.reverseOrderForTopLevelNodes && indentation == 0)
-                comparison = -comparison
-
-            comparison
-        } else {
-            1
-        }
-
         override fun getOrdinal() = childTaskData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
@@ -734,14 +754,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     ordinal
             )
         }
-
-        override fun normalize() = childTaskData.normalize()
-
-        override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                childTaskData.matchesFilterParams(filterParams)
-
-        override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(childTaskData.matchesQuery(query))
     }
 
     private interface NodeParent {
@@ -765,10 +777,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val projectInfo: DetailsNode.ProjectInfo?,
     )
 
-    interface EntryData {
+    interface EntryData : Comparable<EntryData>, QueryMatchable, FilterParamsMatchable {
 
         val name: String
         val children: List<EntryData>
+        val id: Any
+        val canAddSubtask: Boolean
+
+        fun normalize() {
+            normalizedFields
+        }
     }
 
     data class ProjectData(
@@ -776,7 +794,24 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val children: List<ChildTaskData>,
             val projectKey: ProjectKey<*>,
             val current: Boolean,
-    ) : EntryData
+            val startExactTimeStamp: Long,
+    ) : EntryData {
+
+        override val id = projectKey
+
+        override val canAddSubtask = current
+        override val isDeleted = !canAddSubtask
+
+        override val normalizedFields by lazy { listOf(name.normalized()) }
+
+        override val isAssignedToMe = true
+
+        override fun compareTo(other: EntryData): Int {
+            check(other is ProjectData)
+
+            return startExactTimeStamp.compareTo(other.startExactTimeStamp)
+        }
+    }
 
     data class ChildTaskData(
             override val name: String,
@@ -786,19 +821,25 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKey: TaskKey,
             val imageState: ImageState?,
             val current: Boolean,
-            val canAddSubtask: Boolean,
+            override val canAddSubtask: Boolean,
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,
-    ) : EntryData, Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
+    ) : EntryData {
+
+        override val id = taskKey
 
         override val isDeleted = !canAddSubtask
 
-        override fun compareTo(other: ChildTaskData) = ordinal.compareTo(other.ordinal)
+        override fun compareTo(other: EntryData): Int {
+            check(other is ChildTaskData)
+
+            return ordinal.compareTo(other.ordinal)
+        }
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
-        fun normalize() {
+        override fun normalize() {
             normalizedFields
         }
     }

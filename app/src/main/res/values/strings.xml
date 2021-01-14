@@ -140,5 +140,5 @@
     <string name="inviteTitle">This contact doesn\'t seem to be a Check.me user.  Would you like to share a link with them to download the app?</string>
     <string name="userNotFound">User not found</string>
     <string name="addFriend">Add a new friend</string>
-    <string name="showProjects">Show projects</string>
+    <string name="showProjects">Group by project</string>
 </resources>

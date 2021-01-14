@@ -376,7 +376,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
 
-        (activity as Listener).setTaskSelectAllVisibility(taskAdapter.taskNodes.isNotEmpty())
+        (activity as Listener).setTaskSelectAllVisibility(taskAdapter.nodes.isNotEmpty())
     }
 
     private fun getAdapterState() = treeViewAdapter.run {
@@ -480,7 +480,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             NodeParent,
             ActionModeCallback by taskListFragment.selectionCallback {
 
-        lateinit var taskNodes: MutableList<TaskNode>
+        lateinit var nodes: MutableList<Node>
             private set
 
         val treeViewAdapter = TreeViewAdapter(
@@ -493,7 +493,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val taskAdapter = this
 
-        val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }.toSet()
+        val expandedTaskKeys get() = nodes.flatMap { it.expandedTaskKeys }.toSet()
 
         fun initialize(
                 taskData: TaskData,
@@ -540,9 +540,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             taskListFragment.showImage = false
 
-            check(rootTaskData == null || !showProjects)
-
-            taskNodes = taskData.entryDatas // todo project
+            nodes = taskData.entryDatas // todo project
                     .flatMap {
                         fun ChildTaskData.toRootWrapper() = TaskNode(
                                 0,
@@ -554,14 +552,19 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         )
 
                         when (it) {
-                            is ProjectData -> it.children.map { it.toRootWrapper() }
+                            is ProjectData -> {
+                                if (showProjects)
+                                    listOf(ProjectNode(this, it, copying))
+                                else
+                                    it.children.map { it.toRootWrapper() }
+                            }
                             is ChildTaskData -> listOf(it.toRootWrapper())
                             else -> throw IllegalArgumentException()
                         }
                     }
                     .toMutableList()
 
-            treeNodeCollection.nodes = taskNodes.map { it.initialize(adapterState, treeNodeCollection) }
+            treeNodeCollection.nodes = nodes.map { it.initialize(adapterState, treeNodeCollection) }
         }
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
@@ -621,6 +624,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun getMatchResult(query: String) =
                 ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
+
+        abstract fun initialize(
+                adapterState: AdapterState,
+                nodeContainer: NodeContainer<AbstractHolder>,
+        ): TreeNode<AbstractHolder>
     }
 
     private inner class ProjectNode(
@@ -648,7 +656,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     true
             )
 
-        fun initialize(
+        override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
         ): TreeNode<AbstractHolder> {
@@ -717,7 +725,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     true
             )
 
-        fun initialize(
+        override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
         ): TreeNode<AbstractHolder> {

@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -349,7 +351,7 @@ fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnD
 }
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(
-        name,
+        name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks),
         childTaskDatas,
         projectKey,
         endExactTimeStamp == null,

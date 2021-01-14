@@ -139,4 +139,5 @@
     <string name="userNotFound">Nie znaleziono użytkownika</string>
     <string name="addFriend">Dodaj nowego znajomego</string>
     <string name="showProjects">Pokaż projekty</string>
+    <string name="myTasks">Moje zadania</string>
 </resources>

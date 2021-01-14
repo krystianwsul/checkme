@@ -141,4 +141,5 @@
     <string name="userNotFound">User not found</string>
     <string name="addFriend">Add a new friend</string>
     <string name="showProjects">Group by project</string>
+    <string name="myTasks">My tasks</string>
 </resources>

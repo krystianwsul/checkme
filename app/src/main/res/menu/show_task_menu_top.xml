@@ -24,6 +24,7 @@
         android:title="@string/showProjects"
         android:orderInCategory="800"
         app:showAsAction="never"
-        android:checkable="true" />
+        android:checkable="true"
+        android:visible="false" />
 
 </menu>

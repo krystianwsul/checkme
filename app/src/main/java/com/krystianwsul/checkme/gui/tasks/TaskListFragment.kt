@@ -564,7 +564,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     }
                     .toMutableList()
 
-            treeNodeCollection.nodes = nodes.map { it.initialize(adapterState, treeNodeCollection) }
+            treeNodeCollection.nodes = nodes.map { it.initialize(adapterState, treeNodeCollection, showProjects) }
         }
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
@@ -628,6 +628,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         abstract fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
+                showProjects: Boolean,
         ): TreeNode<AbstractHolder>
     }
 
@@ -659,6 +660,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
+                showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
 
             val selected = false // todo project
@@ -677,7 +679,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         it,
                         copying,
                         this
-                ).also { treeNodes += it.initialize(adapterState, treeNode) }
+                ).also { treeNodes += it.initialize(adapterState, treeNode, showProjects) }
             }
 
             treeNode.setChildTreeNodes(treeNodes)
@@ -728,10 +730,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
+                showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
-            val detailsNode = if (childTaskData.projectInfo != null || !childTaskData.note.isNullOrEmpty()) {
+            val projectInfo = childTaskData.projectInfo?.let {
+                if (showProjects)
+                    it.takeIf { it.assignedTo.isNotEmpty() }?.copy(name = "")
+                else
+                    it
+            }
+
+            val detailsNode = if (projectInfo != null || !childTaskData.note.isNullOrEmpty()) {
                 DetailsNode(
-                        childTaskData.projectInfo,
+                        projectInfo,
                         childTaskData.note,
                         this,
                         indentation + 1
@@ -761,7 +771,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         it,
                         copying,
                         this
-                ).also { treeNodes += it.initialize(adapterState, treeNode) }
+                ).also { treeNodes += it.initialize(adapterState, treeNode, showProjects) }
             }
 
             treeNode.setChildTreeNodes(treeNodes)

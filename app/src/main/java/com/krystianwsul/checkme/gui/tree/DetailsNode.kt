@@ -72,6 +72,7 @@ class DetailsNode(
             if (projectInfo != null) {
                 rowProjectContainer.isVisible = true
 
+                rowProjectIcon.isVisible = projectInfo.name.isNotEmpty()
                 rowProject.text = projectInfo.name
 
                 rowAssignedTo.removeAllViews()
@@ -130,6 +131,7 @@ class DetailsNode(
         val rowTopMargin = binding.rowListDetailsTopMargin
         override val rowContainer = binding.rowListDetailsContainer
         val rowProjectContainer = binding.rowListDetailsProjectContainer
+        val rowProjectIcon = binding.rowListDetailsProjectIcon
         val rowProject = binding.rowListDetailsProject
         val rowAssignedTo = binding.rowListDetailsAssignedTo
         val rowMargin = binding.rowListDetailsMargin

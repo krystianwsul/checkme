@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
@@ -16,32 +17,41 @@ fun DomainFactory.getShowTasksData(taskKeys: List<TaskKey>?): ShowTasksViewModel
 
     val copying = taskKeys != null
 
-    val tasks = taskKeys?.map { getTaskForce(it) }
-            ?.asSequence()
-            ?: getUnscheduledTasks(now)
+    fun Task<*>.toChildTaskData(): TaskListFragment.ChildTaskData {
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
-    val taskDatas = tasks.map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-            .map { (task, hierarchyExactTimeStamp) ->
-                TaskListFragment.ChildTaskData(
-                        task.name,
-                        task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(
-                                task,
-                                now,
-                                hierarchyExactTimeStamp,
-                        ),
-                        task.note,
-                        task.taskKey,
-                        task.getImage(deviceDbInfo),
-                        task.current(now),
-                        task.isVisible(now),
-                        task.ordinal,
-                        task.getProjectInfo(now),
-                        task.isAssignedToMe(now, myUserFactory.user),
-                )
-            }
-            .sorted()
-            .toList()
+        return TaskListFragment.ChildTaskData(
+                name,
+                getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                getTaskListChildTaskDatas(
+                        this,
+                        now,
+                        hierarchyExactTimeStamp,
+                ),
+                note,
+                taskKey,
+                getImage(deviceDbInfo),
+                current(now),
+                isVisible(now),
+                ordinal,
+                getProjectInfo(now),
+                isAssignedToMe(now, myUserFactory.user),
+        )
+    }
 
-    ShowTasksViewModel.Data(TaskListFragment.TaskData(taskDatas, null, !copying, null))
+    val entryDatas = taskKeys?.map { getTaskForce(it).toChildTaskData() }
+            ?.sorted()
+            ?.toList()
+            ?: projectsFactory.projects
+                    .values
+                    .map {
+                        val childTaskDatas = it.tasks
+                                .filter { it.current(now) && it.isUnscheduled(now) }
+                                .map { it.toChildTaskData() }
+
+                        it.toProjectData(childTaskDatas)
+                    }
+                    .filter { it.children.isNotEmpty() }
+
+    ShowTasksViewModel.Data(TaskListFragment.TaskData(entryDatas, null, !copying, null))
 }

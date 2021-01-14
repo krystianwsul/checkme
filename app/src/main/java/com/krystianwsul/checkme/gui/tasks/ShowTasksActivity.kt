@@ -239,7 +239,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private fun updateTopMenu() {
         val hasTasks = !data?.taskData
-                ?.childTaskDatas
+                ?.entryDatas
                 .isNullOrEmpty()
 
         binding.showTasksToolbarCollapseInclude

@@ -48,6 +48,7 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -184,8 +185,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         get() = mutableListOf<String>().also {
             checkNotNull(data)
 
-            for (childTaskData in data!!.taskData.childTaskDatas)
-                printTree(it, 1, childTaskData)
+            for (entryData in data!!.taskData.entryDatas) // todo project
+                printTree(it, 1, entryData)
 
         }.joinToString("\n")
 
@@ -228,10 +229,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         else -> shareTree.any { inTree(it.children, childTaskData) }
     }
 
-    private fun printTree(lines: MutableList<String>, indentation: Int, childTaskData: ChildTaskData) {
-        lines.add("-".repeat(indentation) + childTaskData.name)
+    private fun printTree(lines: MutableList<String>, indentation: Int, entryData: EntryData) {
+        lines.add("-".repeat(indentation) + entryData.name)
 
-        childTaskData.children.forEach { printTree(lines, indentation + 1, it) }
+        entryData.children.forEach { printTree(lines, indentation + 1, it) }
     }
 
     override fun onAttach(context: Context) {
@@ -532,7 +533,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 selectedTaskKeys: List<TaskKey>?,
                 expandedTaskKeys: List<TaskKey>?,
                 copying: Boolean,
-                showProjects: Boolean,
+                showProjects: Boolean, // todo project
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -573,8 +574,24 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             taskListFragment.showImage = false
 
-            taskWrappers = taskData.childTaskDatas
-                    .map { TaskWrapper(0, this, it, copying, null) }
+            check(rootTaskData == null || !showProjects)
+
+            taskWrappers = taskData.entryDatas // todo project
+                    .flatMap {
+                        fun ChildTaskData.toRootWrapper() = TaskWrapper(
+                                0,
+                                this@TaskAdapter,
+                                this,
+                                copying,
+                                null,
+                        )
+
+                        when (it) {
+                            is ProjectData -> it.children.map { it.toRootWrapper() }
+                            is ChildTaskData -> listOf(it.toRootWrapper())
+                            else -> throw IllegalArgumentException()
+                        }
+                    }
                     .toMutableList()
 
             treeNodeCollection.nodes = taskWrappers.map {
@@ -790,16 +807,29 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     )
 
     data class TaskData(
-            val childTaskDatas: List<ChildTaskData>,
+            val entryDatas: List<EntryData>,
             val note: String?,
             val showFab: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,
     )
 
+    interface EntryData {
+
+        val name: String
+        val children: List<EntryData>
+    }
+
+    data class ProjectData(
+            override val name: String,
+            override val children: List<ChildTaskData>,
+            val projectKey: ProjectKey<*>,
+            val current: Boolean,
+    ) : EntryData
+
     data class ChildTaskData(
-            val name: String,
+            override val name: String,
             val scheduleText: String?,
-            val children: List<ChildTaskData>,
+            override val children: List<ChildTaskData>,
             val note: String?,
             val taskKey: TaskKey,
             val imageState: ImageState?,
@@ -808,7 +838,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             var ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,
-    ) : Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
+    ) : EntryData, Comparable<ChildTaskData>, QueryMatchable, FilterParamsMatchable {
 
         override val isDeleted = !canAddSubtask
 

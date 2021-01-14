@@ -9,15 +9,13 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.models.FilterResult
-import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.models.filterQuery
+import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
@@ -75,7 +73,7 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = s
 fun DomainFactory.setInstancesNotNotified(
         dataId: Int,
         source: SaveService.Source,
-        instanceKeys: List<InstanceKey>
+        instanceKeys: List<InstanceKey>,
 ) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -101,7 +99,7 @@ fun DomainFactory.setInstancesNotNotified(
 fun DomainFactory.setInstancesAddHourActivity(
         dataId: Int,
         source: SaveService.Source,
-        instanceKeys: Collection<InstanceKey>
+        instanceKeys: Collection<InstanceKey>,
 ): DomainFactory.HourUndoData = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -138,7 +136,7 @@ fun DomainFactory.setInstancesAddHourActivity(
 fun DomainFactory.undoInstancesAddHour(
         dataId: Int,
         source: SaveService.Source,
-        hourUndoData: DomainFactory.HourUndoData
+        hourUndoData: DomainFactory.HourUndoData,
 ) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -184,7 +182,7 @@ fun DomainFactory.setInstanceDone(
 fun DomainFactory.setInstanceNotified(
         dataId: Int,
         source: SaveService.Source,
-        instanceKey: InstanceKey
+        instanceKey: InstanceKey,
 ) = syncOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
@@ -349,3 +347,10 @@ fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnD
 
     notifyCloud(projects)
 }
+
+fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(
+        name,
+        childTaskDatas,
+        projectKey,
+        endExactTimeStamp == null
+)

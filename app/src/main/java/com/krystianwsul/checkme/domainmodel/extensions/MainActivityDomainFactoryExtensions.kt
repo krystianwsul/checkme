@@ -19,35 +19,41 @@ import java.util.*
 fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now) = DomainFactory.syncOnDomain {
     MyCrashlytics.log("DomainFactory.getMainData")
 
-    val childTaskDatas = getTasks().map {
-        val hierarchyDateTime = it.getHierarchyExactTimeStamp(now)
-        Pair(it, hierarchyDateTime)
-    }
-            .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
-            .map { (task, hierarchyExactTimeStamp) ->
-                TaskListFragment.ChildTaskData(
-                        task.name,
-                        task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(
-                                task,
-                                now,
-                                hierarchyExactTimeStamp,
-                        ),
-                        task.note,
-                        task.taskKey,
-                        task.getImage(deviceDbInfo),
-                        task.current(now),
-                        task.isVisible(now),
-                        task.ordinal,
-                        task.getProjectInfo(now),
-                        task.isAssignedToMe(now, myUserFactory.user),
-                )
+    val projectDatas = projectsFactory.projects
+            .values
+            .map {
+                val childTaskDatas = it.tasks
+                        .asSequence()
+                        .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
+                        .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
+                        .map { (task, hierarchyExactTimeStamp) ->
+                            TaskListFragment.ChildTaskData(
+                                    task.name,
+                                    task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                                    getTaskListChildTaskDatas(
+                                            task,
+                                            now,
+                                            hierarchyExactTimeStamp,
+                                    ),
+                                    task.note,
+                                    task.taskKey,
+                                    task.getImage(deviceDbInfo),
+                                    task.current(now),
+                                    task.isVisible(now),
+                                    task.ordinal,
+                                    task.getProjectInfo(now),
+                                    task.isAssignedToMe(now, myUserFactory.user),
+                            )
+                        }
+                        .sortedDescending()
+                        .toList()
+
+                it.toProjectData(childTaskDatas)
             }
-            .sortedDescending()
-            .toMutableList()
+            .filter { it.children.isNotEmpty() }
 
     MainViewModel.Data(
-            TaskListFragment.TaskData(childTaskDatas, null, true, null),
+            TaskListFragment.TaskData(projectDatas, null, true, null),
             myUserFactory.user.defaultTab
     )
 }

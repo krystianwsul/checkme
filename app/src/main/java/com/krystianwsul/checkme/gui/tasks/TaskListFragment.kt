@@ -114,7 +114,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val selected = treeViewAdapter.selectedNodes
             check(selected.isNotEmpty())
 
-            val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskNode }
+            val taskWrappers = selected.map { it.modelNode as TaskNode }
             val childTaskDatas = taskWrappers.map { it.childTaskData }
             val taskKeys = childTaskDatas.map { it.taskKey }
 
@@ -161,9 +161,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val single = selectedNodes.size == 1
 
-            val datas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskNode).childTaskData }
-
-            val current = datas.all { it.current }
+            val current = selectedNodes.map { (it.modelNode as TaskNode).childTaskData }.all { it.current }
 
             return listOf(
                     R.id.action_task_edit to (single && current),
@@ -360,7 +358,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .firstOrNull {
                     val modelNode = it.modelNode
 
-                    if (modelNode is TaskAdapter.TaskNode) {
+                    if (modelNode is TaskNode) {
                         if (it.isExpanded) {
                             modelNode.childTaskData.taskKey == scrollToTaskKey
                         } else {
@@ -383,7 +381,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private fun getAdapterState() = treeViewAdapter.run {
         AdapterState(
-                selectedNodes.map { (it.modelNode as TaskAdapter.TaskNode).childTaskData.taskKey }.toSet(),
+                selectedNodes.map { (it.modelNode as TaskNode).childTaskData.taskKey }.toSet(),
                 (treeModelAdapter as TaskAdapter).expandedTaskKeys.toSet(),
         )
     }
@@ -425,9 +423,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val selectedNodes = treeViewAdapter.selectedNodes
                 check(selectedNodes.isNotEmpty())
 
-                val childTaskData = selectedNodes.singleOrNull()?.let {
-                    (it.modelNode as TaskAdapter.TaskNode).childTaskData
-                }
+                val childTaskData = selectedNodes.singleOrNull()?.let { (it.modelNode as TaskNode).childTaskData }
 
                 if (childTaskData?.canAddSubtask == true) {
                     show()
@@ -481,10 +477,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private inner class TaskAdapter(val taskListFragment: TaskListFragment) :
             BaseAdapter(),
-            TaskParent,
+            NodeParent,
             ActionModeCallback by taskListFragment.selectionCallback {
-
-        override val keyChain = listOf<TaskKey>()
 
         lateinit var taskNodes: MutableList<TaskNode>
             private set
@@ -494,7 +488,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
         )
 
-        override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
+        public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         override val taskAdapter = this
@@ -570,193 +564,189 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()
-
-        inner class TaskNode(
-                override val indentation: Int,
-                private val taskParent: TaskParent,
-                val childTaskData: ChildTaskData,
-                private val copying: Boolean,
-                override val parentNode: ModelNode<AbstractHolder>?,
-        ) :
-                AbstractModelNode(),
-                TaskParent,
-                Sortable,
-                MultiLineModelNode,
-                InvisibleCheckboxModelNode,
-                ThumbnailModelNode,
-                IndentationModelNode {
-
-            override val holderType = HolderType.EXPANDABLE_MULTILINE
-
-            override val keyChain = taskParent.keyChain + childTaskData.taskKey
-
-            override val id = keyChain
-
-            public override lateinit var treeNode: TreeNode<AbstractHolder>
-                private set
-
-            private lateinit var taskNodes: List<TaskNode>
-
-            override val taskAdapter get() = taskParent.taskAdapter
-
-            private val taskListFragment get() = taskAdapter.taskListFragment
-
-            val expandedTaskKeys: List<TaskKey>
-                get() {
-                    if (!treeNode.isExpanded) return listOf()
-
-                    return listOf(childTaskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
-                }
-
-            override val delegates by lazy {
-                listOf(
-                        ExpandableDelegate(treeNode),
-                        MultiLineDelegate(this),
-                        InvisibleCheckboxDelegate(this),
-                        ThumbnailDelegate(this),
-                        IndentationDelegate(this)
-                )
-            }
-
-            override val widthKey
-                get() = MultiLineDelegate.WidthKey(
-                        indentation,
-                        false,
-                        thumbnail != null,
-                        true
-                )
-
-            override val checkBoxInvisible = false
-
-            fun initialize(
-                    adapterState: AdapterState,
-                    nodeContainer: NodeContainer<AbstractHolder>,
-            ): TreeNode<AbstractHolder> {
-                val detailsNode = if (childTaskData.projectInfo != null || !childTaskData.note.isNullOrEmpty()) {
-                    DetailsNode(
-                            childTaskData.projectInfo,
-                            childTaskData.note,
-                            this,
-                            indentation + 1
-                    )
-                } else {
-                    null
-                }
-
-                val selected = adapterState.selectedTaskKeys.contains(childTaskData.taskKey)
-
-                val expanded = if (detailsNode != null || childTaskData.children.isNotEmpty())
-                    adapterState.expandedTaskKeys.contains(childTaskData.taskKey)
-                else
-                    false
-
-                treeNode = TreeNode(this, nodeContainer, expanded, selected)
-
-                val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
-
-                detailsNode?.let { treeNodes += it.initialize(nodeContainer) }
-
-                taskNodes = childTaskData.children.map {
-                    TaskNode(
-                            indentation + 1,
-                            this,
-                            it,
-                            copying,
-                            this
-                    ).also { treeNodes += it.initialize(adapterState, treeNode) }
-                }
-
-                treeNode.setChildTreeNodes(treeNodes)
-
-                return treeNode
-            }
-
-            private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.canAddSubtask }
-
-            override val children
-                get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
-                    (it.modelNode as? TaskNode)?.childTaskData?.name
-                }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
-
-            override val details
-                get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
-                    null
-                } else {
-                    Pair(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
-                }
-
-            override val name
-                get() = MultiLineNameData.Visible(
-                        childTaskData.name,
-                        disabledOverride ?: R.color.textPrimary
-                )
-
-            override val isSelectable = !copying
-
-            override val isDraggable = true
-
-            override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
-                val treeNodeCollection = taskAdapter.treeNodeCollection
-
-                return if (taskListFragment.rootTaskData != null
-                        && treeNodeCollection.selectedChildren.isEmpty()
-                        && indentation == 0
-                        && treeNodeCollection.nodes.none { it.isExpanded }
-                ) {
-                    taskListFragment.dragHelper.startDrag(viewHolder)
-
-                    true
-                } else {
-                    false
-                }
-            }
-
-            override fun onClick(holder: AbstractHolder) {
-                if (!copying)
-                    taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
-                else if (indentation == 0)
-                    taskListFragment.listener.startCopy(childTaskData.taskKey)
-            }
-
-            override val thumbnail = childTaskData.imageState
-
-            override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
-                var comparison = childTaskData.compareTo(other.childTaskData)
-                if (taskListFragment.data!!.reverseOrderForTopLevelNodes && indentation == 0)
-                    comparison = -comparison
-
-                comparison
-            } else {
-                1
-            }
-
-            override fun getOrdinal() = childTaskData.ordinal
-
-            override fun setOrdinal(ordinal: Double) {
-                childTaskData.ordinal = ordinal
-
-                DomainFactory.instance.setOrdinal(
-                        taskListFragment.data!!.dataId,
-                        childTaskData.taskKey,
-                        ordinal
-                )
-            }
-
-            override fun normalize() = childTaskData.normalize()
-
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                    childTaskData.matchesFilterParams(filterParams)
-
-            override fun getMatchResult(query: String) =
-                    ModelNode.MatchResult.fromBoolean(childTaskData.matchesQuery(query))
-        }
     }
 
-    private interface TaskParent {
+    private inner class TaskNode(
+            override val indentation: Int,
+            private val nodeParent: NodeParent,
+            val childTaskData: ChildTaskData,
+            private val copying: Boolean,
+            override val parentNode: ModelNode<AbstractHolder>?,
+    ) :
+            AbstractModelNode(),
+            NodeParent,
+            Sortable,
+            MultiLineModelNode,
+            InvisibleCheckboxModelNode,
+            ThumbnailModelNode,
+            IndentationModelNode {
+
+        override val holderType = HolderType.EXPANDABLE_MULTILINE
+
+        override val id = childTaskData.taskKey
+
+        public override lateinit var treeNode: TreeNode<AbstractHolder>
+            private set
+
+        private lateinit var taskNodes: List<TaskNode>
+
+        override val taskAdapter get() = nodeParent.taskAdapter
+
+        private val taskListFragment get() = taskAdapter.taskListFragment
+
+        val expandedTaskKeys: List<TaskKey>
+            get() {
+                if (!treeNode.isExpanded) return listOf()
+
+                return listOf(childTaskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
+            }
+
+        override val delegates by lazy {
+            listOf(
+                    ExpandableDelegate(treeNode),
+                    MultiLineDelegate(this),
+                    InvisibleCheckboxDelegate(this),
+                    ThumbnailDelegate(this),
+                    IndentationDelegate(this)
+            )
+        }
+
+        override val widthKey
+            get() = MultiLineDelegate.WidthKey(
+                    indentation,
+                    false,
+                    thumbnail != null,
+                    true
+            )
+
+        override val checkBoxInvisible = false
+
+        fun initialize(
+                adapterState: AdapterState,
+                nodeContainer: NodeContainer<AbstractHolder>,
+        ): TreeNode<AbstractHolder> {
+            val detailsNode = if (childTaskData.projectInfo != null || !childTaskData.note.isNullOrEmpty()) {
+                DetailsNode(
+                        childTaskData.projectInfo,
+                        childTaskData.note,
+                        this,
+                        indentation + 1
+                )
+            } else {
+                null
+            }
+
+            val selected = adapterState.selectedTaskKeys.contains(childTaskData.taskKey)
+
+            val expanded = if (detailsNode != null || childTaskData.children.isNotEmpty())
+                adapterState.expandedTaskKeys.contains(childTaskData.taskKey)
+            else
+                false
+
+            treeNode = TreeNode(this, nodeContainer, expanded, selected)
+
+            val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
+
+            detailsNode?.let { treeNodes += it.initialize(nodeContainer) }
+
+            taskNodes = childTaskData.children.map {
+                TaskNode(
+                        indentation + 1,
+                        this,
+                        it,
+                        copying,
+                        this
+                ).also { treeNodes += it.initialize(adapterState, treeNode) }
+            }
+
+            treeNode.setChildTreeNodes(treeNodes)
+
+            return treeNode
+        }
+
+        private val disabledOverride = R.color.textDisabled.takeUnless { childTaskData.canAddSubtask }
+
+        override val children
+            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
+                (it.modelNode as? TaskNode)?.childTaskData?.name
+            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+
+        override val details
+            get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
+                null
+            } else {
+                Pair(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
+            }
+
+        override val name
+            get() = MultiLineNameData.Visible(
+                    childTaskData.name,
+                    disabledOverride ?: R.color.textPrimary
+            )
+
+        override val isSelectable = !copying
+
+        override val isDraggable = true
+
+        override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
+            val treeNodeCollection = taskAdapter.treeNodeCollection
+
+            return if (taskListFragment.rootTaskData != null
+                    && treeNodeCollection.selectedChildren.isEmpty()
+                    && indentation == 0
+                    && treeNodeCollection.nodes.none { it.isExpanded }
+            ) {
+                taskListFragment.dragHelper.startDrag(viewHolder)
+
+                true
+            } else {
+                false
+            }
+        }
+
+        override fun onClick(holder: AbstractHolder) {
+            if (!copying)
+                taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+            else if (indentation == 0)
+                taskListFragment.listener.startCopy(childTaskData.taskKey)
+        }
+
+        override val thumbnail = childTaskData.imageState
+
+        override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
+            var comparison = childTaskData.compareTo(other.childTaskData)
+            if (taskListFragment.data!!.reverseOrderForTopLevelNodes && indentation == 0)
+                comparison = -comparison
+
+            comparison
+        } else {
+            1
+        }
+
+        override fun getOrdinal() = childTaskData.ordinal
+
+        override fun setOrdinal(ordinal: Double) {
+            childTaskData.ordinal = ordinal
+
+            DomainFactory.instance.setOrdinal(
+                    taskListFragment.data!!.dataId,
+                    childTaskData.taskKey,
+                    ordinal
+            )
+        }
+
+        override fun normalize() = childTaskData.normalize()
+
+        override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+                childTaskData.matchesFilterParams(filterParams)
+
+        override fun getMatchResult(query: String) =
+                ModelNode.MatchResult.fromBoolean(childTaskData.matchesQuery(query))
+    }
+
+    private interface NodeParent {
 
         val taskAdapter: TaskAdapter
-
-        val keyChain: List<TaskKey>
     }
 
     data class Data(

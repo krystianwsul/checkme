@@ -571,7 +571,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             private val entryData: EntryData,
             private val nodeParent: NodeParent,
             private val reverseSortOrder: Boolean,
-    ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode {
+    ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode, IndentationModelNode {
 
         override val holderType = HolderType.EXPANDABLE_MULTILINE
 
@@ -593,6 +593,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     ExpandableDelegate(treeNode),
                     MultiLineDelegate(this),
                     InvisibleCheckboxDelegate(this),
+                    IndentationDelegate(this),
             )
         }
 
@@ -601,8 +602,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         protected val disabledOverride = R.color.textDisabled.takeUnless { entryData.canAddSubtask }
 
         override val name
-            get() =
-                MultiLineNameData.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
+            get() = MultiLineNameData.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
 
         override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is Node) {
             var comparison = entryData.compareTo(other.entryData)
@@ -623,6 +623,66 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
     }
 
+    private inner class ProjectNode(
+            taskAdapter: TaskAdapter,
+            val projectData: ProjectData,
+            private val copying: Boolean,
+    ) : Node(projectData, taskAdapter, true) {
+
+        override val parentNode: ModelNode<AbstractHolder>? = null
+
+        override val indentation = 0
+
+        override val expandedTaskKeys: Set<TaskKey>
+            get() {
+                if (!treeNode.isExpanded) return setOf()
+
+                return taskNodes.flatMap { it.expandedTaskKeys }.toSet()
+            }
+
+        override val widthKey
+            get() = MultiLineDelegate.WidthKey(
+                    indentation,
+                    false,
+                    false,
+                    true
+            )
+
+        fun initialize(
+                adapterState: AdapterState,
+                nodeContainer: NodeContainer<AbstractHolder>,
+        ): TreeNode<AbstractHolder> {
+
+            val selected = false // todo project
+
+            val expanded = false // todo project
+
+            treeNode = TreeNode(this, nodeContainer, expanded, selected)
+
+            val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
+
+            taskNodes = projectData.children.map {
+                TaskNode(
+                        indentation + 1,
+                        false,
+                        this,
+                        it,
+                        copying,
+                        this
+                ).also { treeNodes += it.initialize(adapterState, treeNode) }
+            }
+
+            treeNode.setChildTreeNodes(treeNodes)
+
+            return treeNode
+        }
+
+        override val children
+            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
+                (it.modelNode as? TaskNode)?.childTaskData?.name
+            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+    }
+
     private inner class TaskNode(
             override val indentation: Int,
             reverseSortOrder: Boolean,
@@ -633,8 +693,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     ) :
             Node(childTaskData, nodeParent, reverseSortOrder),
             Sortable,
-            ThumbnailModelNode,
-            IndentationModelNode {
+            ThumbnailModelNode {
 
         override val expandedTaskKeys: Set<TaskKey>
             get() {

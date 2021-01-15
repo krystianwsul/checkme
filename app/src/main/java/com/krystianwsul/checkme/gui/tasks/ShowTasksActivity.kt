@@ -78,16 +78,13 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
-                .apply {
-                    if (parameters.copying) setSearchMenuOptions(false, false, true)
-
-                    configureMenu(
-                            R.menu.show_task_menu_top,
-                            R.id.actionShowTaskSearch,
-                            R.id.actionTaskShowDeleted,
-                            showProjectsId = R.id.actionTaskShowProjects,
-                    )
-                }
+                .configureMenu(
+                        R.menu.show_task_menu_top,
+                        R.id.actionShowTaskSearch,
+                        R.id.actionTaskShowDeleted,
+                        R.id.actionTaskShowAssignedToOthers,
+                        R.id.actionTaskShowProjects,
+                )
 
         updateTopMenu()
 
@@ -243,16 +240,39 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     private fun updateTopMenu() {
-        val hasTasks = !data?.taskData
-                ?.entryDatas
-                .isNullOrEmpty()
+        val showSearch: Boolean
+        val showDeleted: Boolean
+        val showAssignedToOthers: Boolean
+        val showProjects: Boolean
+
+        val data = data
+        if (data == null) {
+            showSearch = false
+            showDeleted = false
+            showAssignedToOthers = false
+            showProjects = false
+        } else {
+            val hasTasks = data.taskData
+                    .entryDatas
+                    .isNotEmpty()
+
+            showSearch = hasTasks
+            showDeleted = hasTasks && parameters.showDeleted
+            showAssignedToOthers = hasTasks && parameters.getShowAssignedToOthers(data)
+            showProjects = hasTasks && parameters.showProjects
+        }
 
         binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
-                .menu
                 .apply {
-                    findItem(R.id.actionShowTaskSearch).isVisible = hasTasks
-                    findItem(R.id.actionTaskShowProjects).isVisible = hasTasks
+                    setSearchMenuOptions(showDeleted, showAssignedToOthers, showProjects)
+
+                    menu.apply {
+                        findItem(R.id.actionShowTaskSearch).isVisible = showSearch
+                        findItem(R.id.actionTaskShowDeleted).isVisible = showDeleted
+                        findItem(R.id.actionTaskShowAssignedToOthers).isVisible = showAssignedToOthers
+                        findItem(R.id.actionTaskShowProjects).isVisible = showProjects
+                    }
                 }
     }
 
@@ -262,8 +282,22 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         open val copying = false
 
+        open val showDeleted = true
+        open val showProjects = false
+
+        abstract fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean
+
         @Parcelize
-        object Unscheduled : Parameters()
+        object Unscheduled : Parameters() {
+
+            override val showProjects get() = true
+
+            override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean {
+                check(data.isSharedProject == null)
+
+                return false
+            }
+        }
 
         @Parcelize
         data class Copy(val taskKeys: List<TaskKey>) : Parameters() {
@@ -271,9 +305,20 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             override val reverseOrderForTopLevelNodes get() = false
 
             override val copying get() = true
+
+            override val showDeleted get() = false
+
+            override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean {
+                check(data.isSharedProject == null)
+
+                return false
+            }
         }
 
         @Parcelize
-        data class Project(val projectKey: ProjectKey<*>) : Parameters()
+        data class Project(val projectKey: ProjectKey<*>) : Parameters() {
+
+            override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data) = data.isSharedProject!!
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
+import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
@@ -41,6 +42,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val entryDatas: List<TaskListFragment.EntryData>
     val title: String
+    val isSharedProject: Boolean?
 
     when (parameters) {
         ShowTasksActivity.Parameters.Unscheduled -> {
@@ -56,6 +58,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                     .filter { it.children.isNotEmpty() }
 
             title = MyApplication.context.getString(R.string.noReminder)
+
+            isSharedProject = null
         }
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
@@ -63,6 +67,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                     .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
+
+            isSharedProject = null
         }
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
@@ -70,11 +76,14 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             entryDatas = project.tasks.map { it.toChildTaskData() }
 
             title = project.getDisplayName()
+
+            isSharedProject = project is SharedProject
         }
     }
 
     ShowTasksViewModel.Data(
             TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
             title,
+            isSharedProject,
     )
 }

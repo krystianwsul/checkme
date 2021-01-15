@@ -20,6 +20,14 @@
         android:checkable="true" />
 
     <item
+        android:id="@+id/actionTaskShowAssignedToOthers"
+        android:title="@string/showAssignedTo"
+        android:orderInCategory="700"
+        app:showAsAction="never"
+        android:checkable="true"
+        android:visible="false" />
+
+    <item
         android:id="@+id/actionTaskShowProjects"
         android:title="@string/showProjects"
         android:orderInCategory="800"

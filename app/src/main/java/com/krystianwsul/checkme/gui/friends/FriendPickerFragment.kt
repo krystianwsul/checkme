@@ -56,8 +56,8 @@ class FriendPickerFragment : AbstractDialogFragment() {
         if (data != null) initialize()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
 
         (requireDialog() as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             startActivity(FindFriendActivity.newIntent(requireContext()))

@@ -4,12 +4,15 @@ import android.app.Dialog
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -33,6 +36,8 @@ class AssignToDialogFragment : AbstractDialogFragment() {
 
     lateinit var listener: (Set<UserKey>) -> Unit
 
+    private val buttonEnabledRelay = BehaviorRelay.createDefault(true)
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val userDatas = requireArguments().getParcelableArrayList<EditViewModel.UserData>(KEY_USER_DATAS)!!
         val checked = requireArguments().getParcelableArrayList<UserKey>(KEY_CHECKED)!!.toMutableSet()
@@ -45,10 +50,20 @@ class AssignToDialogFragment : AbstractDialogFragment() {
                     val userKey = userDatas[which].key
 
                     checked.apply { if (isChecked) add(userKey) else remove(userKey) }
+
+                    buttonEnabledRelay.accept(checked.isNotEmpty())
                 }
                 .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
                 .setPositiveButton(android.R.string.ok) { _, _ -> listener(checked) }
                 .create()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        startDisposable += buttonEnabledRelay.subscribe {
+            (requireDialog() as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = it
+        }
     }
 
     @Parcelize

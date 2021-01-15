@@ -42,6 +42,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
@@ -547,6 +548,9 @@ class EditActivity : NavBarActivity() {
 
         @Parcelize
         class Task(val taskKey: TaskKey) : Hint()
+
+        @Parcelize
+        class Project(val projectKey: ProjectKey.Shared) : Hint()
     }
 
     enum class HolderType {

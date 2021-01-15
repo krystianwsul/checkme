@@ -430,12 +430,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(selectedNodes.isNotEmpty())
 
                 val childTaskData = selectedNodes.singleOrNull()?.let { (it.modelNode as? TaskNode)?.childTaskData }
-                // todo project
+                val projectData = selectedNodes.singleOrNull()?.let { (it.modelNode as? ProjectNode)?.projectData }
 
                 if (childTaskData?.canAddSubtask == true) {
                     show()
 
                     edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
+                } else if (projectData?.canAddSubtask == true) {
+                    show()
+
+                    val hint = (projectData.projectKey as? ProjectKey.Shared)?.let { EditActivity.Hint.Project(it) }
+
+                    edit(EditParameters.Create(hint))
                 } else {
                     hide()
                 }

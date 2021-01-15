@@ -80,7 +80,15 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
     val customTimeDatas get() = data.customTimeDatas
 
     protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
-    protected fun EditActivity.Hint.toParentKey() = (this as? EditActivity.Hint.Task)?.taskKey?.toParentKey()
+
+    protected fun EditActivity.Hint.toParentKey(): EditViewModel.ParentKey? {
+        return when (this) {
+            is EditActivity.Hint.Schedule -> null
+            is EditActivity.Hint.Task -> EditViewModel.ParentKey.Task(taskKey)
+            is EditActivity.Hint.Project -> EditViewModel.ParentKey.Project(projectKey)
+        }
+    }
+
     protected fun EditActivity.Hint.toScheduleHint() = this as? EditActivity.Hint.Schedule
 
     val firstScheduleEntry by lazy {
@@ -92,7 +100,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState ?: EditImageState.None)
+    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState ?: EditImageState.None)!!
 
     protected val parentLookup by lazy { ParentLookup() }
 

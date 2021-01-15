@@ -21,7 +21,7 @@ object TooltipManager {
             show: Balloon.() -> Unit,
     ): Balloon? {
         if (tooltipVisible) return null
-        if (Preferences.getTooltipShown(type)) return null
+        if (!type.canBeShown()) return null
 
         tooltipVisible = true
         Preferences.setTooltipShown(type)
@@ -73,6 +73,21 @@ object TooltipManager {
 
         PRESS_TO_SELECT,
         PRESS_MENU_TOOLTIP,
-        PRESS_DRAG
+        PRESS_DRAG,
+        TASKS_TAB,
+        ADD_PROJECT {
+
+            override val dependsOn = listOf(TASKS_TAB)
+        };
+
+        open val dependsOn = listOf<Type>()
+
+        private fun hasBeenShown() = Preferences.getTooltipShown(this)
+
+        fun canBeShown(): Boolean {
+            if (dependsOn.any { !it.hasBeenShown() }) return false
+
+            return !hasBeenShown()
+        }
     }
 }

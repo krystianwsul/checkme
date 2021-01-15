@@ -142,4 +142,6 @@
     <string name="addFriend">Add a new friend</string>
     <string name="showProjects">Group by project</string>
     <string name="myTasks">My tasks</string>
+    <string name="tooltip_tasks_tab">Want to see a list of your tasks?  Check the \"Tasks\" tab.</string>
+    <string name="tooltip_add_project">Want to organize your tasks, or share them with another user?  Use a project.</string>
 </resources>

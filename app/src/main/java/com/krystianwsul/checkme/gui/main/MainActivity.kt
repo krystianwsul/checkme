@@ -10,7 +10,9 @@ import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
@@ -574,6 +576,27 @@ class MainActivity :
                         it.taskData,
                         true
                 ))
+
+                fun showDrawerTooltip(type: TooltipManager.Type, @StringRes message: Int) {
+                    TooltipManager.fiveSecondDelay()
+                            .subscribeShowBalloon(
+                                    this@MainActivity,
+                                    type,
+                                    {
+                                        setTextResource(message)
+                                        setArrowOrientation(ArrowOrientation.BOTTOM)
+                                        setArrowPosition(0.08f)
+                                    },
+                                    { showAlignTop((bottomBinding.bottomAppBar as Toolbar).getPrivateField("mNavButtonView")) }
+                            )
+                            .addTo(createDisposable)
+                }
+
+                if (it.taskData.entryDatas.isNotEmpty())
+                    showDrawerTooltip(TooltipManager.Type.TASKS_TAB, R.string.tooltip_tasks_tab)
+
+                if (it.taskData.entryDatas.size > 1)
+                    showDrawerTooltip(TooltipManager.Type.ADD_PROJECT, R.string.tooltip_add_project)
             }
 
             if (overrideTabSearchState == null) {

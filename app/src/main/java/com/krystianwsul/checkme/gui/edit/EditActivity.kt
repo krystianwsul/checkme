@@ -532,7 +532,16 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun assignTo(userKeys: Set<UserKey>) {
-        delegate.parentScheduleManager.assignedTo = userKeys
+        val allUserKeys = delegate.parentScheduleManager
+                .parent!!
+                .projectUsers
+                .values
+                .map { it.key }
+                .toSet()
+
+        val finalUserKeys = userKeys.takeIf { it != allUserKeys } ?: setOf()
+
+        delegate.parentScheduleManager.assignedTo = finalUserKeys
     }
 
     sealed class Hint : Parcelable {
@@ -926,17 +935,21 @@ class EditActivity : NavBarActivity() {
             override val holderType = HolderType.ASSIGNED
 
             private fun openDialog(editActivity: EditActivity) {
+                val projectUsers = editActivity.delegate
+                        .parentScheduleManager
+                        .parent!!
+                        .projectUsers
+                        .values
+                        .toList()
+
                 AssignToDialogFragment.newInstance(
-                        editActivity.delegate
-                                .parentScheduleManager
-                                .parent!!
-                                .projectUsers
-                                .values
-                                .toList(),
+                        projectUsers,
                         editActivity.delegate
                                 .parentScheduleManager
                                 .assignedTo
                                 .toList()
+                                .takeIf { it.isNotEmpty() }
+                                ?: projectUsers.map { it.key }
                 )
                         .apply { listener = editActivity::assignTo }
                         .show(editActivity.supportFragmentManager, TAG_ASSIGN_TO)

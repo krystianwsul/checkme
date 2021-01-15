@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.tree
 
 import android.view.LayoutInflater
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.databinding.RowAssignedChipDetailsBinding
@@ -69,40 +68,38 @@ class DetailsNode(
         (viewHolder as Holder).apply {
             rowTopMargin.isVisible = treeNode.treeNodeCollection.getPosition(treeNode) == 0
 
-            if (projectInfo != null) {
-                rowProjectContainer.isVisible = true
+            val projectRowVisible = projectInfo?.name?.isNotEmpty() == true
+            rowProjectContainer.isVisible = true
+            rowProject.text = projectInfo?.name
 
-                rowProjectIcon.isVisible = projectInfo.name.isNotEmpty()
-                rowProject.text = projectInfo.name
+            val assignedTo = projectInfo?.assignedTo.orEmpty().flatMap { listOf(it, it, it) } // todo assigned
+            val assignedToVisible = assignedTo.isNotEmpty()
 
-                rowAssignedTo.removeAllViews()
-
-                projectInfo.assignedTo.forEach { user ->
-                    RowAssignedChipDetailsBinding.inflate(
-                            LayoutInflater.from(viewHolder.itemView.context),
-                            rowAssignedTo,
-                            true
-                    )
-                            .root
-                            .apply {
-                                text = user.name
-                                loadPhoto(user.photoUrl)
-                                isCloseIconVisible = false
-                            }
-                }
-            } else {
-                rowProjectContainer.isGone = true
+            rowAssignedTo.apply {
+                isVisible = assignedToVisible
+                removeAllViews()
             }
 
-            if (note.isNullOrEmpty()) {
-                rowNoteContainer.isGone = true
-            } else {
-                rowNoteContainer.isVisible = true
-
-                rowNote.text = note
+            assignedTo.forEach { user -> // todo assign
+                RowAssignedChipDetailsBinding.inflate(
+                        LayoutInflater.from(viewHolder.itemView.context),
+                        rowAssignedTo,
+                        true
+                )
+                        .root
+                        .apply {
+                            text = user.name
+                            loadPhoto(user.photoUrl)
+                            isCloseIconVisible = false
+                        }
             }
 
-            rowMargin.isVisible = projectInfo != null && !note.isNullOrEmpty()
+            val noteVisible = !note.isNullOrEmpty()
+            rowNoteContainer.isVisible = noteVisible
+            rowNote.text = note
+
+            rowMargin1.isVisible = projectRowVisible && assignedToVisible
+            rowMargin2.isVisible = noteVisible && (projectRowVisible || assignedToVisible)
         }
     }
 
@@ -131,10 +128,10 @@ class DetailsNode(
         val rowTopMargin = binding.rowListDetailsTopMargin
         override val rowContainer = binding.rowListDetailsContainer
         val rowProjectContainer = binding.rowListDetailsProjectContainer
-        val rowProjectIcon = binding.rowListDetailsProjectIcon
         val rowProject = binding.rowListDetailsProject
         val rowAssignedTo = binding.rowListDetailsAssignedTo
-        val rowMargin = binding.rowListDetailsMargin
+        val rowMargin1 = binding.rowListDetailsMargin1
+        val rowMargin2 = binding.rowListDetailsMargin2
         val rowNoteContainer = binding.rowListDetailsNoteContainer
         val rowNote = binding.rowListDetailsNote
         override val rowSeparator = binding.rowListDetailsSeparator

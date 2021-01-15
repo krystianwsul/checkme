@@ -252,6 +252,13 @@ class TreeNode<T : TreeHolder>(
             return listOf(this) + displayedChildNodes
         }
 
+    override val displayableNodes: List<TreeNode<T>>
+        get() {
+            if (!canBeShown()) return listOf()
+
+            return listOf(this) + childTreeNodes.flatMap { it.displayableNodes }
+        }
+
     private val displayedChildNodes: List<TreeNode<T>>
         get() {
             check(canBeShown())

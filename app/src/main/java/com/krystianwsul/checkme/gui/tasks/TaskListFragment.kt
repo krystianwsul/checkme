@@ -119,8 +119,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKeys = childTaskDatas.map { it.taskKey }
 
             when (itemId) {
-                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
-                R.id.action_task_edit -> startActivity(EditActivity.getParametersIntent(EditParameters.Edit(childTaskDatas.single().taskKey)))
+                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(selected))
+                R.id.action_task_edit -> startActivity(
+                        EditActivity.getParametersIntent(EditParameters.Edit(childTaskDatas.single().taskKey))
+                )
                 R.id.action_task_join -> startActivity(EditActivity.getParametersIntent(EditParameters.Join(
                         taskKeys.map(EditParameters.Join.Joinable::Task),
                         hint()
@@ -181,14 +183,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var taskListFragmentFab: FloatingActionButton? = null
 
-    val shareData
-        get() = mutableListOf<String>().also {
-            checkNotNull(data)
-
-            for (entryData in data!!.taskData.entryDatas) // todo project
-                printTree(it, 1, entryData)
-
-        }.joinToString("\n")
+    val shareData get() = getShareData(treeViewAdapter.displayableNodes)
 
     private lateinit var adapterState: AdapterState
 
@@ -212,15 +207,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     override val scrollDisposable = viewCreatedDisposable
 
-    private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
-        check(childTaskDatas.isNotEmpty())
-
-        mutableListOf<ChildTaskData>().apply {
-            childTaskDatas.filterNot { inTree(this, it) }.forEach { this.add(it) }
-        }.forEach { childTaskData ->
-            printTree(it, 0, childTaskData)
-        }
-    }.joinToString("\n")
+    private fun getShareData(treeNodes: List<TreeNode<AbstractHolder>>): String {
+        // we can assume that parent nodes will come before child nodes, so distinct will just take the first one
+        return treeNodes.asSequence()
+                .flatMap { it.displayableNodes }
+                .filter { it.modelNode is Node }
+                .map { it.modelNode as Node }
+                .distinct()
+                .map { "-".repeat(it.indentation) + it.entryData.name }
+                .joinToString("\n")
+    }
 
     private fun inTree(shareTree: List<ChildTaskData>, childTaskData: ChildTaskData): Boolean = when {
         shareTree.isEmpty() -> false
@@ -573,7 +569,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     private abstract class Node(
-            private val entryData: EntryData,
+            val entryData: EntryData,
             private val nodeParent: NodeParent,
             private val reverseSortOrder: Boolean,
     ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode, IndentationModelNode {

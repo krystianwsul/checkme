@@ -76,6 +76,11 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
                 ?.flatMap { it.displayedNodes }
                 ?: throw SetTreeNodesNotCalledException()
 
+    override val displayableNodes: List<TreeNode<T>>
+        get() = treeNodesRelay.value
+                ?.flatMap { it.displayableNodes }
+                ?: throw SetTreeNodesNotCalledException()
+
     fun unselect(x: TreeViewAdapter.Placeholder) = treeNodesRelay.value
             ?.forEach { it.unselect(x) }
             ?: throw SetTreeNodesNotCalledException()

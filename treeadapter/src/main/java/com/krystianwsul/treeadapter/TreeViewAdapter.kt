@@ -36,6 +36,8 @@ class TreeViewAdapter<T : TreeHolder>(
     val displayedNodes
         get() = treeNodeCollection?.displayedNodes ?: throw SetTreeNodeCollectionNotCalledException()
 
+    val displayableNodes get() = treeNodeCollection?.displayableNodes ?: throw SetTreeNodeCollectionNotCalledException()
+
     val selectedNodes
         get() = treeNodeCollection?.selectedNodes ?: throw SetTreeNodeCollectionNotCalledException()
 

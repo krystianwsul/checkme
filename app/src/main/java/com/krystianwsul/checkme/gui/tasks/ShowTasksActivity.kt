@@ -15,10 +15,12 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
@@ -79,8 +81,6 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 .apply {
                     if (parameters.copying) setSearchMenuOptions(false, false, true)
 
-                    setText(getString(parameters.title), null, null, true)
-
                     configureMenu(
                             R.menu.show_task_menu_top,
                             R.id.actionShowTaskSearch,
@@ -122,6 +122,10 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private fun onLoadFinished(data: ShowTasksViewModel.Data) {
         this.data = data
+
+        binding.showTasksToolbarCollapseInclude
+                .collapseAppBarLayout
+                .setText(data.title, null, null, true)
 
         updateTopMenu()
         updateBottomMenu()
@@ -214,8 +218,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                     .collapseAppBarLayout
                     .closeSearch()
         } else {
+            @Suppress("IMPLICIT_CAST_TO_ANY")
             when (parameters) {
-                Parameters.Unscheduled -> super.onBackPressed()
                 is Parameters.Copy -> ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters(
                         R.string.stopCopyingMessage,
                         R.string.stopCopyingYes
@@ -223,7 +227,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                     it.listener = this::onConfirm
                     it.show(supportFragmentManager, TAG_CONFIRM)
                 }
-            }
+                else -> super.onBackPressed()
+            }.exhaustive()
         }
     }
 
@@ -253,32 +258,22 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     sealed class Parameters : Parcelable {
 
-        open val taskKeys: List<TaskKey>? = null
+        open val reverseOrderForTopLevelNodes = true
 
-        abstract val title: Int
-
-        abstract val reverseOrderForTopLevelNodes: Boolean
-
-        abstract val copying: Boolean
+        open val copying = false
 
         @Parcelize
-        object Unscheduled : Parameters() {
-
-            override val title get() = R.string.noReminder
-
-            override val reverseOrderForTopLevelNodes get() = true
-
-            override val copying get() = false
-        }
+        object Unscheduled : Parameters()
 
         @Parcelize
-        data class Copy(override val taskKeys: List<TaskKey>) : Parameters() {
-
-            override val title get() = R.string.copyingTasksTitle
+        data class Copy(val taskKeys: List<TaskKey>) : Parameters() {
 
             override val reverseOrderForTopLevelNodes get() = false
 
             override val copying get() = true
         }
+
+        @Parcelize
+        data class Project(val projectKey: ProjectKey<*>) : Parameters()
     }
 }

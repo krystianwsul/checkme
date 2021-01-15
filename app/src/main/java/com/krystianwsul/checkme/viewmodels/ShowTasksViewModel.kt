@@ -20,5 +20,5 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         internalStart()
     }
 
-    data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
+    data class Data(val taskData: TaskListFragment.TaskData, val title: String) : DomainData()
 }

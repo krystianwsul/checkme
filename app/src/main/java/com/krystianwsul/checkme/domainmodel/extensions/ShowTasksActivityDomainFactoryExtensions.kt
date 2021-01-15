@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
@@ -37,21 +39,42 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         )
     }
 
-    val entryDatas = when (parameters) {
-        ShowTasksActivity.Parameters.Unscheduled -> projectsFactory.projects
-                .values
-                .map {
-                    val childTaskDatas = it.tasks
-                            .filter { it.current(now) && it.isUnscheduled(now) }
-                            .map { it.toChildTaskData() }
+    val entryDatas: List<TaskListFragment.EntryData>
+    val title: String
 
-                    it.toProjectData(childTaskDatas)
-                }
-                .filter { it.children.isNotEmpty() }
-        is ShowTasksActivity.Parameters.Copy -> parameters.taskKeys
-                .map { getTaskForce(it).toChildTaskData() }
-                .sorted()
+    when (parameters) {
+        ShowTasksActivity.Parameters.Unscheduled -> {
+            entryDatas = projectsFactory.projects
+                    .values
+                    .map {
+                        val childTaskDatas = it.tasks
+                                .filter { it.current(now) && it.isUnscheduled(now) }
+                                .map { it.toChildTaskData() }
+
+                        it.toProjectData(childTaskDatas)
+                    }
+                    .filter { it.children.isNotEmpty() }
+
+            title = MyApplication.context.getString(R.string.noReminder)
+        }
+        is ShowTasksActivity.Parameters.Copy -> {
+            entryDatas = parameters.taskKeys
+                    .map { getTaskForce(it).toChildTaskData() }
+                    .sorted()
+
+            title = MyApplication.context.getString(R.string.copyingTasksTitle)
+        }
+        is ShowTasksActivity.Parameters.Project -> {
+            val project = projectsFactory.getProjectForce(parameters.projectKey)
+
+            entryDatas = project.tasks.map { it.toChildTaskData() }
+
+            title = project.getDisplayName()
+        }
     }
 
-    ShowTasksViewModel.Data(TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null))
+    ShowTasksViewModel.Data(
+            TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
+            title,
+    )
 }

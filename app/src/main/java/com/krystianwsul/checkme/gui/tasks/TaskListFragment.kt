@@ -703,7 +703,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun onClick(holder: AbstractHolder) {
-            //startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.projectKey))) todo project
+            startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.projectKey)))
         }
     }
 

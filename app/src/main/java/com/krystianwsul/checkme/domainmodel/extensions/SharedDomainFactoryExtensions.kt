@@ -351,9 +351,11 @@ fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnD
 }
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(
-        name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks),
+        getDisplayName(),
         childTaskDatas,
         projectKey,
         endExactTimeStamp == null,
         startExactTimeStamp.long
 )
+
+fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)

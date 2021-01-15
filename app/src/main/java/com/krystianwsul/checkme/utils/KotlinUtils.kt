@@ -356,6 +356,9 @@ fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
 @Suppress("unused")
 fun Any?.ignore() = Unit
 
+@Suppress("unused")
+fun Any?.exhaustive() = Unit
+
 fun webSearchIntent(query: String) =
         Intent(Intent.ACTION_WEB_SEARCH).putExtra(SearchManager.QUERY, query)
 

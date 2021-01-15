@@ -69,7 +69,7 @@ class DetailsNode(
             rowTopMargin.isVisible = treeNode.treeNodeCollection.getPosition(treeNode) == 0
 
             val projectRowVisible = projectInfo?.name?.isNotEmpty() == true
-            rowProjectContainer.isVisible = true
+            rowProjectContainer.isVisible = projectRowVisible
             rowProject.text = projectInfo?.name
 
             val assignedTo = projectInfo?.assignedTo.orEmpty().flatMap { listOf(it, it, it) } // todo assigned

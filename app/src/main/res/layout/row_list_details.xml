@@ -70,10 +70,13 @@
                     android:layout_height="13dp"
                     android:visibility="visible" />
 
-                <com.google.android.material.chip.ChipGroup
+                <com.google.android.flexbox.FlexboxLayout
                     android:id="@+id/rowListDetailsAssignedTo"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:flexWrap="wrap"
+                    app:dividerDrawable="@drawable/assigned_to_divider"
+                    app:showDivider="middle" />
 
                 <View
                     android:id="@+id/rowListDetailsMargin2"

@@ -80,6 +80,7 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
+    implementation 'com.google.android:flexbox:2.0.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'androidx.sharetarget:sharetarget:1.0.0'

@@ -106,20 +106,23 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
-        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_edit_tasks, listener::initBottomBar) }
+        override val bottomBarData by lazy {
+            Triple(listener.getBottomBar(), R.menu.menu_edit_tasks, listener::initBottomBar)
+        }
 
         override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
         override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
-            val selected = treeViewAdapter.selectedNodes
-            check(selected.isNotEmpty())
+            val selectedTreeNodes = treeViewAdapter.selectedNodes
+            check(selectedTreeNodes.isNotEmpty())
 
-            val taskWrappers = selected.map { it.modelNode as TaskNode }
-            val childTaskDatas = taskWrappers.map { it.childTaskData }
-            val taskKeys = childTaskDatas.map { it.taskKey }
+            val selectedNodes = selectedTreeNodes.map { it.modelNode as Node }
+
+            val childTaskDatas by lazy { selectedNodes.map { it as TaskNode }.map { it.childTaskData } }
+            val taskKeys by lazy { childTaskDatas.map { it.taskKey } }
 
             when (itemId) {
-                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(selected))
+                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(selectedTreeNodes))
                 R.id.action_task_edit -> startActivity(
                         EditActivity.getParametersIntent(EditParameters.Edit(childTaskDatas.single().taskKey))
                 )
@@ -136,7 +139,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 }
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
-                R.id.actionTaskWebSearch -> startActivity(webSearchIntent(childTaskDatas.single().name))
+                R.id.actionTaskWebSearch -> startActivity(webSearchIntent(selectedNodes.single().entryData.name))
                 else -> throw UnsupportedOperationException()
             }
 
@@ -158,21 +161,36 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
-            val selectedNodes = treeViewAdapter.selectedNodes
+            val selectedNodes = treeViewAdapter.selectedNodes.map { it.modelNode as Node }
             check(selectedNodes.isNotEmpty())
 
-            val single = selectedNodes.size == 1
+            val allTasks = selectedNodes.all { it is TaskNode }
 
-            val current = selectedNodes.map { (it.modelNode as TaskNode).childTaskData }.all { it.current }
+            return if (allTasks) {
+                val single = selectedNodes.size == 1
 
-            return listOf(
-                    R.id.action_task_edit to (single && current),
-                    R.id.action_task_join to (!single && current),
-                    R.id.action_task_delete to current,
-                    R.id.action_task_show_instances to single,
-                    R.id.actionTaskCopy to current,
-                    R.id.actionTaskWebSearch to single
-            )
+                val current = selectedNodes.map { (it as TaskNode).childTaskData }.all { it.current }
+
+                listOf(
+                        R.id.action_task_edit to (single && current),
+                        R.id.action_task_join to (!single && current),
+                        R.id.action_task_delete to current,
+                        R.id.action_task_show_instances to single,
+                        R.id.actionTaskCopy to current,
+                        R.id.actionTaskWebSearch to single,
+                )
+            } else {
+                val single = selectedNodes.size == 1
+
+                listOf(
+                        R.id.action_task_edit to false,
+                        R.id.action_task_join to false,
+                        R.id.action_task_delete to false,
+                        R.id.action_task_show_instances to false,
+                        R.id.actionTaskCopy to false,
+                        R.id.actionTaskWebSearch to single,
+                )
+            }
         }
 
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) {
@@ -216,18 +234,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .distinct()
                 .map { "-".repeat(it.indentation) + it.entryData.name }
                 .joinToString("\n")
-    }
-
-    private fun inTree(shareTree: List<ChildTaskData>, childTaskData: ChildTaskData): Boolean = when {
-        shareTree.isEmpty() -> false
-        shareTree.contains(childTaskData) -> true
-        else -> shareTree.any { inTree(it.children, childTaskData) }
-    }
-
-    private fun printTree(lines: MutableList<String>, indentation: Int, entryData: EntryData) {
-        lines.add("-".repeat(indentation) + entryData.name)
-
-        entryData.children.forEach { printTree(lines, indentation + 1, it) }
     }
 
     override fun onAttach(context: Context) {
@@ -295,7 +301,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         if (this::treeViewAdapter.isInitialized) {
             val adapterState = getAdapterState()
-            check(selectionCallback.hasActionMode == adapterState.selectedTaskKeys.isNotEmpty())
+            check(selectionCallback.hasActionMode == adapterState.hasSelection)
 
             fun initializeTaskAdapter(placeholder: TreeViewAdapter.Placeholder) {
                 (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(
@@ -376,10 +382,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     private fun getAdapterState() = treeViewAdapter.run {
+        val taskAdapter = treeModelAdapter as TaskAdapter
+
         AdapterState(
-                selectedNodes.map { (it.modelNode as TaskNode).childTaskData.taskKey }.toSet(),
-                (treeModelAdapter as TaskAdapter).expandedTaskKeys,
-                (treeModelAdapter as TaskAdapter).expandedProjectKeys,
+                selectedNodes.mapNotNull { (it.modelNode as? TaskNode)?.childTaskData?.taskKey }.toSet(),
+                taskAdapter.expandedTaskKeys,
+                selectedNodes.mapNotNull { (it.modelNode as? ProjectNode)?.projectData?.projectKey }.toSet(),
+                taskAdapter.expandedProjectKeys,
         )
     }
 
@@ -420,7 +429,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val selectedNodes = treeViewAdapter.selectedNodes
                 check(selectedNodes.isNotEmpty())
 
-                val childTaskData = selectedNodes.singleOrNull()?.let { (it.modelNode as TaskNode).childTaskData }
+                val childTaskData = selectedNodes.singleOrNull()?.let { (it.modelNode as? TaskNode)?.childTaskData }
+                // todo project
 
                 if (childTaskData?.canAddSubtask == true) {
                     show()
@@ -668,14 +678,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 (it.modelNode as? TaskNode)?.childTaskData?.name
             }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
 
+        override val isSelectable = true
+
         override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
                 showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
 
-            val selected = false // todo project
-
+            val selected = adapterState.selectedProjectKeys.contains(projectData.projectKey)
             val expanded = adapterState.expandedProjectKeys.contains(projectData.projectKey)
 
             treeNode = TreeNode(this, nodeContainer, expanded, selected)
@@ -952,9 +963,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private data class AdapterState(
             val selectedTaskKeys: Set<TaskKey>,
             val expandedTaskKeys: Set<TaskKey>,
+            val selectedProjectKeys: Set<ProjectKey<*>>,
             val expandedProjectKeys: Set<ProjectKey<*>>,
     ) : Parcelable {
 
-        constructor() : this(setOf(), setOf(), setOf())
+        constructor() : this(setOf(), setOf(), setOf(), setOf())
+
+        val hasSelection get() = selectedTaskKeys.isNotEmpty() || selectedProjectKeys.isNotEmpty()
     }
 }

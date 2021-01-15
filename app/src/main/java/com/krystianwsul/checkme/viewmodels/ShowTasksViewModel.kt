@@ -2,20 +2,20 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTasksData
+import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.common.utils.TaskKey
 
 class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTasksData(taskKeys)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTasksData(parameters)
     }
 
-    private var taskKeys: List<TaskKey>? = null
+    private lateinit var parameters: ShowTasksActivity.Parameters
 
-    fun start(taskKeys: List<TaskKey>?) {
-        this.taskKeys = taskKeys
+    fun start(parameters: ShowTasksActivity.Parameters) {
+        this.parameters = parameters
 
         internalStart()
     }

@@ -501,7 +501,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 taskData: TaskData,
                 adapterState: AdapterState,
                 copying: Boolean,
-                showProjects: Boolean, // todo project
+                showProjects: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -542,7 +542,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             taskListFragment.showImage = false
 
-            nodes = taskData.entryDatas // todo project
+            nodes = taskData.entryDatas
                     .flatMap {
                         fun ChildTaskData.toRootWrapper() = TaskNode(
                                 0,
@@ -667,6 +667,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     true
             )
 
+        override val children
+            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
+                (it.modelNode as? TaskNode)?.childTaskData?.name
+            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+
         override fun initialize(
                 adapterState: AdapterState,
                 nodeContainer: NodeContainer<AbstractHolder>,
@@ -697,10 +702,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return treeNode
         }
 
-        override val children
-            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
-                (it.modelNode as? TaskNode)?.childTaskData?.name
-            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+        override fun onClick(holder: AbstractHolder) {
+            //startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.projectKey))) todo project
+        }
     }
 
     private inner class TaskNode(

@@ -98,7 +98,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }.also { it.setFab(bottomBinding.bottomFab) }
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
-            start(parameters.taskKeys)
+            start(parameters)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -203,7 +203,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 copiedTaskKey = null
 
                 showTasksViewModel.stop()
-                showTasksViewModel.start(parameters.taskKeys)
+                showTasksViewModel.start(parameters)
             }
         }
     }

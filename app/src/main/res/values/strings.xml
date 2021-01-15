@@ -125,6 +125,7 @@
     <string name="addTaskList">Add to list</string>
     <string name="subtaskDialogMessage">Add a new task at this time?</string>
     <string name="assignTask">Assign task</string>
+    <string name="assignedToAll">Assigned to all members</string>
     <string name="assignedTo">Assigned to:</string>
     <string name="showAssignedTo">Show assigned to others</string>
     <string name="addToReminder">Add to reminder</string>

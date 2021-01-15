@@ -432,18 +432,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 val childTaskData = selectedNodes.singleOrNull()?.let { (it.modelNode as? TaskNode)?.childTaskData }
                 val projectData = selectedNodes.singleOrNull()?.let { (it.modelNode as? ProjectNode)?.projectData }
 
-                if (childTaskData?.canAddSubtask == true) {
-                    show()
+                when {
+                    childTaskData?.canAddSubtask == true -> {
+                        show()
 
-                    edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
-                } else if (projectData?.canAddSubtask == true) {
-                    show()
+                        edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
+                    }
+                    projectData?.canAddSubtask == true -> {
+                        show()
 
-                    val hint = (projectData.projectKey as? ProjectKey.Shared)?.let { EditActivity.Hint.Project(it) }
+                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let { EditActivity.Hint.Project(it) }
 
-                    edit(EditParameters.Create(hint))
-                } else {
-                    hide()
+                        edit(EditParameters.Create(hint))
+                    }
+                    else -> hide()
                 }
             } else {
                 if (data!!.taskData.showFab) {
@@ -702,7 +704,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             taskNodes = projectData.children.map {
                 TaskNode(
                         indentation + 1,
-                        false,
+                        true,
                         this,
                         it,
                         copying,

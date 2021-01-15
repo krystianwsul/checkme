@@ -140,6 +140,6 @@
     <string name="addFriend">Dodaj nowego znajomego</string>
     <string name="showProjects">Pokaż projekty</string>
     <string name="myTasks">Moje zadania</string>
-    <string name="tooltip_tasks_tab">Chcesz zobaczyć listę wszystkich zadań? Sprawdź w zakładce "Zdania".</string>
+    <string name="tooltip_tasks_tab">Chcesz zobaczyć listę wszystkich zadań? Sprawdź w zakładce \"Zdania\".</string>
     <string name="tooltip_add_project">Chcesz zorganizować sobie zadania, albo udostępnić je innemu użytkownikowi? Utwórz projekt.</string>
 </resources>

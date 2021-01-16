@@ -11,7 +11,7 @@ class TreeNode<T : TreeHolder>(
         private val expandInitiallyIfHasChildren: Boolean = false,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
-    private var expanded by notNull<Boolean>() // todo state
+    private var expanded by notNull<Boolean>()
     override val isExpanded get() = expanded
 
     private lateinit var childTreeNodes: MutableList<TreeNode<T>>
@@ -129,6 +129,7 @@ class TreeNode<T : TreeHolder>(
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {
+        // todo add delegate with final initialized state, move majority of function calls into it
         if (this::childTreeNodes.isInitialized) throw SetChildTreeNodesCalledTwiceException()
 
         expanded = expandInitiallyIfHasChildren && childTreeNodes.isNotEmpty()

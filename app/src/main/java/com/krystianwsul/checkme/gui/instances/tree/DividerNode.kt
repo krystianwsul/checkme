@@ -55,7 +55,7 @@ class DividerNode(
     ): TreeNode<AbstractHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 
-        treeNode = TreeNode(this, nodeContainer, expanded, false)
+        treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
 
         val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, expandedInstances, selectedInstances) }
 

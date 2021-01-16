@@ -403,8 +403,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>) = TreeNode(
                 this,
                 treeNodeCollection,
-                false,
-                selectedIds.contains(userListData.id)
+                selectedIds.contains(userListData.id),
         ).also {
             treeNode = it
             it.setChildTreeNodes(listOf())

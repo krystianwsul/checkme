@@ -307,7 +307,12 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override fun compareTo(other: ModelNode<AbstractHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
 
         fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>): TreeNode<AbstractHolder> {
-            treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
+            treeNode = TreeNode(
+                    this,
+                    treeNodeCollection,
+                    selectedIds.contains(userListData.id),
+            )
+
             treeNode.setChildTreeNodes(listOf())
             return treeNode
         }

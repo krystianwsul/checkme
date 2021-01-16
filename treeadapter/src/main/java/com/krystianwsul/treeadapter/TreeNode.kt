@@ -2,14 +2,16 @@ package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
+import kotlin.properties.Delegates.notNull
 
 class TreeNode<T : TreeHolder>(
         val modelNode: ModelNode<T>,
         val parent: NodeContainer<T>,
-        private var expanded: Boolean,
-        private var selected: Boolean,
+        private var selected: Boolean = false,
+        private val expandInitiallyIfHasChildren: Boolean = false,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
+    private var expanded by notNull<Boolean>()
     override val isExpanded get() = expanded
 
     private lateinit var childTreeNodes: MutableList<TreeNode<T>>
@@ -127,9 +129,10 @@ class TreeNode<T : TreeHolder>(
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {
+        // todo add delegate with final initialized state, move majority of function calls into it
         if (this::childTreeNodes.isInitialized) throw SetChildTreeNodesCalledTwiceException()
 
-        if (expanded && childTreeNodes.isEmpty()) throw EmptyExpandedException()
+        expanded = expandInitiallyIfHasChildren && childTreeNodes.isNotEmpty()
 
         this.childTreeNodes = childTreeNodes.sorted().toMutableList()
     }

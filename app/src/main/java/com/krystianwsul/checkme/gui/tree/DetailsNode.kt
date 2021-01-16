@@ -52,7 +52,7 @@ class DetailsNode(
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
 
-        treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
+        treeNode = TreeNode(this, nodeContainer)
         treeNode.setChildTreeNodes(listOf())
 
         return treeNode

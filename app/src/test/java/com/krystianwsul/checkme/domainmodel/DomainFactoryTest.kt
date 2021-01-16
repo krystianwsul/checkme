@@ -38,7 +38,9 @@ class DomainFactoryTest {
                 "task",
                 domainFactory.getMainData()
                         .taskData
-                        .childTaskDatas
+                        .entryDatas
+                        .single()
+                        .children
                         .single()
                         .name
         )

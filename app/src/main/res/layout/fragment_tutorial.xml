@@ -42,7 +42,8 @@
             android:textSize="@dimen/textPrimary"
             android:textColor="@color/textDisabled"
             android:gravity="center"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="20dp" />
 
     </RelativeLayout>
 

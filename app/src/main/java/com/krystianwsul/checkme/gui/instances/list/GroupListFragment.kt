@@ -51,7 +51,6 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
 class GroupListFragment @JvmOverloads constructor(
@@ -119,17 +118,9 @@ class GroupListFragment @JvmOverloads constructor(
 
     lateinit var listener: GroupListListener
 
-    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
-
-    var treeViewAdapter
-        get() = treeViewAdapterRelay.value!!
-        set(value) {
-            treeViewAdapterRelay.accept(value)
-        }
-
-    private val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()
-
-    val progressShown by lazy { getProgressShownObservable(binding.groupListRecycler) { treeViewAdapter } }
+    val progressShown by lazy {
+        getProgressShownObservable(binding.groupListRecycler) { searchDataManager.treeViewAdapter }
+    }
 
     private val parametersRelay = BehaviorRelay.create<GroupListParameters>()
     val parameters get() = parametersRelay.value!!
@@ -139,26 +130,28 @@ class GroupListFragment @JvmOverloads constructor(
     val dragHelper: DragHelper by lazy {
         object : DragHelper() {
 
-            override fun getTreeViewAdapter() = treeViewAdapter
+            override fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder> = searchDataManager.treeViewAdapter
         }
     }
 
     var forceSaveStateListener: (() -> Unit)? = null
 
+    val treeViewAdapter: TreeViewAdapter<AbstractHolder> get() = searchDataManager.treeViewAdapter
+
     val selectionCallback = object : SelectionCallback() {
 
         override val activity get() = this@GroupListFragment.activity
 
-        override fun getTreeViewAdapter() = treeViewAdapter
+        override fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder> = treeViewAdapter
 
-        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
+        override fun unselect(placeholder: TreeViewAdapter.Placeholder) = getTreeViewAdapter().unselect(placeholder)
 
         override val bottomBarData by lazy {
             Triple(listener.getBottomBar(), R.menu.menu_edit_groups_bottom, listener::initBottomBar)
         }
 
         override fun onMenuClick(@IdRes itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
-            val treeNodes = treeViewAdapter.selectedNodes
+            val treeNodes = getTreeViewAdapter().selectedNodes
 
             val selectedDatas = nodesToSelectedDatas(treeNodes, true)
             if (selectedDatas.isEmpty()) {
@@ -246,34 +239,36 @@ class GroupListFragment @JvmOverloads constructor(
                             true
                     )
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
-                        treeNode.modelNode.let {
-                            if (it is NotDoneGroupNode) {
-                                val nodeCollection = it.nodeCollection
+                    removeFromGetter<TreeNode<AbstractHolder>>(
+                            { getTreeViewAdapter().selectedNodes.sortedByDescending { it.indentation } },
+                            { treeNode ->
+                                treeNode.modelNode.let {
+                                    if (it is NotDoneGroupNode) {
+                                        val nodeCollection = it.nodeCollection
 
-                                nodeCollection.notDoneGroupCollection.remove(it, placeholder)
+                                        nodeCollection.notDoneGroupCollection.remove(it, placeholder)
 
-                                if (!it.expanded()) {
-                                    it.instanceDatas.forEach {
-                                        it.done = done
+                                        if (!it.expanded()) {
+                                            it.instanceDatas.forEach {
+                                                it.done = done
 
-                                        nodeCollection.dividerNode.add(it, placeholder)
+                                                nodeCollection.dividerNode.add(it, placeholder)
+                                            }
+                                        } else {
+                                            check(it.treeNode.allChildren.all { it.isSelected })
+                                        }
+
+                                        decrementSelected(placeholder)
+                                    } else {
+                                        val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
+                                        instanceData.done = done
+
+                                        it.removeFromParent(placeholder)
+
+                                        it.parentNodeCollection.dividerNode.add(instanceData, placeholder)
                                     }
-                                } else {
-                                    check(it.treeNode.allChildren.all { it.isSelected })
                                 }
-
-                                decrementSelected(placeholder)
-                            } else {
-                                val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
-                                instanceData.done = done
-
-                                it.removeFromParent(placeholder)
-
-                                it.parentNodeCollection.dividerNode.add(instanceData, placeholder)
-                            }
-                        }
-                    }
+                            })
 
                     listener.showSnackbarDone(instanceKeys.size) {
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, false)
@@ -288,19 +283,21 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
-                        treeNode.modelNode.let {
-                            val instanceData = (it as DoneInstanceNode).instanceData
-                            instanceData.done = null
+                    removeFromGetter<TreeNode<AbstractHolder>>(
+                            { getTreeViewAdapter().selectedNodes.sortedByDescending { it.indentation } },
+                            { treeNode ->
+                                treeNode.modelNode.let {
+                                    val instanceData = (it as DoneInstanceNode).instanceData
+                                    instanceData.done = null
 
-                            it.removeFromParent(placeholder)
+                                    it.removeFromParent(placeholder)
 
-                            it.dividerNode
-                                    .nodeCollection
-                                    .notDoneGroupCollection
-                                    .add(instanceData, placeholder)
-                        }
-                    }
+                                    it.dividerNode
+                                            .nodeCollection
+                                            .notDoneGroupCollection
+                                            .add(instanceData, placeholder)
+                                }
+                            })
 
                     listener.showSnackbarDone(instanceKeys.size) {
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, true)
@@ -339,7 +336,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups_top, actionMode!!.menu)
 
-            listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter, initial)
+            listener.onCreateGroupActionMode(actionMode!!, getTreeViewAdapter(), initial)
 
             super.onFirstAdded(placeholder, initial)
         }
@@ -356,7 +353,7 @@ class GroupListFragment @JvmOverloads constructor(
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)
 
-            val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+            val selectedDatas = nodesToSelectedDatas(getTreeViewAdapter().selectedNodes, true)
             check(selectedDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
@@ -410,7 +407,8 @@ class GroupListFragment @JvmOverloads constructor(
             return itemVisibilities
         }
 
-        override fun getTitleCount() = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).size
+        override fun getTitleCount() =
+                nodesToSelectedDatas(getTreeViewAdapter().selectedNodes, true).size
 
         override fun onDestroyActionMode(mode: ActionMode) {
             super.onDestroyActionMode(mode)
@@ -457,10 +455,6 @@ class GroupListFragment @JvmOverloads constructor(
 
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.groupListRecycler
-
-    private val initializedRelay = BehaviorRelay.create<Unit>()
-
-    private var filterCriteria: FilterCriteria = FilterCriteria.None
 
     val searchResults by lazy { parameters is GroupListParameters.Search }
 
@@ -521,6 +515,91 @@ class GroupListFragment @JvmOverloads constructor(
         binding.groupListRecycler.layoutManager = LinearLayoutManager(context)
     }
 
+    private val searchDataManager = object : SearchDataManager<GroupListParameters, GroupAdapter>(
+            activity.started,
+            parametersRelay
+    ) {
+
+        override val recyclerView get() = binding.groupListRecycler
+        override val progressView get() = binding.groupListProgress
+        override val emptyTextBinding get() = binding.groupListEmptyTextInclude
+
+        override val emptyTextResId
+            get() = when (val parameters = parameters) {
+                is GroupListParameters.All -> R.string.instances_empty_root
+                is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!) {
+                    R.string.empty_child
+                } else {
+                    R.string.empty_disabled
+                }
+                is GroupListParameters.Search -> R.string.noResults
+                else -> null
+            }
+
+        override val compositeDisposable = attachedToWindowDisposable
+
+        override val filterCriteriaObservable = parametersRelay.switchMap {
+            when (it) {
+                is GroupListParameters.Search -> Observable.just(it.filterCriteria)
+                else -> listener.instanceSearch
+            }
+        }
+
+        override fun dataIsImmediate(data: GroupListParameters) = data.immediate
+
+        override fun dataRequiresReinitializingModelAdapter(data: GroupListParameters) =
+                (data as? GroupListParameters.All)?.differentPage == true
+
+        override fun getFilterCriteriaFromData(data: GroupListParameters) =
+                (data as? GroupListParameters.Search)?.filterCriteria
+
+        override fun instantiateAdapters(filterCriteria: FilterCriteria) =
+                GroupAdapter(this@GroupListFragment, filterCriteria).let { it to it.treeViewAdapter }
+
+        override fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
+            binding.groupListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
+
+            dragHelper.attachToRecyclerView(binding.groupListRecycler)
+        }
+
+        override fun initializeModelAdapter(modelAdapter: GroupAdapter, data: GroupListParameters) {
+            if (treeViewAdapterInitialized) state = modelAdapter.groupListState
+
+            modelAdapter.initialize(
+                    data.dataId,
+                    data.groupListDataWrapper.customTimeDatas,
+                    data.useGroups,
+                    data.groupListDataWrapper.instanceDatas,
+                    state,
+                    data.groupListDataWrapper.taskDatas,
+                    data.groupListDataWrapper.note,
+                    data.groupListDataWrapper.imageData,
+                    data.showProgress,
+                    data.useDoneNode,
+                    data.groupListDataWrapper.projectInfo,
+            )
+        }
+
+        override fun updateTreeViewAdapterAfterModelAdapterInitialization(
+                treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+                data: GroupListParameters,
+                initial: Boolean,
+                placeholder: TreeViewAdapter.Placeholder,
+        ) {
+            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, initial)
+        }
+
+        override fun onDataChanged() {
+            setGroupMenuItemVisibility()
+            updateFabVisibility()
+
+            tryScroll()
+        }
+    }
+
     public override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             state.apply {
@@ -534,7 +613,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
-                filterCriteria = getParcelable(KEY_SEARCH_DATA)!!
+                searchDataManager.setInitialFilterCriteria(getParcelable(KEY_SEARCH_DATA)!!)
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -546,45 +625,13 @@ class GroupListFragment @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        val observable = activity.started.switchMap { if (it) parametersRelay else Observable.never() }
-
-        attachedToWindowDisposable += observable.subscribe { initialize() }
+        searchDataManager.subscribe()
 
         activity.startTicks(receiver)
 
         activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = this::onEditInstances
 
-        val filterCriteriaObservable = parametersRelay.switchMap {
-            when (it) {
-                is GroupListParameters.Search -> Observable.just(it.filterCriteria)
-                else -> listener.instanceSearch
-            }
-        }
-
-        attachedToWindowDisposable += observeEmptySearchState(
-                initializedRelay,
-                filterCriteriaObservable,
-                { treeViewAdapter },
-                ::search,
-                binding.groupListRecycler,
-                binding.groupListProgress,
-                binding.groupListEmptyTextInclude,
-                { parameters.immediate },
-                {
-                    when (val parameters = parameters) {
-                        is GroupListParameters.All -> R.string.instances_empty_root
-                        is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!) {
-                            R.string.empty_child
-                        } else {
-                            R.string.empty_disabled
-                        }
-                        is GroupListParameters.Search -> R.string.noResults
-                        else -> null
-                    }
-                }
-        )
-
-        treeViewAdapterRelay.firstOrError()
+        searchDataManager.treeViewAdapterSingle
                 .flatMapObservable { it.updates }
                 .subscribe {
                     setGroupMenuItemVisibility()
@@ -611,7 +658,9 @@ class GroupListFragment @JvmOverloads constructor(
                 .filter {
                     it.draggable &&
                             it.groupListDataWrapper.taskEditable != false &&
-                            treeViewAdapter.displayedNodes.none { it.isExpanded || it.isSelected } &&
+                            searchDataManager.treeViewAdapter
+                                    .displayedNodes
+                                    .none { it.isExpanded || it.isSelected } &&
                             it.groupListDataWrapper.instanceDatas.size > 1
                 }
                 .mapNotNull {
@@ -686,13 +735,11 @@ class GroupListFragment @JvmOverloads constructor(
 
     fun setParameters(parameters: GroupListParameters) = parametersRelay.accept(parameters)
 
-    private fun useGroups() = parameters is GroupListParameters.All
-
     public override fun onSaveInstanceState() = Bundle().apply {
         putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
-        if (treeViewAdapterInitialized)
-            putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState)
+        if (searchDataManager.treeViewAdapterInitialized)
+            putParcelable(EXPANSION_STATE_KEY, searchDataManager.modelAdapter!!.groupListState)
 
         putParcelable(
                 LAYOUT_MANAGER_STATE,
@@ -703,92 +750,17 @@ class GroupListFragment @JvmOverloads constructor(
 
         putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
 
-        putParcelable(KEY_SEARCH_DATA, filterCriteria)
-    }
-
-    private fun initialize() {
-        (parameters as? GroupListParameters.Search)?.let { filterCriteria = it.filterCriteria }
-
-        if (treeViewAdapterInitialized && (parameters as? GroupListParameters.All)?.differentPage != true) {
-            state = (treeViewAdapter.treeModelAdapter as GroupAdapter).groupListState
-
-            treeViewAdapter.updateDisplayedNodes { placeholder ->
-                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(
-                        parameters.dataId,
-                        parameters.groupListDataWrapper.customTimeDatas,
-                        useGroups(),
-                        parameters.groupListDataWrapper.instanceDatas,
-                        state,
-                        parameters.groupListDataWrapper.taskDatas,
-                        parameters.groupListDataWrapper.note,
-                        parameters.groupListDataWrapper.imageData,
-                        parameters.showProgress,
-                        parameters.useDoneNode,
-                        parameters.groupListDataWrapper.projectInfo,
-                )
-
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
-
-                treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
-            }
-        } else {
-            val groupAdapter = GroupAdapter(this, filterCriteria)
-
-            groupAdapter.initialize(
-                    parameters.dataId,
-                    parameters.groupListDataWrapper.customTimeDatas,
-                    useGroups(),
-                    parameters.groupListDataWrapper.instanceDatas,
-                    state,
-                    parameters.groupListDataWrapper.taskDatas,
-                    parameters.groupListDataWrapper.note,
-                    parameters.groupListDataWrapper.imageData,
-                    parameters.showProgress,
-                    parameters.useDoneNode,
-                    parameters.groupListDataWrapper.projectInfo,
-            )
-
-            treeViewAdapter = groupAdapter.treeViewAdapter
-
-            binding.groupListRecycler.apply {
-                adapter = treeViewAdapter
-                itemAnimator = CustomItemAnimator()
-            }
-
-            dragHelper.attachToRecyclerView(binding.groupListRecycler)
-
-            treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
-            }
-        }
-
-        setGroupMenuItemVisibility()
-        updateFabVisibility()
-
-        tryScroll()
-
-        initializedRelay.accept(Unit)
-    }
-
-    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
-        this.filterCriteria = filterCriteria
-
-        if (placeholder != null) {
-            check(treeViewAdapterInitialized)
-            treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
-        } else {
-            check(!treeViewAdapterInitialized)
-        }
+        putParcelable(KEY_SEARCH_DATA, searchDataManager.filterCriteria)
     }
 
     private fun setGroupMenuItemVisibility() {
         listener.apply {
             val position = (parametersRelay.value as? GroupListParameters.All)?.position
 
-            if (treeViewAdapterInitialized)
+            if (searchDataManager.treeViewAdapterInitialized)
                 setGroupMenuItemVisibility(
                         position,
-                        treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable }
+                        searchDataManager.treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable }
                 )
             else
                 setGroupMenuItemVisibility(position, false)
@@ -809,7 +781,8 @@ class GroupListFragment @JvmOverloads constructor(
         updateFabVisibility()
     }
 
-    private fun getStartEditActivityFabState(hint: EditActivity.Hint, closeActionMode: Boolean = false) = FabState.Visible { startEditActivity(hint, closeActionMode) }
+    private fun getStartEditActivityFabState(hint: EditActivity.Hint, closeActionMode: Boolean = false) =
+            FabState.Visible { startEditActivity(hint, closeActionMode) }
 
     private fun startEditActivity(hint: EditActivity.Hint, closeActionMode: Boolean) {
         if (closeActionMode) selectionCallback.actionMode!!.finish()
@@ -831,7 +804,11 @@ class GroupListFragment @JvmOverloads constructor(
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
-                val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+                val selectedDatas = nodesToSelectedDatas(
+                        searchDataManager.treeViewAdapter.selectedNodes,
+                        true
+                )
+
                 val singleSelectedData = selectedDatas.singleOrNull()
 
                 if (singleSelectedData != null) {
@@ -945,9 +922,10 @@ class GroupListFragment @JvmOverloads constructor(
         get() = getAllInstanceDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
-        if (!treeViewAdapterInitialized) return null
+        if (!searchDataManager.treeViewAdapterInitialized) return null
 
-        return treeViewAdapter.displayedNodes
+        return searchDataManager.treeViewAdapter
+                .displayedNodes
                 .firstOrNull {
                     when (val modelNode = it.modelNode) {
                         is NotDoneGroupNode -> {
@@ -976,7 +954,11 @@ class GroupListFragment @JvmOverloads constructor(
                         else -> false
                     }
                 }
-                ?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+                ?.let {
+                    searchDataManager.treeViewAdapter
+                            .getTreeNodeCollection()
+                            .getPosition(it)
+                }
     }
 
     private fun onEditInstances(undoData: UndoData, count: Int) {

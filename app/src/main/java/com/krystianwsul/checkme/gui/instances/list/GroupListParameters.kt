@@ -13,6 +13,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
 
+    open val useGroups = false
+
     data class All(
             override val dataId: Int,
             override val immediate: Boolean,
@@ -23,6 +25,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters(false) {
 
         override val fabActionMode = FabActionMode.BOTH
+
+        override val useGroups = true
     }
 
     data class TimeStamp(

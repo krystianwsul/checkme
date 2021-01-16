@@ -72,7 +72,7 @@ class DetailsNode(
             rowProjectContainer.isVisible = projectRowVisible
             rowProject.text = projectInfo?.name
 
-            val assignedTo = projectInfo?.assignedTo.orEmpty().flatMap { listOf(it, it, it) } // todo assigned
+            val assignedTo = projectInfo?.assignedTo.orEmpty()
             val assignedToVisible = assignedTo.isNotEmpty()
 
             rowAssignedTo.apply {
@@ -80,7 +80,7 @@ class DetailsNode(
                 removeAllViews()
             }
 
-            assignedTo.forEach { user -> // todo assign
+            assignedTo.forEach { user ->
                 RowAssignedChipDetailsBinding.inflate(
                         LayoutInflater.from(viewHolder.itemView.context),
                         rowAssignedTo,

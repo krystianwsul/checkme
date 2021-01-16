@@ -20,12 +20,16 @@ class RxQueueTest {
         assertEquals(listOf(1, 2, 3), testObserver.values())
     }
 
-    @Test(expected = NullPointerException::class)
+    @Test
     fun testMultipleObservers() {
         val rxQueue = RxQueue<Int>()
 
         rxQueue.subscribe(TestObserver())
-        rxQueue.subscribe(TestObserver())
+
+        val testObserver = TestObserver<Int>()
+        rxQueue.subscribe(testObserver)
+
+        testObserver.assertError(IllegalStateException::class.java)
     }
 
     @Test

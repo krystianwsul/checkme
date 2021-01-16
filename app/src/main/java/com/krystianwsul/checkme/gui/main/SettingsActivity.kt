@@ -10,10 +10,7 @@ import androidx.preference.SwitchPreferenceCompat
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
@@ -172,6 +169,20 @@ class SettingsActivity : NavBarActivity() {
 
                     true
                 }
+            }
+
+            findPreference<Preference>(getString(R.string.tooltips))!!.setOnPreferenceClickListener {
+                TooltipManager.Type
+                        .values()
+                        .forEach { Preferences.setTooltipShown(it, false) }
+
+                Snackbar.make(
+                        settingsActivity.binding.settingsRoot,
+                        R.string.tooltipsRestarted,
+                        Snackbar.LENGTH_SHORT
+                ).show()
+
+                true
             }
         }
 

@@ -86,6 +86,7 @@
     <string name="remove">Remove image</string>
     <string name="addTo">Add to</string>
     <string name="settings">Settings</string>
+    <string name="account">Account</string>
     <string name="accountDetails">Profile</string>
     <string name="accountUpdate">Update your profile based on your Google account</string>
     <string name="profileUpdated">Profile updated</string>
@@ -145,4 +146,7 @@
     <string name="myTasks">My tasks</string>
     <string name="tooltip_tasks_tab">Want to see a list of your tasks?  Check the \"Tasks\" tab.</string>
     <string name="tooltip_add_project">Want to organize your tasks, or share them with another user?  Use a project.</string>
+    <string name="tooltips">Tooltips</string>
+    <string name="tooltipsDescription">Show tooltips from the beginning</string>
+    <string name="tooltipsRestarted">Tooltips restarted</string>
 </resources>

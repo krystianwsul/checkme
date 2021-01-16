@@ -85,6 +85,7 @@
     <string name="remove">Usuń obraz</string>
     <string name="addTo">Dodaj do</string>
     <string name="settings">Ustawienia</string>
+    <string name="account">Konto</string>
     <string name="accountDetails">Profil</string>
     <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
     <string name="profileUpdated">Zaktualizowano profil</string>
@@ -143,4 +144,7 @@
     <string name="myTasks">Moje zadania</string>
     <string name="tooltip_tasks_tab">Chcesz zobaczyć listę wszystkich zadań? Sprawdź w zakładce \"Zdania\".</string>
     <string name="tooltip_add_project">Chcesz zorganizować sobie zadania, albo udostępnić je innemu użytkownikowi? Utwórz projekt.</string>
+    <string name="tooltips">Podpowiedzi</string>
+    <string name="tooltipsDescription">Pokaż podpowiedzi od nowa</string>
+    <string name="tooltipsRestarted">Wznowiono podpowiedzi</string>
 </resources>

@@ -29,13 +29,6 @@
             tools:ignore="HardcodedText" />
 
         <Button
-            android:id="@+id/debugTooltips"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Reset tooltips"
-            tools:ignore="HardcodedText" />
-
-        <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/debugLoad"

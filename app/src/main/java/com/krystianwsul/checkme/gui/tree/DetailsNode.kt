@@ -91,6 +91,8 @@ class DetailsNode(
                             text = user.name
                             loadPhoto(user.photoUrl)
                             isCloseIconVisible = false
+                            rippleColor = null
+                            isClickable = false
                         }
             }
 

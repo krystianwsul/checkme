@@ -568,7 +568,7 @@ class GroupListFragment @JvmOverloads constructor(
                 ::search,
                 binding.groupListRecycler,
                 binding.groupListProgress,
-                binding.groupListEmptyTextInclude.emptyTextLayout,
+                binding.groupListEmptyTextInclude,
                 { parameters.immediate },
                 {
                     when (val parameters = parameters) {

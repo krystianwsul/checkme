@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.gui.utils
 
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.CheckResult
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.databinding.EmptyTextBinding
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -21,7 +19,7 @@ fun observeEmptySearchState(
         search: (FilterCriteria, TreeViewAdapter.Placeholder?) -> Unit,
         recyclerView: RecyclerView,
         progressView: View,
-        emptyTextLayout: LinearLayout,
+        emptyTextBinding: EmptyTextBinding,
         immediate: () -> Boolean,
         emptyTextId: () -> Int?,
 ) = Observables.combineLatest(
@@ -48,16 +46,16 @@ fun observeEmptySearchState(
                 emptyTextId() to R.drawable.empty
 
             if (textId != null) {
-                show += emptyTextLayout
+                show += emptyTextBinding.emptyTextLayout
 
-                emptyTextLayout.findViewById<TextView>(R.id.emptyText).setText(textId)
-                emptyTextLayout.findViewById<ImageView>(R.id.emptyImage).setImageResource(drawableId)
+                emptyTextBinding.emptyText.setText(textId)
+                emptyTextBinding.emptyImage.setImageResource(drawableId)
             } else {
-                hide += emptyTextLayout
+                hide += emptyTextBinding.emptyTextLayout
             }
         } else {
             show += recyclerView
-            hide += emptyTextLayout
+            hide += emptyTextBinding.emptyTextLayout
         }
 
         animateVisibility(show, hide, immediate = immediate())

@@ -269,7 +269,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 ::search,
                 binding.taskListRecycler,
                 binding.taskListProgress,
-                binding.taskListEmptyTextInclude.emptyTextLayout,
+                binding.taskListEmptyTextInclude,
                 { data!!.immediate },
                 { rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root }
         )

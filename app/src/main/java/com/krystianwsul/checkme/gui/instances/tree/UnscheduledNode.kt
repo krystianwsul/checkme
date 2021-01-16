@@ -61,7 +61,7 @@ class UnscheduledNode(
 
         this.taskDatas = taskDatas
 
-        treeNode = TreeNode(this, nodeContainer, expanded, false)
+        treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
 
         treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) })
 

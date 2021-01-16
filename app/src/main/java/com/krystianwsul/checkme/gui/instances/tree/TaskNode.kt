@@ -101,7 +101,7 @@ class TaskNode(
         val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
-        treeNode = TreeNode(this, nodeContainer, expanded, selected)
+        treeNode = TreeNode(this, nodeContainer, selected, expanded)
 
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 

@@ -116,7 +116,7 @@ class NotDoneGroupNode(
             selectedInstances.contains(it.instanceKey)
         } ?: selectedGroups.contains(exactTimeStamp.long)
 
-        treeNode = TreeNode(this, nodeContainer, expanded, selected)
+        treeNode = TreeNode(this, nodeContainer, selected, expanded)
 
         if (instanceData != null) {
             singleInstanceNodeCollection = NodeCollection(
@@ -559,7 +559,7 @@ class NotDoneGroupNode(
                 false to false
             }
 
-            treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
+            treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expanded)
 
             nodeCollection = NodeCollection(
                     indentation + 1,

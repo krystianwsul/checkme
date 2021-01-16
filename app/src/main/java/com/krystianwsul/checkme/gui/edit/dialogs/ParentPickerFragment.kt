@@ -312,7 +312,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     expanded = expandedParentKeys.contains(entryData.entryKey)
                 }
 
-                treeNode = TreeNode(this, nodeContainer, expanded, false)
+                treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
 
                 taskWrappers = ArrayList()
 

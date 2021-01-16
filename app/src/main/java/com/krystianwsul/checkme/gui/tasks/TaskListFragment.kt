@@ -693,11 +693,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 nodeContainer: NodeContainer<AbstractHolder>,
                 showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
-
             val selected = adapterState.selectedProjectKeys.contains(projectData.projectKey)
             val expanded = adapterState.expandedProjectKeys.contains(projectData.projectKey)
 
-            treeNode = TreeNode(this, nodeContainer, expanded, selected)
+            treeNode = TreeNode(this, nodeContainer, selected, expanded)
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
@@ -788,7 +787,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             else
                 false
 
-            treeNode = TreeNode(this, nodeContainer, expanded, selected)
+            treeNode = TreeNode(this, nodeContainer, selected, expanded)
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 

@@ -284,7 +284,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 private set
 
             fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>): TreeNode<AbstractHolder> {
-                treeNode = TreeNode(this, treeNodeCollection, false, selectedProjectIds.contains(projectData.id))
+                treeNode = TreeNode(this, treeNodeCollection, selectedProjectIds.contains(projectData.id))
                 treeNode.setChildTreeNodes(ArrayList())
                 return treeNode
             }

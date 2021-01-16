@@ -266,8 +266,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>) = TreeNode(
                 this,
                 treeNodeCollection,
-                false,
-                selectedCustomTimeKeys?.contains(customTimeData.id) ?: false
+                selectedCustomTimeKeys?.contains(customTimeData.id) ?: false,
         ).also {
             treeNode = it
             it.setChildTreeNodes(listOf())

@@ -80,7 +80,7 @@ class DoneInstanceNode(
             doneExpanded = false
         }
 
-        treeNode = TreeNode(this, dividerTreeNode, expanded, selected)
+        treeNode = TreeNode(this, dividerTreeNode, selected, expanded)
 
         nodeCollection = NodeCollection(
                 indentation + 1,

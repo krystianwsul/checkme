@@ -72,7 +72,7 @@ class DoneInstanceNode(
 
         val expanded: Boolean
         val doneExpanded: Boolean
-        if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
+        if (expandedInstances.containsKey(instanceData.instanceKey)) {
             expanded = true
             doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
         } else {

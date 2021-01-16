@@ -306,13 +306,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     nodeContainer: NodeContainer<AbstractHolder>,
                     expandedParentKeys: List<Parcelable>?,
             ): TreeNode<AbstractHolder> {
-                var expanded = false
-                if (expandedParentKeys != null) {
-                    check(expandedParentKeys.isNotEmpty())
-                    expanded = expandedParentKeys.contains(entryData.entryKey)
-                }
-
-                treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
+                treeNode = TreeNode(
+                        this,
+                        nodeContainer,
+                        expandInitiallyIfHasChildren = expandedParentKeys?.contains(entryData.entryKey) == true
+                )
 
                 taskWrappers = ArrayList()
 

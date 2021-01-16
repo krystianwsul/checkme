@@ -106,7 +106,7 @@ class NotDoneGroupNode(
         val instanceData = instanceDatas.singleOrNull()
 
         val (expanded, doneExpanded) = instanceData?.run {
-            if (expandedInstances.containsKey(instanceKey) && children.isNotEmpty())
+            if (expandedInstances.containsKey(instanceKey))
                 true to expandedInstances.getValue(instanceKey)
             else
                 false to false
@@ -553,13 +553,18 @@ class NotDoneGroupNode(
                 selectedGroups: List<Long>,
                 notDoneGroupTreeNode: TreeNode<AbstractHolder>,
         ): TreeNode<AbstractHolder> {
-            val (expanded, doneExpanded) = if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
+            val (expanded, doneExpanded) = if (expandedInstances.containsKey(instanceData.instanceKey)) {
                 true to expandedInstances.getValue(instanceData.instanceKey)
             } else {
                 false to false
             }
 
-            treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expanded)
+            treeNode = TreeNode(
+                    this,
+                    notDoneGroupTreeNode,
+                    selected,
+                    expanded
+            )
 
             nodeCollection = NodeCollection(
                     indentation + 1,

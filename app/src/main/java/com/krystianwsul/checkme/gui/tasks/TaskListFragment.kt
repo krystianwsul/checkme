@@ -580,7 +580,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     }
                     .toMutableList()
 
-            treeNodeCollection.nodes = nodes.map { it.initialize(adapterState, treeNodeCollection, showProjects) }
+            treeNodes += nodes.map { it.initialize(adapterState, treeNodeCollection, showProjects) }
+
+            treeNodeCollection.nodes = treeNodes
         }
 
         override fun scrollToTop() = this@TaskListFragment.scrollToTop()

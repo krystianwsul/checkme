@@ -23,16 +23,15 @@ abstract class DomainListener<D : DomainData> {
         }
 
         disposable = DomainFactory.instanceRelay
+                .observeOn(Schedulers.single())
                 .filterNotNull()
                 .switchMap { domainFactory ->
                     domainFactory.domainListenerManager
                             .addListener(this)
                             .map { domainFactory }
                 }
-                .observeOn(Schedulers.single())
                 .toFlowable(BackpressureStrategy.LATEST)
                 .map { getDataResult(it) }
-                .observeOn(AndroidSchedulers.mainThread())
                 .map { it.data!! }
                 .filter { data.value != it }
                 .doFinally {
@@ -40,6 +39,7 @@ abstract class DomainListener<D : DomainData> {
                             ?.domainListenerManager
                             ?.removeListener(this)
                 }
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data)
     }
 

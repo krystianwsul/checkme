@@ -35,7 +35,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogDateLayout"
                     style="@style/MySpinner"
                     android:layout_width="match_parent"
@@ -51,7 +51,7 @@
                         android:layout_height="wrap_content"
                         tools:ignore="LabelFor" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 <LinearLayout
                     android:id="@+id/scheduleDialogDayLayout"
@@ -224,7 +224,7 @@
 
                 </RadioGroup>
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogTimeLayout"
                     style="@style/MySpinner"
                     android:layout_width="match_parent"
@@ -239,7 +239,7 @@
                         android:layout_height="wrap_content"
                         tools:ignore="LabelFor" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogFromLayout"

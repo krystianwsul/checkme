@@ -27,7 +27,6 @@ import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -158,7 +157,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var position: Int? = null
 
-    val result = PublishRelay.create<ScheduleDialogResult>()
+    val result = PublishRelay.create<ScheduleDialogResult>()!!
 
     private val dateFieldDatas by lazy {
         listOf(
@@ -262,7 +261,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        binding.scheduleDialogTime.setFixedOnClickListener {
+        binding.scheduleDialogTimeLayout.setDropdown {
             checkNotNull(customTimeDatas)
 
             val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
@@ -287,7 +286,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     timePickerDialogFragmentListener
         }
 
-        binding.scheduleDialogDate.setFixedOnClickListener {
+        binding.scheduleDialogDateLayout.setDropdown {
             delegate.getDatePicker().let {
                 it.addListener(datePickerDialogFragmentListener)
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)

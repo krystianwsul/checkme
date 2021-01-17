@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyApplication
@@ -35,7 +34,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -715,29 +713,24 @@ class EditActivity : NavBarActivity() {
                         .parent
 
                 (holder as ScheduleHolder).rowScheduleBinding.apply {
-                    scheduleLayout.endIconMode = if (parent != null)
-                        TextInputLayout.END_ICON_CLEAR_TEXT
-                    else
-                        TextInputLayout.END_ICON_DROPDOWN_MENU
+                    scheduleLayout.apply {
+                        fun clickListener() = ParentPickerFragment.newInstance(parent != null, true).let {
+                            it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
+                            it.initialize(activity.parentFragmentDelegate)
+                        }
 
-                    scheduleText.run {
-                        setText(parent?.name)
-
-                        setFixedOnClickListener {
-                            ParentPickerFragment.newInstance(parent != null, true).let {
-                                it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(activity.parentFragmentDelegate)
+                        if (parent != null) {
+                            setClose(::clickListener) {
+                                activity.delegate
+                                        .parentScheduleManager
+                                        .parent = null
                             }
+                        } else {
+                            setDropdown(::clickListener)
                         }
                     }
 
-                    if (parent != null) {
-                        scheduleLayout.setEndIconOnClickListener {
-                            activity.delegate
-                                    .parentScheduleManager
-                                    .parent = null
-                        }
-                    }
+                    scheduleText.setText(parent?.name)
                 }
             }
         }
@@ -753,13 +746,8 @@ class EditActivity : NavBarActivity() {
                     scheduleLayout.run {
                         hint = null
                         isHintAnimationEnabled = false
-                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
-                    }
 
-                    scheduleText.run {
-                        setText(scheduleEntry.scheduleDataWrapper.getText(activity.delegate.customTimeDatas, activity))
-
-                        setFixedOnClickListener(
+                        setClose(
                                 {
                                     val parameters = ScheduleDialogParameters(
                                             holder.adapterPosition,
@@ -774,6 +762,11 @@ class EditActivity : NavBarActivity() {
                                 { activity.removeSchedule(holder.adapterPosition) }
                         )
                     }
+
+                    scheduleText.setText(scheduleEntry.scheduleDataWrapper.getText(
+                            activity.delegate.customTimeDatas,
+                            activity,
+                    ))
                 }
             }
 
@@ -788,15 +781,13 @@ class EditActivity : NavBarActivity() {
             }
 
             private fun same(other: ScheduleEntry): Boolean {
-                if (scheduleEntry.id == other.id)
-                    return true
+                if (scheduleEntry.id == other.id) return true
 
                 return scheduleEntry.scheduleDataWrapper === other.scheduleDataWrapper
             }
 
             override fun same(other: Item): Boolean {
-                if (other !is Schedule)
-                    return false
+                if (other !is Schedule) return false
 
                 return same(other.scheduleEntry)
             }
@@ -814,13 +805,8 @@ class EditActivity : NavBarActivity() {
                         hint = activity.getString(R.string.addReminder)
                         error = null
                         isHintAnimationEnabled = false
-                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
-                    }
 
-                    scheduleText.run {
-                        text = null
-
-                        setFixedOnClickListener {
+                        setDropdown {
                             val parameters = ScheduleDialogParameters(
                                     null,
                                     activity.delegate
@@ -833,6 +819,8 @@ class EditActivity : NavBarActivity() {
                             activity.parametersRelay.accept(parameters)
                         }
                     }
+
+                    scheduleText.text = null
                 }
             }
         }
@@ -902,7 +890,8 @@ class EditActivity : NavBarActivity() {
 
                     imageImage.setOnClickListener { listener() }
                     imageEdit.setOnClickListener { listener() }
-                    imageLayoutText.setFixedOnClickListener(::listener)
+
+                    imageLayout.setDropdown(::listener)
 
                     root.removeOnLayoutChangeListener(layoutChangeListener)
                     root.addOnLayoutChangeListener(layoutChangeListener)
@@ -959,8 +948,8 @@ class EditActivity : NavBarActivity() {
                 viewsMap.clear()
 
                 (holder as AssignedHolder).rowAssignedBinding
-                        .assignedText
-                        .setFixedOnClickListener { openDialog(activity) }
+                        .assignedLayout
+                        .setDropdown { openDialog(activity) }
 
                 onNewAssignedTo(activity, holder)
             }

@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/activity_vertical_margin"/>
 
-    <com.google.android.material.textfield.TextInputLayout
+    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
         android:id="@+id/scheduleLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,6 +31,6 @@
             tools:ignore="LabelFor"
             android:singleLine="false" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
 </LinearLayout>

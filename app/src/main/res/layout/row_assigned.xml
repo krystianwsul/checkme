@@ -9,15 +9,14 @@
     android:orientation="vertical"
     android:animateLayoutChanges="true">
 
-    <com.google.android.material.textfield.TextInputLayout
+    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
         android:id="@+id/assignedLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/assignedToAll"
         app:errorEnabled="true"
         app:hintAnimationEnabled="false"
-        style="@style/MySpinner"
-        app:endIconMode="dropdown_menu">
+        style="@style/MySpinner">
 
         <AutoCompleteTextView
             android:id="@+id/assignedText"
@@ -27,7 +26,7 @@
             tools:ignore="LabelFor"
             android:singleLine="false" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/assignedChipGroup"

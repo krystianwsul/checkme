@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.utils
 
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
@@ -82,10 +81,8 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     }
 
     private fun observeData() {
-        Log.e("asdf", "magic 1")
         screenReadyObservable.switchMap { if (it) dataObservable else Observable.never() }
                 .subscribe { data ->
-                    Log.e("asdf", "magic 2")
                     val first = this.data == null
                     val immediate = dataIsImmediate(data)
 
@@ -102,12 +99,12 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
                         attachTreeViewAdapter(treeViewAdapter)
 
+                        this.modelAdapter = modelAdapter
+                        treeViewAdapterRelay.accept(treeViewAdapter)
+
                         treeViewAdapter.updateDisplayedNodes {
                             updateTreeViewAdapterAfterModelAdapterInitialization(treeViewAdapter, data, first, it)
                         }
-
-                        this.modelAdapter = modelAdapter
-                        treeViewAdapterRelay.accept(treeViewAdapter)
                     } else {
                         emptyBefore = isAdapterEmpty()
 

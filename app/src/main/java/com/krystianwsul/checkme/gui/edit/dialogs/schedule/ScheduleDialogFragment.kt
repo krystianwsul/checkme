@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentScheduleDialogBinding
@@ -29,6 +28,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
+import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditViewModel
@@ -563,7 +563,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class DateFieldData(
             val field: AutoCompleteTextView,
-            val layout: TextInputLayout,
+            val layout: MyTextInputLayout,
             val property: KMutableProperty0<Date?>,
             val tag: String,
             val min: (() -> Date)? = null,
@@ -706,15 +706,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 data.field.setText(date?.getDisplayText())
 
-                data.layout.apply {
-                    if (dropdown) {
-                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
-                    } else {
-                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
-                        isEndIconVisible = true
-                    }
-                }
-
                 fun showDialog() = newMaterialDatePicker(
                         data.property.get() ?: Date.today(),
                         data.min?.invoke()
@@ -728,11 +719,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     updateFields()
                 }
 
-                data.field.apply {
-                    if (dropdown)
-                        setFixedOnClickListener(::showDialog)
-                    else
-                        setFixedOnClickListener(::showDialog, ::clearField)
+                data.layout.apply {
+                    if (dropdown) setDropdown(::showDialog) else setClose(::showDialog, ::clearField)
                 }
             }
         }

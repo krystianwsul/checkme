@@ -241,7 +241,7 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogFromLayout"
                     style="@style/MySpinner"
                     android:layout_width="match_parent"
@@ -257,9 +257,9 @@
                         android:hint="@string/from"
                         tools:ignore="LabelFor" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogUntilLayout"
                     style="@style/MySpinner"
                     android:layout_width="match_parent"
@@ -275,7 +275,7 @@
                         android:hint="@string/until"
                         tools:ignore="LabelFor" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/scheduleDialogSave"

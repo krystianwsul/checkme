@@ -62,25 +62,18 @@ class TreeViewAdapter<T : TreeHolder>(
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection = treeNodeCollection
 
+        locker = AdapterLocker()
+
         normalizeRelay.accept(Unit)
     }
 
     override fun getItemCount() = displayedNodes.size + if (showPadding) 1 else 0
 
-    private fun <T> runWithLocker(action: () -> T): T { // todo search make more generalized, so it can
-        check(locker == null)
-
-        locker = AdapterLocker()
-        val result = action()
-        locker = null
-
-        return result
-    }
-
-    private fun getStates() = runWithLocker { displayedNodes.map { it.state } }
+    private fun getStates() = displayedNodes.map { it.state }
 
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
         check(!updating)
+        checkNotNull(locker)
 
         val oldStates = getStates()
         val oldShowProgress = showProgress
@@ -88,10 +81,12 @@ class TreeViewAdapter<T : TreeHolder>(
         val oldShowPadding = showPadding
 
         updating = true
+        locker = null
 
         action(Placeholder.instance)
 
         val newFilterCriteria = filterCriteria
+        locker = AdapterLocker()
 
         if (
                 (newFilterCriteria != oldFilterCriteria) &&

@@ -10,7 +10,6 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AutoCompleteTextView
 import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
 import com.krystianwsul.checkme.R
@@ -22,8 +21,8 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.utils.setChecked
-import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.gui.utils.setFixedOnClickListenerAndFixIcon
+import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -70,7 +69,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
-    private lateinit var timeViews: Map<DayOfWeek, AutoCompleteTextView>
+    private lateinit var timeViews: Map<DayOfWeek, MyTextInputLayout>
     private var hourMinutes = mutableMapOf<DayOfWeek, HourMinute>()
 
     private var savedInstanceState: Bundle? = null
@@ -233,7 +232,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
 
-        binding.timeAllDaysTime.setFixedOnClickListener {
+        binding.timeAllDaysTimeLayout.setDropdown {
             TimePickerDialogFragment.newInstance(allDaysHourMinute, SerializableUnit).apply {
                 listener = allDaysListener
                 show(supportFragmentManager, TAG_TIME_PICKER_ALL_DAYS)
@@ -243,7 +242,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TAG_TIME_PICKER_ALL_DAYS)?.listener = allDaysListener
 
         DayOfWeek.values().forEach { dayOfWeek ->
-            timeViews.getValue(dayOfWeek).setFixedOnClickListener {
+            timeViews.getValue(dayOfWeek).setDropdown {
                 val currHourMinute = hourMinutes.getValue(dayOfWeek)
 
                 TimePickerDialogFragment.newInstance(currHourMinute, dayOfWeek).apply {

@@ -52,7 +52,7 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/timeAllDaysTimeLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -69,7 +69,7 @@
                         tools:ignore="LabelFor"
                         android:text="@string/allDays" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
             </LinearLayout>
 
@@ -96,7 +96,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeSundayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -107,11 +108,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeSundayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -132,7 +132,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeMondayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -143,11 +144,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeMondayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -168,7 +168,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeTuesdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -179,11 +180,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeTuesdayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -204,7 +204,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeWednesdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -215,11 +216,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeWednesdayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -240,7 +240,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeThursdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -251,11 +252,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeThursdayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -276,7 +276,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeFridayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -287,11 +288,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeFridayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -313,7 +313,8 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                        android:id="@+id/timeSaturdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -324,11 +325,10 @@
                         <AutoCompleteTextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/timeSaturdayTime"
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 
                 </RelativeLayout>
 

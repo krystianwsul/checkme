@@ -74,4 +74,6 @@ class MyTextInputLayout : TextInputLayout {
 
         super.setEndIconOnClickListener(endIconOnClickListener)
     }
+
+    fun setText(text: String) = editText!!.setText(text)
 }

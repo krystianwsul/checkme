@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.treeadapter.locker.AdapterLocker
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -55,6 +56,9 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private val normalizedObservable = BehaviorRelay.createDefault(false)
 
+    var locker: AdapterLocker? = null
+        private set
+
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection = treeNodeCollection
 
@@ -63,10 +67,22 @@ class TreeViewAdapter<T : TreeHolder>(
 
     override fun getItemCount() = displayedNodes.size + if (showPadding) 1 else 0
 
+    private fun <T> runWithLocker(action: () -> T): T { // todo search make more generalized, so it can
+        check(locker == null)
+
+        locker = AdapterLocker()
+        val result = action()
+        locker = null
+
+        return result
+    }
+
+    private fun getStates() = runWithLocker { displayedNodes.map { it.state } }
+
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
         check(!updating)
 
-        val oldStates = displayedNodes.map { it.state }
+        val oldStates = getStates()
         val oldShowProgress = showProgress
         val oldFilterCriteria = filterCriteria
         val oldShowPadding = showPadding
@@ -90,7 +106,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
         updating = false
 
-        val newStates = displayedNodes.map { it.state }
+        val newStates = getStates()
         val newShowProgress = showProgress
         val newShowPadding = showPadding
 

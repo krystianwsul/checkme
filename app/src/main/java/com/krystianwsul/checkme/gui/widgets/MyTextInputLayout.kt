@@ -14,6 +14,7 @@ class MyTextInputLayout : TextInputLayout {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
+        @Suppress("DEPRECATION")
         endIconMode = END_ICON_CUSTOM
     }
 
@@ -30,6 +31,8 @@ class MyTextInputLayout : TextInputLayout {
         endIconDrawable = ContextCompat.getDrawable(context, drawableRes)!!.apply {
             setTint(ContextCompat.getColor(context, R.color.textInputIcon))
         }
+
+        errorIconDrawable = ContextCompat.getDrawable(context, drawableRes)
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {
@@ -44,14 +47,31 @@ class MyTextInputLayout : TextInputLayout {
 
     private fun setDropdownIcon() = setDrawableRes(R.drawable.mtrl_ic_arrow_drop_down)
 
+    @Deprecated("")
     override fun setEndIconMode(endIconMode: Int) {
         if (disallowSettingIcon) throw UnsupportedOperationException()
 
         super.setEndIconMode(endIconMode)
     }
 
-    fun setListeners(listener: () -> Unit, iconListener: () -> Unit) {
+    private var disallowSettingListener = true
+
+    private fun setListeners(listener: () -> Unit, iconListener: () -> Unit) {
+        check(disallowSettingListener)
+
+        disallowSettingListener = false
+
         editText!!.setOnClickListener { listener() }
+        @Suppress("DEPRECATION")
         setEndIconOnClickListener { iconListener() }
+
+        disallowSettingListener = true
+    }
+
+    @Deprecated("")
+    override fun setEndIconOnClickListener(endIconOnClickListener: OnClickListener?) {
+        if (disallowSettingListener) throw UnsupportedOperationException()
+
+        super.setEndIconOnClickListener(endIconOnClickListener)
     }
 }

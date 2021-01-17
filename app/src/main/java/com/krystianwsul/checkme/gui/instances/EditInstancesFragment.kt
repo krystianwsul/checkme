@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -32,7 +31,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
-import com.krystianwsul.checkme.gui.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -204,7 +202,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.editInstanceDate.setFixedOnClickListener {
+        binding.editInstanceDateLayout.setDropdown {
             newMaterialDatePicker(state.date).let {
                 it.addListener(materialDatePickerListener)
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
@@ -303,7 +301,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener =
                 timePickerDialogFragmentListener
 
-        binding.editInstanceTime.setFixedOnClickListener {
+        binding.editInstanceTimeLayout.setDropdown {
             val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
@@ -351,26 +349,23 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private var first = true
 
     private fun updateFields() {
-        binding.editInstanceParentLayout.endIconMode = if (state.parentInstanceData != null)
-            TextInputLayout.END_ICON_CLEAR_TEXT
-        else
-            TextInputLayout.END_ICON_DROPDOWN_MENU
-
         binding.editInstanceParentText.setText(state.parentInstanceData?.name)
 
         binding.editInstanceParentLayout.isEndIconVisible = true
 
-        binding.editInstanceParentText.setFixedOnClickListener {
-            ParentPickerFragment.newInstance(data.parentInstanceData != null, false).let {
-                it.show(childFragmentManager, TAG_PARENT_PICKER)
-                it.initialize(parentPickerDelegate)
-            }
+        fun listener() = ParentPickerFragment.newInstance(data.parentInstanceData != null, false).let {
+            it.show(childFragmentManager, TAG_PARENT_PICKER)
+            it.initialize(parentPickerDelegate)
         }
 
-        if (state.parentInstanceData != null) {
-            binding.editInstanceParentLayout.setEndIconOnClickListener {
-                state.parentInstanceData = null
-                updateFields()
+        binding.editInstanceParentLayout.apply {
+            if (state.parentInstanceData != null) {
+                setClose(::listener) {
+                    state.parentInstanceData = null
+                    updateFields()
+                }
+            } else {
+                setDropdown(::listener)
             }
         }
 

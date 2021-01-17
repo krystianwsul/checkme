@@ -56,7 +56,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private val normalizedObservable = BehaviorRelay.createDefault(false)
 
-    var locker: AdapterLocker? = null
+    var locker: AdapterLocker<T>? = null
         private set
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {

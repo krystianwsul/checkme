@@ -250,9 +250,13 @@ class TreeNode<T : TreeHolder>(
 
     override val displayedNodes: List<TreeNode<T>>
         get() {
-            if (!canBeShown()) return listOf()
+            val locker = getLocker()
+            locker?.displayedNodes?.let { return it }
 
-            return listOf(this) + displayedChildNodes
+            val result = if (canBeShown()) listOf(this) + displayedChildNodes else listOf()
+
+            locker?.displayedNodes = result
+            return result
         }
 
     override val displayableNodes: List<TreeNode<T>>
@@ -271,6 +275,8 @@ class TreeNode<T : TreeHolder>(
             else
                 listOf()
         }
+
+    private fun getLocker() = treeViewAdapter.locker?.getNodeLocker(this)
 
     /**
      * todo: consider adding a cache that can be used when these values are known not to change, such as after

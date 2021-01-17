@@ -11,7 +11,7 @@ object TimeLogger {
     fun print() {
         times.entries
                 .sortedBy { it.key }
-                .forEach { log("called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
+                .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 
     fun start(key: String) = Tracker(key)

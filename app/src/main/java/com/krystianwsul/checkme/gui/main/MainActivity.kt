@@ -574,7 +574,7 @@ class MainActivity :
                         it.dataId,
                         it.immediate,
                         it.taskData,
-                        true
+                        true,
                 ))
 
                 fun showDrawerTooltip(type: TooltipManager.Type, @StringRes message: Int) {

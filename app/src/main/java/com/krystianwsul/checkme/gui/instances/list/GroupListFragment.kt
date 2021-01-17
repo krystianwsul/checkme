@@ -547,11 +547,13 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun dataIsImmediate(data: GroupListParameters) = data.immediate
 
-        override fun dataRequiresReinitializingModelAdapter(data: GroupListParameters) =
-                (data as? GroupListParameters.All)?.differentPage == true
-
         override fun getFilterCriteriaFromData(data: GroupListParameters) =
                 (data as? GroupListParameters.Search)?.filterCriteria
+
+        override fun filterDataChangeRequiresReinitializingModelAdapter(
+                oldFilterCriteria: FilterCriteria,
+                newFilterCriteria: FilterCriteria,
+        ) = false
 
         override fun instantiateAdapters(filterCriteria: FilterCriteria) =
                 GroupAdapter(this@GroupListFragment, filterCriteria).let { it to it.treeViewAdapter }
@@ -565,7 +567,11 @@ class GroupListFragment @JvmOverloads constructor(
             dragHelper.attachToRecyclerView(binding.groupListRecycler)
         }
 
-        override fun initializeModelAdapter(modelAdapter: GroupAdapter, data: GroupListParameters) {
+        override fun initializeModelAdapter(
+                modelAdapter: GroupAdapter,
+                data: GroupListParameters,
+                filterCriteria: FilterCriteria,
+        ) {
             if (treeViewAdapterInitialized) state = modelAdapter.groupListState
 
             modelAdapter.initialize(
@@ -588,9 +594,7 @@ class GroupListFragment @JvmOverloads constructor(
                 data: GroupListParameters,
                 initial: Boolean,
                 placeholder: TreeViewAdapter.Placeholder,
-        ) {
-            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, initial)
-        }
+        ) = selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, initial)
 
         override fun onDataChanged() {
             setGroupMenuItemVisibility()
@@ -598,6 +602,8 @@ class GroupListFragment @JvmOverloads constructor(
 
             tryScroll()
         }
+
+        override fun onFilterCriteriaChanged() = Unit
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) {

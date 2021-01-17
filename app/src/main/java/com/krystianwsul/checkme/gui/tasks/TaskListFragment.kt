@@ -56,7 +56,6 @@ import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.cast
-import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.*
@@ -77,15 +76,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var rootTaskData: RootTaskData? = null
 
-    private var data: Data? = null
-
-    lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
-        private set
+    private val dataRelay = BehaviorRelay.create<Data>()
+    private var data
+        get() = dataRelay.value
+        set(value) = dataRelay.accept(value)
 
     private val dragHelper by lazy {
         object : DragHelper() {
 
-            override fun getTreeViewAdapter() = treeViewAdapter
+            override fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder> = treeViewAdapter
         }
     }
 
@@ -201,11 +200,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var taskListFragmentFab: FloatingActionButton? = null
 
+    val treeViewAdapter: TreeViewAdapter<AbstractHolder> get() = searchDataManager.treeViewAdapter
+
     val shareData get() = getShareData(treeViewAdapter.displayableNodes)
 
     private lateinit var adapterState: AdapterState
-
-    private var filterCriteria: FilterCriteria = FilterCriteria.None
 
     private val listener get() = activity as Listener
 
@@ -216,14 +215,77 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.taskListRecycler
 
-    private val initializedRelay = BehaviorRelay.create<Unit>()
-
     private val bindingProperty = ResettableProperty<FragmentTaskListBinding>()
     private var binding by bindingProperty
 
     val emptyTextLayout get() = binding.taskListEmptyTextInclude.emptyTextLayout
 
     override val scrollDisposable = viewCreatedDisposable
+
+    private val viewCreatedObservable = BehaviorRelay.createDefault(false)
+
+    private val searchDataManager = object : SearchDataManager<Data, TaskAdapter>(viewCreatedObservable, dataRelay) {
+
+        override val recyclerView get() = binding.taskListRecycler
+        override val progressView get() = binding.taskListProgress
+        override val emptyTextBinding get() = binding.taskListEmptyTextInclude
+
+        override val emptyTextResId get() = rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root
+
+        override val compositeDisposable = viewCreatedDisposable
+
+        override val filterCriteriaObservable get() = listener.taskSearch.cast<FilterCriteria>()
+
+        override fun dataIsImmediate(data: Data) = data.immediate
+
+        override fun getFilterCriteriaFromData(data: Data): FilterCriteria? = null
+
+        override fun filterDataChangeRequiresReinitializingModelAdapter(
+                oldFilterCriteria: FilterCriteria,
+                newFilterCriteria: FilterCriteria,
+        ): Boolean {
+            fun FilterCriteria.showProjects() = (this as? FilterCriteria.Full)?.filterParams?.showProjects
+
+            return rootTaskData == null && oldFilterCriteria.showProjects() != newFilterCriteria.showProjects()
+        }
+
+        override fun instantiateAdapters(filterCriteria: FilterCriteria) =
+                TaskAdapter(this@TaskListFragment).let { it to it.treeViewAdapter }
+
+        override fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
+            binding.taskListRecycler.apply {
+                adapter = treeViewAdapter
+                itemAnimator = CustomItemAnimator()
+            }
+
+            dragHelper.attachToRecyclerView(binding.taskListRecycler)
+        }
+
+        override fun initializeModelAdapter(modelAdapter: TaskAdapter, data: Data, filterCriteria: FilterCriteria) {
+            val showProjects = (filterCriteria as? FilterCriteria.Full)?.filterParams?.showProjects == true
+
+            if (treeViewAdapterInitialized) adapterState = getAdapterState()
+
+            modelAdapter.initialize(data.taskData, adapterState, data.copying, showProjects)
+        }
+
+        override fun updateTreeViewAdapterAfterModelAdapterInitialization(
+                treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+                data: Data,
+                initial: Boolean,
+                placeholder: TreeViewAdapter.Placeholder,
+        ) = selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, initial)
+
+        override fun onDataChanged() {
+            updateFabVisibility("initialize")
+
+            updateSelectAll()
+
+            tryScroll()
+        }
+
+        override fun onFilterCriteriaChanged() = updateFabVisibility("search")
+    }
 
     private fun getShareData(treeNodes: List<TreeNode<AbstractHolder>>): String {
         // we can assume that parent nodes will come before child nodes, so distinct will just take the first one
@@ -247,7 +309,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         adapterState = savedInstanceState?.getParcelable(KEY_ADAPTER_STATE) ?: AdapterState()
 
         savedInstanceState?.run {
-            filterCriteria = getParcelable(KEY_SEARCH_DATA)!!
+            searchDataManager.setInitialFilterCriteria(getParcelable(KEY_SEARCH_DATA)!!)
+
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
 
@@ -262,19 +325,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         binding.taskListRecycler.layoutManager = LinearLayoutManager(context)
 
-        viewCreatedDisposable += observeEmptySearchState(
-                initializedRelay,
-                listener.taskSearch.cast(),
-                { treeViewAdapter },
-                ::search,
-                binding.taskListRecycler,
-                binding.taskListProgress,
-                binding.taskListEmptyTextInclude,
-                { data!!.immediate },
-                { rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root }
-        )
+        viewCreatedObservable.accept(true)
 
-        initialize()
+        searchDataManager.subscribe()
     }
 
     fun setAllTasks(data: Data) {
@@ -282,68 +335,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         rootTaskData = null
         this.data = data
-
-        initialize()
     }
 
     fun setTaskKey(rootTaskData: RootTaskData, data: Data) {
         this.rootTaskData = rootTaskData
         this.data = data
-
-        initialize()
-    }
-
-    private fun initialize(placeholder: TreeViewAdapter.Placeholder? = null) {
-        if (view == null) return
-        if (data == null) return
-
-        val showProjects = (filterCriteria as? FilterCriteria.Full)?.filterParams?.showProjects == true
-
-        if (this::treeViewAdapter.isInitialized) {
-            val adapterState = getAdapterState()
-            check(selectionCallback.hasActionMode == adapterState.hasSelection)
-
-            fun initializeTaskAdapter(placeholder: TreeViewAdapter.Placeholder) {
-                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(
-                        data!!.taskData,
-                        adapterState,
-                        data!!.copying,
-                        showProjects,
-                )
-
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, placeholder, false)
-            }
-
-            if (placeholder != null)
-                initializeTaskAdapter(placeholder)
-            else
-                treeViewAdapter.updateDisplayedNodes(::initializeTaskAdapter)
-        } else {
-            val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(data!!.taskData, adapterState, data!!.copying, showProjects)
-            treeViewAdapter = taskAdapter.treeViewAdapter
-
-            binding.taskListRecycler.apply {
-                adapter = treeViewAdapter
-                itemAnimator = CustomItemAnimator()
-            }
-
-            dragHelper.attachToRecyclerView(binding.taskListRecycler)
-
-            treeViewAdapter.updateDisplayedNodes {
-                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, it, true)
-
-                search(filterCriteria, it)
-            }
-        }
-
-        updateFabVisibility("initialize")
-
-        initializedRelay.accept(Unit)
-
-        updateSelectAll()
-
-        tryScroll()
     }
 
     private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> = listOf(
@@ -354,7 +350,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private val ChildTaskData.allTaskKeys get() = getAllChildTaskDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
-        if (!this::treeViewAdapter.isInitialized) return null
+        if (!searchDataManager.treeViewAdapterInitialized) return null
 
         return treeViewAdapter.displayedNodes
                 .firstOrNull {
@@ -396,10 +392,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         super.onSaveInstanceState(outState)
 
         outState.run {
-            if (this@TaskListFragment::treeViewAdapter.isInitialized)
+            if (searchDataManager.treeViewAdapterInitialized)
                 putParcelable(KEY_ADAPTER_STATE, getAdapterState())
 
-            putParcelable(KEY_SEARCH_DATA, filterCriteria)
+            putParcelable(KEY_SEARCH_DATA, searchDataManager.filterCriteria)
 
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
@@ -463,28 +459,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder?) {
-        fun FilterCriteria.showProjects() = (this as? FilterCriteria.Full)?.filterParams?.showProjects
-
-        val showProjectsChanged = rootTaskData == null &&
-                this.filterCriteria.showProjects() != filterCriteria.showProjects()
-
-        this.filterCriteria = filterCriteria
-        updateFabVisibility("search")
-
-        if (placeholder != null) {
-            check(this::treeViewAdapter.isInitialized)
-
-            if (showProjectsChanged)
-                initialize(placeholder)
-            else
-                treeViewAdapter.setFilterCriteria(filterCriteria, placeholder)
-        } else {
-            check(!this::treeViewAdapter.isInitialized)
-        }
-    }
-
     override fun onDestroyView() {
+        viewCreatedObservable.accept(false)
+
         bindingProperty.reset()
 
         super.onDestroyView()
@@ -977,7 +954,5 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     ) : Parcelable {
 
         constructor() : this(setOf(), setOf(), setOf(), setOf())
-
-        val hasSelection get() = selectedTaskKeys.isNotEmpty() || selectedProjectKeys.isNotEmpty()
     }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.utils
 
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
@@ -13,6 +14,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
         private val screenReadyObservable: Observable<Boolean>,
@@ -41,15 +43,20 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
         private set
 
     protected abstract fun dataIsImmediate(data: DATA): Boolean
-    protected abstract fun dataRequiresReinitializingModelAdapter(data: DATA): Boolean
+
     protected abstract fun getFilterCriteriaFromData(data: DATA): FilterCriteria?
+
+    protected abstract fun filterDataChangeRequiresReinitializingModelAdapter(
+            oldFilterCriteria: FilterCriteria,
+            newFilterCriteria: FilterCriteria,
+    ): Boolean
 
     protected abstract fun instantiateAdapters(filterCriteria: FilterCriteria):
             Pair<MODEL_ADAPTER, TreeViewAdapter<AbstractHolder>>
 
     protected abstract fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>)
 
-    protected abstract fun initializeModelAdapter(modelAdapter: MODEL_ADAPTER, data: DATA)
+    protected abstract fun initializeModelAdapter(modelAdapter: MODEL_ADAPTER, data: DATA, filterCriteria: FilterCriteria)
 
     protected abstract fun updateTreeViewAdapterAfterModelAdapterInitialization(
             treeViewAdapter: TreeViewAdapter<AbstractHolder>,
@@ -59,8 +66,11 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     )
 
     protected abstract fun onDataChanged()
+    protected abstract fun onFilterCriteriaChanged()
 
     fun setInitialFilterCriteria(filterCriteria: FilterCriteria) {
+        check(modelAdapter == null)
+
         this.filterCriteria = filterCriteria
     }
 
@@ -72,18 +82,23 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     }
 
     private fun observeData() {
+        Log.e("asdf", "magic 1")
         screenReadyObservable.switchMap { if (it) dataObservable else Observable.never() }
                 .subscribe { data ->
+                    Log.e("asdf", "magic 2")
                     val first = this.data == null
                     val immediate = dataIsImmediate(data)
 
                     this.data = data
                     getFilterCriteriaFromData(data)?.let { filterCriteria = it }
 
+                    val emptyBefore: Boolean
                     if (first) {
+                        emptyBefore = true
+
                         val (modelAdapter, treeViewAdapter) = instantiateAdapters(filterCriteria)
 
-                        initializeModelAdapter(modelAdapter, data)
+                        initializeModelAdapter(modelAdapter, data, filterCriteria)
 
                         attachTreeViewAdapter(treeViewAdapter)
 
@@ -94,18 +109,18 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                         this.modelAdapter = modelAdapter
                         treeViewAdapterRelay.accept(treeViewAdapter)
                     } else {
-                        val emptyBefore = isAdapterEmpty()
+                        emptyBefore = isAdapterEmpty()
 
                         treeViewAdapter.updateDisplayedNodes {
-                            initializeModelAdapter(modelAdapter!!, data)
+                            initializeModelAdapter(modelAdapter!!, data, filterCriteria)
 
                             updateTreeViewAdapterAfterModelAdapterInitialization(treeViewAdapter, data, first, it)
 
                             treeViewAdapter.setFilterCriteria(filterCriteria, it)
                         }
-
-                        updateEmptyState(emptyBefore, immediate)
                     }
+
+                    updateEmptyState(emptyBefore, immediate)
 
                     onDataChanged()
                 }
@@ -113,13 +128,26 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     }
 
     private fun observeFilterCriteria() {
-        filterCriteriaObservable.subscribe { filterCriteria ->
+        compositeDisposable += filterCriteriaObservable.subscribe { filterCriteria ->
+            val oldFilterCriteria = this.filterCriteria
             this.filterCriteria = filterCriteria
+
+            onFilterCriteriaChanged()
 
             if (treeViewAdapterInitialized) {
                 val emptyBefore = isAdapterEmpty()
 
-                treeViewAdapter.updateDisplayedNodes { treeViewAdapter.setFilterCriteria(filterCriteria, it) }
+                if (filterDataChangeRequiresReinitializingModelAdapter(oldFilterCriteria, filterCriteria)) {
+                    treeViewAdapter.updateDisplayedNodes {
+                        initializeModelAdapter(modelAdapter!!, data!!, filterCriteria)
+
+                        updateTreeViewAdapterAfterModelAdapterInitialization(treeViewAdapter, data!!, false, it)
+
+                        treeViewAdapter.setFilterCriteria(filterCriteria, it)
+                    }
+                } else {
+                    treeViewAdapter.updateDisplayedNodes { treeViewAdapter.setFilterCriteria(filterCriteria, it) }
+                }
 
                 updateEmptyState(emptyBefore, false)
             }

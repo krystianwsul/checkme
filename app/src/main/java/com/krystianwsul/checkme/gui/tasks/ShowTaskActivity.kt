@@ -142,7 +142,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                         data.dataId,
                         immediate,
                         data.taskData,
-                        false
+                        false,
                 )
         )
     }

@@ -540,7 +540,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val filterCriteriaObservable = parametersRelay.switchMap {
             when (it) {
-                is GroupListParameters.Search -> Observable.just(it.filterCriteria)
+                is GroupListParameters.Search -> Observable.never()
                 else -> listener.instanceSearch
             }
         }

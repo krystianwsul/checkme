@@ -86,7 +86,6 @@ fun DomainFactory.setInstancesDateTime(
 
     val now = ExactTimeStamp.Local.now
 
-
     val instances = instanceKeys.map(this::getInstance)
 
     val editInstancesUndoData = SetInstancesDateTimeUndoData(
@@ -99,6 +98,23 @@ fun DomainFactory.setInstancesDateTime(
                 ownerKey,
                 DateTime(instanceDate, getTime(instanceTimePair)),
         )
+
+        if (it.parentInstance != null) {
+            when (it.parentState) {
+                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent) // todo consider removing taskHierarchy
+                is Instance.ParentState.NoParent -> throw IllegalStateException()
+                is Instance.ParentState.Parent -> {
+                    val newParentState = if (it.getTaskHierarchyParentInstance() != null)
+                        Instance.ParentState.NoParent
+                    else
+                        Instance.ParentState.Unset
+
+                    it.setParentState(newParentState)
+                }
+            }
+
+            check(it.parentInstance == null)
+        }
     }
 
     val projects = instances.map { it.task.project }.toSet()

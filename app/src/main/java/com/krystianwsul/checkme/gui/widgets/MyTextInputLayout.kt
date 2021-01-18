@@ -1,11 +1,23 @@
 package com.krystianwsul.checkme.gui.widgets
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.TransitionDrawable
 import android.util.AttributeSet
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.util.concurrent.TimeUnit
+
 
 class MyTextInputLayout : TextInputLayout {
 
@@ -30,21 +42,74 @@ class MyTextInputLayout : TextInputLayout {
 
     private lateinit var mode: Mode
 
-    private fun setDrawableRes(@DrawableRes drawableRes: Int) {
-        endIconDrawable = ContextCompat.getDrawable(context, drawableRes)!!.apply {
+    @DrawableRes
+    private var previousDrawableRes: Int? = null
+
+    private var animationDisposable: Disposable? = null
+
+    private fun getDrawable(@DrawableRes drawableRes: Int) = getBitmapFromVectorDrawable(drawableRes)
+
+    private fun getBitmapFromVectorDrawable(drawableId: Int): Drawable {
+        val drawable = ContextCompat.getDrawable(context, drawableId)!!.apply {
             setTint(ContextCompat.getColor(context, R.color.textInputIcon))
         }
+
+        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return BitmapDrawable(context.resources, bitmap)
+    }
+
+    private val animationTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
+
+    private fun setDrawableRes(@DrawableRes drawableRes: Int) {
+        if (drawableRes == previousDrawableRes) return
+
+        Log.e("asdf", "magic setDrawableRes " + hashCode())
+
+        val oldEndIcon = previousDrawableRes?.let(::getDrawable)
+        val newEndIcon = getDrawable(drawableRes)
+
+        if (oldEndIcon == null) {
+            check(animationDisposable == null)
+
+            endIconDrawable = newEndIcon
+        } else {
+            disposeAnimation()
+
+            val transitionDrawable = TransitionDrawable(arrayOf(oldEndIcon, newEndIcon)).apply {
+                isCrossFadeEnabled = true
+            }
+
+            endIconDrawable = oldEndIcon
+
+            endIconDrawable = transitionDrawable
+            transitionDrawable.startTransition(animationTime)
+
+            animationDisposable = Single.just(Unit)
+                    .delay(animationTime.toLong(), TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy {
+                        Log.e("asdf", "magic replacing after anim")
+                        endIconDrawable = newEndIcon
+                    }
+        }
+
+        previousDrawableRes = drawableRes
 
         errorIconDrawable = ContextCompat.getDrawable(context, drawableRes)
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {
+        Log.e("asdf", "magic setClose")
         setListeners(listener, iconListener)
         mode = Mode.Close
         mode.updateIcon(this)
     }
 
     fun setDropdown(listener: () -> Unit) {
+        Log.e("asdf", "magic setDropdown")
         setListeners(listener, listener)
         setDropdownMode()
     }
@@ -89,9 +154,15 @@ class MyTextInputLayout : TextInputLayout {
         mode.updateIcon(this)
     }
 
-    fun toggleChecked() {
-        (mode as Mode.Dropdown).let { it.isChecked = !it.isChecked }
-        mode.updateIcon(this)
+    private fun disposeAnimation() {
+        animationDisposable?.dispose()
+        animationDisposable = null
+    }
+
+    override fun onDetachedFromWindow() {
+        disposeAnimation()
+
+        super.onDetachedFromWindow()
     }
 
     private sealed class Mode {

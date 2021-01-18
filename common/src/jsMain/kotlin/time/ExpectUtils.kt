@@ -8,3 +8,5 @@ actual fun DateTimeTz.formatTime() = toString("HH:mm")
 actual fun TimeSoy.formatTime() = format("HH:mm")
 
 actual fun DateSoy.formatDate() = format("yyyy-MM-dd")
+
+actual fun DayOfWeek.format() = name

@@ -20,7 +20,8 @@ import com.krystianwsul.common.time.Date
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import java.text.DateFormatSymbols
+import java.time.Month
+import java.time.format.TextStyle
 import java.util.*
 
 
@@ -77,10 +78,10 @@ class DayFragment @JvmOverloads constructor(
 
                     val month = Calendar.getInstance().run {
                         add(Calendar.MONTH, position)
-                        get(Calendar.MONTH)
+                        get(Calendar.MONTH) + 1
                     }
 
-                    DateFormatSymbols.getInstance().months[month]
+                    Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())
                 }
             }
         }

@@ -43,8 +43,6 @@ class MyTextInputLayout : TextInputLayout {
         setTint(ContextCompat.getColor(context, R.color.textInputIcon))
     }
 
-    private val animationTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) / 2 }
-
     private fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
 
     private fun getAlphaAnimator(duration: Int, vararg values: Float): ValueAnimator {
@@ -142,7 +140,7 @@ class MyTextInputLayout : TextInputLayout {
     fun setText(text: String) = editText!!.setText(text)
 
     fun setChecked(isChecked: Boolean) {
-        (mode as Mode.Dropdown).let { it.isChecked = isChecked }
+        (mode as Mode.Dropdown).isChecked = isChecked
         mode.updateIcon(this)
     }
 

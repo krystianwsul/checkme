@@ -184,6 +184,29 @@ class SettingsActivity : NavBarActivity() {
 
                 true
             }
+
+            findPreference<ListPreference>(getString(R.string.language))!!.apply {
+                val initialLanguage = Preferences.language
+
+                value = getString(when (initialLanguage) {
+                    Preferences.Language.DEFAULT -> R.string.setAutomatically
+                    Preferences.Language.ENGLISH -> R.string.english
+                    Preferences.Language.POLISH -> R.string.polish
+                })
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    val newLanguage = when (newValue as String) {
+                        getString(R.string.setAutomatically) -> Preferences.Language.DEFAULT
+                        getString(R.string.english) -> Preferences.Language.ENGLISH
+                        getString(R.string.polish) -> Preferences.Language.POLISH
+                        else -> throw IllegalArgumentException()
+                    }
+
+                    Preferences.language = newLanguage
+
+                    true
+                }
+            }
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

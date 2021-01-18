@@ -21,4 +21,11 @@
         <item>@string/mediumPriorityNotifications</item>
         <item>@string/noNotifications</item>
     </string-array>
+
+    <string-array name="languages">
+        <item>@string/setAutomatically</item>
+        <item>@string/english</item>
+        <item>@string/polish</item>
+    </string-array>
+
 </resources>

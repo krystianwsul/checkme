@@ -149,4 +149,8 @@
     <string name="tooltips">Tooltips</string>
     <string name="tooltipsDescription">Show tooltips from the beginning</string>
     <string name="tooltipsRestarted">Tooltips restarted</string>
+    <string name="english">English</string>
+    <string name="polish">Polish</string>
+    <string name="setAutomatically">Set automatically</string>
+    <string name="language">Language</string>
 </resources>

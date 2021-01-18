@@ -31,12 +31,19 @@
             app:title="@string/notifications"
             app:useSimpleSummaryProvider="true" />
 
-    </PreferenceCategory>
+        <Preference
+            app:key="@string/tooltips"
+            app:title="@string/tooltips"
+            app:summary="@string/tooltipsDescription" />
 
-    <Preference
-        app:key="@string/tooltips"
-        app:title="@string/tooltips"
-        app:summary="@string/tooltipsDescription" />
+        <ListPreference
+            app:entries="@array/languages"
+            app:entryValues="@array/languages"
+            app:key="@string/language"
+            app:title="@string/language"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
 
     <!--
     <PreferenceCategory app:title="@string/messages_header">

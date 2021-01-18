@@ -37,6 +37,7 @@ object Preferences : FactoryProvider.Preferences {
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
     private const val KEY_SHOW_PROJECTS = "showProjects"
+    private const val KEY_LANGUAGE = "language"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -56,6 +57,11 @@ object Preferences : FactoryProvider.Preferences {
     private fun booleanObservable(key: String, defValue: Boolean) = preferenceObservable(
             { getBoolean(key, defValue) },
             { putBoolean(key, it) }
+    )
+
+    private fun intObservable(key: String, defValue: Int) = preferenceObservable(
+            { getInt(key, defValue) },
+            { putInt(key, it) }
     )
 
     override var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
@@ -109,6 +115,9 @@ object Preferences : FactoryProvider.Preferences {
                 .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
                 .ignore()
     }
+
+    private var languageInt by intObservable(KEY_LANGUAGE, Language.DEFAULT.ordinal)
+    var language by observable(Language.values()[languageInt]) { _, _, newValue -> languageInt = newValue.ordinal }
 
     private fun putNotificationLevel(notificationLevel: NotificationLevel) {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
@@ -208,5 +217,9 @@ object Preferences : FactoryProvider.Preferences {
         DAY,
         WEEK,
         MONTH
+    }
+
+    enum class Language {
+        DEFAULT, ENGLISH, POLISH
     }
 }

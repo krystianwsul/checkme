@@ -147,4 +147,8 @@
     <string name="tooltips">Podpowiedzi</string>
     <string name="tooltipsDescription">Pokaż podpowiedzi od nowa</string>
     <string name="tooltipsRestarted">Wznowiono podpowiedzi</string>
+    <string name="english">Angielski</string>
+    <string name="polish">Polski</string>
+    <string name="setAutomatically">Ustaw automatycznie</string>
+    <string name="language">Język</string>
 </resources>

@@ -26,12 +26,18 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     val now = ExactTimeStamp.Local.now
 
-    val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
+    val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
     }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
 
     val instances = instanceKeys.map(::getInstance)
     check(instances.all { it.done == null })
+
+    instances.forEach { instance ->
+        (instance.instanceTime as? Time.Custom<*>)?.let {
+            customTimes[it.key] = it
+        }
+    }
 
     fun Instance<*>.hierarchyContainsKeys(): Boolean {
         if (instanceKey in instanceKeys) return true
@@ -49,7 +55,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     val dateTime = instances.map { it.instanceDateTime }.minOrNull()!!
 
-    val customTimeDatas = currentCustomTimes.mapValues {
+    val customTimeDatas = customTimes.mapValues {
         it.value.let {
             EditInstancesViewModel.CustomTimeData(
                     it.key,

@@ -168,7 +168,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 }
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)
-                                    check(it.isRootInstance)
 
                                     EditInstancesFragment.newInstance(listOf(instanceKey)).show(
                                             supportFragmentManager,

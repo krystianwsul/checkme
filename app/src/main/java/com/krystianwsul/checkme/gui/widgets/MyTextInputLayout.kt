@@ -24,8 +24,11 @@ class MyTextInputLayout : TextInputLayout {
         clearOnEditTextAttachedListeners()
         clearOnEndIconChangedListeners()
         setEndIconTintList(null)
-        setDropdownIcon()
+
+        setDropdownMode()
     }
+
+    private lateinit var mode: Mode
 
     private fun setDrawableRes(@DrawableRes drawableRes: Int) {
         endIconDrawable = ContextCompat.getDrawable(context, drawableRes)!!.apply {
@@ -36,16 +39,20 @@ class MyTextInputLayout : TextInputLayout {
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {
-        setDrawableRes(R.drawable.mtrl_ic_cancel)
         setListeners(listener, iconListener)
+        mode = Mode.Close
+        mode.updateIcon(this)
     }
 
     fun setDropdown(listener: () -> Unit) {
-        setDropdownIcon()
         setListeners(listener, listener)
+        setDropdownMode()
     }
 
-    private fun setDropdownIcon() = setDrawableRes(R.drawable.mtrl_ic_arrow_drop_down)
+    private fun setDropdownMode() {
+        mode = Mode.Dropdown()
+        mode.updateIcon(this)
+    }
 
     @Deprecated("")
     override fun setEndIconMode(endIconMode: Int) {
@@ -76,4 +83,37 @@ class MyTextInputLayout : TextInputLayout {
     }
 
     fun setText(text: String) = editText!!.setText(text)
+
+    fun setChecked(isChecked: Boolean) {
+        (mode as Mode.Dropdown).let { it.isChecked = isChecked }
+        mode.updateIcon(this)
+    }
+
+    fun toggleChecked() {
+        (mode as Mode.Dropdown).let { it.isChecked = !it.isChecked }
+        mode.updateIcon(this)
+    }
+
+    private sealed class Mode {
+
+        abstract fun updateIcon(myTextInputLayout: MyTextInputLayout)
+
+        object Close : Mode() {
+
+            override fun updateIcon(myTextInputLayout: MyTextInputLayout) =
+                    myTextInputLayout.setDrawableRes(R.drawable.mtrl_ic_cancel)
+        }
+
+        class Dropdown(var isChecked: Boolean = false) : Mode() {
+
+            override fun updateIcon(myTextInputLayout: MyTextInputLayout) {
+                val icon = if (isChecked)
+                    R.drawable.mtrl_ic_arrow_drop_up
+                else
+                    R.drawable.mtrl_ic_arrow_drop_down
+
+                myTextInputLayout.setDrawableRes(icon)
+            }
+        }
+    }
 }

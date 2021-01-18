@@ -20,8 +20,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
-import com.krystianwsul.checkme.gui.utils.setChecked
-import com.krystianwsul.checkme.gui.utils.setFixedOnClickListenerAndFixIcon
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.SerializableUnit
@@ -304,10 +302,11 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     private fun setUpAllDaysToggle() {
-        if (allDaysExpanded) binding.timeAllDaysTextLayout.setChecked()
+        if (allDaysExpanded) binding.timeAllDaysTextLayout.setChecked(true)
 
-        binding.timeAllDaysText.setFixedOnClickListenerAndFixIcon {
+        binding.timeAllDaysTextLayout.setDropdown {
             allDaysExpanded = !allDaysExpanded
+            binding.timeAllDaysTextLayout.setChecked(allDaysExpanded)
 
             if (!allDaysExpanded) {
                 val hourMinute = hourMinutes.getValue(DayOfWeek.SUNDAY)

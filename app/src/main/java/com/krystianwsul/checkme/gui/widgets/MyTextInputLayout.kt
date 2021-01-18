@@ -1,22 +1,18 @@
 package com.krystianwsul.checkme.gui.widgets
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.TransitionDrawable
 import android.util.AttributeSet
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import com.google.android.material.animation.AnimationUtils
+import com.google.android.material.internal.CheckableImageButton
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.concurrent.TimeUnit
+import com.krystianwsul.checkme.utils.callPrivateFunction
+import com.krystianwsul.checkme.utils.getPrivateField
 
 
 class MyTextInputLayout : TextInputLayout {
@@ -31,6 +27,7 @@ class MyTextInputLayout : TextInputLayout {
     }
 
     private val disallowSettingIcon = true
+    private var first = true
 
     init {
         clearOnEditTextAttachedListeners()
@@ -42,76 +39,71 @@ class MyTextInputLayout : TextInputLayout {
 
     private lateinit var mode: Mode
 
-    @DrawableRes
-    private var previousDrawableRes: Int? = null
-
-    private var animationDisposable: Disposable? = null
-
-    private fun getDrawable(@DrawableRes drawableRes: Int) = getBitmapFromVectorDrawable(drawableRes)
-
-    private fun getBitmapFromVectorDrawable(drawableId: Int): Drawable {
-        val drawable = ContextCompat.getDrawable(context, drawableId)!!.apply {
-            setTint(ContextCompat.getColor(context, R.color.textInputIcon))
-        }
-
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return BitmapDrawable(context.resources, bitmap)
+    private fun getDrawable(@DrawableRes drawableId: Int) = ContextCompat.getDrawable(context, drawableId)!!.apply {
+        setTint(ContextCompat.getColor(context, R.color.textInputIcon))
     }
 
-    private val animationTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
+    private val animationTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) / 2 }
+
+    private fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
+
+    private fun getAlphaAnimator(duration: Int, vararg values: Float): ValueAnimator {
+        val animator = ValueAnimator.ofFloat(*values)
+        animator.interpolator = AnimationUtils.LINEAR_INTERPOLATOR
+        animator.duration = duration.toLong()
+        animator.addUpdateListener { animation ->
+            val alpha = animation.animatedValue as Float
+            getEndIconView().alpha = alpha
+        }
+        return animator
+    }
+
+    private var previousDrawableRes: Int? = null
 
     private fun setDrawableRes(@DrawableRes drawableRes: Int) {
-        if (drawableRes == previousDrawableRes) return
+        if (previousDrawableRes == drawableRes) return
+        previousDrawableRes = drawableRes
 
-        Log.e("asdf", "magic setDrawableRes " + hashCode())
-
-        val oldEndIcon = previousDrawableRes?.let(::getDrawable)
         val newEndIcon = getDrawable(drawableRes)
 
-        if (oldEndIcon == null) {
-            check(animationDisposable == null)
+        if (first) {
+            check(animators == null)
 
             endIconDrawable = newEndIcon
         } else {
+            val outAnimator = getAlphaAnimator(50, 1f, 0f)
+            val inAnimator = getAlphaAnimator(67, 0f, 1f)
+
+            outAnimator.addListener(object : AnimatorListenerAdapter() {
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    endIconDrawable = newEndIcon
+
+                    inAnimator.start()
+                }
+            })
+
             disposeAnimation()
+            animators = Pair(outAnimator, inAnimator)
 
-            val transitionDrawable = TransitionDrawable(arrayOf(oldEndIcon, newEndIcon)).apply {
-                isCrossFadeEnabled = true
-            }
-
-            endIconDrawable = oldEndIcon
-
-            endIconDrawable = transitionDrawable
-            transitionDrawable.startTransition(animationTime)
-
-            animationDisposable = Single.just(Unit)
-                    .delay(animationTime.toLong(), TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy {
-                        Log.e("asdf", "magic replacing after anim")
-                        endIconDrawable = newEndIcon
-                    }
+            outAnimator.start()
         }
 
-        previousDrawableRes = drawableRes
-
         errorIconDrawable = ContextCompat.getDrawable(context, drawableRes)
+        callPrivateFunction<TextInputLayout, Unit>("setErrorIconVisible", false)
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {
-        Log.e("asdf", "magic setClose")
         setListeners(listener, iconListener)
         mode = Mode.Close
         mode.updateIcon(this)
+        first = false
     }
 
     fun setDropdown(listener: () -> Unit) {
-        Log.e("asdf", "magic setDropdown")
         setListeners(listener, listener)
         setDropdownMode()
+        first = false
     }
 
     private fun setDropdownMode() {
@@ -154,9 +146,14 @@ class MyTextInputLayout : TextInputLayout {
         mode.updateIcon(this)
     }
 
+    private var animators: Pair<Animator, Animator>? = null
+
     private fun disposeAnimation() {
-        animationDisposable?.dispose()
-        animationDisposable = null
+        animators?.let {
+            it.first.cancel()
+            it.second.cancel()
+        }
+        animators = null
     }
 
     override fun onDetachedFromWindow() {

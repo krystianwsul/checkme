@@ -336,6 +336,19 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
     }
 }
 
+inline fun <reified T, U> T.callPrivateFunction(name: String, vararg args: Any): U {
+    return T::class
+            .java
+            .declaredMethods
+            .single { it.name == name }
+            .let {
+                it.isAccessible = true
+
+                @Suppress("UNCHECKED_CAST")
+                it.invoke(this, *args) as U
+            }
+}
+
 fun <T> Single<T>.tryGetCurrentValue(): T? {
     var value: T? = null
     subscribe { t -> value = t }.dispose()

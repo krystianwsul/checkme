@@ -67,7 +67,9 @@ abstract class SelectionCallback : ActionMode.Callback, ActionModeCallback {
             val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
             it.animateBottom(final)
 
-            it.animateReplaceMenu(bottomBarData.second) { updateMenu() }
+            val itemVisibilities = getItemVisibilities()
+
+            it.animateReplaceMenu(bottomBarData.second, itemVisibilities) { updateMenu() }
 
             it.setOnMenuItemClickListener {
                 onActionItemClicked(actionMode!!, it)

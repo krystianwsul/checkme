@@ -163,7 +163,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     override fun initBottomBar() {
         bottomBinding.bottomAppBar.apply {
-            animateReplaceMenu(R.menu.menu_select_all, ::updateBottomMenu)
+            animateReplaceMenu(R.menu.menu_select_all, onEnd = ::updateBottomMenu)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {

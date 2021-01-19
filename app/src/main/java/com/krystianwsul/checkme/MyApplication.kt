@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import androidx.preference.PreferenceManager
+import com.akexorcist.localizationactivity.core.LocalizationApplicationDelegate
+import com.akexorcist.localizationactivity.core.LocalizationUtility
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.github.tamir7.contacts.Contacts
@@ -31,9 +34,9 @@ import com.krystianwsul.common.domain.UserInfo
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Maybe
-import net.danlew.android.joda.JodaTimeAndroid
 import rxdogtag2.RxDogTag
 import java.io.File
+import java.util.*
 
 class MyApplication : Application() {
 
@@ -58,6 +61,28 @@ class MyApplication : Application() {
     val hasUserInfo get() = userInfoRelay.value!!.value != null
     val userInfo get() = userInfoRelay.value!!.value!!
 
+    val localizationDelegate = LocalizationApplicationDelegate()
+
+    var defaultLocale: Locale = Locale.getDefault()
+        private set
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(localizationDelegate.attachBaseContext(base))
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        defaultLocale = LocalizationUtility.getLocaleFromConfiguration(newConfig)
+
+        Preferences.language.applySettingStartup()
+
+        super.onConfigurationChanged(newConfig)
+        localizationDelegate.onConfigurationChanged(this)
+    }
+
+    override fun getApplicationContext(): Context {
+        return localizationDelegate.getApplicationContext(super.getApplicationContext())
+    }
+
     @SuppressLint("CheckResult")
     override fun onCreate() {
         super.onCreate()
@@ -70,7 +95,7 @@ class MyApplication : Application() {
 
         RxDogTag.install()
 
-        JodaTimeAndroid.init(this)
+        Preferences.language.applySettingStartup()
 
         Preferences.tickLog.logLineDate("MyApplication.onCreate")
 

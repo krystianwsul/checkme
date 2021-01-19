@@ -2,8 +2,10 @@ package com.krystianwsul.checkme
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.akexorcist.localizationactivity.core.LanguageSetting
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
 import com.krystianwsul.checkme.utils.ignore
@@ -14,6 +16,8 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.core.Observable
 import org.joda.time.LocalDateTime
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -220,6 +224,29 @@ object Preferences : FactoryProvider.Preferences {
     }
 
     enum class Language {
-        DEFAULT, ENGLISH, POLISH
+        DEFAULT {
+
+            override val locale get() = MyApplication.instance.defaultLocale
+
+            override fun applySettingStartup() = LanguageSetting.setLanguage(MyApplication.context, locale)
+        },
+        ENGLISH {
+
+            override val locale: Locale = Locale.ENGLISH
+        },
+        POLISH {
+
+            override val locale = Locale("pl")
+        };
+
+        protected abstract val locale: Locale
+
+        open fun applySettingStartup() {}
+
+        fun applySetting(activity: AbstractActivity) {
+            activity.setLanguage(locale)
+
+            applySettingStartup()
+        }
     }
 }

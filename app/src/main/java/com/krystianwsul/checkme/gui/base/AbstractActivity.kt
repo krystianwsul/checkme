@@ -1,8 +1,12 @@
 package com.krystianwsul.checkme.gui.base
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.akexorcist.localizationactivity.core.LocalizationActivityDelegate
+import com.akexorcist.localizationactivity.core.OnLocaleChangedListener
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -18,8 +22,9 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
+import java.util.*
 
-abstract class AbstractActivity : AppCompatActivity() {
+abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
     companion object {
 
@@ -38,10 +43,28 @@ abstract class AbstractActivity : AppCompatActivity() {
     protected val startDisposable = CompositeDisposable()
     private val resumeDisposable = CompositeDisposable()
 
-    val started = BehaviorRelay.createDefault(false)
+    val started = BehaviorRelay.createDefault(false)!!
+
+    private val localizationDelegate = LocalizationActivityDelegate(this)
+
+    override fun attachBaseContext(newBase: Context) {
+        applyOverrideConfiguration(localizationDelegate.updateConfigurationLocale(newBase))
+        super.attachBaseContext(newBase)
+    }
+
+    override fun getApplicationContext(): Context {
+        return localizationDelegate.getApplicationContext(super.getApplicationContext())
+    }
+
+    override fun getResources(): Resources {
+        return localizationDelegate.getResources(super.getResources())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         MyCrashlytics.logMethod(this)
+
+        localizationDelegate.addOnLocaleChangedListener(this)
+        localizationDelegate.onCreate()
 
         super.onCreate(savedInstanceState)
     }
@@ -73,6 +96,8 @@ abstract class AbstractActivity : AppCompatActivity() {
         MyCrashlytics.logMethod(this)
 
         super.onResume()
+
+        localizationDelegate.onResume(this)
 
         snackbarData?.let {
             (this as? SnackbarListener)?.apply {
@@ -115,4 +140,24 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         super.onDestroy()
     }
+
+    fun setLanguage(language: String) {
+        localizationDelegate.setLanguage(this, language)
+    }
+
+    fun setLanguage(language: String, country: String) {
+        localizationDelegate.setLanguage(this, language, country)
+    }
+
+    fun setLanguage(locale: Locale) {
+        localizationDelegate.setLanguage(this, locale)
+    }
+
+    fun getCurrentLanguage(): Locale {
+        return localizationDelegate.getLanguage(this)
+    }
+
+    override fun onBeforeLocaleChanged() {}
+
+    override fun onAfterLocaleChanged() {}
 }

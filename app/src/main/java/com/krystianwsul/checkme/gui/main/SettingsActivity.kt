@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
+import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -203,6 +204,8 @@ class SettingsActivity : NavBarActivity() {
                     }
 
                     Preferences.language = newLanguage
+
+                    newLanguage.applySetting(requireActivity() as AbstractActivity)
 
                     true
                 }

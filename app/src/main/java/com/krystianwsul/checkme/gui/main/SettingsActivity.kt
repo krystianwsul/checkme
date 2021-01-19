@@ -39,6 +39,8 @@ class SettingsActivity : NavBarActivity() {
 
     private lateinit var binding: SettingsActivityBinding
 
+    override val titleId = R.string.settings
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

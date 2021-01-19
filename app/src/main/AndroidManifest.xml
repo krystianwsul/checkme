@@ -26,7 +26,6 @@
 
         <activity
             android:name=".gui.main.SettingsActivity"
-            android:label="@string/settings"
             android:theme="@style/AppTheme" />
         <activity android:name=".gui.main.TutorialActivity">
             <intent-filter>

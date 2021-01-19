@@ -47,6 +47,8 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
     private val localizationDelegate = LocalizationActivityDelegate(this)
 
+    protected open val titleId: Int? = null
+
     override fun attachBaseContext(newBase: Context) {
         applyOverrideConfiguration(localizationDelegate.updateConfigurationLocale(newBase))
         super.attachBaseContext(newBase)
@@ -65,6 +67,8 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
         localizationDelegate.addOnLocaleChangedListener(this)
         localizationDelegate.onCreate()
+
+        titleId?.let(::setTitle)
 
         super.onCreate(savedInstanceState)
     }

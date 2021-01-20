@@ -68,9 +68,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     protected abstract fun onFilterCriteriaChanged()
 
     fun setInitialFilterCriteria(filterCriteria: FilterCriteria) {
-        check(modelAdapter == null)
-
-        this.filterCriteria = filterCriteria
+        if (modelAdapter == null)
+            this.filterCriteria = filterCriteria
+        else
+            check(this.filterCriteria == filterCriteria)
     }
 
     private var data: DATA? = null

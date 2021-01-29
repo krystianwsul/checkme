@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import androidx.annotation.IdRes
@@ -808,7 +809,9 @@ class GroupListFragment @JvmOverloads constructor(
             it.instanceDateTime.date to it.createTaskTimePair
         }.getHint()
 
+        Log.e("asdf", "magic 1")
         return if (selectionCallback.hasActionMode) {
+            Log.e("asdf", "magic 2 " + parameters.fabActionMode)
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
                 val selectedDatas = nodesToSelectedDatas(
                         searchDataManager.treeViewAdapter.selectedNodes,
@@ -818,6 +821,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val singleSelectedData = selectedDatas.singleOrNull()
 
                 if (singleSelectedData != null) {
+                    Log.e("asdf", "magic 3")
                     val instanceData = singleSelectedData as? GroupListDataWrapper.InstanceData
 
                     val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.canAddSubtask
@@ -841,6 +845,7 @@ class GroupListFragment @JvmOverloads constructor(
                 } else if (parameters.fabActionMode.showTime
                         && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
                 ) {
+                    Log.e("asdf", "magic 4")
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
                     if (instanceDatas.asSequence()
@@ -855,6 +860,7 @@ class GroupListFragment @JvmOverloads constructor(
                         FabState.Hidden
                     }
                 } else {
+                    Log.e("asdf", "magic 5")
                     FabState.Hidden
                 }
             } else {

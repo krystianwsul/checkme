@@ -70,7 +70,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
         override val useDoneNode = false
 
-        override val fabActionMode = if (filterCriteria.query.isNotEmpty()) FabActionMode.NONE else FabActionMode.BOTH
+        override val fabActionMode = FabActionMode.BOTH
     }
 
     enum class FabActionMode(val showSubtask: Boolean, val showTime: Boolean) {

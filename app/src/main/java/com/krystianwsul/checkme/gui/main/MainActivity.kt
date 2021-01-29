@@ -50,8 +50,8 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import com.skydoves.balloon.ArrowConstraints
 import com.skydoves.balloon.ArrowOrientation
+import com.skydoves.balloon.ArrowOrientationRules
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.Observables
@@ -736,7 +736,7 @@ class MainActivity :
                         {
                             setTextResource(R.string.tooltip_press_menu_tooltip)
                             setArrowOrientation(ArrowOrientation.TOP)
-                            setArrowConstraints(ArrowConstraints.ALIGN_ANCHOR)
+                            setArrowOrientationRules(ArrowOrientationRules.ALIGN_ANCHOR)
                         },
                         { showAlignBottom(it) }
                 )

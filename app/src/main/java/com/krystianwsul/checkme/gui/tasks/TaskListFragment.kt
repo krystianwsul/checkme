@@ -250,7 +250,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun instantiateAdapters(filterCriteria: FilterCriteria) =
-                TaskAdapter(this@TaskListFragment).let { it to it.treeViewAdapter }
+                TaskAdapter(this@TaskListFragment, filterCriteria).let { it to it.treeViewAdapter }
 
         override fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
             binding.taskListRecycler.apply {
@@ -467,7 +467,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         super.onDestroyView()
     }
 
-    private inner class TaskAdapter(val taskListFragment: TaskListFragment) :
+    private inner class TaskAdapter(val taskListFragment: TaskListFragment, filterCriteria: FilterCriteria) :
             BaseAdapter(),
             NodeParent,
             ActionModeCallback by taskListFragment.selectionCallback {
@@ -478,6 +478,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val treeViewAdapter = TreeViewAdapter(
                 this,
                 TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
+                filterCriteria
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

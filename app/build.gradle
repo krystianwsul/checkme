@@ -67,7 +67,7 @@ android {
 ext {
     powermockVersion = '2.0.9'
     lifecycleVersion = '2.2.0'
-    glideVersion = '4.11.0'
+    glideVersion = '4.12.0'
 }
 
 dependencies {

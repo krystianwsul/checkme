@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import androidx.annotation.StringRes
+import arrow.syntax.function.invoke
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
@@ -33,27 +34,12 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         ): EditDelegate {
             val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
-            fun <T : EditParameters> curry(
-                    editParameters: T,
-                    constructor: (T, EditViewModel.Data, Bundle?, EditImageState?, CompositeDisposable) -> EditDelegate,
-            ) = {
-                data: EditViewModel.Data,
-                savedInstanceState: Bundle?,
-                editImageState: EditImageState?,
-                compositeDisposable: CompositeDisposable,
-                ->
-                constructor(editParameters, data, savedInstanceState, editImageState, compositeDisposable)
-            }
-
             return when (parameters) {
-                is EditParameters.Copy -> curry(parameters, ::CopyExistingTaskEditDelegate)
-                is EditParameters.Edit -> curry(parameters, ::EditExistingTaskEditDelegate)
-                is EditParameters.Join -> curry(parameters, ::JoinTasksEditDelegate)
-                is EditParameters.Create,
-                is EditParameters.Share,
-                is EditParameters.Shortcut,
-                EditParameters.None,
-                -> curry(parameters, ::CreateTaskEditDelegate)
+                is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
+                is EditParameters.Edit -> (::EditExistingTaskEditDelegate)(parameters)
+                is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
+                is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
+                    (::CreateTaskEditDelegate)(parameters)
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
     }

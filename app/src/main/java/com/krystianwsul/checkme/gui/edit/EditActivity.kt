@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
@@ -691,8 +690,6 @@ class EditActivity : NavBarActivity() {
             override val holderType get() = HolderType.SCHEDULE
 
             override fun bind(activity: EditActivity, holder: Holder) {
-                Log.e("asdf", "magic bind " + holder.hashCode())
-
                 (holder as ScheduleHolder).apply {
                     rowScheduleBinding.apply {
                         scheduleMargin.isVisible = true
@@ -711,8 +708,6 @@ class EditActivity : NavBarActivity() {
             }
 
             override fun onNewParent(activity: EditActivity, holder: Holder) {
-                Log.e("asdf", "magic onNewParent " + holder.hashCode())
-
                 val parent = activity.delegate
                         .parentScheduleManager
                         .parent

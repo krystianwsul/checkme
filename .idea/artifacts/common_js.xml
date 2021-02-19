@@ -1,6 +1,8 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="common-js">
     <output-path>C:\Users\kryst\StudioProjects\Check.me\common\build\libs</output-path>
-    <root id="archive" name="common-js.jar" />
+    <root id="archive" name="common-js.jar">
+      <element id="module-output" name="kryst.StudioProjects.Check.me.common.jsMain" />
+    </root>
   </artifact>
 </component>

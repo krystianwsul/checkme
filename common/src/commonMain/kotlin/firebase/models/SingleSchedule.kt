@@ -75,6 +75,8 @@ class SingleSchedule<T : ProjectType>(
         )
     }
 
+    override fun toString() = super.toString() + ", dateTime: $dateTime"
+
     private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord<T>(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,

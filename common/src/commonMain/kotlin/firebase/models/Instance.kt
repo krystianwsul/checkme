@@ -155,7 +155,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             } != false
                         }
                         is Type.Schedule -> true
-                        is Type.NoSchedule<T> -> true // unexpected
+                        /**
+                         * if this interval was created by removing a schedule (noScheduleOrParent == null), we should
+                         * keep looking
+                         */
+                        is Type.NoSchedule<T> -> type.noScheduleOrParent == null // unexpected
                     }
                 }
                 .first()

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxrelay3.BehaviorRelay
@@ -47,7 +48,11 @@ class TutorialViewModel : ViewModel() {
                 accept(State.Initial)
             }
 
-            MyCrashlytics.logException(GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess + ", status: " + googleSignInResult.status))
+            if (googleSignInResult.status.statusCode != GoogleSignInStatusCodes.CANCELED) {
+                MyCrashlytics.logException(GoogleSignInException(
+                        googleSignInResult.run { "isSuccess: $isSuccess, status: $status" }
+                ))
+            }
         }
     }
 

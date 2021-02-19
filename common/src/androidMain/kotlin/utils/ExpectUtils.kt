@@ -2,6 +2,7 @@ package com.krystianwsul.common.utils
 
 import android.util.Base64
 import android.util.Log
+import java.util.*
 
 actual typealias Serializable = java.io.Serializable
 actual typealias Parcelize = kotlinx.parcelize.Parcelize
@@ -12,3 +13,7 @@ actual fun String.toBase64() = Base64.encodeToString(toByteArray(charset("UTF-8"
 actual fun log(message: String) {
     Log.e("asdf", message)
 }
+
+actual fun <T> MutableList<T>.synchronized(): MutableList<T> = Collections.synchronizedList(this)
+
+actual fun currentThreadId() = Thread.currentThread().id

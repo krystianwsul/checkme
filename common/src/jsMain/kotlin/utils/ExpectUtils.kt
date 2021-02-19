@@ -17,3 +17,7 @@ actual fun String.toBase64() = Buffer(this).toString("base64")
 actual fun log(message: String) {
     console.log(message)
 }
+
+actual fun <T> MutableList<T>.synchronized() = this
+
+actual fun currentThreadId() = 0L

@@ -908,15 +908,18 @@ class Task<T : ProjectType>(
     }
 
     private val generatedInstances = mutableMapOf<InstanceKey, Instance<T>>()
+    private val generatedInstancesLog = mutableListOf<String>().synchronized()
 
     private fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
-        if (!generatedInstances.containsKey(instanceKey))
+        if (!generatedInstances.containsKey(instanceKey)) {
+            generatedInstancesLog += "adding $instanceKey from " + currentThreadId() + ", " + Exception().stackTraceToString()
             generatedInstances[instanceKey] = Instance(this, scheduleDateTime)
+        }
 
         return generatedInstances[instanceKey]
-                ?: throw InstanceKeyNotFoundException("instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(", \n"))
+                ?: throw InstanceKeyNotFoundException("instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(", \n") + "; \n log: " + generatedInstancesLog.joinToString(", \n"))
     }
 
     fun getScheduleText(
@@ -944,7 +947,7 @@ class Task<T : ProjectType>(
 
     fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
         val intervals = intervals
 
         try {

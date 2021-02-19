@@ -7,3 +7,7 @@ expect interface Parcelable
 expect fun String.toBase64(): String
 
 expect fun log(message: String)
+
+expect fun <T> MutableList<T>.synchronized(): MutableList<T>
+
+expect fun currentThreadId(): Long

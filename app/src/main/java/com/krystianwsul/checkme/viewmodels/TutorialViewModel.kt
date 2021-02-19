@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 
 class TutorialViewModel : ViewModel() {
 
-    val state = BehaviorRelay.createDefault<State>(State.Initial)
+    val state = BehaviorRelay.createDefault<State>(State.Initial)!!
 
     fun startSignIn() = state.accept(State.Progress)
 

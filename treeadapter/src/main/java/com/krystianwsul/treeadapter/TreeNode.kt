@@ -108,13 +108,15 @@ class TreeNode<T : TreeHolder>(
         get() {
             if (!parent.isExpanded) throw InvisibleNodeException()
 
-            val positionInCollection = treeNodeCollection.getPosition(this)
+            val positionInCollection = treeNodeCollection.getPosition(this, PositionMode.DISPLAYED)
             check(positionInCollection >= 0)
 
             if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
-            if (parent.getPosition(this) == parent.displayedNodes.size - 1) return parent.wantsSeparators
 
-            val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1)
+            if (parent.getPosition(this, PositionMode.DISPLAYED) == parent.displayedNodes.size - 1)
+                return parent.wantsSeparators
+
+            val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1, PositionMode.DISPLAYED)
             return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators
         }
 
@@ -177,10 +179,10 @@ class TreeNode<T : TreeHolder>(
 
     private fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.decrementSelected(placeholder)
 
-    fun getNode(position: Int): TreeNode<T> {
+    override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
         checkChildTreeNodesSet()
 
-        check(position in displayedNodes.indices)
+        check(position in positionMode.getRecursiveNodes(this).indices)
 
         if (position == 0) return this
 
@@ -188,10 +190,10 @@ class TreeNode<T : TreeHolder>(
 
         var currPosition = position - 1
 
-        for (notDoneGroupTreeNode in childTreeNodes) {
-            val notDoneDisplayedSize = notDoneGroupTreeNode.displayedNodes.size
+        for (notDoneGroupTreeNode in positionMode.getDirectChildNodes(this)) {
+            val notDoneDisplayedSize = positionMode.getRecursiveNodes(notDoneGroupTreeNode).size
 
-            if (currPosition < notDoneDisplayedSize) return notDoneGroupTreeNode.getNode(currPosition)
+            if (currPosition < notDoneDisplayedSize) return notDoneGroupTreeNode.getNode(currPosition, positionMode)
 
             currPosition -= notDoneDisplayedSize
         }
@@ -199,19 +201,19 @@ class TreeNode<T : TreeHolder>(
         throw IndexOutOfBoundsException()
     }
 
-    override fun getPosition(treeNode: TreeNode<T>): Int {
+    override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
         checkChildTreeNodesSet()
 
         if (treeNode === this) return 0
         if (!expanded) return -1
 
         var offset = 1
-        for (childTreeNode in childTreeNodes) {
-            val position = childTreeNode.getPosition(treeNode)
+        for (childTreeNode in positionMode.getDirectChildNodes(this)) {
+            val position = childTreeNode.getPosition(treeNode, positionMode)
 
             if (position >= 0) return offset + position
 
-            offset += childTreeNode.displayedNodes.size
+            offset += positionMode.getRecursiveNodes(childTreeNode).size
         }
 
         return -1
@@ -251,7 +253,7 @@ class TreeNode<T : TreeHolder>(
     override val displayedNodes: List<TreeNode<T>>
         get() {
             val locker = getLocker()
-            locker?.displayedNodes?.let { return it }
+            locker?.displayedNodes?.let { return it } // todo position
 
             val result = if (canBeShown()) listOf(this) + displayedChildNodes else listOf()
 

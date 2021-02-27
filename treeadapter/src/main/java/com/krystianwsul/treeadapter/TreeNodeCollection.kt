@@ -32,18 +32,16 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" }
     }
 
-    fun getNode(position: Int): TreeNode<T> {
-        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
+    override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
+        check(position in positionMode.getRecursiveNodes(this).indices)
 
+        val treeNodes = positionMode.getDirectChildNodes(this)
         var currPosition = position
-        check(currPosition >= 0)
-        check(currPosition < displayedNodes.size)
 
         for (treeNode in treeNodes) {
-            val nodeDisplayedSize = treeNode.displayedNodes.size
+            val nodeDisplayedSize = positionMode.getRecursiveNodes(treeNode).size
 
-            if (currPosition < nodeDisplayedSize)
-                return treeNode.getNode(currPosition)
+            if (currPosition < nodeDisplayedSize) return treeNode.getNode(currPosition, positionMode)
 
             currPosition -= nodeDisplayedSize
         }
@@ -51,15 +49,15 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         throw IndexOutOfBoundsException()
     }
 
-    override fun getPosition(treeNode: TreeNode<T>): Int {
-        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
+    override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
+        val treeNodes = positionMode.getDirectChildNodes(this)
 
         var offset = 0
         for (currTreeNode in treeNodes) {
-            val position = currTreeNode.getPosition(treeNode)
-            if (position >= 0)
-                return offset + position
-            offset += currTreeNode.displayedNodes.size
+            val position = currTreeNode.getPosition(treeNode, positionMode)
+            if (position >= 0) return offset + position
+
+            offset += positionMode.getRecursiveNodes(currTreeNode).size
         }
 
         return -1

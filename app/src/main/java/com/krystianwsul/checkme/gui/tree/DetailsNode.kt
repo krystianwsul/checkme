@@ -33,11 +33,11 @@ class DetailsNode(
 
     override val holderType = HolderType.DETAILS
 
-    override val id get() = Id(nodeContainer.id)
+    override val id get() = Id(parentNode?.id)
 
     override val state get() = State(super.state, projectInfo, note)
 
-    data class Id(val id: Any)
+    data class Id(val id: Any?)
 
     override val normalizedFields by lazy { listOfNotNull(note?.normalized()) }
 

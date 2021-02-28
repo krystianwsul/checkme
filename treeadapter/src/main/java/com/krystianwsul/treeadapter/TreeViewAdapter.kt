@@ -60,9 +60,26 @@ class TreeViewAdapter<T : TreeHolder>(
         private set
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
-        this.treeNodeCollection = treeNodeCollection
+        if (this.treeNodeCollection == null) {
+            check(!updating)
+            check(locker == null)
 
-        locker = AdapterLocker()
+            this.treeNodeCollection = treeNodeCollection
+
+            treeNodeCollection.nodesObservable
+                    .firstOrError()
+                    .subscribe { _ ->
+                        check(!updating)
+                        check(locker == null)
+
+                        locker = AdapterLocker()
+                    }
+        } else {
+            check(updating)
+            check(locker == null)
+
+            this.treeNodeCollection = treeNodeCollection
+        }
 
         normalizeRelay.accept(Unit)
     }

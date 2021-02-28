@@ -19,6 +19,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     var nodes
         get() = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
         set(rootTreeNodes) {
+            check(treeViewAdapter.locker == null)
+
             if (treeNodesRelay.value != null) throw SetTreeNodesCalledTwiceException()
 
             treeNodesRelay.accept(rootTreeNodes.sorted())
@@ -91,6 +93,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         treeNodes.add(treeNode)
         treeNodes.sort()
 
+        check(treeViewAdapter.locker == null)
+
         treeNodesRelay.accept(treeNodes)
     }
 
@@ -102,6 +106,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         check(treeNodes.contains(treeNode))
 
         treeNodes.remove(treeNode)
+
+        check(treeViewAdapter.locker == null)
 
         treeNodesRelay.accept(treeNodes)
     }
@@ -127,6 +133,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             removeAt(fromPosition)
             add(toPosition, treeNode)
         }
+
+        check(treeViewAdapter.locker == null)
 
         treeNodesRelay.accept(treeNodes)
     }

@@ -253,7 +253,7 @@ class TreeNode<T : TreeHolder>(
     override val displayedNodes: List<TreeNode<T>>
         get() {
             val locker = getLocker()
-            locker?.displayedNodes?.let { return it } // todo position
+            locker?.displayedNodes?.let { return it }
 
             val result = if (canBeShown()) listOf(this) + displayedChildNodes else listOf()
 

@@ -380,23 +380,22 @@ abstract class Project<T : ProjectType>(
                 .filterQuery(searchData?.searchCriteria?.query).map { it.first }
                 .toList()
 
-        val instanceSequences = filteredTasks.map { task ->
-            throwIfInterrupted()
-
-            val instances = task.getInstances(
+        val instanceSequences = filteredTasks.map {
+            it.getInstances(
                     startExactTimeStamp,
                     endExactTimeStamp,
                     now,
                     onlyRoot = true,
                     filterVisible = filterVisible
             )
-                    .let {
-                        if (searchData == null) {
-                            it
-                        } else {
-                            it.filterSearchCriteria(searchData.searchCriteria, now, searchData.myUser)
-                        }
-                    }
+        }
+
+        return combineInstanceSequences(instanceSequences).let { sequence ->
+            throwIfInterrupted()
+
+            searchData?.let { sequence.filterSearchCriteria(it.searchCriteria, now, it.myUser) } ?: sequence
+        }.let { instances ->
+            throwIfInterrupted()
 
             if (filterVisible) {
                 instances.filter { instance ->
@@ -411,8 +410,6 @@ abstract class Project<T : ProjectType>(
                 instances
             }
         }
-
-        return combineInstanceSequences(instanceSequences)
     }
 
     fun fixOffsets() {

@@ -291,7 +291,8 @@ class NotDoneGroupNode(
         })
     }
 
-    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] === hourMinute }
+    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
+            groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))

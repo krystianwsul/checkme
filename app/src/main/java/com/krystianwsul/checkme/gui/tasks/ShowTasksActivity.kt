@@ -127,16 +127,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         updateTopMenu()
         updateBottomMenu()
 
-        taskListFragment.parameters = TaskListFragment.Parameters.All(
-                TaskListFragment.Data(
-                        data.dataId,
-                        data.immediate,
-                        data.taskData,
-                        parameters.reverseOrderForTopLevelNodes,
-                        parameters.copying,
-                        false
-                )
-        )
+        taskListFragment.parameters = parameters.mapDataToTaskListFragmentParameters(data)
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit
@@ -289,6 +280,18 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         abstract fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean
 
+        protected fun mapDataToTaskListFragmentData(data: ShowTasksViewModel.Data) = TaskListFragment.Data(
+                data.dataId,
+                data.immediate,
+                data.taskData,
+                reverseOrderForTopLevelNodes,
+                copying,
+                false
+        )
+
+        open fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data): TaskListFragment.Parameters =
+                TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data))
+
         @Parcelize
         object Unscheduled : Parameters() {
 
@@ -321,6 +324,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         data class Project(val projectKey: ProjectKey<*>) : Parameters() {
 
             override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data) = data.isSharedProject!!
+
+            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.Project(mapDataToTaskListFragmentData(data), projectKey)
         }
     }
 }

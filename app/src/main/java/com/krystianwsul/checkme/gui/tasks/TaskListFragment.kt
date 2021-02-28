@@ -961,6 +961,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         data class All(override val data: Data) : Parameters()
 
+        data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters()
+
         data class Task(override val data: Data, override val rootTaskData: RootTaskData) : Parameters()
     }
 }

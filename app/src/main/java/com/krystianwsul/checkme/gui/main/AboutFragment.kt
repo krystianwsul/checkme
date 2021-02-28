@@ -46,8 +46,9 @@ class AboutFragment : AbstractFragment() {
                 .addView(AboutPage(requireContext()).setImage(R.drawable.ic_launcher_round_try_sign2_unscaled)
                         .setDescription(getString(R.string.aboutDescription))
                         .addItem(element)
-                        .addEmail("krystianwsul@gmail.com")
+                        .addWebsite("https://krystianwsul.com")
                         .addPlayStore("com.krystianwsul.checkme")
+                        .addEmail("krystianwsul@gmail.com")
                         .addItem(Element().setTitle(getString(R.string.version) + " " + BuildConfig.VERSION_NAME))
                         .create().apply {
                             findViewById<ImageView>(mehdi.sakout.aboutpage.R.id.image).apply {

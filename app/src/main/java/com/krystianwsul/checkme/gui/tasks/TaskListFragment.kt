@@ -133,7 +133,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
                 R.id.action_task_join -> startActivity(EditActivity.getParametersIntent(EditParameters.Join(
                         taskKeys.map(EditParameters.Join.Joinable::Task),
-                        hint()
+                        parameters!!.hint,
                 )))
                 R.id.action_task_delete -> {
                     checkNotNull(data)
@@ -404,8 +404,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         updateFabVisibility("setFab")
     }
 
-    private fun hint() = rootTaskData?.let { EditActivity.Hint.Task(it.taskKey) }
-
     private fun updateFabVisibility(source: String) {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
 
@@ -444,7 +442,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 if (data!!.taskData.showFab) {
                     show()
 
-                    edit(EditParameters.Create(hint(), showFirstSchedule = data!!.showFirstSchedule))
+                    edit(EditParameters.Create(parameters!!.hint, showFirstSchedule = data!!.showFirstSchedule))
                 } else {
                     hide()
                 }
@@ -959,10 +957,21 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         abstract val data: Data
         open val rootTaskData: RootTaskData? = null
 
-        data class All(override val data: Data) : Parameters()
+        abstract val hint: EditActivity.Hint?
 
-        data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters()
+        data class All(override val data: Data) : Parameters() {
 
-        data class Task(override val data: Data, override val rootTaskData: RootTaskData) : Parameters()
+            override val hint: EditActivity.Hint? = null
+        }
+
+        data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
+
+            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
+        }
+
+        data class Task(override val data: Data, override val rootTaskData: RootTaskData) : Parameters() {
+
+            override val hint = EditActivity.Hint.Task(rootTaskData.taskKey)
+        }
     }
 }

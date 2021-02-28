@@ -76,7 +76,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private val parametersRelay = BehaviorRelay.create<Parameters>()
 
-    private var parameters: Parameters?
+    var parameters: Parameters?
         get() = parametersRelay.value
         set(value) {
             checkNotNull(value)
@@ -337,16 +337,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         viewCreatedObservable.accept(true)
 
         searchDataManager.subscribe()
-    }
-
-    fun setAllTasks(data: Data) {
-        check(rootTaskData == null)
-
-        this.parameters = Parameters.All(data)
-    }
-
-    fun setTaskKey(rootTaskData: RootTaskData, data: Data) {
-        this.parameters = Parameters.Task(data, rootTaskData)
     }
 
     private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> = listOf(

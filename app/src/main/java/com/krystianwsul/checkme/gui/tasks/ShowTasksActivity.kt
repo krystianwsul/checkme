@@ -127,14 +127,16 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         updateTopMenu()
         updateBottomMenu()
 
-        taskListFragment.setAllTasks(TaskListFragment.Data(
-                data.dataId,
-                data.immediate,
-                data.taskData,
-                parameters.reverseOrderForTopLevelNodes,
-                parameters.copying,
-                false
-        ))
+        taskListFragment.parameters = TaskListFragment.Parameters.All(
+                TaskListFragment.Data(
+                        data.dataId,
+                        data.immediate,
+                        data.taskData,
+                        parameters.reverseOrderForTopLevelNodes,
+                        parameters.copying,
+                        false
+                )
+        )
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit

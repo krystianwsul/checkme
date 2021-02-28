@@ -136,14 +136,14 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         updateTopMenu()
         updateBottomMenu()
 
-        taskListFragment.setTaskKey(
-                TaskListFragment.RootTaskData(taskKey, data.imageData),
+        taskListFragment.parameters = TaskListFragment.Parameters.Task(
                 TaskListFragment.Data(
                         data.dataId,
                         immediate,
                         data.taskData,
                         false,
-                )
+                ),
+                TaskListFragment.RootTaskData(taskKey, data.imageData),
         )
     }
 

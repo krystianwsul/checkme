@@ -570,7 +570,7 @@ class MainActivity :
             start()
 
             createDisposable += data.subscribe {
-                taskListFragment.setAllTasks(TaskListFragment.Data(
+                taskListFragment.parameters = TaskListFragment.Parameters.All(TaskListFragment.Data(
                         it.dataId,
                         it.immediate,
                         it.taskData,

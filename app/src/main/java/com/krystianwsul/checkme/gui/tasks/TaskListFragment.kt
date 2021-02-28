@@ -74,12 +74,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         fun newInstance() = TaskListFragment()
     }
 
-    private var rootTaskData: RootTaskData? = null
+    private val parametersRelay = BehaviorRelay.create<Parameters>()
 
-    private val dataRelay = BehaviorRelay.create<Data>()
-    private var data
-        get() = dataRelay.value
-        set(value) = dataRelay.accept(value)
+    private var parameters: Parameters?
+        get() = parametersRelay.value
+        set(value) {
+            checkNotNull(value)
+
+            parametersRelay.accept(value)
+        }
+
+    private val rootTaskData get() = parameters?.rootTaskData
+    private val data get() = parameters?.data
 
     private val dragHelper by lazy {
         object : DragHelper() {
@@ -224,7 +230,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private val viewCreatedObservable = BehaviorRelay.createDefault(false)
 
-    private val searchDataManager = object : SearchDataManager<Data, TaskAdapter>(viewCreatedObservable, dataRelay) {
+    private val searchDataManager = object : SearchDataManager<Data, TaskAdapter>(
+            viewCreatedObservable,
+            parametersRelay.map { it.data },
+    ) {
 
         override val recyclerView get() = binding.taskListRecycler
         override val progressView get() = binding.taskListProgress
@@ -333,13 +342,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     fun setAllTasks(data: Data) {
         check(rootTaskData == null)
 
-        rootTaskData = null
-        this.data = data
+        this.parameters = Parameters.All(data)
     }
 
     fun setTaskKey(rootTaskData: RootTaskData, data: Data) {
-        this.rootTaskData = rootTaskData
-        this.data = data
+        this.parameters = Parameters.Task(data, rootTaskData)
     }
 
     private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> = listOf(
@@ -955,5 +962,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     ) : Parcelable {
 
         constructor() : this(setOf(), setOf(), setOf(), setOf())
+    }
+
+    sealed class Parameters {
+
+        abstract val data: Data
+        open val rootTaskData: RootTaskData? = null
+
+        data class All(override val data: Data) : Parameters()
+
+        data class Task(override val data: Data, override val rootTaskData: RootTaskData) : Parameters()
     }
 }

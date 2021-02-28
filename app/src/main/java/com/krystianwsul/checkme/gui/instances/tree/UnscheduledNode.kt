@@ -50,6 +50,8 @@ class UnscheduledNode(
         )
     }
 
+    override val expandOnMatch = false
+
     fun initialize(
             expanded: Boolean,
             nodeContainer: NodeContainer<AbstractHolder>,

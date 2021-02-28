@@ -28,6 +28,8 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     val isDraggable get() = false
 
+    val expandOnMatch get() = true
+
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
     fun onClick(holder: T) = Unit

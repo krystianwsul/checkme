@@ -77,6 +77,13 @@ class TreeNode<T : TreeHolder>(
 
             if (!visible()) throw InvisibleNodeException()
 
+            return expandCanBeVisible
+        }
+
+    private val expandCanBeVisible: Boolean // if this node were visible, aka parent expanded
+        get() {
+            checkChildTreeNodesSet()
+
             if (childTreeNodes.none { it.canBeShown() }) return false
 
             return true
@@ -426,11 +433,14 @@ class TreeNode<T : TreeHolder>(
     fun expandMatching(query: String) {
         checkChildTreeNodesSet()
 
-        if (!visible()) return
-        if (!expandVisible) return
+        /**
+         * this used to check visible() and expandVisible, but I'm relaxing the condition so that No Reminders doesn't
+         * get expanded, but if you do expand it manually, it expands all the way down to the match.
+         */
+        if (!expandCanBeVisible) return
         if (childTreeNodes.none { canBeShown() }) return
 
-        if (childHierarchyMatchesQuery(query)) expanded = true
+        if (childHierarchyMatchesQuery(query) && modelNode.expandOnMatch) expanded = true
 
         childTreeNodes.forEach { it.expandMatching(query) }
     }

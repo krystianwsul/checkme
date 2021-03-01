@@ -67,12 +67,14 @@
 
         </LinearLayout>
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/tutorialProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:indeterminate="true"
+            app:indicatorColor="@color/secondaryColor" />
 
     </RelativeLayout>
 

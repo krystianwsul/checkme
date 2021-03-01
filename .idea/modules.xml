@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Check.me.iml" filepath="$PROJECT_DIR$/.idea/modules/Check.me.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.androidAndroidTestProto.iml" />
@@ -11,25 +12,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common.jsTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/StudioProjects.Check.me.iml" filepath="$PROJECT_DIR$/.idea/modules/StudioProjects.Check.me.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.androidAndroidTestProto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.androidAndroidTestRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.androidAndroidTestRelease.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.commonMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.commonTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.jsMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/StudioProjects.Check.me.common.jsTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.androidAndroidTestProto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.androidAndroidTestRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.androidAndroidTestRelease.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.commonMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.commonTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.jsMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Users.kryst.StudioProjects.Check.me.common.jsTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.androidAndroidTestProto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.androidAndroidTestRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.androidAndroidTestRelease.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.commonMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.commonTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.jsMain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/kryst.StudioProjects.Check.me.common.jsTest.iml" />
     </modules>
   </component>
 </project>

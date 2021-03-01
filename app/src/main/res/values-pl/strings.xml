@@ -151,4 +151,7 @@
     <string name="polish">Polski</string>
     <string name="setAutomatically">Ustaw automatycznie</string>
     <string name="language">Język</string>
+    <string name="morning">rano</string>
+    <string name="afternoon">po poudniu</string>
+    <string name="evening">wieczorem</string>
 </resources>

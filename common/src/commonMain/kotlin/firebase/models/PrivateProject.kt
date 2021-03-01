@@ -28,6 +28,12 @@ class PrivateProject(
 
     override val customTimes get() = remoteCustomTimes.values
 
+    var defaultTimesCreated
+        get() = projectRecord.defaultTimesCreated
+        set(value) {
+            projectRecord.defaultTimesCreated = value
+        }
+
     init {
         for (remoteCustomTimeRecord in projectRecord.customTimeRecords.values) {
             @Suppress("LeakingThis")

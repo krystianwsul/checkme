@@ -90,6 +90,8 @@ class PrivateProjectRecord(
 
     override val childKey get() = key
 
+    var defaultTimesCreated by Committer(projectJson::defaultTimesCreated, "$key/$PROJECT_JSON")
+
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
     fun getCustomTimeRecordId() =

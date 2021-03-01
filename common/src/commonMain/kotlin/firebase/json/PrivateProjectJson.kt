@@ -14,4 +14,5 @@ class PrivateProjectJson @JvmOverloads constructor(
         override var tasks: MutableMap<String, PrivateTaskJson> = mutableMapOf(),
         override var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, PrivateCustomTimeJson> = mutableMapOf(),
+        var defaultTimesCreated: Boolean = false,
 ) : ProjectJson<ProjectType.Private>

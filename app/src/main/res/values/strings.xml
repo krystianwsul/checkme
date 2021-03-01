@@ -153,4 +153,7 @@
     <string name="polish">Polish</string>
     <string name="setAutomatically">Set automatically</string>
     <string name="language">Language</string>
+    <string name="morning">morning</string>
+    <string name="afternoon">afternoon</string>
+    <string name="evening">evening</string>
 </resources>

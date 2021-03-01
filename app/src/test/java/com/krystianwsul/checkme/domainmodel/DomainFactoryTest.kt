@@ -67,7 +67,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now = now,
-        )
+        ).taskKey
 
         now += 1.hours
 
@@ -79,7 +79,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now = now
-        )
+        ).taskKey
 
         assertEquals(taskKey1, getTodayInstanceDatas(now).single().taskKey)
         assertEquals(taskKey2, getTodayInstanceDatas(now).single().children.values.single().taskKey)
@@ -134,7 +134,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).taskKey
 
         val doneChildTaskKey = domainFactory.createChildTask(
                 SaveService.Source.SERVICE,
@@ -144,7 +144,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        )
+        ).taskKey
 
         val notDoneChildTaskKey = domainFactory.createChildTask(
                 SaveService.Source.SERVICE,
@@ -154,7 +154,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        )
+        ).taskKey
 
         assertEquals(1, getTodayInstanceDatas(now).size)
         assertEquals(2, getTodayInstanceDatas(now).single().children.size)
@@ -190,7 +190,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).taskKey
 
         domainFactory.updateChildTask(
                 SaveService.Source.SERVICE,
@@ -228,7 +228,7 @@ class DomainFactoryTest {
 
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val parenTaskKey = domainFactory.createScheduleRootTask(
+        val parentTaskKey = domainFactory.createScheduleRootTask(
                 SaveService.Source.SERVICE,
                 "parentTask",
                 listOf(
@@ -240,7 +240,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        )
+        ).taskKey
 
         val firstInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
@@ -264,7 +264,7 @@ class DomainFactoryTest {
 
         domainFactory.createChildTask(
                 SaveService.Source.SERVICE,
-                parenTaskKey,
+                parentTaskKey,
                 "childTask",
                 null,
                 null,
@@ -295,7 +295,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).taskKey
 
         assertEquals(
                 1,
@@ -315,7 +315,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        )
+        ).taskKey
 
         val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper

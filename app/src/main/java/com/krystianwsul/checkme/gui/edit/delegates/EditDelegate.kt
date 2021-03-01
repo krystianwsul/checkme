@@ -293,14 +293,14 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
 
         class Task(override val taskKey: TaskKey) : CreateResult() {
 
-            override val intent = ShowTaskActivity.newIntent(taskKey)
+            override val intent get() = ShowTaskActivity.newIntent(taskKey)
         }
 
-        class Instance(instanceKey: InstanceKey) : CreateResult() {
+        class Instance(private val instanceKey: InstanceKey) : CreateResult() {
 
             override val taskKey = instanceKey.taskKey
 
-            override val intent = ShowInstanceActivity.getIntent(MyApplication.instance, instanceKey)
+            override val intent get() = ShowInstanceActivity.getIntent(MyApplication.instance, instanceKey)
         }
     }
 }

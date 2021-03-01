@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
 import android.graphics.Rect
+import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -65,6 +66,9 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                         textView.isSingleLine = false
                         textView.setLines(lines)
                     }
+
+                    // ellipsize is stupid when measured width is close to max width
+                    textView.ellipsize = if (lines == wantLines) null else TextUtils.TruncateAt.END
                 }
             }
 

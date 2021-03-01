@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import com.google.android.material.timepicker.MaterialTimePicker
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -58,7 +59,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private const val KEY_STATE = "state"
 
         private const val DATE_FRAGMENT_TAG = "dateFragment"
-        private const val TIME_FRAGMENT_TAG = "timeFragment"
+        private const val TAG_TIME_FRAGMENT = "timeFragment"
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val TAG_PARENT_PICKER = "parentPicker"
 
@@ -92,12 +93,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             updateFields()
         }
 
-        override fun onOtherSelected() {
-            TimePickerDialogFragment.newInstance(state.timePairPersist.hourMinute, SerializableUnit).also {
-                it.listener = timePickerDialogFragmentListener
-                it.show(childFragmentManager, TIME_FRAGMENT_TAG)
-            }
-        }
+        override fun onOtherSelected() = newMaterialTimePicker(
+                requireContext(),
+                childFragmentManager,
+                TAG_TIME_FRAGMENT,
+                state.timePairPersist.hourMinute,
+        ).setListener(timePickerDialogFragmentListener)
 
         override fun onAddSelected() = startActivityForResult(
                 ShowCustomTimeActivity.getCreateIntent(requireContext()),
@@ -105,7 +106,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         )
     }
 
-    private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
         state.timePairPersist.setHourMinute(hourMinute)
         updateFields()
     }
@@ -298,8 +299,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             addOneShotGlobalLayoutListener { isHintAnimationEnabled = true }
         }
 
-        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TIME_FRAGMENT_TAG)?.listener =
-                timePickerDialogFragmentListener
+        tryGetFragment<MaterialTimePicker>(TAG_TIME_FRAGMENT)?.setListener(timePickerDialogFragmentListener)
 
         binding.editInstanceTimeLayout.setDropdown {
             val customTimeDatas = ArrayList(data.customTimeDatas

@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentScheduleDialogBinding
@@ -52,7 +53,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TAG_FROM_FRAGMENT = "fromFragment"
         private const val TAG_UNTIL_FRAGMENT = "untilFragment"
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
-        private const val TIME_PICKER_TAG = "timePicker"
+        private const val TAG_TIME_PICKER = "timePicker"
 
         private val daysOfWeekMap = mapOf(
                 DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
@@ -101,16 +102,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onOtherSelected() {
             checkNotNull(customTimeDatas)
 
-            TimePickerDialogFragment.newInstance(
+            newMaterialTimePicker(
+                    requireContext(),
+                    childFragmentManager,
+                    TAG_TIME_PICKER,
                     scheduleDialogData.timePairPersist.hourMinute,
-                    SerializableUnit
-            ).let {
-                it.listener = timePickerDialogFragmentListener
-                it.show(
-                        childFragmentManager,
-                        TIME_PICKER_TAG
-                )
-            }
+            ).setListener(timePickerDialogFragmentListener)
         }
 
         override fun onAddSelected() {
@@ -121,7 +118,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
         checkNotNull(customTimeDatas)
 
         scheduleDialogData.timePairPersist.setHourMinute(hourMinute)
@@ -277,14 +274,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        childFragmentManager.apply {
-            (findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener =
-                    timeDialogListener
-
-            @Suppress("UNCHECKED_CAST")
-            (findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment<SerializableUnit>)?.listener =
-                    timePickerDialogFragmentListener
-        }
+        tryGetFragment<TimeDialogFragment>(TIME_LIST_FRAGMENT_TAG)?.timeDialogListener = timeDialogListener
+        tryGetFragment<MaterialTimePicker>(TAG_TIME_PICKER)?.setListener(timePickerDialogFragmentListener)
 
         binding.scheduleDialogDateLayout.setDropdown {
             delegate.getDatePicker().let {

@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
+import com.google.android.material.timepicker.MaterialTimePicker
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -19,10 +20,10 @@ import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
-import com.krystianwsul.checkme.gui.dialogs.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.dialogs.newMaterialTimePicker
+import com.krystianwsul.checkme.gui.dialogs.setListener
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -42,7 +43,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         private const val KEY_HOUR_MINUTES = "hourMinutes"
         private const val KEY_ALL_DAYS_EXPANDED = "allDaysExpanded"
 
-        private const val TIME_PICKER_TAG = "timePicker"
+        private const val TAG_TIME_PICKER = "timePicker"
         private const val TAG_TIME_PICKER_ALL_DAYS = "timePickerAllDays"
         private const val DISCARD_TAG = "discard"
 
@@ -84,7 +85,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         if (dayOfWeek == DayOfWeek.SUNDAY) binding.timeAllDaysTime.setText(hourMinute.toString())
     }
 
-    private val allDaysListener = { hourMinute: HourMinute, _: SerializableUnit ->
+    private val allDaysListener = { hourMinute: HourMinute ->
         DayOfWeek.values().forEach { dayOfWeek ->
             hourMinutes[dayOfWeek] = hourMinute
             timeViews.getValue(dayOfWeek).setText(hourMinute.toString())
@@ -231,26 +232,29 @@ class ShowCustomTimeActivity : NavBarActivity() {
         tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
 
         binding.timeAllDaysTimeLayout.setDropdown {
-            TimePickerDialogFragment.newInstance(allDaysHourMinute, SerializableUnit).apply {
-                listener = allDaysListener
-                show(supportFragmentManager, TAG_TIME_PICKER_ALL_DAYS)
-            }
+            newMaterialTimePicker(
+                    this,
+                    supportFragmentManager,
+                    TAG_TIME_PICKER_ALL_DAYS,
+                    allDaysHourMinute,
+            ).setListener(allDaysListener)
         }
 
-        tryGetFragment<TimePickerDialogFragment<SerializableUnit>>(TAG_TIME_PICKER_ALL_DAYS)?.listener = allDaysListener
+        tryGetFragment<MaterialTimePicker>(TAG_TIME_PICKER_ALL_DAYS)?.setListener(allDaysListener)
 
         DayOfWeek.values().forEach { dayOfWeek ->
             timeViews.getValue(dayOfWeek).setDropdown {
-                val currHourMinute = hourMinutes.getValue(dayOfWeek)
-
-                TimePickerDialogFragment.newInstance(currHourMinute, dayOfWeek).apply {
-                    listener = timePickerDialogFragmentListener
-                    show(supportFragmentManager, TIME_PICKER_TAG)
-                }
+                newMaterialTimePicker(
+                        this,
+                        supportFragmentManager,
+                        TAG_TIME_PICKER,
+                        hourMinutes.getValue(dayOfWeek),
+                        dayOfWeek,
+                ).setListener(timePickerDialogFragmentListener)
             }
         }
 
-        tryGetFragment<TimePickerDialogFragment<DayOfWeek>>(TIME_PICKER_TAG)?.listener = timePickerDialogFragmentListener
+        tryGetFragment<MaterialTimePicker>(TAG_TIME_PICKER)?.setListener(timePickerDialogFragmentListener)
 
         binding.showCustomTimeToolbarEditTextInclude
                 .toolbarEditText

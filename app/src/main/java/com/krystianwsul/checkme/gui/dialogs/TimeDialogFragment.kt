@@ -32,7 +32,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
 
         val customTimeDatas = requireArguments().getParcelableArrayList<CustomTimeData>(CUSTOM_TIMES_KEY)!!
 
-        val names = customTimeDatas.map { it.name } + getString(R.string.other) + getString(R.string.add)
+        val names = customTimeDatas.map { it.name } + getString(R.string.add) + getString(R.string.other)
 
         val adapter = ArrayAdapter(requireContext(), R.layout.row_time, R.id.timeRowText, names)
 
@@ -46,10 +46,10 @@ class TimeDialogFragment : AbstractDialogFragment() {
                             val customTimeKey = customTimeDatas[which].customTimeKey
                             timeDialogListener.onCustomTimeSelected(customTimeKey)
                         }
-                        which == customTimeDatas.size -> timeDialogListener.onOtherSelected()
+                        which == customTimeDatas.size -> timeDialogListener.onAddSelected()
                         else -> {
                             check(which == customTimeDatas.size + 1)
-                            timeDialogListener.onAddSelected()
+                            timeDialogListener.onOtherSelected()
                         }
                     }
                 }

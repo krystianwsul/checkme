@@ -201,7 +201,7 @@ class DomainFactory(
                 )
             }
 
-            if (!projectsFactory.privateProject.run { defaultTimesCreated && customTimes.isEmpty() }) {
+            if (projectsFactory.privateProject.run { !defaultTimesCreated && customTimes.isEmpty() }) {
                 createCustomTime(R.string.morning, HourMinute(9, 0))
                 createCustomTime(R.string.afternoon, HourMinute(13, 0))
                 createCustomTime(R.string.evening, HourMinute(18, 0))

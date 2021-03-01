@@ -517,13 +517,13 @@ class EditActivity : NavBarActivity() {
 
         val createParameters = EditDelegate.CreateParameters(name, note, allReminders)
 
-        val taskKey = delegate.createTask(createParameters)
+        val createResult = delegate.createTask(createParameters)
 
-        if (andOpen) startActivity(ShowTaskActivity.newIntent(taskKey))
+        if (andOpen) startActivity(createResult.intent)
 
         setResult(
                 Activity.RESULT_OK,
-                Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) }
+                Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, createResult.taskKey as Parcelable) }
         )
 
         finish()

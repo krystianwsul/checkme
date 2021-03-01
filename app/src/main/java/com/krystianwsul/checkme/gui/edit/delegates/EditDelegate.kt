@@ -1,20 +1,21 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.StringRes
 import arrow.syntax.function.invoke
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
+import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
+import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
@@ -216,7 +217,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             tmpParentTaskKey = taskKey
     }
 
-    fun createTask(createParameters: CreateParameters): TaskKey {
+    fun createTask(createParameters: CreateParameters): CreateResult {
         check(createParameters.allReminders || showAllRemindersDialog() != null)
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
@@ -231,22 +232,22 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
 
         return when {
-            parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
+            parentScheduleManager.schedules.isNotEmpty() -> CreateResult.Task(createTaskWithSchedule(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     sharedProjectParameters
-            )
+            ))
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
 
                 val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
 
-                createTaskWithParent(createParameters, parentTaskKey)
+                CreateResult.Task(createTaskWithParent(createParameters, parentTaskKey))
             }
             else -> {
                 check(assignedTo.isEmpty())
 
-                createTaskWithoutReminder(createParameters, projectId)
+                CreateResult.Task(createTaskWithoutReminder(createParameters, projectId))
             }
         }
     }
@@ -280,4 +281,22 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
     }
 
     class SharedProjectParameters(val key: ProjectKey.Shared, val assignedTo: Set<UserKey>)
+
+    sealed class CreateResult {
+
+        abstract val taskKey: TaskKey
+        abstract val intent: Intent
+
+        class Task(override val taskKey: TaskKey) : CreateResult() {
+
+            override val intent = ShowTaskActivity.newIntent(taskKey)
+        }
+
+        class Instance(instanceKey: InstanceKey) : CreateResult() {
+
+            override val taskKey = instanceKey.taskKey
+
+            override val intent = ShowInstanceActivity.getIntent(MyApplication.instance, instanceKey)
+        }
+    }
 }

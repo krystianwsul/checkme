@@ -43,6 +43,9 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
                     (::CreateTaskEditDelegate)(parameters)
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
+
+        fun TaskKey.toCreateResult() = CreateResult.Task(this)
+        fun InstanceKey.toCreateResult() = CreateResult.Instance(this)
     }
 
     fun newData(data: EditViewModel.Data) {
@@ -61,7 +64,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
     open val initialName: String? = null
     open val initialNote: String? = null
     open val scheduleHint: EditActivity.Hint.Schedule? = null
-    open val showSaveAndOpen: Boolean = true
+    open val showSaveAndOpen = false
 
     val parentTreeDatas get() = data.parentTreeDatas
     val customTimeDatas get() = data.customTimeDatas
@@ -232,22 +235,22 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
 
         return when {
-            parentScheduleManager.schedules.isNotEmpty() -> CreateResult.Task(createTaskWithSchedule(
+            parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     sharedProjectParameters
-            ))
+            )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
 
                 val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
 
-                CreateResult.Task(createTaskWithParent(createParameters, parentTaskKey))
+                createTaskWithParent(createParameters, parentTaskKey)
             }
             else -> {
                 check(assignedTo.isEmpty())
 
-                CreateResult.Task(createTaskWithoutReminder(createParameters, projectId))
+                createTaskWithoutReminder(createParameters, projectId)
             }
         }
     }
@@ -256,17 +259,17 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): TaskKey
+    ): CreateResult
 
     abstract fun createTaskWithParent(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey,
-    ): TaskKey
+    ): CreateResult
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): TaskKey
+    ): CreateResult
 
     fun saveState(outState: Bundle) {
         parentScheduleManager.saveState(outState)

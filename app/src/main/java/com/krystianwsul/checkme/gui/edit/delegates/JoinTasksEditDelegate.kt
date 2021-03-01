@@ -22,7 +22,6 @@ class JoinTasksEditDelegate(
 ) : EditDelegate(editImageState, compositeDisposable) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
-    override val showSaveAndOpen = false
 
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
@@ -72,7 +71,7 @@ class JoinTasksEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): TaskKey {
+    ): CreateResult {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
                         SaveService.Source.GUI,
@@ -87,9 +86,10 @@ class JoinTasksEditDelegate(
                         createParameters.allReminders
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -105,12 +105,13 @@ class JoinTasksEditDelegate(
                         instanceKeys
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -126,5 +127,6 @@ class JoinTasksEditDelegate(
                         instanceKeys
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 }

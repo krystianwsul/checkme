@@ -25,6 +25,8 @@ class CreateTaskEditDelegate(
 
     override val initialName: String?
     override val scheduleHint: EditActivity.Hint.Schedule?
+    override val showSaveAndOpen = true
+
     override val parentScheduleManager: ParentScheduleManager
 
     init {
@@ -115,7 +117,7 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -130,9 +132,10 @@ class CreateTaskEditDelegate(
                                 ?.value
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult() // todo instance
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
         check(createParameters.allReminders)
 
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
@@ -148,12 +151,13 @@ class CreateTaskEditDelegate(
                                 ?.value
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult() // todo instance
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -167,5 +171,6 @@ class CreateTaskEditDelegate(
                                 ?.value
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult() // todo instance
     }
 }

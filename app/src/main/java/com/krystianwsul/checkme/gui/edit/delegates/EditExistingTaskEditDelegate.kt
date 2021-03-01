@@ -48,46 +48,52 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance.updateScheduleTask(
-                SaveService.Source.GUI,
-                parameters.taskKey,
-                createParameters.name,
-                scheduleDatas,
-                createParameters.note,
-                sharedProjectParameters,
-                imageUrl.value!!.writeImagePath
-        )
+        return DomainFactory.instance
+                .updateScheduleTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        scheduleDatas,
+                        createParameters.note,
+                        sharedProjectParameters,
+                        imageUrl.value!!.writeImagePath
+                )
+                .toCreateResult()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
-        return DomainFactory.instance.updateChildTask(
-                SaveService.Source.GUI,
-                parameters.taskKey,
-                createParameters.name,
-                parentTaskKey,
-                createParameters.note,
-                imageUrl.value!!.writeImagePath,
-                parameters.openedFromInstanceKey,
-                createParameters.allReminders
-        )
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
+        return DomainFactory.instance
+                .updateChildTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        parentTaskKey,
+                        createParameters.note,
+                        imageUrl.value!!.writeImagePath,
+                        parameters.openedFromInstanceKey,
+                        createParameters.allReminders
+                )
+                .toCreateResult()
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance.updateRootTask(
-                SaveService.Source.GUI,
-                parameters.taskKey,
-                createParameters.name,
-                createParameters.note,
-                sharedProjectKey,
-                imageUrl.value!!.writeImagePath
-        )
+        return DomainFactory.instance
+                .updateRootTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        createParameters.note,
+                        sharedProjectKey,
+                        imageUrl.value!!.writeImagePath
+                )
+                .toCreateResult()
     }
 }

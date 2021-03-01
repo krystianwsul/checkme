@@ -27,7 +27,7 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -43,9 +43,10 @@ class CopyExistingTaskEditDelegate(
                         parameters.taskKey
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): TaskKey {
+    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -60,12 +61,13 @@ class CopyExistingTaskEditDelegate(
                         parameters.taskKey
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): TaskKey {
+    ): CreateResult {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -80,5 +82,6 @@ class CopyExistingTaskEditDelegate(
                         parameters.taskKey
                 )
                 .also { EditActivity.createdTaskKey = it }
+                .toCreateResult()
     }
 }

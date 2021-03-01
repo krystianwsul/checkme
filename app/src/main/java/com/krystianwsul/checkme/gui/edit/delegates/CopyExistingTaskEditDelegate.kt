@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
-import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -42,8 +41,7 @@ class CopyExistingTaskEditDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
@@ -60,8 +58,7 @@ class CopyExistingTaskEditDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
@@ -81,7 +78,6 @@ class CopyExistingTaskEditDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 }

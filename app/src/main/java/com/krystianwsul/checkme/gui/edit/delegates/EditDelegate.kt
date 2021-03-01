@@ -45,7 +45,8 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
 
         fun TaskKey.toCreateResult() = CreateResult.Task(this)
-        fun InstanceKey.toCreateResult() = CreateResult.Instance(this)
+
+        fun CreateResult.applyCreatedTaskKey() = apply { EditActivity.createdTaskKey = taskKey }
     }
 
     fun newData(data: EditViewModel.Data) {

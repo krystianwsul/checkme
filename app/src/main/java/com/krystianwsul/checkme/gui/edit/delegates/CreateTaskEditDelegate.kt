@@ -131,8 +131,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult() // todo instance
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
@@ -150,8 +149,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult() // todo instance
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
@@ -170,7 +168,6 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult() // todo instance
+                .applyCreatedTaskKey()
     }
 }

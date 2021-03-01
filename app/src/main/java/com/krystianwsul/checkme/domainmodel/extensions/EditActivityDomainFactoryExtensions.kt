@@ -140,7 +140,7 @@ fun DomainFactory.createScheduleRootTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): EditDelegate.CreateResult = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -174,8 +174,13 @@ fun DomainFactory.createScheduleRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    task.taskKey
+    task.toCreateResult(now)
 }
+
+private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) =
+        getInstances(null, null, now).singleOrNull()
+                ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
+                ?: EditDelegate.CreateResult.Task(taskKey)
 
 fun DomainFactory.createChildTask(
         source: SaveService.Source,
@@ -185,7 +190,7 @@ fun DomainFactory.createChildTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): EditDelegate.CreateResult = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -215,7 +220,7 @@ fun DomainFactory.createChildTask(
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    childTask.taskKey
+    childTask.toCreateResult(now)
 }
 
 fun DomainFactory.createRootTask(
@@ -226,7 +231,7 @@ fun DomainFactory.createRootTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): EditDelegate.CreateResult = syncOnDomain {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -257,7 +262,7 @@ fun DomainFactory.createRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    task.taskKey
+    task.toCreateResult(now)
 }
 
 fun DomainFactory.updateScheduleTask(

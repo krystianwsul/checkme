@@ -148,6 +148,9 @@ class TreeNode<T : TreeHolder>(
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
+    fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: PayloadSeparator) =
+            modelNode.onPayload(viewHolder, payloadSeparator)
+
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 
     private fun toggleSelected(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
@@ -494,7 +497,17 @@ class TreeNode<T : TreeHolder>(
             val expandVisible: Boolean,
             val separatorVisibility: Boolean,
             val modelState: ModelState,
-    )
+    ) {
+
+        fun getPayload(other: State) = if (isExpanded == other.isExpanded &&
+                isSelected == other.isSelected &&
+                expandVisible == other.expandVisible &&
+                separatorVisibility != other.separatorVisibility &&
+                modelState == other.modelState
+        ) PayloadSeparator else null
+    }
+
+    object PayloadSeparator
 
     override val id get() = modelNode.id
 }

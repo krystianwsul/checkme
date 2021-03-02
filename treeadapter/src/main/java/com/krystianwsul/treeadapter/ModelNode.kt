@@ -32,6 +32,9 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
+    fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: TreeNode.PayloadSeparator): Unit =
+            throw UnsupportedOperationException()
+
     fun onClick(holder: T) = Unit
 
     fun normalize() = Unit

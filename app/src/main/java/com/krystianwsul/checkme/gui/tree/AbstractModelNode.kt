@@ -43,7 +43,12 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
                     null
             }
 
-            rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+            onPayload(viewHolder, TreeNode.PayloadSeparator)
         }
+    }
+
+    override fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: TreeNode.PayloadSeparator) {
+        (viewHolder as AbstractHolder).rowSeparator.visibility =
+                if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
     }
 }

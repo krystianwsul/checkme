@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.common.utils.singleOrEmpty
 import com.krystianwsul.treeadapter.locker.AdapterLocker
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -154,6 +155,12 @@ class TreeViewAdapter<T : TreeHolder>(
 
                 return oldStates[oldItemPosition] == newStates[newItemPosition]
             }
+
+            override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+                paddingComparison(oldItemPosition, newItemPosition)?.let { return null }
+
+                return oldStates[oldItemPosition].getPayload(newStates[newItemPosition])
+            }
         }).dispatchUpdatesTo(object : ListUpdateCallback {
 
             override fun onInserted(position: Int, count: Int) {
@@ -207,6 +214,24 @@ class TreeViewAdapter<T : TreeHolder>(
             check(position == itemCount - 1)
 
             (holder as PaddingHolder).showProgress(showProgress)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: List<Any>) {
+        if (position == displayedNodes.size) {
+            check(showPadding)
+            check(payloads.isEmpty())
+
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val payloadSeparator = payloads.singleOrEmpty()?.let { it as TreeNode.PayloadSeparator }
+
+            treeNodeCollection!!.getNode(position, PositionMode.DISPLAYED).apply {
+                if (payloadSeparator != null)
+                    onPayload(holder, payloadSeparator)
+                else
+                    super.onBindViewHolder(holder, position, payloads)
+            }
         }
     }
 

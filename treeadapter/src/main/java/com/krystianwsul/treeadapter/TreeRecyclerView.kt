@@ -34,4 +34,6 @@ class TreeRecyclerView : RecyclerView {
 
         super.onDetachedFromWindow()
     }
+
+    fun fixDrag() = cleanupLayoutState(this)
 }

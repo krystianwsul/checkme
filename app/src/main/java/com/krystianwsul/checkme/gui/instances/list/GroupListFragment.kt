@@ -131,6 +131,8 @@ class GroupListFragment @JvmOverloads constructor(
         object : DragHelper() {
 
             override fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder> = searchDataManager.treeViewAdapter
+
+            override val recyclerView get() = binding.groupListRecycler
         }
     }
 

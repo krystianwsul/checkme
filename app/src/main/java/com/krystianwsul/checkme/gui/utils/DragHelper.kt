@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.treeadapter.Sortable
+import com.krystianwsul.treeadapter.TreeRecyclerView
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper(callback) {
@@ -42,7 +43,15 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         MyCrashlytics.logMethod(this, "startPosition after: $startPosition")
 
         super.startDrag(viewHolder)
+
+        /**
+         * This fixes a glitch in which moving certain children prevents the next drag&drop from working (viewHolder
+         * detaches and moves, but never calls canDropOver)
+         */
+        recyclerView.post { recyclerView.fixDrag() }
     }
+
+    protected abstract val recyclerView: TreeRecyclerView
 
     private fun onMoveHelper(viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         MyCrashlytics.logMethod(this, "endPosition before: $endPosition")

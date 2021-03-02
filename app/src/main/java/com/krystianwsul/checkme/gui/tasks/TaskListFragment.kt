@@ -91,6 +91,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         object : DragHelper() {
 
             override fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder> = treeViewAdapter
+
+            override val recyclerView get() = binding.taskListRecycler
         }
     }
 

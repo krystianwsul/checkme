@@ -74,7 +74,7 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
         )
     }
 
-    val dataWrapper = GroupListDataWrapper(
+    return GroupListDataWrapper(
             customTimeDatas,
             null,
             listOf(),
@@ -83,6 +83,4 @@ private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeS
             null,
             null
     )
-
-    return dataWrapper
 }

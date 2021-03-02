@@ -570,12 +570,15 @@ class MainActivity :
             start()
 
             createDisposable += data.subscribe {
-                taskListFragment.parameters = TaskListFragment.Parameters.All(TaskListFragment.Data(
-                        it.dataId,
-                        it.immediate,
-                        it.taskData,
+                taskListFragment.parameters = TaskListFragment.Parameters.All(
+                        TaskListFragment.Data(
+                                it.dataId,
+                                it.immediate,
+                                it.taskData,
+                                true,
+                        ),
                         true,
-                ))
+                )
 
                 fun showDrawerTooltip(type: TooltipManager.Type, @StringRes message: Int) {
                     TooltipManager.fiveSecondDelay()

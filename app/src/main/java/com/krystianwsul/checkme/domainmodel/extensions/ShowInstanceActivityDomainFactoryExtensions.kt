@@ -112,7 +112,7 @@ private fun DomainFactory.getGroupListData(
                 )
             }
 
-    val dataWrapper = GroupListDataWrapper(
+    return GroupListDataWrapper(
             customTimeDatas,
             instance.canAddSubtask(now),
             listOf(),
@@ -121,6 +121,4 @@ private fun DomainFactory.getGroupListData(
             task.getImage(deviceDbInfo),
             instance.getProjectInfo(now)
     )
-
-    return dataWrapper
 }

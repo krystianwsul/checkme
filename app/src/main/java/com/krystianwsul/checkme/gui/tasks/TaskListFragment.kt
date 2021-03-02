@@ -803,7 +803,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
             val treeNodeCollection = taskAdapter.treeNodeCollection
 
-            return if (taskListFragment.rootTaskData != null
+            return if (taskListFragment.parameters?.canDrag == true
                     && treeNodeCollection.selectedChildren.isEmpty()
                     && treeNode.parent.displayedChildNodes.none { it.isExpanded }
             ) {
@@ -958,7 +958,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         abstract val hint: EditActivity.Hint?
 
-        data class All(override val data: Data) : Parameters() {
+        open val canDrag = true
+
+        data class All(override val data: Data, override val canDrag: Boolean) : Parameters() {
 
             override val hint: EditActivity.Hint? = null
         }

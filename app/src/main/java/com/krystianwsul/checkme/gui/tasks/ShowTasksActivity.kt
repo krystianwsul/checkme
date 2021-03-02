@@ -289,8 +289,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 false
         )
 
-        open fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data): TaskListFragment.Parameters =
-                TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data))
+        abstract fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data): TaskListFragment.Parameters
 
         @Parcelize
         object Unscheduled : Parameters() {
@@ -302,6 +301,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
                 return false
             }
+
+            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data), true)
         }
 
         @Parcelize
@@ -318,6 +320,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
                 return false
             }
+
+            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data), false)
         }
 
         @Parcelize

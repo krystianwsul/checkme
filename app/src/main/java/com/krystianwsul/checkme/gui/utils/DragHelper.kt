@@ -90,7 +90,12 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         return thisTreeNode.parent == otherTreeNode.parent
     }
 
-    private fun onChildDrawHelper(viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, isCurrentlyActive: Boolean) {
+    private fun onChildDrawHelper(
+            viewHolder: RecyclerView.ViewHolder,
+            dX: Float,
+            dY: Float,
+            isCurrentlyActive: Boolean,
+    ) {
         viewHolder.itemView.apply {
             translationX = dX
             translationY = dY
@@ -115,7 +120,11 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         override fun isLongPressDragEnabled() = false
 
-        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder) = dragHelper.onMoveHelper(viewHolder, target)
+        override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+        ) = dragHelper.onMoveHelper(viewHolder, target)
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
 
@@ -127,8 +136,20 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
             super.clearView(recyclerView, viewHolder)
         }
 
-        override fun canDropOver(recyclerView: RecyclerView, current: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder) = dragHelper.canDropOverHelper(recyclerView, target)
+        override fun canDropOver(
+                recyclerView: RecyclerView,
+                current: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+        ) = dragHelper.canDropOverHelper(recyclerView, target)
 
-        override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) = dragHelper.onChildDrawHelper(viewHolder, dX, dY, isCurrentlyActive)
+        override fun onChildDraw(
+                canvas: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean,
+        ) = dragHelper.onChildDrawHelper(viewHolder, dX, dY, isCurrentlyActive)
     }
 }

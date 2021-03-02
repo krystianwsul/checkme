@@ -1,6 +1,9 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -18,10 +21,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.NodeContainer
-import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.*
 
 class TaskNode(
         override val indentation: Int,
@@ -34,7 +34,8 @@ class TaskNode(
         MultiLineModelNode,
         InvisibleCheckboxModelNode,
         ThumbnailModelNode,
-        IndentationModelNode {
+        IndentationModelNode,
+        Sortable {
 
     companion object {
 
@@ -92,6 +93,8 @@ class TaskNode(
         )
 
     override val checkBoxInvisible = true
+
+    override val isDraggable = true
 
     fun initialize(
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -170,4 +173,24 @@ class TaskNode(
             taskData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))
+
+    override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
+        return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
+                && treeNode.parent.displayedChildNodes.none { it.isExpanded }
+        ) {
+            groupListFragment.dragHelper.startDrag(viewHolder)
+
+            true
+        } else {
+            false
+        }
+    }
+
+    override fun getOrdinal() = taskData.ordinal
+
+    override fun setOrdinal(ordinal: Double) {
+        taskData.ordinal = ordinal
+
+        DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, taskData.taskKey, ordinal)
+    }
 }

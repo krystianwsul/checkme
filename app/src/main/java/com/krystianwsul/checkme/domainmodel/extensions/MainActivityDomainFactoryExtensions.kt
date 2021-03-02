@@ -129,6 +129,7 @@ fun DomainFactory.getGroupListData(
                     it.getImage(deviceDbInfo),
                     it.isAssignedToMe(now, myUserFactory.user),
                     it.getProjectInfo(now),
+                    it.ordinal,
             )
         }.toList()
     } else {

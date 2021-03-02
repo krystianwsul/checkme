@@ -230,6 +230,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
                     childTask.getImage(deviceDbInfo),
                     childTask.isAssignedToMe(now, myUserFactory.user),
                     childTask.getProjectInfo(now),
+                    childTask.ordinal,
             )
         }
         .toList()

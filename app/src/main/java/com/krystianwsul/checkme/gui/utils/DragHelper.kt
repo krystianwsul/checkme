@@ -77,8 +77,8 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
     abstract fun getTreeViewAdapter(): TreeViewAdapter<AbstractHolder>
 
-    private fun canDropOverHelper(recyclerView: RecyclerView, target: RecyclerView.ViewHolder): Boolean {
-        val treeNodeCollection = (recyclerView.adapter as TreeViewAdapter<*>).getTreeNodeCollection()
+    private fun canDropOverHelper(target: RecyclerView.ViewHolder): Boolean {
+        val treeNodeCollection = getTreeViewAdapter().getTreeNodeCollection()
 
         val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedNodes.size) it - 1 else it }
 
@@ -140,7 +140,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
                 recyclerView: RecyclerView,
                 current: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder,
-        ) = dragHelper.canDropOverHelper(recyclerView, target)
+        ) = dragHelper.canDropOverHelper(target)
 
         override fun onChildDraw(
                 canvas: Canvas,

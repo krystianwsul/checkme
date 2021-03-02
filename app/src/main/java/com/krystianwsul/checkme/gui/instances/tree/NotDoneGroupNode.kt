@@ -212,8 +212,6 @@ class NotDoneGroupNode(
                 )
             }
         } else {
-            val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
-
             val date = exactTimeStamp.date
             val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
 
@@ -266,11 +264,10 @@ class NotDoneGroupNode(
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment
-        val treeNodeCollection = groupAdapter.treeNodeCollection
 
         return if (singleInstance()
                 && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
-                && treeNodeCollection.selectedChildren.isEmpty()
+                && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
                 && treeNode.parent.displayedChildNodes.none { it.isExpanded }
                 && groupListFragment.parameters.draggable
         ) {
@@ -428,11 +425,7 @@ class NotDoneGroupNode(
         singleInstanceData.let {
             it.ordinal = ordinal
 
-            DomainFactory.instance.setOrdinal(
-                groupListFragment.parameters.dataId,
-                it.taskKey,
-                ordinal
-            )
+            DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
         }
     }
 
@@ -485,7 +478,8 @@ class NotDoneGroupNode(
             CheckableModelNode,
             MultiLineModelNode,
             ThumbnailModelNode,
-            IndentationModelNode {
+            IndentationModelNode,
+            Sortable {
 
         companion object {
 
@@ -545,6 +539,8 @@ class NotDoneGroupNode(
                     thumbnail != null,
                     true
             )
+
+        override val isDraggable = true
 
         fun initialize(
                 expandedInstances: Map<InstanceKey, Boolean>,
@@ -650,11 +646,17 @@ class NotDoneGroupNode(
                 }
             }
 
-        override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+        override fun onClick(holder: AbstractHolder) =
+                groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(
+                        groupListFragment.activity,
+                        instanceData.instanceKey,
+                ))
 
-        override fun compareTo(other: ModelNode<AbstractHolder>) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
+        override fun compareTo(other: ModelNode<AbstractHolder>) =
+                instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
-        fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
+        fun removeFromParent(placeholder: TreeViewAdapter.Placeholder) =
+                parentNotDoneGroupNode.remove(this, placeholder)
 
         override val id = Id(instanceData.instanceKey)
 
@@ -668,6 +670,31 @@ class NotDoneGroupNode(
                 instanceData.matchesFilterParams(filterParams)
 
         override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
+
+        override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
+            val groupListFragment = groupAdapter.groupListFragment
+
+            return if (groupListFragment.parameters.groupListDataWrapper.taskEditable != false
+                    && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
+                    && treeNode.parent.displayedChildNodes.none { it.isExpanded }
+            ) {
+                groupListFragment.dragHelper.startDrag(viewHolder)
+
+                true
+            } else {
+                false
+            }
+        }
+
+        override fun getOrdinal() = instanceData.ordinal
+
+        override fun setOrdinal(ordinal: Double) {
+            instanceData.let {
+                it.ordinal = ordinal
+
+                DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+            }
+        }
 
         data class Id(val instanceKey: InstanceKey)
     }

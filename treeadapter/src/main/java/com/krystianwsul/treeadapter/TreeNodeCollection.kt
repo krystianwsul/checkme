@@ -160,19 +160,21 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     }
 
     fun setNewItemPosition(position: Int) {
-        val visibleNodes = displayedNodes
+        val allDisplayedNodes = displayedNodes
+        val adjustedPositionInAllNodes = min(allDisplayedNodes.size - 1, position) // padding
+        val currentTreeNode = allDisplayedNodes[adjustedPositionInAllNodes]
+        val currentNode = currentTreeNode.modelNode
 
-        val adjustedPosition = min(visibleNodes.size - 1, position) // padding
+        val displayedNodesInParent = currentTreeNode.parent.displayedChildNodes
+        val currentPositionInParent = displayedNodesInParent.indexOf(currentTreeNode)
 
-        val previousNode = adjustedPosition.takeIf { it > 0 }
-                ?.let { visibleNodes[adjustedPosition - 1] }
+        val previousNode = currentPositionInParent.takeIf { it > 0 }
+                ?.let { displayedNodesInParent[currentPositionInParent - 1] }
                 ?.modelNode
                 as? Sortable
 
-        val currentNode = visibleNodes[adjustedPosition].modelNode as Sortable
-
-        val nextNode = adjustedPosition.takeIf { it < visibleNodes.size - 1 }
-                ?.let { visibleNodes[adjustedPosition + 1] }
+        val nextNode = currentPositionInParent.takeIf { it < displayedNodesInParent.size - 1 }
+                ?.let { displayedNodesInParent[currentPositionInParent + 1] }
                 ?.modelNode
                 as? Sortable
 
@@ -196,7 +198,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
         printOrdinals("setNewItemPosition before")
 
-        currentNode.setOrdinal((previousOrdinal + nextOrdinal) / 2)
+        (currentNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
 
         printOrdinals("setNewItemPosition after")
     }

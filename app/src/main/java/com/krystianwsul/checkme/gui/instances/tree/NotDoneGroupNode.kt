@@ -269,7 +269,7 @@ class NotDoneGroupNode(
                 && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
                 && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
                 && treeNode.parent.displayedChildNodes.none { it.isExpanded }
-                && groupListFragment.parameters.draggable
+                && (groupListFragment.parameters.draggable || indentation != 0)
         ) {
             groupListFragment.dragHelper.startDrag(viewHolder)
 

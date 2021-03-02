@@ -76,7 +76,9 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
                 ?.flatMap { it.displayedNodes }
                 ?: throw SetTreeNodesNotCalledException()
 
-    override val displayableNodes: List<TreeNode<T>>
+    override val displayedChildNodes get() = displayedNodes
+
+    override val displayableNodes
         get() = treeNodesRelay.value
                 ?.flatMap { it.displayableNodes }
                 ?: throw SetTreeNodesNotCalledException()
@@ -122,27 +124,43 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     override val indentation = 0
 
-    fun moveItem(fromPosition: Int, toPosition: Int, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+    fun moveItem(fromPosition: Int, toPosition: Int, placeholder: TreeViewAdapter.Placeholder) {
+        val fromTreeNode = getNode(fromPosition, PositionMode.DISPLAYED)
+        val toTreeNode = getNode(toPosition, PositionMode.DISPLAYED)
+
+        listOf(fromTreeNode, toTreeNode).map { it.parent }
+                .distinct()
+                .single()
+                .swapNodePositions(fromTreeNode, toTreeNode, placeholder)
+    }
+
+    override fun swapNodePositions(
+            fromTreeNode: TreeNode<T>,
+            toTreeNode: TreeNode<T>,
+            placeholder: TreeViewAdapter.Placeholder,
+    ) {
+        check(treeViewAdapter.locker == null)
+
         val treeNodes = treeNodesRelay.value
                 ?.toMutableList()
                 ?: throw SetTreeNodesNotCalledException()
 
-        val treeNode = treeNodes[fromPosition]
+        val fromPosition = treeNodes.indexOf(fromTreeNode)
+        check(fromPosition >= 0)
+
+        val toPosition = treeNodes.indexOf(toTreeNode)
+        check(toPosition >= 0)
 
         treeNodes.apply {
             removeAt(fromPosition)
-            add(toPosition, treeNode)
+            add(toPosition, fromTreeNode)
         }
-
-        check(treeViewAdapter.locker == null)
 
         treeNodesRelay.accept(treeNodes)
     }
 
     fun setNewItemPosition(position: Int) {
-        val treeNodes = treeNodesRelay.value ?: throw SetTreeNodesNotCalledException()
-
-        val visibleNodes = treeNodes.filter { it.canBeShown() }
+        val visibleNodes = displayedNodes
 
         val adjustedPosition = min(visibleNodes.size - 1, position) // padding
 

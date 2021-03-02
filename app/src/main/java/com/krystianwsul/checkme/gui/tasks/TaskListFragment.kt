@@ -805,8 +805,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             return if (taskListFragment.rootTaskData != null
                     && treeNodeCollection.selectedChildren.isEmpty()
-                    && indentation == 0
-                    && treeNodeCollection.nodes.none { it.isExpanded }
+                    && treeNode.parent.displayedChildNodes.none { it.isExpanded }
             ) {
                 taskListFragment.dragHelper.startDrag(viewHolder)
 

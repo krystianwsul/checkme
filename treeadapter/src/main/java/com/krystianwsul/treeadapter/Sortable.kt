@@ -2,7 +2,7 @@ package com.krystianwsul.treeadapter
 
 interface Sortable {
 
-    fun getOrdinal(): Double = throw UnsupportedOperationException()
+    fun getOrdinal(): Double
 
-    fun setOrdinal(ordinal: Double): Unit = throw UnsupportedOperationException()
+    fun setOrdinal(ordinal: Double)
 }

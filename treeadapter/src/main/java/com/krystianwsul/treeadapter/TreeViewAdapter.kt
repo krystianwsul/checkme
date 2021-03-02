@@ -162,9 +162,7 @@ class TreeViewAdapter<T : TreeHolder>(
                 if (position == 0) treeModelAdapter.scrollToTop()
             }
 
-            override fun onRemoved(position: Int, count: Int) {
-                notifyItemRangeRemoved(position, count)
-            }
+            override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
 
             override fun onMoved(fromPosition: Int, toPosition: Int) {
                 notifyItemMoved(fromPosition, toPosition)
@@ -172,9 +170,8 @@ class TreeViewAdapter<T : TreeHolder>(
                 if (toPosition == 0) treeModelAdapter.scrollToTop()
             }
 
-            override fun onChanged(position: Int, count: Int, payload: Any?) {
-                notifyItemRangeChanged(position, count, payload)
-            }
+            override fun onChanged(position: Int, count: Int, payload: Any?) =
+                    notifyItemRangeChanged(position, count, payload)
         })
 
         updates.accept(Unit)
@@ -284,12 +281,8 @@ class TreeViewAdapter<T : TreeHolder>(
             treeNodeCollection!!.getItemViewType(position)
     }
 
-    fun moveItem(
-            from: Int,
-            to: Int,
-            placeholder: Placeholder,
-    ) = treeNodeCollection?.moveItem(from, to, placeholder)
-            ?: throw SetTreeNodeCollectionNotCalledException()
+    fun moveItem(from: Int, to: Int, placeholder: Placeholder) =
+            treeNodeCollection?.moveItem(from, to, placeholder) ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun setNewItemPosition(position: Int) = treeNodeCollection?.setNewItemPosition(position)
             ?: throw SetTreeNodeCollectionNotCalledException()

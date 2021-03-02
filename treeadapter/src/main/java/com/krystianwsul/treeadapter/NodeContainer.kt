@@ -11,7 +11,7 @@ interface NodeContainer<T : TreeHolder> {
     val indentation: Int
 
     val displayedNodes: List<TreeNode<T>>
-
+    val displayedChildNodes: List<TreeNode<T>>
     val displayableNodes: List<TreeNode<T>>
 
     val id: Any
@@ -25,4 +25,6 @@ interface NodeContainer<T : TreeHolder> {
     fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 
     fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
+
+    fun swapNodePositions(fromTreeNode: TreeNode<T>, toTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 }

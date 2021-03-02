@@ -275,7 +275,7 @@ class TreeNode<T : TreeHolder>(
             return listOf(this) + childTreeNodes.flatMap { it.displayableNodes }
         }
 
-    private val displayedChildNodes: List<TreeNode<T>>
+    override val displayedChildNodes: List<TreeNode<T>>
         get() {
             check(canBeShown())
 
@@ -447,6 +447,25 @@ class TreeNode<T : TreeHolder>(
 
     private fun checkChildTreeNodesSet() {
         if (!this::childTreeNodes.isInitialized) throw SetChildTreeNodesNotCalledException()
+    }
+
+    override fun swapNodePositions(
+            fromTreeNode: TreeNode<T>,
+            toTreeNode: TreeNode<T>,
+            placeholder: TreeViewAdapter.Placeholder,
+    ) {
+        check(treeViewAdapter.locker == null)
+
+        val fromPosition = childTreeNodes.indexOf(fromTreeNode)
+        check(fromPosition >= 0)
+
+        val toPosition = childTreeNodes.indexOf(toTreeNode)
+        check(toPosition >= 0)
+
+        childTreeNodes.apply {
+            removeAt(fromPosition)
+            add(toPosition, fromTreeNode)
+        }
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

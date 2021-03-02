@@ -53,9 +53,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
-        getTreeViewAdapter().updateDisplayedNodes {
-            getTreeViewAdapter().moveItem(from, endPosition!!, it)
-        }
+        getTreeViewAdapter().updateDisplayedNodes { getTreeViewAdapter().moveItem(from, endPosition!!, it) }
 
         return true
     }
@@ -84,7 +82,12 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedNodes.size) it - 1 else it }
 
-        return treeNodeCollection.getNode(position).modelNode is Sortable
+        val thisTreeNode = treeNodeCollection.getNode(startPosition!!)
+        val otherTreeNode = treeNodeCollection.getNode(position)
+
+        if (otherTreeNode.modelNode !is Sortable) return false
+
+        return thisTreeNode.parent == otherTreeNode.parent
     }
 
     private fun onChildDrawHelper(viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, isCurrentlyActive: Boolean) {

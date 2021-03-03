@@ -44,6 +44,10 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         super.startDrag(viewHolder)
 
+        fixDrag()
+    }
+
+    private fun fixDrag() {
         /**
          * This fixes a glitch in which moving certain children prevents the next drag&drop from working (viewHolder
          * detaches and moves, but never calls canDropOver)
@@ -63,6 +67,8 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
         getTreeViewAdapter().updateDisplayedNodes { getTreeViewAdapter().moveItem(from, endPosition!!, it) }
+
+        fixDrag()
 
         return true
     }

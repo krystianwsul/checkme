@@ -427,10 +427,13 @@ class TreeNode<T : TreeHolder>(
         childTreeNodes.forEach { it.normalize() }
     }
 
-    fun collapseAll() {
-        childTreeNodes.forEach { it.collapseAll() }
+    fun resetExpansion(onlyProgrammatic: Boolean, placeholder: TreeViewAdapter.Placeholder) {
+        childTreeNodes.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
 
-        expansionState.programmatic = false
+        if (onlyProgrammatic)
+            expansionState.programmatic = false
+        else
+            expansionState = ExpansionState()
     }
 
     fun expandMatching(query: String) {

@@ -111,7 +111,7 @@ class TreeViewAdapter<T : TreeHolder>(
                 (newFilterCriteria.expandMatches || oldFilterCriteria.expandMatches)
         ) {
             treeNodeCollection!!.apply {
-                collapseAll()
+                resetExpansion(true, Placeholder.instance)
 
                 if (filterCriteria.expandMatches) expandMatching(filterCriteria.query)
             }
@@ -331,6 +331,10 @@ class TreeViewAdapter<T : TreeHolder>(
 
     fun getTreeNodeCollection() = treeNodeCollection
             ?: throw SetTreeNodeCollectionNotCalledException()
+
+    fun clearExpansionStates() = updateDisplayedNodes {
+        treeNodeCollection?.resetExpansion(false, it) ?: throw SetTreeNodeCollectionNotCalledException()
+    }
 
     class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
 

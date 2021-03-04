@@ -292,6 +292,8 @@ class MainActivity :
 
                     animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
+                    binding.mainSearchGroupListFragment.clearExpansionStates()
+
                     clearSearch()
                 }
     }
@@ -1053,10 +1055,13 @@ class MainActivity :
     }
 
     override fun onBackPressed() {
-        if (binding.mainSearchInclude.toolbar.visibility == View.VISIBLE)
+        if (binding.mainSearchInclude.toolbar.visibility == View.VISIBLE) {
+            check(tabSearchStateRelay.value!!.isSearching)
+
             setTabSearchState(tabSearchStateRelay.value!!.closeSearch())
-        else
+        } else {
             super.onBackPressed()
+        }
     }
 
     private fun onDateSwitch() {

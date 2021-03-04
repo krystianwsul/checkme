@@ -209,8 +209,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             ?.forEach { it.normalize() }
             ?: throw SetTreeNodesNotCalledException()
 
-    fun collapseAll() {
-        treeNodesRelay.value!!.forEach { it.collapseAll() }
+    fun resetExpansion(onlyProgrammatic: Boolean, placeholder: TreeViewAdapter.Placeholder) {
+        treeNodesRelay.value!!.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
     }
 
     fun expandMatching(query: String) {

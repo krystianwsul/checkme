@@ -213,8 +213,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         treeNodesRelay.value!!.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
     }
 
-    fun expandMatching(query: String) {
-        treeNodesRelay.value!!.forEach { it.expandMatching(query) }
+    fun expandMatching(query: String, force: Boolean) {
+        treeNodesRelay.value!!.forEach { it.expandMatching(query, force) }
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

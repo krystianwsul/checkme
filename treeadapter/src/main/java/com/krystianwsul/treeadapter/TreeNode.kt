@@ -348,7 +348,7 @@ class TreeNode<T : TreeHolder>(
     private fun childHierarchyMatchesQuery(query: String): Boolean =
             childTreeNodes.any { it.matchesQuery(query) || it.childHierarchyMatchesQuery(query) }
 
-    private fun visible(): Boolean {
+    fun visible(): Boolean {
         checkChildTreeNodesSet()
 
         if (!canBeShown()) return false
@@ -436,7 +436,7 @@ class TreeNode<T : TreeHolder>(
             expansionState = ExpansionState()
     }
 
-    fun expandMatching(query: String) {
+    fun expandMatching(query: String, force: Boolean) {
         checkChildTreeNodesSet()
 
         /**
@@ -446,9 +446,9 @@ class TreeNode<T : TreeHolder>(
         if (!expandCanBeVisible) return
         if (childTreeNodes.none { canBeShown() }) return
 
-        if (childHierarchyMatchesQuery(query) && modelNode.expandOnMatch) expansionState.programmatic = true
+        if ((modelNode.expandOnMatch || force) && childHierarchyMatchesQuery(query)) expansionState.programmatic = true
 
-        childTreeNodes.forEach { it.expandMatching(query) }
+        childTreeNodes.forEach { it.expandMatching(query, false) }
     }
 
     private fun checkChildTreeNodesSet() {

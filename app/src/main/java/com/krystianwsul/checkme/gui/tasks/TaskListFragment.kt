@@ -381,9 +381,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         AdapterState(
                 selectedNodes.mapNotNull { (it.modelNode as? TaskNode)?.childTaskData?.taskKey }.toSet(),
-                taskAdapter.expandedTaskKeys,
+                taskAdapter.taskExpansionStates,
                 selectedNodes.mapNotNull { (it.modelNode as? ProjectNode)?.projectData?.projectKey }.toSet(),
-                taskAdapter.expandedProjectKeys,
+                taskAdapter.projectExpansionStates,
         )
     }
 
@@ -483,8 +483,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val taskAdapter = this
 
-        val expandedTaskKeys get() = nodes.flatMap { it.expandedTaskKeys }.toSet()
-        val expandedProjectKeys get() = nodes.flatMap { it.expandedProjectKeys }.toSet()
+        val taskExpansionStates get() = nodes.map { it.taskExpansionStates }.flatten()
+        val projectExpansionStates get() = nodes.map { it.projectExpansionStates }.flatten()
 
         fun initialize(
                 taskData: TaskData,
@@ -582,8 +582,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         protected val taskListFragment get() = taskAdapter.taskListFragment
 
-        abstract val expandedTaskKeys: Set<TaskKey>
-        abstract val expandedProjectKeys: Set<ProjectKey<*>>
+        abstract val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
+        abstract val projectExpansionStates: Map<ProjectKey<*>, TreeNode.ExpansionState>
 
         override val delegates by lazy {
             listOf(
@@ -636,19 +636,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val indentation = 0
 
-        override val expandedTaskKeys: Set<TaskKey>
-            get() {
-                if (!treeNode.isExpanded) return setOf()
-
-                return taskNodes.flatMap { it.expandedTaskKeys }.toSet()
-            }
-
-        override val expandedProjectKeys: Set<ProjectKey<*>>
-            get() {
-                if (!treeNode.isExpanded) return setOf()
-
-                return setOf(projectData.projectKey)
-            }
+        override val taskExpansionStates get() = taskNodes.map { it.taskExpansionStates }.flatten()
+        override val projectExpansionStates get() = mapOf(projectData.projectKey to treeNode.expansionState)
 
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
@@ -674,7 +663,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     this,
                     nodeContainer,
                     adapterState.selectedProjectKeys.contains(projectData.projectKey),
-                    adapterState.expandedProjectKeys.contains(projectData.projectKey),
+                    adapterState.projectExpansionStates[projectData.projectKey],
             )
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
@@ -712,14 +701,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             Sortable,
             ThumbnailModelNode {
 
-        override val expandedTaskKeys: Set<TaskKey>
-            get() {
-                if (!treeNode.isExpanded) return setOf()
+        override val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
+            get() = mapOf(childTaskData.taskKey to treeNode.expansionState) +
+                    taskNodes.map { it.taskExpansionStates }.flatten()
 
-                return setOf(childTaskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
-            }
-
-        override val expandedProjectKeys = setOf<ProjectKey<*>>()
+        override val projectExpansionStates = emptyMap<ProjectKey<*>, TreeNode.ExpansionState>()
 
         override val delegates by lazy {
             super.delegates + listOf(
@@ -763,7 +749,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     this,
                     nodeContainer,
                     adapterState.selectedTaskKeys.contains(childTaskData.taskKey),
-                    adapterState.expandedTaskKeys.contains(childTaskData.taskKey)
+                    adapterState.taskExpansionStates[childTaskData.taskKey],
             )
 
             val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
@@ -945,12 +931,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     @Parcelize
     private data class AdapterState(
             val selectedTaskKeys: Set<TaskKey>,
-            val expandedTaskKeys: Set<TaskKey>,
+            val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             val selectedProjectKeys: Set<ProjectKey<*>>,
-            val expandedProjectKeys: Set<ProjectKey<*>>,
+            val projectExpansionStates: Map<ProjectKey<*>, TreeNode.ExpansionState>,
     ) : Parcelable {
 
-        constructor() : this(setOf(), setOf(), setOf(), setOf())
+        constructor() : this(setOf(), mapOf(), setOf(), mapOf())
     }
 
     sealed class Parameters {

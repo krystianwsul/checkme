@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
+import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 
@@ -68,11 +69,9 @@ class TaskNode(
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
-    val expandedTaskKeys: List<TaskKey>
-        get() = if (expanded())
-            listOf(taskData.taskKey) + taskNodes.flatMap { it.expandedTaskKeys }
-        else
-            listOf()
+    val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
+        get() =
+            mapOf(taskData.taskKey to treeNode.expansionState) + taskNodes.map { it.taskExpansionStates }.flatten()
 
     override val delegates by lazy {
         listOf(
@@ -98,14 +97,14 @@ class TaskNode(
 
     fun initialize(
             nodeContainer: NodeContainer<AbstractHolder>,
-            expandedTaskKeys: List<TaskKey>,
+            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             selectedTaskKeys: List<TaskKey>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
                 this,
                 nodeContainer,
                 selectedTaskKeys.contains(taskData.taskKey),
-                expandedTaskKeys.contains(taskData.taskKey),
+                taskExpansionStates[taskData.taskKey],
         )
 
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
@@ -119,7 +118,7 @@ class TaskNode(
             ).initialize(nodeContainer)
         }
 
-        treeNodes += taskData.children.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) }
+        treeNodes += taskData.children.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) }
 
         treeNode.setChildTreeNodes(treeNodes)
 
@@ -128,12 +127,12 @@ class TaskNode(
 
     private fun newChildTreeNode(
             taskData: GroupListDataWrapper.TaskData,
-            expandedTaskKeys: List<TaskKey>,
+            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             selectedTaskKeys: List<TaskKey>,
     ) = TaskNode(indentation + 1, taskData, this, this).let {
         taskNodes.add(it)
 
-        it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
+        it.initialize(treeNode, taskExpansionStates, selectedTaskKeys)
     }
 
     override val groupAdapter by lazy { taskParent.groupAdapter }

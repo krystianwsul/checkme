@@ -250,7 +250,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                                         nodeCollection.notDoneGroupCollection.remove(it, placeholder)
 
-                                        if (!it.expanded()) {
+                                        if (!it.treeNode.isExpanded) {
                                             it.instanceDatas.forEach {
                                                 it.done = done
 
@@ -993,14 +993,12 @@ class GroupListFragment @JvmOverloads constructor(
 
         val groupListState: GroupListState
             get() {
-                val expandedGroups = nodeCollection.expandedGroups
+                val groupExpansionStates = nodeCollection.groupExpansionStates
+                val instanceExpansionStates = nodeCollection.instanceExpansionStates
 
-                val expandedInstances = mutableMapOf<InstanceKey, Boolean>()
-                nodeCollection.addExpandedInstances(expandedInstances)
-
-                val doneExpanded = nodeCollection.doneExpanded
-                val unscheduledExpanded = nodeCollection.unscheduledExpanded
-                val expandedTaskKeys = nodeCollection.expandedTaskKeys
+                val doneExpanded = nodeCollection.doneExpansionState
+                val unscheduledExpansionState = nodeCollection.unscheduledExpansionState
+                val taskExpansionStates = nodeCollection.taskExpansionStates
 
                 val selectedNodes = treeViewAdapter.selectedNodes
                 val selectedDatas = nodesToSelectedDatas(selectedNodes, false)
@@ -1013,10 +1011,10 @@ class GroupListFragment @JvmOverloads constructor(
 
                 return GroupListState(
                         doneExpanded,
-                        expandedGroups,
-                        expandedInstances,
-                        unscheduledExpanded,
-                        expandedTaskKeys,
+                        groupExpansionStates,
+                        instanceExpansionStates,
+                        unscheduledExpansionState,
+                        taskExpansionStates,
                         selectedInstances,
                         selectedGroups,
                         selectedTasks
@@ -1060,14 +1058,14 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                     instanceDatas,
-                    groupListState.expandedGroups,
-                    groupListState.expandedInstances,
-                    groupListState.doneExpanded,
+                    groupListState.groupExpansionStates,
+                    groupListState.instanceExpansionStates,
+                    groupListState.doneExpansionState,
                     groupListState.selectedInstances,
                     groupListState.selectedGroups,
                     taskDatas,
-                    groupListState.unscheduledExpanded,
-                    groupListState.expandedTaskKeys,
+                    groupListState.unscheduledExpansionState,
+                    groupListState.taskExpansionStates,
                     groupListState.selectedTaskKeys,
                     imageState?.let {
                         ImageNode.ImageData(

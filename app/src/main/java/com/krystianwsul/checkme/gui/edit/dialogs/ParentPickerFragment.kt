@@ -23,6 +23,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
+import com.krystianwsul.checkme.utils.getMap
+import com.krystianwsul.checkme.utils.putMap
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -57,7 +59,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private val delegateRelay = BehaviorRelay.create<Delegate>()
 
     private var treeViewAdapter: TreeViewAdapter<AbstractHolder>? = null
-    private var expandedParentKeys: List<Parcelable>? = null
+    private var expansionStates: Map<Parcelable, TreeNode.ExpansionState>? = null
 
     private var filterCriteria: FilterCriteria = FilterCriteria.Full()
 
@@ -68,8 +70,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         savedInstanceState?.apply {
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
-                expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                check(expandedParentKeys!!.isNotEmpty())
+                expansionStates = getMap(EXPANDED_TASK_KEYS_KEY)!!
+                check(expansionStates!!.isNotEmpty())
             }
 
             filterCriteria = getParcelable(QUERY_KEY)!!
@@ -128,14 +130,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
         check(activity != null)
 
         if (treeViewAdapter != null) {
-            val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
+            val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expansionStates.toMap()
 
-            expandedParentKeys = if (expanded.isEmpty()) null else expanded
+            expansionStates = if (expanded.isEmpty()) null else expanded
 
             treeViewAdapter!!.updateDisplayedNodes { placeholder ->
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
                         adapterData.entryDatas,
-                        expandedParentKeys,
+                        expansionStates,
                         adapterData.showProgress
                 )
 
@@ -145,7 +147,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             adapterData.filterCriteria?.let { filterCriteria = it }
 
             val taskAdapter = TaskAdapter()
-            taskAdapter.initialize(adapterData.entryDatas, expandedParentKeys, adapterData.showProgress)
+            taskAdapter.initialize(adapterData.entryDatas, expansionStates, adapterData.showProgress)
             treeViewAdapter = taskAdapter.treeViewAdapter
 
             binding.parentPickerRecycler.apply {
@@ -180,10 +182,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onSaveInstanceState(outState)
 
         if (treeViewAdapter != null) {
-            val expandedParentKeys = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
+            val expansionStates = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expansionStates.toMap()
 
-            if (expandedParentKeys.isNotEmpty())
-                outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedParentKeys))
+            if (expansionStates.isNotEmpty()) outState.putMap(EXPANDED_TASK_KEYS_KEY, expansionStates)
         }
 
         outState.putParcelable(QUERY_KEY, filterCriteria)
@@ -215,14 +216,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override val taskAdapter = this
 
-        val expandedParentKeys get() = taskWrappers.flatMap { it.expandedParentKeys }
+        val expansionStates get() = taskWrappers.flatMap { it.expansionStates }
 
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
 
         fun initialize(
                 entryDatas: Collection<EntryData>,
-                expandedParentKeys: List<Parcelable>?,
+                expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
                 showProgress: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -237,7 +238,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             for (parentTreeData in entryDatas) {
                 val taskWrapper = TaskWrapper(0, this, parentTreeData, null)
 
-                treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedParentKeys))
+                treeNodes.add(taskWrapper.initialize(treeNodeCollection, expansionStates))
 
                 taskWrappers.add(taskWrapper)
             }
@@ -270,20 +271,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val taskAdapter get() = taskParent.taskAdapter
 
-            val expandedParentKeys: List<Parcelable>
-                get() {
-                    val expandedParentKeys = ArrayList<Parcelable>()
-
-                    val treeNode = this.treeNode
-
-                    if (treeNode.isExpanded) {
-                        expandedParentKeys.add(entryData.entryKey)
-
-                        expandedParentKeys.addAll(taskWrappers.flatMap { it.expandedParentKeys })
-                    }
-
-                    return expandedParentKeys
-                }
+            val expansionStates: List<Pair<Parcelable, TreeNode.ExpansionState>>
+                get() = listOf(entryData.entryKey to treeNode.expansionState) +
+                        taskWrappers.flatMap { it.expansionStates }
 
             override val delegates by lazy {
                 listOf(
@@ -304,12 +294,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             fun initialize(
                     nodeContainer: NodeContainer<AbstractHolder>,
-                    expandedParentKeys: List<Parcelable>?,
+                    expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
             ): TreeNode<AbstractHolder> {
                 treeNode = TreeNode(
                         this,
                         nodeContainer,
-                        expandInitiallyIfHasChildren = expandedParentKeys?.contains(entryData.entryKey) == true
+                        initialExpansionState = expansionStates?.get(entryData.entryKey)
                 )
 
                 taskWrappers = ArrayList()
@@ -319,7 +309,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 for (parentTreeData in entryData.childEntryDatas) {
                     val taskWrapper = TaskWrapper(indentation + 1, this, parentTreeData, this)
 
-                    treeNodes.add(taskWrapper.initialize(treeNode, expandedParentKeys))
+                    treeNodes.add(taskWrapper.initialize(treeNode, expansionStates))
 
                     taskWrappers.add(taskWrapper)
                 }

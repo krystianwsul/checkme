@@ -29,26 +29,26 @@ class NodeCollection(
 
     private var unscheduledNode: UnscheduledNode? = null
 
-    val expandedGroups: List<TimeStamp> get() = notDoneGroupCollection.expandedGroups
+    val groupExpansionStates get() = notDoneGroupCollection.groupExpansionStates
 
-    val unscheduledExpanded get() = unscheduledNode?.expanded() ?: false
+    val unscheduledExpansionState get() = unscheduledNode?.expansionState
 
-    val expandedTaskKeys: List<TaskKey> get() = unscheduledNode?.expandedTaskKeys ?: listOf()
+    val taskExpansionStates get() = unscheduledNode?.taskExpansionStates.orEmpty()
 
-    val doneExpanded get() = dividerNode.expanded()
+    val doneExpansionState get() = dividerNode.expansionState
 
     val searchResults by lazy { groupAdapter.groupListFragment.searchResults }
 
     fun initialize(
             instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
-            expandedGroups: List<TimeStamp>,
-            expandedInstances: Map<InstanceKey, Boolean>,
-            doneExpanded: Boolean,
+            expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+            doneExpansionState: TreeNode.ExpansionState?,
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
             taskDatas: List<GroupListDataWrapper.TaskData>,
-            unscheduledExpanded: Boolean,
-            expandedTaskKeys: List<TaskKey>,
+            unscheduledExpansionState: TreeNode.ExpansionState?,
+            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             selectedTaskKeys: List<TaskKey>,
             imageData: ImageNode.ImageData?,
     ): List<TreeNode<AbstractHolder>> {
@@ -91,10 +91,10 @@ class NodeCollection(
                 unscheduledNode = UnscheduledNode(this@NodeCollection, searchResults)
 
                 add(unscheduledNode!!.initialize(
-                        unscheduledExpanded,
+                        unscheduledExpansionState,
                         nodeContainer,
                         taskDatas,
-                        expandedTaskKeys,
+                        taskExpansionStates,
                         selectedTaskKeys
                 ))
             }
@@ -102,7 +102,7 @@ class NodeCollection(
             dividerNode = DividerNode(indentation, this@NodeCollection, parentNode)
 
             add(dividerNode.initialize(
-                    doneExpanded && doneInstanceDatas.isNotEmpty(),
+                    doneExpansionState,
                     nodeContainer,
                     doneInstanceDatas,
                     expandedInstances,
@@ -111,8 +111,7 @@ class NodeCollection(
         }
     }
 
-    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
-        notDoneGroupCollection.addExpandedInstances(expandedInstances)
-        dividerNode.addExpandedInstances(expandedInstances)
-    }
+    val instanceExpansionStates
+        get() =
+            notDoneGroupCollection.instanceExpansionStates + dividerNode.instanceExpansionStates
 }

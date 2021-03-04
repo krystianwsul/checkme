@@ -12,3 +12,5 @@ fun View.measureVisibleHeight(visibleWidth: Int): Int {
 
     return measuredHeight
 }
+
+fun <T, U> List<Map<T, U>>.flatten(): Map<T, U> = flatMap { it.entries.map { it.key to it.value } }.toMap()

@@ -1,18 +1,20 @@
 package com.krystianwsul.treeadapter
 
+import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.parcelize.Parcelize
 import java.util.*
-import kotlin.properties.Delegates.notNull
 
 class TreeNode<T : TreeHolder>(
         val modelNode: ModelNode<T>,
         val parent: NodeContainer<T>,
         private var selected: Boolean = false,
-        private val expandInitiallyIfHasChildren: Boolean = false,
+        private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
-    private var expanded by notNull<Boolean>()
-    override val isExpanded get() = expanded
+    lateinit var expansionState: ExpansionState
+        private set
+    override val isExpanded get() = expansionState.isExpanded
 
     private lateinit var childTreeNodes: MutableList<TreeNode<T>>
 
@@ -99,7 +101,7 @@ class TreeNode<T : TreeHolder>(
         if (childTreeNodes.isEmpty()) throw EmptyExpandedException()
 
         treeViewAdapter.updateDisplayedNodes { placeholder ->
-            expanded = if (expanded) { // collapsing
+            expansionState.user = if (isExpanded) { // collapsing
                 childTreeNodes.forEach { it.deselectRecursive(placeholder) }
 
                 false
@@ -141,7 +143,7 @@ class TreeNode<T : TreeHolder>(
         // todo add delegate with final initialized state, move majority of function calls into it
         if (this::childTreeNodes.isInitialized) throw SetChildTreeNodesCalledTwiceException()
 
-        expanded = expandInitiallyIfHasChildren && childTreeNodes.isNotEmpty()
+        expansionState = initialExpansionState?.takeIf { childTreeNodes.isNotEmpty() } ?: ExpansionState()
 
         this.childTreeNodes = childTreeNodes.sorted().toMutableList()
     }
@@ -164,14 +166,12 @@ class TreeNode<T : TreeHolder>(
     }
 
     private fun updateSelect(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean) {
-        if (selected) {
+        if (selected)
             incrementSelected(placeholder)
-        } else {
+        else
             decrementSelected(placeholder)
-        }
 
-        if (recursive && expanded)
-            propagateSelection(selected, placeholder)
+        if (recursive && isExpanded) propagateSelection(selected, placeholder)
 
         if (recursive && !selected && modelNode.deselectParent) {
             (parent as TreeNode).takeIf { it.selected }?.toggleSelected(placeholder, false)
@@ -196,7 +196,7 @@ class TreeNode<T : TreeHolder>(
 
         if (position == 0) return this
 
-        check(expanded)
+        check(isExpanded)
 
         var currPosition = position - 1
 
@@ -215,7 +215,7 @@ class TreeNode<T : TreeHolder>(
         checkChildTreeNodesSet()
 
         if (treeNode === this) return 0
-        if (!expanded) return -1
+        if (!isExpanded) return -1
 
         var offset = 1
         for (childTreeNode in positionMode.getDirectChildNodes(this)) {
@@ -242,7 +242,7 @@ class TreeNode<T : TreeHolder>(
         val selected = selectedNodes
 
         if (selected.isNotEmpty()) {
-            check(expanded)
+            check(isExpanded)
 
             selected.forEach { it.unselect(placeholder) }
         }
@@ -282,7 +282,7 @@ class TreeNode<T : TreeHolder>(
         get() {
             check(canBeShown())
 
-            return if (expanded)
+            return if (isExpanded)
                 childTreeNodes.flatMap { it.displayedNodes }
             else
                 listOf()
@@ -372,7 +372,7 @@ class TreeNode<T : TreeHolder>(
 
         if (!visible) return
 
-        if (expanded && 0 == childTreeNodes.map { it.displayedNodes.size }.sum()) expanded = false
+        if (isExpanded && 0 == childTreeNodes.map { it.displayedNodes.size }.sum()) expansionState = ExpansionState()
     }
 
     fun removeAll(placeholder: TreeViewAdapter.Placeholder) {
@@ -430,7 +430,7 @@ class TreeNode<T : TreeHolder>(
     fun collapseAll() {
         childTreeNodes.forEach { it.collapseAll() }
 
-        if (expanded) expanded = false
+        expansionState.programmatic = false
     }
 
     fun expandMatching(query: String) {
@@ -443,7 +443,7 @@ class TreeNode<T : TreeHolder>(
         if (!expandCanBeVisible) return
         if (childTreeNodes.none { canBeShown() }) return
 
-        if (childHierarchyMatchesQuery(query) && modelNode.expandOnMatch) expanded = true
+        if (childHierarchyMatchesQuery(query) && modelNode.expandOnMatch) expansionState.programmatic = true
 
         childTreeNodes.forEach { it.expandMatching(query) }
     }
@@ -510,4 +510,10 @@ class TreeNode<T : TreeHolder>(
     object PayloadSeparator
 
     override val id get() = modelNode.id
+
+    @Parcelize
+    class ExpansionState(var programmatic: Boolean = false, var user: Boolean? = null) : Parcelable {
+
+        val isExpanded get() = user ?: programmatic
+    }
 }

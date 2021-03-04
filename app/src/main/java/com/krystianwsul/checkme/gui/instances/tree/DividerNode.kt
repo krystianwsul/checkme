@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
+import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -47,15 +48,15 @@ class DividerNode(
     override val disableRipple = true
 
     fun initialize(
-            expanded: Boolean,
+            initialExpansionState: TreeNode.ExpansionState?,
             nodeContainer: NodeContainer<AbstractHolder>,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-            expandedInstances: Map<InstanceKey, Boolean>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
             selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
-        check(!expanded || doneInstanceDatas.isNotEmpty())
+        check(initialExpansionState?.isExpanded != true || doneInstanceDatas.isNotEmpty())
 
-        treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
+        treeNode = TreeNode(this, nodeContainer, initialExpansionState = initialExpansionState)
 
         val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, expandedInstances, selectedInstances) }
 
@@ -66,7 +67,7 @@ class DividerNode(
 
     private fun newChildTreeNode(
             instanceData: GroupListDataWrapper.InstanceData,
-            expandedInstances: Map<InstanceKey, Boolean>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
             selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
@@ -80,12 +81,9 @@ class DividerNode(
         return childTreeNode
     }
 
-    fun expanded() = treeNode.isExpanded
+    val expansionState get() = treeNode.expansionState
 
-    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
-        for (doneInstanceNode in doneInstanceNodes)
-            doneInstanceNode.addExpandedInstances(expandedInstances)
-    }
+    val instanceExpansionStates get() = doneInstanceNodes.map { it.instanceExpansionStates }.flatten()
 
     override val text by lazy { groupListFragment.activity.getString(R.string.done) }
 

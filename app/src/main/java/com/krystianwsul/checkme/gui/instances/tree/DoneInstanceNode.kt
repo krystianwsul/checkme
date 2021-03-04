@@ -65,22 +65,15 @@ class DoneInstanceNode(
 
     fun initialize(
             dividerTreeNode: TreeNode<AbstractHolder>,
-            expandedInstances: Map<InstanceKey, Boolean>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
             selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
-        val expanded: Boolean
-        val doneExpanded: Boolean
-        if (expandedInstances.containsKey(instanceData.instanceKey)) {
-            expanded = true
-            doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
-        } else {
-            expanded = false
-            doneExpanded = false
-        }
+        val (expansionState, doneExpansionState) =
+                expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
-        treeNode = TreeNode(this, dividerTreeNode, selected, expanded)
+        treeNode = TreeNode(this, dividerTreeNode, selected, expansionState)
 
         nodeCollection = NodeCollection(
                 indentation + 1,
@@ -94,14 +87,14 @@ class DoneInstanceNode(
 
         treeNode.setChildTreeNodes(nodeCollection.initialize(
                 instanceData.children.values,
-                listOf(),
+                mapOf(),
                 expandedInstances,
-                doneExpanded,
+                doneExpansionState,
                 listOf(),
                 listOf(),
                 listOf(),
-                false,
-                listOf(),
+                null,
+                mapOf(),
                 listOf(),
                 null))
 
@@ -110,15 +103,15 @@ class DoneInstanceNode(
 
     private fun expanded() = treeNode.isExpanded
 
-    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
-        if (!expanded())
-            return
+    val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
+        get() {
+            val collectionExpansionState = CollectionExpansionState(
+                    treeNode.expansionState,
+                    nodeCollection.doneExpansionState,
+            )
 
-        check(!expandedInstances.containsKey(instanceData.instanceKey))
-
-        expandedInstances[instanceData.instanceKey] = nodeCollection.doneExpanded
-        nodeCollection.addExpandedInstances(expandedInstances)
-    }
+            return mapOf(instanceData.instanceKey to collectionExpansionState) + nodeCollection.instanceExpansionStates
+        }
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 

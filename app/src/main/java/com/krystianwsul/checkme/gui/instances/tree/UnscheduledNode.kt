@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
+import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -34,7 +35,7 @@ class UnscheduledNode(
 
     private val taskNodes = mutableListOf<TaskNode>()
 
-    val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }
+    val taskExpansionStates get() = taskNodes.map { it.taskExpansionStates }.flatten()
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
@@ -53,34 +54,34 @@ class UnscheduledNode(
     override val expandOnMatch = false
 
     fun initialize(
-            expanded: Boolean,
+            expansionState: TreeNode.ExpansionState?,
             nodeContainer: NodeContainer<AbstractHolder>,
             taskDatas: List<GroupListDataWrapper.TaskData>,
-            expandedTaskKeys: List<TaskKey>,
+            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             selectedTaskKeys: List<TaskKey>,
     ): TreeNode<AbstractHolder> {
-        check(!expanded || taskDatas.isNotEmpty())
+        check(expansionState?.isExpanded != true || taskDatas.isNotEmpty())
 
         this.taskDatas = taskDatas
 
-        treeNode = TreeNode(this, nodeContainer, expandInitiallyIfHasChildren = expanded)
+        treeNode = TreeNode(this, nodeContainer, initialExpansionState = expansionState)
 
-        treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) })
+        treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) })
 
         return treeNode
     }
 
     private fun newChildTreeNode(
             taskData: GroupListDataWrapper.TaskData,
-            expandedTaskKeys: List<TaskKey>,
-            selectedTaskKeys: List<TaskKey>
+            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
+            selectedTaskKeys: List<TaskKey>,
     ) = TaskNode(0, taskData, this, this).let {
         taskNodes.add(it)
 
-        it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
+        it.initialize(treeNode, taskExpansionStates, selectedTaskKeys)
     }
 
-    fun expanded() = treeNode.isExpanded
+    val expansionState get() = treeNode.expansionState
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 

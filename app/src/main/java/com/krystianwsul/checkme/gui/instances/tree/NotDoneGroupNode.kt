@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
+import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
@@ -95,8 +96,8 @@ class NotDoneGroupNode(
     }
 
     fun initialize(
-            expandedGroups: List<TimeStamp>,
-            expandedInstances: Map<InstanceKey, Boolean>,
+            expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -105,18 +106,15 @@ class NotDoneGroupNode(
 
         val instanceData = instanceDatas.singleOrNull()
 
-        val (expanded, doneExpanded) = instanceData?.run {
-            if (expandedInstances.containsKey(instanceKey))
-                true to expandedInstances.getValue(instanceKey)
-            else
-                false to false
-        } ?: expandedGroups.contains(exactTimeStamp.toTimeStamp()) to false
+        val (expansionState, doneExpansionState) = instanceData?.let {
+            expandedInstances[it.instanceKey] ?: CollectionExpansionState()
+        } ?: CollectionExpansionState(expandedGroups[exactTimeStamp.toTimeStamp()], null)
 
         val selected = instanceData?.let {
             selectedInstances.contains(it.instanceKey)
         } ?: selectedGroups.contains(exactTimeStamp.long)
 
-        treeNode = TreeNode(this, nodeContainer, selected, expanded)
+        treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
         if (instanceData != null) {
             singleInstanceNodeCollection = NodeCollection(
@@ -133,12 +131,12 @@ class NotDoneGroupNode(
                     instanceData.children.values,
                     expandedGroups,
                     expandedInstances,
-                    doneExpanded,
+                    doneExpansionState,
                     selectedInstances,
                     selectedGroups,
                     listOf(),
-                    false,
-                    listOf(),
+                    null,
+                    mapOf(),
                     listOf(),
                     null
             ))
@@ -165,25 +163,26 @@ class NotDoneGroupNode(
         return instanceDatas.size == 1
     }
 
-    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
-        if (!expanded())
-            return
+    val instanceExpansionStates
+        get(): Map<InstanceKey, CollectionExpansionState> {
+            return if (singleInstance()) {
+                val collectionExpansionState = CollectionExpansionState(
+                        treeNode.expansionState,
+                        singleInstanceNodeCollection!!.doneExpansionState
+                )
 
-        if (singleInstance()) {
-            check(!expandedInstances.containsKey(singleInstanceData.instanceKey))
-
-            expandedInstances[singleInstanceData.instanceKey] = singleInstanceNodeCollection!!.doneExpanded
-            singleInstanceNodeCollection!!.addExpandedInstances(expandedInstances)
-        } else {
-            notDoneInstanceNodes.forEach { it.addExpandedInstances(expandedInstances) }
+                mapOf(singleInstanceData.instanceKey to collectionExpansionState) +
+                        singleInstanceNodeCollection!!.instanceExpansionStates
+            } else {
+                notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
+            }
         }
-    }
 
     override val name
         get() = if (singleInstance()) {
             MultiLineNameData.Visible(
                     singleInstanceData.name,
-                    if (singleInstanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
+                    if (singleInstanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
             )
         } else {
             if (treeNode.isExpanded) {
@@ -336,14 +335,14 @@ class NotDoneGroupNode(
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(
                     instanceDatas[0].children.values,
-                    listOf(),
                     mapOf(),
-                    false,
+                    mapOf(),
+                    TreeNode.ExpansionState(),
                     listOf(),
                     listOf(),
                     listOf(),
-                    false,
-                    listOf(),
+                    null,
+                    mapOf(),
                     listOf(),
                     null
             )
@@ -395,7 +394,7 @@ class NotDoneGroupNode(
 
     private fun newChildTreeNode(
             instanceData: GroupListDataWrapper.InstanceData,
-            expandedInstances: Map<InstanceKey, Boolean>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
             selected: Boolean,
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
@@ -415,7 +414,7 @@ class NotDoneGroupNode(
         return childTreeNode
     }
 
-    fun expanded() = treeNode.isExpanded
+    val expansionState get() = treeNode.expansionState
 
     override val isSelectable = true
 
@@ -543,24 +542,16 @@ class NotDoneGroupNode(
         override val isDraggable = true
 
         fun initialize(
-                expandedInstances: Map<InstanceKey, Boolean>,
+                expandedInstances: Map<InstanceKey, CollectionExpansionState>,
                 selected: Boolean,
                 selectedInstances: List<InstanceKey>,
                 selectedGroups: List<Long>,
                 notDoneGroupTreeNode: TreeNode<AbstractHolder>,
         ): TreeNode<AbstractHolder> {
-            val (expanded, doneExpanded) = if (expandedInstances.containsKey(instanceData.instanceKey)) {
-                true to expandedInstances.getValue(instanceData.instanceKey)
-            } else {
-                false to false
-            }
+            val (expansionState, doneExpansionState) =
+                    expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
-            treeNode = TreeNode(
-                    this,
-                    notDoneGroupTreeNode,
-                    selected,
-                    expanded
-            )
+            treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expansionState)
 
             nodeCollection = NodeCollection(
                     indentation + 1,
@@ -574,14 +565,14 @@ class NotDoneGroupNode(
 
             treeNode.setChildTreeNodes(nodeCollection.initialize(
                     instanceData.children.values,
-                    listOf(),
+                    mapOf(),
                     expandedInstances,
-                    doneExpanded,
+                    doneExpansionState,
                     selectedInstances,
                     selectedGroups,
                     listOf(),
-                    false,
-                    listOf(),
+                    null,
+                    mapOf(),
                     listOf(),
                     null
             ))
@@ -589,15 +580,15 @@ class NotDoneGroupNode(
             return treeNode
         }
 
-        fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
-            if (!treeNode.isExpanded)
-                return
+        val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
+            get() {
+                val collectionExpansionState = CollectionExpansionState(
+                        treeNode.expansionState,
+                        nodeCollection.doneExpansionState,
+                )
 
-            check(!expandedInstances.containsKey(instanceData.instanceKey))
-
-            expandedInstances[instanceData.instanceKey] = nodeCollection.doneExpanded
-            nodeCollection.addExpandedInstances(expandedInstances)
-        }
+                return mapOf(instanceData.instanceKey to collectionExpansionState) + nodeCollection.instanceExpansionStates
+            }
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 

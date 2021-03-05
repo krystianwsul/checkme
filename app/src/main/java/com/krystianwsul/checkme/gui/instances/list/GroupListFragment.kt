@@ -975,7 +975,7 @@ class GroupListFragment @JvmOverloads constructor(
         listener.showSnackbarHour(count) { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
     }
 
-    fun clearExpansionStates() = treeViewAdapter.clearExpansionStates()
+    fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 
     class GroupAdapter(val groupListFragment: GroupListFragment, filterCriteria: FilterCriteria) :
             BaseAdapter(),

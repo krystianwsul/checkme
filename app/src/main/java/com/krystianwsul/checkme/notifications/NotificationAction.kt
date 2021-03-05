@@ -89,7 +89,7 @@ sealed class NotificationAction : Parcelable {
 
         override fun perform(callback: (() -> Unit)?) {
             DomainFactory.addFirebaseListener {
-                it.checkSave()
+                it.throwIfSaved()
                 it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
                 callback?.invoke()
             }

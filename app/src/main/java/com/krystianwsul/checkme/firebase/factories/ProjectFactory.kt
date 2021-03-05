@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
+import com.krystianwsul.checkme.domainmodel.DomainLocker
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
@@ -57,6 +58,8 @@ abstract class ProjectFactory<T : ProjectType>(
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
         return AndroidRootInstanceManager(taskRecord, snapshot, factoryProvider).apply {
+            DomainLocker.throwIfLocked()
+
             rootInstanceManagers[taskRecord.taskKey] = this
         }
     }

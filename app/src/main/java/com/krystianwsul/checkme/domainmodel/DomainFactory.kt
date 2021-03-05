@@ -115,7 +115,7 @@ class DomainFactory(
                     && !domainFactory.friendsFactory.isSaved
                     && !domainFactory.myUserFactory.isSaved
             ) {
-                domainFactory.checkSave()
+                domainFactory.throwIfSaved()
                 firebaseListener(domainFactory)
             } else {
                 firebaseListeners.add(Pair(firebaseListener, "other"))
@@ -147,11 +147,7 @@ class DomainFactory(
                 ChangeType.REMOTE -> RunType.REMOTE
             }
 
-        private val lock = Any()
-
-        fun <T> syncOnDomain(action: () -> T): T {
-            return synchronized(lock, action)
-        }
+        fun <T> syncOnDomain(action: () -> T) = DomainLocker.syncOnDomain(action)
     }
 
     var remoteReadTimes: ReadTimes
@@ -426,7 +422,7 @@ class DomainFactory(
         APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
-    fun checkSave() = syncOnDomain {
+    fun throwIfSaved() = syncOnDomain {
         if (projectsFactory.isSaved) throw SavedFactoryException()
     }
 
@@ -485,7 +481,7 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    fun updateNotificationsTick(
+    private fun updateNotificationsTick(
             source: SaveService.Source,
             silent: Boolean,
             sourceName: String,

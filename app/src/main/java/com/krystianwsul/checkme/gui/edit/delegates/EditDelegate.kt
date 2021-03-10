@@ -134,21 +134,17 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
     ) = name != taskData.name || note != taskData.note
 
     fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
-        if (scheduleEntry.scheduleDataWrapper !is EditViewModel.ScheduleDataWrapper.Single)
-            return null
+        if (scheduleEntry.scheduleDataWrapper !is EditViewModel.ScheduleDataWrapper.Single) return null
 
-        if (skipScheduleCheck(scheduleEntry))
-            return null
+        if (skipScheduleCheck(scheduleEntry)) return null
 
         val date = scheduleEntry.scheduleDataWrapper
                 .scheduleData
                 .date
 
-        if (date > Date.today())
-            return null
+        if (date > Date.today()) return null
 
-        if (date < Date.today())
-            return ScheduleError.DATE
+        if (date < Date.today()) return ScheduleError.DATE
 
         val hourMinute = scheduleEntry.scheduleDataWrapper
                 .timePair
@@ -159,8 +155,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
                             ?: hourMinute!!
                 }
 
-        if (hourMinute <= HourMinute.now)
-            return ScheduleError.TIME
+        if (hourMinute <= HourMinute.now) return ScheduleError.TIME
 
         return null
     }

@@ -171,7 +171,7 @@ class EditActivity : NavBarActivity() {
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogParameters>()
 
-    private val timeRelay = BehaviorRelay.createDefault(Unit)
+    private val timeRelay = BehaviorRelay.createDefault(Unit) // this is just a trigger to re-check schedule errors
 
     private val timeReceiver = object : BroadcastReceiver() {
 
@@ -474,6 +474,7 @@ class EditActivity : NavBarActivity() {
     private fun updateError() = updateNameError() || delegate.parentScheduleManager
             .schedules
             .any { delegate.getError(it) != null }
+            .also { if (it) timeRelay.accept(Unit) }
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)

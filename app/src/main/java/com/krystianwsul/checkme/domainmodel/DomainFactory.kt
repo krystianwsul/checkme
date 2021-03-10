@@ -2,14 +2,12 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
@@ -32,7 +30,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -171,38 +168,11 @@ class DomainFactory(
 
         remoteReadTimes = ReadTimes(startTime, readTime, now)
 
-        projectsFactory.privateProject.run {
-            fun createCustomTime(@StringRes nameRes: Int, hourMinute: HourMinute) {
-                val name = MyApplication.context.getString(nameRes)
+        projectsFactory.privateProject.let {
+            if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
+                DefaultCustomTimeCreator.createDefaultCustomTimes(it)
 
-                newRemoteCustomTime(
-                        PrivateCustomTimeJson(
-                                name,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                hourMinute.hour,
-                                hourMinute.minute,
-                                true
-                        )
-                )
-            }
-
-            if (projectsFactory.privateProject.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                createCustomTime(R.string.morning, HourMinute(9, 0))
-                createCustomTime(R.string.afternoon, HourMinute(13, 0))
-                createCustomTime(R.string.evening, HourMinute(18, 0))
-
-                defaultTimesCreated = true
+                it.defaultTimesCreated = true
             }
         }
 

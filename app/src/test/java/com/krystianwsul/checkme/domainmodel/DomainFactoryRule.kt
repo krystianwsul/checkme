@@ -87,6 +87,9 @@ class DomainFactoryRule : TestRule {
 
         mockkObject(ImageManager)
         every { ImageManager.prefetch(any(), any(), any()) } returns Unit
+
+        mockkObject(DefaultCustomTimeCreator)
+        every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
     }
 
     private fun before() {
@@ -110,6 +113,9 @@ class DomainFactoryRule : TestRule {
 
             var taskHierarchyId = 0
             every { getPrivateTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
+
+            var customTimeId = 0
+            every { getPrivateCustomTimeRecordId(any()) } answers { "customTimeId" + ++customTimeId }
         }
 
         val projectsFactory = ProjectsFactory(

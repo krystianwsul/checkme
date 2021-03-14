@@ -31,6 +31,7 @@ abstract class DomainListener<D : DomainData> {
                             .map { domainFactory }
                 }
                 .toFlowable(BackpressureStrategy.LATEST)
+                .observeOn(Schedulers.single())
                 .map { getDataResult(it) }
                 .map { it.data!! }
                 .filter { data.value != it }

@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
@@ -146,9 +147,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         bottomBinding.bottomAppBar
                 .menu
                 .run {
-                    if (findItem(R.id.action_select_all) == null) return
+                    if (findItem(R.id.projectMenuEdit) == null) return
 
-                    findItem(R.id.action_select_all).isVisible = selectAllVisible
+                    findItem(R.id.projectMenuEdit).isVisible =
+                            (parameters as? Parameters.Project)?.projectKey is ProjectKey.Shared
+                    findItem(R.id.projectMenuSelectAll).isVisible = selectAllVisible
                 }
     }
 
@@ -156,11 +159,16 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     override fun initBottomBar() {
         bottomBinding.bottomAppBar.apply {
-            animateReplaceMenu(R.menu.menu_select_all, onEnd = ::updateBottomMenu)
+            animateReplaceMenu(R.menu.menu_show_project_bottom, onEnd = ::updateBottomMenu)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_select_all -> taskListFragment.treeViewAdapter.selectAll()
+                    R.id.projectMenuEdit -> {
+                        val projectKey = (parameters as Parameters.Project).projectKey as ProjectKey.Shared
+
+                        startActivity(ShowProjectActivity.newIntent(this@ShowTasksActivity, projectKey))
+                    }
+                    R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }
 

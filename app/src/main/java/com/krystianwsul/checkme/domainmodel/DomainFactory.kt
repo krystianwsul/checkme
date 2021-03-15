@@ -30,6 +30,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -143,7 +144,11 @@ class DomainFactory(
                 ChangeType.REMOTE -> RunType.REMOTE
             }
 
-        fun <T> syncOnDomain(action: () -> T) = DomainLocker.syncOnDomain(action)
+        fun <T> syncOnDomain(action: () -> T): T {
+            SchedulerTypeHolder.requireScheduler()
+
+            return DomainLocker.syncOnDomain(action)
+        }
     }
 
     var remoteReadTimes: ReadTimes

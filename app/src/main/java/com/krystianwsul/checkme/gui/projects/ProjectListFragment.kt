@@ -71,23 +71,29 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(placeholder)
 
-        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar) }
+        override val bottomBarData by lazy {
+            Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar)
+        }
 
         override fun onMenuClick(itemId: Int, placeholder: TreeViewAdapter.Placeholder): Boolean {
+            checkNotNull(data)
+
             val projectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toHashSet()
 
             check(projectIds.isNotEmpty())
 
-            when (itemId) {
-                R.id.action_project_delete -> {
-                    checkNotNull(data)
+            val projectKey by lazy { projectIds.single() }
 
-                    RemoveInstancesDialogFragment.newInstance(projectIds)
-                            .also { it.listener = deleteInstancesListener }
-                            .show(childFragmentManager, TAG_REMOVE_INSTANCES)
-                }
+            when (itemId) {
+                R.id.projectsMenuShowTasks ->
+                    startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectKey)))
+                R.id.projectsMenuEdit ->
+                    startActivity(ShowProjectActivity.newIntent(requireContext(), projectKey))
+                R.id.projectsMenuDelete -> RemoveInstancesDialogFragment.newInstance(projectIds)
+                        .also { it.listener = deleteInstancesListener }
+                        .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 else -> throw UnsupportedOperationException()
             }
 
@@ -108,6 +114,15 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             mainActivity.onDestroyActionMode()
+        }
+
+        override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
+            val selectedNodes = getTreeViewAdapter().selectedNodes
+            check(selectedNodes.isNotEmpty())
+
+            val single = selectedNodes.size == 1
+
+            return listOf(R.id.projectsMenuShowTasks, R.id.projectsMenuEdit).map { it to single }
         }
     }
 
@@ -146,7 +161,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentProjectListBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+            FragmentProjectListBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

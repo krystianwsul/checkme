@@ -157,4 +157,5 @@
     <string name="afternoon">afternoon</string>
     <string name="evening">evening</string>
     <string name="editProject">Edit project</string>
+    <string name="showTasks">Show tasks</string>
 </resources>

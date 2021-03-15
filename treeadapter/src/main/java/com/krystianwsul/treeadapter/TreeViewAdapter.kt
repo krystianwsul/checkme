@@ -254,8 +254,6 @@ class TreeViewAdapter<T : TreeHolder>(
     }
 
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        check(recyclerAttached)
-
         if (holder !is TreeHolder) return
 
         check(holder in attachedHolders)

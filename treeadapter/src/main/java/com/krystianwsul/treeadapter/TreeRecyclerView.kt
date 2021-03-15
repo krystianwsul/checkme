@@ -14,7 +14,8 @@ class TreeRecyclerView : RecyclerView {
 
     override fun setAdapter(adapter: Adapter<*>?) {
         check(adapter is TreeViewAdapter<*>)
-        check(this.adapter == null)
+
+        if (isAttachedToWindow) this.adapter?.onRecyclerDetachedFromWindow()
 
         super.setAdapter(adapter)
 

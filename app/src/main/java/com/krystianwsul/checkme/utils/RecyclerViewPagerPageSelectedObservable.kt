@@ -24,11 +24,6 @@ class RecyclerViewPagerPageSelectedObservable(private val recyclerViewPager: Rec
                 if (!isDisposed && newState == RecyclerView.SCROLL_STATE_IDLE)
                     observer.onNext(recyclerViewPager.currentPosition)
             }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (!isDisposed)
-                    observer.onNext(recyclerViewPager.currentPosition)
-            }
         }
 
         init {

@@ -298,6 +298,14 @@ class MainActivity :
                 }
     }
 
+    private fun fixedSmoothScroll(position: Int) {
+        val width = binding.mainDaysPager.width
+
+        val positionDiff = position - binding.mainDaysPager.currentPosition
+
+        binding.mainDaysPager.smoothScrollBy(positionDiff * width, 0)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -508,17 +516,18 @@ class MainActivity :
                     .commit()
         }
 
-        binding.mainDaysPager.run {
-            pageSelections().subscribe {
-                Preferences.mainTabsLog.logLineHour("pageSelections $it")
+        binding.mainDaysPager
+                .pageSelections()
+                .subscribe {
+                    Preferences.mainTabsLog.logLineHour("pageSelections $it")
 
-                daysPosition.accept(it)
+                    daysPosition.accept(it)
 
-                updateBottomMenu()
+                    updateBottomMenu()
 
-                updateCalendarDate()
-            }.addTo(createDisposable)
-        }
+                    updateCalendarDate()
+                }
+                .addTo(createDisposable)
 
         binding.mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
@@ -559,7 +568,7 @@ class MainActivity :
                 val date = LocalDate(year, month + 1, dayOfMonth)
 
                 val position = Days.daysBetween(LocalDate.now(), date).days
-                binding.mainDaysPager.smoothScrollToPosition(position)
+                fixedSmoothScroll(position)
 
                 actionMode?.finish()
 
@@ -676,7 +685,7 @@ class MainActivity :
                         Preferences.mainTabsLog.logLineHour("onTabSelected ${tab.position}")
 
                         state = PagerScrollState.TabTarget(tab.position)
-                        binding.mainDaysPager.smoothScrollToPosition(tab.position)
+                        fixedSmoothScroll(tab.position)
                     }
                 }
 
@@ -1072,7 +1081,7 @@ class MainActivity :
 
         binding.mainDaysPager
                 .currentPosition
-                .let { if (it > 0) binding.mainDaysPager.smoothScrollToPosition(it - 1) }
+                .let { if (it > 0) fixedSmoothScroll(it - 1) }
 
         dayViewModel.refresh()
         mainViewModel.refresh()

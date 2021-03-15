@@ -10,7 +10,7 @@ import kotlin.reflect.KProperty
 abstract class RemoteRecord(create: Boolean, allowParseOnMain: Boolean = false) {
 
     init {
-        SchedulerTypeHolder.requireScheduler(SchedulerType.DOMAIN.takeIf { !create && !allowParseOnMain })
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN.takeIf { !create && !allowParseOnMain })
     }
 
     private var shouldDelete = false

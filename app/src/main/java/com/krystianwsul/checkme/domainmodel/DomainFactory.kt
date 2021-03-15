@@ -145,7 +145,7 @@ class DomainFactory(
             }
 
         fun <T> syncOnDomain(action: () -> T): T {
-            SchedulerTypeHolder.requireScheduler()
+            SchedulerTypeHolder.instance.requireScheduler()
 
             return DomainLocker.syncOnDomain(action)
         }

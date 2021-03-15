@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
+import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
@@ -307,7 +308,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         false
                 )
 
-            override fun onClick(holder: AbstractHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
+            override fun onClick(holder: AbstractHolder) =
+                    startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.id)))
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
                 check(other is ProjectNode)

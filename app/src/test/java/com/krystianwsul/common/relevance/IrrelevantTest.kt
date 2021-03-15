@@ -2,6 +2,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
@@ -21,6 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import org.junit.Assert.*
+import org.junit.BeforeClass
 import org.junit.Test
 
 class IrrelevantTest {
@@ -43,6 +45,12 @@ class IrrelevantTest {
         }
 
         private val projectParent = mockk<Project.Parent>()
+
+        @JvmStatic
+        @BeforeClass
+        fun beforeClass() {
+            SchedulerTypeHolder.instance = mockk(relaxed = true)
+        }
     }
 
     @Test

@@ -1,17 +1,18 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.common.utils.ThreadInfo
+import com.krystianwsul.common.utils.getThreadInfo
+
 object DomainLocker {
 
     private val lock = Any()
-
-    private fun getCurrentThreadData() = Thread.currentThread().let { ThreadData(it.id, it.name) }
 
     @Volatile
     private var lockData: LockData? = null
 
     fun <T> syncOnDomain(action: () -> T) = synchronized(lock) {
         throwIfLocked()
-        if (lockData == null) lockData = LockData(getCurrentThreadData())
+        if (lockData == null) lockData = LockData(getThreadInfo())
         lockData!!.counter++
 
         val ret = action()
@@ -25,22 +26,20 @@ object DomainLocker {
 
     fun throwIfLocked() {
         lockData?.let {
-            val currentThreadData = getCurrentThreadData()
+            val currentThreadData = getThreadInfo()
 
-            if (it.threadData.threadId != currentThreadData.threadId)
-                throw DomainLockedException(it.threadData, currentThreadData)
+            if (it.threadInfo.id != currentThreadData.id)
+                throw DomainLockedException(it.threadInfo, currentThreadData)
         }
     }
 
-    private class LockData(val threadData: ThreadData, var counter: Int = 0)
-
-    private data class ThreadData(val threadId: Long, val threadName: String)
+    private class LockData(val threadInfo: ThreadInfo, var counter: Int = 0)
 
     /**
      * I'm betting this this whole mess is being caused by access from Firebase' thread.  If so, the next step might be
      * to
      */
 
-    private class DomainLockedException(lockThreadData: ThreadData, currentThreadData: ThreadData) :
-            Exception("locked on thread: $lockThreadData, current thread: $currentThreadData")
+    private class DomainLockedException(lockThreadInfo: ThreadInfo, currentThreadInfo: ThreadInfo) :
+            Exception("locked on thread: $lockThreadInfo, current thread: $currentThreadInfo")
 }

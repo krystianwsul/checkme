@@ -30,6 +30,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -42,7 +43,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
 
@@ -144,7 +144,11 @@ class DomainFactory(
                 ChangeType.REMOTE -> RunType.REMOTE
             }
 
-        fun <T> syncOnDomain(action: () -> T) = DomainLocker.syncOnDomain(action)
+        fun <T> syncOnDomain(action: () -> T): T {
+            SchedulerTypeHolder.instance.requireScheduler()
+
+            return DomainLocker.syncOnDomain(action)
+        }
     }
 
     var remoteReadTimes: ReadTimes
@@ -192,7 +196,7 @@ class DomainFactory(
                         .map { "remote change" },
                 Single.just(Unit)
                         .delay(1, TimeUnit.MINUTES)
-                        .observeOn(Schedulers.single())
+                        .observeOnDomain()
                         .map { "timeout" }
         ).map { it.toObservable() }
                 .merge()

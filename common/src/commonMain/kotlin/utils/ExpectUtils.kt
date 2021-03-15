@@ -10,4 +10,4 @@ expect fun log(message: String)
 
 expect fun <T> MutableList<T>.synchronized(): MutableList<T>
 
-expect fun currentThreadId(): Long
+expect fun getThreadInfo(): ThreadInfo

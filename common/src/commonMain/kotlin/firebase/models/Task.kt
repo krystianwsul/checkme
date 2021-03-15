@@ -914,7 +914,7 @@ class Task<T : ProjectType>(
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         if (!generatedInstances.containsKey(instanceKey)) {
-            generatedInstancesLog += "adding $instanceKey from " + currentThreadId() + ", " + Exception().stackTraceToString()
+            generatedInstancesLog += "adding $instanceKey from " + getThreadInfo() + ", " + Exception().stackTraceToString()
             generatedInstances[instanceKey] = Instance(this, scheduleDateTime)
         }
 

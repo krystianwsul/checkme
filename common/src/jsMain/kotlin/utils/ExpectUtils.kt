@@ -20,4 +20,4 @@ actual fun log(message: String) {
 
 actual fun <T> MutableList<T>.synchronized() = this
 
-actual fun currentThreadId() = 0L
+actual fun getThreadInfo() = ThreadInfo(0L, "JS thread")

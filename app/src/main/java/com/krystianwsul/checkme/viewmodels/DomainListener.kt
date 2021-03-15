@@ -2,11 +2,11 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
 
 abstract class DomainListener<D : DomainData> {
 
@@ -25,7 +25,7 @@ abstract class DomainListener<D : DomainData> {
         var listenerAdded = false
 
         disposable = DomainFactory.instanceRelay
-                .observeOn(Schedulers.single())
+                .observeOnDomain()
                 .filterNotNull()
                 .switchMap { domainFactory ->
                     /**
@@ -43,7 +43,7 @@ abstract class DomainListener<D : DomainData> {
                             .map { domainFactory }
                 }
                 .toFlowable(BackpressureStrategy.LATEST)
-                .observeOn(Schedulers.single())
+                .observeOnDomain()
                 .map { getDataResult(it) }
                 .map { it.data!! }
                 .filter { data.value != it }

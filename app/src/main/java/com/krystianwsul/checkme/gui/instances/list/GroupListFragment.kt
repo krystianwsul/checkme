@@ -517,7 +517,7 @@ class GroupListFragment @JvmOverloads constructor(
         binding.groupListRecycler.layoutManager = LinearLayoutManager(context)
     }
 
-    private val searchDataManager = object : SearchDataManager<GroupListParameters, GroupAdapter>(
+    private fun newSearchDataManager() = object : SearchDataManager<GroupListParameters, GroupAdapter>(
             activity.started,
             parametersRelay
     ) {
@@ -608,6 +608,8 @@ class GroupListFragment @JvmOverloads constructor(
         override fun onFilterCriteriaChanged() = Unit
     }
 
+    private var searchDataManager = newSearchDataManager()
+
     public override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             state.apply {
@@ -621,6 +623,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
+                searchDataManager = newSearchDataManager()
                 searchDataManager.setInitialFilterCriteria(getParcelable(KEY_SEARCH_DATA)!!)
             }
 

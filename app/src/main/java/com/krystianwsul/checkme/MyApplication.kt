@@ -16,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.AndroidSchedulerTypeHolder
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -31,6 +32,8 @@ import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Maybe
@@ -92,6 +95,8 @@ class MyApplication : Application() {
         _sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         MyCrashlytics.init()
+
+        SchedulerTypeHolder.instance = AndroidSchedulerTypeHolder().apply { set(SchedulerType.MAIN) }
 
         RxDogTag.install()
 

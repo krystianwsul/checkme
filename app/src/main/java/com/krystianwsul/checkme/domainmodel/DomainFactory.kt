@@ -42,7 +42,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
 
@@ -192,7 +191,7 @@ class DomainFactory(
                         .map { "remote change" },
                 Single.just(Unit)
                         .delay(1, TimeUnit.MINUTES)
-                        .observeOn(Schedulers.single())
+                        .observeOnDomain()
                         .map { "timeout" }
         ).map { it.toObservable() }
                 .merge()

@@ -11,6 +11,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -21,7 +22,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.*
 
 abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
@@ -88,7 +88,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
     }
 
     private fun tick(source: String) = Single.just(Unit)
-            .observeOn(Schedulers.single())
+            .observeOnDomain()
             .subscribeBy {
                 DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source))
             }

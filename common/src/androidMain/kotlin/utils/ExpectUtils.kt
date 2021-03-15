@@ -16,4 +16,4 @@ actual fun log(message: String) {
 
 actual fun <T> MutableList<T>.synchronized(): MutableList<T> = Collections.synchronizedList(this)
 
-actual fun currentThreadId() = Thread.currentThread().id
+actual fun getThreadInfo() = Thread.currentThread().run { ThreadInfo(id, name) }

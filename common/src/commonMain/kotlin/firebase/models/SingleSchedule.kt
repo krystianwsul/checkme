@@ -81,6 +81,7 @@ class SingleSchedule<T : ProjectType>(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,
             singleScheduleRecord.id,
+            allowParseOnMain = true,
     ) {
 
         override val date get() = instance.instanceDate

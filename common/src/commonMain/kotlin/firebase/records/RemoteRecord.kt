@@ -1,11 +1,19 @@
 package com.krystianwsul.common.firebase.records
 
+import com.krystianwsul.common.firebase.SchedulerException
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
 
-abstract class RemoteRecord(create: Boolean) {
+abstract class RemoteRecord(create: Boolean, allowParseOnMain: Boolean = false) {
+
+    init {
+        val schedulerType = SchedulerTypeHolder.instance.get() ?: throw SchedulerException() // todo scheduler
+        if (!create && !allowParseOnMain && (schedulerType == SchedulerType.MAIN)) throw SchedulerException() // todo scheduler
+    }
 
     private var shouldDelete = false
 

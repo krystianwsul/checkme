@@ -8,18 +8,21 @@ class DomainListenerManager {
 
     private val domainListeners = mutableMapOf<DomainListener<*>, BehaviorRelay<Unit>>()
 
+    @Synchronized
     fun addListener(domainListener: DomainListener<*>): Observable<Unit> {
         check(!domainListeners.containsKey(domainListener))
 
         return BehaviorRelay.createDefault(Unit).also { domainListeners[domainListener] = it }
     }
 
+    @Synchronized
     fun removeListener(domainListener: DomainListener<*>) {
         check(domainListeners.containsKey(domainListener))
 
         domainListeners.remove(domainListener)
     }
 
+    @Synchronized
     fun notify(notificationType: NotificationType) {
         fun Map.Entry<DomainListener<*>, *>.dataId() = key.data.value?.dataId
 

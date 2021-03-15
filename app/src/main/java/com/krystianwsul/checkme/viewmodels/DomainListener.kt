@@ -22,10 +22,22 @@ abstract class DomainListener<D : DomainData> {
                 return
         }
 
+        var listenerAdded = false
+
         disposable = DomainFactory.instanceRelay
                 .observeOn(Schedulers.single())
                 .filterNotNull()
                 .switchMap { domainFactory ->
+                    /**
+                     * What's expected here: the DomainListener may be initialized before the DomainFactory is
+                     * available.  And, it can stick around after the DomainFactory is destroyed, such as on logout.
+                     * But after logout, all DomainListeners should be destroyed, so we should never see more than
+                     * one event get this far.
+                     */
+                    check(!listenerAdded)
+
+                    listenerAdded = true
+
                     domainFactory.domainListenerManager
                             .addListener(this)
                             .map { domainFactory }
@@ -36,9 +48,11 @@ abstract class DomainListener<D : DomainData> {
                 .map { it.data!! }
                 .filter { data.value != it }
                 .doFinally {
-                    DomainFactory.nullableInstance
-                            ?.domainListenerManager
-                            ?.removeListener(this)
+                    if (listenerAdded) {
+                        DomainFactory.nullableInstance
+                                ?.domainListenerManager
+                                ?.removeListener(this)
+                    }
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(data)

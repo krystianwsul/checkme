@@ -5,14 +5,18 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowProjectData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     val friendDatas = friendsFactory.friends
             .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
@@ -34,7 +38,7 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
         userListDatas = setOf()
     }
 
-    ShowProjectViewModel.Data(name, userListDatas, friendDatas)
+    return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
 }
 
 fun DomainFactory.createProject(

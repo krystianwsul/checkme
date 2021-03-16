@@ -2,16 +2,19 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
-fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     check(instanceKeys.isNotEmpty())
 
@@ -61,5 +64,5 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             null
     )
 
-    ShowNotificationGroupViewModel.Data(dataWrapper)
+    return ShowNotificationGroupViewModel.Data(dataWrapper)
 }

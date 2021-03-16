@@ -279,6 +279,8 @@ class DomainFactory(
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 

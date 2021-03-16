@@ -9,14 +9,18 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 
-fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
             ?.let { requestInstanceKey.copy(taskKey = it) }
@@ -44,7 +48,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
         displayText += "\nexists? " + instance.exists()
     }
 
-    ShowInstanceViewModel.Data(
+    return ShowInstanceViewModel.Data(
             instance.name,
             instanceDateTime,
             instance.done != null,

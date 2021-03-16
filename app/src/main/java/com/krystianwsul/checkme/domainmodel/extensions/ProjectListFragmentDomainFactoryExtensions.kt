@@ -6,11 +6,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 
-fun DomainFactory.getProjectListData(): ProjectListViewModel.Data = syncOnDomain {
+fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getProjectListData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     val remoteProjects = projectsFactory.sharedProjects
 
@@ -25,7 +29,7 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data = syncOnDomain
             }
             .toSortedMap()
 
-    ProjectListViewModel.Data(projectDatas)
+    return ProjectListViewModel.Data(projectDatas)
 }
 
 fun DomainFactory.setProjectEndTimeStamps(

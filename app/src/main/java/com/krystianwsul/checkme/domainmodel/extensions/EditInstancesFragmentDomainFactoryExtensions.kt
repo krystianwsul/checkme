@@ -12,6 +12,8 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -19,8 +21,10 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 
-fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data = syncOnDomain {
+fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     check(instanceKeys.isNotEmpty())
 
@@ -65,7 +69,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
+    return EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
 }
 
 private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, DateTimePair?>>) : UndoData {
@@ -200,10 +204,12 @@ fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,
         page: Int,
         projectKey: ProjectKey<*>?,
-): DomainResult<EditInstancesSearchViewModel.Data> = syncOnDomain {
+): DomainResult<EditInstancesSearchViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
-    LockerManager.setLocker { now ->
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
+    return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
             val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
                     now,

@@ -14,6 +14,8 @@ import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -23,8 +25,10 @@ import com.krystianwsul.common.utils.*
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
         parentTaskKeyHint: TaskKey?,
-): EditViewModel.Data = syncOnDomain {
+): EditViewModel.Data {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     val now = ExactTimeStamp.Local.now
 
@@ -122,7 +126,7 @@ fun DomainFactory.getCreateTaskData(
         is EditViewModel.StartParameters.Create -> null
     }
 
-    EditViewModel.Data(
+    return EditViewModel.Data(
             taskData,
             parentTreeDatas,
             customTimeDatas,

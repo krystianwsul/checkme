@@ -5,19 +5,23 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 
-fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
     val customTime = projectsFactory.privateProject.getCustomTime(customTimeKey)
 
     val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
 
-    ShowCustomTimeViewModel.Data(customTimeKey, customTime.name, hourMinutes)
+    return ShowCustomTimeViewModel.Data(customTimeKey, customTime.name, hourMinutes)
 }
 
 fun DomainFactory.updateCustomTime(

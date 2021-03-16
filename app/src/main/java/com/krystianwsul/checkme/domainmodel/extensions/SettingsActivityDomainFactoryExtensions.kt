@@ -5,11 +5,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 
-fun DomainFactory.getSettingsData(): SettingsViewModel.Data = syncOnDomain {
+fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
     MyCrashlytics.log("DomainFactory.getSettingsData")
 
-    SettingsViewModel.Data(myUserFactory.user.defaultReminder)
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
+    return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
 }
 
 fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = syncOnDomain {

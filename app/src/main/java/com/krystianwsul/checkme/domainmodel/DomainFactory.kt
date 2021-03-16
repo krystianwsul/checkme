@@ -31,6 +31,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.SchedulerType
 import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
@@ -327,7 +328,11 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() = syncOnDomain { updateNotifications(ExactTimeStamp.Local.now, true) }
+    override fun clearUserInfo() {
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
+        updateNotifications(ExactTimeStamp.Local.now, true)
+    }
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) = syncOnDomain {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")

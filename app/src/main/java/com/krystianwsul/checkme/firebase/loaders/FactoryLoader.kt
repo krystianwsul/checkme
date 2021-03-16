@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -36,13 +37,14 @@ class FactoryLoader(
 
         fun <T> Single<T>.cacheImmediate() = cacheImmediate(domainDisposable)
 
-        domainFactoryObservable = userInfoObservable.switchMapSingle {
+        domainFactoryObservable = userInfoObservable.observeOnDomain().switchMapSingle {
             domainDisposable.clear()
 
             if (it.value != null) {
                 val userInfo = it.value
 
-                val deviceInfoObservable = tokenObservable.map { DeviceInfo(userInfo, it.value) }
+                val deviceInfoObservable = tokenObservable.observeOnDomain()
+                        .map { DeviceInfo(userInfo, it.value) }
                         .replay(1)
                         .apply { domainDisposable += connect() }
 
@@ -147,16 +149,18 @@ class FactoryLoader(
                             }
                             .addTo(domainDisposable)
 
-                    domainDisposable += tokenObservable.subscribe { tokenWrapper ->
-                        DomainFactory.addFirebaseListener { domainFactory ->
-                            domainFactory.updateDeviceDbInfo(
-                                    DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
-                                    SaveService.Source.GUI
-                            )
-                        }
-                    }
+                    tokenObservable.observeOnDomain()
+                            .subscribe { tokenWrapper ->
+                                DomainFactory.addFirebaseListener { domainFactory ->
+                                    domainFactory.updateDeviceDbInfo(
+                                            DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
+                                            SaveService.Source.GUI
+                                    )
+                                }
+                            }
+                            .addTo(domainDisposable)
 
-                    domainFactorySingle.map { NullableWrapper(it) }
+                    domainFactorySingle.map(::NullableWrapper)
                 }
             } else {
                 factoryProvider.nullableInstance?.clearUserInfo()

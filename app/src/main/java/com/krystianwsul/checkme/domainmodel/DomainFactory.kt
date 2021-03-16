@@ -64,7 +64,7 @@ class DomainFactory(
 
         private const val MAX_NOTIFICATIONS = 3
 
-        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())!!
 
         val nullableInstance get() = instanceRelay.value!!.value
 
@@ -335,7 +335,9 @@ class DomainFactory(
         updateNotifications(ExactTimeStamp.Local.now, true)
     }
 
-    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) = syncOnDomain {
+    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
         updateShortcuts(now)

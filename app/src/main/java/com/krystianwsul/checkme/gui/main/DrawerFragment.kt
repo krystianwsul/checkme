@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.gui.main.MainActivity.TabSearchState
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxjava3.kotlin.addTo
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
@@ -34,7 +35,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val mainActivity get() = activity as MainActivity
 
-    private val drawerViewModel by lazy { DrawerViewModel() }
+    private val drawerViewModel by lazy { getViewModel<DrawerViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

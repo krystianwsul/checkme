@@ -45,7 +45,6 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
 
@@ -108,7 +107,8 @@ class DomainFactory(
         }
 
         // todo route all external calls through here
-        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
+        @CheckResult
+        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = completeOnDomain {
             val domainFactory = nullableInstance
             if (
                     domainFactory?.projectsFactory?.isSaved == false
@@ -208,9 +208,8 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .subscribeBy { source ->
-                    addFirebaseListener { it.fixOffsets(source) }
-                }
+                .flatMapCompletable { source -> addFirebaseListener { it.fixOffsets(source) } }
+                .subscribe()
                 .addTo(domainDisposable)
     }
 

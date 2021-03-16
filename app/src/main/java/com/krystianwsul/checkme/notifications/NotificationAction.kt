@@ -29,7 +29,7 @@ sealed class NotificationAction : Parcelable {
             DomainFactory.addFirebaseListener {
                 it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
                 callback?.invoke()
-            }
+            }.subscribe()
         }
     }
 
@@ -92,7 +92,7 @@ sealed class NotificationAction : Parcelable {
                 it.throwIfSaved()
                 it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
                 callback?.invoke()
-            }
+            }.subscribe()
         }
     }
 }

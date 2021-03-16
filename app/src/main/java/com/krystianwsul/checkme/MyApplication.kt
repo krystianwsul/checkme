@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -157,15 +158,11 @@ class MyApplication : Application() {
                     ?: Maybe.empty()
         }
                 .observeOnDomain()
-                .subscribe {
-                    it.value
-                            ?.photoUrl
-                            ?.let { url ->
-                                DomainFactory.addFirebaseListener {
-                                    it.updatePhotoUrl(SaveService.Source.GUI, url.toString())
-                                }
-                            }
+                .mapNotNull { it.value?.photoUrl }
+                .switchMapCompletable { url ->
+                    DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
                 }
+                .subscribe()
 
         RxPaparazzo.register(this)
 

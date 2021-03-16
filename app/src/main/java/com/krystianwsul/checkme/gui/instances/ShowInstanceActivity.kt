@@ -296,6 +296,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             DomainFactory.addFirebaseListener {
                 it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
             }
+                    .subscribe()
+                    .addTo(createDisposable)
+
             data?.notificationShown = false
         }
     }

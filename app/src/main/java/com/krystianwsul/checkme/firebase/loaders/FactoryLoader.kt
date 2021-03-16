@@ -149,15 +149,15 @@ class FactoryLoader(
                             }
                             .addTo(domainDisposable)
 
-                    tokenObservable.observeOnDomain()
-                            .subscribe { tokenWrapper ->
-                                DomainFactory.addFirebaseListener { domainFactory ->
-                                    domainFactory.updateDeviceDbInfo(
-                                            DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
-                                            SaveService.Source.GUI
-                                    )
-                                }
-                            }
+                    tokenObservable.flatMapCompletable { tokenWrapper ->
+                        DomainFactory.addFirebaseListener { domainFactory ->
+                            domainFactory.updateDeviceDbInfo(
+                                    DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
+                                    SaveService.Source.GUI
+                            )
+                        }
+                    }
+                            .subscribe()
                             .addTo(domainDisposable)
 
                     domainFactorySingle.map(::NullableWrapper)

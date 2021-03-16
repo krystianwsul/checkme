@@ -84,7 +84,7 @@ object Uploader {
 
             DomainFactory.addFirebaseListener {
                 it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
-            }
+            }.subscribe()
         }
     }
 

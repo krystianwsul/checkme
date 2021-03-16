@@ -20,10 +20,21 @@ class RecyclerViewPagerPageSelectedObservable(private val recyclerViewPager: Rec
 
         private val onScrollListener = object : RecyclerView.OnScrollListener() {
 
+            private var first = true
+
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (!isDisposed && newState == RecyclerView.SCROLL_STATE_IDLE)
-                    observer.onNext(recyclerViewPager.currentPosition)
+                if (!isDisposed && newState == RecyclerView.SCROLL_STATE_IDLE) emit()
             }
+
+            // just to grab initial value
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (!isDisposed && first) {
+                    first = false
+                    emit()
+                }
+            }
+
+            private fun emit() = observer.onNext(recyclerViewPager.currentPosition)
         }
 
         init {
@@ -31,8 +42,6 @@ class RecyclerViewPagerPageSelectedObservable(private val recyclerViewPager: Rec
             recyclerViewPager.addOnScrollListener(onScrollListener)
         }
 
-        override fun onDispose() {
-            recyclerViewPager.removeOnScrollListener(onScrollListener)
-        }
+        override fun onDispose() = recyclerViewPager.removeOnScrollListener(onScrollListener)
     }
 }

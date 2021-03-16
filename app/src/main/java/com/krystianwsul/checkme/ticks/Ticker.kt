@@ -5,9 +5,8 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.domainmodel.runOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import io.reactivex.rxjava3.core.Completable
 
 
 object Ticker {
@@ -25,14 +24,12 @@ object Ticker {
 
             NotificationWrapper.instance.hideTemporary(TICK_NOTIFICATION_ID, "Ticker.tick skipping")
         } else {
-            Completable.complete()
-                    .observeOnDomain()
-                    .subscribe {
-                        DomainFactory.setFirebaseTickListener(
-                                SaveService.Source.SERVICE,
-                                TickData.Lock(source, domainChanged),
-                        )
-                    }
+            runOnDomain {
+                DomainFactory.setFirebaseTickListener(
+                        SaveService.Source.SERVICE,
+                        TickData.Lock(source, domainChanged),
+                )
+            }
         }
     }
 }

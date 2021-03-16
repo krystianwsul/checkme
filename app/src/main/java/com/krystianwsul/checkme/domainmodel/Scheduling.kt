@@ -11,6 +11,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 fun <T : Any> Observable<T>.observeOnDomain() = observeOn(Schedulers.single()).doOnNext { setSchedulerType() }!!
 fun <T : Any> Single<T>.observeOnDomain() = observeOn(Schedulers.single()).doOnSuccess { setSchedulerType() }!!
 fun <T : Any> Flowable<T>.observeOnDomain() = observeOn(Schedulers.single()).doOnNext { setSchedulerType() }!!
-fun Completable.observeOnDomain() = observeOn(Schedulers.single()).doOnComplete { setSchedulerType() }!!
+
+fun domainCompletable() = Completable.fromCallable { setSchedulerType() }.subscribeOn(Schedulers.single())!!
+fun runOnDomain(action: () -> Unit) = domainCompletable().andThen(Completable.fromAction(action)).subscribe()!!
 
 private fun setSchedulerType() = SchedulerTypeHolder.instance.set(SchedulerType.DOMAIN)

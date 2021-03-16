@@ -214,9 +214,10 @@ class DomainFactory(
     }
 
     private fun fixOffsets(source: String) {
+        MyCrashlytics.log("triggering fixing offsets from $source")
+
         SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
-        MyCrashlytics.log("triggering fixing offsets from $source")
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
         projectsFactory.projects
@@ -336,9 +337,9 @@ class DomainFactory(
     }
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
-
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
+
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
         updateShortcuts(now)
 
@@ -410,7 +411,9 @@ class DomainFactory(
         APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
-    fun throwIfSaved() = syncOnDomain {
+    fun throwIfSaved() {
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         if (projectsFactory.isSaved) throw SavedFactoryException()
     }
 

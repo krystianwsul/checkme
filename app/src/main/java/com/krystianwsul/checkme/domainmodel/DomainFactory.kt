@@ -122,7 +122,7 @@ class DomainFactory(
             }
         }
 
-        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
+        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) = runOnDomain {
             val domainFactory = nullableInstance
             if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
                 Preferences.tickLog.logLineHour("running firebaseListener $source")

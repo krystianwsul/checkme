@@ -250,9 +250,11 @@ class NotDoneGroupNode(
                             done
                     )
 
-                    setDone(true).subscribe()
-
-                    groupListFragment.listener.showSnackbarDone(1) { setDone(false).subscribe() }
+                    setDone(true).flatMapMaybe {
+                        groupListFragment.listener.showSnackbarDoneMaybe(1)
+                    }
+                            .flatMapSingle { setDone(false) }
+                            .subscribe() // todo scheduler addTo
                 }
             }
         } else {

@@ -26,7 +26,6 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class DoneInstanceNode(
         override val indentation: Int,
@@ -102,8 +101,6 @@ class DoneInstanceNode(
         return treeNode
     }
 
-    private fun expanded() = treeNode.isExpanded
-
     val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         get() {
             val collectionExpansionState = CollectionExpansionState(
@@ -144,7 +141,7 @@ class DoneInstanceNode(
                                 instanceData.instanceKey,
                                 false
                         )
-                        .subscribeBy {
+                        .doOnSuccess {
                             groupAdapter.treeNodeCollection
                                     .treeViewAdapter
                                     .updateDisplayedNodes { placeholder ->
@@ -154,18 +151,17 @@ class DoneInstanceNode(
 
                                         nodeCollection.notDoneGroupCollection.add(instanceData, placeholder)
                                     }
-
-                            groupListFragment.listener.showSnackbarNotDone(1) {
-                                DomainFactory.instance
-                                        .setInstanceDone(
-                                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                                SaveService.Source.GUI,
-                                                instanceData.instanceKey,
-                                                true
-                                        )
-                                        .subscribe() // todo scheduler
-                            }
-                        }// todo scheduler 1. feed this subscription back somewhere, 2. progress
+                        }
+                        .flatMapMaybe { groupListFragment.listener.showSnackbarNotDoneMaybe(1) }
+                        .flatMapSingle {
+                            DomainFactory.instance.setInstanceDone(
+                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                    SaveService.Source.GUI,
+                                    instanceData.instanceKey,
+                                    true
+                            )
+                        }
+                        .subscribe()// todo scheduler addTo
             }
         }
 
@@ -188,12 +184,14 @@ class DoneInstanceNode(
 
     override val isSelectable = true
 
-    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(
+            ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey)
+    )
 
-    fun removeFromParent(x: TreeViewAdapter.Placeholder) {
-        dividerNode.remove(this, x)
+    fun removeFromParent(placeholder: TreeViewAdapter.Placeholder) {
+        dividerNode.remove(this, placeholder)
 
-        treeNode.deselect(x)
+        treeNode.deselect(placeholder)
     }
 
     override val id = instanceData.instanceKey

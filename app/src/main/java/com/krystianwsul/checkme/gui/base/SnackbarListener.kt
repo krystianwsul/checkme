@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import io.reactivex.rxjava3.core.Maybe
 
 interface SnackbarListener {
 
@@ -22,26 +23,58 @@ interface SnackbarListener {
     LONG = 2750
      */
 
-    fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, Snackbar.LENGTH_LONG, action)
+    fun showSnackbarRemoved(count: Int, action: () -> Unit) =
+            showSnackbar(R.string.snackbarRemoved, count, Snackbar.LENGTH_LONG, action)
 
-    fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarDone, count, Snackbar.LENGTH_SHORT, action)
+    fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbarDoneMaybe(count).subscribe { action() }!!
+    fun showSnackbarDoneMaybe(count: Int) = showSnackbarMaybe(R.string.snackbarDone, count, Snackbar.LENGTH_SHORT)
 
-    fun showSnackbarNotDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarNotDone, count, Snackbar.LENGTH_SHORT, action)
+    fun showSnackbarNotDoneMaybe(count: Int) = showSnackbarMaybe(R.string.snackbarNotDone, count, Snackbar.LENGTH_SHORT)
 
     fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG)
 
-    fun showSnackbarHour(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT, action)
+    fun showSnackbarHour(count: Int, action: () -> Unit) =
+            showSnackbar(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT, action)
 
     fun showText(message: String, duration: Int) = showSnackbar(message, duration)
 
-    private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, action)
+    private fun showSnackbarMaybe(@StringRes messageId: Int, count: Int, duration: Int) =
+            Maybe.create<Unit> { emitter ->
+                showSnackbar(
+                        messageId,
+                        count,
+                        duration,
+                        { emitter.onSuccess(Unit) },
+                        { emitter.onComplete() }
+                )
+            }!!
 
-    private fun showSnackbar(message: String, duration: Int, action: (() -> Unit)? = null) {
+    private fun showSnackbar(
+            @StringRes messageId: Int,
+            count: Int,
+            duration: Int,
+            action: () -> Unit,
+            onDismiss: (() -> Unit)? = null,
+    ) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, action, onDismiss)
+
+    private fun showSnackbar(
+            message: String,
+            duration: Int,
+            action: (() -> Unit)? = null,
+            onDismiss: (() -> Unit)? = null,
+    ) {
         MyCrashlytics.logMethod(this)
 
         Snackbar.make(snackbarParent, message, duration).apply {
             action?.let {
                 setAction(R.string.undo) { action() }
+            }
+
+            onDismiss?.let {
+                addCallback(object : Snackbar.Callback() {
+
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) = it()
+                })
             }
 
             anchorView = anchor

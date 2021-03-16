@@ -30,7 +30,6 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.*
 
 class NotDoneGroupNode(
@@ -244,18 +243,16 @@ class NotDoneGroupNode(
                 CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    fun setDone(done: Boolean) = DomainFactory.instance
-                            .setInstanceDone(
-                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                    SaveService.Source.GUI,
-                                    instanceKey,
-                                    done
-                            )
-                            .subscribe() // todo scheduler
+                    fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
+                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                            SaveService.Source.GUI,
+                            instanceKey,
+                            done
+                    )
 
-                    setDone(true)
+                    setDone(true).subscribe()
 
-                    groupListFragment.listener.showSnackbarDone(1) { setDone(false) }
+                    groupListFragment.listener.showSnackbarDone(1) { setDone(false).subscribe() }
                 }
             }
         } else {
@@ -621,7 +618,7 @@ class NotDoneGroupNode(
                                     instanceKey,
                                     true
                             )
-                            .subscribeBy {
+                            .doOnSuccess {
                                 groupAdapter.treeNodeCollection
                                         .treeViewAdapter
                                         .updateDisplayedNodes { placeholder ->
@@ -631,18 +628,17 @@ class NotDoneGroupNode(
 
                                             parentNodeCollection.dividerNode.add(instanceData, placeholder)
                                         }
-
-                                groupListFragment.listener.showSnackbarDone(1) {
-                                    DomainFactory.instance
-                                            .setInstanceDone(
-                                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                                    SaveService.Source.GUI,
-                                                    instanceKey,
-                                                    false
-                                            )
-                                            .subscribe() // todo scheduler
-                                }
-                            }// todo scheduler
+                            }
+                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
+                            .flatMapSingle {
+                                DomainFactory.instance.setInstanceDone(
+                                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                        SaveService.Source.GUI,
+                                        instanceKey,
+                                        false
+                                )
+                            }
+                            .subscribe()// todo scheduler addTo
                 }
             }
 

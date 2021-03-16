@@ -328,7 +328,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         instanceKey,
                         done
                 )
-                .subscribe() // todo scheduler
+                .subscribe() // todo scheduler addTo
     }
 
     override fun onCreateGroupActionMode(

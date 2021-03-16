@@ -321,12 +321,14 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.instance.setInstanceDone(
-                DomainListenerManager.NotificationType.First(data!!.dataId),
-                SaveService.Source.GUI,
-                instanceKey,
-                done
-        )
+        DomainFactory.instance
+                .setInstanceDone(
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        SaveService.Source.GUI,
+                        instanceKey,
+                        done
+                )
+                .subscribe() // todo scheduler
     }
 
     override fun onCreateGroupActionMode(

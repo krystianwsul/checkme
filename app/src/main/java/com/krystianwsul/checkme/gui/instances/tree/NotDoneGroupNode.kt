@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.*
 
 class NotDoneGroupNode(
@@ -243,12 +244,14 @@ class NotDoneGroupNode(
                 CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                            SaveService.Source.GUI,
-                            instanceKey,
-                            done
-                    )
+                    fun setDone(done: Boolean) = DomainFactory.instance
+                            .setInstanceDone(
+                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                    SaveService.Source.GUI,
+                                    instanceKey,
+                                    done
+                            )
+                            .subscribe() // todo scheduler
 
                     setDone(true)
 
@@ -611,29 +614,35 @@ class NotDoneGroupNode(
                     val groupAdapter = parentNodeCollection.groupAdapter
                     val instanceKey = instanceData.instanceKey
 
-                    groupAdapter.treeNodeCollection
-                            .treeViewAdapter
-                            .updateDisplayedNodes {
-                                instanceData.done = DomainFactory.instance.setInstanceDone(
-                                        DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
-                                        SaveService.Source.GUI,
-                                        instanceKey,
-                                        true
-                                )!!
+                    DomainFactory.instance
+                            .setInstanceDone(
+                                    DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                    SaveService.Source.GUI,
+                                    instanceKey,
+                                    true
+                            )
+                            .subscribeBy {
+                                groupAdapter.treeNodeCollection
+                                        .treeViewAdapter
+                                        .updateDisplayedNodes { placeholder ->
+                                            instanceData.done = it.value!!
 
-                                parentNotDoneGroupNode.remove(this, it)
+                                            parentNotDoneGroupNode.remove(this, placeholder)
 
-                                parentNodeCollection.dividerNode.add(instanceData, it)
-                            }
+                                            parentNodeCollection.dividerNode.add(instanceData, placeholder)
+                                        }
 
-                    groupListFragment.listener.showSnackbarDone(1) {
-                        DomainFactory.instance.setInstanceDone(
-                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                SaveService.Source.GUI,
-                                instanceKey,
-                                false
-                        )
-                    }
+                                groupListFragment.listener.showSnackbarDone(1) {
+                                    DomainFactory.instance
+                                            .setInstanceDone(
+                                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                                    SaveService.Source.GUI,
+                                                    instanceKey,
+                                                    false
+                                            )
+                                            .subscribe() // todo scheduler
+                                }
+                            }// todo scheduler
                 }
             }
 

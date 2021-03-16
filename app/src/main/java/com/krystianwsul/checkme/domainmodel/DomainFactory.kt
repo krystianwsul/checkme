@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
+import androidx.annotation.CheckResult
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -37,6 +38,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 import com.soywiz.klock.hours
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -149,6 +151,10 @@ class DomainFactory(
 
             return DomainLocker.syncOnDomain(action)
         }
+
+        @CheckResult
+        fun <T : Any> scheduleOnDomain(action: () -> T) =
+                domainCompletable().andThen(Single.fromCallable(action)).observeOn(AndroidSchedulers.mainThread())!!
     }
 
     var remoteReadTimes: ReadTimes

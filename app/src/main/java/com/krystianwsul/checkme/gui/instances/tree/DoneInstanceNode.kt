@@ -26,6 +26,7 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class DoneInstanceNode(
         override val indentation: Int,
@@ -136,29 +137,35 @@ class DoneInstanceNode(
                 val nodeCollection = dividerNode.nodeCollection
                 val groupAdapter = nodeCollection.groupAdapter
 
-                groupAdapter.treeNodeCollection
-                        .treeViewAdapter
-                        .updateDisplayedNodes {
-                            instanceData.done = DomainFactory.instance.setInstanceDone(
-                                    DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
-                                    SaveService.Source.GUI,
-                                    instanceData.instanceKey,
-                                    false
-                            )
+                DomainFactory.instance
+                        .setInstanceDone(
+                                DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                SaveService.Source.GUI,
+                                instanceData.instanceKey,
+                                false
+                        )
+                        .subscribeBy {
+                            groupAdapter.treeNodeCollection
+                                    .treeViewAdapter
+                                    .updateDisplayedNodes { placeholder ->
+                                        instanceData.done = it.value
 
-                            dividerNode.remove(this, it)
+                                        dividerNode.remove(this, placeholder)
 
-                            nodeCollection.notDoneGroupCollection.add(instanceData, it)
-                        }
+                                        nodeCollection.notDoneGroupCollection.add(instanceData, placeholder)
+                                    }
 
-                groupListFragment.listener.showSnackbarNotDone(1) {
-                    DomainFactory.instance.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                            SaveService.Source.GUI,
-                            instanceData.instanceKey,
-                            true
-                    )
-                }
+                            groupListFragment.listener.showSnackbarNotDone(1) {
+                                DomainFactory.instance
+                                        .setInstanceDone(
+                                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                                SaveService.Source.GUI,
+                                                instanceData.instanceKey,
+                                                true
+                                        )
+                                        .subscribe() // todo scheduler
+                            }
+                        }// todo scheduler 1. feed this subscription back somewhere, 2. progress
             }
         }
 

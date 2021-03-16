@@ -173,7 +173,7 @@ class DomainFactoryTest {
                 doneInstanceKey,
                 true,
                 now
-        )
+        ).subscribe()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
         assertEquals(2, getTodayInstanceDatas(now).single().children.size)
@@ -258,7 +258,7 @@ class DomainFactoryTest {
                 instanceKey1,
                 true,
                 now
-        )
+        ).subscribe()
 
         now += 1.hours
 

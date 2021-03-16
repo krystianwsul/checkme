@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.common.firebase.SchedulerType
 import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import io.reactivex.rxjava3.core.Completable
@@ -13,6 +14,10 @@ fun <T : Any> Single<T>.observeOnDomain() = observeOn(Schedulers.single()).doOnS
 fun <T : Any> Flowable<T>.observeOnDomain() = observeOn(Schedulers.single()).doOnNext { setSchedulerType() }!!
 
 fun domainCompletable() = Completable.fromCallable { setSchedulerType() }.subscribeOn(Schedulers.single())!!
-fun runOnDomain(action: () -> Unit) = domainCompletable().andThen(Completable.fromAction(action)).subscribe()!!
+
+@CheckResult
+fun completeOnDomain(action: () -> Unit) = domainCompletable().andThen(Completable.fromAction(action))!!
+
+fun runOnDomain(action: () -> Unit) = completeOnDomain(action).subscribe()!!
 
 private fun setSchedulerType() = SchedulerTypeHolder.instance.set(SchedulerType.DOMAIN)

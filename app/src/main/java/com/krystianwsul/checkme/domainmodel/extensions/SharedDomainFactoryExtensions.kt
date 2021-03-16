@@ -1,10 +1,12 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
@@ -21,6 +23,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Single
 import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
@@ -158,13 +161,14 @@ fun DomainFactory.undoInstancesAddHour(
     notifyCloud(remoteProjects)
 }
 
+@CheckResult
 fun DomainFactory.setInstanceDone(
         notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKey: InstanceKey,
         done: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): ExactTimeStamp.Local? = syncOnDomain {
+): Single<NullableWrapper<ExactTimeStamp.Local>> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -178,7 +182,7 @@ fun DomainFactory.setInstanceDone(
 
     notifyCloud(instance.task.project)
 
-    instance.done
+    NullableWrapper(instance.done)
 }
 
 fun DomainFactory.setInstanceNotified(

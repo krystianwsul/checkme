@@ -348,8 +348,10 @@ class DomainFactory(
         changeTypeRelay.accept(changeType)
     }
 
-    override fun updateUserRecord(snapshot: Snapshot) = syncOnDomain {
+    override fun updateUserRecord(snapshot: Snapshot) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
+
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
@@ -477,8 +479,11 @@ class DomainFactory(
             silent: Boolean,
             sourceName: String,
             domainChanged: Boolean = false,
-    ) = syncOnDomain {
+    ) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
+
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.Local.now
@@ -501,8 +506,11 @@ class DomainFactory(
         projectsFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
     }
 
-    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = syncOnDomain {
+    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
+
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
         this.deviceDbInfo = deviceDbInfo

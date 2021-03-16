@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -36,6 +37,7 @@ import com.krystianwsul.common.firebase.SchedulerType
 import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import rxdogtag2.RxDogTag
 import java.io.File
@@ -124,15 +126,20 @@ class MyApplication : Application() {
 
         val localFactory = LocalFactory(PersistenceManager.instance)
 
-        FactoryLoader(
-                localFactory,
-                userInfoRelay,
-                FactoryProvider.Impl(localFactory),
-                Preferences.tokenRelay
-        ).domainFactoryObservable.subscribe {
-            @Suppress("UNCHECKED_CAST")
-            DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
-        }
+        Completable.complete()
+                .observeOnDomain()
+                .andThen(
+                        FactoryLoader(
+                                localFactory,
+                                userInfoRelay,
+                                FactoryProvider.Impl(localFactory),
+                                Preferences.tokenRelay.observeOnDomain()
+                        ).domainFactoryObservable
+                )
+                .subscribe {
+                    @Suppress("UNCHECKED_CAST")
+                    DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
+                }
 
         if (Preferences.token == null)
             FirebaseMessaging.getInstance()
@@ -154,13 +161,17 @@ class MyApplication : Application() {
                                 .toMaybe()
                     }
                     ?: Maybe.empty()
-        }.subscribe {
-            it.value
-                    ?.photoUrl
-                    ?.let { url ->
-                        DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
-                    }
         }
+                .observeOnDomain()
+                .subscribe {
+                    it.value
+                            ?.photoUrl
+                            ?.let { url ->
+                                DomainFactory.addFirebaseListener {
+                                    it.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                                }
+                            }
+                }
 
         RxPaparazzo.register(this)
 

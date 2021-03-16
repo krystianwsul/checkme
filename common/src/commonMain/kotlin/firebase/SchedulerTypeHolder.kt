@@ -1,7 +1,5 @@
 package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.ErrorLogger
-
 interface SchedulerTypeHolder {
 
     companion object {
@@ -14,12 +12,14 @@ interface SchedulerTypeHolder {
     fun set(schedulerType: SchedulerType)
 
     fun requireScheduler(requiredSchedulerType: SchedulerType? = null) {
-        fun err() = ErrorLogger.instance.logException(SchedulerException())
+        fun err(): Unit = throw SchedulerException() // ErrorLogger.instance.logException(SchedulerException()) // todo scheduler
 
         val schedulerType = get() ?: run {
             err()
             return
         }
+
+        if (schedulerType != SchedulerType.DOMAIN) err() // todo scheduler
 
         requiredSchedulerType?.let {
             if (it != schedulerType) err()

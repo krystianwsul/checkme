@@ -8,5 +8,7 @@ import android.content.Intent
 class TimeChangeReceiver : BroadcastReceiver() {
 
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
-    override fun onReceive(context: Context, intent: Intent) = Ticker.tick("TimeChangeReceiver", true)
+    override fun onReceive(context: Context, intent: Intent) {
+        Ticker.tick("TimeChangeReceiver", true).subscribe()
+    }
 }

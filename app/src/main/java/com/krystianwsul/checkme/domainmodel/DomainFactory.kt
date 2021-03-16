@@ -79,8 +79,8 @@ class DomainFactory(
                 .replay(1)!!
                 .apply { connect() }
 
-        // still running?
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = syncOnDomain {
+        @CheckResult
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = completeOnDomain {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance

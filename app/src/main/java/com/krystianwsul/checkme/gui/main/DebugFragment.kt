@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
@@ -47,7 +48,11 @@ class DebugFragment : AbstractFragment() {
                 }
                 .addTo(viewCreatedDisposable)
 
-        binding.debugTick.setOnClickListener { Ticker.tick("DebugFragment") }
+        binding.debugTick
+                .clicks()
+                .switchMapCompletable { Ticker.tick("DebugFragment") }
+                .subscribe()
+                .addTo(viewCreatedDisposable)
 
         binding.debugLoad.setOnClickListener {
             binding.debugData.text = StringBuilder().apply {

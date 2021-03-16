@@ -20,7 +20,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             check(refresh.isNotEmpty())
             check(data[REFRESH_KEY] == "true")
 
-            if (MyApplication.instance.hasUserInfo) Ticker.tick("MyFirebaseMessagingService", true)
+            if (MyApplication.instance.hasUserInfo)
+                Ticker.tick("MyFirebaseMessagingService", true).subscribe()
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

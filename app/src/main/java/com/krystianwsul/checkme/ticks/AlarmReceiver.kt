@@ -12,5 +12,7 @@ class AlarmReceiver : BroadcastReceiver() {
         fun newIntent() = Intent(MyApplication.instance, AlarmReceiver::class.java)
     }
 
-    override fun onReceive(context: Context, intent: Intent) = Ticker.tick("AlarmReceiver")
+    override fun onReceive(context: Context, intent: Intent) {
+        Ticker.tick("AlarmReceiver").subscribe()
+    }
 }

@@ -213,7 +213,9 @@ class DomainFactory(
                 .addTo(domainDisposable)
     }
 
-    private fun fixOffsets(source: String) = syncOnDomain {
+    private fun fixOffsets(source: String) {
+        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
         MyCrashlytics.log("triggering fixing offsets from $source")
         if (projectsFactory.isSaved) throw SavedFactoryException()
 

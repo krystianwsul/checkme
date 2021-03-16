@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree.delegates.checkable
 
 import android.view.View
+import io.reactivex.rxjava3.core.Completable
 
 sealed class CheckBoxState {
 
@@ -17,7 +18,7 @@ sealed class CheckBoxState {
         override val visibility = View.INVISIBLE
     }
 
-    class Visible(override val checked: Boolean, val listener: () -> Unit) : CheckBoxState() {
+    class Visible(override val checked: Boolean, val completable: () -> Completable) : CheckBoxState() {
 
         override val visibility = View.VISIBLE
 

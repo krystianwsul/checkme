@@ -161,7 +161,7 @@ class DoneInstanceNode(
                                     true
                             )
                         }
-                        .subscribe()// todo scheduler addTo
+                        .ignoreElement()
             }
         }
 

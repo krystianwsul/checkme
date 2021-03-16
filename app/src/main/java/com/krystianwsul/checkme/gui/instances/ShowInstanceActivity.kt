@@ -30,6 +30,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
@@ -174,7 +175,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             EDIT_INSTANCES_TAG
                                     )
                                 }
-                                R.id.instanceMenuCheck -> if (!it.done) setDone(true)
+                                R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)
                             }
                         }
@@ -328,7 +329,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         instanceKey,
                         done
                 )
-                .subscribe() // todo scheduler addTo
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     override fun onCreateGroupActionMode(

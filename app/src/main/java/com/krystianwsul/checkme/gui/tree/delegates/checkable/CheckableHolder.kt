@@ -5,6 +5,7 @@ import android.widget.CheckBox
 import android.widget.FrameLayout
 import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.gui.tree.BaseHolder
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 
@@ -20,9 +21,12 @@ interface CheckableHolder : BaseHolder {
                 rowCheckBox.clicks()
         ).merge()
                 .mapTreeNode()
-                .subscribe {
-                    ((it.modelNode as CheckableModelNode).checkBoxState as? CheckBoxState.Visible)?.listener?.invoke()
+                .switchMapCompletable {
+                    ((it.modelNode as CheckableModelNode).checkBoxState as? CheckBoxState.Visible)?.completable
+                            ?.invoke()
+                            ?: Completable.complete()
                 }
+                .subscribe()
                 .addTo(compositeDisposable)
     }
 }

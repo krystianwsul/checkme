@@ -254,7 +254,7 @@ class NotDoneGroupNode(
                         groupListFragment.listener.showSnackbarDoneMaybe(1)
                     }
                             .flatMapSingle { setDone(false) }
-                            .subscribe() // todo scheduler addTo
+                            .ignoreElement()
                 }
             }
         } else {
@@ -640,7 +640,7 @@ class NotDoneGroupNode(
                                         false
                                 )
                             }
-                            .subscribe()// todo scheduler addTo
+                            .ignoreElement()
                 }
             }
 

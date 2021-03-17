@@ -303,6 +303,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
             DomainFactory.addFirebaseListener {
                 it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
+                        .subscribe()
+                        .addTo(createDisposable)
             }
                     .subscribe()
                     .addTo(createDisposable)

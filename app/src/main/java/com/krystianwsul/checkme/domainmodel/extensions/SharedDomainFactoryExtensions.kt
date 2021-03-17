@@ -186,11 +186,12 @@ fun DomainFactory.setInstanceDone(
     NullableWrapper(instance.done)
 }
 
+@CheckResult
 fun DomainFactory.setInstanceNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKey: InstanceKey,
-) = syncOnDomain { // todo scheduler completable
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

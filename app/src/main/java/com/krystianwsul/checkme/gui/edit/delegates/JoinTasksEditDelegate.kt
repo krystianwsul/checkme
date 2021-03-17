@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
@@ -89,23 +90,28 @@ class JoinTasksEditDelegate(
                 .toCreateResult()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
+    override fun createTaskWithParent(
+            createParameters: CreateParameters,
+            parentTaskKey: TaskKey,
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .createJoinChildTask(
-                        SaveService.Source.GUI,
-                        parentTaskKey,
-                        createParameters.name,
-                        taskKeys,
-                        createParameters.note,
-                        imageUrl.value!!
-                                .writeImagePath
-                                ?.value,
-                        instanceKeys
-                )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+        return Single.just(
+                DomainFactory.instance
+                        .createJoinChildTask(
+                                SaveService.Source.GUI,
+                                parentTaskKey,
+                                createParameters.name,
+                                taskKeys,
+                                createParameters.note,
+                                imageUrl.value!!
+                                        .writeImagePath
+                                        ?.value,
+                                instanceKeys
+                        )
+                        .also { EditActivity.createdTaskKey = it }
+                        .toCreateResult()
+        )
     }
 
     override fun createTaskWithoutReminder(

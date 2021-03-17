@@ -79,7 +79,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now = now
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         assertEquals(taskKey1, getTodayInstanceDatas(now).single().taskKey)
         assertEquals(taskKey2, getTodayInstanceDatas(now).single().children.values.single().taskKey)
@@ -144,7 +146,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         val notDoneChildTaskKey = domainFactory.createChildTask(
                 SaveService.Source.SERVICE,
@@ -154,7 +158,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         assertEquals(1, getTodayInstanceDatas(now).size)
         assertEquals(2, getTodayInstanceDatas(now).single().children.size)
@@ -270,7 +276,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).blockingGet()
 
         val secondInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
@@ -315,7 +321,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper

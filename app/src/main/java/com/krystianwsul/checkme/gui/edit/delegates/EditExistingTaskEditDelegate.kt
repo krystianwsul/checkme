@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class EditExistingTaskEditDelegate(
@@ -64,19 +65,24 @@ class EditExistingTaskEditDelegate(
                 .toCreateResult()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
-        return DomainFactory.instance
-                .updateChildTask(
-                        SaveService.Source.GUI,
-                        parameters.taskKey,
-                        createParameters.name,
-                        parentTaskKey,
-                        createParameters.note,
-                        imageUrl.value!!.writeImagePath,
-                        parameters.openedFromInstanceKey,
-                        createParameters.allReminders
-                )
-                .toCreateResult()
+    override fun createTaskWithParent(
+            createParameters: CreateParameters,
+            parentTaskKey: TaskKey,
+    ): Single<CreateResult> {
+        return Single.just(
+                DomainFactory.instance
+                        .updateChildTask(
+                                SaveService.Source.GUI,
+                                parameters.taskKey,
+                                createParameters.name,
+                                parentTaskKey,
+                                createParameters.note,
+                                imageUrl.value!!.writeImagePath,
+                                parameters.openedFromInstanceKey,
+                                createParameters.allReminders
+                        )
+                        .toCreateResult()
+        )
     }
 
     override fun createTaskWithoutReminder(

@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
@@ -134,7 +135,10 @@ class CreateTaskEditDelegate(
                 .applyCreatedTaskKey()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
+    override fun createTaskWithParent(
+            createParameters: CreateParameters,
+            parentTaskKey: TaskKey,
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
@@ -149,7 +153,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .applyCreatedTaskKey()
+                .doOnSuccess { it.applyCreatedTaskKey() }
     }
 
     override fun createTaskWithoutReminder(

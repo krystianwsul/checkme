@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import android.net.Uri
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
@@ -21,6 +23,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
@@ -186,6 +189,7 @@ private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) 
                 ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
                 ?: EditDelegate.CreateResult.Task(taskKey)
 
+@CheckResult
 fun DomainFactory.createChildTask(
         source: SaveService.Source,
         parentTaskKey: TaskKey,
@@ -194,7 +198,7 @@ fun DomainFactory.createChildTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): EditDelegate.CreateResult = syncOnDomain {
+): Single<EditDelegate.CreateResult> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.createChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

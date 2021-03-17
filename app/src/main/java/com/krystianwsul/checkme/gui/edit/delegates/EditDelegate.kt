@@ -17,6 +17,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.getCurrentValue
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -216,7 +217,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             tmpParentTaskKey = taskKey
     }
 
-    fun createTask(createParameters: CreateParameters): CreateResult {
+    fun createTask(createParameters: CreateParameters): Single<CreateResult> {
         check(createParameters.allReminders || showAllRemindersDialog() != null)
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
@@ -231,10 +232,12 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
 
         return when {
-            parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
-                    createParameters,
-                    parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                    sharedProjectParameters
+            parentScheduleManager.schedules.isNotEmpty() -> Single.just(
+                    createTaskWithSchedule(
+                            createParameters,
+                            parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
+                            sharedProjectParameters
+                    )
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
@@ -246,7 +249,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             else -> {
                 check(assignedTo.isEmpty())
 
-                createTaskWithoutReminder(createParameters, projectId)
+                Single.just(createTaskWithoutReminder(createParameters, projectId))
             }
         }
     }
@@ -257,10 +260,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             sharedProjectParameters: SharedProjectParameters?,
     ): CreateResult
 
-    abstract fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
-    ): CreateResult
+    abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,

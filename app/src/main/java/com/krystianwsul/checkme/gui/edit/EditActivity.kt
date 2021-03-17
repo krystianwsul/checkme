@@ -55,6 +55,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.observable
 
@@ -518,16 +519,18 @@ class EditActivity : NavBarActivity() {
 
         val createParameters = EditDelegate.CreateParameters(name, note, allReminders)
 
-        val createResult = delegate.createTask(createParameters)
+        delegate.createTask(createParameters)
+                .subscribeBy {
+                    if (andOpen) startActivity(it.intent)
 
-        if (andOpen) startActivity(createResult.intent)
+                    setResult(
+                            Activity.RESULT_OK,
+                            Intent().putExtra(ShowTaskActivity.TASK_KEY_KEY, it.taskKey as Parcelable)
+                    )
 
-        setResult(
-                Activity.RESULT_OK,
-                Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, createResult.taskKey as Parcelable) }
-        )
-
-        finish()
+                    finish()
+                }
+                .addTo(createDisposable)
     }
 
     private fun assignTo(userKeys: Set<UserKey>) {

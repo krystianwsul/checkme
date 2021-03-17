@@ -36,8 +36,8 @@ interface SnackbarListener {
 
     fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG)
 
-    fun showSnackbarHour(count: Int, action: () -> Unit) =
-            showSnackbar(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT, action)
+    fun showSnackbarHour(count: Int, action: () -> Unit) = showSnackbarHourMaybe(count).subscribe { action() }!!
+    fun showSnackbarHourMaybe(count: Int) = showSnackbarMaybe(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT)
 
     fun showText(message: String, duration: Int) = showSnackbar(message, duration)
 

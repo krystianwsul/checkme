@@ -166,7 +166,19 @@ class GroupListFragment @JvmOverloads constructor(
                     check(showHour(selectedDatas))
                     val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
-                    addHour(instanceKeys)
+
+                    val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+
+                    listener.showSnackbarHourMaybe(hourUndoData.instanceDateTimes.size)
+                            .flatMapCompletable {
+                                DomainFactory.instance.undoInstancesAddHour(
+                                        0,
+                                        SaveService.Source.GUI,
+                                        hourUndoData,
+                                )
+                            }
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
                 }
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
@@ -778,14 +790,6 @@ class GroupListFragment @JvmOverloads constructor(
                 )
             else
                 setGroupMenuItemVisibility(position, false)
-        }
-    }
-
-    private fun addHour(instanceKeys: Collection<InstanceKey>) {
-        val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
-
-        listener.showSnackbarHour(hourUndoData.instanceDateTimes.size) {
-            DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
         }
     }
 

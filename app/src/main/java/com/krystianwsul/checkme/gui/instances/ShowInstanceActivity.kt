@@ -165,13 +165,15 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             listOf(instanceKey)
                                     )
 
-                                    showSnackbarHour(hourUndoData.instanceDateTimes.size) {
+                                    showSnackbarHourMaybe(hourUndoData.instanceDateTimes.size).flatMapCompletable {
                                         DomainFactory.instance.undoInstancesAddHour(
                                                 0,
                                                 SaveService.Source.GUI,
-                                                hourUndoData
+                                                hourUndoData,
                                         )
                                     }
+                                            .subscribe()
+                                            .addTo(createDisposable)
                                 }
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)

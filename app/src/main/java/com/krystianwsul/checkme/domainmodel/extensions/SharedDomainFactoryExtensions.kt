@@ -138,11 +138,12 @@ fun DomainFactory.setInstancesAddHourActivity(
     DomainFactory.HourUndoData(instanceDateTimes)
 }
 
+@CheckResult
 fun DomainFactory.undoInstancesAddHour(
         dataId: Int,
         source: SaveService.Source,
         hourUndoData: DomainFactory.HourUndoData,
-) = syncOnDomain { // todo scheduler completable
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

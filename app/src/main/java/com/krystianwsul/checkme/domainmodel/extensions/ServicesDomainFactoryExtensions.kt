@@ -14,7 +14,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
-fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) = syncOnDomain {
+fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -43,8 +43,8 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
 
 fun DomainFactory.setInstanceNotificationDone(
         source: SaveService.Source,
-        instanceKey: InstanceKey
-) = syncOnDomain {
+        instanceKey: InstanceKey,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -65,8 +65,8 @@ fun DomainFactory.setInstanceNotificationDone(
 
 fun DomainFactory.setInstancesNotified(
         source: SaveService.Source,
-        instanceKeys: List<InstanceKey>
-) = syncOnDomain {
+        instanceKeys: List<InstanceKey>,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstancesNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -81,8 +81,8 @@ fun DomainFactory.setInstancesNotified(
 fun DomainFactory.setTaskImageUploaded(
         source: SaveService.Source,
         taskKey: TaskKey,
-        imageUuid: String
-) = syncOnDomain {
+        imageUuid: String,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

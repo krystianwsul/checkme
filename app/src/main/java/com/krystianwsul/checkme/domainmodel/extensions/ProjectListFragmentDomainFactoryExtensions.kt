@@ -65,8 +65,8 @@ fun DomainFactory.setProjectEndTimeStamps(
 fun DomainFactory.clearProjectEndTimeStamps(
         dataId: Int,
         source: SaveService.Source,
-        projectUndoData: ProjectUndoData
-) = syncOnDomain {
+        projectUndoData: ProjectUndoData,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     val now = ExactTimeStamp.Local.now

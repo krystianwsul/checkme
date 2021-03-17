@@ -46,8 +46,8 @@ fun DomainFactory.setCustomTimesCurrent(
         dataId: Int,
         source: SaveService.Source,
         customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
-        current: Boolean
-) = DomainFactory.syncOnDomain {
+        current: Boolean,
+) = DomainFactory.syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
@@ -130,13 +131,16 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainFactory.instance.updateCustomTime(
-                                data!!.dataId,
-                                SaveService.Source.GUI,
-                                data!!.key,
-                                name,
-                                hourMinutes
-                        )
+                        DomainFactory.instance
+                                .updateCustomTime(
+                                        data!!.dataId,
+                                        SaveService.Source.GUI,
+                                        data!!.key,
+                                        name,
+                                        hourMinutes
+                                )
+                                .subscribe()
+                                .addTo(createDisposable)
                     } else {
                         val customTimeKey = DomainFactory.instance.createCustomTime(
                                 SaveService.Source.GUI,

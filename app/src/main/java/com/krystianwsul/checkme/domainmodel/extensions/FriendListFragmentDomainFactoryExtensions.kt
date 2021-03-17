@@ -30,7 +30,7 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
     return FriendListViewModel.Data(userListDatas)
 }
 
-fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = syncOnDomain {
+fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.removeFriends")
     check(!friendsFactory.isSaved)
 
@@ -39,7 +39,7 @@ fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) 
     save(0, source)
 }
 
-fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = syncOnDomain {
+fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.addFriends")
     check(!myUserFactory.isSaved)
 

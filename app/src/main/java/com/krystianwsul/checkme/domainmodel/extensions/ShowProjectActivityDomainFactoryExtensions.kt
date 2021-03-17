@@ -45,8 +45,8 @@ fun DomainFactory.createProject(
         dataId: Int,
         source: SaveService.Source,
         name: String,
-        friends: Set<UserKey>
-) = syncOnDomain {
+        friends: Set<UserKey>,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -82,8 +82,8 @@ fun DomainFactory.updateProject(
         projectId: ProjectKey.Shared,
         name: String,
         addedFriends: Set<UserKey>,
-        removedFriends: Set<UserKey>
-) = syncOnDomain {
+        removedFriends: Set<UserKey>,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())

@@ -16,7 +16,7 @@ fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
     return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
 }
 
-fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = syncOnDomain {
+fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.updateDefaultTab")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 
@@ -28,8 +28,8 @@ fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) 
 fun DomainFactory.updateDefaultReminder(
         dataId: Int,
         source: SaveService.Source,
-        defaultReminder: Boolean
-) = syncOnDomain {
+        defaultReminder: Boolean,
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.updateDefaultReminder")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 

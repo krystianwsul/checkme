@@ -39,7 +39,7 @@ fun DomainFactory.setTaskEndTimeStamps(
     setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
 }
 
-fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = syncOnDomain {
+fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -58,7 +58,7 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     notifyCloud(remoteProjects)
 }
 
-fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = syncOnDomain {
+fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -79,7 +79,7 @@ fun DomainFactory.setInstancesNotNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
-) = syncOnDomain {
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -142,7 +142,7 @@ fun DomainFactory.undoInstancesAddHour(
         dataId: Int,
         source: SaveService.Source,
         hourUndoData: DomainFactory.HourUndoData,
-) = syncOnDomain {
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -189,7 +189,7 @@ fun DomainFactory.setInstanceNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKey: InstanceKey,
-) = syncOnDomain {
+) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -201,7 +201,7 @@ fun DomainFactory.setInstanceNotified(
     save(dataId, source)
 }
 
-fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) = syncOnDomain {
+fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
     if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
@@ -340,7 +340,7 @@ fun addChildToParent(
     )
 }
 
-fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnDomain {
+fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnDomain { // todo scheduler completable
     MyCrashlytics.log("DomainFactory.undo")
     if (isSaved.value!!) throw SavedFactoryException()
 

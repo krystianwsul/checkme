@@ -45,8 +45,10 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -217,20 +219,24 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            val editInstancesUndoData = DomainFactory.instance.run {
-                state.parentInstanceData
-                        ?.let { setInstancesParent(SaveService.Source.GUI, data.instanceKeys, it.instanceKey) }
-                        ?: setInstancesDateTime(
-                                SaveService.Source.GUI,
-                                data.instanceKeys,
-                                state.date,
-                                state.timePairPersist.timePair
-                        )
-            }
+            DomainFactory.instance
+                    .run {
+                        state.parentInstanceData
+                                ?.let { setInstancesParent(SaveService.Source.GUI, data.instanceKeys, it.instanceKey) }
+                                ?: setInstancesDateTime(
+                                        SaveService.Source.GUI,
+                                        data.instanceKeys,
+                                        state.date,
+                                        state.timePairPersist.timePair
+                                )
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeBy {
+                        dismiss()
 
-            dismiss()
-
-            listener?.invoke(editInstancesUndoData, data.instanceKeys.size)
+                        listener?.invoke(it, data.instanceKeys.size)
+                    }
+                    .addTo(viewCreatedDisposable)
         }
 
         binding.editInstanceCancel.setOnClickListener { requireDialog().cancel() }

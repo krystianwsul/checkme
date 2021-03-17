@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.common.firebase.SchedulerType
@@ -30,7 +31,8 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
     return FriendListViewModel.Data(userListDatas)
 }
 
-fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = syncOnDomain { // todo scheduler completable
+@CheckResult
+fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.removeFriends")
     check(!friendsFactory.isSaved)
 
@@ -39,7 +41,8 @@ fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) 
     save(0, source)
 }
 
-fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = syncOnDomain { // todo scheduler completable
+@CheckResult
+fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.addFriends")
     check(!myUserFactory.isSaved)
 

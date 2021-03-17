@@ -38,6 +38,8 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
@@ -255,15 +257,18 @@ class FriendListFragment : AbstractFragment(), FabUser {
             val userPairs = userListDatas.associate { it.id to it.userWrapper }
             val friendIds = userPairs.map { it.key }.toSet()
 
-            DomainFactory.instance.removeFriends(SaveService.Source.GUI, friendIds)
-
-            mainActivity.showSnackbarRemoved(userListDatas.size) {
-                onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
-                        .toMutableSet()
-                        .apply { addAll(userListDatas) }))
-
-                DomainFactory.instance.addFriends(SaveService.Source.GUI, userPairs)
-            }
+            DomainFactory.instance
+                    .removeFriends(SaveService.Source.GUI, friendIds)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
+                    .doOnSuccess {
+                        onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
+                                .toMutableSet()
+                                .apply { addAll(userListDatas) }))
+                    }
+                    .flatMapCompletable { DomainFactory.instance.addFriends(SaveService.Source.GUI, userPairs) }
+                    .subscribe()
+                    .addTo(createDisposable)
         }
     }
 

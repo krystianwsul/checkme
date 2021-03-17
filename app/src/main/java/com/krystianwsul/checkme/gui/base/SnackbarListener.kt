@@ -23,10 +23,6 @@ interface SnackbarListener {
     LONG = 2750
      */
 
-    fun showSnackbarRemoved(count: Int, action: () -> Unit) {
-        showSnackbarRemovedMaybe(count).subscribe { action() }!!
-    }
-
     fun showSnackbarRemovedMaybe(count: Int) = showSnackbarMaybe(R.string.snackbarRemoved, count, Snackbar.LENGTH_LONG)
 
     fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbarDoneMaybe(count).subscribe { action() }!!

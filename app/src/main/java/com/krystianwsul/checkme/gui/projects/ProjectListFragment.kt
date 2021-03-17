@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
@@ -114,7 +115,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private lateinit var projectListViewModel: ProjectListViewModel
 
-    private val deleteInstancesListener = { projectIds: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { projectIds, removeInstances ->
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
@@ -125,9 +126,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 removeInstances
         )
 
-        mainActivity.showSnackbarRemoved(projectIds.size) {
-            DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
-        }
+        mainActivity.showSnackbarRemovedMaybe(projectIds.size)
+                .flatMapCompletable {
+                    DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
+                }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val bindingProperty = ResettableProperty<FragmentProjectListBinding>()

@@ -52,7 +52,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         @Suppress("UNCHECKED_CAST")
         val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(
                 SaveService.Source.GUI,
@@ -60,9 +60,12 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 removeInstances
         )
 
-        showSnackbarRemoved(taskUndoData.taskKeys.size) {
-            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-        }
+        showSnackbarRemovedMaybe(taskUndoData.taskKeys.size)
+                .flatMapCompletable {
+                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+                }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {

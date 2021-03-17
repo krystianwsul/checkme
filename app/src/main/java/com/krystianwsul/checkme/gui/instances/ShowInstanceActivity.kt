@@ -86,7 +86,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showInstanceViewModel.stop()
 
         val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(
@@ -99,9 +99,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         if (visible) {
             showInstanceViewModel.start(instanceKey)
 
-            showSnackbarRemoved(taskKeys.size) {
-                DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
-            }
+            showSnackbarRemovedMaybe(taskKeys.size)
+                    .flatMapCompletable {
+                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
+                    }
+                    .subscribe()
+                    .addTo(createDisposable)
         } else {
             setSnackbar(undoTaskData)
 

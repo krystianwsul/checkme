@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.common.domain.TaskUndoData
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -32,6 +33,9 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
             Companion.snackbarData = snackbarData
         }
+
+        fun setSnackbar(action: (SnackbarListener) -> Unit) =
+                setSnackbar(SnackbarData { Completable.fromAction { action(it) } })
 
         fun setSnackbar(taskUndoData: TaskUndoData) = setSnackbar(TaskSnackbarData(taskUndoData))
     }
@@ -102,7 +106,11 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
         snackbarData?.let {
             (this as? SnackbarListener)?.apply {
-                anchor.addOneShotGlobalLayoutListener { it.show(this) }
+                anchor.addOneShotGlobalLayoutListener {
+                    it.show(this)
+                            .subscribe()
+                            .addTo(createDisposable)
+                }
             }
         }
         snackbarData = null // shouldn't this be moved into `apply` or `addOneShotGlobalLayoutListener`?

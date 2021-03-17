@@ -55,6 +55,7 @@ import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -96,15 +97,18 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
         val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
-        listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-        }
+        listener.showSnackbarRemovedMaybe(taskUndoData.taskKeys.size)
+                .flatMapCompletable {
+                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+                }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val selectionCallback = object : SelectionCallback() {

@@ -8,9 +8,8 @@ import com.krystianwsul.common.domain.TaskUndoData
 
 class TaskSnackbarData(private val taskUndoData: TaskUndoData) : SnackbarData {
 
-    override fun show(snackbarListener: SnackbarListener) {
-        snackbarListener.showSnackbarRemoved(1) {
-            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-        }
-    }
+    override fun show(snackbarListener: SnackbarListener) =
+            snackbarListener.showSnackbarRemovedMaybe(1).flatMapCompletable {
+                DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+            }!!
 }

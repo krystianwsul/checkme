@@ -25,6 +25,7 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
@@ -51,7 +52,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     override val snackbarParent get() = binding.showGroupCoordinator
 
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         @Suppress("UNCHECKED_CAST")
         val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(
                 SaveService.Source.GUI,
@@ -59,9 +60,11 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 removeInstances
         )
 
-        showSnackbarRemoved(taskUndoData.taskKeys.size) {
+        showSnackbarRemovedMaybe(taskUndoData.taskKeys.size).flatMapCompletable {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
         }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {

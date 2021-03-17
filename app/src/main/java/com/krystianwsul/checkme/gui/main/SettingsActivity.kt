@@ -137,7 +137,11 @@ class SettingsActivity : NavBarActivity() {
                     }.ordinal
 
                     Preferences.tab = newTab
-                    DomainFactory.instance.updateDefaultTab(SaveService.Source.GUI, newTab)
+
+                    DomainFactory.instance
+                            .updateDefaultTab(SaveService.Source.GUI, newTab)
+                            .subscribe()
+                            .addTo(createDisposable)
 
                     true
                 }
@@ -152,11 +156,10 @@ class SettingsActivity : NavBarActivity() {
                             isChecked = it.defaultReminder
 
                             setOnPreferenceChangeListener { _, newValue ->
-                                DomainFactory.instance.updateDefaultReminder(
-                                        it.dataId,
-                                        SaveService.Source.GUI,
-                                        newValue as Boolean
-                                )
+                                DomainFactory.instance
+                                        .updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+                                        .subscribe()
+                                        .addTo(createDisposable)
 
                                 true
                             }

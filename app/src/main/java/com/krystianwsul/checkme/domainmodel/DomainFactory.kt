@@ -106,6 +106,7 @@ class DomainFactory(
             }
         }
 
+        // todo scheduler change to single that emits when firebase is ready
         // todo route all external calls through here
         @CheckResult
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = completeOnDomain {

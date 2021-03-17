@@ -45,11 +45,8 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
 
-        // todo scheduler
-        fun TaskKey.toCreateResult() = CreateResult.Task(this)
-
-        // todo scheduler
-        fun CreateResult.applyCreatedTaskKey() = apply { EditActivity.createdTaskKey = taskKey }
+        fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
+        fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }!!
     }
 
     fun newData(data: EditViewModel.Data) {

@@ -42,7 +42,7 @@ class CopyExistingTaskEditDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .doOnSuccess { it.applyCreatedTaskKey() }
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
@@ -62,7 +62,7 @@ class CopyExistingTaskEditDelegate(
                                 ?.value,
                         parameters.taskKey
                 )
-                .doOnSuccess { it.applyCreatedTaskKey() }
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
@@ -71,19 +71,17 @@ class CopyExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return Single.just(
-                DomainFactory.instance
-                        .createRootTask(
-                                SaveService.Source.GUI,
-                                createParameters.name,
-                                createParameters.note,
-                                sharedProjectKey,
-                                imageUrl.value!!
-                                        .writeImagePath
-                                        ?.value,
-                                parameters.taskKey
-                        )
-                        .applyCreatedTaskKey()
-        )
+        return DomainFactory.instance
+                .createRootTask(
+                        SaveService.Source.GUI,
+                        createParameters.name,
+                        createParameters.note,
+                        sharedProjectKey,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
+                        parameters.taskKey
+                )
+                .applyCreatedTaskKey()
     }
 }

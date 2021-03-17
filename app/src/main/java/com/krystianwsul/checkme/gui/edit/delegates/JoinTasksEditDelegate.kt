@@ -73,23 +73,21 @@ class JoinTasksEditDelegate(
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult> {
-        return Single.just(
-                DomainFactory.instance
-                        .createScheduleJoinRootTask(
-                                SaveService.Source.GUI,
-                                createParameters.name,
-                                scheduleDatas,
-                                parameters.joinables,
-                                createParameters.note,
-                                sharedProjectParameters,
-                                imageUrl.value!!
-                                        .writeImagePath
-                                        ?.value,
-                                createParameters.allReminders
-                        )
-                        .also { EditActivity.createdTaskKey = it }
-                        .toCreateResult()
-        )
+        return DomainFactory.instance
+                .createScheduleJoinRootTask(
+                        SaveService.Source.GUI,
+                        createParameters.name,
+                        scheduleDatas,
+                        parameters.joinables,
+                        createParameters.note,
+                        sharedProjectParameters,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
+                        createParameters.allReminders
+                )
+                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
@@ -110,8 +108,8 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         instanceKeys
                 )
-                .doOnSuccess { EditActivity.createdTaskKey = it }
-                .map { it.toCreateResult() }
+                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
@@ -132,7 +130,7 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         instanceKeys
                 )
-                .doOnSuccess { EditActivity.createdTaskKey = it }
-                .map { it.toCreateResult() }
+                .toCreateResult()
+                .applyCreatedTaskKey()
     }
 }

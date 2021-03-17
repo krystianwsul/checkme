@@ -99,7 +99,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).blockingGet()
 
         assertEquals(2, getTodayInstanceDatas(now).size)
 
@@ -115,7 +115,7 @@ class DomainFactoryTest {
                 null,
                 true,
                 now,
-        )
+        ).blockingGet()
 
         domainFactory.getTaskForce(taskKey1).invalidateIntervals()
         domainFactory.getTaskForce(taskKey2).invalidateIntervals()
@@ -214,7 +214,7 @@ class DomainFactoryTest {
                 null,
                 true,
                 now
-        )
+        ).blockingGet()
 
         domainFactory.updateChildTask(
                 SaveService.Source.SERVICE,
@@ -226,7 +226,7 @@ class DomainFactoryTest {
                 null,
                 true,
                 now
-        )
+        ).blockingGet()
 
         assertEquals(2, getTodayInstanceDatas(now).size)
 
@@ -362,7 +362,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        )
+        ).blockingGet()
 
         domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
@@ -419,7 +419,7 @@ class DomainFactoryTest {
                 null,
                 true,
                 now
-        )
+        ).blockingGet()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
         assertEquals(2, getTodayInstanceDatas(now).single().children.size)

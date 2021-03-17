@@ -5,7 +5,6 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -232,6 +231,7 @@ fun DomainFactory.createChildTask(
     childTask.toCreateResult(now)
 }
 
+@CheckResult
 fun DomainFactory.createRootTask(
         source: SaveService.Source,
         name: String,
@@ -240,7 +240,7 @@ fun DomainFactory.createRootTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): EditDelegate.CreateResult = syncOnDomain {
+): Single<EditDelegate.CreateResult> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.createRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -274,6 +274,7 @@ fun DomainFactory.createRootTask(
     task.toCreateResult(now)
 }
 
+@CheckResult
 fun DomainFactory.updateScheduleTask(
         source: SaveService.Source,
         taskKey: TaskKey,
@@ -283,7 +284,7 @@ fun DomainFactory.updateScheduleTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): Single<TaskKey> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -328,6 +329,7 @@ fun DomainFactory.updateScheduleTask(
     task.taskKey
 }
 
+@CheckResult
 fun DomainFactory.updateChildTask(
         source: SaveService.Source,
         taskKey: TaskKey,
@@ -338,7 +340,7 @@ fun DomainFactory.updateChildTask(
         removeInstanceKey: InstanceKey?,
         allReminders: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): Single<TaskKey> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.updateChildTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -399,6 +401,7 @@ fun DomainFactory.updateChildTask(
     task.taskKey
 }
 
+@CheckResult
 fun DomainFactory.updateRootTask(
         source: SaveService.Source,
         taskKey: TaskKey,
@@ -407,7 +410,7 @@ fun DomainFactory.updateRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): Single<TaskKey> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.updateRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -443,6 +446,7 @@ fun DomainFactory.updateRootTask(
     task.taskKey
 }
 
+@CheckResult
 fun DomainFactory.createScheduleJoinRootTask(
         source: SaveService.Source,
         name: String,
@@ -453,7 +457,7 @@ fun DomainFactory.createScheduleJoinRootTask(
         imagePath: Pair<String, Uri>?,
         allReminders: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): TaskKey = syncOnDomain {
+): Single<TaskKey> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

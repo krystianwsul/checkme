@@ -52,39 +52,35 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return Single.just(
-                DomainFactory.instance
-                        .updateScheduleTask(
-                                SaveService.Source.GUI,
-                                parameters.taskKey,
-                                createParameters.name,
-                                scheduleDatas,
-                                createParameters.note,
-                                sharedProjectParameters,
-                                imageUrl.value!!.writeImagePath
-                        )
-                        .toCreateResult()
-        )
+        return DomainFactory.instance
+                .updateScheduleTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        scheduleDatas,
+                        createParameters.note,
+                        sharedProjectParameters,
+                        imageUrl.value!!.writeImagePath
+                )
+                .toCreateResult()
     }
 
     override fun createTaskWithParent(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey,
     ): Single<CreateResult> {
-        return Single.just(
-                DomainFactory.instance
-                        .updateChildTask(
-                                SaveService.Source.GUI,
-                                parameters.taskKey,
-                                createParameters.name,
-                                parentTaskKey,
-                                createParameters.note,
-                                imageUrl.value!!.writeImagePath,
-                                parameters.openedFromInstanceKey,
-                                createParameters.allReminders
-                        )
-                        .toCreateResult()
-        )
+        return DomainFactory.instance
+                .updateChildTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        parentTaskKey,
+                        createParameters.note,
+                        imageUrl.value!!.writeImagePath,
+                        parameters.openedFromInstanceKey,
+                        createParameters.allReminders
+                )
+                .toCreateResult()
     }
 
     override fun createTaskWithoutReminder(
@@ -93,17 +89,15 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return Single.just(
-                DomainFactory.instance
-                        .updateRootTask(
-                                SaveService.Source.GUI,
-                                parameters.taskKey,
-                                createParameters.name,
-                                createParameters.note,
-                                sharedProjectKey,
-                                imageUrl.value!!.writeImagePath
-                        )
-                        .toCreateResult()
-        )
+        return DomainFactory.instance
+                .updateRootTask(
+                        SaveService.Source.GUI,
+                        parameters.taskKey,
+                        createParameters.name,
+                        createParameters.note,
+                        sharedProjectKey,
+                        imageUrl.value!!.writeImagePath
+                )
+                .toCreateResult()
     }
 }

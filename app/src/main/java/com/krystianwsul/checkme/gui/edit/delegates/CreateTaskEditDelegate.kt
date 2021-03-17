@@ -132,7 +132,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .doOnSuccess { it.applyCreatedTaskKey() }
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
@@ -153,7 +153,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .doOnSuccess { it.applyCreatedTaskKey() }
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
@@ -162,18 +162,16 @@ class CreateTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return Single.just(
-                DomainFactory.instance
-                        .createRootTask(
-                                SaveService.Source.GUI,
-                                createParameters.name,
-                                createParameters.note,
-                                sharedProjectKey,
-                                imageUrl.value!!
-                                        .writeImagePath
-                                        ?.value
-                        )
-                        .applyCreatedTaskKey()
-        )
+        return DomainFactory.instance
+                .createRootTask(
+                        SaveService.Source.GUI,
+                        createParameters.name,
+                        createParameters.note,
+                        sharedProjectKey,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value
+                )
+                .applyCreatedTaskKey()
     }
 }

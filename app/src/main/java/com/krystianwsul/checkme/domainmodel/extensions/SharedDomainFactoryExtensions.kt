@@ -103,11 +103,12 @@ fun DomainFactory.setInstancesNotNotified(
     save(dataId, source)
 }
 
+@CheckResult
 fun DomainFactory.setInstancesAddHourActivity(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: Collection<InstanceKey>,
-): DomainFactory.HourUndoData = syncOnDomain {
+): Single<DomainFactory.HourUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -252,7 +253,9 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         page: Int,
         projectKey: ProjectKey<*>?,
         mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
-): Pair<List<T>, Boolean> = syncOnDomain {
+): Pair<List<T>, Boolean> {
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
     val (instances, hasMore) = getRootInstances(
@@ -279,7 +282,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         mapper(it, now, children)
     }
 
-    instanceDatas.sorted().take(desiredCount) to hasMore
+    return instanceDatas.sorted().take(desiredCount) to hasMore
 }
 
 private class AddChildToParentUndoData(

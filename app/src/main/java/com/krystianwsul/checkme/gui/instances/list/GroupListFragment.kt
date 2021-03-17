@@ -179,15 +179,12 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
 
-                    val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
-
-                    listener.showSnackbarHourMaybe(hourUndoData.instanceDateTimes.size)
+                    DomainFactory.instance
+                            .setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
                             .flatMapCompletable {
-                                DomainFactory.instance.undoInstancesAddHour(
-                                        0,
-                                        SaveService.Source.GUI,
-                                        hourUndoData,
-                                )
+                                DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, it)
                             }
                             .subscribe()
                             .addTo(attachedToWindowDisposable)

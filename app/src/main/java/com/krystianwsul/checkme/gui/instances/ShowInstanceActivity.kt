@@ -30,6 +30,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -159,19 +160,23 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 R.id.instanceMenuHour -> {
                                     check(showHour())
 
-                                    val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(
-                                            0,
-                                            SaveService.Source.GUI,
-                                            listOf(instanceKey)
-                                    )
-
-                                    showSnackbarHourMaybe(hourUndoData.instanceDateTimes.size).flatMapCompletable {
-                                        DomainFactory.instance.undoInstancesAddHour(
-                                                0,
-                                                SaveService.Source.GUI,
-                                                hourUndoData,
-                                        )
-                                    }
+                                    DomainFactory.instance
+                                            .setInstancesAddHourActivity(
+                                                    0,
+                                                    SaveService.Source.GUI,
+                                                    listOf(instanceKey),
+                                            )
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .flatMapMaybe {
+                                                showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
+                                            }
+                                            .flatMapCompletable {
+                                                DomainFactory.instance.undoInstancesAddHour(
+                                                        0,
+                                                        SaveService.Source.GUI,
+                                                        it,
+                                                )
+                                            }
                                             .subscribe()
                                             .addTo(createDisposable)
                                 }

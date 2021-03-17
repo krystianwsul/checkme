@@ -982,7 +982,10 @@ class GroupListFragment @JvmOverloads constructor(
     private fun onEditInstances(undoData: UndoData, count: Int) {
         selectionCallback.actionMode!!.finish()
 
-        listener.showSnackbarHour(count) { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
+        listener.showSnackbarHourMaybe(count)
+                .flatMapCompletable { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
+                .subscribe()
+                .addTo(attachedToWindowDisposable)
     }
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()

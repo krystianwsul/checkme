@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
-import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -157,7 +156,6 @@ class MyApplication : Application() {
                     }
                     ?: Maybe.empty()
         }
-                .observeOnDomain()
                 .mapNotNull { it.value?.photoUrl }
                 .switchMapCompletable { url ->
                     DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }

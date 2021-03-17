@@ -16,6 +16,8 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.SchedulerType
+import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -203,8 +205,11 @@ fun DomainFactory.setInstanceNotified(
     save(dataId, source)
 }
 
-fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) = syncOnDomain { // todo scheduler completable
+fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
+
+    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+
     if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
     myUserFactory.user.photoUrl = photoUrl
@@ -342,7 +347,8 @@ fun addChildToParent(
     )
 }
 
-fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnDomain { // todo scheduler completable
+@CheckResult
+fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.undo")
     if (isSaved.value!!) throw SavedFactoryException()
 

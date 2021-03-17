@@ -317,11 +317,14 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    DomainFactory.instance.setInstancesNotNotified(
-                            parameters.dataId,
-                            SaveService.Source.GUI,
-                            instanceKeys
-                    )
+                    DomainFactory.instance
+                            .setInstancesNotNotified(
+                                    parameters.dataId,
+                                    SaveService.Source.GUI,
+                                    instanceKeys
+                            )
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
 
                     instanceDatas.forEach { it.notificationShown = true }
                 }

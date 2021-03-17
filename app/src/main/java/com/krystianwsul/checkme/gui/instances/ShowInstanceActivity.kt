@@ -146,11 +146,14 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     // to ignore double taps
                                     if (!it.notificationShown) {
-                                        DomainFactory.instance.setInstancesNotNotified(
-                                                0,
-                                                SaveService.Source.GUI,
-                                                listOf(instanceKey)
-                                        )
+                                        DomainFactory.instance
+                                                .setInstancesNotNotified(
+                                                        0,
+                                                        SaveService.Source.GUI,
+                                                        listOf(instanceKey),
+                                                )
+                                                .subscribe()
+                                                .addTo(createDisposable)
                                     }
                                 }
                                 R.id.instanceMenuHour -> {

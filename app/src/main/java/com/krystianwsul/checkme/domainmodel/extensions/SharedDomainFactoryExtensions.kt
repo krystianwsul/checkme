@@ -74,11 +74,12 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = c
     notifyCloud(task.project)
 }
 
+@CheckResult
 fun DomainFactory.setInstancesNotNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
-) = syncOnDomain { // todo scheduler completable
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

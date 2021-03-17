@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.SchedulerType
@@ -41,12 +42,13 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
     return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
 }
 
+@CheckResult
 fun DomainFactory.createProject(
         dataId: Int,
         source: SaveService.Source,
         name: String,
         friends: Set<UserKey>,
-) = syncOnDomain { // todo scheduler completable
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -60,12 +62,12 @@ fun DomainFactory.createProject(
     recordOf.add(key)
 
     val remoteProject = projectsFactory.createProject(
-        name,
-        now,
-        recordOf,
-        myUserFactory.user,
-        deviceDbInfo.userInfo,
-        friendsFactory
+            name,
+            now,
+            recordOf,
+            myUserFactory.user,
+            deviceDbInfo.userInfo,
+            friendsFactory
     )
 
     myUserFactory.user.addProject(remoteProject.projectKey)
@@ -76,6 +78,7 @@ fun DomainFactory.createProject(
     notifyCloud(remoteProject)
 }
 
+@CheckResult
 fun DomainFactory.updateProject(
         dataId: Int,
         source: SaveService.Source,
@@ -83,7 +86,7 @@ fun DomainFactory.updateProject(
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-) = syncOnDomain { // todo scheduler completable
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())

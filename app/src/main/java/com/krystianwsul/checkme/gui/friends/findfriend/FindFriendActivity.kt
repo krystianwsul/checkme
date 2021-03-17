@@ -29,7 +29,9 @@ import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewS
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.tbruyelle.rxpermissions2.RxPermissions
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 class FindFriendActivity : NavBarActivity() {
 
@@ -144,20 +146,25 @@ class FindFriendActivity : NavBarActivity() {
                         hideSoftKeyboard(binding.root)
 
                         if (contact.userWrapper != null) {
-                            val added = DomainFactory.instance.tryAddFriend(SaveService.Source.GUI, contact.userWrapper)
+                            DomainFactory.instance
+                                    .tryAddFriend(SaveService.Source.GUI, contact.userWrapper)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeBy {
+                                        if (it) {
+                                            setSnackbar {
+                                                it.showText(R.string.addedUserToFriends, Snackbar.LENGTH_SHORT)
+                                            }
 
-                            if (added) {
-                                setSnackbar {
-                                    it.showText(getString(R.string.addedUserToFriends), Snackbar.LENGTH_SHORT)
-                                }
-                                finish()
-                            } else {
-                                Snackbar.make(
-                                        binding.root,
-                                        getString(R.string.userAlreadyInFriends),
-                                        Snackbar.LENGTH_SHORT
-                                ).show()
-                            }
+                                            finish()
+                                        } else {
+                                            Snackbar.make(
+                                                    binding.root,
+                                                    getString(R.string.userAlreadyInFriends),
+                                                    Snackbar.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                    .addTo(createDisposable)
                         } else {
                             ConfirmDialogFragment.newInstance(
                                     ConfirmDialogFragment.Parameters(

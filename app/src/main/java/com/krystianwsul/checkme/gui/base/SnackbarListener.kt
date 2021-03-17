@@ -35,6 +35,7 @@ interface SnackbarListener {
     fun showSnackbarHourMaybe(count: Int) = showSnackbarMaybe(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT)
 
     fun showText(message: String, duration: Int) = showSnackbar(message, duration)
+    fun showText(messageId: Int, duration: Int) = showSnackbar(messageId, duration)
 
     private fun showSnackbarMaybe(@StringRes messageId: Int, count: Int, duration: Int) =
             Maybe.create<Unit> { emitter ->
@@ -54,6 +55,13 @@ interface SnackbarListener {
             action: () -> Unit,
             onDismiss: (() -> Unit)? = null,
     ) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, action, onDismiss)
+
+    private fun showSnackbar(
+            messageId: Int,
+            duration: Int,
+            action: (() -> Unit)? = null,
+            onDismiss: (() -> Unit)? = null,
+    ) = showSnackbar(snackbarParent.context.getString(messageId), duration, action, onDismiss)
 
     private fun showSnackbar(
             message: String,

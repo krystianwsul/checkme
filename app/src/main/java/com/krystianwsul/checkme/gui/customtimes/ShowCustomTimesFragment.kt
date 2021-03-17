@@ -34,6 +34,8 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
@@ -69,15 +71,23 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             when (itemId) {
                 R.id.action_custom_times_delete -> {
-                    val selectedCustomTimeKeys = (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).customTimeWrappers
-                            .filter { it.treeNode.isSelected }
-                            .map { it.customTimeData.id }
+                    val selectedCustomTimeKeys =
+                            (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).customTimeWrappers
+                                    .filter { it.treeNode.isSelected }
+                                    .map { it.customTimeData.id }
 
-                    DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeKeys, false)
+                    fun setAreCurrent(current: Boolean) = DomainFactory.instance.setCustomTimesCurrent(
+                            0,
+                            SaveService.Source.GUI,
+                            selectedCustomTimeKeys,
+                            current,
+                    )
 
-                    customTimesListListener.showSnackbarRemoved(selectedCustomTimeKeys.size) {
-                        DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeKeys, true)
-                    }
+                    setAreCurrent(false).observeOn(AndroidSchedulers.mainThread())
+                            .andThen(customTimesListListener.showSnackbarRemovedMaybe(selectedCustomTimeKeys.size))
+                            .flatMapCompletable { setAreCurrent(true) }
+                            .subscribe()
+                            .addTo(createDisposable)
                 }
                 else -> throw UnsupportedOperationException()
             }

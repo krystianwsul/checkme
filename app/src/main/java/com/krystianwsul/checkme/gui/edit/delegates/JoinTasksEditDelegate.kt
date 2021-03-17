@@ -72,22 +72,24 @@ class JoinTasksEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult {
-        return DomainFactory.instance
-                .createScheduleJoinRootTask(
-                        SaveService.Source.GUI,
-                        createParameters.name,
-                        scheduleDatas,
-                        parameters.joinables,
-                        createParameters.note,
-                        sharedProjectParameters,
-                        imageUrl.value!!
-                                .writeImagePath
-                                ?.value,
-                        createParameters.allReminders
-                )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+    ): Single<CreateResult> {
+        return Single.just(
+                DomainFactory.instance
+                        .createScheduleJoinRootTask(
+                                SaveService.Source.GUI,
+                                createParameters.name,
+                                scheduleDatas,
+                                parameters.joinables,
+                                createParameters.note,
+                                sharedProjectParameters,
+                                imageUrl.value!!
+                                        .writeImagePath
+                                        ?.value,
+                                createParameters.allReminders
+                        )
+                        .also { EditActivity.createdTaskKey = it }
+                        .toCreateResult()
+        )
     }
 
     override fun createTaskWithParent(
@@ -96,28 +98,26 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return Single.just(
-                DomainFactory.instance
-                        .createJoinChildTask(
-                                SaveService.Source.GUI,
-                                parentTaskKey,
-                                createParameters.name,
-                                taskKeys,
-                                createParameters.note,
-                                imageUrl.value!!
-                                        .writeImagePath
-                                        ?.value,
-                                instanceKeys
-                        )
-                        .also { EditActivity.createdTaskKey = it }
-                        .toCreateResult()
-        )
+        return DomainFactory.instance
+                .createJoinChildTask(
+                        SaveService.Source.GUI,
+                        parentTaskKey,
+                        createParameters.name,
+                        taskKeys,
+                        createParameters.note,
+                        imageUrl.value!!
+                                .writeImagePath
+                                ?.value,
+                        instanceKeys
+                )
+                .doOnSuccess { EditActivity.createdTaskKey = it }
+                .map { it.toCreateResult() }
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -132,7 +132,7 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         instanceKeys
                 )
-                .also { EditActivity.createdTaskKey = it }
-                .toCreateResult()
+                .doOnSuccess { EditActivity.createdTaskKey = it }
+                .map { it.toCreateResult() }
     }
 }

@@ -45,8 +45,10 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
 
+        // todo scheduler
         fun TaskKey.toCreateResult() = CreateResult.Task(this)
 
+        // todo scheduler
         fun CreateResult.applyCreatedTaskKey() = apply { EditActivity.createdTaskKey = taskKey }
     }
 
@@ -232,12 +234,10 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         }
 
         return when {
-            parentScheduleManager.schedules.isNotEmpty() -> Single.just(
-                    createTaskWithSchedule(
-                            createParameters,
-                            parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                            sharedProjectParameters
-                    )
+            parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
+                    createParameters,
+                    parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
+                    sharedProjectParameters,
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
@@ -249,7 +249,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             else -> {
                 check(assignedTo.isEmpty())
 
-                Single.just(createTaskWithoutReminder(createParameters, projectId))
+                createTaskWithoutReminder(createParameters, projectId)
             }
         }
     }
@@ -258,14 +258,14 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult
+    ): Single<CreateResult>
 
     abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult
+    ): Single<CreateResult>
 
     fun saveState(outState: Bundle) {
         parentScheduleManager.saveState(outState)

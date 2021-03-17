@@ -118,7 +118,7 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -132,7 +132,7 @@ class CreateTaskEditDelegate(
                                 .writeImagePath
                                 ?.value
                 )
-                .applyCreatedTaskKey()
+                .doOnSuccess { it.applyCreatedTaskKey() }
     }
 
     override fun createTaskWithParent(
@@ -159,19 +159,21 @@ class CreateTaskEditDelegate(
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .createRootTask(
-                        SaveService.Source.GUI,
-                        createParameters.name,
-                        createParameters.note,
-                        sharedProjectKey,
-                        imageUrl.value!!
-                                .writeImagePath
-                                ?.value
-                )
-                .applyCreatedTaskKey()
+        return Single.just(
+                DomainFactory.instance
+                        .createRootTask(
+                                SaveService.Source.GUI,
+                                createParameters.name,
+                                createParameters.note,
+                                sharedProjectKey,
+                                imageUrl.value!!
+                                        .writeImagePath
+                                        ?.value
+                        )
+                        .applyCreatedTaskKey()
+        )
     }
 }

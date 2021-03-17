@@ -32,7 +32,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 null
-        )
+        ).blockingGet()
 
         assertEquals(
                 "task",
@@ -67,7 +67,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now = now,
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         now += 1.hours
 
@@ -136,7 +138,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         val doneChildTaskKey = domainFactory.createChildTask(
                 SaveService.Source.SERVICE,
@@ -196,7 +200,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         domainFactory.updateChildTask(
                 SaveService.Source.SERVICE,
@@ -246,7 +252,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         val firstInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
@@ -301,7 +309,9 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        ).taskKey
+        )
+                .blockingGet()
+                .taskKey
 
         assertEquals(
                 1,
@@ -380,7 +390,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).blockingGet()
 
         domainFactory.createScheduleRootTask(
                 SaveService.Source.SERVICE,
@@ -391,7 +401,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 now,
-        )
+        ).blockingGet()
 
         assertEquals(2, getTodayInstanceDatas(now).size)
 

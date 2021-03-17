@@ -49,20 +49,22 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .updateScheduleTask(
-                        SaveService.Source.GUI,
-                        parameters.taskKey,
-                        createParameters.name,
-                        scheduleDatas,
-                        createParameters.note,
-                        sharedProjectParameters,
-                        imageUrl.value!!.writeImagePath
-                )
-                .toCreateResult()
+        return Single.just(
+                DomainFactory.instance
+                        .updateScheduleTask(
+                                SaveService.Source.GUI,
+                                parameters.taskKey,
+                                createParameters.name,
+                                scheduleDatas,
+                                createParameters.note,
+                                sharedProjectParameters,
+                                imageUrl.value!!.writeImagePath
+                        )
+                        .toCreateResult()
+        )
     }
 
     override fun createTaskWithParent(
@@ -88,18 +90,20 @@ class EditExistingTaskEditDelegate(
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .updateRootTask(
-                        SaveService.Source.GUI,
-                        parameters.taskKey,
-                        createParameters.name,
-                        createParameters.note,
-                        sharedProjectKey,
-                        imageUrl.value!!.writeImagePath
-                )
-                .toCreateResult()
+        return Single.just(
+                DomainFactory.instance
+                        .updateRootTask(
+                                SaveService.Source.GUI,
+                                parameters.taskKey,
+                                createParameters.name,
+                                createParameters.note,
+                                sharedProjectKey,
+                                imageUrl.value!!.writeImagePath
+                        )
+                        .toCreateResult()
+        )
     }
 }

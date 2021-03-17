@@ -54,6 +54,7 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
@@ -101,12 +102,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
-
-        listener.showSnackbarRemovedMaybe(taskUndoData.taskKeys.size)
-                .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-                }
+        DomainFactory.instance
+                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMapMaybe { listener.showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
+                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
                 .subscribe()
                 .addTo(createDisposable)
     }

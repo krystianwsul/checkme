@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
@@ -27,11 +26,12 @@ import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
 
+@CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
-): TaskUndoData = syncOnDomain {
+): Single<TaskUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

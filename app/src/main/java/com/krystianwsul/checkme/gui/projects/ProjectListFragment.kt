@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
@@ -119,16 +120,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(
-                0,
-                SaveService.Source.GUI,
-                projectIds as Set<ProjectKey.Shared>,
-                removeInstances
-        )
-
-        mainActivity.showSnackbarRemovedMaybe(projectIds.size)
+        DomainFactory.instance
+                .setProjectEndTimeStamps(
+                        0,
+                        SaveService.Source.GUI,
+                        projectIds as Set<ProjectKey.Shared>,
+                        removeInstances,
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
+                    DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.SchedulerType
 import com.krystianwsul.common.firebase.SchedulerTypeHolder
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getProjectListData")
@@ -34,12 +35,13 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     return ProjectListViewModel.Data(projectDatas)
 }
 
+@CheckResult
 fun DomainFactory.setProjectEndTimeStamps(
         dataId: Int,
         source: SaveService.Source,
         projectIds: Set<ProjectKey<*>>,
-        removeInstances: Boolean
-): ProjectUndoData = syncOnDomain {
+        removeInstances: Boolean,
+): Single<ProjectUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
     check(projectIds.isNotEmpty())

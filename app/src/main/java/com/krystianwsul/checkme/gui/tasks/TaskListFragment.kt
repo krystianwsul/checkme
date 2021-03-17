@@ -821,11 +821,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun setOrdinal(ordinal: Double) {
             childTaskData.ordinal = ordinal
 
-            DomainFactory.instance.setOrdinal(
-                    taskListFragment.data!!.dataId,
-                    childTaskData.taskKey,
-                    ordinal
-            )
+            DomainFactory.instance
+                    .setOrdinal(taskListFragment.data!!.dataId, childTaskData.taskKey, ordinal)
+                    .subscribe()
         }
     }
 

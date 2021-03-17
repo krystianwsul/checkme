@@ -190,6 +190,8 @@ class TaskNode(
     override fun setOrdinal(ordinal: Double) {
         taskData.ordinal = ordinal
 
-        DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, taskData.taskKey, ordinal)
+        DomainFactory.instance
+                .setOrdinal(groupListFragment.parameters.dataId, taskData.taskKey, ordinal)
+                .subscribe()
     }
 }

@@ -426,7 +426,9 @@ class NotDoneGroupNode(
         singleInstanceData.let {
             it.ordinal = ordinal
 
-            DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+            DomainFactory.instance
+                    .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                    .subscribe()
         }
     }
 
@@ -690,7 +692,9 @@ class NotDoneGroupNode(
             instanceData.let {
                 it.ordinal = ordinal
 
-                DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                DomainFactory.instance
+                        .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                        .subscribe()
             }
         }
 

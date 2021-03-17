@@ -56,7 +56,8 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     notifyCloud(remoteProjects)
 }
 
-fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = syncOnDomain { // todo scheduler completable
+@CheckResult
+fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

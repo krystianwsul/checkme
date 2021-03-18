@@ -73,7 +73,8 @@ class DomainFactory(
                 .apply { connect() }
 
         // emits on domain thread
-        fun onReady() = instanceRelay.filterNotNull()
+        fun onReady() = instanceRelay.subscribeOnDomain()
+                .filterNotNull()
                 .switchMap { domainFactory -> domainFactory.isSaved.map { domainFactory to it } }
                 .filter { (_, isSaved) -> !isSaved }
                 .map { (domainFactory, _) -> domainFactory }

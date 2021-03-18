@@ -258,7 +258,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                                 projectId!!,
                                 name,
                                 saveState.addedIds,
-                                saveState.removedIds
+                                saveState.removedIds,
                         )
                     }
                 }

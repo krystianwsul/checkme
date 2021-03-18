@@ -412,7 +412,7 @@ class GroupListFragment @JvmOverloads constructor(
             return lines.joinToString("\n")
         }
 
-    private val attachedToWindowDisposable = CompositeDisposable()
+    val attachedToWindowDisposable = CompositeDisposable()
 
     private val receiver = object : BroadcastReceiver() {
 

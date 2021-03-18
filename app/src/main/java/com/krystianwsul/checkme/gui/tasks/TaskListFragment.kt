@@ -824,6 +824,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             DomainFactory.instance
                     .setOrdinal(taskListFragment.data!!.dataId, childTaskData.taskKey, ordinal)
                     .subscribe()
+                    .addTo(createDisposable)
         }
     }
 

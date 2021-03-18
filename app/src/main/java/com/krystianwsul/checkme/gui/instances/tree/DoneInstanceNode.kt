@@ -25,12 +25,12 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.kotlin.addTo
 
 class DoneInstanceNode(
         override val indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
-        val dividerNode: DividerNode,
+        private val dividerNode: DividerNode,
 ) : AbstractModelNode(),
         NodeCollectionParent,
         CheckableModelNode,
@@ -158,10 +158,11 @@ class DoneInstanceNode(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     SaveService.Source.GUI,
                                     instanceData.instanceKey,
-                                    true
+                                    true,
                             )
                         }
-                        .ignoreElement()
+                        .subscribe()
+                        .addTo(groupListFragment.attachedToWindowDisposable)
             }
         }
 
@@ -187,12 +188,6 @@ class DoneInstanceNode(
     override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(
             ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey)
     )
-
-    fun removeFromParent(placeholder: TreeViewAdapter.Placeholder) {
-        dividerNode.remove(this, placeholder)
-
-        treeNode.deselect(placeholder)
-    }
 
     override val id = instanceData.instanceKey
 

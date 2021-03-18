@@ -37,7 +37,7 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
     )
     instance.setNotificationShown(localFactory, false)
 
-    updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
+    notifier.updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
     save(0, source)
 
@@ -59,7 +59,7 @@ fun DomainFactory.setInstanceNotificationDone(source: SaveService.Source, instan
     instance.setDone(localFactory, true, now)
     instance.setNotificationShown(localFactory, false)
 
-    updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
+    notifier.updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
     save(0, source)
 

@@ -170,7 +170,7 @@ fun DomainFactory.createScheduleRootTask(
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -217,7 +217,7 @@ fun DomainFactory.createChildTask(
             copyTaskKey
     )
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -260,7 +260,7 @@ fun DomainFactory.createRootTask(
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -315,7 +315,7 @@ fun DomainFactory.updateScheduleTask(
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -387,7 +387,7 @@ fun DomainFactory.updateChildTask(
         }
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -432,7 +432,7 @@ fun DomainFactory.updateRootTask(
     if (imagePath != null)
         task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -501,7 +501,7 @@ fun DomainFactory.createScheduleJoinRootTask(
     else
         joinJoinables(newParentTask, joinables, now)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -553,7 +553,7 @@ fun DomainFactory.createJoinChildTask(
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 
@@ -606,7 +606,7 @@ fun DomainFactory.createJoinRootTask(
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(null, source)
 

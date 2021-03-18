@@ -131,7 +131,7 @@ fun DomainFactory.setInstancesDateTime(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(DomainListenerManager.NotificationType.All, source)
 
@@ -194,7 +194,7 @@ fun DomainFactory.setInstancesParent(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(DomainListenerManager.NotificationType.All, source)
 

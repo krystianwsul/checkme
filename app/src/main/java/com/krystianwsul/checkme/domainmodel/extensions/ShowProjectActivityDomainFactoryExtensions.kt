@@ -102,7 +102,7 @@ fun DomainFactory.updateProject(
 
     friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 

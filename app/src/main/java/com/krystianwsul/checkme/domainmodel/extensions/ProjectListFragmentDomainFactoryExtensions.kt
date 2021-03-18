@@ -56,7 +56,7 @@ fun DomainFactory.setProjectEndTimeStamps(
         it.setEndExactTimeStamp(now, projectUndoData, removeInstances)
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 
@@ -86,7 +86,7 @@ fun DomainFactory.clearProjectEndTimeStamps(
 
     processTaskUndoData(projectUndoData.taskUndoData, now)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 

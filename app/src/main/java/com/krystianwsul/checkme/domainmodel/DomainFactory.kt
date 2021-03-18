@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.os.Build
-import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
@@ -22,7 +20,6 @@ import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapWith
@@ -35,11 +32,8 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
-import com.soywiz.klock.days
-import com.soywiz.klock.hours
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -62,8 +56,6 @@ class DomainFactory(
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
-
-        private const val MAX_NOTIFICATIONS = 3
 
         val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())!!
 
@@ -128,7 +120,7 @@ class DomainFactory(
     var remoteReadTimes: ReadTimes
         private set
 
-    private var aggregateData: AggregateData? = null
+    var aggregateData: AggregateData? = null
 
     val domainListenerManager = DomainListenerManager()
 
@@ -138,6 +130,8 @@ class DomainFactory(
     val isSaved = BehaviorRelay.createDefault(false)!!
 
     private val changeTypeRelay = PublishRelay.create<ChangeType>()
+
+    val notifier = Notifier(this, NotificationWrapper.instance)
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
@@ -276,7 +270,9 @@ class DomainFactory(
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
-        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) { updateNotifications(ExactTimeStamp.Local.now) }
+        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
+            notifier.updateNotifications(ExactTimeStamp.Local.now)
+        }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
@@ -302,7 +298,7 @@ class DomainFactory(
     override fun clearUserInfo() {
         DomainThreadChecker.instance.requireDomainThread()
 
-        updateNotifications(ExactTimeStamp.Local.now, true)
+        notifier.updateNotifications(ExactTimeStamp.Local.now, true)
     }
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
@@ -349,7 +345,7 @@ class DomainFactory(
         val tickData = TickHolder.getTickData()
 
         fun tick(tickData: TickData, forceNotify: Boolean) {
-            updateNotificationsTick(
+            notifier.updateNotificationsTick(
                     now,
                     tickData.silent && !forceNotify,
                     "${tickData.source}, runType: $runType"
@@ -361,7 +357,7 @@ class DomainFactory(
         fun notify() {
             check(tickData == null)
 
-            updateNotifications(now, silent = false, sourceName = source)
+            notifier.updateNotifications(now, silent = false, sourceName = source)
         }
 
         when (runType) {
@@ -409,7 +405,7 @@ class DomainFactory(
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
-        updateNotifications(now)
+        notifier.updateNotifications(now)
 
         save(0, source)
 
@@ -452,22 +448,9 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        updateNotificationsTick(now, silent, sourceName, domainChanged)
+        notifier.updateNotificationsTick(now, silent, sourceName, domainChanged)
 
         save(0, source)
-    }
-
-    private fun updateNotificationsTick(
-            now: ExactTimeStamp.Local,
-            silent: Boolean,
-            sourceName: String,
-            domainChanged: Boolean = false,
-    ) {
-        updateNotifications(now, silent = silent, sourceName = sourceName, domainChanged = domainChanged)
-
-        setIrrelevant(now)
-
-        projectsFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
     }
 
     override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
@@ -707,52 +690,6 @@ class DomainFactory(
                 }
     }
 
-    private fun setIrrelevant(now: ExactTimeStamp.Local) {
-        if (false) {
-            val tomorrow = (DateTimeSoy.now() + 1.days).date
-            val dateTimeSoy = DateTimeSoy(tomorrow, com.soywiz.klock.Time(2.hours))
-            val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
-
-            projectsFactory.projects
-                    .values
-                    .forEach {
-                        val results = Irrelevant.setIrrelevant(
-                                object : Project.Parent {
-
-                                    override fun deleteProject(project: Project<*>) {
-                                        TODO("Not yet implemented")
-                                    }
-                                },
-                                it,
-                                exactTimeStamp,
-                                false
-                        )
-
-                        results.irrelevantExistingInstances
-                                .sortedBy { it.scheduleDateTime }
-                                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
-
-                        results.irrelevantSchedules
-                                .sortedBy { it.startExactTimeStamp }
-                                .forEach {
-                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.rootTask}")
-                                }
-                    }
-
-            throw Exception("Irrelevant.setIrrelevant write prevented")
-        }
-
-        val instances = projectsFactory.projects
-                .values
-                .map { it.existingInstances + it.getRootInstances(null, now.toOffset().plusOne(), now) }
-                .flatten()
-
-        val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
-                .toMutableList()
-                .apply { removeAll(instances.map { it.getShown(localFactory) }) }
-        irrelevantInstanceShownRecords.forEach { it.delete() }
-    }
-
     fun notifyCloud(project: Project<*>) = notifyCloud(setOf(project))
 
     fun notifyCloud(projects: Set<Project<*>>) {
@@ -782,200 +719,6 @@ class DomainFactory(
         BackendNotifier.notify(projects, deviceDbInfo.deviceInfo, userKeys)
     }
 
-    fun updateNotifications(
-            now: ExactTimeStamp.Local,
-            clear: Boolean = false,
-            silent: Boolean = true,
-            removedTaskKeys: List<TaskKey> = listOf(),
-            sourceName: String = "other",
-            domainChanged: Boolean = false,
-    ) {
-        val skipSave = aggregateData != null
-
-        Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
-
-        if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(silent, sourceName, domainChanged))
-            return
-        }
-
-        NotificationWrapper.instance.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
-
-        val notificationInstances = if (clear)
-            mapOf()
-        else
-            getRootInstances(null, now.toOffset().plusOne(), now /* 24 hack */)
-                    .filter {
-                        it.done == null
-                                && !it.getNotified(localFactory)
-                                && it.instanceDateTime.toLocalExactTimeStamp() <= now
-                                && !removedTaskKeys.contains(it.taskKey)
-                                && it.isAssignedToMe(now, myUserFactory.user)
-                    }
-                    .associateBy { it.instanceKey }
-
-        Preferences.tickLog.logLineHour(
-                "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
-        )
-
-        val instanceShownPairs = localFactory.instanceShownRecords
-                .filter { it.notificationShown }
-                .map { Pair(it, projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId)) }
-
-        instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
-            val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-            val customTimeId = instanceShownRecord.scheduleCustomTimeId
-
-            val customTimePair: Pair<String, String>?
-            val hourMinute: HourMinute?
-            if (!customTimeId.isNullOrEmpty()) {
-                check(instanceShownRecord.scheduleHour == null)
-                check(instanceShownRecord.scheduleMinute == null)
-
-                customTimePair = Pair(instanceShownRecord.projectId, customTimeId)
-                hourMinute = null
-            } else {
-                checkNotNull(instanceShownRecord.scheduleHour)
-                checkNotNull(instanceShownRecord.scheduleMinute)
-
-                customTimePair = null
-                hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-            }
-
-            val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
-
-            NotificationWrapper.instance.cancelNotification(
-                    Instance.getNotificationId(
-                            scheduleDate,
-                            customTimePair,
-                            hourMinute,
-                            taskKey
-                    )
-            )
-            instanceShownRecord.notificationShown = false
-        }
-
-        val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
-                .map { (instanceShownRecord, task) ->
-                    val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-                    val customTimeId = instanceShownRecord.scheduleCustomTimeId
-                    val project = task!!.project
-
-                    val customTimeKey: CustomTimeKey<*>?
-                    val hourMinute: HourMinute?
-                    if (!customTimeId.isNullOrEmpty()) {
-                        check(instanceShownRecord.scheduleHour == null)
-                        check(instanceShownRecord.scheduleMinute == null)
-
-                        customTimeKey = project.getCustomTime(customTimeId).key
-                        hourMinute = null
-                    } else {
-                        checkNotNull(instanceShownRecord.scheduleHour)
-                        checkNotNull(instanceShownRecord.scheduleMinute)
-
-                        customTimeKey = null
-                        hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-                    }
-
-                    val taskKey = TaskKey(project.projectKey, instanceShownRecord.taskId)
-                    InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
-                }
-                .toSet()
-
-        val showInstanceKeys = notificationInstances.keys - shownInstanceKeys
-
-        Preferences.tickLog.logLineHour("shown instances: " + shownInstanceKeys.joinToString(", ") {
-            getInstance(it).name
-        })
-
-        val hideInstanceKeys = shownInstanceKeys - notificationInstances.keys
-
-        for (showInstanceKey in showInstanceKeys)
-            getInstance(showInstanceKey).setNotificationShown(localFactory, true)
-
-        for (hideInstanceKey in hideInstanceKeys)
-            getInstance(hideInstanceKey).setNotificationShown(localFactory, false)
-
-        Preferences.tickLog.logLineHour("silent? $silent")
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size > MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
-                    val silentParam =
-                            if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
-
-                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
-                } else { // instances shown
-                    for (shownInstanceKey in shownInstanceKeys)
-                        NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)
-
-                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
-                }
-            } else { // show instances
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.instance.cancelNotification(0)
-
-                    for (instance in notificationInstances.values)
-                        notifyInstance(instance, silent, now)
-                } else { // instances shown
-                    for (hideInstanceKey in hideInstanceKeys)
-                        NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
-
-                    for (showInstanceKey in showInstanceKeys)
-                        notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
-
-                    notificationInstances.values
-                            .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach { updateInstance(it, now) }
-                }
-            }
-        } else {
-            if (notificationInstances.isEmpty()) {
-                Preferences.tickLog.logLineHour("hiding group")
-                NotificationWrapper.instance.cancelNotification(0)
-            } else {
-                Preferences.tickLog.logLineHour("showing group")
-                NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
-            }
-
-            for (hideInstanceKey in hideInstanceKeys) {
-                val instance = getInstance(hideInstanceKey)
-                Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
-                NotificationWrapper.instance.cancelNotification(instance.notificationId)
-            }
-
-            for (showInstanceKey in showInstanceKeys) {
-                val instance = notificationInstances.getValue(showInstanceKey)
-                Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
-                notifyInstance(instance, silent, now)
-            }
-
-            val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
-
-            updateInstances.forEach {
-                Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
-                updateInstance(it, now)
-            }
-        }
-
-        if (!silent) Preferences.lastTick = now.long
-
-        val nextAlarm = getTasks().filter { it.current(now) && it.isRootTask(now) }
-                .mapNotNull { it.getNextAlarm(now, myUserFactory.user) }
-                .minOrNull()
-                .takeUnless { clear }
-
-        NotificationWrapper.instance.updateAlarm(nextAlarm)
-
-        nextAlarm?.let { Preferences.tickLog.logLineHour("next tick: $it") }
-    }
-
-    private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp.Local) =
-            NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)
-
-    private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp.Local) =
-            NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
-
     fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
             setNotified(localFactory, true)
@@ -1000,7 +743,7 @@ class DomainFactory(
     inner class SavedFactoryException :
             Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
 
-    private class AggregateData {
+    class AggregateData {
 
         val notificationProjects = mutableSetOf<Project<*>>()
         val notificationUserKeys = mutableSetOf<UserKey>()

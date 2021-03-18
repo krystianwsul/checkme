@@ -46,7 +46,7 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
 
     processTaskUndoData(taskUndoData, now)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(0, source)
 
@@ -68,7 +68,7 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = c
 
     task.ordinal = ordinal
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, SaveService.Source.GUI)
 
@@ -97,7 +97,7 @@ fun DomainFactory.setInstancesNotNotified(
         instance.setNotificationShown(localFactory, false)
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 }
@@ -129,7 +129,7 @@ fun DomainFactory.setInstancesAddHourActivity(
         )
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 
@@ -155,7 +155,7 @@ fun DomainFactory.undoInstancesAddHour(
         getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, instanceDateTime) }
     }
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(dataId, source)
 
@@ -179,7 +179,7 @@ fun DomainFactory.setInstanceDone(
 
     instance.setDone(localFactory, done, now)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(notificationType, source)
 
@@ -358,7 +358,7 @@ fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = complet
 
     val projects = undoData.undo(this, now)
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(DomainListenerManager.NotificationType.All, source)
 

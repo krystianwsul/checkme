@@ -28,7 +28,7 @@ fun DomainFactory.setInstancesDone(
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    updateNotifications(now)
+    notifier.updateNotifications(now)
 
     save(notificationType, source)
 

@@ -16,7 +16,7 @@ sealed class NotificationAction : Parcelable {
 
     abstract val requestCode: Int
 
-    abstract fun perform(callback: (() -> Unit)? = null)
+    abstract fun perform(callback: (() -> Unit)? = null) // todo scheduler completable
 
     @Parcelize
     data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
@@ -49,10 +49,10 @@ sealed class NotificationAction : Parcelable {
             val notificationWrapper = NotificationWrapper.instance
             notificationWrapper.cleanGroup(notificationId)
 
-            DomainFactory.addFirebaseListener("InstanceDoneService $name") {
+            DomainFactory.addFirebaseListener {
                 it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
                 callback?.invoke()
-            }
+            }.subscribe()
         }
     }
 
@@ -69,13 +69,12 @@ sealed class NotificationAction : Parcelable {
         override fun perform(callback: (() -> Unit)?) {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
-            val notificationWrapper = NotificationWrapper.instance
-            notificationWrapper.cleanGroup(notificationId)
+            NotificationWrapper.instance.cleanGroup(notificationId)
 
-            DomainFactory.addFirebaseListener("InstanceHourService $name") {
+            DomainFactory.addFirebaseListener {
                 it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
                 callback?.invoke()
-            }
+            }.subscribe()
         }
     }
 

@@ -120,17 +120,6 @@ class DomainFactory(
             }
         }
 
-        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) = runOnDomain {
-            val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
-                Preferences.tickLog.logLineHour("running firebaseListener $source")
-                firebaseListener(domainFactory)
-            } else {
-                Preferences.tickLog.logLineHour("queuing firebaseListener $source")
-                firebaseListeners += firebaseListener
-            }
-        }
-
         private val ChangeType.runType
             get() = when (this) {
                 ChangeType.LOCAL -> RunType.LOCAL

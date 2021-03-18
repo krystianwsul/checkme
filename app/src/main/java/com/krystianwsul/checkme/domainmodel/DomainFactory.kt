@@ -122,7 +122,7 @@ class DomainFactory(
 
         @CheckResult
         fun <T : Any> scheduleOnDomain(action: () -> T) =
-                domainCompletable().andThen(Single.fromCallable(action)).observeOn(AndroidSchedulers.mainThread())!!
+                Single.fromCallable(action).subscribeOnDomain().observeOn(AndroidSchedulers.mainThread())!!
     }
 
     var remoteReadTimes: ReadTimes

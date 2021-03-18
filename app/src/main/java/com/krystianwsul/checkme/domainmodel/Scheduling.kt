@@ -11,9 +11,10 @@ fun <T : Any> Observable<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 fun <T : Any> Single<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 fun <T : Any> Flowable<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 
-fun domainCompletable() = Completable.complete().subscribeOn(Schedulers.single())!! // todo scheduler
+fun <T : Any> Single<T>.subscribeOnDomain() = subscribeOn(Schedulers.single())!!
+fun Completable.subscribeOnDomain() = subscribeOn(Schedulers.single())!!
 
 @CheckResult
-fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOn(Schedulers.single())!!
+fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain()
 
 fun runOnDomain(action: () -> Unit) = completeOnDomain(action).subscribe()!!

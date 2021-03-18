@@ -70,7 +70,7 @@ class DomainFactory(
 
         val instance get() = nullableInstance!!
 
-        private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
+        private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
         var firstRun = false
 
@@ -111,15 +111,12 @@ class DomainFactory(
         @CheckResult
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = completeOnDomain {
             val domainFactory = nullableInstance
-            if (
-                    domainFactory?.projectsFactory?.isSaved == false
-                    && !domainFactory.friendsFactory.isSaved
-                    && !domainFactory.myUserFactory.isSaved
-            ) {
+
+            if (domainFactory?.isSaved?.value == false) {
                 domainFactory.throwIfSaved()
                 firebaseListener(domainFactory)
             } else {
-                firebaseListeners.add(Pair(firebaseListener, "other"))
+                firebaseListeners += firebaseListener
             }
         }
 
@@ -130,15 +127,7 @@ class DomainFactory(
                 firebaseListener(domainFactory)
             } else {
                 Preferences.tickLog.logLineHour("queuing firebaseListener $source")
-                Preferences.tickLog.logLineHour(
-                        "listeners before: " + firebaseListeners.joinToString(
-                                "; "
-                        ) { it.second })
-                firebaseListeners.add(Pair(firebaseListener, source))
-                Preferences.tickLog.logLineHour(
-                        "listeners after: " + firebaseListeners.joinToString(
-                                "; "
-                        ) { it.second })
+                firebaseListeners += firebaseListener
             }
         }
 
@@ -367,7 +356,7 @@ class DomainFactory(
         aggregateData = AggregateData()
 
         Preferences.tickLog.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
-        firebaseListeners.forEach { it.first(this) }
+        firebaseListeners.forEach { it(this) }
         firebaseListeners.clear()
 
         val copyAggregateData = aggregateData!!

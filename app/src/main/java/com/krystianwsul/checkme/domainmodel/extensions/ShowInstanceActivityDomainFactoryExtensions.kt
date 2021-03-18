@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -16,6 +17,7 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
@@ -63,12 +65,13 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
     )
 }
 
+@CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey,
-): Pair<TaskUndoData, Boolean> = syncOnDomain {
+): Single<Pair<TaskUndoData, Boolean>> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

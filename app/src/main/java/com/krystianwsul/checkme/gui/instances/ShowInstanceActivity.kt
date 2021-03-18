@@ -90,27 +90,26 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showInstanceViewModel.stop()
 
-        val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(
-                SaveService.Source.GUI,
-                taskKeys as Set<TaskKey>,
-                removeInstances,
-                instanceKey
-        )
+        val undoTaskDataSingle = DomainFactory.instance
+                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances, instanceKey)
+                .observeOn(AndroidSchedulers.mainThread())
+                .cache()
 
-        if (visible) {
-            showInstanceViewModel.start(instanceKey)
+        undoTaskDataSingle.filter { (_, visible) -> visible }
+                .map { (undoTaskData, _) -> undoTaskData }
+                .doOnSuccess { showInstanceViewModel.start(instanceKey) }
+                .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
+                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
+                .subscribe()
+                .addTo(createDisposable)
 
-            showSnackbarRemovedMaybe(taskKeys.size)
-                    .flatMapCompletable {
-                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
-                    }
-                    .subscribe()
-                    .addTo(createDisposable)
-        } else {
-            setSnackbar(undoTaskData)
-
-            finish()
-        }
+        undoTaskDataSingle.filter { (_, visible) -> !visible }
+                .map { (undoTaskData, _) -> undoTaskData }
+                .subscribe {
+                    setSnackbar(it)
+                    finish()
+                }
+                .addTo(createDisposable)
     }
 
     override val instanceSearch by lazy {

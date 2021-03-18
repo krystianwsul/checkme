@@ -11,6 +11,7 @@ abstract class NotificationWrapper {
     companion object {
 
         val instance = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> NotificationWrapperImplQ()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NotificationWrapperImplOMr1()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NotificationWrapperImplO()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN()
@@ -27,7 +28,12 @@ abstract class NotificationWrapper {
             now: ExactTimeStamp.Local,
     )
 
-    abstract fun notifyGroup(instances: Collection<Instance<*>>, silent: Boolean, now: ExactTimeStamp.Local)
+    abstract fun notifyGroup(
+            instances: Collection<Instance<*>>,
+            silent: Boolean,
+            now: ExactTimeStamp.Local,
+            summary: Boolean = true,
+    )
 
     abstract fun cleanGroup(lastNotificationId: Int?)
 

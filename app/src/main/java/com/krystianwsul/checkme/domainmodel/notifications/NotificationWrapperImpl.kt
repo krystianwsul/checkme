@@ -43,9 +43,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         @JvmStatic
         protected val KEY_HASH_CODE = "com.krystianwsul.checkme.notification_hash_code"
 
-        @JvmStatic
-        protected val MAX_INBOX_LINES = 5
-
         private const val NOTIFICATION_ID_GROUP = 0
 
         private const val TAG_TEMPORARY = "temporary"
@@ -56,6 +53,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                     .getBoolean(R.bool.release)
         }
     }
+
+    protected open val maxInboxLines = 5
 
     protected val notificationManager by lazy { MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
@@ -146,7 +145,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         fun action(
                 @DrawableRes icon: Int,
                 @StringRes text: Int,
-                pendingIntent: PendingIntent
+                pendingIntent: PendingIntent,
         ) = NotificationCompat.Action
                 .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
                 .build()
@@ -254,21 +253,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .map { it.name }
             .toList()
 
-    protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES
+    protected open fun getExtraCount(lines: List<String>, summary: Boolean) = lines.size - maxInboxLines
 
     private fun getInboxStyle(
             lines: List<String>,
-            group: Boolean
+            summary: Boolean,
     ): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val inboxStyle = NotificationCompat.InboxStyle()
 
-        val finalLines = lines.take(MAX_INBOX_LINES)
+        inboxStyle.setBigContentTitle(null)
+
+        val finalLines = lines.take(maxInboxLines)
 
         finalLines.forEach { inboxStyle.addLine(it) }
 
-        val extraCount = getExtraCount(lines, group)
+        val extraCount = getExtraCount(lines, summary)
 
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
@@ -280,7 +281,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected open fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(MyApplication.instance)
 
     protected open fun getNotificationBuilder(
-            title: String,
+            title: String?,
             text: String?,
             deleteIntent: PendingIntent?,
             contentIntent: PendingIntent,
@@ -293,10 +294,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash,
-            highPriority: Boolean
+            highPriority: Boolean,
     ): NotificationCompat.Builder {
-        check(title.isNotEmpty())
-
         val priority = if (highPriority) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
 
         val builder = newBuilder(silent, highPriority)
@@ -336,8 +335,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return builder
     }
 
-    protected open fun notify(
-            title: String,
+    protected fun notify(
+            title: String?,
             text: String?,
             notificationId: Int,
             deleteIntent: PendingIntent?,
@@ -352,7 +351,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash,
             tag: String?,
-            highPriority: Boolean
+            highPriority: Boolean,
     ) {
         val unchanged = notificationManager.activeNotifications
                 ?.singleOrNull { it.id == notificationHash.id }
@@ -393,10 +392,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             instances: Collection<Instance<*>>,
             silent: Boolean, // not needed >= 24
             now: ExactTimeStamp.Local,
+            summary: Boolean,
     ) {
         val highPriority = getHighPriority() ?: return
 
-        val groupData = GroupData(instances, now, silent, highPriority)
+        val groupData = GroupData(instances, now, silent, highPriority, summary)
         notificationRelay.accept { notifyGroupHelper(groupData) }
     }
 
@@ -405,6 +405,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             private val now: ExactTimeStamp.Local,
             val silent: Boolean,
             val highPriority: Boolean,
+            val summary: Boolean,
     ) {
         val instances = instances.map(::Instance)
 
@@ -433,11 +434,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val (inboxStyle, styleHash) = getInboxStyle(groupData.instances
-                .sortedWith(compareBy({ it.timeStamp }, { it.startExactTimeStamp }))
-                .map { it.name + it.text }, true)
+        val (inboxStyle, styleHash) = getInboxStyle(
+                groupData.instances
+                        .sortedWith(compareBy({ it.timeStamp }, { it.startExactTimeStamp }))
+                        .map { it.name + it.text },
+                groupData.summary,
+        )
 
-        val title = groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders)
+        val title = if (groupData.summary) groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null
         val text = names.joinToString(", ")
 
         val notificationHash = NotificationHash(
@@ -536,14 +540,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     protected data class NotificationHash(
-            val title: String,
+            val title: String?,
             val text: String?,
             val id: Int,
             val timeStamp: Long?,
             val style: Style?,
             val sortKey: String,
             val uuid: String?,
-            val tag: String?
+            val tag: String?,
     ) {
 
         interface Style {

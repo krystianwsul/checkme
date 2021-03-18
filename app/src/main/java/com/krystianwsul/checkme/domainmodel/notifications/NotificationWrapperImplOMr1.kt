@@ -4,7 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 
-class NotificationWrapperImplOMr1 : NotificationWrapperImplO() {
+open class NotificationWrapperImplOMr1 : NotificationWrapperImplO() {
 
     override fun getInstanceData(
             deviceDbInfo: DeviceDbInfo,

@@ -56,11 +56,11 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
     override fun getExtraCount(
             lines: List<String>,
-            group: Boolean
-    ) = if (group) 0 else lines.size - MAX_INBOX_LINES
+            summary: Boolean,
+    ) = if (summary) 0 else lines.size - maxInboxLines
 
     override fun getNotificationBuilder(
-            title: String,
+            title: String?,
             text: String?,
             deleteIntent: PendingIntent?,
             contentIntent: PendingIntent,
@@ -73,7 +73,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash,
-            highPriority: Boolean
+            highPriority: Boolean,
     ) = super.getNotificationBuilder(
             title,
             text,
@@ -92,8 +92,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     ).apply {
         setGroup(GROUP_KEY)
 
-        if (summary)
-            setGroupSummary(true)
+        if (summary) setGroupSummary(true)
     }
 
     override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })

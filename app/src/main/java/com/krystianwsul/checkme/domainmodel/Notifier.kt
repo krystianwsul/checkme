@@ -21,7 +21,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     companion object {
 
-        private const val MAX_NOTIFICATIONS = 3
+        private const val MAX_NOTIFICATIONS_OLD = 3
+
+        // To prevent spam if there's a huge backlog
+        private const val MAX_NOTIFICATIONS_Q = 10
     }
 
     fun updateNotificationsTick(
@@ -217,8 +220,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         Preferences.tickLog.logLineHour("silent? $silent")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size > MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
+            if (notificationInstances.size > MAX_NOTIFICATIONS_OLD) { // show group
+                if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
                     val silentParam =
                             if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
 
@@ -233,7 +236,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     notificationWrapper.notifyGroup(notificationInstances.values, silent, now)
                 }
             } else { // show instances
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS) { // group shown
+                if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
                     NotificationWrapper.instance.cancelNotification(0)
 
                     for (instance in notificationInstances.values)
@@ -253,7 +256,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                             .forEach { updateInstance(it, now) }
                 }
             }
-        } else {
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (notificationInstances.isEmpty()) {
                 Preferences.tickLog.logLineHour("hiding group")
                 NotificationWrapper.instance.cancelNotification(0)
@@ -279,6 +282,45 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             updateInstances.forEach {
                 Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
                 updateInstance(it, now)
+            }
+        } else {
+
+            if (notificationInstances.size > MAX_NOTIFICATIONS_Q) {
+                Preferences.tickLog.logLineHour("showing group")
+                NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)
+
+                for (shownInstanceKey in shownInstanceKeys) {
+                    val instance = domainFactory.getInstance(shownInstanceKey)
+                    Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
+                    NotificationWrapper.instance.cancelNotification(instance.notificationId)
+                }
+            } else {
+                if (notificationInstances.isEmpty()) {
+                    Preferences.tickLog.logLineHour("hiding group")
+                    NotificationWrapper.instance.cancelNotification(0)
+                } else {
+                    Preferences.tickLog.logLineHour("showing group")
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
+                }
+
+                for (hideInstanceKey in hideInstanceKeys) {
+                    val instance = domainFactory.getInstance(hideInstanceKey)
+                    Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
+                    NotificationWrapper.instance.cancelNotification(instance.notificationId)
+                }
+
+                for (showInstanceKey in showInstanceKeys) {
+                    val instance = notificationInstances.getValue(showInstanceKey)
+                    Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
+                    notifyInstance(instance, silent, now)
+                }
+
+                val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
+
+                updateInstances.forEach {
+                    Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
+                    updateInstance(it, now)
+                }
             }
         }
 

@@ -148,12 +148,6 @@ class DomainFactory(
                 ChangeType.REMOTE -> RunType.REMOTE
             }
 
-        fun <T> syncOnDomain(action: () -> T): T {
-            SchedulerTypeHolder.instance.requireScheduler()
-
-            return DomainLocker.syncOnDomain(action)
-        }
-
         @CheckResult
         fun <T : Any> scheduleOnDomain(action: () -> T) =
                 domainCompletable().andThen(Single.fromCallable(action)).observeOn(AndroidSchedulers.mainThread())!!

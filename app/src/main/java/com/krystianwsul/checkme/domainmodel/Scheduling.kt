@@ -11,6 +11,7 @@ fun <T : Any> Observable<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 fun <T : Any> Single<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 fun <T : Any> Flowable<T>.observeOnDomain() = observeOn(Schedulers.single())!!
 
+fun <T : Any> Observable<T>.subscribeOnDomain() = subscribeOn(Schedulers.single())!!
 fun <T : Any> Single<T>.subscribeOnDomain() = subscribeOn(Schedulers.single())!!
 fun Completable.subscribeOnDomain() = subscribeOn(Schedulers.single())!!
 

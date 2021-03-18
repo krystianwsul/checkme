@@ -6,15 +6,14 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
 fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(instanceKeys.isNotEmpty())
 

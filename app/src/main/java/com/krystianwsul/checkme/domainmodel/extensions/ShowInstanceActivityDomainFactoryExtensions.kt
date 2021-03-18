@@ -10,8 +10,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -22,7 +21,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
             ?.let { requestInstanceKey.copy(taskKey = it) }

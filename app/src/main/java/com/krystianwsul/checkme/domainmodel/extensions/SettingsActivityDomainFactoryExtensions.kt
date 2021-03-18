@@ -6,13 +6,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 
 fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
     MyCrashlytics.log("DomainFactory.getSettingsData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
 }

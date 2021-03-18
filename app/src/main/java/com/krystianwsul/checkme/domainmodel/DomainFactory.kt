@@ -33,8 +33,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
@@ -184,7 +183,7 @@ class DomainFactory(
     private fun fixOffsets(source: String) {
         MyCrashlytics.log("triggering fixing offsets from $source")
 
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -247,7 +246,7 @@ class DomainFactory(
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
@@ -301,7 +300,7 @@ class DomainFactory(
     // firebase
 
     override fun clearUserInfo() {
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         updateNotifications(ExactTimeStamp.Local.now, true)
     }
@@ -309,7 +308,7 @@ class DomainFactory(
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         updateShortcuts(now)
 
@@ -321,7 +320,7 @@ class DomainFactory(
     override fun updateUserRecord(snapshot: Snapshot) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
 
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
@@ -385,7 +384,7 @@ class DomainFactory(
     }
 
     fun throwIfSaved() {
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         if (projectsFactory.isSaved) throw SavedFactoryException()
     }
@@ -453,7 +452,7 @@ class DomainFactory(
     ) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
 
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -480,7 +479,7 @@ class DomainFactory(
     override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
 
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+        DomainThreadChecker.instance.requireDomainThread()
 
         if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 

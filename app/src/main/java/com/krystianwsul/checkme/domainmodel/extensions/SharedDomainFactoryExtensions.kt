@@ -15,8 +15,7 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -209,7 +208,7 @@ fun DomainFactory.setInstanceNotified(
 fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
@@ -254,7 +253,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         projectKey: ProjectKey<*>?,
         mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
 ): Pair<List<T>, Boolean> {
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 

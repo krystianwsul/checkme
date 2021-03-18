@@ -9,8 +9,7 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -18,7 +17,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 

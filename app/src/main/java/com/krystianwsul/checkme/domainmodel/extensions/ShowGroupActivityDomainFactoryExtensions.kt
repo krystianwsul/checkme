@@ -8,8 +8,7 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -19,7 +18,7 @@ import java.util.*
 fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 

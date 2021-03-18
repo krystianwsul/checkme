@@ -19,8 +19,7 @@ abstract class ScheduleRecord<T : ProjectType>(
         private val scheduleJson: ScheduleJson<T>,
         scheduleTypeSubkey: String,
         _id: String?,
-        allowParseOnMain: Boolean = false,
-) : RemoteRecord(_id == null, allowParseOnMain) {
+) : RemoteRecord(_id == null) {
 
     companion object {
 

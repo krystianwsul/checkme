@@ -8,8 +8,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
@@ -20,7 +19,7 @@ fun DomainFactory.getSearchInstancesData(
 ): DomainResult<SearchInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {

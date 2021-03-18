@@ -13,8 +13,7 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -26,7 +25,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(instanceKeys.isNotEmpty())
 
@@ -211,7 +210,7 @@ fun DomainFactory.getEditInstancesSearchData(
 ): DomainResult<EditInstancesSearchViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {

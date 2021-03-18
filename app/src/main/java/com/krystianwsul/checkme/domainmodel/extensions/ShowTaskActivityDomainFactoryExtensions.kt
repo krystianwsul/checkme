@@ -6,15 +6,14 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
 fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val taskKey = copiedTaskKeys[requestTaskKey] ?: requestTaskKey
 

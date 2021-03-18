@@ -14,7 +14,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
@@ -96,7 +96,7 @@ class DomainFactoryRule : TestRule {
         mockkObject(DefaultCustomTimeCreator)
         every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
 
-        SchedulerTypeHolder.instance = mockk(relaxed = true)
+        DomainThreadChecker.instance = mockk(relaxed = true)
 
         RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }

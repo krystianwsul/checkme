@@ -6,15 +6,14 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 
 fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getFriendListData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val friends = friendsFactory.friends
 

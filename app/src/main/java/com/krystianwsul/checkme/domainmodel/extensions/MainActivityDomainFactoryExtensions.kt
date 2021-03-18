@@ -12,8 +12,7 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
@@ -21,7 +20,7 @@ import java.util.*
 fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val projectDatas = projectsFactory.projects
             .values
@@ -69,7 +68,7 @@ fun DomainFactory.getGroupListData(
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(position >= 0)
 

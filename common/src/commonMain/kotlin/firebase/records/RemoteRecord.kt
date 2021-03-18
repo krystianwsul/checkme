@@ -1,16 +1,15 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
 
-abstract class RemoteRecord(create: Boolean, allowParseOnMain: Boolean = false) {
+abstract class RemoteRecord(create: Boolean) {
 
     init {
-        SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN.takeIf { !create && !allowParseOnMain })
+        DomainThreadChecker.instance.requireDomainThread()
     }
 
     private var shouldDelete = false

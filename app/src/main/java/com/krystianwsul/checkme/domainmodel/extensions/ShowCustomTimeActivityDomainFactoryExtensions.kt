@@ -7,8 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDo
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
@@ -18,7 +17,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val customTime = projectsFactory.privateProject.getCustomTime(customTimeKey)
 

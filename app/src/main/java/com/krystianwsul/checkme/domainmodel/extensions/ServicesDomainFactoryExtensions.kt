@@ -6,8 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -18,7 +17,7 @@ import java.util.*
 fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -48,7 +47,7 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
 fun DomainFactory.setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
     MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -71,7 +70,7 @@ fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys:
     MyCrashlytics.log("DomainFactory.setInstancesNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(instanceKeys.isNotEmpty())
 
@@ -84,7 +83,7 @@ fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys:
 fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

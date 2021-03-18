@@ -8,8 +8,7 @@ import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Single
@@ -17,7 +16,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getProjectListData")
 
-    SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)
+    DomainThreadChecker.instance.requireDomainThread()
 
     val remoteProjects = projectsFactory.sharedProjects
 

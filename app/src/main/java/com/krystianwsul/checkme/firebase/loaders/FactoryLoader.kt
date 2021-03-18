@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.cacheImmediate
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -149,15 +150,13 @@ class FactoryLoader(
                             }
                             .addTo(domainDisposable)
 
-                    tokenObservable.flatMapCompletable { tokenWrapper ->
-                        DomainFactory.addFirebaseListener { domainFactory ->
-                            domainFactory.updateDeviceDbInfo(
-                                    DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
-                                    SaveService.Source.GUI
-                            )
-                        }
-                    }
-                            .subscribe()
+                    tokenObservable.flatMapSingle { DomainFactory.onReady().mapWith(it) }
+                            .subscribe { (domainFactory, tokenWrapper) ->
+                                domainFactory.updateDeviceDbInfo(
+                                        DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
+                                        SaveService.Source.GUI
+                                )
+                            }
                             .addTo(domainDisposable)
 
                     domainFactorySingle.map(::NullableWrapper)

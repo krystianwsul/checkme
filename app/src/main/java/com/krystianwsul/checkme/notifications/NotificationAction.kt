@@ -29,9 +29,9 @@ sealed class NotificationAction : Parcelable {
         override fun perform(): Completable {
             check(instanceKeys.isNotEmpty())
 
-            return DomainFactory.addFirebaseListener {
-                it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
-            }
+            return DomainFactory.onReady()
+                    .doOnSuccess { it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys) }
+                    .ignoreElement()
         }
     }
 
@@ -50,9 +50,9 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainFactory.addFirebaseListener {
-                it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
-            }
+            return DomainFactory.onReady()
+                    .doOnSuccess { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
+                    .ignoreElement()
         }
     }
 
@@ -71,9 +71,9 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainFactory.addFirebaseListener {
-                it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
-            }
+            return DomainFactory.onReady()
+                    .doOnSuccess { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
+                    .ignoreElement()
         }
     }
 
@@ -85,11 +85,8 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform(): Completable {
-            return DomainFactory.addFirebaseListener {
-                it.throwIfSaved()
-                it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey).subscribe()
-            }
-        }
+        override fun perform() = DomainFactory.onReady().flatMapCompletable {
+            it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
+        }!!
     }
 }

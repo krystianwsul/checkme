@@ -24,6 +24,8 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -79,6 +81,13 @@ class DomainFactory(
                 .replay(1)!!
                 .apply { connect() }
 
+        // emits on domain thread
+        fun onReady() = instanceRelay.filterNotNull()
+                .switchMap { domainFactory -> domainFactory.isSaved.map { domainFactory to it } }
+                .filter { (_, isSaved) -> !isSaved }
+                .map { (domainFactory, _) -> domainFactory }
+                .firstOrError()!!
+
         @CheckResult
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = completeOnDomain {
             check(MyApplication.instance.hasUserInfo)
@@ -103,20 +112,6 @@ class DomainFactory(
                     tickData?.release()
                     newTickData.release()
                 }
-            }
-        }
-
-        // todo scheduler change to single that emits when firebase is ready
-        // todo route all external calls through here
-        @CheckResult
-        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = completeOnDomain {
-            val domainFactory = nullableInstance
-
-            if (domainFactory?.isSaved?.value == false) {
-                domainFactory.throwIfSaved()
-                firebaseListener(domainFactory)
-            } else {
-                firebaseListeners += firebaseListener
             }
         }
 
@@ -181,8 +176,8 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .flatMapCompletable { source -> addFirebaseListener { it.fixOffsets(source) } }
-                .subscribe()
+                .flatMap { onReady().mapWith(it) }
+                .subscribe { (domainFactory, source) -> domainFactory.fixOffsets(source) }
                 .addTo(domainDisposable)
     }
 
@@ -338,13 +333,14 @@ class DomainFactory(
 
         if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
 
-        updateIsSaved()
-
         check(aggregateData == null)
 
         aggregateData = AggregateData()
 
         Preferences.tickLog.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
+
+        updateIsSaved()
+
         firebaseListeners.forEach { it(this) }
         firebaseListeners.clear()
 

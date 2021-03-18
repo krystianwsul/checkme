@@ -21,9 +21,11 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -79,11 +81,12 @@ class SettingsActivity : NavBarActivity() {
     private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount): Completable {
         Snackbar.make(binding.settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
 
-        return googleSignInAccount.photoUrl
-                ?.let { url ->
-                    DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
+        return Maybe.fromCallable { googleSignInAccount.photoUrl }
+                .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
+                .doOnSuccess { (domainFactory, url) ->
+                    domainFactory.updatePhotoUrl(SaveService.Source.GUI, url.toString())
                 }
-                ?: Completable.complete()
+                .ignoreElement()
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

@@ -81,11 +81,7 @@ fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys:
     save(0, source)
 }
 
-fun DomainFactory.setTaskImageUploaded(
-        source: SaveService.Source,
-        taskKey: TaskKey,
-        imageUuid: String,
-) {
+fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     SchedulerTypeHolder.instance.requireScheduler(SchedulerType.DOMAIN)

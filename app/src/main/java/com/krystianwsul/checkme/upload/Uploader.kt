@@ -18,6 +18,7 @@ import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.subscribeBy
 
 object Uploader {
 
@@ -82,9 +83,9 @@ object Uploader {
         addOnSuccessListener {
             Queue.removeEntry(entry)
 
-            DomainFactory.addFirebaseListener {
+            DomainFactory.onReady().subscribeBy {
                 it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
-            }.subscribe()
+            }
         }
     }
 

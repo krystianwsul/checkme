@@ -264,8 +264,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             setIntent(intent)
             cancelNotification()
             setInstanceNotified()
-
-            updateTopMenu()
         } else {
             startActivity(getForwardIntent(
                     this,
@@ -305,15 +303,16 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainFactory.addFirebaseListener {
-                it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
-                        .subscribe()
-                        .addTo(createDisposable)
-            }
-                    .subscribe()
+            DomainFactory.onReady()
+                    .flatMapCompletable {
+                        it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        data?.notificationShown = false
+                        updateTopMenu()
+                    }
                     .addTo(createDisposable)
-
-            data?.notificationShown = false
         }
     }
 

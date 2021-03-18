@@ -33,7 +33,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
         NotificationWrapper.instance.notifyTemporary(notificationAction.requestCode, source)
 
-        notificationAction.perform {
+        notificationAction.perform().subscribe {
             NotificationWrapper.instance.hideTemporary(notificationAction.requestCode, source)
         }
     }

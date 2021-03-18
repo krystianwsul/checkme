@@ -2,21 +2,20 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-fun DomainFactory.getShowTaskInstancesData(
-        taskKey: TaskKey,
-        page: Int
-): ShowTaskInstancesViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTaskInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     val task = getTaskForce(taskKey)
     val now = ExactTimeStamp.Local.now
@@ -69,5 +68,5 @@ fun DomainFactory.getShowTaskInstancesData(
             null
     )
 
-    ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
+    return ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
 }

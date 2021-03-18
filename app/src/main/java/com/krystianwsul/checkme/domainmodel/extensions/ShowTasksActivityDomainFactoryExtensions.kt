@@ -9,12 +9,15 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
-fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data = DomainFactory.syncOnDomain {
+fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 
@@ -81,7 +84,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         }
     }
 
-    ShowTasksViewModel.Data(
+    return ShowTasksViewModel.Data(
             TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
             title,
             isSharedProject,

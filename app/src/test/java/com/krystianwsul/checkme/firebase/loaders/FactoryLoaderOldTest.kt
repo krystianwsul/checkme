@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -24,11 +25,8 @@ import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.*
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 class FactoryLoaderOldTest {
 
@@ -40,6 +38,9 @@ class FactoryLoaderOldTest {
             Task.USE_ROOT_INSTANCES = false
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val local = object : FactoryProvider.Local {
 
@@ -53,7 +54,7 @@ class FactoryLoaderOldTest {
                 scheduleDay: Int,
                 scheduleCustomTimeId: CustomTimeId<*>?,
                 scheduleHour: Int?,
-                scheduleMinute: Int?
+                scheduleMinute: Int?,
         ): Instance.Shown? = null
 
         override fun createShown(

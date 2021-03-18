@@ -24,7 +24,10 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.io.Serializable
 
 class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
@@ -48,19 +51,19 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showTaskViewModel.stop()
 
         @Suppress("UNCHECKED_CAST")
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(
-                SaveService.Source.GUI,
-                taskKeys as Set<TaskKey>,
-                removeInstances
-        )
+        DomainFactory.instance
+                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy {
+                    finish()
 
-        finish()
-
-        setSnackbar(taskUndoData)
+                    setSnackbar(it)
+                }
+                .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {

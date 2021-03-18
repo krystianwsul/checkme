@@ -86,7 +86,7 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) =
 
 fun View.onGlobalLayout() = Single.create<Unit> { emitter ->
     addOneShotGlobalLayoutListener { emitter.onSuccess(Unit) }
-}
+}!!
 
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)
@@ -129,15 +129,6 @@ private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): Lis
 }
 
 fun View.setIndent(indent: Int) = updatePadding((indent * 48 * context.resources.displayMetrics.density + 0.5f).toInt())
-
-fun <T> removeFromGetter(getter: () -> List<T>, action: (T) -> Unit) {
-    var list = getter()
-
-    do {
-        action(list.first())
-        list = getter()
-    } while (list.isNotEmpty())
-}
 
 fun Resources.dpToPx(dp: Int): Float {
     val density = displayMetrics.density
@@ -332,7 +323,7 @@ fun <T : Any> List<Single<T>>.zipSingle() = if (isEmpty()) {
             it as T
         }
     }
-}
+}!!
 
 inline fun <reified T, U> T.getPrivateField(name: String): U {
     return T::class.java.getDeclaredField(name).let {

@@ -37,6 +37,8 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
@@ -130,20 +132,24 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private lateinit var projectListViewModel: ProjectListViewModel
 
-    private val deleteInstancesListener = { projectIds: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { projectIds, removeInstances ->
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(
-                0,
-                SaveService.Source.GUI,
-                projectIds as Set<ProjectKey.Shared>,
-                removeInstances
-        )
-
-        mainActivity.showSnackbarRemoved(projectIds.size) {
-            DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
-        }
+        DomainFactory.instance
+                .setProjectEndTimeStamps(
+                        0,
+                        SaveService.Source.GUI,
+                        projectIds as Set<ProjectKey.Shared>,
+                        removeInstances,
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
+                .flatMapCompletable {
+                    DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, it)
+                }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val bindingProperty = ResettableProperty<FragmentProjectListBinding>()

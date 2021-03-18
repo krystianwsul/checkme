@@ -54,7 +54,9 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -96,15 +98,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
-
-        listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-        }
+        DomainFactory.instance
+                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMapMaybe { listener.showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
+                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     private val selectionCallback = object : SelectionCallback() {
@@ -817,11 +821,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun setOrdinal(ordinal: Double) {
             childTaskData.ordinal = ordinal
 
-            DomainFactory.instance.setOrdinal(
-                    taskListFragment.data!!.dataId,
-                    childTaskData.taskKey,
-                    ordinal
-            )
+            DomainFactory.instance
+                    .setOrdinal(taskListFragment.data!!.dataId, childTaskData.taskKey, ordinal)
+                    .subscribe()
+                    .addTo(createDisposable)
         }
     }
 

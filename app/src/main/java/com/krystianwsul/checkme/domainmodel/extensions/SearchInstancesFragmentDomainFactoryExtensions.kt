@@ -2,13 +2,13 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
@@ -16,10 +16,12 @@ import com.krystianwsul.common.locker.LockerManager
 fun DomainFactory.getSearchInstancesData(
         searchCriteria: SearchCriteria,
         page: Int,
-): DomainResult<SearchInstancesViewModel.Data> = syncOnDomain {
+): DomainResult<SearchInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
-    LockerManager.setLocker { now ->
+    DomainThreadChecker.instance.requireDomainThread()
+
+    return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
             val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())

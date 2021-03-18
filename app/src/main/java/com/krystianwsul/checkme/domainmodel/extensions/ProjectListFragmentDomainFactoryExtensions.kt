@@ -1,16 +1,22 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
+import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getProjectListData(): ProjectListViewModel.Data = syncOnDomain {
+fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getProjectListData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     val remoteProjects = projectsFactory.sharedProjects
 
@@ -25,15 +31,16 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data = syncOnDomain
             }
             .toSortedMap()
 
-    ProjectListViewModel.Data(projectDatas)
+    return ProjectListViewModel.Data(projectDatas)
 }
 
+@CheckResult
 fun DomainFactory.setProjectEndTimeStamps(
         dataId: Int,
         source: SaveService.Source,
         projectIds: Set<ProjectKey<*>>,
-        removeInstances: Boolean
-): ProjectUndoData = syncOnDomain {
+        removeInstances: Boolean,
+): Single<ProjectUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
     check(projectIds.isNotEmpty())
@@ -58,11 +65,12 @@ fun DomainFactory.setProjectEndTimeStamps(
     projectUndoData
 }
 
+@CheckResult
 fun DomainFactory.clearProjectEndTimeStamps(
         dataId: Int,
         source: SaveService.Source,
-        projectUndoData: ProjectUndoData
-) = syncOnDomain {
+        projectUndoData: ProjectUndoData,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     val now = ExactTimeStamp.Local.now

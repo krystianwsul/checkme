@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
@@ -71,7 +72,7 @@ class JoinTasksEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
                         SaveService.Source.GUI,
@@ -85,11 +86,14 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         createParameters.allReminders
                 )
-                .also { EditActivity.createdTaskKey = it }
                 .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
+    override fun createTaskWithParent(
+            createParameters: CreateParameters,
+            parentTaskKey: TaskKey,
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -104,14 +108,14 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         instanceKeys
                 )
-                .also { EditActivity.createdTaskKey = it }
                 .toCreateResult()
+                .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -126,7 +130,7 @@ class JoinTasksEditDelegate(
                                 ?.value,
                         instanceKeys
                 )
-                .also { EditActivity.createdTaskKey = it }
                 .toCreateResult()
+                .applyCreatedTaskKey()
     }
 }

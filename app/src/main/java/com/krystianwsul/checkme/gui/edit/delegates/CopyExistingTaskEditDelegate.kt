@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CopyExistingTaskEditDelegate(
@@ -26,7 +27,7 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -44,7 +45,10 @@ class CopyExistingTaskEditDelegate(
                 .applyCreatedTaskKey()
     }
 
-    override fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): CreateResult {
+    override fun createTaskWithParent(
+            createParameters: CreateParameters,
+            parentTaskKey: TaskKey,
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance
@@ -64,7 +68,7 @@ class CopyExistingTaskEditDelegate(
     override fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult {
+    ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return DomainFactory.instance

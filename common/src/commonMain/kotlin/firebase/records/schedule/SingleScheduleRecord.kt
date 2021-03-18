@@ -12,15 +12,14 @@ open class SingleScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
         scheduleWrapper: ScheduleWrapper<T>,
         id: String? = null,
-        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
-        allowParseOnMain: Boolean = false,
+        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> =
+                ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : ScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,
         scheduleWrapperBridge.singleScheduleJson!!,
         "singleScheduleJson",
         id,
-        allowParseOnMain,
 ) {
 
     val singleScheduleJson by lazy { scheduleWrapperBridge.singleScheduleJson!! }

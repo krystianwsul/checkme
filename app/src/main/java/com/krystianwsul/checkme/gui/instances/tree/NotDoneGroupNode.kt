@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.kotlin.addTo
 import java.util.*
 
 class NotDoneGroupNode(
@@ -60,7 +61,7 @@ class NotDoneGroupNode(
 
     val singleInstanceData get() = instanceDatas.single()
 
-    val nodeCollection get() = notDoneGroupCollection.nodeCollection
+    private val nodeCollection get() = notDoneGroupCollection.nodeCollection
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -250,9 +251,17 @@ class NotDoneGroupNode(
                             done
                     )
 
-                    setDone(true)
+                    setDone(true).flatMapMaybe {
+                        groupListFragment.listener.showSnackbarDoneMaybe(1)
+                    }
+                            .flatMapSingle { setDone(false) }
+                            .subscribe()
+                            .addTo(groupListFragment.attachedToWindowDisposable)
 
-                    groupListFragment.listener.showSnackbarDone(1) { setDone(false) }
+                    /**
+                     * todo it would be better to move all of this out of the node, and both handle the snackbar and
+                     * the subscription there
+                     */
                 }
             }
         } else {
@@ -381,10 +390,18 @@ class NotDoneGroupNode(
 
             val instanceData1 = instanceDatas.single()
 
-            val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData1, this@NotDoneGroupNode)
+            val notDoneInstanceNode = NotDoneInstanceNode(
+                    indentation,
+                    instanceData1,
+                    this@NotDoneGroupNode,
+            )
+
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
-            treeNode.add(notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode), placeholder)
+            treeNode.add(
+                    notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode),
+                    placeholder,
+            )
         }
 
         instanceDatas.add(instanceData)
@@ -399,14 +416,18 @@ class NotDoneGroupNode(
             selectedInstances: List<InstanceKey>,
             selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
-        val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this)
+        val notDoneInstanceNode = NotDoneInstanceNode(
+                indentation,
+                instanceData,
+                this,
+        )
 
         val childTreeNode = notDoneInstanceNode.initialize(
                 expandedInstances,
                 selected,
                 selectedInstances,
                 selectedGroups,
-                treeNode
+                treeNode,
         )
 
         notDoneInstanceNodes.add(notDoneInstanceNode)
@@ -424,7 +445,10 @@ class NotDoneGroupNode(
         singleInstanceData.let {
             it.ordinal = ordinal
 
-            DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+            DomainFactory.instance
+                    .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                    .subscribe()
+                    .addTo(groupListFragment.attachedToWindowDisposable)
         }
     }
 
@@ -515,7 +539,7 @@ class NotDoneGroupNode(
 
         private val parentNotDoneGroupCollection get() = parentNotDoneGroupNode.notDoneGroupCollection
 
-        val parentNodeCollection get() = parentNotDoneGroupCollection.nodeCollection
+        private val parentNodeCollection get() = parentNotDoneGroupCollection.nodeCollection
 
         private val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -574,7 +598,7 @@ class NotDoneGroupNode(
                     null,
                     mapOf(),
                     listOf(),
-                    null
+                    null,
             ))
 
             return treeNode
@@ -611,29 +635,35 @@ class NotDoneGroupNode(
                     val groupAdapter = parentNodeCollection.groupAdapter
                     val instanceKey = instanceData.instanceKey
 
-                    groupAdapter.treeNodeCollection
-                            .treeViewAdapter
-                            .updateDisplayedNodes {
-                                instanceData.done = DomainFactory.instance.setInstanceDone(
-                                        DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                    DomainFactory.instance
+                            .setInstanceDone(
+                                    DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                    SaveService.Source.GUI,
+                                    instanceKey,
+                                    true
+                            )
+                            .doOnSuccess {
+                                groupAdapter.treeNodeCollection
+                                        .treeViewAdapter
+                                        .updateDisplayedNodes { placeholder ->
+                                            instanceData.done = it.value!!
+
+                                            parentNotDoneGroupNode.remove(this, placeholder)
+
+                                            parentNodeCollection.dividerNode.add(instanceData, placeholder)
+                                        }
+                            }
+                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
+                            .flatMapSingle {
+                                DomainFactory.instance.setInstanceDone(
+                                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                         SaveService.Source.GUI,
                                         instanceKey,
-                                        true
-                                )!!
-
-                                parentNotDoneGroupNode.remove(this, it)
-
-                                parentNodeCollection.dividerNode.add(instanceData, it)
+                                        false,
+                                )
                             }
-
-                    groupListFragment.listener.showSnackbarDone(1) {
-                        DomainFactory.instance.setInstanceDone(
-                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                SaveService.Source.GUI,
-                                instanceKey,
-                                false
-                        )
-                    }
+                            .subscribe()
+                            .addTo(groupListFragment.attachedToWindowDisposable)
                 }
             }
 
@@ -645,9 +675,6 @@ class NotDoneGroupNode(
 
         override fun compareTo(other: ModelNode<AbstractHolder>) =
                 instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
-
-        fun removeFromParent(placeholder: TreeViewAdapter.Placeholder) =
-                parentNotDoneGroupNode.remove(this, placeholder)
 
         override val id = Id(instanceData.instanceKey)
 
@@ -683,7 +710,10 @@ class NotDoneGroupNode(
             instanceData.let {
                 it.ordinal = ordinal
 
-                DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                DomainFactory.instance
+                        .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                        .subscribe()
+                        .addTo(groupListFragment.attachedToWindowDisposable)
             }
         }
 

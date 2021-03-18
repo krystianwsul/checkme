@@ -14,6 +14,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
@@ -21,10 +22,14 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.*
+import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+
 
 class DomainFactoryRule : TestRule {
 
@@ -90,6 +95,11 @@ class DomainFactoryRule : TestRule {
 
         mockkObject(DefaultCustomTimeCreator)
         every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
+
+        DomainThreadChecker.instance = mockk(relaxed = true)
+
+        RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
     }
 
     private fun before() {
@@ -169,5 +179,8 @@ class DomainFactoryRule : TestRule {
         unmockkObject(NotificationWrapper)
 
         unmockkObject(BackendNotifier)
+
+        RxJavaPlugins.reset()
+        RxAndroidPlugins.reset()
     }
 }

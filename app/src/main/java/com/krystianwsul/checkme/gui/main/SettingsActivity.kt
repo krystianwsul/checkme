@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.main
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.annotation.CheckResult
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -20,8 +21,11 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -73,12 +77,16 @@ class SettingsActivity : NavBarActivity() {
         return true
     }
 
-    private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount) {
-        googleSignInAccount.photoUrl?.let { url ->
-            DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
-        }
-
+    @CheckResult
+    private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount): Completable {
         Snackbar.make(binding.settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
+
+        return Maybe.fromCallable { googleSignInAccount.photoUrl }
+                .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
+                .doOnSuccess { (domainFactory, url) ->
+                    domainFactory.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                }
+                .ignoreElement()
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
@@ -97,12 +105,16 @@ class SettingsActivity : NavBarActivity() {
 
             settingsActivity.settingsViewModel
                     .relay
-                    .subscribe {
-                        if (it.value != null)
+                    .flatMapCompletable {
+                        if (it.value != null) {
                             settingsActivity.updateFromAccount(it.value)
-                        else
+                        } else {
                             startActivityForResult(MyApplication.instance.googleSignInClient.signInIntent, RC_SIGN_IN)
+
+                            Completable.complete()
+                        }
                     }
+                    .subscribe()
                     .addTo(createDisposable)
 
             findPreference<Preference>(getString(R.string.accountDetails))!!.setOnPreferenceClickListener {
@@ -128,7 +140,11 @@ class SettingsActivity : NavBarActivity() {
                     }.ordinal
 
                     Preferences.tab = newTab
-                    DomainFactory.instance.updateDefaultTab(SaveService.Source.GUI, newTab)
+
+                    DomainFactory.instance
+                            .updateDefaultTab(SaveService.Source.GUI, newTab)
+                            .subscribe()
+                            .addTo(createDisposable)
 
                     true
                 }
@@ -143,11 +159,10 @@ class SettingsActivity : NavBarActivity() {
                             isChecked = it.defaultReminder
 
                             setOnPreferenceChangeListener { _, newValue ->
-                                DomainFactory.instance.updateDefaultReminder(
-                                        it.dataId,
-                                        SaveService.Source.GUI,
-                                        newValue as Boolean
-                                )
+                                DomainFactory.instance
+                                        .updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+                                        .subscribe()
+                                        .addTo(createDisposable)
 
                                 true
                             }
@@ -224,6 +239,8 @@ class SettingsActivity : NavBarActivity() {
 
             if (account != null)
                 settingsActivity.updateFromAccount(account)
+                        .subscribe()
+                        .addTo(createDisposable)
             else
                 MyCrashlytics.logException(SettingsSignInException(result.status.toString()))
         }

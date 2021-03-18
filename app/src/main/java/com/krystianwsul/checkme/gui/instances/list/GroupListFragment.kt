@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -48,6 +49,7 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -161,12 +163,31 @@ class GroupListFragment @JvmOverloads constructor(
                 return true
             }
 
+            fun setInstancesDone(
+                    instanceKeys: List<InstanceKey>,
+                    done: Boolean,
+            ) = DomainFactory.instance.setInstancesDone(
+                    DomainListenerManager.NotificationType.First(parameters.dataId),
+                    SaveService.Source.GUI,
+                    instanceKeys,
+                    done,
+            )
+
             when (itemId) {
                 R.id.actionGroupHour -> {
                     check(showHour(selectedDatas))
                     val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
-                    addHour(instanceKeys)
+
+                    DomainFactory.instance
+                            .setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
+                            .flatMapCompletable {
+                                DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, it)
+                            }
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
                 }
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
@@ -234,47 +255,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    val done = DomainFactory.instance.setInstancesDone(
-                            parameters.dataId,
-                            SaveService.Source.GUI,
-                            instanceKeys,
-                            true
-                    )
-
-                    removeFromGetter<TreeNode<AbstractHolder>>(
-                            { getTreeViewAdapter().selectedNodes.sortedByDescending { it.indentation } },
-                            { treeNode ->
-                                treeNode.modelNode.let {
-                                    if (it is NotDoneGroupNode) {
-                                        val nodeCollection = it.nodeCollection
-
-                                        nodeCollection.notDoneGroupCollection.remove(it, placeholder)
-
-                                        if (!it.treeNode.isExpanded) {
-                                            it.instanceDatas.forEach {
-                                                it.done = done
-
-                                                nodeCollection.dividerNode.add(it, placeholder)
-                                            }
-                                        } else {
-                                            check(it.treeNode.allChildren.all { it.isSelected })
-                                        }
-
-                                        decrementSelected(placeholder)
-                                    } else {
-                                        val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
-                                        instanceData.done = done
-
-                                        it.removeFromParent(placeholder)
-
-                                        it.parentNodeCollection.dividerNode.add(instanceData, placeholder)
-                                    }
-                                }
-                            })
-
-                    listener.showSnackbarDone(instanceKeys.size) {
-                        DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, false)
-                    }
+                    setInstancesDone(instanceKeys, true).observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { listener.showSnackbarDoneMaybe(instanceKeys.size) }
+                            .flatMapSingle { setInstancesDone(instanceKeys, false) }
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
                 }
                 R.id.action_group_mark_not_done -> {
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
@@ -283,27 +268,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
-
-                    removeFromGetter<TreeNode<AbstractHolder>>(
-                            { getTreeViewAdapter().selectedNodes.sortedByDescending { it.indentation } },
-                            { treeNode ->
-                                treeNode.modelNode.let {
-                                    val instanceData = (it as DoneInstanceNode).instanceData
-                                    instanceData.done = null
-
-                                    it.removeFromParent(placeholder)
-
-                                    it.dividerNode
-                                            .nodeCollection
-                                            .notDoneGroupCollection
-                                            .add(instanceData, placeholder)
-                                }
-                            })
-
-                    listener.showSnackbarDone(instanceKeys.size) {
-                        DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, true)
-                    }
+                    setInstancesDone(instanceKeys, false).observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { listener.showSnackbarDoneMaybe(instanceKeys.size) }
+                            .flatMapSingle { setInstancesDone(instanceKeys, true) }
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
                 }
                 R.id.action_group_notify -> {
                     val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
@@ -317,11 +286,14 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    DomainFactory.instance.setInstancesNotNotified(
-                            parameters.dataId,
-                            SaveService.Source.GUI,
-                            instanceKeys
-                    )
+                    DomainFactory.instance
+                            .setInstancesNotNotified(
+                                    parameters.dataId,
+                                    SaveService.Source.GUI,
+                                    instanceKeys
+                            )
+                            .subscribe()
+                            .addTo(attachedToWindowDisposable)
 
                     instanceDatas.forEach { it.notificationShown = true }
                 }
@@ -440,7 +412,7 @@ class GroupListFragment @JvmOverloads constructor(
             return lines.joinToString("\n")
         }
 
-    private val attachedToWindowDisposable = CompositeDisposable()
+    val attachedToWindowDisposable = CompositeDisposable()
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -778,14 +750,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    private fun addHour(instanceKeys: Collection<InstanceKey>) {
-        val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
-
-        listener.showSnackbarHour(hourUndoData.instanceDateTimes.size) {
-            DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
-        }
-    }
-
     override fun setFab(floatingActionButton: FloatingActionButton) {
         this.floatingActionButton = floatingActionButton
 
@@ -975,7 +939,10 @@ class GroupListFragment @JvmOverloads constructor(
     private fun onEditInstances(undoData: UndoData, count: Int) {
         selectionCallback.actionMode!!.finish()
 
-        listener.showSnackbarHour(count) { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
+        listener.showSnackbarHourMaybe(count)
+                .flatMapCompletable { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
+                .subscribe()
+                .addTo(attachedToWindowDisposable)
     }
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()

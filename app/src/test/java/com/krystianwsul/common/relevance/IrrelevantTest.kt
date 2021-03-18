@@ -2,7 +2,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
@@ -49,7 +49,7 @@ class IrrelevantTest {
         @JvmStatic
         @BeforeClass
         fun beforeClass() {
-            SchedulerTypeHolder.instance = mockk(relaxed = true)
+            DomainThreadChecker.instance = mockk(relaxed = true)
         }
     }
 

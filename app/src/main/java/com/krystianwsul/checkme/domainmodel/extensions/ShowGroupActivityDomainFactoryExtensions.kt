@@ -2,21 +2,23 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
 import java.util.*
 
-fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data = syncOnDomain {
+fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 
@@ -30,7 +32,7 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
 
     val displayText = DateTime(date, time).getDisplayText()
 
-    ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
+    return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
 }
 
 private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp.Local): GroupListDataWrapper {

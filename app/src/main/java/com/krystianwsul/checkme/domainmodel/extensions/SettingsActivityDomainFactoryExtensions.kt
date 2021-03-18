@@ -1,18 +1,23 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
+import com.krystianwsul.common.firebase.DomainThreadChecker
 
-fun DomainFactory.getSettingsData(): SettingsViewModel.Data = syncOnDomain {
+fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
     MyCrashlytics.log("DomainFactory.getSettingsData")
 
-    SettingsViewModel.Data(myUserFactory.user.defaultReminder)
+    DomainThreadChecker.instance.requireDomainThread()
+
+    return SettingsViewModel.Data(myUserFactory.user.defaultReminder)
 }
 
-fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = syncOnDomain {
+@CheckResult
+fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultTab")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 
@@ -21,11 +26,12 @@ fun DomainFactory.updateDefaultTab(source: SaveService.Source, defaultTab: Int) 
     save(0, source)
 }
 
+@CheckResult
 fun DomainFactory.updateDefaultReminder(
         dataId: Int,
         source: SaveService.Source,
-        defaultReminder: Boolean
-) = syncOnDomain {
+        defaultReminder: Boolean,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultReminder")
     if (myUserFactory.isSaved) throw SavedFactoryException()
 

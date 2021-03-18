@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
+import androidx.annotation.CheckResult
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -23,6 +24,8 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -30,19 +33,19 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 import com.soywiz.klock.hours
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates.observable
 
@@ -62,13 +65,13 @@ class DomainFactory(
 
         private const val MAX_NOTIFICATIONS = 3
 
-        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())!!
 
         val nullableInstance get() = instanceRelay.value!!.value
 
         val instance get() = nullableInstance!!
 
-        private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
+        private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
         var firstRun = false
 
@@ -77,8 +80,15 @@ class DomainFactory(
                 .replay(1)!!
                 .apply { connect() }
 
-        // still running?
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = syncOnDomain {
+        // emits on domain thread
+        fun onReady() = instanceRelay.filterNotNull()
+                .switchMap { domainFactory -> domainFactory.isSaved.map { domainFactory to it } }
+                .filter { (_, isSaved) -> !isSaved }
+                .map { (domainFactory, _) -> domainFactory }
+                .firstOrError()!!
+
+        @CheckResult
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = completeOnDomain {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
@@ -104,51 +114,15 @@ class DomainFactory(
             }
         }
 
-        // todo route all external calls through here
-        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
-            val domainFactory = nullableInstance
-            if (
-                    domainFactory?.projectsFactory?.isSaved == false
-                    && !domainFactory.friendsFactory.isSaved
-                    && !domainFactory.myUserFactory.isSaved
-            ) {
-                domainFactory.throwIfSaved()
-                firebaseListener(domainFactory)
-            } else {
-                firebaseListeners.add(Pair(firebaseListener, "other"))
-            }
-        }
-
-        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) = syncOnDomain {
-            val domainFactory = nullableInstance
-            if (domainFactory?.projectsFactory?.isSaved == false && !domainFactory.friendsFactory.isSaved) {
-                Preferences.tickLog.logLineHour("running firebaseListener $source")
-                firebaseListener(domainFactory)
-            } else {
-                Preferences.tickLog.logLineHour("queuing firebaseListener $source")
-                Preferences.tickLog.logLineHour(
-                        "listeners before: " + firebaseListeners.joinToString(
-                                "; "
-                        ) { it.second })
-                firebaseListeners.add(Pair(firebaseListener, source))
-                Preferences.tickLog.logLineHour(
-                        "listeners after: " + firebaseListeners.joinToString(
-                                "; "
-                        ) { it.second })
-            }
-        }
-
         private val ChangeType.runType
             get() = when (this) {
                 ChangeType.LOCAL -> RunType.LOCAL
                 ChangeType.REMOTE -> RunType.REMOTE
             }
 
-        fun <T> syncOnDomain(action: () -> T): T {
-            SchedulerTypeHolder.instance.requireScheduler()
-
-            return DomainLocker.syncOnDomain(action)
-        }
+        @CheckResult
+        fun <T : Any> scheduleOnDomain(action: () -> T) =
+                Single.fromCallable(action).subscribeOnDomain().observeOn(AndroidSchedulers.mainThread())!!
     }
 
     var remoteReadTimes: ReadTimes
@@ -201,14 +175,16 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .subscribeBy { source ->
-                    addFirebaseListener { it.fixOffsets(source) }
-                }
+                .flatMap { onReady().mapWith(it) }
+                .subscribe { (domainFactory, source) -> domainFactory.fixOffsets(source) }
                 .addTo(domainDisposable)
     }
 
-    private fun fixOffsets(source: String) = syncOnDomain {
+    private fun fixOffsets(source: String) {
         MyCrashlytics.log("triggering fixing offsets from $source")
+
+        DomainThreadChecker.instance.requireDomainThread()
+
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
         projectsFactory.projects
@@ -270,6 +246,8 @@ class DomainFactory(
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
+        DomainThreadChecker.instance.requireDomainThread()
+
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
@@ -321,10 +299,16 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() = syncOnDomain { updateNotifications(ExactTimeStamp.Local.now, true) }
+    override fun clearUserInfo() {
+        DomainThreadChecker.instance.requireDomainThread()
 
-    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) = syncOnDomain {
+        updateNotifications(ExactTimeStamp.Local.now, true)
+    }
+
+    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
+
+        DomainThreadChecker.instance.requireDomainThread()
 
         updateShortcuts(now)
 
@@ -333,8 +317,10 @@ class DomainFactory(
         changeTypeRelay.accept(changeType)
     }
 
-    override fun updateUserRecord(snapshot: Snapshot) = syncOnDomain {
+    override fun updateUserRecord(snapshot: Snapshot) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
+
+        DomainThreadChecker.instance.requireDomainThread()
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
@@ -346,14 +332,15 @@ class DomainFactory(
 
         if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
 
-        updateIsSaved()
-
         check(aggregateData == null)
 
         aggregateData = AggregateData()
 
         Preferences.tickLog.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
-        firebaseListeners.forEach { it.first(this) }
+
+        updateIsSaved()
+
+        firebaseListeners.forEach { it(this) }
         firebaseListeners.clear()
 
         val copyAggregateData = aggregateData!!
@@ -394,10 +381,6 @@ class DomainFactory(
     private enum class RunType {
 
         APP_START, SIGN_IN, LOCAL, REMOTE
-    }
-
-    fun throwIfSaved() = syncOnDomain {
-        if (projectsFactory.isSaved) throw SavedFactoryException()
     }
 
     // sets
@@ -460,8 +443,11 @@ class DomainFactory(
             silent: Boolean,
             sourceName: String,
             domainChanged: Boolean = false,
-    ) = syncOnDomain {
+    ) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
+
+        DomainThreadChecker.instance.requireDomainThread()
+
         if (projectsFactory.isSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.Local.now
@@ -484,8 +470,11 @@ class DomainFactory(
         projectsFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
     }
 
-    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = syncOnDomain {
+    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
+
+        DomainThreadChecker.instance.requireDomainThread()
+
         if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
         this.deviceDbInfo = deviceDbInfo

@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
@@ -12,15 +13,19 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data = syncOnDomain {
+fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(instanceKeys.isNotEmpty())
 
@@ -65,7 +70,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
+    return EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
 }
 
 private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, DateTimePair?>>) : UndoData {
@@ -79,12 +84,13 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
     }
 }
 
+@CheckResult
 fun DomainFactory.setInstancesDateTime(
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): UndoData = syncOnDomain {
+): Single<UndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -155,11 +161,12 @@ private class SetInstanceParentUndoData(
     }
 }
 
+@CheckResult
 fun DomainFactory.setInstancesParent(
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
-): UndoData = syncOnDomain {
+): Single<UndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesParent")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -200,10 +207,12 @@ fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,
         page: Int,
         projectKey: ProjectKey<*>?,
-): DomainResult<EditInstancesSearchViewModel.Data> = syncOnDomain {
+): DomainResult<EditInstancesSearchViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
-    LockerManager.setLocker { now ->
+    DomainThreadChecker.instance.requireDomainThread()
+
+    return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
             val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
                     now,

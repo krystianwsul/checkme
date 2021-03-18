@@ -1,14 +1,12 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
@@ -17,26 +15,30 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Single
 import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
 
+@CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
-): TaskUndoData = syncOnDomain {
+): Single<TaskUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
     setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
 }
 
-fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = syncOnDomain {
+@CheckResult
+fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -55,7 +57,8 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
     notifyCloud(remoteProjects)
 }
 
-fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = syncOnDomain {
+@CheckResult
+fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -72,11 +75,12 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = s
     notifyCloud(task.project)
 }
 
+@CheckResult
 fun DomainFactory.setInstancesNotNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
-) = syncOnDomain {
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -98,11 +102,12 @@ fun DomainFactory.setInstancesNotNotified(
     save(dataId, source)
 }
 
+@CheckResult
 fun DomainFactory.setInstancesAddHourActivity(
         dataId: Int,
         source: SaveService.Source,
         instanceKeys: Collection<InstanceKey>,
-): DomainFactory.HourUndoData = syncOnDomain {
+): Single<DomainFactory.HourUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -135,11 +140,12 @@ fun DomainFactory.setInstancesAddHourActivity(
     DomainFactory.HourUndoData(instanceDateTimes)
 }
 
+@CheckResult
 fun DomainFactory.undoInstancesAddHour(
         dataId: Int,
         source: SaveService.Source,
         hourUndoData: DomainFactory.HourUndoData,
-) = syncOnDomain {
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -158,13 +164,14 @@ fun DomainFactory.undoInstancesAddHour(
     notifyCloud(remoteProjects)
 }
 
+@CheckResult
 fun DomainFactory.setInstanceDone(
         notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKey: InstanceKey,
         done: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): ExactTimeStamp.Local? = syncOnDomain {
+): Single<NullableWrapper<ExactTimeStamp.Local>> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -178,14 +185,15 @@ fun DomainFactory.setInstanceDone(
 
     notifyCloud(instance.task.project)
 
-    instance.done
+    NullableWrapper(instance.done)
 }
 
+@CheckResult
 fun DomainFactory.setInstanceNotified(
         dataId: Int,
         source: SaveService.Source,
         instanceKey: InstanceKey,
-) = syncOnDomain {
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -197,8 +205,11 @@ fun DomainFactory.setInstanceNotified(
     save(dataId, source)
 }
 
-fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) = syncOnDomain {
+fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
+
+    DomainThreadChecker.instance.requireDomainThread()
+
     if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
 
     myUserFactory.user.photoUrl = photoUrl
@@ -241,7 +252,9 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         page: Int,
         projectKey: ProjectKey<*>?,
         mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
-): Pair<List<T>, Boolean> = syncOnDomain {
+): Pair<List<T>, Boolean> {
+    DomainThreadChecker.instance.requireDomainThread()
+
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
     val (instances, hasMore) = getRootInstances(
@@ -268,7 +281,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         mapper(it, now, children)
     }
 
-    instanceDatas.sorted().take(desiredCount) to hasMore
+    return instanceDatas.sorted().take(desiredCount) to hasMore
 }
 
 private class AddChildToParentUndoData(
@@ -336,7 +349,8 @@ fun addChildToParent(
     )
 }
 
-fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = syncOnDomain {
+@CheckResult
+fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.undo")
     if (isSaved.value!!) throw SavedFactoryException()
 

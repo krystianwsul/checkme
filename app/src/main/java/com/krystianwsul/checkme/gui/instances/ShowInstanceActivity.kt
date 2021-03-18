@@ -30,6 +30,8 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
@@ -85,27 +87,29 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+    private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showInstanceViewModel.stop()
 
-        val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(
-                SaveService.Source.GUI,
-                taskKeys as Set<TaskKey>,
-                removeInstances,
-                instanceKey
-        )
+        val undoTaskDataSingle = DomainFactory.instance
+                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances, instanceKey)
+                .observeOn(AndroidSchedulers.mainThread())
+                .cache()
 
-        if (visible) {
-            showInstanceViewModel.start(instanceKey)
+        undoTaskDataSingle.filter { (_, visible) -> visible }
+                .map { (undoTaskData, _) -> undoTaskData }
+                .doOnSuccess { showInstanceViewModel.start(instanceKey) }
+                .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
+                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
+                .subscribe()
+                .addTo(createDisposable)
 
-            showSnackbarRemoved(taskKeys.size) {
-                DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
-            }
-        } else {
-            setSnackbar(undoTaskData)
-
-            finish()
-        }
+        undoTaskDataSingle.filter { (_, visible) -> !visible }
+                .map { (undoTaskData, _) -> undoTaskData }
+                .subscribe {
+                    setSnackbar(it)
+                    finish()
+                }
+                .addTo(createDisposable)
     }
 
     override val instanceSearch by lazy {
@@ -142,29 +146,38 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     // to ignore double taps
                                     if (!it.notificationShown) {
-                                        DomainFactory.instance.setInstancesNotNotified(
-                                                0,
-                                                SaveService.Source.GUI,
-                                                listOf(instanceKey)
-                                        )
+                                        DomainFactory.instance
+                                                .setInstancesNotNotified(
+                                                        0,
+                                                        SaveService.Source.GUI,
+                                                        listOf(instanceKey),
+                                                )
+                                                .subscribe()
+                                                .addTo(createDisposable)
                                     }
                                 }
                                 R.id.instanceMenuHour -> {
                                     check(showHour())
 
-                                    val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(
-                                            0,
-                                            SaveService.Source.GUI,
-                                            listOf(instanceKey)
-                                    )
-
-                                    showSnackbarHour(hourUndoData.instanceDateTimes.size) {
-                                        DomainFactory.instance.undoInstancesAddHour(
-                                                0,
-                                                SaveService.Source.GUI,
-                                                hourUndoData
-                                        )
-                                    }
+                                    DomainFactory.instance
+                                            .setInstancesAddHourActivity(
+                                                    0,
+                                                    SaveService.Source.GUI,
+                                                    listOf(instanceKey),
+                                            )
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .flatMapMaybe {
+                                                showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
+                                            }
+                                            .flatMapCompletable {
+                                                DomainFactory.instance.undoInstancesAddHour(
+                                                        0,
+                                                        SaveService.Source.GUI,
+                                                        it,
+                                                )
+                                            }
+                                            .subscribe()
+                                            .addTo(createDisposable)
                                 }
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)
@@ -174,7 +187,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             EDIT_INSTANCES_TAG
                                     )
                                 }
-                                R.id.instanceMenuCheck -> if (!it.done) setDone(true)
+                                R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)
                             }
                         }
@@ -251,8 +264,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             setIntent(intent)
             cancelNotification()
             setInstanceNotified()
-
-            updateTopMenu()
         } else {
             startActivity(getForwardIntent(
                     this,
@@ -292,10 +303,16 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainFactory.addFirebaseListener {
-                it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
-            }
-            data?.notificationShown = false
+            DomainFactory.onReady()
+                    .flatMapCompletable {
+                        it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
+                    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        data?.notificationShown = false
+                        updateTopMenu()
+                    }
+                    .addTo(createDisposable)
         }
     }
 
@@ -321,12 +338,15 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.instance.setInstanceDone(
-                DomainListenerManager.NotificationType.First(data!!.dataId),
-                SaveService.Source.GUI,
-                instanceKey,
-                done
-        )
+        DomainFactory.instance
+                .setInstanceDone(
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        SaveService.Source.GUI,
+                        instanceKey,
+                        done
+                )
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     override fun onCreateGroupActionMode(

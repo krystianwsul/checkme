@@ -37,6 +37,7 @@ import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -239,25 +240,30 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        if (projectId == null) {
-            check(saveState.removedIds.isEmpty())
+        DomainFactory.instance
+                .run {
+                    if (projectId == null) {
+                        check(saveState.removedIds.isEmpty())
 
-            DomainFactory.instance.createProject(
-                    data!!.dataId,
-                    SaveService.Source.GUI,
-                    name,
-                    saveState.addedIds
-            )
-        } else {
-            DomainFactory.instance.updateProject(
-                    data!!.dataId,
-                    SaveService.Source.GUI,
-                    projectId!!,
-                    name,
-                    saveState.addedIds,
-                    saveState.removedIds
-            )
-        }
+                        createProject(
+                                data!!.dataId,
+                                SaveService.Source.GUI,
+                                name,
+                                saveState.addedIds
+                        )
+                    } else {
+                        updateProject(
+                                data!!.dataId,
+                                SaveService.Source.GUI,
+                                projectId!!,
+                                name,
+                                saveState.addedIds,
+                                saveState.removedIds,
+                        )
+                    }
+                }
+                .subscribe()
+                .addTo(createDisposable)
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {

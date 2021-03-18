@@ -25,12 +25,12 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.rxjava3.kotlin.addTo
 
 class DoneInstanceNode(
         override val indentation: Int,
         val instanceData: GroupListDataWrapper.InstanceData,
-        val dividerNode: DividerNode,
+        private val dividerNode: DividerNode,
 ) : AbstractModelNode(),
         NodeCollectionParent,
         CheckableModelNode,
@@ -101,8 +101,6 @@ class DoneInstanceNode(
         return treeNode
     }
 
-    private fun expanded() = treeNode.isExpanded
-
     val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         get() {
             val collectionExpansionState = CollectionExpansionState(
@@ -136,29 +134,35 @@ class DoneInstanceNode(
                 val nodeCollection = dividerNode.nodeCollection
                 val groupAdapter = nodeCollection.groupAdapter
 
-                groupAdapter.treeNodeCollection
-                        .treeViewAdapter
-                        .updateDisplayedNodes {
-                            instanceData.done = DomainFactory.instance.setInstanceDone(
-                                    DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                DomainFactory.instance
+                        .setInstanceDone(
+                                DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                SaveService.Source.GUI,
+                                instanceData.instanceKey,
+                                false
+                        )
+                        .doOnSuccess {
+                            groupAdapter.treeNodeCollection
+                                    .treeViewAdapter
+                                    .updateDisplayedNodes { placeholder ->
+                                        instanceData.done = it.value
+
+                                        dividerNode.remove(this, placeholder)
+
+                                        nodeCollection.notDoneGroupCollection.add(instanceData, placeholder)
+                                    }
+                        }
+                        .flatMapMaybe { groupListFragment.listener.showSnackbarNotDoneMaybe(1) }
+                        .flatMapSingle {
+                            DomainFactory.instance.setInstanceDone(
+                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     SaveService.Source.GUI,
                                     instanceData.instanceKey,
-                                    false
+                                    true,
                             )
-
-                            dividerNode.remove(this, it)
-
-                            nodeCollection.notDoneGroupCollection.add(instanceData, it)
                         }
-
-                groupListFragment.listener.showSnackbarNotDone(1) {
-                    DomainFactory.instance.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                            SaveService.Source.GUI,
-                            instanceData.instanceKey,
-                            true
-                    )
-                }
+                        .subscribe()
+                        .addTo(groupListFragment.attachedToWindowDisposable)
             }
         }
 
@@ -181,13 +185,9 @@ class DoneInstanceNode(
 
     override val isSelectable = true
 
-    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
-
-    fun removeFromParent(x: TreeViewAdapter.Placeholder) {
-        dividerNode.remove(this, x)
-
-        treeNode.deselect(x)
-    }
+    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(
+            ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey)
+    )
 
     override val id = instanceData.instanceKey
 

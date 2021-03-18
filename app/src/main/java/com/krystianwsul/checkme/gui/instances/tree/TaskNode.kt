@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.kotlin.addTo
 
 class TaskNode(
         override val indentation: Int,
@@ -137,8 +138,6 @@ class TaskNode(
 
     override val groupAdapter by lazy { taskParent.groupAdapter }
 
-    private fun expanded() = treeNode.isExpanded
-
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
         other.taskData
                 .startExactTimeStamp
@@ -190,6 +189,9 @@ class TaskNode(
     override fun setOrdinal(ordinal: Double) {
         taskData.ordinal = ordinal
 
-        DomainFactory.instance.setOrdinal(groupListFragment.parameters.dataId, taskData.taskKey, ordinal)
+        DomainFactory.instance
+                .setOrdinal(groupListFragment.parameters.dataId, taskData.taskKey, ordinal)
+                .subscribe()
+                .addTo(groupListFragment.attachedToWindowDisposable)
     }
 }

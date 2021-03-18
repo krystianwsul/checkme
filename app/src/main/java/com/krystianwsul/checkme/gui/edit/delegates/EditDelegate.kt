@@ -17,6 +17,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.getCurrentValue
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -44,9 +45,8 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
         }
 
-        fun TaskKey.toCreateResult() = CreateResult.Task(this)
-
-        fun CreateResult.applyCreatedTaskKey() = apply { EditActivity.createdTaskKey = taskKey }
+        fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
+        fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }!!
     }
 
     fun newData(data: EditViewModel.Data) {
@@ -216,7 +216,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             tmpParentTaskKey = taskKey
     }
 
-    fun createTask(createParameters: CreateParameters): CreateResult {
+    fun createTask(createParameters: CreateParameters): Single<CreateResult> {
         check(createParameters.allReminders || showAllRemindersDialog() != null)
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
@@ -234,7 +234,7 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                    sharedProjectParameters
+                    sharedProjectParameters,
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
@@ -255,17 +255,14 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
-    ): CreateResult
+    ): Single<CreateResult>
 
-    abstract fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
-    ): CreateResult
+    abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
-    ): CreateResult
+    ): Single<CreateResult>
 
     fun saveState(outState: Bundle) {
         parentScheduleManager.saveState(outState)

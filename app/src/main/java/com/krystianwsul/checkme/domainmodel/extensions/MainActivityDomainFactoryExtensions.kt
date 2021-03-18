@@ -12,12 +12,15 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 
-fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now) = DomainFactory.syncOnDomain {
+fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     val projectDatas = projectsFactory.projects
             .values
@@ -52,7 +55,7 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
             }
             .filter { it.children.isNotEmpty() }
 
-    MainViewModel.Data(
+    return MainViewModel.Data(
             TaskListFragment.TaskData(projectDatas, null, true, null),
             myUserFactory.user.defaultTab
     )
@@ -62,8 +65,10 @@ fun DomainFactory.getGroupListData(
         now: ExactTimeStamp.Local,
         position: Int,
         timeRange: Preferences.TimeRange,
-): DayViewModel.DayData = DomainFactory.syncOnDomain {
+): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
+
+    DomainThreadChecker.instance.requireDomainThread()
 
     check(position >= 0)
 
@@ -172,5 +177,5 @@ fun DomainFactory.getGroupListData(
             null
     )
 
-    DayViewModel.DayData(dataWrapper)
+    return DayViewModel.DayData(dataWrapper)
 }

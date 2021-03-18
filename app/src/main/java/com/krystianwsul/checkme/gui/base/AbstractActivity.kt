@@ -11,17 +11,15 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
-import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.common.domain.TaskUndoData
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.*
 
 abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
@@ -35,6 +33,9 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
             Companion.snackbarData = snackbarData
         }
+
+        fun setSnackbar(action: (SnackbarListener) -> Unit) =
+                setSnackbar(SnackbarData { Completable.fromAction { action(it) } })
 
         fun setSnackbar(taskUndoData: TaskUndoData) = setSnackbar(TaskSnackbarData(taskUndoData))
     }
@@ -87,11 +88,11 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         started.accept(true)
     }
 
-    private fun tick(source: String) = Single.just(Unit)
-            .observeOnDomain()
-            .subscribeBy {
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source))
-            }
+    private fun tick(source: String) = DomainFactory.setFirebaseTickListener(
+            SaveService.Source.SERVICE,
+            TickData.Normal(true, source),
+    )
+            .subscribe()
             .addTo(createDisposable)
 
     protected open val tickOnResume = true
@@ -105,7 +106,11 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
         snackbarData?.let {
             (this as? SnackbarListener)?.apply {
-                anchor.addOneShotGlobalLayoutListener { it.show(this) }
+                anchor.addOneShotGlobalLayoutListener {
+                    it.show(this)
+                            .subscribe()
+                            .addTo(createDisposable)
+                }
             }
         }
         snackbarData = null // shouldn't this be moved into `apply` or `addOneShotGlobalLayoutListener`?

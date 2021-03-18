@@ -16,11 +16,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.domainmodel.AndroidSchedulerTypeHolder
+import com.krystianwsul.checkme.domainmodel.AndroidDomainThreadChecker
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
+import com.krystianwsul.checkme.domainmodel.runOnDomain
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -28,12 +29,13 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.mapNotNull
+import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.SchedulerType
-import com.krystianwsul.common.firebase.SchedulerTypeHolder
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Maybe
@@ -96,9 +98,11 @@ class MyApplication : Application() {
 
         MyCrashlytics.init()
 
-        SchedulerTypeHolder.instance = AndroidSchedulerTypeHolder().apply { set(SchedulerType.MAIN) }
-
         RxDogTag.install()
+
+        DomainThreadChecker.instance = AndroidDomainThreadChecker().also {
+            runOnDomain { it.setDomainThread() }
+        }
 
         Preferences.language.applySettingStartup()
 
@@ -128,7 +132,7 @@ class MyApplication : Application() {
                 localFactory,
                 userInfoRelay,
                 FactoryProvider.Impl(localFactory),
-                Preferences.tokenRelay
+                Preferences.tokenRelay,
         ).domainFactoryObservable.subscribe {
             @Suppress("UNCHECKED_CAST")
             DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
@@ -154,13 +158,12 @@ class MyApplication : Application() {
                                 .toMaybe()
                     }
                     ?: Maybe.empty()
-        }.subscribe {
-            it.value
-                    ?.photoUrl
-                    ?.let { url ->
-                        DomainFactory.addFirebaseListener { it.updatePhotoUrl(SaveService.Source.GUI, url.toString()) }
-                    }
         }
+                .mapNotNull { it.value?.photoUrl }
+                .switchMapSingle { DomainFactory.onReady().mapWith(it) }
+                .subscribe { (domainFactory, url) ->
+                    domainFactory.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                }
 
         RxPaparazzo.register(this)
 

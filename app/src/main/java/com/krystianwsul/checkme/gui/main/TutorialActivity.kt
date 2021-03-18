@@ -101,12 +101,8 @@ class TutorialActivity : NavBarActivity() {
                             animateVisibility(tutorialProgress, tutorialLayout)
                         }
                         is TutorialViewModel.State.Success -> {
-                            setSnackbar { snackbarListener ->
-                                snackbarListener.showText(
-                                        getString(R.string.signInAs) + " " + it.displayName,
-                                        Snackbar.LENGTH_SHORT
-                                )
-                            }
+                            val message = getString(R.string.signInAs) + " " + it.displayName
+                            setSnackbar { it.showText(message, Snackbar.LENGTH_SHORT) }
 
                             startMain()
                         }

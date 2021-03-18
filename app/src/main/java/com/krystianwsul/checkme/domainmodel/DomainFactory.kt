@@ -383,12 +383,6 @@ class DomainFactory(
         APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
-    fun throwIfSaved() {
-        DomainThreadChecker.instance.requireDomainThread()
-
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-    }
-
     // sets
 
     fun setTaskEndTimeStamps(

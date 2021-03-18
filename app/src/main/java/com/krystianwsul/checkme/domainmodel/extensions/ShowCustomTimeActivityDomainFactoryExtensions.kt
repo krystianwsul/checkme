@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.syncOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
@@ -53,11 +54,12 @@ fun DomainFactory.updateCustomTime(
     save(dataId, source)
 }
 
+@CheckResult
 fun DomainFactory.createCustomTime(
         source: SaveService.Source,
         name: String,
-        hourMinutes: Map<DayOfWeek, HourMinute>
-): CustomTimeKey.Private = syncOnDomain {
+        hourMinutes: Map<DayOfWeek, HourMinute>,
+): Single<CustomTimeKey.Private> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.createCustomTime")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 

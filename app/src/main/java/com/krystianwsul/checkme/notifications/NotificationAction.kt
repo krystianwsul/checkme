@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.notifications
 
 import android.os.Parcelable
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
@@ -10,26 +11,27 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotified
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
+import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
 
 sealed class NotificationAction : Parcelable {
 
     abstract val requestCode: Int
 
-    abstract fun perform(callback: (() -> Unit)? = null) // todo scheduler completable
+    @CheckResult
+    abstract fun perform(): Completable
 
     @Parcelize
     data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
 
         override val requestCode get() = 0
 
-        override fun perform(callback: (() -> Unit)?) {
+        override fun perform(): Completable {
             check(instanceKeys.isNotEmpty())
 
-            DomainFactory.addFirebaseListener {
+            return DomainFactory.addFirebaseListener {
                 it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
-                callback?.invoke()
-            }.subscribe()
+            }
         }
     }
 
@@ -43,16 +45,14 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform(callback: (() -> Unit)?) {
+        override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
 
-            val notificationWrapper = NotificationWrapper.instance
-            notificationWrapper.cleanGroup(notificationId)
+            NotificationWrapper.instance.cleanGroup(notificationId)
 
-            DomainFactory.addFirebaseListener {
+            return DomainFactory.addFirebaseListener {
                 it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
-                callback?.invoke()
-            }.subscribe()
+            }
         }
     }
 
@@ -66,32 +66,30 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform(callback: (() -> Unit)?) {
+        override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            DomainFactory.addFirebaseListener {
+            return DomainFactory.addFirebaseListener {
                 it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
-                callback?.invoke()
-            }.subscribe()
+            }
         }
     }
 
     @Parcelize
     data class DeleteInstanceNotification(
             val instanceKey: InstanceKey,
-            private val actionId: Int = 4
+            private val actionId: Int = 4,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
 
-        override fun perform(callback: (() -> Unit)?) {
-            DomainFactory.addFirebaseListener {
+        override fun perform(): Completable {
+            return DomainFactory.addFirebaseListener {
                 it.throwIfSaved()
                 it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey).subscribe()
-                callback?.invoke()
-            }.subscribe()
+            }
         }
     }
 }

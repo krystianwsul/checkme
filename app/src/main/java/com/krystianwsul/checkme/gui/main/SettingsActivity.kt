@@ -169,7 +169,7 @@ class SettingsActivity : NavBarActivity() {
                             setOnPreferenceChangeListener { _, newValue ->
                                 DomainFactory.instance
                                         .updateDefaultReminder(
-                                                settingsActivity.settingsViewModel.dataId.toSkip(),
+                                                settingsActivity.settingsViewModel.dataId.toSkip(), // allowed
                                                 SaveService.Source.GUI,
                                                 newValue as Boolean,
                                         )

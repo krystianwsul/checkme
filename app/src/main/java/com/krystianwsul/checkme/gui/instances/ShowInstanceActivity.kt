@@ -318,16 +318,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             DomainFactory.onReady()
                     .flatMapCompletable {
                         it.setInstanceNotified(
-                                showInstanceViewModel.dataId.toSkip(),
+                                showInstanceViewModel.dataId.toFirst(),
                                 SaveService.Source.GUI,
                                 instanceKey,
                         )
                     }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        data?.notificationShown = false
-                        updateTopMenu()
-                    }
+                    .subscribe()
                     .addTo(createDisposable)
         }
     }

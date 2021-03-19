@@ -29,7 +29,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val taskCurrent: Boolean,
             val isRootInstance: Boolean,
             val groupListDataWrapper: GroupListDataWrapper,
-            var notificationShown: Boolean,
+            val notificationShown: Boolean,
             val displayText: String,
             val taskKey: TaskKey,
             val isVisible: Boolean,

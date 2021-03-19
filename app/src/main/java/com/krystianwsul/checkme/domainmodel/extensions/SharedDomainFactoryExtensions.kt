@@ -39,7 +39,11 @@ fun DomainFactory.setTaskEndTimeStamps(
 }
 
 @CheckResult
-fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) = completeOnDomain {
+fun DomainFactory.clearTaskEndTimeStamps(
+        notificationType: DomainListenerManager.NotificationType,
+        source: SaveService.Source,
+        taskUndoData: TaskUndoData,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -49,7 +53,7 @@ fun DomainFactory.clearTaskEndTimeStamps(source: SaveService.Source, taskUndoDat
 
     notifier.updateNotifications(now)
 
-    save(0, source)
+    save(notificationType, source)
 
     val remoteProjects = taskUndoData.taskKeys
             .map { getTaskForce(it).project }
@@ -206,7 +210,11 @@ fun DomainFactory.setInstanceNotified(
     save(dataId, source)
 }
 
-fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
+fun DomainFactory.updatePhotoUrl(
+        notificationType: DomainListenerManager.NotificationType,
+        source: SaveService.Source,
+        photoUrl: String,
+) {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -216,7 +224,7 @@ fun DomainFactory.updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
-    save(0, source)
+    save(notificationType, source)
 }
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =

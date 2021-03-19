@@ -5,6 +5,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -138,6 +139,7 @@ fun DomainFactory.getCreateTaskData(
 
 @CheckResult
 fun DomainFactory.createScheduleRootTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -172,7 +174,7 @@ fun DomainFactory.createScheduleRootTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(task.project)
 
@@ -190,6 +192,7 @@ private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) 
 
 @CheckResult
 fun DomainFactory.createChildTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
@@ -219,7 +222,7 @@ fun DomainFactory.createChildTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(childTask.project)
 
@@ -232,6 +235,7 @@ fun DomainFactory.createChildTask(
 
 @CheckResult
 fun DomainFactory.createRootTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         note: String?,
@@ -262,7 +266,7 @@ fun DomainFactory.createRootTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(task.project)
 
@@ -275,6 +279,7 @@ fun DomainFactory.createRootTask(
 
 @CheckResult
 fun DomainFactory.updateScheduleTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -317,7 +322,7 @@ fun DomainFactory.updateScheduleTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(task.project)
 
@@ -330,6 +335,7 @@ fun DomainFactory.updateScheduleTask(
 
 @CheckResult
 fun DomainFactory.updateChildTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -389,7 +395,7 @@ fun DomainFactory.updateChildTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(task.project) // todo image on server, purge images after this call
 
@@ -402,6 +408,7 @@ fun DomainFactory.updateChildTask(
 
 @CheckResult
 fun DomainFactory.updateRootTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         taskKey: TaskKey,
         name: String,
@@ -434,7 +441,7 @@ fun DomainFactory.updateRootTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(task.project)
 
@@ -447,6 +454,7 @@ fun DomainFactory.updateRootTask(
 
 @CheckResult
 fun DomainFactory.createScheduleJoinRootTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -503,7 +511,7 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(newParentTask.project)
 
@@ -516,6 +524,7 @@ fun DomainFactory.createScheduleJoinRootTask(
 
 @CheckResult
 fun DomainFactory.createJoinChildTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         parentTaskKey: TaskKey,
         name: String,
@@ -555,7 +564,7 @@ fun DomainFactory.createJoinChildTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(childTask.project)
 
@@ -568,6 +577,7 @@ fun DomainFactory.createJoinChildTask(
 
 @CheckResult
 fun DomainFactory.createJoinRootTask(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -608,7 +618,7 @@ fun DomainFactory.createJoinRootTask(
 
     notifier.updateNotifications(now)
 
-    save(null, source)
+    save(notificationType, source)
 
     notifyCloud(newParentTask.project)
 

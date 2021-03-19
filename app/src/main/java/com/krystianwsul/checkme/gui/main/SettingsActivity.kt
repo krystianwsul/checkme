@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
@@ -84,7 +85,11 @@ class SettingsActivity : NavBarActivity() {
         return Maybe.fromCallable { googleSignInAccount.photoUrl }
                 .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
                 .doOnSuccess { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                    domainFactory.updatePhotoUrl(
+                            DomainListenerManager.NotificationType.All,
+                            SaveService.Source.GUI,
+                            url.toString(),
+                    )
                 }
                 .ignoreElement()
     }
@@ -142,7 +147,11 @@ class SettingsActivity : NavBarActivity() {
                     Preferences.tab = newTab
 
                     DomainFactory.instance
-                            .updateDefaultTab(SaveService.Source.GUI, newTab)
+                            .updateDefaultTab(
+                                    DomainListenerManager.NotificationType.All,
+                                    SaveService.Source.GUI,
+                                    newTab,
+                            )
                             .subscribe()
                             .addTo(createDisposable)
 

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -39,7 +40,7 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
 
     notifier.updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
-    save(0, source)
+    save(DomainListenerManager.NotificationType.All, source)
 
     notifyCloud(instance.task.project)
 }
@@ -61,7 +62,7 @@ fun DomainFactory.setInstanceNotificationDone(source: SaveService.Source, instan
 
     notifier.updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
-    save(0, source)
+    save(DomainListenerManager.NotificationType.All, source)
 
     notifyCloud(instance.task.project)
 }
@@ -77,7 +78,7 @@ fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys:
     for (instanceKey in instanceKeys)
         setInstanceNotified(instanceKey)
 
-    save(0, source)
+    save(DomainListenerManager.NotificationType.All, source)
 }
 
 fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
@@ -92,7 +93,7 @@ fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: Task
 
     task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
-    save(0, source)
+    save(DomainListenerManager.NotificationType.All, source)
 
     notifyCloud(task.project)
 }

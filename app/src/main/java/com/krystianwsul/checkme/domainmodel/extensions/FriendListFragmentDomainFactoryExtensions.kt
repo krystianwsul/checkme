@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
@@ -31,17 +32,25 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
 }
 
 @CheckResult
-fun DomainFactory.removeFriends(source: SaveService.Source, keys: Set<UserKey>) = completeOnDomain {
+fun DomainFactory.removeFriends(
+        notificationType: DomainListenerManager.NotificationType,
+        source: SaveService.Source,
+        keys: Set<UserKey>,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.removeFriends")
     check(!friendsFactory.isSaved)
 
     keys.forEach { myUserFactory.user.removeFriend(it) }
 
-    save(0, source)
+    save(notificationType, source)
 }
 
 @CheckResult
-fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, UserWrapper>) = completeOnDomain {
+fun DomainFactory.addFriends(
+        notificationType: DomainListenerManager.NotificationType,
+        source: SaveService.Source,
+        userMap: Map<UserKey, UserWrapper>,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.addFriends")
     check(!myUserFactory.isSaved)
 
@@ -50,5 +59,5 @@ fun DomainFactory.addFriends(source: SaveService.Source, userMap: Map<UserKey, U
         friendsFactory.addFriend(it.key, it.value)
     }
 
-    save(0, source)
+    save(notificationType, source)
 }

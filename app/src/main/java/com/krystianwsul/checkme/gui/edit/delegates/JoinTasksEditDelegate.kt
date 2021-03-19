@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
@@ -75,6 +76,7 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         return DomainFactory.instance
                 .createScheduleJoinRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
@@ -84,7 +86,7 @@ class JoinTasksEditDelegate(
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        createParameters.allReminders
+                        createParameters.allReminders,
                 )
                 .toCreateResult()
                 .applyCreatedTaskKey()
@@ -98,6 +100,7 @@ class JoinTasksEditDelegate(
 
         return DomainFactory.instance
                 .createJoinChildTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
@@ -106,7 +109,7 @@ class JoinTasksEditDelegate(
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        instanceKeys
+                        instanceKeys,
                 )
                 .toCreateResult()
                 .applyCreatedTaskKey()
@@ -120,6 +123,7 @@ class JoinTasksEditDelegate(
 
         return DomainFactory.instance
                 .createJoinRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         taskKeys,
@@ -128,7 +132,7 @@ class JoinTasksEditDelegate(
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        instanceKeys
+                        instanceKeys,
                 )
                 .toCreateResult()
                 .applyCreatedTaskKey()

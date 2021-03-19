@@ -167,7 +167,13 @@ class MainActivity :
                 )
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
-                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
+                .flatMapCompletable {
+                    DomainFactory.instance.clearTaskEndTimeStamps(
+                            DomainListenerManager.NotificationType.All,
+                            SaveService.Source.GUI,
+                            it,
+                    )
+                }
                 .subscribe()
                 .addTo(createDisposable)
     }

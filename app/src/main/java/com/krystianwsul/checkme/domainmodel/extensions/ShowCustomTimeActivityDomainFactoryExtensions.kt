@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
@@ -55,6 +56,7 @@ fun DomainFactory.updateCustomTime(
 
 @CheckResult
 fun DomainFactory.createCustomTime(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
@@ -87,7 +89,7 @@ fun DomainFactory.createCustomTime(
 
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
 
-    save(0, source)
+    save(notificationType, source)
 
     remoteCustomTime.key
 }

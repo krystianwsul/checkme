@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -11,6 +12,7 @@ import io.reactivex.rxjava3.core.Single
 
 @CheckResult
 fun DomainFactory.tryAddFriend(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         userWrapper: UserWrapper,
 ): Single<Boolean> = scheduleOnDomain {
@@ -25,7 +27,7 @@ fun DomainFactory.tryAddFriend(
         myUserFactory.user.addFriend(userKey)
         friendsFactory.addFriend(userKey, userWrapper)
 
-        save(0, source)
+        save(notificationType, source)
 
         true
     }

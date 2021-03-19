@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.utils
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -10,6 +11,10 @@ class TaskSnackbarData(private val taskUndoData: TaskUndoData) : SnackbarData {
 
     override fun show(snackbarListener: SnackbarListener) =
             snackbarListener.showSnackbarRemovedMaybe(1).flatMapCompletable {
-                DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+                DomainFactory.instance.clearTaskEndTimeStamps(
+                        DomainListenerManager.NotificationType.All,
+                        SaveService.Source.GUI,
+                        taskUndoData,
+                )
             }!!
 }

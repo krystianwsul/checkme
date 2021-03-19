@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.os.Bundle
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
@@ -123,6 +124,7 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createScheduleRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
@@ -130,7 +132,7 @@ class CreateTaskEditDelegate(
                         sharedProjectParameters,
                         imageUrl.value!!
                                 .writeImagePath
-                                ?.value
+                                ?.value,
                 )
                 .applyCreatedTaskKey()
     }
@@ -145,6 +147,7 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createChildTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
@@ -164,13 +167,14 @@ class CreateTaskEditDelegate(
 
         return DomainFactory.instance
                 .createRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,
                         sharedProjectKey,
                         imageUrl.value!!
                                 .writeImagePath
-                                ?.value
+                                ?.value,
                 )
                 .applyCreatedTaskKey()
     }

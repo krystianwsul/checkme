@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.updateChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
@@ -54,13 +55,14 @@ class EditExistingTaskEditDelegate(
 
         return DomainFactory.instance
                 .updateScheduleTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
                         scheduleDatas,
                         createParameters.note,
                         sharedProjectParameters,
-                        imageUrl.value!!.writeImagePath
+                        imageUrl.value!!.writeImagePath,
                 )
                 .toCreateResult()
     }
@@ -71,6 +73,7 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         return DomainFactory.instance
                 .updateChildTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
@@ -78,7 +81,7 @@ class EditExistingTaskEditDelegate(
                         createParameters.note,
                         imageUrl.value!!.writeImagePath,
                         parameters.openedFromInstanceKey,
-                        createParameters.allReminders
+                        createParameters.allReminders,
                 )
                 .toCreateResult()
     }
@@ -91,12 +94,13 @@ class EditExistingTaskEditDelegate(
 
         return DomainFactory.instance
                 .updateRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
                         createParameters.note,
                         sharedProjectKey,
-                        imageUrl.value!!.writeImagePath
+                        imageUrl.value!!.writeImagePath,
                 )
                 .toCreateResult()
     }

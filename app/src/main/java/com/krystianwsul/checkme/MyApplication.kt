@@ -16,13 +16,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.domainmodel.AndroidDomainThreadChecker
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
-import com.krystianwsul.checkme.domainmodel.runOnDomain
-import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -45,6 +42,7 @@ import java.util.*
 
 class MyApplication : Application() {
 
+    @Suppress("ObjectPropertyName")
     companion object {
 
         @SuppressLint("StaticFieldLeak")
@@ -66,7 +64,7 @@ class MyApplication : Application() {
     val hasUserInfo get() = userInfoRelay.value!!.value != null
     val userInfo get() = userInfoRelay.value!!.value!!
 
-    val localizationDelegate = LocalizationApplicationDelegate()
+    private val localizationDelegate = LocalizationApplicationDelegate()
 
     var defaultLocale: Locale = Locale.getDefault()
         private set
@@ -162,7 +160,11 @@ class MyApplication : Application() {
                 .mapNotNull { it.value?.photoUrl }
                 .switchMapSingle { DomainFactory.onReady().mapWith(it) }
                 .subscribe { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                    domainFactory.updatePhotoUrl(
+                            DomainListenerManager.NotificationType.All,
+                            SaveService.Source.GUI,
+                            url.toString(),
+                    )
                 }
 
         RxPaparazzo.register(this)

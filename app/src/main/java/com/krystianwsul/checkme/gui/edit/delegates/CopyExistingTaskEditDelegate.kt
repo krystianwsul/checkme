@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
@@ -32,6 +33,7 @@ class CopyExistingTaskEditDelegate(
 
         return DomainFactory.instance
                 .createScheduleRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
@@ -53,6 +55,7 @@ class CopyExistingTaskEditDelegate(
 
         return DomainFactory.instance
                 .createChildTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
@@ -73,6 +76,7 @@ class CopyExistingTaskEditDelegate(
 
         return DomainFactory.instance
                 .createRootTask(
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,

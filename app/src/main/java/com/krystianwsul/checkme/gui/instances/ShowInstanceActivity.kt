@@ -105,7 +105,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .map { (undoTaskData, _) -> undoTaskData }
                 .doOnSuccess { showInstanceViewModel.start(instanceKey) }
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
-                .flatMapCompletable { DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it) }
+                .flatMapCompletable {
+                    DomainFactory.instance.clearTaskEndTimeStamps(
+                            DomainListenerManager.NotificationType.All,
+                            SaveService.Source.GUI,
+                            it,
+                    )
+                }
                 .subscribe()
                 .addTo(createDisposable)
 

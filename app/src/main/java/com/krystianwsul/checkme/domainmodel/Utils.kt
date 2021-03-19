@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
+import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
@@ -18,13 +19,23 @@ fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 fun ImageState.toImageLoader() = ImageLoader(this)
 
 fun <T : DomainData> getDomainResultInterrupting(action: () -> T): DomainResult<T> {
-    return try {
+    check(InterruptionChecker.instance == null)
+
+    InterruptionChecker.instance = InterruptionChecker { Thread.interrupted() }
+
+    val domainResult = try {
         DomainResult.Completed(action())
     } catch (domainInterruptedException: DomainInterruptedException) {
         Log.e("asdf", "domain interrupted", domainInterruptedException)
 
         DomainResult.Interrupted()
     }
+
+    checkNotNull(InterruptionChecker.instance)
+
+    InterruptionChecker.instance = null
+
+    return domainResult
 }
 
 fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {

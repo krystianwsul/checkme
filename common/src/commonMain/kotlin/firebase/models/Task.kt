@@ -12,7 +12,7 @@ import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.interrupt.throwIfInterrupted
+import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -251,7 +251,7 @@ class Task<T : ProjectType>(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
     ) = filter {
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
 
         val exactTimeStamp = it.first.toLocalExactTimeStamp()
 
@@ -292,7 +292,7 @@ class Task<T : ProjectType>(
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
         return scheduleSequence.flatMap {
-            throwIfInterrupted()
+            InterruptionChecker.throwIfInterrupted()
 
             it.asSequence().map { it.first }
                     .distinct()
@@ -324,7 +324,7 @@ class Task<T : ProjectType>(
         }
 
         return combineSequencesGrouping(scheduleResults) {
-            throwIfInterrupted()
+            InterruptionChecker.throwIfInterrupted()
 
             val nextDateTime = it.filterNotNull()
                     .minByOrNull { it.first }!!
@@ -344,7 +344,7 @@ class Task<T : ProjectType>(
             onlyRoot: Boolean = false,
             filterVisible: Boolean = true,
     ): Sequence<Instance<out T>> {
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
 
         return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
             getExistingInstances(

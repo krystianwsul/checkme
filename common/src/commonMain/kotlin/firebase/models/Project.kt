@@ -13,7 +13,7 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.interrupt.throwIfInterrupted
+import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -374,7 +374,7 @@ abstract class Project<T : ProjectType>(
     ): Sequence<Instance<out T>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
 
         val filteredTasks = tasks.asSequence()
                 .filterQuery(searchData?.searchCriteria?.query).map { it.first }
@@ -391,15 +391,15 @@ abstract class Project<T : ProjectType>(
         }
 
         return combineInstanceSequences(instanceSequences).let { sequence ->
-            throwIfInterrupted()
+            InterruptionChecker.throwIfInterrupted()
 
             searchData?.let { sequence.filterSearchCriteria(it.searchCriteria, now, it.myUser) } ?: sequence
         }.let { instances ->
-            throwIfInterrupted()
+            InterruptionChecker.throwIfInterrupted()
 
             if (filterVisible) {
                 instances.filter { instance ->
-                    throwIfInterrupted()
+                    InterruptionChecker.throwIfInterrupted()
 
                     instance.isVisible(
                             now,

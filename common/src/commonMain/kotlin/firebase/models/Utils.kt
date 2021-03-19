@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.interrupt.throwIfInterrupted
+import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
@@ -9,10 +9,11 @@ fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (qu
     map { it to FilterResult.MATCHES }
 } else {
     fun childHierarchyMatches(task: Task<out T>): FilterResult {
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
+
         if (task.matchesQuery(query)) return FilterResult.MATCHES
 
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
 
         if (
                 task.childHierarchyIntervals.any {
@@ -36,7 +37,7 @@ fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
     this
 } else {
     fun childHierarchyMatches(instance: Instance<out T>): Boolean {
-        throwIfInterrupted()
+        InterruptionChecker.throwIfInterrupted()
 
         if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false
 

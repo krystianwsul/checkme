@@ -298,68 +298,6 @@ class NotDoneGroupNode(
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
             groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
-    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
-        check(instanceDatas.contains(notDoneInstanceNode.instanceData))
-        instanceDatas.remove(notDoneInstanceNode.instanceData)
-
-        check(notDoneInstanceNodes.contains(notDoneInstanceNode))
-        notDoneInstanceNodes.remove(notDoneInstanceNode)
-
-        val childTreeNode = notDoneInstanceNode.treeNode
-        val selected = childTreeNode.isSelected
-
-        if (selected)
-            childTreeNode.deselect(placeholder, false)
-
-        treeNode.remove(childTreeNode, placeholder)
-
-        check(instanceDatas.isNotEmpty())
-        if (instanceDatas.size == 1) {
-            val notDoneInstanceNode1 = notDoneInstanceNodes.single()
-            notDoneInstanceNodes.remove(notDoneInstanceNode1)
-
-            val childTreeNode1 = notDoneInstanceNode1.treeNode
-            val selected1 = childTreeNode1.isSelected
-
-            if (selected1) {
-                if (!treeNode.isSelected)
-                    treeNode.select(placeholder, false)
-
-                childTreeNode1.deselect(placeholder, false)
-            }
-
-            treeNode.remove(childTreeNode1, placeholder)
-
-            val instanceData = instanceDatas.single()
-
-            singleInstanceNodeCollection = NodeCollection(
-                    indentation + 1,
-                    groupAdapter,
-                    false,
-                    treeNode,
-                    instanceData.note,
-                    this,
-                    instanceData.projectInfo,
-            )
-
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(
-                    instanceDatas[0].children.values,
-                    mapOf(),
-                    mapOf(),
-                    TreeNode.ExpansionState(),
-                    listOf(),
-                    listOf(),
-                    listOf(),
-                    null,
-                    mapOf(),
-                    listOf(),
-                    null
-            )
-
-            childTreeNodes.forEach { treeNode.add(it, placeholder) }
-        }
-    }
-
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
@@ -641,22 +579,11 @@ class NotDoneGroupNode(
 
                     DomainFactory.instance
                             .setInstanceDone(
-                                    DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     SaveService.Source.GUI,
                                     instanceKey,
                                     true
                             )
-                            .doOnSuccess {
-                                groupAdapter.treeNodeCollection
-                                        .treeViewAdapter
-                                        .updateDisplayedNodes { placeholder ->
-                                            instanceData.done = it.value!!
-
-                                            parentNotDoneGroupNode.remove(this, placeholder)
-
-                                            parentNodeCollection.dividerNode.add(instanceData, placeholder)
-                                        }
-                            }
                             .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
                             .flatMapSingle {
                                 DomainFactory.instance.setInstanceDone(

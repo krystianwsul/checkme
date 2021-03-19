@@ -136,22 +136,11 @@ class DoneInstanceNode(
 
                 DomainFactory.instance
                         .setInstanceDone(
-                                DomainListenerManager.NotificationType.Skip(groupAdapter.dataId),
+                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                 SaveService.Source.GUI,
                                 instanceData.instanceKey,
-                                false
+                                false,
                         )
-                        .doOnSuccess {
-                            groupAdapter.treeNodeCollection
-                                    .treeViewAdapter
-                                    .updateDisplayedNodes { placeholder ->
-                                        instanceData.done = it.value
-
-                                        dividerNode.remove(this, placeholder)
-
-                                        nodeCollection.notDoneGroupCollection.add(instanceData, placeholder)
-                                    }
-                        }
                         .flatMapMaybe { groupListFragment.listener.showSnackbarNotDoneMaybe(1) }
                         .flatMapSingle {
                             DomainFactory.instance.setInstanceDone(
@@ -180,7 +169,7 @@ class DoneInstanceNode(
         val doneInstanceNode = other as DoneInstanceNode
         checkNotNull(doneInstanceNode.instanceData.done)
 
-        return -instanceData.done!!.compareTo(doneInstanceNode.instanceData.done!!) // negate
+        return -instanceData.done.compareTo(doneInstanceNode.instanceData.done) // negate
     }
 
     override val isSelectable = true

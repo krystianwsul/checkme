@@ -60,11 +60,13 @@ class UnscheduledNode(
             taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
             selectedTaskKeys: List<TaskKey>,
     ): TreeNode<AbstractHolder> {
-        check(expansionState?.isExpanded != true || taskDatas.isNotEmpty())
-
         this.taskDatas = taskDatas
 
-        treeNode = TreeNode(this, nodeContainer, initialExpansionState = expansionState)
+        treeNode = TreeNode(
+                this,
+                nodeContainer,
+                initialExpansionState = expansionState.takeIf { taskDatas.isNotEmpty() },
+        )
 
         treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) })
 

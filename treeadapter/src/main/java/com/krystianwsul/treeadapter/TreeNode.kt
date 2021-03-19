@@ -14,6 +14,7 @@ class TreeNode<T : TreeHolder>(
 
     lateinit var expansionState: ExpansionState
         private set
+
     override val isExpanded get() = expansionState.isExpanded
 
     private lateinit var childTreeNodes: MutableList<TreeNode<T>>
@@ -401,24 +402,10 @@ class TreeNode<T : TreeHolder>(
 
     override val indentation by lazy { parent.indentation + 1 }
 
-    fun select(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (selected) throw SelectCalledTwiceException()
-
-        if (!modelNode.isSelectable) throw NotSelectableSelectedException()
-
-        toggleSelected(placeholder, recursive)
-    }
-
-    fun deselect(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
-        if (!selected) throw NotSelectedException()
-
-        toggleSelected(placeholder, recursive)
-    }
-
     private fun deselectRecursive(placeholder: TreeViewAdapter.Placeholder) {
         checkChildTreeNodesSet()
 
-        if (selected) deselect(placeholder, false)
+        if (selected) toggleSelected(placeholder, false)
     }
 
     fun normalize() {
@@ -489,10 +476,6 @@ class TreeNode<T : TreeHolder>(
     class InvisibleNodeException : UnsupportedOperationException("This operation is meaningless if the node is not visible.")
 
     class NoChildrenException : UnsupportedOperationException("Can't get selected children of a node that has no children.")
-
-    class SelectCalledTwiceException : UnsupportedOperationException("Can't select a node that is already selected.")
-
-    class NotSelectedException : UnsupportedOperationException("Can't deselect a node that is not selected.")
 
     data class State(
             val isExpanded: Boolean,

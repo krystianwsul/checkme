@@ -298,14 +298,12 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.instance
                             .setInstancesNotNotified(
-                                    DomainListenerManager.NotificationType.Skip(parameters.dataId),
+                                    DomainListenerManager.NotificationType.First(parameters.dataId),
                                     SaveService.Source.GUI,
                                     instanceKeys,
                             )
                             .subscribe()
                             .addTo(attachedToWindowDisposable)
-
-                    instanceDatas.forEach { it.notificationShown = true }
                 }
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))

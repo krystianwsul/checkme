@@ -45,7 +45,7 @@ data class GroupListDataWrapper(
     }
 
     data class InstanceData(
-            var done: ExactTimeStamp.Local?,
+            val done: ExactTimeStamp.Local?,
             val instanceKey: InstanceKey,
             val displayText: String?,
             override val name: String,
@@ -58,7 +58,7 @@ data class GroupListDataWrapper(
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             var ordinal: Double,
-            var notificationShown: Boolean,
+            val notificationShown: Boolean,
             val imageState: ImageState?,
             override val isAssignedToMe: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,

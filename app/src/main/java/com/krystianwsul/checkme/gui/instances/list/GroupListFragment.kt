@@ -39,6 +39,7 @@ import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
@@ -683,7 +684,7 @@ class GroupListFragment @JvmOverloads constructor(
     fun setAll(
             timeRange: Preferences.TimeRange,
             position: Int,
-            dataId: Int,
+            dataId: DataId,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
     ) {
@@ -698,27 +699,27 @@ class GroupListFragment @JvmOverloads constructor(
 
     fun setTimeStamp(
             timeStamp: TimeStamp,
-            dataId: Int,
+            dataId: DataId,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
 
     fun setInstanceKey(
             instanceKey: InstanceKey,
-            dataId: Int,
+            dataId: DataId,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
 
     fun setInstanceKeys(
-            dataId: Int,
+            dataId: DataId,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
 
     fun setTaskKey(
             taskKey: TaskKey,
-            dataId: Int,
+            dataId: DataId,
             immediate: Boolean,
             groupListDataWrapper: GroupListDataWrapper,
             showLoader: Boolean,
@@ -1007,14 +1008,14 @@ class GroupListFragment @JvmOverloads constructor(
                 )
             }
 
-        var dataId = -1
+        lateinit var dataId: DataId
             private set
 
         lateinit var customTimeDatas: List<GroupListDataWrapper.CustomTimeData>
             private set
 
         fun initialize(
-                dataId: Int,
+                dataId: DataId,
                 customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
                 useGroups: Boolean,
                 instanceDatas: Collection<GroupListDataWrapper.InstanceData>,

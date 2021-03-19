@@ -245,10 +245,10 @@ class NotDoneGroupNode(
                     val instanceKey = singleInstanceData.instanceKey
 
                     fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                            groupAdapter.dataId.toFirst(),
                             SaveService.Source.GUI,
                             instanceKey,
-                            done
+                            done,
                     )
 
                     setDone(true).flatMapMaybe {

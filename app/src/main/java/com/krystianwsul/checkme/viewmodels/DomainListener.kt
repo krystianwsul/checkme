@@ -10,7 +10,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 
 abstract class DomainListener<D : DomainData> {
 
-    val data = BehaviorRelay.create<D>()
+    val data = BehaviorRelay.create<D>()!!
 
     private var disposable: Disposable? = null
 

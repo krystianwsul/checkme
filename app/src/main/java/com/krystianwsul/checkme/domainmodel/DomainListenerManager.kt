@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import io.reactivex.rxjava3.core.Observable
 
@@ -42,8 +43,8 @@ class DomainListenerManager {
 
         object All : NotificationType()
 
-        data class Skip(val dataId: Int) : NotificationType()
+        data class Skip(val dataId: DataId) : NotificationType()
 
-        data class First(val dataId: Int) : NotificationType()
+        data class First(val dataId: DataId) : NotificationType()
     }
 }

@@ -1,11 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.treeadapter.FilterCriteria
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
 
-    abstract val dataId: Int
+    abstract val dataId: DataId
     abstract val immediate: Boolean
     abstract val groupListDataWrapper: GroupListDataWrapper
 
@@ -16,7 +17,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val useGroups = false
 
     data class All(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             val position: Int,
@@ -30,27 +31,27 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     }
 
     data class TimeStamp(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
-            val timeStamp: com.krystianwsul.common.time.TimeStamp
+            val timeStamp: com.krystianwsul.common.time.TimeStamp,
     ) : GroupListParameters()
 
     data class InstanceKey(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
-            val instanceKey: com.krystianwsul.common.utils.InstanceKey
+            val instanceKey: com.krystianwsul.common.utils.InstanceKey,
     ) : GroupListParameters()
 
     data class InstanceKeys(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper
+            override val groupListDataWrapper: GroupListDataWrapper,
     ) : GroupListParameters(false)
 
     data class TaskKey(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             val taskKey: com.krystianwsul.common.utils.TaskKey,
@@ -61,7 +62,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     }
 
     data class Search(
-            override val dataId: Int,
+            override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
             override val showProgress: Boolean,

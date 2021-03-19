@@ -235,10 +235,7 @@ class DomainFactory(
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
-            check(
-                    notificationType is NotificationType.All ||
-                            (notificationType as? NotificationType.Skip)?.dataId == 0
-            )
+            check(notificationType is NotificationType.All)
 
             return
         }

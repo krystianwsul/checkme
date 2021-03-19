@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.TimeStamp
@@ -430,7 +431,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         updateBottomMenu()
     }
 
-    override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) {
+    override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
                 .also { it.listener = deleteInstancesListener }
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)

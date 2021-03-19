@@ -9,7 +9,7 @@ abstract class DomainData {
         private val nextId get() = dataId++
     }
 
-    val dataId = nextId
+    val dataId = DataId(nextId)
 
     private var _immediate = false
     val immediate: Boolean

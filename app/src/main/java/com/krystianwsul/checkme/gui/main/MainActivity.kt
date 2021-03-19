@@ -162,7 +162,7 @@ class MainActivity :
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.First(dataId),
+                        dataId.toFirst(),
                         SaveService.Source.GUI,
                         taskKeys,
                         removeInstances,
@@ -255,7 +255,8 @@ class MainActivity :
 
         override fun initBottomBar() = this@MainActivity.initBottomBar()
 
-        override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) = this@MainActivity.deleteTasks(dataId, taskKeys)
+        override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
+                this@MainActivity.deleteTasks(dataId, taskKeys)
 
         override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
             SubtaskDialogFragment.newInstance(resultData)
@@ -361,7 +362,7 @@ class MainActivity :
 
             override fun initBottomBar() = this@MainActivity.initBottomBar()
 
-            override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) =
+            override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
                     this@MainActivity.deleteTasks(dataId, taskKeys)
 
             override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
@@ -739,9 +740,9 @@ class MainActivity :
                 .addTo(createDisposable)
     }
 
-    private data class DeleteTasksData(val dataId: Int, val taskKeys: Set<TaskKey>) : Serializable
+    private data class DeleteTasksData(val dataId: DataId, val taskKeys: Set<TaskKey>) : Serializable
 
-    private fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) {
+    private fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(DeleteTasksData(dataId, taskKeys))
                 .also { it.listener = deleteInstancesListener }
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)

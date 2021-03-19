@@ -143,13 +143,13 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         }
     }
 
-    private fun onLoadFinished(data: ShowProjectViewModel.Data?) {
+    private fun onLoadFinished(data: ShowProjectViewModel.Data) {
         this.data = data
 
         if (savedInstanceState == null) {
             binding.showProjectToolbarEditTextInclude
                     .toolbarEditText
-                    .setText(data!!.name)
+                    .setText(data.name)
         } else {
             savedInstanceState = null
         }
@@ -163,7 +163,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         invalidateOptionsMenu()
 
-        userListFragment.initialize(projectId, data!!)
+        userListFragment.initialize(projectId, data, showProjectViewModel.dataId)
     }
 
     override fun onBackPressed() {

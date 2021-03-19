@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -59,7 +58,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        showGroupViewModel.dataId.toFirst(),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances
@@ -68,7 +67,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.First(data!!.dataId),
+                            showGroupViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             it,
                     )
@@ -172,7 +171,12 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             return
         }
 
-        binding.groupListFragment.setTimeStamp(timeStamp, data.dataId, immediate, data.groupListDataWrapper)
+        binding.groupListFragment.setTimeStamp(
+                timeStamp,
+                showGroupViewModel.dataId,
+                immediate,
+                data.groupListDataWrapper,
+        )
 
         updateTopMenu()
     }

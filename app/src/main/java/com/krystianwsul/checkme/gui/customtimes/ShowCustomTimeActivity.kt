@@ -136,7 +136,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     if (data != null) {
                         DomainFactory.instance
                                 .updateCustomTime(
-                                        DomainListenerManager.NotificationType.Skip(data!!.dataId),
+                                        showCustomTimeViewModel!!.dataId.toSkip(),
                                         SaveService.Source.GUI,
                                         data!!.key,
                                         name,

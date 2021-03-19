@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -56,13 +55,10 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
-        val notificationType =
-                DomainListenerManager.NotificationType.First(showTaskInstancesViewModel.data.value!!.dataId)
-
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        notificationType,
+                        showTaskInstancesViewModel.dataId.toFirst(),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -70,7 +66,11 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(notificationType, SaveService.Source.GUI, it)
+                    DomainFactory.instance.clearTaskEndTimeStamps(
+                            showTaskInstancesViewModel.dataId.toFirst(),
+                            SaveService.Source.GUI,
+                            it,
+                    )
                 }
                 .subscribe()
                 .addTo(createDisposable)
@@ -83,7 +83,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var page = 0
 
-    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)
+    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)!!
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding
@@ -107,7 +107,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             data.doOnNext {
                 binding.groupListFragment.setTaskKey(
                         taskKey,
-                        it.dataId,
+                        showTaskInstancesViewModel.dataId,
                         it.immediate,
                         it.groupListDataWrapper,
                         it.showLoader

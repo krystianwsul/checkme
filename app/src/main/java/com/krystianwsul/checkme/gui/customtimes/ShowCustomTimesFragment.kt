@@ -13,7 +13,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
@@ -78,7 +77,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                                     .map { it.customTimeData.id }
 
                     fun setAreCurrent(current: Boolean) = DomainFactory.instance.setCustomTimesCurrent(
-                            DomainListenerManager.NotificationType.First(data.dataId),
+                            showCustomTimesViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             selectedCustomTimeKeys,
                             current,

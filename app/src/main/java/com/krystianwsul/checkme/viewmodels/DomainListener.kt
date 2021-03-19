@@ -10,6 +10,14 @@ import io.reactivex.rxjava3.disposables.Disposable
 
 abstract class DomainListener<D : DomainData> {
 
+    companion object {
+
+        private var dataId = 1
+
+        private val nextId get() = dataId++
+    }
+
+    val dataId = DataId(nextId)
     val data = BehaviorRelay.create<D>()!!
 
     private var disposable: Disposable? = null
@@ -44,8 +52,7 @@ abstract class DomainListener<D : DomainData> {
                 }
                 .toFlowable(BackpressureStrategy.LATEST)
                 .observeOnDomain()
-                .map { getDataResult(it) }
-                .map { it.data!! }
+                .map { getDataResult(it).data!! }
                 .filter { data.value != it }
                 .doFinally {
                     if (listenerAdded) {

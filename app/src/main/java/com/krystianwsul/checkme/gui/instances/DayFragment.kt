@@ -155,12 +155,12 @@ class DayFragment @JvmOverloads constructor(
             }
         }.addTo(compositeDisposable)
 
-        key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
-                .subscribe { (key, data) ->
+        key.switchMap { key -> entry!!.data.map { Triple(key, it, entry!!.dataId) } }
+                .subscribe { (key, data, dataId) ->
                     binding.groupListFragment.setAll(
                             key.first,
                             key.second,
-                            data.dataId,
+                            dataId,
                             data.immediate,
                             data.groupListDataWrapper
                     )

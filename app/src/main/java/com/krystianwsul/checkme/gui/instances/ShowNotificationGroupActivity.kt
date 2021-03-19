@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -60,7 +59,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        showNotificationGroupViewModel.dataId.toFirst(),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -69,7 +68,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.First(data!!.dataId),
+                            showNotificationGroupViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             it,
                     )
@@ -127,7 +126,11 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it
 
-                binding.groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.groupListDataWrapper)
+                binding.groupListFragment.setInstanceKeys(
+                        showNotificationGroupViewModel.dataId,
+                        it.immediate,
+                        it.groupListDataWrapper,
+                )
 
                 updateTopMenu()
             }

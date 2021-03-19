@@ -12,7 +12,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -253,7 +252,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             DomainFactory.instance
                     .removeFriends(
-                            DomainListenerManager.NotificationType.First(data!!.dataId),
+                            friendListViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             friendIds,
                     )
@@ -261,7 +260,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                     .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
                     .flatMapCompletable {
                         DomainFactory.instance.addFriends(
-                                DomainListenerManager.NotificationType.First(data!!.dataId),
+                                friendListViewModel.dataId.toFirst(),
                                 SaveService.Source.GUI,
                                 userPairs,
                         )

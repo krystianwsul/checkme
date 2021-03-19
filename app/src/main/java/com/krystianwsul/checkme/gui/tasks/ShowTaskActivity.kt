@@ -147,7 +147,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         taskListFragment.parameters = TaskListFragment.Parameters.Task(
                 TaskListFragment.Data(
-                        data.dataId,
+                        showTaskViewModel.dataId,
                         immediate,
                         data.taskData,
                         false,

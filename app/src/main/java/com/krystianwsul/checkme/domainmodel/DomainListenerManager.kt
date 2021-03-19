@@ -25,7 +25,7 @@ class DomainListenerManager {
 
     @Synchronized
     fun notify(notificationType: NotificationType) {
-        fun Map.Entry<DomainListener<*>, *>.dataId() = key.data.value?.dataId
+        fun Map.Entry<DomainListener<*>, *>.dataId() = key.dataId
 
         val eligibleListeners = when (notificationType) {
             NotificationType.All -> domainListeners.values

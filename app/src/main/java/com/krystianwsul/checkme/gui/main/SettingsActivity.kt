@@ -14,7 +14,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
 import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
@@ -86,7 +85,7 @@ class SettingsActivity : NavBarActivity() {
                 .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
                 .doOnSuccess { (domainFactory, url) ->
                     domainFactory.updatePhotoUrl(
-                            DomainListenerManager.NotificationType.First(settingsViewModel.data.value!!.dataId),
+                            settingsViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             url.toString(),
                     )
@@ -148,9 +147,7 @@ class SettingsActivity : NavBarActivity() {
 
                     DomainFactory.instance
                             .updateDefaultTab(
-                                    DomainListenerManager.NotificationType.First(
-                                            settingsActivity.settingsViewModel.data.value!!.dataId
-                                    ),
+                                    settingsActivity.settingsViewModel.dataId.toFirst(),
                                     SaveService.Source.GUI,
                                     newTab,
                             )
@@ -172,7 +169,7 @@ class SettingsActivity : NavBarActivity() {
                             setOnPreferenceChangeListener { _, newValue ->
                                 DomainFactory.instance
                                         .updateDefaultReminder(
-                                                DomainListenerManager.NotificationType.Skip(it.dataId),
+                                                settingsActivity.settingsViewModel.dataId.toSkip(),
                                                 SaveService.Source.GUI,
                                                 newValue as Boolean,
                                         )

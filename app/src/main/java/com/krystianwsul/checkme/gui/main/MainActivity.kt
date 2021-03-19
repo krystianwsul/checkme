@@ -598,12 +598,7 @@ class MainActivity :
 
             createDisposable += data.subscribe {
                 taskListFragment.parameters = TaskListFragment.Parameters.All(
-                        TaskListFragment.Data(
-                                it.dataId,
-                                it.immediate,
-                                it.taskData,
-                                true,
-                        ),
+                        TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
                         true,
                 )
 
@@ -659,11 +654,11 @@ class MainActivity :
                     searchInstancesViewModel,
                     {
                         binding.mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
-                                it.dataId,
+                                searchInstancesViewModel.dataId,
                                 it.immediate,
                                 it.groupListDataWrapper,
                                 it.showLoader,
-                                FilterCriteria.ExpandOnly(it.searchCriteria)
+                                FilterCriteria.ExpandOnly(it.searchCriteria),
                         ))
                     },
                     this::start,

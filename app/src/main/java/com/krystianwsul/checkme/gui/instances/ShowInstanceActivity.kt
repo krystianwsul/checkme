@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -93,7 +92,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         val undoTaskDataSingle = DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        showInstanceViewModel.dataId.toFirst(),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -108,7 +107,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.First(data!!.dataId),
+                            showInstanceViewModel.dataId.toFirst(),
                             SaveService.Source.GUI,
                             it,
                     )
@@ -161,7 +160,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     if (!it.notificationShown) {
                                         DomainFactory.instance
                                                 .setInstancesNotNotified(
-                                                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                                                        showInstanceViewModel.dataId.toFirst(),
                                                         SaveService.Source.GUI,
                                                         listOf(instanceKey),
                                                 )
@@ -174,7 +173,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     DomainFactory.instance
                                             .setInstancesAddHourActivity(
-                                                    DomainListenerManager.NotificationType.First(data!!.dataId),
+                                                    showInstanceViewModel.dataId.toFirst(),
                                                     SaveService.Source.GUI,
                                                     listOf(instanceKey),
                                             )
@@ -184,7 +183,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             }
                                             .flatMapCompletable {
                                                 DomainFactory.instance.undoInstancesAddHour(
-                                                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                                                        showInstanceViewModel.dataId.toFirst(),
                                                         SaveService.Source.GUI,
                                                         it,
                                                 )
@@ -319,9 +318,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             DomainFactory.onReady()
                     .flatMapCompletable {
                         it.setInstanceNotified(
-                                data?.dataId
-                                        ?.let(DomainListenerManager.NotificationType::Skip)
-                                        ?: DomainListenerManager.NotificationType.All,
+                                showInstanceViewModel.dataId.toSkip(),
                                 SaveService.Source.GUI,
                                 instanceKey,
                         )
@@ -353,16 +350,21 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         updateTopMenu()
         updateBottomMenu()
 
-        binding.groupListFragment.setInstanceKey(instanceKey, data.dataId, immediate, data.groupListDataWrapper)
+        binding.groupListFragment.setInstanceKey(
+                instanceKey,
+                showInstanceViewModel.dataId,
+                immediate,
+                data.groupListDataWrapper,
+        )
     }
 
     private fun setDone(done: Boolean) {
         DomainFactory.instance
                 .setInstanceDone(
-                        DomainListenerManager.NotificationType.First(data!!.dataId),
+                        showInstanceViewModel.dataId.toFirst(),
                         SaveService.Source.GUI,
                         instanceKey,
-                        done
+                        done,
                 )
                 .subscribe()
                 .addTo(createDisposable)
@@ -411,7 +413,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
 
-                            deleteTasks(data!!.dataId, setOf(instanceKey.taskKey))
+                            deleteTasks(showInstanceViewModel.dataId, setOf(instanceKey.taskKey))
                         }
                         R.id.instance_menu_select_all -> binding.groupListFragment
                                 .treeViewAdapter

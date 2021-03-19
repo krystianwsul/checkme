@@ -6,7 +6,8 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     protected abstract val domainListener: DomainListener<D>
 
-    val data by lazy { domainListener.data }
+    val data get() = domainListener.data
+    val dataId get() = domainListener.dataId
 
     fun stop() = domainListener.stop()
 

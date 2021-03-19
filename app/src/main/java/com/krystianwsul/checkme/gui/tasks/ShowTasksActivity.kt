@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -128,7 +129,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         updateTopMenu()
         updateBottomMenu()
 
-        taskListFragment.parameters = parameters.mapDataToTaskListFragmentParameters(data)
+        taskListFragment.parameters = parameters.mapDataToTaskListFragmentParameters(showTasksViewModel.dataId, data)
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit
@@ -288,8 +289,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         abstract fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean
 
-        protected fun mapDataToTaskListFragmentData(data: ShowTasksViewModel.Data) = TaskListFragment.Data(
-                data.dataId,
+        protected fun mapDataToTaskListFragmentData(
+                dataId: DataId,
+                data: ShowTasksViewModel.Data,
+        ) = TaskListFragment.Data(
+                dataId,
                 data.immediate,
                 data.taskData,
                 reverseOrderForTopLevelNodes,
@@ -297,7 +301,10 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 false
         )
 
-        abstract fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data): TaskListFragment.Parameters
+        abstract fun mapDataToTaskListFragmentParameters(
+                dataId: DataId,
+                data: ShowTasksViewModel.Data,
+        ): TaskListFragment.Parameters
 
         @Parcelize
         object Unscheduled : Parameters() {
@@ -310,8 +317,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 return false
             }
 
-            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data), true)
+            override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), true)
         }
 
         @Parcelize
@@ -329,8 +336,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 return false
             }
 
-            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(data), false)
+            override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), false)
         }
 
         @Parcelize
@@ -338,8 +345,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
             override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data) = data.isSharedProject!!
 
-            override fun mapDataToTaskListFragmentParameters(data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.Project(mapDataToTaskListFragmentData(data), projectKey)
+            override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
+                    TaskListFragment.Parameters.Project(mapDataToTaskListFragmentData(dataId, data), projectKey)
         }
     }
 }

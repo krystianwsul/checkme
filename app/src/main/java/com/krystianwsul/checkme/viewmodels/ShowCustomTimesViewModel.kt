@@ -14,7 +14,7 @@ class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>(
 
     fun start() = internalStart()
 
-    data class Data(val entries: MutableList<CustomTimeData>) : DomainData()
+    data class Data(val entries: List<CustomTimeData>) : DomainData()
 
     data class CustomTimeData(val id: CustomTimeKey.Private, val name: String, val details: String) {
 

@@ -14,7 +14,7 @@ class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
     fun start() = internalStart()
 
-    data class Data(val userListDatas: MutableSet<UserListData>) : DomainData()
+    data class Data(val userListDatas: Set<UserListData>) : DomainData()
 
     data class UserListData(
             val name: String,

@@ -106,7 +106,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
                         scheduleData.date,
-                        mutableSetOf(scheduleData.date.dayOfWeek),
+                        setOf(scheduleData.date.dayOfWeek),
                         true,
                         monthDayNumber,
                         dayOfMonthToWeekOfMonth(monthDayNumber),
@@ -132,11 +132,9 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(suggestedDate)
 
-                val days = scheduleData.daysOfWeek.toMutableSet()
-
                 return ScheduleDialogData(
                         suggestedDate,
-                        days,
+                        scheduleData.daysOfWeek,
                         true,
                         monthDayNumber,
                         dayOfMonthToWeekOfMonth(monthDayNumber),
@@ -170,7 +168,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
                         date,
-                        mutableSetOf(date.dayOfWeek),
+                        setOf(date.dayOfWeek),
                         true,
                         scheduleData.dayOfMonth,
                         dayOfMonthToWeekOfMonth(scheduleData.dayOfMonth),
@@ -210,7 +208,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
                         date,
-                        mutableSetOf(scheduleData.dayOfWeek),
+                        setOf(scheduleData.dayOfWeek),
                         false,
                         listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).minOrNull()!!,
                         scheduleData.weekOfMonth,
@@ -246,7 +244,7 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
                         date,
-                        mutableSetOf(date.dayOfWeek),
+                        setOf(date.dayOfWeek),
                         true,
                         monthDayNumber,
                         dayOfMonthToWeekOfMonth(monthDayNumber),

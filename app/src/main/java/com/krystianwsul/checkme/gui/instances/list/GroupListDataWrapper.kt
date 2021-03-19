@@ -56,7 +56,7 @@ data class GroupListDataWrapper(
             val isRootInstance: Boolean,
             val createTaskTimePair: TimePair,
             override val note: String?,
-            val children: MutableMap<InstanceKey, InstanceData>,
+            val children: Map<InstanceKey, InstanceData>,
             val ordinal: Double,
             val notificationShown: Boolean,
             val imageState: ImageState?,

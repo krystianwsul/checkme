@@ -385,7 +385,7 @@ class NotDoneGroupNode(
 
             DomainFactory.instance
                     .setOrdinal(
-                            DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId),
+                            DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId), // todo skip
                             it.taskKey,
                             ordinal,
                     )
@@ -643,7 +643,7 @@ class NotDoneGroupNode(
 
                 DomainFactory.instance
                         .setOrdinal(
-                                DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId),
+                                DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId), // todo skip
                                 it.taskKey,
                                 ordinal,
                         )

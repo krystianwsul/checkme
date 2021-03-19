@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -33,12 +35,11 @@ import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.tryGetFragment
-import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -58,7 +59,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         private set
 
     private var data: ShowProjectViewModel.Data? = null
-    private lateinit var dataId: DataId
 
     private var saveState = SaveState(HashSet(), HashSet(), HashSet())
 
@@ -156,10 +156,9 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun initialize(projectId: ProjectKey.Shared?, data: ShowProjectViewModel.Data, dataId: DataId) {
+    fun initialize(projectId: ProjectKey.Shared?, data: ShowProjectViewModel.Data) {
         this.projectId = projectId
         this.data = data
-        this.dataId = dataId
 
         initialize()
     }
@@ -237,21 +236,27 @@ class UserListFragment : AbstractFragment(), FabUser {
         return saveState.removedIds.isNotEmpty()
     }
 
-    fun save(name: String) {
+    @CheckResult
+    fun save(name: String): Completable {
         check(name.isNotEmpty())
         checkNotNull(data)
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        DomainFactory.instance
+        return DomainFactory.instance
                 .run {
                     if (projectId == null) {
                         check(saveState.removedIds.isEmpty())
 
-                        createProject(dataId.toSkip(), SaveService.Source.GUI, name, saveState.addedIds)
+                        createProject(
+                                DomainListenerManager.NotificationType.All,
+                                SaveService.Source.GUI,
+                                name,
+                                saveState.addedIds,
+                        )
                     } else {
                         updateProject(
-                                dataId.toSkip(),
+                                DomainListenerManager.NotificationType.All,
                                 SaveService.Source.GUI,
                                 projectId!!,
                                 name,
@@ -260,8 +265,6 @@ class UserListFragment : AbstractFragment(), FabUser {
                         )
                     }
                 }
-                .subscribe()
-                .addTo(createDisposable)
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {

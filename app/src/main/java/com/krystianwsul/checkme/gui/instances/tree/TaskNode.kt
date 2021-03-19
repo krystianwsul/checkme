@@ -192,7 +192,7 @@ class TaskNode(
 
         DomainFactory.instance
                 .setOrdinal(
-                        DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId),
+                        DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId), // todo skip
                         taskData.taskKey,
                         ordinal,
                 )

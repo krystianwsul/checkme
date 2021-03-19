@@ -19,6 +19,8 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListener {
@@ -77,8 +79,9 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
                 showProjectViewModel.stop()
 
                 userListFragment.save(binding.showProjectToolbarEditTextInclude.toolbarEditText.text.toString())
-
-                finish()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe { finish() }
+                        .addTo(createDisposable)
             }
             android.R.id.home -> {
                 if (tryClose())
@@ -163,7 +166,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         invalidateOptionsMenu()
 
-        userListFragment.initialize(projectId, data, showProjectViewModel.dataId)
+        userListFragment.initialize(projectId, data)
     }
 
     override fun onBackPressed() {

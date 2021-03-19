@@ -27,6 +27,7 @@ const val SEARCH_PAGE_SIZE = 20
 
 @CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
@@ -34,7 +35,7 @@ fun DomainFactory.setTaskEndTimeStamps(
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
+    setTaskEndTimeStamps(notificationType, source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
 }
 
 @CheckResult

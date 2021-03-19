@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowTaskBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -56,7 +57,12 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
-                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
+                .setTaskEndTimeStamps(
+                        DomainListenerManager.NotificationType.All,
+                        SaveService.Source.GUI,
+                        taskKeys as Set<TaskKey>,
+                        removeInstances,
+                )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy {
                     finish()

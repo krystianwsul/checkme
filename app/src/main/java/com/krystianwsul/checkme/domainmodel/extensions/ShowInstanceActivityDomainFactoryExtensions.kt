@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -66,6 +67,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
 @CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
@@ -76,7 +78,7 @@ fun DomainFactory.setTaskEndTimeStamps(
 
     val now = ExactTimeStamp.Local.now
 
-    val taskUndoData = setTaskEndTimeStamps(source, taskKeys, deleteInstances, now)
+    val taskUndoData = setTaskEndTimeStamps(notificationType, source, taskKeys, deleteInstances, now)
 
     Pair(taskUndoData, debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)))
 }

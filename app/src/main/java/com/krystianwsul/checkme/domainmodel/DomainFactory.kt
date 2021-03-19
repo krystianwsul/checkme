@@ -186,7 +186,7 @@ class DomainFactory(
                 .values
                 .forEach { it.fixOffsets() }
 
-        save(null, SaveService.Source.SERVICE)
+        save(NotificationType.All, SaveService.Source.SERVICE)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -223,6 +223,7 @@ class DomainFactory(
         }
     }
 
+    @Deprecated("")
     fun save(
             dataId: Int?,
             source: SaveService.Source,
@@ -367,7 +368,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        save(0, SaveService.Source.GUI, runType == RunType.REMOTE)
+        save(NotificationType.All, SaveService.Source.GUI, runType == RunType.REMOTE)
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
@@ -383,6 +384,7 @@ class DomainFactory(
     // sets
 
     fun setTaskEndTimeStamps(
+            notificationType: NotificationType,
             source: SaveService.Source,
             taskKeys: Set<TaskKey>,
             deleteInstances: Boolean,
@@ -408,7 +410,7 @@ class DomainFactory(
 
         notifier.updateNotifications(now)
 
-        save(0, source)
+        save(notificationType, source)
 
         notifyCloud(remoteProjects)
 
@@ -451,7 +453,7 @@ class DomainFactory(
 
         notifier.updateNotificationsTick(now, silent, sourceName, domainChanged)
 
-        save(0, source)
+        save(NotificationType.All, source)
     }
 
     override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
@@ -470,7 +472,7 @@ class DomainFactory(
 
         projectsFactory.updateDeviceInfo(deviceDbInfo)
 
-        save(0, source)
+        save(NotificationType.All, source)
     }
 
     // internal

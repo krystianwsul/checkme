@@ -91,7 +91,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         showInstanceViewModel.stop()
 
         val undoTaskDataSingle = DomainFactory.instance
-                .setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances, instanceKey)
+                .setTaskEndTimeStamps(
+                        DomainListenerManager.NotificationType.All,
+                        SaveService.Source.GUI,
+                        taskKeys as Set<TaskKey>,
+                        removeInstances,
+                        instanceKey,
+                )
                 .observeOn(AndroidSchedulers.mainThread())
                 .cache()
 

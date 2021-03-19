@@ -26,12 +26,13 @@ class DomainFactoryTest {
     @Test
     fun testCreatingTask() {
         domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "task",
                 listOf(ScheduleData.Single(Date(2020, 12, 20), TimePair(HourMinute(20, 0)))),
                 null,
                 null,
-                null
+                null,
         ).blockingGet()
 
         assertEquals(
@@ -60,6 +61,7 @@ class DomainFactoryTest {
 
         val taskName1 = "task1"
         val taskKey1 = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 taskName1,
                 scheduleDatas,
@@ -75,12 +77,13 @@ class DomainFactoryTest {
 
         val taskName2 = "task2"
         val taskKey2 = domainFactory.createChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 taskKey1,
                 taskName2,
                 null,
                 null,
-                now = now
+                now = now,
         )
                 .blockingGet()
                 .taskKey
@@ -91,6 +94,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 taskKey2,
                 taskName2,
@@ -106,6 +110,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.updateChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 taskKey1,
                 taskName1,
@@ -130,6 +135,7 @@ class DomainFactoryTest {
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val parentTask1Key = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "parentTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -143,25 +149,27 @@ class DomainFactoryTest {
                 .taskKey
 
         val doneChildTaskKey = domainFactory.createChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 parentTask1Key,
                 "childTask1",
                 null,
                 null,
                 null,
-                now
+                now,
         )
                 .blockingGet()
                 .taskKey
 
         val notDoneChildTaskKey = domainFactory.createChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 parentTask1Key,
                 "childTask2",
                 null,
                 null,
                 null,
-                now
+                now,
         )
                 .blockingGet()
                 .taskKey
@@ -178,11 +186,11 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.setInstanceDone(
-                DomainListenerManager.NotificationType.Alll,
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 doneInstanceKey,
                 true,
-                now
+                now,
         ).subscribe()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
@@ -192,6 +200,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         val parentTask2Key = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "parentTask2",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
@@ -205,6 +214,7 @@ class DomainFactoryTest {
                 .taskKey
 
         domainFactory.updateChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 doneChildTaskKey,
                 "childTask1",
@@ -217,6 +227,7 @@ class DomainFactoryTest {
         ).blockingGet()
 
         domainFactory.updateChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 notDoneChildTaskKey,
                 "childTask2",
@@ -225,7 +236,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 true,
-                now
+                now,
         ).blockingGet()
 
         assertEquals(2, getTodayInstanceDatas(now).size)
@@ -241,6 +252,7 @@ class DomainFactoryTest {
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val parentTaskKey = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "parentTask",
                 listOf(
@@ -251,7 +263,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 null,
-                now
+                now,
         )
                 .blockingGet()
                 .taskKey
@@ -267,16 +279,17 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.setInstanceDone(
-                DomainListenerManager.NotificationType.Alll,
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 instanceKey1,
                 true,
-                now
+                now,
         ).subscribe()
 
         now += 1.hours
 
         domainFactory.createChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 parentTaskKey,
                 "childTask",
@@ -301,6 +314,7 @@ class DomainFactoryTest {
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val task1Key = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "task1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
@@ -324,13 +338,14 @@ class DomainFactoryTest {
         now += 1.hours
 
         val task2Key = domainFactory.createChildTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 task1Key,
                 "task2",
                 null,
                 null,
                 null,
-                now
+                now,
         )
                 .blockingGet()
                 .taskKey
@@ -354,6 +369,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 task2Key,
                 "task2",
@@ -361,7 +377,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 null,
-                now
+                now,
         ).blockingGet()
 
         domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
@@ -382,6 +398,7 @@ class DomainFactoryTest {
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "childTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -393,6 +410,7 @@ class DomainFactoryTest {
         ).blockingGet()
 
         domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "childTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -410,6 +428,7 @@ class DomainFactoryTest {
         now += 2.hours // 3AM
 
         domainFactory.createScheduleJoinRootTask(
+                DomainListenerManager.NotificationType.All,
                 SaveService.Source.SERVICE,
                 "parentTask",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(4, 0)))),
@@ -418,7 +437,7 @@ class DomainFactoryTest {
                 null,
                 null,
                 true,
-                now
+                now,
         ).blockingGet()
 
         assertEquals(1, getTodayInstanceDatas(now).size)

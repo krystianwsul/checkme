@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
@@ -86,7 +87,7 @@ sealed class NotificationAction : Parcelable {
         override val requestCode get() = hashCode()
 
         override fun perform() = DomainFactory.onReady().flatMapCompletable {
-            it.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
+            it.setInstanceNotified(DomainListenerManager.NotificationType.All, SaveService.Source.SERVICE, instanceKey)
         }!!
     }
 }

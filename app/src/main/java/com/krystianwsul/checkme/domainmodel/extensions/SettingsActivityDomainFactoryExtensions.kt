@@ -33,7 +33,7 @@ fun DomainFactory.updateDefaultTab(
 
 @CheckResult
 fun DomainFactory.updateDefaultReminder(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         defaultReminder: Boolean,
 ) = completeOnDomain {
@@ -42,5 +42,5 @@ fun DomainFactory.updateDefaultReminder(
 
     myUserFactory.user.defaultReminder = defaultReminder
 
-    save(dataId, source)
+    save(notificationType, source)
 }

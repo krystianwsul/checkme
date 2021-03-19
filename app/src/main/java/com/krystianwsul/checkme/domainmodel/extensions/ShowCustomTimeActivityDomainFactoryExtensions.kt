@@ -29,7 +29,7 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): S
 
 @CheckResult
 fun DomainFactory.updateCustomTime(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         customTimeId: CustomTimeKey.Private,
         name: String,
@@ -51,7 +51,7 @@ fun DomainFactory.updateCustomTime(
             customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    save(dataId, source)
+    save(notificationType, source)
 }
 
 @CheckResult

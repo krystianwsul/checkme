@@ -169,7 +169,11 @@ class SettingsActivity : NavBarActivity() {
 
                             setOnPreferenceChangeListener { _, newValue ->
                                 DomainFactory.instance
-                                        .updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+                                        .updateDefaultReminder(
+                                                DomainListenerManager.NotificationType.Skip(it.dataId),
+                                                SaveService.Source.GUI,
+                                                newValue as Boolean,
+                                        )
                                         .subscribe()
                                         .addTo(createDisposable)
 

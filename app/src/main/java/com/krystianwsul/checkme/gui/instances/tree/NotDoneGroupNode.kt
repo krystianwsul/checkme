@@ -446,7 +446,11 @@ class NotDoneGroupNode(
             it.ordinal = ordinal
 
             DomainFactory.instance
-                    .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                    .setOrdinal(
+                            DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId),
+                            it.taskKey,
+                            ordinal,
+                    )
                     .subscribe()
                     .addTo(groupListFragment.attachedToWindowDisposable)
         }
@@ -711,7 +715,11 @@ class NotDoneGroupNode(
                 it.ordinal = ordinal
 
                 DomainFactory.instance
-                        .setOrdinal(groupListFragment.parameters.dataId, it.taskKey, ordinal)
+                        .setOrdinal(
+                                DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId),
+                                it.taskKey,
+                                ordinal,
+                        )
                         .subscribe()
                         .addTo(groupListFragment.attachedToWindowDisposable)
             }

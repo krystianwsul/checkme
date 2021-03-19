@@ -223,19 +223,6 @@ class DomainFactory(
         }
     }
 
-    @Deprecated("")
-    fun save(
-            dataId: Int?,
-            source: SaveService.Source,
-            forceDomainChanged: Boolean = false,
-            values: MutableMap<String, Any?> = mutableMapOf(),
-    ) = save(
-            dataId?.let(NotificationType::Skip) ?: NotificationType.All,
-            source,
-            forceDomainChanged,
-            values
-    )
-
     fun save(
             notificationType: NotificationType,
             source: SaveService.Source,

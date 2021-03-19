@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setProjectEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -138,7 +139,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setProjectEndTimeStamps(
-                        0,
+                        DomainListenerManager.NotificationType.All,
                         SaveService.Source.GUI,
                         projectIds as Set<ProjectKey.Shared>,
                         removeInstances,
@@ -146,7 +147,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, it)
+                    DomainFactory.instance.clearProjectEndTimeStamps(
+                            DomainListenerManager.NotificationType.All,
+                            SaveService.Source.GUI,
+                            it,
+                    )
                 }
                 .subscribe()
                 .addTo(createDisposable)

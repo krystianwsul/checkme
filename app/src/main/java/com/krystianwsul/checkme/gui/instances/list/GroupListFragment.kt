@@ -180,11 +180,19 @@ class GroupListFragment @JvmOverloads constructor(
 
 
                     DomainFactory.instance
-                            .setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+                            .setInstancesAddHourActivity(
+                                    DomainListenerManager.NotificationType.All,
+                                    SaveService.Source.GUI,
+                                    instanceKeys,
+                            )
                             .observeOn(AndroidSchedulers.mainThread())
                             .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
                             .flatMapCompletable {
-                                DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, it)
+                                DomainFactory.instance.undoInstancesAddHour(
+                                        DomainListenerManager.NotificationType.All,
+                                        SaveService.Source.GUI,
+                                        it,
+                                )
                             }
                             .subscribe()
                             .addTo(attachedToWindowDisposable)
@@ -288,9 +296,9 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.instance
                             .setInstancesNotNotified(
-                                    parameters.dataId,
+                                    DomainListenerManager.NotificationType.Skip(parameters.dataId),
                                     SaveService.Source.GUI,
-                                    instanceKeys
+                                    instanceKeys,
                             )
                             .subscribe()
                             .addTo(attachedToWindowDisposable)

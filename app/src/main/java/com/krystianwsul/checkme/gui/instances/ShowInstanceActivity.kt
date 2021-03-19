@@ -160,7 +160,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     if (!it.notificationShown) {
                                         DomainFactory.instance
                                                 .setInstancesNotNotified(
-                                                        0,
+                                                        DomainListenerManager.NotificationType.All,
                                                         SaveService.Source.GUI,
                                                         listOf(instanceKey),
                                                 )
@@ -173,7 +173,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     DomainFactory.instance
                                             .setInstancesAddHourActivity(
-                                                    0,
+                                                    DomainListenerManager.NotificationType.All,
                                                     SaveService.Source.GUI,
                                                     listOf(instanceKey),
                                             )
@@ -183,7 +183,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             }
                                             .flatMapCompletable {
                                                 DomainFactory.instance.undoInstancesAddHour(
-                                                        0,
+                                                        DomainListenerManager.NotificationType.All,
                                                         SaveService.Source.GUI,
                                                         it,
                                                 )
@@ -317,7 +317,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
             DomainFactory.onReady()
                     .flatMapCompletable {
-                        it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
+                        it.setInstanceNotified(
+                                data?.dataId
+                                        ?.let(DomainListenerManager.NotificationType::Skip)
+                                        ?: DomainListenerManager.NotificationType.All,
+                                SaveService.Source.GUI,
+                                instanceKey,
+                        )
                     }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {

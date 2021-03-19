@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.prettyPrint
@@ -45,7 +46,7 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 
 @CheckResult
 fun DomainFactory.setCustomTimesCurrent(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
         current: Boolean,
@@ -64,5 +65,5 @@ fun DomainFactory.setCustomTimesCurrent(
         remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
     }
 
-    save(dataId, source)
+    save(notificationType, source)
 }

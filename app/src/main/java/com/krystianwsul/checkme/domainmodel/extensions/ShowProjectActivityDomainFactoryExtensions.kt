@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
@@ -43,7 +44,7 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
 
 @CheckResult
 fun DomainFactory.createProject(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         name: String,
         friends: Set<UserKey>,
@@ -72,14 +73,14 @@ fun DomainFactory.createProject(
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    save(dataId, source)
+    save(notificationType, source)
 
     notifyCloud(remoteProject)
 }
 
 @CheckResult
 fun DomainFactory.updateProject(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         projectId: ProjectKey.Shared,
         name: String,
@@ -104,7 +105,7 @@ fun DomainFactory.updateProject(
 
     notifier.updateNotifications(now)
 
-    save(dataId, source)
+    save(notificationType, source)
 
     notifyCloud(remoteProject, removedFriends)
 }

@@ -13,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -246,14 +247,14 @@ class UserListFragment : AbstractFragment(), FabUser {
                         check(saveState.removedIds.isEmpty())
 
                         createProject(
-                                data!!.dataId,
+                                DomainListenerManager.NotificationType.Skip(data!!.dataId),
                                 SaveService.Source.GUI,
                                 name,
                                 saveState.addedIds
                         )
                     } else {
                         updateProject(
-                                data!!.dataId,
+                                DomainListenerManager.NotificationType.Skip(data!!.dataId),
                                 SaveService.Source.GUI,
                                 projectId!!,
                                 name,

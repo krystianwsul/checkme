@@ -63,7 +63,11 @@ fun DomainFactory.clearTaskEndTimeStamps(
 }
 
 @CheckResult
-fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = completeOnDomain {
+fun DomainFactory.setOrdinal(
+        notificationType: DomainListenerManager.NotificationType,
+        taskKey: TaskKey,
+        ordinal: Double,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setOrdinal")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -75,14 +79,14 @@ fun DomainFactory.setOrdinal(dataId: Int, taskKey: TaskKey, ordinal: Double) = c
 
     notifier.updateNotifications(now)
 
-    save(dataId, SaveService.Source.GUI)
+    save(notificationType, SaveService.Source.GUI)
 
     notifyCloud(task.project)
 }
 
 @CheckResult
 fun DomainFactory.setInstancesNotNotified(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
 ) = completeOnDomain {
@@ -104,12 +108,12 @@ fun DomainFactory.setInstancesNotNotified(
 
     notifier.updateNotifications(now)
 
-    save(dataId, source)
+    save(notificationType, source)
 }
 
 @CheckResult
 fun DomainFactory.setInstancesAddHourActivity(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKeys: Collection<InstanceKey>,
 ): Single<DomainFactory.HourUndoData> = scheduleOnDomain {
@@ -136,7 +140,7 @@ fun DomainFactory.setInstancesAddHourActivity(
 
     notifier.updateNotifications(now)
 
-    save(dataId, source)
+    save(notificationType, source)
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
@@ -147,7 +151,7 @@ fun DomainFactory.setInstancesAddHourActivity(
 
 @CheckResult
 fun DomainFactory.undoInstancesAddHour(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         hourUndoData: DomainFactory.HourUndoData,
 ) = completeOnDomain {
@@ -162,7 +166,7 @@ fun DomainFactory.undoInstancesAddHour(
 
     notifier.updateNotifications(now)
 
-    save(dataId, source)
+    save(notificationType, source)
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
@@ -195,7 +199,7 @@ fun DomainFactory.setInstanceDone(
 
 @CheckResult
 fun DomainFactory.setInstanceNotified(
-        dataId: Int,
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKey: InstanceKey,
 ) = completeOnDomain {
@@ -207,7 +211,7 @@ fun DomainFactory.setInstanceNotified(
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
     setInstanceNotified(instanceKey)
 
-    save(dataId, source)
+    save(notificationType, source)
 }
 
 fun DomainFactory.updatePhotoUrl(

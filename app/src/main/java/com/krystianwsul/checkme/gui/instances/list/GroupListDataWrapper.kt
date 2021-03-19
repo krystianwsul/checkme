@@ -29,7 +29,7 @@ data class GroupListDataWrapper(
             val imageState: ImageState?,
             override val isAssignedToMe: Boolean,
             val projectInfo: DetailsNode.ProjectInfo?,
-            var ordinal: Double,
+            val ordinal: Double,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
         init {
@@ -57,7 +57,7 @@ data class GroupListDataWrapper(
             val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
-            var ordinal: Double,
+            val ordinal: Double,
             val notificationShown: Boolean,
             val imageState: ImageState?,
             override val isAssignedToMe: Boolean,

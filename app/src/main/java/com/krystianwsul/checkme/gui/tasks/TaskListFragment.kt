@@ -832,14 +832,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun getOrdinal() = childTaskData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            childTaskData.ordinal = ordinal
-
             DomainFactory.instance
-                    .setOrdinal(
-                            DomainListenerManager.NotificationType.Skip(taskListFragment.data!!.dataId), // todo skip
-                            childTaskData.taskKey,
-                            ordinal,
-                    )
+                    .setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
                     .subscribe()
                     .addTo(createDisposable)
         }
@@ -911,7 +905,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val imageState: ImageState?,
             val current: Boolean,
             override val canAddSubtask: Boolean,
-            var ordinal: Double,
+            val ordinal: Double,
             val projectInfo: DetailsNode.ProjectInfo?,
             override val isAssignedToMe: Boolean,
     ) : EntryData {

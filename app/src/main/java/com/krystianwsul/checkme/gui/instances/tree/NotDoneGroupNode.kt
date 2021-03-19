@@ -380,18 +380,14 @@ class NotDoneGroupNode(
     override fun getOrdinal() = singleInstanceData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
-        singleInstanceData.let {
-            it.ordinal = ordinal
-
-            DomainFactory.instance
-                    .setOrdinal(
-                            DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId), // todo skip
-                            it.taskKey,
-                            ordinal,
-                    )
-                    .subscribe()
-                    .addTo(groupListFragment.attachedToWindowDisposable)
-        }
+        DomainFactory.instance
+                .setOrdinal(
+                        groupListFragment.parameters.dataId.toFirst(),
+                        singleInstanceData.taskKey,
+                        ordinal,
+                )
+                .subscribe()
+                .addTo(groupListFragment.attachedToWindowDisposable)
     }
 
     override val id: Any = if (nodeCollection.useGroups) {
@@ -638,18 +634,14 @@ class NotDoneGroupNode(
         override fun getOrdinal() = instanceData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            instanceData.let {
-                it.ordinal = ordinal
-
-                DomainFactory.instance
-                        .setOrdinal(
-                                DomainListenerManager.NotificationType.Skip(groupListFragment.parameters.dataId), // todo skip
-                                it.taskKey,
-                                ordinal,
-                        )
-                        .subscribe()
-                        .addTo(groupListFragment.attachedToWindowDisposable)
-            }
+            DomainFactory.instance
+                    .setOrdinal(
+                            groupListFragment.parameters.dataId.toFirst(),
+                            instanceData.taskKey,
+                            ordinal,
+                    )
+                    .subscribe()
+                    .addTo(groupListFragment.attachedToWindowDisposable)
         }
 
         data class Id(val instanceKey: InstanceKey)

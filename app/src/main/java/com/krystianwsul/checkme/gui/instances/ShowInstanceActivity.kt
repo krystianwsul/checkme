@@ -194,10 +194,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)
 
-                                    EditInstancesFragment.newInstance(listOf(instanceKey)).show(
-                                            supportFragmentManager,
-                                            EDIT_INSTANCES_TAG
-                                    )
+                                    EditInstancesFragment.newInstance(
+                                            listOf(instanceKey),
+                                            showInstanceViewModel.dataId,
+                                    ).show(supportFragmentManager, EDIT_INSTANCES_TAG)
                                 }
                                 R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)

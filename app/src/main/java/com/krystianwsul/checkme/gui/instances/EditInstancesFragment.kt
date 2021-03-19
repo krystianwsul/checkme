@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
@@ -36,6 +35,7 @@ import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -58,6 +58,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     companion object {
 
         private const val INSTANCE_KEYS = "instanceKeys"
+        private const val KEY_DATA_ID = "dataId"
 
         private const val KEY_STATE = "state"
 
@@ -66,10 +67,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val TAG_PARENT_PICKER = "parentPicker"
 
-        fun newInstance(instanceKeys: List<InstanceKey>) = EditInstancesFragment().apply {
+        fun newInstance(instanceKeys: List<InstanceKey>, dataId: DataId) = EditInstancesFragment().apply {
             check(instanceKeys.isNotEmpty())
 
-            arguments = Bundle().apply { putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys)) }
+            arguments = Bundle().apply {
+                putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys))
+                putParcelable(KEY_DATA_ID, dataId)
+            }
         }
     }
 
@@ -186,8 +190,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
+    private lateinit var dataId: DataId
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        dataId = requireArguments().getParcelable(KEY_DATA_ID)!!
 
         childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.addListener(materialDatePickerListener)
 
@@ -225,14 +233,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         state.parentInstanceData
                                 ?.let {
                                     setInstancesParent(
-                                            DomainListenerManager.NotificationType.All, // todo dataId get dataId from host
+                                            dataId.toFirst(),
                                             SaveService.Source.GUI,
                                             data.instanceKeys,
                                             it.instanceKey,
                                     )
                                 }
                                 ?: setInstancesDateTime(
-                                        DomainListenerManager.NotificationType.All, // todo dataId
+                                        dataId.toFirst(),
                                         SaveService.Source.GUI,
                                         data.instanceKeys,
                                         state.date,

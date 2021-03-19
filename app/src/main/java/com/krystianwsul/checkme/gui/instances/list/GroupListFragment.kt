@@ -201,9 +201,10 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
 
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-
-                    EditInstancesFragment.newInstance(instanceDatas.map { it.instanceKey })
+                    EditInstancesFragment.newInstance(
+                            selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey },
+                            parameters.dataId,
+                    )
                             .also { it.listener = this@GroupListFragment::onEditInstances }
                             .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
 

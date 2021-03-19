@@ -105,7 +105,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.All,
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -114,7 +114,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .flatMapMaybe { listener.showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(data!!.dataId),
                             SaveService.Source.GUI,
                             it,
                     )

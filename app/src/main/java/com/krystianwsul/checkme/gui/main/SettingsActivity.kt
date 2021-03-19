@@ -86,7 +86,7 @@ class SettingsActivity : NavBarActivity() {
                 .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
                 .doOnSuccess { (domainFactory, url) ->
                     domainFactory.updatePhotoUrl(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(settingsViewModel.data.value!!.dataId),
                             SaveService.Source.GUI,
                             url.toString(),
                     )
@@ -148,7 +148,9 @@ class SettingsActivity : NavBarActivity() {
 
                     DomainFactory.instance
                             .updateDefaultTab(
-                                    DomainListenerManager.NotificationType.All,
+                                    DomainListenerManager.NotificationType.First(
+                                            settingsActivity.settingsViewModel.data.value!!.dataId
+                                    ),
                                     SaveService.Source.GUI,
                                     newTab,
                             )

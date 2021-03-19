@@ -28,12 +28,11 @@ class DomainListenerManager {
 
         val eligibleListeners = when (notificationType) {
             NotificationType.All -> domainListeners.values
-            is NotificationType.Skip -> {
+            is NotificationType.Skip ->
                 domainListeners.filter { it.dataId() != notificationType.dataId }.map { it.value }
-            }
-            is NotificationType.First -> {
-                domainListeners.entries.sortedByDescending { it.dataId() == notificationType.dataId }.map { it.value }
-            }
+            is NotificationType.First -> domainListeners.entries
+                    .sortedByDescending { it.dataId() == notificationType.dataId }
+                    .map { it.value }
         }
 
         eligibleListeners.forEach { it.accept(Unit) }

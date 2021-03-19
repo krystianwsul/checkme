@@ -247,29 +247,21 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") placeHolder: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = userDataWrappers.filter { it.treeNode.isSelected }
-
-            selectedUserDataWrappers.forEach { treeNodeCollection.remove(it.treeNode, placeHolder) }
-
-            selectedUserDataWrappers.forEach { userDataWrappers.remove(it) }
-
             val userListDatas = selectedUserDataWrappers.map { it.userListData }
-            data!!.userListDatas.removeAll(userListDatas)
-
             val userPairs = userListDatas.associate { it.id to it.userWrapper }
             val friendIds = userPairs.map { it.key }.toSet()
 
             DomainFactory.instance
-                    .removeFriends(DomainListenerManager.NotificationType.All, SaveService.Source.GUI, friendIds)
+                    .removeFriends(
+                            DomainListenerManager.NotificationType.First(data!!.dataId),
+                            SaveService.Source.GUI,
+                            friendIds,
+                    )
                     .observeOn(AndroidSchedulers.mainThread())
                     .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
-                    .doOnSuccess {
-                        onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
-                                .toMutableSet()
-                                .apply { addAll(userListDatas) }))
-                    }
                     .flatMapCompletable {
                         DomainFactory.instance.addFriends(
-                                DomainListenerManager.NotificationType.All,
+                                DomainListenerManager.NotificationType.First(data!!.dataId),
                                 SaveService.Source.GUI,
                                 userPairs,
                         )

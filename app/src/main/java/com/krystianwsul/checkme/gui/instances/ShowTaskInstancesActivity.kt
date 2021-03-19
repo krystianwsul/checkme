@@ -55,10 +55,13 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
+        val notificationType =
+                DomainListenerManager.NotificationType.First(showTaskInstancesViewModel.data.value!!.dataId)
+
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.All,
+                        notificationType,
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -66,11 +69,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.All,
-                            SaveService.Source.GUI,
-                            it,
-                    )
+                    DomainFactory.instance.clearTaskEndTimeStamps(notificationType, SaveService.Source.GUI, it)
                 }
                 .subscribe()
                 .addTo(createDisposable)
@@ -177,7 +176,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         }
     }
 
-    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+    override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
                 .also { it.listener = deleteInstancesListener }
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)

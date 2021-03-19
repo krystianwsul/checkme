@@ -181,7 +181,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.instance
                             .setInstancesAddHourActivity(
-                                    DomainListenerManager.NotificationType.All,
+                                    DomainListenerManager.NotificationType.First(parameters.dataId),
                                     SaveService.Source.GUI,
                                     instanceKeys,
                             )
@@ -189,7 +189,7 @@ class GroupListFragment @JvmOverloads constructor(
                             .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
                             .flatMapCompletable {
                                 DomainFactory.instance.undoInstancesAddHour(
-                                        DomainListenerManager.NotificationType.All,
+                                        DomainListenerManager.NotificationType.First(parameters.dataId),
                                         SaveService.Source.GUI,
                                         it,
                                 )
@@ -229,7 +229,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(selectedDatas.all { it.taskCurrent })
 
-                    listener.deleteTasks(taskKeys.toSet())
+                    listener.deleteTasks(parameters.dataId, taskKeys.toSet())
                 }
                 R.id.action_group_join -> {
                     val joinables = selectedDatas.map {
@@ -948,7 +948,13 @@ class GroupListFragment @JvmOverloads constructor(
         selectionCallback.actionMode!!.finish()
 
         listener.showSnackbarHourMaybe(count)
-                .flatMapCompletable { DomainFactory.instance.undo(SaveService.Source.GUI, undoData) }
+                .flatMapCompletable {
+                    DomainFactory.instance.undo(
+                            DomainListenerManager.NotificationType.First(parameters.dataId),
+                            SaveService.Source.GUI,
+                            undoData,
+                    )
+                }
                 .subscribe()
                 .addTo(attachedToWindowDisposable)
     }

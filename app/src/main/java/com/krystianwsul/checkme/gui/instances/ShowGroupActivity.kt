@@ -58,7 +58,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.All,
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances
@@ -67,7 +67,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(data!!.dataId),
                             SaveService.Source.GUI,
                             it,
                     )
@@ -212,7 +212,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
     }
 
-    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+    override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
                 .also { it.listener = deleteInstancesListener }
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)

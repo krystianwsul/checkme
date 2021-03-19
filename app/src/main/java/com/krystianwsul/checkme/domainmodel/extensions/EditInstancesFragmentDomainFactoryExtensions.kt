@@ -86,6 +86,7 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
 
 @CheckResult
 fun DomainFactory.setInstancesDateTime(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
@@ -133,7 +134,7 @@ fun DomainFactory.setInstancesDateTime(
 
     notifier.updateNotifications(now)
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(notificationType, source)
 
     notifyCloud(projects)
 
@@ -163,6 +164,7 @@ private class SetInstanceParentUndoData(
 
 @CheckResult
 fun DomainFactory.setInstancesParent(
+        notificationType: DomainListenerManager.NotificationType,
         source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
@@ -196,7 +198,7 @@ fun DomainFactory.setInstancesParent(
 
     notifier.updateNotifications(now)
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(notificationType, source)
 
     notifyCloud(projects)
 

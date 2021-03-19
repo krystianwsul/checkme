@@ -92,7 +92,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         val undoTaskDataSingle = DomainFactory.instance
                 .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.All,
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
                         SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
@@ -107,7 +107,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(data!!.dataId),
                             SaveService.Source.GUI,
                             it,
                     )
@@ -160,7 +160,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     if (!it.notificationShown) {
                                         DomainFactory.instance
                                                 .setInstancesNotNotified(
-                                                        DomainListenerManager.NotificationType.All,
+                                                        DomainListenerManager.NotificationType.First(data!!.dataId),
                                                         SaveService.Source.GUI,
                                                         listOf(instanceKey),
                                                 )
@@ -173,7 +173,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     DomainFactory.instance
                                             .setInstancesAddHourActivity(
-                                                    DomainListenerManager.NotificationType.All,
+                                                    DomainListenerManager.NotificationType.First(data!!.dataId),
                                                     SaveService.Source.GUI,
                                                     listOf(instanceKey),
                                             )
@@ -183,7 +183,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             }
                                             .flatMapCompletable {
                                                 DomainFactory.instance.undoInstancesAddHour(
-                                                        DomainListenerManager.NotificationType.All,
+                                                        DomainListenerManager.NotificationType.First(data!!.dataId),
                                                         SaveService.Source.GUI,
                                                         it,
                                                 )
@@ -410,7 +410,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
 
-                            deleteTasks(setOf(instanceKey.taskKey))
+                            deleteTasks(data!!.dataId, setOf(instanceKey.taskKey))
                         }
                         R.id.instance_menu_select_all -> binding.groupListFragment
                                 .treeViewAdapter
@@ -430,7 +430,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         updateBottomMenu()
     }
 
-    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+    override fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
                 .also { it.listener = deleteInstancesListener }
                 .show(supportFragmentManager, TAG_DELETE_INSTANCES)

@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
@@ -222,8 +223,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             DomainFactory.instance
                     .run {
                         state.parentInstanceData
-                                ?.let { setInstancesParent(SaveService.Source.GUI, data.instanceKeys, it.instanceKey) }
+                                ?.let {
+                                    setInstancesParent(
+                                            DomainListenerManager.NotificationType.All, // todo dataId get dataId from host
+                                            SaveService.Source.GUI,
+                                            data.instanceKeys,
+                                            it.instanceKey,
+                                    )
+                                }
                                 ?: setInstancesDateTime(
+                                        DomainListenerManager.NotificationType.All, // todo dataId
                                         SaveService.Source.GUI,
                                         data.instanceKeys,
                                         state.date,

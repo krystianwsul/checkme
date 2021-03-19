@@ -20,7 +20,7 @@ class SettingsViewModel : DomainViewModel<SettingsViewModel.Data>() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    val relay = PublishRelay.create<NullableWrapper<GoogleSignInAccount>>()
+    val relay = PublishRelay.create<NullableWrapper<GoogleSignInAccount>>()!!
 
     fun silentSignIn() {
         MyApplication.instance

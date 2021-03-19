@@ -237,7 +237,7 @@ class DomainFactory(
         if (skipping) {
             check(
                     notificationType is NotificationType.All ||
-                            (notificationType is NotificationType.Skip && notificationType.dataId == 0)
+                            (notificationType as? NotificationType.Skip)?.dataId == 0
             )
 
             return

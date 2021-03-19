@@ -363,7 +363,11 @@ fun addChildToParent(
 }
 
 @CheckResult
-fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = completeOnDomain {
+fun DomainFactory.undo(
+        notificationType: DomainListenerManager.NotificationType,
+        source: SaveService.Source,
+        undoData: UndoData,
+) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.undo")
     if (isSaved.value!!) throw SavedFactoryException()
 
@@ -373,7 +377,7 @@ fun DomainFactory.undo(source: SaveService.Source, undoData: UndoData) = complet
 
     notifier.updateNotifications(now)
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(notificationType, source)
 
     notifyCloud(projects)
 }

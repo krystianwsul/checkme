@@ -178,7 +178,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.setInstanceDone(
-                DomainListenerManager.NotificationType.All,
+                DomainListenerManager.NotificationType.Alll,
                 SaveService.Source.SERVICE,
                 doneInstanceKey,
                 true,
@@ -267,7 +267,7 @@ class DomainFactoryTest {
         now += 1.hours
 
         domainFactory.setInstanceDone(
-                DomainListenerManager.NotificationType.All,
+                DomainListenerManager.NotificationType.Alll,
                 SaveService.Source.SERVICE,
                 instanceKey1,
                 true,

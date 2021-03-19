@@ -139,7 +139,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
                 .setProjectEndTimeStamps(
-                        DomainListenerManager.NotificationType.All,
+                        DomainListenerManager.NotificationType.First(data!!.dataId),
                         SaveService.Source.GUI,
                         projectIds as Set<ProjectKey.Shared>,
                         removeInstances,
@@ -148,7 +148,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
                 .flatMapCompletable {
                     DomainFactory.instance.clearProjectEndTimeStamps(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(data!!.dataId),
                             SaveService.Source.GUI,
                             it,
                     )

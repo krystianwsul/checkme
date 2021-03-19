@@ -31,7 +31,7 @@ interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
     fun initBottomBar()
 
-    fun deleteTasks(taskKeys: Set<TaskKey>)
+    fun deleteTasks(dataId: Int, taskKeys: Set<TaskKey>)
 
     fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData): Unit = throw UnsupportedOperationException()
 }

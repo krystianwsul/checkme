@@ -78,7 +78,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                                     .map { it.customTimeData.id }
 
                     fun setAreCurrent(current: Boolean) = DomainFactory.instance.setCustomTimesCurrent(
-                            DomainListenerManager.NotificationType.All,
+                            DomainListenerManager.NotificationType.First(data.dataId),
                             SaveService.Source.GUI,
                             selectedCustomTimeKeys,
                             current,

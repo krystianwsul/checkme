@@ -58,7 +58,6 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
 import org.joda.time.Days
@@ -615,12 +614,6 @@ class MainActivity :
 
                 if (it.taskData.entryDatas.size > 1)
                     showDrawerTooltip(TooltipManager.Type.ADD_PROJECT, R.string.tooltip_add_project)
-            }
-
-            if (overrideTabSearchState == null) {
-                data.firstOrError() // todo tab why here specifically?
-                        .subscribeBy { setTabSearchState(TabSearchState.fromTabSetting(Tab.values()[Preferences.tab])) }
-                        .addTo(createDisposable)
             }
         }
 

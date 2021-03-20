@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.akexorcist.localizationactivity.core.LanguageSetting
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.deserialize
@@ -23,7 +22,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-object Preferences : FactoryProvider.Preferences {
+object Preferences {
 
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
@@ -56,7 +55,7 @@ object Preferences : FactoryProvider.Preferences {
             write: SharedPreferences.Editor.(T) -> Unit,
     ) = observable(sharedPreferences.initial()) { _, _, newValue -> sharedPreferences.edit { write(newValue) } }
 
-    override var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
+    var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
 
     private fun booleanObservable(key: String, defValue: Boolean) = preferenceObservable(
             { getBoolean(key, defValue) },
@@ -68,7 +67,7 @@ object Preferences : FactoryProvider.Preferences {
             { putInt(key, it) }
     )
 
-    override var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
+    var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit { putString(KEY_SHORTCUTS, newValue) }
@@ -80,7 +79,8 @@ object Preferences : FactoryProvider.Preferences {
 
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
 
-    val tokenRelay = BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))
+    val tokenRelay =
+            BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
 

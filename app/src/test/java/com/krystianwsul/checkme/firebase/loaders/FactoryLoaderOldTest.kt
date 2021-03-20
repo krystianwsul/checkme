@@ -142,22 +142,11 @@ class FactoryLoaderOldTest {
         override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
     }
 
-    private class TestPreferences : FactoryProvider.Preferences {
-
-        override var tab = 0
-
-        override var addDefaultReminder: Boolean
-            get() = TODO("Not yet implemented")
-            set(@Suppress("UNUSED_PARAMETER") value) {}
-    }
-
     private class TestFactoryProvider : FactoryProvider {
 
         override val nullableInstance: FactoryProvider.Domain? = null
 
         override val database = TestDatabase()
-
-        override val preferences = TestPreferences()
 
         override val projectProvider = object : ProjectProvider {
 

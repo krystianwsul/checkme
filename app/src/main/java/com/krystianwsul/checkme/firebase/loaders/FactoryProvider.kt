@@ -20,8 +20,6 @@ interface FactoryProvider {
 
     val database: Database
 
-    val preferences: Preferences
-
     val projectProvider: ProjectProvider
 
     val shownFactory: Instance.ShownFactory
@@ -75,19 +73,11 @@ interface FactoryProvider {
 
     }
 
-    interface Preferences {
-
-        var tab: Int // todo check usages var
-        var addDefaultReminder: Boolean // todo check usages var
-    }
-
     class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 
         override val database = AndroidDatabaseWrapper
-
-        override val preferences = com.krystianwsul.checkme.Preferences
 
         override val projectProvider = object : ProjectProvider {
 

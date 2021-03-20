@@ -79,9 +79,6 @@ class ProjectFactoryNewTest {
         override val nullableInstance: FactoryProvider.Domain
             get() = TODO("Not yet implemented")
 
-        override val preferences: FactoryProvider.Preferences
-            get() = TODO("Not yet implemented")
-
         override val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
 
         override fun newDomain(

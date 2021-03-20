@@ -618,8 +618,8 @@ class MainActivity :
             }
 
             if (overrideTabSearchState == null) {
-                data.firstOrError()
-                        .subscribeBy { setTabSearchState(TabSearchState.fromTabSetting(Tab.values()[it.defaultTab])) }
+                data.firstOrError() // todo tab why here specifically?
+                        .subscribeBy { setTabSearchState(TabSearchState.fromTabSetting(Tab.values()[Preferences.tab])) }
                         .addTo(createDisposable)
             }
         }

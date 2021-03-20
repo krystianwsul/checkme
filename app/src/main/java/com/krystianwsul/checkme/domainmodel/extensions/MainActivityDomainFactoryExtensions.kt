@@ -57,7 +57,6 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
 
     return MainViewModel.Data(
             TaskListFragment.TaskData(projectDatas, null, true, null),
-            myUserFactory.user.defaultTab
     )
 }
 

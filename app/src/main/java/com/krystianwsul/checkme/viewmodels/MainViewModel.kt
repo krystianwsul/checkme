@@ -13,7 +13,5 @@ class MainViewModel : DomainViewModel<MainViewModel.Data>() {
 
     fun start() = internalStart()
 
-    data class Data(
-            val taskData: TaskListFragment.TaskData,
-            val defaultTab: Int) : DomainData()
+    data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 }

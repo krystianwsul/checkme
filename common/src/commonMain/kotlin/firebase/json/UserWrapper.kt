@@ -9,7 +9,6 @@ import kotlin.jvm.JvmOverloads
 @Parcelize
 data class UserWrapper @JvmOverloads constructor(
         val userData: UserJson = UserJson(),
-        var defaultTab: Int = 0,
         val projects: MutableMap<String, Boolean> = mutableMapOf(),
         val friends: MutableMap<String, Boolean> = mutableMapOf(),
 ) : Parcelable

@@ -23,5 +23,4 @@ class MyUserRecord(
     }
 
     override var photoUrl by Committer(userJson::photoUrl, "$key/$USER_DATA")
-    override var defaultTab by Committer(createObject::defaultTab)
 }

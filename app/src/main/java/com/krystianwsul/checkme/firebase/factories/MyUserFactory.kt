@@ -45,20 +45,13 @@ class MyUserFactory(
     val savedList get() = myUserManager.savedList
 
     init {
-        setTab()
-
         user.name = deviceDbInfo.name
         user.setToken(deviceDbInfo)
-    }
-
-    private fun setTab() {
-        factoryProvider.preferences.tab = user.defaultTab
     }
 
     fun onNewSnapshot(snapshot: Snapshot): ChangeType {
         val changeWrapper = myUserManager.set(snapshot)
         user = MyUser(changeWrapper.data)
-        setTab()
 
         return changeWrapper.changeType
     }

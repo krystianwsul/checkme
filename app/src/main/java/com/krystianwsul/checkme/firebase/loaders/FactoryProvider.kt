@@ -77,8 +77,8 @@ interface FactoryProvider {
 
     interface Preferences {
 
-        var tab: Int
-        var addDefaultReminder: Boolean
+        var tab: Int // todo check usages var
+        var addDefaultReminder: Boolean // todo check usages var
     }
 
     class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {

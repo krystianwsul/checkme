@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -75,7 +74,7 @@ class FactoryLoaderOldTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) = Unit
+        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) = Unit
 
         override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
             TODO("Not yet implemented")

@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -56,7 +55,6 @@ class EditExistingTaskEditDelegate(
         return DomainFactory.instance
                 .updateScheduleTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
                         scheduleDatas,
@@ -74,7 +72,6 @@ class EditExistingTaskEditDelegate(
         return DomainFactory.instance
                 .updateChildTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
                         parentTaskKey,
@@ -95,7 +92,6 @@ class EditExistingTaskEditDelegate(
         return DomainFactory.instance
                 .updateRootTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         parameters.taskKey,
                         createParameters.name,
                         createParameters.note,

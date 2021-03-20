@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -154,7 +153,6 @@ class FactoryLoader(
                             .subscribe { (domainFactory, tokenWrapper) ->
                                 domainFactory.updateDeviceDbInfo(
                                         DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), localFactory.uuid),
-                                        SaveService.Source.GUI
                                 )
                             }
                             .addTo(domainDisposable)

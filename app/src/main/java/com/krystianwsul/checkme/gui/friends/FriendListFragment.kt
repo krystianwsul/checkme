@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -251,19 +250,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
             val friendIds = userPairs.map { it.key }.toSet()
 
             DomainFactory.instance
-                    .removeFriends(
-                            friendListViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
-                            friendIds,
-                    )
+                    .removeFriends(friendListViewModel.dataId.toFirst(), friendIds)
                     .observeOn(AndroidSchedulers.mainThread())
                     .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
                     .flatMapCompletable {
-                        DomainFactory.instance.addFriends(
-                                friendListViewModel.dataId.toFirst(),
-                                SaveService.Source.GUI,
-                                userPairs,
-                        )
+                        DomainFactory.instance.addFriends(friendListViewModel.dataId.toFirst(), userPairs)
                     }
                     .subscribe()
                     .addTo(createDisposable)

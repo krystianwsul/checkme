@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -246,7 +245,6 @@ class NotDoneGroupNode(
 
                     fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
                             groupAdapter.dataId.toFirst(),
-                            SaveService.Source.GUI,
                             instanceKey,
                             done,
                     )
@@ -576,7 +574,6 @@ class NotDoneGroupNode(
                     DomainFactory.instance
                             .setInstanceDone(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                    SaveService.Source.GUI,
                                     instanceKey,
                                     true
                             )
@@ -584,7 +581,6 @@ class NotDoneGroupNode(
                             .flatMapSingle {
                                 DomainFactory.instance.setInstanceDone(
                                         DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                        SaveService.Source.GUI,
                                         instanceKey,
                                         false,
                                 )

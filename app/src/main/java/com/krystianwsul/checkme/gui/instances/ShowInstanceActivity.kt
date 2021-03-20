@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -93,7 +92,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         val undoTaskDataSingle = DomainFactory.instance
                 .setTaskEndTimeStamps(
                         showInstanceViewModel.dataId.toFirst(),
-                        SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
                         instanceKey,
@@ -106,11 +104,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .doOnSuccess { showInstanceViewModel.start(instanceKey) }
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(
-                            showInstanceViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
-                            it,
-                    )
+                    DomainFactory.instance.clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)
@@ -161,7 +155,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                         DomainFactory.instance
                                                 .setInstancesNotNotified(
                                                         showInstanceViewModel.dataId.toFirst(),
-                                                        SaveService.Source.GUI,
                                                         listOf(instanceKey),
                                                 )
                                                 .subscribe()
@@ -174,7 +167,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                     DomainFactory.instance
                                             .setInstancesAddHourActivity(
                                                     showInstanceViewModel.dataId.toFirst(),
-                                                    SaveService.Source.GUI,
                                                     listOf(instanceKey),
                                             )
                                             .observeOn(AndroidSchedulers.mainThread())
@@ -184,7 +176,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                             .flatMapCompletable {
                                                 DomainFactory.instance.undoInstancesAddHour(
                                                         showInstanceViewModel.dataId.toFirst(),
-                                                        SaveService.Source.GUI,
                                                         it,
                                                 )
                                             }
@@ -316,13 +307,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
             DomainFactory.onReady()
-                    .flatMapCompletable {
-                        it.setInstanceNotified(
-                                showInstanceViewModel.dataId.toFirst(),
-                                SaveService.Source.GUI,
-                                instanceKey,
-                        )
-                    }
+                    .flatMapCompletable { it.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey) }
                     .subscribe()
                     .addTo(createDisposable)
         }
@@ -356,12 +341,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private fun setDone(done: Boolean) {
         DomainFactory.instance
-                .setInstanceDone(
-                        showInstanceViewModel.dataId.toFirst(),
-                        SaveService.Source.GUI,
-                        instanceKey,
-                        done,
-                )
+                .setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
                 .subscribe()
                 .addTo(createDisposable)
     }

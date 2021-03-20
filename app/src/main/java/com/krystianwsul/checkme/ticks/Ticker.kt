@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.rxjava3.core.Completable
 
 
@@ -28,10 +27,7 @@ object Ticker {
 
             Completable.complete()
         } else {
-            DomainFactory.setFirebaseTickListener(
-                    SaveService.Source.SERVICE,
-                    TickData.Lock(source, domainChanged),
-            )
+            DomainFactory.setFirebaseTickListener(TickData.Lock(source, domainChanged))
         }
     }
 }

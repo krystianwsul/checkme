@@ -19,7 +19,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapWith
@@ -81,7 +80,7 @@ class DomainFactory(
                 .firstOrError()!!
 
         @CheckResult
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) = completeOnDomain {
+        fun setFirebaseTickListener(newTickData: TickData) = completeOnDomain {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
@@ -96,7 +95,7 @@ class DomainFactory(
 
                 if (notifyListeners) domainFactory.domainListenerManager.notify(NotificationType.All)
 
-                domainFactory.updateNotificationsTick(source, silent, newTickData.source)
+                domainFactory.updateNotificationsTick(silent, newTickData.source)
 
                 if (tickData?.waiting == true) {
                     TickHolder.addTickData(newTickData)
@@ -186,7 +185,7 @@ class DomainFactory(
                 .values
                 .forEach { it.fixOffsets() }
 
-        save(NotificationType.All, SaveService.Source.SERVICE)
+        save(NotificationType.All)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -225,7 +224,6 @@ class DomainFactory(
 
     fun save(
             notificationType: NotificationType,
-            source: SaveService.Source,
             forceDomainChanged: Boolean = false,
             values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
@@ -240,7 +238,7 @@ class DomainFactory(
             return
         }
 
-        val localChanges = localFactory.save(source)
+        val localChanges = localFactory.save()
         projectsFactory.save(values)
         myUserFactory.save(values)
         friendsFactory.save(values)
@@ -352,7 +350,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        save(NotificationType.All, SaveService.Source.GUI, runType == RunType.REMOTE)
+        save(NotificationType.All, runType == RunType.REMOTE)
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
@@ -369,7 +367,6 @@ class DomainFactory(
 
     fun setTaskEndTimeStamps(
             notificationType: NotificationType,
-            source: SaveService.Source,
             taskKeys: Set<TaskKey>,
             deleteInstances: Boolean,
             now: ExactTimeStamp.Local,
@@ -394,7 +391,7 @@ class DomainFactory(
 
         notifier.updateNotifications(now)
 
-        save(notificationType, source)
+        save(notificationType)
 
         notifyCloud(remoteProjects)
 
@@ -422,7 +419,6 @@ class DomainFactory(
     }
 
     private fun updateNotificationsTick(
-            source: SaveService.Source,
             silent: Boolean,
             sourceName: String,
             domainChanged: Boolean = false,
@@ -437,10 +433,10 @@ class DomainFactory(
 
         notifier.updateNotificationsTick(now, silent, sourceName, domainChanged)
 
-        save(NotificationType.All, source)
+        save(NotificationType.All)
     }
 
-    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source) {
+    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
         MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
 
         DomainThreadChecker.instance.requireDomainThread()
@@ -456,7 +452,7 @@ class DomainFactory(
 
         projectsFactory.updateDeviceInfo(deviceDbInfo)
 
-        save(NotificationType.All, source)
+        save(NotificationType.All)
     }
 
     // internal

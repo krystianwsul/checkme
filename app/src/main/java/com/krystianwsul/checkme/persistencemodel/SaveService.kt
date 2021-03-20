@@ -5,7 +5,11 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object SaveService {
 
-    private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
+    private fun save(
+            insertCommands: List<InsertCommand>,
+            updateCommands: List<UpdateCommand>,
+            deleteCommands: List<DeleteCommand>,
+    ) {
         val sqLiteDatabase = MySQLiteHelper.database
 
         sqLiteDatabase.beginTransaction()
@@ -33,11 +37,11 @@ object SaveService {
             var instance: Factory = FactoryImpl()
         }
 
-        abstract fun startService(persistenceManager: PersistenceManager, source: Source): Boolean
+        abstract fun startService(persistenceManager: PersistenceManager): Boolean
 
         private class FactoryImpl : Factory() {
 
-            override fun startService(persistenceManager: PersistenceManager, source: Source): Boolean {
+            override fun startService(persistenceManager: PersistenceManager): Boolean {
                 val collections = persistenceManager.instanceShownRecords
 
                 val insertCommands = collections.asSequence()
@@ -57,12 +61,9 @@ object SaveService {
                 val hasChanges = insertCommands.any() || updateCommands.any() || deleteCommands.any()
 
                 if (hasChanges) {
-                    when (source) {
-                        Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
-                                .subscribeOn(Schedulers.io())
-                                .subscribe()
-                        Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands)
-                    }
+                    Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
+                            .subscribeOn(Schedulers.io())
+                            .subscribe()
                 }
 
                 return hasChanges
@@ -76,10 +77,5 @@ object SaveService {
                 return deleted.map { it.deleteCommand }
             }
         }
-    }
-
-    enum class Source {
-
-        GUI, SERVICE
     }
 }

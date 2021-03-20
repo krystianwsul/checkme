@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -34,7 +33,6 @@ class CopyExistingTaskEditDelegate(
         return DomainFactory.instance
                 .createScheduleRootTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         createParameters.name,
                         scheduleDatas,
                         createParameters.note,
@@ -56,7 +54,6 @@ class CopyExistingTaskEditDelegate(
         return DomainFactory.instance
                 .createChildTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         parentTaskKey,
                         createParameters.name,
                         createParameters.note,
@@ -77,14 +74,13 @@ class CopyExistingTaskEditDelegate(
         return DomainFactory.instance
                 .createRootTask(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         createParameters.name,
                         createParameters.note,
                         sharedProjectKey,
                         imageUrl.value!!
                                 .writeImagePath
                                 ?.value,
-                        parameters.taskKey
+                        parameters.taskKey,
                 )
                 .applyCreatedTaskKey()
     }

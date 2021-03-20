@@ -28,7 +28,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -78,7 +77,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
                     fun setAreCurrent(current: Boolean) = DomainFactory.instance.setCustomTimesCurrent(
                             showCustomTimesViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
                             selectedCustomTimeKeys,
                             current,
                     )

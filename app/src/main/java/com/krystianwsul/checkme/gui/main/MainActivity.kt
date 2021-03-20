@@ -44,7 +44,6 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
@@ -161,19 +160,13 @@ class MainActivity :
 
         @Suppress("UNCHECKED_CAST")
         DomainFactory.instance
-                .setTaskEndTimeStamps(
-                        dataId.toFirst(),
-                        SaveService.Source.GUI,
-                        taskKeys,
-                        removeInstances,
-                )
+                .setTaskEndTimeStamps(dataId.toFirst(), taskKeys, removeInstances)
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     // todo get dataId from current screen
                     DomainFactory.instance.clearTaskEndTimeStamps(
                             DomainListenerManager.NotificationType.First(dataId),
-                            SaveService.Source.GUI,
                             it,
                     )
                 }

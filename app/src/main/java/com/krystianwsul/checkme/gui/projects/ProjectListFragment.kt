@@ -31,7 +31,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -139,18 +138,13 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         DomainFactory.instance
                 .setProjectEndTimeStamps(
                         projectListViewModel.dataId.toFirst(),
-                        SaveService.Source.GUI,
                         projectIds as Set<ProjectKey.Shared>,
                         removeInstances,
                 )
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearProjectEndTimeStamps(
-                            projectListViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
-                            it,
-                    )
+                    DomainFactory.instance.clearProjectEndTimeStamps(projectListViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

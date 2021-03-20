@@ -9,9 +9,8 @@ import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.setTaskImageUploaded
+import com.krystianwsul.checkme.domainmodel.extensions.setTaskImageUploadedService
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.ImageState
@@ -83,9 +82,7 @@ object Uploader {
         addOnSuccessListener {
             Queue.removeEntry(entry)
 
-            DomainFactory.onReady().subscribeBy {
-                it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
-            }
+            DomainFactory.onReady().subscribeBy { it.setTaskImageUploadedService(entry.taskKey, entry.uuid) }
         }
     }
 

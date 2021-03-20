@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -34,7 +33,6 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
 @CheckResult
 fun DomainFactory.removeFriends(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         keys: Set<UserKey>,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.removeFriends")
@@ -42,13 +40,12 @@ fun DomainFactory.removeFriends(
 
     keys.forEach { myUserFactory.user.removeFriend(it) }
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
 @CheckResult
 fun DomainFactory.addFriends(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         userMap: Map<UserKey, UserWrapper>,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.addFriends")
@@ -59,5 +56,5 @@ fun DomainFactory.addFriends(
         friendsFactory.addFriend(it.key, it.value)
     }
 
-    save(notificationType, source)
+    save(notificationType)
 }

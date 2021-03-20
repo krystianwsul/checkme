@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Project
@@ -45,7 +44,6 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
 @CheckResult
 fun DomainFactory.createProject(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         name: String,
         friends: Set<UserKey>,
 ) = completeOnDomain {
@@ -73,7 +71,7 @@ fun DomainFactory.createProject(
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(remoteProject)
 }
@@ -81,7 +79,6 @@ fun DomainFactory.createProject(
 @CheckResult
 fun DomainFactory.updateProject(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         projectId: ProjectKey.Shared,
         name: String,
         addedFriends: Set<UserKey>,
@@ -105,7 +102,7 @@ fun DomainFactory.updateProject(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(remoteProject, removedFriends)
 }

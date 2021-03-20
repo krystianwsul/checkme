@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.utils.CustomTimeId
@@ -21,7 +20,7 @@ class LocalFactory(
 
     override val uuid get() = persistenceManager.uuid
 
-    fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
+    fun save(): Boolean = persistenceManager.save()
 
     override fun getShown(
             projectId: ProjectKey<*>,

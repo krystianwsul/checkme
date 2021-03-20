@@ -27,7 +27,6 @@ import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewEvent
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewModel
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewState
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -148,11 +147,7 @@ class FindFriendActivity : NavBarActivity() {
 
                         if (contact.userWrapper != null) {
                             DomainFactory.instance
-                                    .tryAddFriend(
-                                            DomainListenerManager.NotificationType.All,
-                                            SaveService.Source.GUI,
-                                            contact.userWrapper,
-                                    )
+                                    .tryAddFriend(DomainListenerManager.NotificationType.All, contact.userWrapper)
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeBy {
                                         if (it) {

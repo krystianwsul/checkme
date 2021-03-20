@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -59,7 +58,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         DomainFactory.instance
                 .setTaskEndTimeStamps(
                         DomainListenerManager.NotificationType.All,
-                        SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
                 )

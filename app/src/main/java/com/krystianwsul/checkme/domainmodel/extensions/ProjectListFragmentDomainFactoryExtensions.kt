@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -38,7 +37,6 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
 @CheckResult
 fun DomainFactory.setProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         projectIds: Set<ProjectKey<*>>,
         removeInstances: Boolean,
 ): Single<ProjectUndoData> = scheduleOnDomain {
@@ -59,7 +57,7 @@ fun DomainFactory.setProjectEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(remoteProjects)
 
@@ -69,7 +67,6 @@ fun DomainFactory.setProjectEndTimeStamps(
 @CheckResult
 fun DomainFactory.clearProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         projectUndoData: ProjectUndoData,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
@@ -89,7 +86,7 @@ fun DomainFactory.clearProjectEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(remoteProjects)
 }

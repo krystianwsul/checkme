@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDo
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
@@ -87,7 +86,6 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
 @CheckResult
 fun DomainFactory.setInstancesDateTime(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
@@ -134,7 +132,7 @@ fun DomainFactory.setInstancesDateTime(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(projects)
 
@@ -165,7 +163,6 @@ private class SetInstanceParentUndoData(
 @CheckResult
 fun DomainFactory.setInstancesParent(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
 ): Single<UndoData> = scheduleOnDomain {
@@ -198,7 +195,7 @@ fun DomainFactory.setInstancesParent(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(projects)
 

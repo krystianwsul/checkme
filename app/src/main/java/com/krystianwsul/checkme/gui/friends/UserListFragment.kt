@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
@@ -250,14 +249,12 @@ class UserListFragment : AbstractFragment(), FabUser {
 
                         createProject(
                                 DomainListenerManager.NotificationType.All,
-                                SaveService.Source.GUI,
                                 name,
                                 saveState.addedIds,
                         )
                     } else {
                         updateProject(
                                 DomainListenerManager.NotificationType.All,
-                                SaveService.Source.GUI,
                                 projectId!!,
                                 name,
                                 saveState.addedIds,

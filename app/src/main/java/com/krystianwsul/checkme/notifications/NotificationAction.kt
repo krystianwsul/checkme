@@ -6,11 +6,10 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDone
+import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDoneService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
-import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotified
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotifiedService
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
@@ -31,7 +30,7 @@ sealed class NotificationAction : Parcelable {
             check(instanceKeys.isNotEmpty())
 
             return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys) }
+                    .doOnSuccess { it.setInstancesNotifiedService(instanceKeys) }
                     .ignoreElement()
         }
     }
@@ -52,7 +51,7 @@ sealed class NotificationAction : Parcelable {
             NotificationWrapper.instance.cleanGroup(notificationId)
 
             return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
+                    .doOnSuccess { it.setInstanceNotificationDoneService(instanceKey) }
                     .ignoreElement()
         }
     }
@@ -73,7 +72,7 @@ sealed class NotificationAction : Parcelable {
             NotificationWrapper.instance.cleanGroup(notificationId)
 
             return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
+                    .doOnSuccess { it.setInstanceAddHourService(instanceKey) }
                     .ignoreElement()
         }
     }
@@ -87,7 +86,7 @@ sealed class NotificationAction : Parcelable {
         override val requestCode get() = hashCode()
 
         override fun perform() = DomainFactory.onReady().flatMapCompletable {
-            it.setInstanceNotified(DomainListenerManager.NotificationType.All, SaveService.Source.SERVICE, instanceKey)
+            it.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
         }!!
     }
 }

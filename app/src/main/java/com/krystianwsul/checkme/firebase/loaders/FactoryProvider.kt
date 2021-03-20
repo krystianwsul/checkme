@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
@@ -60,7 +59,7 @@ interface FactoryProvider {
 
         fun clearUserInfo()
 
-        fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, source: SaveService.Source)
+        fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo)
     }
 
     interface Local : Instance.ShownFactory {

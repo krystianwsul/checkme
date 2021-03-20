@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.common.domain.TaskUndoData
 import io.reactivex.rxjava3.core.Completable
@@ -88,10 +87,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         started.accept(true)
     }
 
-    private fun tick(source: String) = DomainFactory.setFirebaseTickListener(
-            SaveService.Source.SERVICE,
-            TickData.Normal(true, source),
-    )
+    private fun tick(source: String) = DomainFactory.setFirebaseTickListener(TickData.Normal(true, source))
             .subscribe()
             .addTo(createDisposable)
 

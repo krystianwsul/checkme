@@ -36,7 +36,6 @@ import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.utils.*
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -169,7 +168,6 @@ class GroupListFragment @JvmOverloads constructor(
                     done: Boolean,
             ) = DomainFactory.instance.setInstancesDone(
                     DomainListenerManager.NotificationType.First(parameters.dataId),
-                    SaveService.Source.GUI,
                     instanceKeys,
                     done,
             )
@@ -183,7 +181,6 @@ class GroupListFragment @JvmOverloads constructor(
                     DomainFactory.instance
                             .setInstancesAddHourActivity(
                                     DomainListenerManager.NotificationType.First(parameters.dataId),
-                                    SaveService.Source.GUI,
                                     instanceKeys,
                             )
                             .observeOn(AndroidSchedulers.mainThread())
@@ -191,7 +188,6 @@ class GroupListFragment @JvmOverloads constructor(
                             .flatMapCompletable {
                                 DomainFactory.instance.undoInstancesAddHour(
                                         DomainListenerManager.NotificationType.First(parameters.dataId),
-                                        SaveService.Source.GUI,
                                         it,
                                 )
                             }
@@ -299,7 +295,6 @@ class GroupListFragment @JvmOverloads constructor(
                     DomainFactory.instance
                             .setInstancesNotNotified(
                                     DomainListenerManager.NotificationType.First(parameters.dataId),
-                                    SaveService.Source.GUI,
                                     instanceKeys,
                             )
                             .subscribe()
@@ -951,7 +946,6 @@ class GroupListFragment @JvmOverloads constructor(
                 .flatMapCompletable {
                     DomainFactory.instance.undo(
                             DomainListenerManager.NotificationType.First(parameters.dataId),
-                            SaveService.Source.GUI,
                             undoData,
                     )
                 }

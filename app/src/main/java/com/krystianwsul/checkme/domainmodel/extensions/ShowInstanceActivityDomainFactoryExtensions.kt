@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDo
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
@@ -68,7 +67,6 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 @CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey,
@@ -78,7 +76,7 @@ fun DomainFactory.setTaskEndTimeStamps(
 
     val now = ExactTimeStamp.Local.now
 
-    val taskUndoData = setTaskEndTimeStamps(notificationType, source, taskKeys, deleteInstances, now)
+    val taskUndoData = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
 
     Pair(taskUndoData, debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)))
 }

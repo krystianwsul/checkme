@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -15,7 +14,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
-fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
+fun DomainFactory.setInstanceAddHourService(instanceKey: InstanceKey) {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -40,12 +39,12 @@ fun DomainFactory.setInstanceAddHourService(source: SaveService.Source, instance
 
     notifier.updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(DomainListenerManager.NotificationType.All)
 
     notifyCloud(instance.task.project)
 }
 
-fun DomainFactory.setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
+fun DomainFactory.setInstanceNotificationDoneService(instanceKey: InstanceKey) {
     MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -62,12 +61,12 @@ fun DomainFactory.setInstanceNotificationDone(source: SaveService.Source, instan
 
     notifier.updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(DomainListenerManager.NotificationType.All)
 
     notifyCloud(instance.task.project)
 }
 
-fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
+fun DomainFactory.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) {
     MyCrashlytics.log("DomainFactory.setInstancesNotified")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
@@ -78,10 +77,10 @@ fun DomainFactory.setInstancesNotified(source: SaveService.Source, instanceKeys:
     for (instanceKey in instanceKeys)
         setInstanceNotified(instanceKey)
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(DomainListenerManager.NotificationType.All)
 }
 
-fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
+fun DomainFactory.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: String) {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -93,7 +92,7 @@ fun DomainFactory.setTaskImageUploaded(source: SaveService.Source, taskKey: Task
 
     task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
-    save(DomainListenerManager.NotificationType.All, source)
+    save(DomainListenerManager.NotificationType.All)
 
     notifyCloud(task.project)
 }

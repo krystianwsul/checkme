@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.newMaterialTimePicker
 import com.krystianwsul.checkme.gui.dialogs.setListener
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -137,7 +136,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
                         DomainFactory.instance
                                 .updateCustomTime(
                                         DomainListenerManager.NotificationType.All,
-                                        SaveService.Source.GUI,
                                         data!!.key,
                                         name,
                                         hourMinutes
@@ -149,7 +147,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
                         DomainFactory.instance
                                 .createCustomTime(
                                         DomainListenerManager.NotificationType.All,
-                                        SaveService.Source.GUI,
                                         name,
                                         hourMinutes,
                                 )

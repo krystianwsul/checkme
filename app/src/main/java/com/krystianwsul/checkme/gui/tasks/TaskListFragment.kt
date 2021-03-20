@@ -43,7 +43,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -107,7 +106,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         DomainFactory.instance
                 .setTaskEndTimeStamps(
                         DomainListenerManager.NotificationType.First(data!!.dataId),
-                        SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
                 )
@@ -116,7 +114,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .flatMapCompletable {
                     DomainFactory.instance.clearTaskEndTimeStamps(
                             DomainListenerManager.NotificationType.First(data!!.dataId),
-                            SaveService.Source.GUI,
                             it,
                     )
                 }

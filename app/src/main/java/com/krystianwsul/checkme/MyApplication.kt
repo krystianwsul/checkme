@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -160,11 +159,7 @@ class MyApplication : Application() {
                 .mapNotNull { it.value?.photoUrl }
                 .switchMapSingle { DomainFactory.onReady().mapWith(it) }
                 .subscribe { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(
-                            DomainListenerManager.NotificationType.All,
-                            SaveService.Source.GUI,
-                            url.toString(),
-                    )
+                    domainFactory.updatePhotoUrl(DomainListenerManager.NotificationType.All, url.toString())
                 }
 
         RxPaparazzo.register(this)

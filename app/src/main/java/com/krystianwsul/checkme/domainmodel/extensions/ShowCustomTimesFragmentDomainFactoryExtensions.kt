@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -47,7 +46,6 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 @CheckResult
 fun DomainFactory.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
         current: Boolean,
 ) = completeOnDomain {
@@ -65,5 +63,5 @@ fun DomainFactory.setCustomTimesCurrent(
         remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
     }
 
-    save(notificationType, source)
+    save(notificationType)
 }

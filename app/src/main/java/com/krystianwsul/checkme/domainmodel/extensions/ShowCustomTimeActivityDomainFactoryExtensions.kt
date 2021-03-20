@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
@@ -30,7 +29,6 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): S
 @CheckResult
 fun DomainFactory.updateCustomTime(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         customTimeId: CustomTimeKey.Private,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
@@ -51,13 +49,12 @@ fun DomainFactory.updateCustomTime(
             customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
 @CheckResult
 fun DomainFactory.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
 ): Single<CustomTimeKey.Private> = scheduleOnDomain {
@@ -89,7 +86,7 @@ fun DomainFactory.createCustomTime(
 
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
 
-    save(notificationType, source)
+    save(notificationType)
 
     remoteCustomTime.key
 }

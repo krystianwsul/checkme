@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.Single
@@ -13,7 +12,6 @@ import io.reactivex.rxjava3.core.Single
 @CheckResult
 fun DomainFactory.setInstancesDone(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
         done: Boolean,
 ): Single<ExactTimeStamp.Local> = scheduleOnDomain {
@@ -30,7 +28,7 @@ fun DomainFactory.setInstancesDone(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(remoteProjects)
 

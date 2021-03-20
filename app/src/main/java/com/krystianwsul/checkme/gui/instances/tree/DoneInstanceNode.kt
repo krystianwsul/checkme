@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
@@ -137,7 +136,6 @@ class DoneInstanceNode(
                 DomainFactory.instance
                         .setInstanceDone(
                                 DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                SaveService.Source.GUI,
                                 instanceData.instanceKey,
                                 false,
                         )
@@ -145,7 +143,6 @@ class DoneInstanceNode(
                         .flatMapSingle {
                             DomainFactory.instance.setInstanceDone(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                    SaveService.Source.GUI,
                                     instanceData.instanceKey,
                                     true,
                             )

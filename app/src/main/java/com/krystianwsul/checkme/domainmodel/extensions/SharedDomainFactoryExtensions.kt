@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDo
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -28,20 +27,18 @@ const val SEARCH_PAGE_SIZE = 20
 @CheckResult
 fun DomainFactory.setTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
 ): Single<TaskUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
-    setTaskEndTimeStamps(notificationType, source, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
+    setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
 }
 
 @CheckResult
 fun DomainFactory.clearTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         taskUndoData: TaskUndoData,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
@@ -53,7 +50,7 @@ fun DomainFactory.clearTaskEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     val remoteProjects = taskUndoData.taskKeys
             .map { getTaskForce(it).project }
@@ -79,7 +76,7 @@ fun DomainFactory.setOrdinal(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, SaveService.Source.GUI)
+    save(notificationType)
 
     notifyCloud(task.project)
 }
@@ -87,7 +84,6 @@ fun DomainFactory.setOrdinal(
 @CheckResult
 fun DomainFactory.setInstancesNotNotified(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKeys: List<InstanceKey>,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
@@ -108,13 +104,12 @@ fun DomainFactory.setInstancesNotNotified(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
 @CheckResult
 fun DomainFactory.setInstancesAddHourActivity(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKeys: Collection<InstanceKey>,
 ): Single<DomainFactory.HourUndoData> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
@@ -140,7 +135,7 @@ fun DomainFactory.setInstancesAddHourActivity(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
@@ -152,7 +147,6 @@ fun DomainFactory.setInstancesAddHourActivity(
 @CheckResult
 fun DomainFactory.undoInstancesAddHour(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         hourUndoData: DomainFactory.HourUndoData,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
@@ -166,7 +160,7 @@ fun DomainFactory.undoInstancesAddHour(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
@@ -176,7 +170,6 @@ fun DomainFactory.undoInstancesAddHour(
 @CheckResult
 fun DomainFactory.setInstanceDone(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKey: InstanceKey,
         done: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
@@ -190,7 +183,7 @@ fun DomainFactory.setInstanceDone(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(instance.task.project)
 
@@ -200,7 +193,6 @@ fun DomainFactory.setInstanceDone(
 @CheckResult
 fun DomainFactory.setInstanceNotified(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         instanceKey: InstanceKey,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
@@ -211,14 +203,10 @@ fun DomainFactory.setInstanceNotified(
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
     setInstanceNotified(instanceKey)
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
-fun DomainFactory.updatePhotoUrl(
-        notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
-        photoUrl: String,
-) {
+fun DomainFactory.updatePhotoUrl(notificationType: DomainListenerManager.NotificationType, photoUrl: String) {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -228,7 +216,7 @@ fun DomainFactory.updatePhotoUrl(
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
@@ -365,7 +353,6 @@ fun addChildToParent(
 @CheckResult
 fun DomainFactory.undo(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         undoData: UndoData,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.undo")
@@ -377,7 +364,7 @@ fun DomainFactory.undo(
 
     notifier.updateNotifications(now)
 
-    save(notificationType, source)
+    save(notificationType)
 
     notifyCloud(projects)
 }

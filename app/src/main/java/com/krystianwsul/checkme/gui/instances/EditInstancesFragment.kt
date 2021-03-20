@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -231,20 +230,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             DomainFactory.instance
                     .run {
                         state.parentInstanceData
-                                ?.let {
-                                    setInstancesParent(
-                                            dataId.toFirst(),
-                                            SaveService.Source.GUI,
-                                            data.instanceKeys,
-                                            it.instanceKey,
-                                    )
-                                }
+                                ?.let { setInstancesParent(dataId.toFirst(), data.instanceKeys, it.instanceKey) }
                                 ?: setInstancesDateTime(
                                         dataId.toFirst(),
-                                        SaveService.Source.GUI,
                                         data.instanceKeys,
                                         state.date,
-                                        state.timePairPersist.timePair
+                                        state.timePairPersist.timePair,
                                 )
                     }
                     .observeOn(AndroidSchedulers.mainThread())

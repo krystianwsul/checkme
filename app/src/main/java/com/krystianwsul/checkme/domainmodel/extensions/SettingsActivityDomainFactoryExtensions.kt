@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 
@@ -20,7 +19,6 @@ fun DomainFactory.getSettingsData(): SettingsViewModel.Data {
 @CheckResult
 fun DomainFactory.updateDefaultTab(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         defaultTab: Int,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultTab")
@@ -28,13 +26,12 @@ fun DomainFactory.updateDefaultTab(
 
     myUserFactory.user.defaultTab = defaultTab
 
-    save(notificationType, source)
+    save(notificationType)
 }
 
 @CheckResult
 fun DomainFactory.updateDefaultReminder(
         notificationType: DomainListenerManager.NotificationType,
-        source: SaveService.Source,
         defaultReminder: Boolean,
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.updateDefaultReminder")
@@ -42,5 +39,5 @@ fun DomainFactory.updateDefaultReminder(
 
     myUserFactory.user.defaultReminder = defaultReminder
 
-    save(notificationType, source)
+    save(notificationType)
 }

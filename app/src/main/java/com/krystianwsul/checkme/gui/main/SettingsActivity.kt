@@ -19,7 +19,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
@@ -84,11 +83,7 @@ class SettingsActivity : NavBarActivity() {
         return Maybe.fromCallable { googleSignInAccount.photoUrl }
                 .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
                 .doOnSuccess { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(
-                            settingsViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
-                            url.toString(),
-                    )
+                    domainFactory.updatePhotoUrl(settingsViewModel.dataId.toFirst(), url.toString())
                 }
                 .ignoreElement()
     }
@@ -146,11 +141,7 @@ class SettingsActivity : NavBarActivity() {
                     Preferences.tab = newTab
 
                     DomainFactory.instance
-                            .updateDefaultTab(
-                                    settingsActivity.settingsViewModel.dataId.toFirst(),
-                                    SaveService.Source.GUI,
-                                    newTab,
-                            )
+                            .updateDefaultTab(settingsActivity.settingsViewModel.dataId.toFirst(), newTab)
                             .subscribe()
                             .addTo(createDisposable)
 
@@ -170,7 +161,6 @@ class SettingsActivity : NavBarActivity() {
                                 DomainFactory.instance
                                         .updateDefaultReminder(
                                                 settingsActivity.settingsViewModel.dataId.toSkip(), // allowed
-                                                SaveService.Source.GUI,
                                                 newValue as Boolean,
                                         )
                                         .subscribe()

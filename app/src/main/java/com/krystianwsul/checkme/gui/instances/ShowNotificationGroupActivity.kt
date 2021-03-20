@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -60,18 +59,13 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         DomainFactory.instance
                 .setTaskEndTimeStamps(
                         showNotificationGroupViewModel.dataId.toFirst(),
-                        SaveService.Source.GUI,
                         taskKeys as Set<TaskKey>,
                         removeInstances,
                 )
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(
-                            showNotificationGroupViewModel.dataId.toFirst(),
-                            SaveService.Source.GUI,
-                            it,
-                    )
+                    DomainFactory.instance.clearTaskEndTimeStamps(showNotificationGroupViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

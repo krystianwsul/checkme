@@ -1,10 +1,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settingsRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/settingsRoot"
-    android:fitsSystemWindows="true"
-    android:background="@color/materialBackground">
+    android:background="@color/materialBackground"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,25 +14,10 @@
             android:id="@+id/settingsToolbarInclude"
             layout="@layout/toolbar" />
 
-        <RelativeLayout
+        <FrameLayout
+            android:id="@+id/settingsFrame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <FrameLayout
-                android:id="@+id/settingsFrame"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone" />
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/settingsProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_centerInParent="true"
-                android:indeterminate="true"
-                app:indicatorColor="@color/secondaryColor" />
-
-        </RelativeLayout>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

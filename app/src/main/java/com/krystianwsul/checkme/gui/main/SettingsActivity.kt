@@ -14,12 +14,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultReminder
-import com.krystianwsul.checkme.domainmodel.extensions.updateDefaultTab
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
-import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -27,7 +25,6 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 
 class SettingsActivity : NavBarActivity() {
 
@@ -58,14 +55,6 @@ class SettingsActivity : NavBarActivity() {
             if (findFragmentById(R.id.settingsFrame) == null)
                 beginTransaction().replace(R.id.settingsFrame, SettingsFragment()).commit()
         }
-
-        settingsViewModel.apply {
-            start()
-
-            createDisposable += data.subscribe {
-                binding.run { animateVisibility(settingsFrame, settingsProgress, immediate = it.immediate) }
-            }
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -83,7 +72,7 @@ class SettingsActivity : NavBarActivity() {
         return Maybe.fromCallable { googleSignInAccount.photoUrl }
                 .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
                 .doOnSuccess { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(settingsViewModel.dataId.toFirst(), url.toString())
+                    domainFactory.updatePhotoUrl(DomainListenerManager.NotificationType.All, url.toString())
                 }
                 .ignoreElement()
     }
@@ -140,37 +129,21 @@ class SettingsActivity : NavBarActivity() {
 
                     Preferences.tab = newTab
 
-                    DomainFactory.instance
-                            .updateDefaultTab(settingsActivity.settingsViewModel.dataId.toFirst(), newTab)
-                            .subscribe()
-                            .addTo(createDisposable)
-
                     true
                 }
             }
 
             val defaultReminderPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!
 
-            settingsActivity.settingsViewModel
-                    .data
-                    .subscribe {
-                        defaultReminderPreference.apply {
-                            isChecked = it.defaultReminder
+            defaultReminderPreference.apply {
+                isChecked = Preferences.addDefaultReminder
 
-                            setOnPreferenceChangeListener { _, newValue ->
-                                DomainFactory.instance
-                                        .updateDefaultReminder(
-                                                settingsActivity.settingsViewModel.dataId.toSkip(), // allowed
-                                                newValue as Boolean,
-                                        )
-                                        .subscribe()
-                                        .addTo(createDisposable)
+                setOnPreferenceChangeListener { _, newValue ->
+                    Preferences.addDefaultReminder = newValue as Boolean
 
-                                true
-                            }
-                        }
-                    }
-                    .addTo(createDisposable)
+                    true
+                }
+            }
 
             findPreference<ListPreference>(getString(R.string.notifications))!!.apply {
                 value = getString(when (Preferences.notificationLevel) {

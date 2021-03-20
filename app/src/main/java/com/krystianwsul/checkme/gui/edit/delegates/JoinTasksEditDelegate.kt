@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
@@ -38,7 +39,7 @@ class JoinTasksEditDelegate(
                             ?.let {
                                 (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
                             },
-                    firstScheduleEntry.takeIf { data.defaultReminder }
+                    firstScheduleEntry.takeIf { Preferences.addDefaultReminder },
             )
         }
 

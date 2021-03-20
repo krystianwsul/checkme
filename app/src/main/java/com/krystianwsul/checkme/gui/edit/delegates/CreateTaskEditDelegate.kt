@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
@@ -45,7 +46,7 @@ class CreateTaskEditDelegate(
                             listOfNotNull(
                                     firstScheduleEntry.takeIf {
                                         initialParentKey !is EditViewModel.ParentKey.Task
-                                                && data.defaultReminder
+                                                && Preferences.addDefaultReminder
                                                 && parameters.showFirstSchedule
                                     }
                             ),
@@ -62,7 +63,9 @@ class CreateTaskEditDelegate(
                     ParentScheduleState(
                             initialParentKey,
                             listOfNotNull(
-                                    firstScheduleEntry.takeIf { initialParentKey == null && data.defaultReminder }
+                                    firstScheduleEntry.takeIf {
+                                        initialParentKey == null && Preferences.addDefaultReminder
+                                    }
                             ),
                             setOf()
                     )
@@ -84,7 +87,7 @@ class CreateTaskEditDelegate(
                 initialStateGetter = {
                     ParentScheduleState(
                             null,
-                            listOfNotNull(firstScheduleEntry.takeIf { data.defaultReminder }),
+                            listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
                             setOf()
                     )
                 }

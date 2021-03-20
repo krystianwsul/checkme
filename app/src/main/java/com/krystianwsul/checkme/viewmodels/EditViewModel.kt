@@ -264,7 +264,6 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
             val taskData: TaskData?,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-            val defaultReminder: Boolean,
             val showAllInstancesDialog: Boolean?,
     ) : DomainData()
 

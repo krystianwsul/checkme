@@ -131,8 +131,7 @@ fun DomainFactory.getCreateTaskData(
             taskData,
             parentTreeDatas,
             customTimeDatas,
-            myUserFactory.user.defaultReminder,
-            showAllInstancesDialog
+            showAllInstancesDialog,
     )
 }
 

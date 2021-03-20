@@ -133,7 +133,14 @@ class TreeViewAdapter<T : TreeHolder>(
                 val oldIsPadding = oldShowPadding && oldItemPosition == oldStates.size
                 val newIsPadding = newShowPadding && newItemPosition == newStates.size
 
-                if (oldIsPadding && newIsPadding) return true
+                /**
+                 * only treat them as equal if progress is shown.  Otherwise don't, to prevent weird scroll issue.
+                 *
+                 * Issue: padding is shown in basically any list.  So in a situation where all items change, and the
+                 * dataset is taller than the screen, you'll get a scroll-to-top animation (since the padding was a
+                 * fixed point between the two datasets.)
+                 */
+                if (oldIsPadding && newIsPadding) return (oldShowProgress || newShowProgress)
                 if (oldIsPadding != newIsPadding) return false
 
                 return null

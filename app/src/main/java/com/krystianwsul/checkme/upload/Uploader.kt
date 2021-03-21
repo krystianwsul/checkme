@@ -65,13 +65,17 @@ object Uploader {
                                 if (task.getImage(domainFactory.deviceDbInfo) != ImageState.Local(entry.uuid))
                                     return@forEach
 
-                                storage.child(entry.uuid)
-                                        .putFile(
-                                                entry.fileUri.toUri(),
-                                                StorageMetadata.Builder().build(),
-                                                entry.sessionUri?.toUri(),
-                                        )
-                                        .addListeners(entry)
+                                try {
+                                    storage.child(entry.uuid)
+                                            .putFile(
+                                                    entry.fileUri.toUri(),
+                                                    StorageMetadata.Builder().build(),
+                                                    entry.sessionUri?.toUri(),
+                                            )
+                                            .addListeners(entry)
+                                } catch (throwable: Throwable) {
+                                    MyCrashlytics.logException(UploadException("failed to read file", throwable))
+                                }
                             }
                 }
     }

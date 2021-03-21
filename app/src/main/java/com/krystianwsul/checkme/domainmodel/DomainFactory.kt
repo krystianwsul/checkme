@@ -75,6 +75,7 @@ class DomainFactory(
         fun onReady() = instanceRelay.subscribeOnDomain()
                 .filterNotNull()
                 .switchMap { domainFactory -> domainFactory.isSaved.map { domainFactory to it } }
+                .observeOnDomain()
                 .filter { (_, isSaved) -> !isSaved }
                 .map { (domainFactory, _) -> domainFactory }
                 .firstOrError()!!

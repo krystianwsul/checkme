@@ -10,6 +10,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
@@ -148,7 +149,7 @@ object ImageManager {
                                     }
                                 }
                                         .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .observeOnDomain()
                                         .subscribeBy {
                                             check(imageStates.getValue(uuid) is State.Downloading)
 

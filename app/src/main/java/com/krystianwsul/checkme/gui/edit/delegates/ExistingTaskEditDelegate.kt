@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
@@ -12,7 +11,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?,
+        private val editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
 ) : EditDelegate(editImageState, compositeDisposable) {
 
@@ -29,23 +28,19 @@ abstract class ExistingTaskEditDelegate(
                         taskData.assignedTo,
                         taskData.scheduleDataWrappers
                                 ?.map { ScheduleEntry(it) }
-                                ?.toList()
+                                ?.toList(),
                 )
             },
-            parentLookup
+            parentLookup,
     )
 
-    final override val imageUrl: BehaviorRelay<EditImageState>
-
-    init {
-        val final = when {
+    override fun getInitialEditImageState(): EditImageState {
+        return when {
             editImageState?.dontOverwrite == true -> editImageState
             taskData.imageState != null -> EditImageState.Existing(taskData.imageState!!)
             editImageState != null -> editImageState
             else -> EditImageState.None
         }
-
-        imageUrl = BehaviorRelay.createDefault(final)
     }
 
     override fun checkImageChanged(): Boolean {

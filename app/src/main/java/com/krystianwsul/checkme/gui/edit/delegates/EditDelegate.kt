@@ -22,7 +22,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDisposable: CompositeDisposable) {
+abstract class EditDelegate(private val savedEditImageState: EditImageState?, compositeDisposable: CompositeDisposable) {
 
     companion object {
 
@@ -36,13 +36,17 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
         ): EditDelegate {
             val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
 
-            return when (parameters) {
+            val editDelegate = when (parameters) {
                 is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
                 is EditParameters.Edit -> (::EditExistingTaskEditDelegate)(parameters)
                 is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
                 is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
                     (::CreateTaskEditDelegate)(parameters)
             }(data, savedInstanceState, savedEditImageState, compositeDisposable)
+
+            editDelegate.imageUrl.accept(editDelegate.getInitialEditImageState())
+
+            return editDelegate
         }
 
         fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
@@ -91,7 +95,9 @@ abstract class EditDelegate(savedEditImageState: EditImageState?, compositeDispo
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open val imageUrl = BehaviorRelay.createDefault(savedEditImageState ?: EditImageState.None)!!
+    val imageUrl = BehaviorRelay.create<EditImageState>()!!
+
+    protected open fun getInitialEditImageState(): EditImageState = savedEditImageState ?: EditImageState.None
 
     protected val parentLookup by lazy { ParentLookup() }
 

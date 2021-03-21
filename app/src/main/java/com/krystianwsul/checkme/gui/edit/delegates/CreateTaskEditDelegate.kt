@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -21,7 +20,7 @@ class CreateTaskEditDelegate(
         private val parameters: EditParameters,
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?,
+        private val editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
 ) : EditDelegate(editImageState, compositeDisposable) {
 
@@ -98,14 +97,12 @@ class CreateTaskEditDelegate(
         parentScheduleManager = ParentMultiScheduleManager(
                 savedInstanceState,
                 initialStateGetter,
-                parentLookup
+                parentLookup,
         )
     }
 
-    override val imageUrl: BehaviorRelay<EditImageState>
-
-    init {
-        val final = when {
+    override fun getInitialEditImageState(): EditImageState {
+        return when {
             editImageState?.dontOverwrite == true -> editImageState
             (parameters as? EditParameters.Share)?.uri != null -> parameters.uri!!
                     .toString()
@@ -113,8 +110,6 @@ class CreateTaskEditDelegate(
             editImageState != null -> editImageState
             else -> EditImageState.None
         }
-
-        imageUrl = BehaviorRelay.createDefault(final)
     }
 
     override fun createTaskWithSchedule(

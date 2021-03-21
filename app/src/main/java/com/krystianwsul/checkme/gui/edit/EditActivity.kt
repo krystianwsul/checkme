@@ -10,6 +10,7 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -36,7 +37,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.EditViewModel
-import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
@@ -168,7 +168,7 @@ class EditActivity : NavBarActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private lateinit var editViewModel: EditViewModel
+    val editViewModel by viewModels<EditViewModel>()
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogParameters>()
 
@@ -258,7 +258,7 @@ class EditActivity : NavBarActivity() {
         if (!noteHasFocusRelay.value!!)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        editViewModel = getViewModel<EditViewModel>().apply {
+        editViewModel.apply {
             parameters.startViewModel(this)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
@@ -342,8 +342,8 @@ class EditActivity : NavBarActivity() {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
                 it.targetUI()
-                        .delegate
-                        .imageUrl
+                        .editViewModel
+                        .editImageStateRelay
                         .accept(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
@@ -372,8 +372,10 @@ class EditActivity : NavBarActivity() {
                     parameters,
                     data,
                     savedInstanceState,
-                    createDisposable
+                    createDisposable,
             )
+
+            editViewModel.initializeEditImageState(delegate)
         }
         hasDelegate = true
 
@@ -487,11 +489,12 @@ class EditActivity : NavBarActivity() {
         if (!hasDelegate) return false
 
         return delegate.checkDataChanged(
+                editViewModel.editImageState,
                 binding.editToolbarEditTextInclude
                         .toolbarEditText
                         .text
                         .toString(),
-                note
+                note,
         )
     }
 
@@ -517,7 +520,7 @@ class EditActivity : NavBarActivity() {
 
         editViewModel.stop()
 
-        val createParameters = EditDelegate.CreateParameters(name, note, allReminders)
+        val createParameters = EditDelegate.CreateParameters(name, note, allReminders, editViewModel.editImageState)
 
         delegate.createTask(createParameters)
                 .subscribeBy {
@@ -630,7 +633,7 @@ class EditActivity : NavBarActivity() {
                     .takeIf { it >= 0 }
                     ?.let { items[it] }
 
-            delegate.imageUrl
+            editViewModel.editImageStateRelay
                     .subscribe { getItem()?.onNewImageState(it, holder) }
                     .addTo(holder.compositeDisposable)
 
@@ -647,10 +650,14 @@ class EditActivity : NavBarActivity() {
             holder.compositeDisposable += timeRelay.subscribe {
                 getItem()?.onTimeChanged(this@EditActivity, holder)
             }
+
+            createDisposable += holder.compositeDisposable
         }
 
         override fun onViewDetachedFromWindow(holder: Holder) {
             holder.compositeDisposable.clear()
+
+            createDisposable.remove(holder.compositeDisposable)
 
             super.onViewDetachedFromWindow(holder)
         }
@@ -886,9 +893,8 @@ class EditActivity : NavBarActivity() {
 
                 (holder as ImageHolder).rowImageBinding.apply {
                     fun listener() = CameraGalleryFragment.newInstance(
-                            activity.delegate
-                                    .imageUrl
-                                    .value!!
+                            activity.editViewModel
+                                    .editImageState
                                     .loader != null
                     ).show(activity.supportFragmentManager, TAG_CAMERA_GALLERY)
 

@@ -1,12 +1,17 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.content.Context
+import android.os.Bundle
 import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.common.firebase.models.ImageState
@@ -18,7 +23,12 @@ import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.*
 
-class EditViewModel : DomainViewModel<EditViewModel.Data>() {
+class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainViewModel<EditViewModel.Data>() {
+
+    companion object {
+
+        private const val KEY_EDIT_IMAGE_STATE = "editImageState"
+    }
 
     private lateinit var startParameters: StartParameters
     private var parentTaskKeyHint: TaskKey? = null
@@ -31,9 +41,20 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
         )
     }
 
+    val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
+    val editImageState get() = editImageStateRelay.value!!
+
+    init {
+        savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {
+            Bundle().apply {
+                editImageStateRelay.value?.let { putSerializable(KEY_EDIT_IMAGE_STATE, it) }
+            }
+        }
+    }
+
     fun start(
             startParameters: StartParameters = StartParameters.Create,
-            parentTaskKeyHint: TaskKey? = null
+            parentTaskKeyHint: TaskKey? = null,
     ) {
         this.startParameters = startParameters
         this.parentTaskKeyHint = parentTaskKeyHint
@@ -41,7 +62,14 @@ class EditViewModel : DomainViewModel<EditViewModel.Data>() {
         internalStart()
     }
 
-    fun start(taskKey: TaskKey) = start(StartParameters.Task(taskKey))
+    fun initializeEditImageState(editDelegate: EditDelegate) {
+        if (editImageStateRelay.value == null) {
+            val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
+                    ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
+
+            editImageStateRelay.accept(editDelegate.getInitialEditImageState(savedEditImageState))
+        }
+    }
 
     sealed class ScheduleDataWrapper : Serializable {
 

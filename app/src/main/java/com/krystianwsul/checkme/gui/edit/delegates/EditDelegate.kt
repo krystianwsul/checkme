@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.StringRes
 import arrow.syntax.function.invoke
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
@@ -22,11 +21,9 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-abstract class EditDelegate(private val savedEditImageState: EditImageState?, compositeDisposable: CompositeDisposable) {
+abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
 
     companion object {
-
-        private const val IMAGE_URL_KEY = "imageUrl"
 
         fun fromParameters(
                 parameters: EditParameters,
@@ -34,19 +31,13 @@ abstract class EditDelegate(private val savedEditImageState: EditImageState?, co
                 savedInstanceState: Bundle?,
                 compositeDisposable: CompositeDisposable,
         ): EditDelegate {
-            val savedEditImageState = savedInstanceState?.getSerializable(IMAGE_URL_KEY) as? EditImageState
-
-            val editDelegate = when (parameters) {
+            return when (parameters) {
                 is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
                 is EditParameters.Edit -> (::EditExistingTaskEditDelegate)(parameters)
                 is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
                 is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
                     (::CreateTaskEditDelegate)(parameters)
-            }(data, savedInstanceState, savedEditImageState, compositeDisposable)
-
-            editDelegate.imageUrl.accept(editDelegate.getInitialEditImageState())
-
-            return editDelegate
+            }(data, savedInstanceState, compositeDisposable)
         }
 
         fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
@@ -95,9 +86,8 @@ abstract class EditDelegate(private val savedEditImageState: EditImageState?, co
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    val imageUrl = BehaviorRelay.create<EditImageState>()!!
-
-    protected open fun getInitialEditImageState(): EditImageState = savedEditImageState ?: EditImageState.None
+    open fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState =
+            savedEditImageState ?: EditImageState.None
 
     protected val parentLookup by lazy { ParentLookup() }
 
@@ -121,15 +111,15 @@ abstract class EditDelegate(private val savedEditImageState: EditImageState?, co
                 .apply { compositeDisposable += connect() }
     }
 
-    fun checkDataChanged(name: String, note: String?): Boolean {
+    fun checkDataChanged(editImageState: EditImageState, name: String, note: String?): Boolean {
         if (parentScheduleManager.changed) return true
 
-        if (checkImageChanged()) return true
+        if (checkImageChanged(editImageState)) return true
 
         return checkNameNoteChanged(name, note)
     }
 
-    protected open fun checkImageChanged() = imageUrl.value != EditImageState.None
+    protected open fun checkImageChanged(editImageState: EditImageState) = editImageState != EditImageState.None
 
     protected open fun checkNameNoteChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 
@@ -270,12 +260,14 @@ abstract class EditDelegate(private val savedEditImageState: EditImageState?, co
             sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult>
 
-    fun saveState(outState: Bundle) {
-        parentScheduleManager.saveState(outState)
-        outState.putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
-    }
+    fun saveState(outState: Bundle) = parentScheduleManager.saveState(outState)
 
-    class CreateParameters(val name: String, val note: String?, val allReminders: Boolean)
+    class CreateParameters(
+            val name: String,
+            val note: String?,
+            val allReminders: Boolean,
+            val editImageState: EditImageState,
+    )
 
     enum class ScheduleError(@StringRes val resource: Int) {
 

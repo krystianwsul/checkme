@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -19,9 +22,8 @@ class JoinTasksEditDelegate(
         private val parameters: EditParameters.Join,
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
-) : EditDelegate(editImageState, compositeDisposable) {
+) : EditDelegate(compositeDisposable) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 
@@ -82,7 +84,7 @@ class JoinTasksEditDelegate(
                         parameters.joinables,
                         createParameters.note,
                         sharedProjectParameters,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                         createParameters.allReminders,
@@ -104,7 +106,7 @@ class JoinTasksEditDelegate(
                         createParameters.name,
                         taskKeys,
                         createParameters.note,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                         instanceKeys,
@@ -126,7 +128,7 @@ class JoinTasksEditDelegate(
                         taskKeys,
                         createParameters.note,
                         sharedProjectKey,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                         instanceKeys,

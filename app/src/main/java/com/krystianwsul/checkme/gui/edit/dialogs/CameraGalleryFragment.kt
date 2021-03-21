@@ -73,8 +73,8 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                         )
 
                     }
-                    R.id.camera_gallery_remove -> editActivity.delegate
-                            .imageUrl
+                    R.id.camera_gallery_remove -> editActivity.editViewModel
+                            .editImageStateRelay
                             .accept(EditImageState.Removed)
                     else -> throw IllegalArgumentException()
                 }

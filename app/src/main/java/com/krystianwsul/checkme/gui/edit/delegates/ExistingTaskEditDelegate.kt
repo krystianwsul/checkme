@@ -11,9 +11,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        private val editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
-) : EditDelegate(editImageState, compositeDisposable) {
+) : EditDelegate(compositeDisposable) {
 
     protected val taskData get() = data.taskData!!
 
@@ -34,21 +33,21 @@ abstract class ExistingTaskEditDelegate(
             parentLookup,
     )
 
-    override fun getInitialEditImageState(): EditImageState {
+    override fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState {
         return when {
-            editImageState?.dontOverwrite == true -> editImageState
+            savedEditImageState?.dontOverwrite == true -> savedEditImageState
             taskData.imageState != null -> EditImageState.Existing(taskData.imageState!!)
-            editImageState != null -> editImageState
+            savedEditImageState != null -> savedEditImageState
             else -> EditImageState.None
         }
     }
 
-    override fun checkImageChanged(): Boolean {
+    override fun checkImageChanged(editImageState: EditImageState): Boolean {
         val defaultEditImageState = taskData.imageState
                 ?.let { EditImageState.Existing(it) }
                 ?: EditImageState.None
 
-        return imageUrl.value != defaultEditImageState
+        return editImageState != defaultEditImageState
     }
 
     override fun checkNameNoteChanged(name: String, note: String?) = checkNameNoteChanged(taskData, name, note)

@@ -20,9 +20,8 @@ class CreateTaskEditDelegate(
         private val parameters: EditParameters,
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        private val editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
-) : EditDelegate(editImageState, compositeDisposable) {
+) : EditDelegate(compositeDisposable) {
 
     override val initialName: String?
     override val scheduleHint: EditActivity.Hint.Schedule?
@@ -101,13 +100,13 @@ class CreateTaskEditDelegate(
         )
     }
 
-    override fun getInitialEditImageState(): EditImageState {
+    override fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState {
         return when {
-            editImageState?.dontOverwrite == true -> editImageState
+            savedEditImageState?.dontOverwrite == true -> savedEditImageState
             (parameters as? EditParameters.Share)?.uri != null -> parameters.uri!!
                     .toString()
                     .let { EditImageState.Selected(it, it) }
-            editImageState != null -> editImageState
+            savedEditImageState != null -> savedEditImageState
             else -> EditImageState.None
         }
     }
@@ -126,7 +125,7 @@ class CreateTaskEditDelegate(
                         scheduleDatas,
                         createParameters.note,
                         sharedProjectParameters,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                 )
@@ -147,7 +146,7 @@ class CreateTaskEditDelegate(
                         parentTaskKey,
                         createParameters.name,
                         createParameters.note,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                 )
@@ -166,7 +165,7 @@ class CreateTaskEditDelegate(
                         createParameters.name,
                         createParameters.note,
                         sharedProjectKey,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                 )

@@ -113,7 +113,8 @@ sealed class EditParameters : Parcelable {
     @Parcelize
     class Copy(val taskKey: TaskKey) : EditParameters() {
 
-        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(taskKey)
+        override fun startViewModel(viewModel: EditViewModel) =
+                viewModel.start(EditViewModel.StartParameters.Task(taskKey))
     }
 
     @Parcelize
@@ -121,7 +122,8 @@ sealed class EditParameters : Parcelable {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
-        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(taskKey)
+        override fun startViewModel(viewModel: EditViewModel) =
+                viewModel.start(EditViewModel.StartParameters.Task(taskKey))
     }
 
     @Parcelize

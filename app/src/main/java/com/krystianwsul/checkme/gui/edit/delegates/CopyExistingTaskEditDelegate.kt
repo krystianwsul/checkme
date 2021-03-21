@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
-import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -19,9 +18,8 @@ class CopyExistingTaskEditDelegate(
         private val parameters: EditParameters.Copy,
         data: EditViewModel.Data,
         savedInstanceState: Bundle?,
-        editImageState: EditImageState?,
         compositeDisposable: CompositeDisposable,
-) : ExistingTaskEditDelegate(data, savedInstanceState, editImageState, compositeDisposable) {
+) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable) {
 
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
@@ -37,10 +35,10 @@ class CopyExistingTaskEditDelegate(
                         scheduleDatas,
                         createParameters.note,
                         sharedProjectParameters,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
-                        parameters.taskKey
+                        parameters.taskKey,
                 )
                 .applyCreatedTaskKey()
     }
@@ -57,10 +55,10 @@ class CopyExistingTaskEditDelegate(
                         parentTaskKey,
                         createParameters.name,
                         createParameters.note,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
-                        parameters.taskKey
+                        parameters.taskKey,
                 )
                 .applyCreatedTaskKey()
     }
@@ -77,7 +75,7 @@ class CopyExistingTaskEditDelegate(
                         createParameters.name,
                         createParameters.note,
                         sharedProjectKey,
-                        imageUrl.value!!
+                        createParameters.editImageState
                                 .writeImagePath
                                 ?.value,
                         parameters.taskKey,

@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.UserKey
 class ParentMultiScheduleManager(
         savedInstanceState: Bundle?,
         initialStateGetter: () -> ParentScheduleState,
-        private val parentLookup: EditDelegate.ParentLookup
+        private val parentLookup: EditDelegate.ParentLookup,
 ) : ParentScheduleManager {
 
     companion object {
@@ -20,9 +20,7 @@ class ParentMultiScheduleManager(
         private const val KEY_STATE = "state"
     }
 
-    private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE)
-            ?: initialStateGetter()
-
+    private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE) ?: initialStateGetter()
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
@@ -75,10 +73,8 @@ class ParentMultiScheduleManager(
 
     private fun toState() = ParentScheduleState(parent?.parentKey, schedules, assignedTo)
 
-    override fun saveState(outState: Bundle) {
-        outState.apply {
-            putParcelable(KEY_STATE, toState())
-            putParcelable(KEY_INITIAL_STATE, initialState)
-        }
+    override fun saveState() = Bundle().apply {
+        putParcelable(KEY_STATE, toState())
+        putParcelable(KEY_INITIAL_STATE, initialState)
     }
 }

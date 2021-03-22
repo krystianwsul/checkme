@@ -260,7 +260,7 @@ abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
             sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult>
 
-    fun saveState(outState: Bundle) = parentScheduleManager.saveState(outState)
+    fun saveState() = parentScheduleManager.saveState()
 
     class CreateParameters(
             val name: String,

@@ -19,6 +19,8 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.Month
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.*
@@ -28,8 +30,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     companion object {
 
         private const val KEY_EDIT_IMAGE_STATE = "editImageState"
+        private const val KEY_DELEGATE_STATE = "delegateState"
     }
 
+    private lateinit var editParameters: EditParameters
     private lateinit var startParameters: StartParameters
     private var parentTaskKeyHint: TaskKey? = null
 
@@ -44,12 +48,46 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
     val editImageState get() = editImageStateRelay.value!!
 
+    lateinit var delegate: EditDelegate
+        private set
+
+    val hasDelegate get() = this::delegate.isInitialized
+
     init {
         savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {
             Bundle().apply {
                 editImageStateRelay.value?.let { putSerializable(KEY_EDIT_IMAGE_STATE, it) }
             }
         }
+
+        savedStateHandle.setSavedStateProvider(KEY_DELEGATE_STATE) {
+            if (hasDelegate) delegate.saveState() else Bundle()
+        }
+
+        data.firstOrError()
+                .subscribeBy {
+                    check(!this::delegate.isInitialized)
+
+                    delegate = EditDelegate.fromParameters(
+                            editParameters,
+                            it,
+                            savedStateHandle.get(KEY_DELEGATE_STATE),
+                            clearedDisposable,
+                    )
+
+                    initializeEditImageState(delegate) // todo image merge
+                }
+                .addTo(clearedDisposable)
+
+        data.skip(1)
+                .subscribe { delegate.newData(it) }
+                .addTo(clearedDisposable)
+    }
+
+    fun start(editParameters: EditParameters) {
+        this.editParameters = editParameters
+
+        editParameters.startViewModel(this) // todo image invert
     }
 
     fun start(

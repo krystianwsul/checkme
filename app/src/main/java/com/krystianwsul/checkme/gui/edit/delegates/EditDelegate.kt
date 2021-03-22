@@ -86,9 +86,6 @@ abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
 
     abstract val parentScheduleManager: ParentScheduleManager
 
-    open fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState =
-            savedEditImageState ?: EditImageState.None
-
     protected val parentLookup by lazy { ParentLookup() }
 
     val adapterItemObservable by lazy {

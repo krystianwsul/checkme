@@ -3,11 +3,20 @@ package com.krystianwsul.checkme.gui.edit
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import android.util.Log
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
+import org.apache.commons.io.IOUtils
+import java.io.File
+import java.io.FileOutputStream
 
 sealed class EditParameters : Parcelable {
 
@@ -67,6 +76,15 @@ sealed class EditParameters : Parcelable {
     open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
     open val parentTaskKeyHint: TaskKey? = null
 
+    protected fun getInitialEditImageState(savedEditImageState: EditImageState?) =
+            savedEditImageState ?: EditImageState.None
+
+    open fun getInitialEditImageStateSingle(
+            savedEditImageState: EditImageState?,
+            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+            editActivity: EditActivity,
+    ) = Single.just(getInitialEditImageState(savedEditImageState))!!
+
     @Parcelize
     class Create(
             val hint: EditActivity.Hint? = null,
@@ -120,6 +138,23 @@ sealed class EditParameters : Parcelable {
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
         override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
+
+        override fun getInitialEditImageStateSingle(
+                savedEditImageState: EditImageState?,
+                taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+                editActivity: EditActivity,
+        ): Single<EditImageState> {
+            return if (savedEditImageState?.dontOverwrite == true) {
+                Single.just(savedEditImageState)
+            } else {
+                taskDataSingle.map {
+                    it.value!!
+                            .imageState
+                            ?.let(EditImageState::Existing)
+                            ?: getInitialEditImageState(savedEditImageState)
+                }
+            }
+        }
     }
 
     @Parcelize
@@ -137,6 +172,50 @@ sealed class EditParameters : Parcelable {
             fun fromText(nameHint: String, parentTaskKeyHint: TaskKey?) = Share(nameHint, parentTaskKeyHint)
 
             fun fromUri(uri: Uri) = Share(uri = uri)
+        }
+
+        override fun getInitialEditImageStateSingle(
+                savedEditImageState: EditImageState?,
+                taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+                editActivity: EditActivity,
+        ): Single<EditImageState> {
+            return when {
+                savedEditImageState?.dontOverwrite == true -> Single.just(savedEditImageState)
+                uri != null -> {
+                    if (uri.scheme == "file") {
+                        uri.toString().let { Single.just(EditImageState.Selected(it, it)) }
+                    } else {
+                        check(uri.scheme == "content")
+
+                        copyFile(editActivity)
+                    }
+                }
+                else -> super.getInitialEditImageStateSingle(savedEditImageState, taskDataSingle, editActivity)
+            }
+        }
+
+        private fun copyFile(editActivity: EditActivity): Single<EditImageState> {
+            return Single.fromCallable<EditImageState> {
+                val outputFile = File.createTempFile(
+                        "copiedImage",
+                        null,
+                        MyApplication.instance.getRxPaparazzoDir(),
+                )
+
+                Log.e("asdf", "magic copying from $uri to " + outputFile.toURI())
+
+                editActivity.contentResolver
+                        .openInputStream(uri!!)
+                        .use { inputStream ->
+                            FileOutputStream(outputFile).use { outputStream ->
+                                IOUtils.copy(inputStream, outputStream)
+                            }
+                        }
+
+                EditImageState.Selected(outputFile)
+            }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
         }
     }
 

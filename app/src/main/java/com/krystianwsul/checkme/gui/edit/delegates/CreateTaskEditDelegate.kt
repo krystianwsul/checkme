@@ -100,17 +100,6 @@ class CreateTaskEditDelegate(
         )
     }
 
-    override fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState {
-        return when {
-            savedEditImageState?.dontOverwrite == true -> savedEditImageState
-            (parameters as? EditParameters.Share)?.uri != null -> parameters.uri!!
-                    .toString()
-                    .let { EditImageState.Selected(it, it) }
-            savedEditImageState != null -> savedEditImageState
-            else -> EditImageState.None
-        }
-    }
-
     override fun createTaskWithSchedule(
             createParameters: CreateParameters,
             scheduleDatas: List<ScheduleData>,

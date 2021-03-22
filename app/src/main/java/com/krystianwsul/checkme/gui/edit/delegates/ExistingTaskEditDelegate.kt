@@ -33,15 +33,6 @@ abstract class ExistingTaskEditDelegate(
             parentLookup,
     )
 
-    override fun getInitialEditImageState(savedEditImageState: EditImageState?): EditImageState {
-        return when {
-            savedEditImageState?.dontOverwrite == true -> savedEditImageState
-            taskData.imageState != null -> EditImageState.Existing(taskData.imageState!!)
-            savedEditImageState != null -> savedEditImageState
-            else -> EditImageState.None
-        }
-    }
-
     override fun checkImageChanged(editImageState: EditImageState): Boolean {
         val defaultEditImageState = taskData.imageState
                 ?.let { EditImageState.Existing(it) }

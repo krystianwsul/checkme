@@ -1,13 +1,10 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
@@ -22,19 +19,14 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.Month
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
-import org.apache.commons.io.IOUtils
-import java.io.File
-import java.io.FileOutputStream
 import java.io.Serializable
 import java.util.*
 
 class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainViewModel<EditViewModel.Data>() {
+    // todo image move to other package
 
     companion object {
 
@@ -82,16 +74,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                             savedStateHandle.get(KEY_DELEGATE_STATE),
                             clearedDisposable,
                     )
-
-                    if (editImageStateRelay.value == null) { // todo image
-                        check(editImageStateRelay.value == null)
-
-                        val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
-                                ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
-
-                        val editImageState = delegate.getInitialEditImageState(savedEditImageState)
-                        editImageStateRelay.accept(editImageState)
-                    }
                 }
                 .addTo(clearedDisposable)
 
@@ -105,42 +87,19 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
 
         internalStart()
 
-        val editImageState = (editParameters as? EditParameters.Share)?.uri?.toString()?.let { EditImageState.Selected(it, it) }
+        if (editImageStateRelay.value != null) return
 
-        if (editImageState is EditImageState.Selected) {
-            val uri = Uri.parse(editImageState.uri)
+        val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
+                ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
 
-            if (uri.scheme == "content") {
-                Single.fromCallable {
-                    val outputFile = File.createTempFile(
-                            "copiedImage",
-                            null,
-                            MyApplication.instance.getRxPaparazzoDir(),
-                    )
-
-                    Log.e("asdf", "magic copying from $uri to " + outputFile.toURI())
-
-                    editActivity.contentResolver
-                            .openInputStream(uri)
-                            .use { inputStream ->
-                                FileOutputStream(outputFile).use { outputStream ->
-                                    IOUtils.copy(inputStream, outputStream)
-                                }
-                            }
-
-                    outputFile
-                }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeBy {
-                            Log.e("asdf", "magic setting file " + it.absolutePath)
-                            editImageStateRelay.accept(EditImageState.Selected(it))
-                        }
-                        .addTo(clearedDisposable) // todo image dispose if state changes
-            } else {
-                check(uri.scheme == "file")
-            }
-        }
+        editParameters.getInitialEditImageStateSingle(
+                savedEditImageState,
+                data.firstOrError().map { NullableWrapper(it.taskData) },
+                editActivity,
+        )
+                .doOnSuccess { check(editImageStateRelay.value == null) }
+                .subscribe(editImageStateRelay)
+                .addTo(clearedDisposable)
     }
 
     fun setEditImageState(editImageState: EditImageState) {
@@ -166,12 +125,13 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                     customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
                     dayOfWeek: DayOfWeek? = null,
             ): String {
-                return timePair.customTimeKey?.let {
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
-
-                    customTimeData.name + (dayOfWeek?.let { " (" + customTimeData.hourMinutes[it] + ")" }
-                            ?: "")
-                } ?: timePair.hourMinute!!.toString()
+                return timePair.customTimeKey
+                        ?.let {
+                            customTimeDatas.getValue(it).let {
+                                it.name + (dayOfWeek?.let { _ -> " (" + it.hourMinutes[dayOfWeek] + ")" } ?: "")
+                            }
+                        }
+                        ?: timePair.hourMinute!!.toString()
             }
 
             fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1

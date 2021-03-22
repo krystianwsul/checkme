@@ -1,10 +1,13 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
@@ -19,9 +22,15 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.Month
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.parcelize.Parcelize
+import org.apache.commons.io.IOUtils
+import java.io.File
+import java.io.FileOutputStream
 import java.io.Serializable
 import java.util.*
 
@@ -74,12 +83,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                             clearedDisposable,
                     )
 
-                    check(editImageStateRelay.value == null)
+                    if (editImageStateRelay.value == null) { // todo image
+                        check(editImageStateRelay.value == null)
 
-                    val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
-                            ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
+                        val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
+                                ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
 
-                    editImageStateRelay.accept(delegate.getInitialEditImageState(savedEditImageState))
+                        val editImageState = delegate.getInitialEditImageState(savedEditImageState)
+                        editImageStateRelay.accept(editImageState)
+                    }
                 }
                 .addTo(clearedDisposable)
 
@@ -88,13 +100,52 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                 .addTo(clearedDisposable)
     }
 
-    fun start(editParameters: EditParameters) {
+    fun start(editParameters: EditParameters, editActivity: EditActivity) {
         this.editParameters = editParameters
 
         internalStart()
+
+        val editImageState = (editParameters as? EditParameters.Share)?.uri?.toString()?.let { EditImageState.Selected(it, it) }
+
+        if (editImageState is EditImageState.Selected) {
+            val uri = Uri.parse(editImageState.uri)
+
+            if (uri.scheme == "content") {
+                Single.fromCallable {
+                    val outputFile = File.createTempFile(
+                            "copiedImage",
+                            null,
+                            MyApplication.instance.getRxPaparazzoDir(),
+                    )
+
+                    Log.e("asdf", "magic copying from $uri to " + outputFile.toURI())
+
+                    editActivity.contentResolver
+                            .openInputStream(uri)
+                            .use { inputStream ->
+                                FileOutputStream(outputFile).use { outputStream ->
+                                    IOUtils.copy(inputStream, outputStream)
+                                }
+                            }
+
+                    outputFile
+                }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy {
+                            Log.e("asdf", "magic setting file " + it.absolutePath)
+                            editImageStateRelay.accept(EditImageState.Selected(it))
+                        }
+                        .addTo(clearedDisposable) // todo image dispose if state changes
+            } else {
+                check(uri.scheme == "file")
+            }
+        }
     }
 
     fun setEditImageState(editImageState: EditImageState) {
+        checkNotNull(editImageStateRelay.value)
+
         editImageStateRelay.accept(editImageState)
     }
 

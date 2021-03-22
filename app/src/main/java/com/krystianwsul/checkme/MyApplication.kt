@@ -177,12 +177,12 @@ class MyApplication : Application() {
         Contacts.initialize(this)
     }
 
-    private fun clearPaparazzo() {
-        val paparazzo = instance.filesDir.absolutePath + "/RxPaparazzo/"
+    fun getRxPaparazzoDir() = File(instance.filesDir.absolutePath + "/RxPaparazzo/")
 
+    private fun clearPaparazzo() {
         val queued = Queue.getEntries().map { it.path }
 
-        (File(paparazzo).listFiles() ?: arrayOf())
+        (getRxPaparazzoDir().listFiles() ?: arrayOf())
                 .filterNot { it.absolutePath in queued }
                 .forEach {
                     try {

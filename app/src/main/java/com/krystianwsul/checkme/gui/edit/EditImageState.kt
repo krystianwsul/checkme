@@ -5,6 +5,7 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import java.io.File
 import java.io.Serializable
 
 sealed class EditImageState : Serializable {
@@ -30,6 +31,8 @@ sealed class EditImageState : Serializable {
     }
 
     data class Selected(val path: String, val uri: String) : EditImageState() {
+
+        constructor(file: File) : this(file.absolutePath, file.toURI().toString())
 
         override val dontOverwrite = true
 

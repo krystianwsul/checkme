@@ -172,4 +172,6 @@ dependencies {
     implementation "io.arrow-kt:arrow-core:$arrowVersion"
     implementation "io.arrow-kt:arrow-syntax:$arrowVersion"
     kapt "io.arrow-kt:arrow-meta:$arrowVersion"
+
+    implementation 'commons-io:commons-io:2.8.0'
 }

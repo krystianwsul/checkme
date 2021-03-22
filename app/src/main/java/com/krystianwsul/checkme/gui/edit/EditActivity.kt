@@ -260,10 +260,8 @@ class EditActivity : NavBarActivity() {
         if (!noteHasFocusRelay.value!!)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        editViewModel.start(parameters)
-
         editViewModel.apply {
-            start(parameters)
+            start(parameters, this@EditActivity)
 
             createDisposable += data.subscribe { onLoadFinished() }
         }
@@ -346,10 +344,9 @@ class EditActivity : NavBarActivity() {
     fun getImage(single: Observable<Response<EditActivity, FileData>>) {
         single.observeOn(AndroidSchedulers.mainThread()).subscribe {
             if (it.resultCode() == Activity.RESULT_OK) {
-                val file = it.data().file
                 it.targetUI()
                         .editViewModel
-                        .setEditImageState(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
+                        .setEditImageState(EditImageState.Selected(it.data().file))
             }
         }
     }

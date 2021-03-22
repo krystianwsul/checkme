@@ -36,7 +36,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParamete
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair

@@ -9,10 +9,10 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker

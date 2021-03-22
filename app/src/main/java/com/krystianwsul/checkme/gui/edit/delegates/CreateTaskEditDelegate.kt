@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
 import com.krystianwsul.checkme.gui.edit.*
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.parcelize.Parcelize
 

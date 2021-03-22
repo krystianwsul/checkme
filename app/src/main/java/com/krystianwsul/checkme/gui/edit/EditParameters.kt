@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Parcelable
 import android.util.Log
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey

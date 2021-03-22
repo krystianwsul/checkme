@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.viewmodels
+package com.krystianwsul.checkme.gui.edit
 
 import android.content.Context
 import android.os.Bundle
@@ -8,12 +8,13 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
-import com.krystianwsul.checkme.gui.edit.EditActivity
-import com.krystianwsul.checkme.gui.edit.EditImageState
-import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
+import com.krystianwsul.checkme.viewmodels.DomainData
+import com.krystianwsul.checkme.viewmodels.DomainListener
+import com.krystianwsul.checkme.viewmodels.DomainViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -26,7 +27,6 @@ import java.io.Serializable
 import java.util.*
 
 class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainViewModel<EditViewModel.Data>() {
-    // todo image move to other package
 
     companion object {
 

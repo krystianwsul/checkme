@@ -1,11 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.krystianwsul.checkme.gui.edit.EditImageState
-import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
-import com.krystianwsul.checkme.gui.edit.ScheduleEntry
-import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.gui.edit.*
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(

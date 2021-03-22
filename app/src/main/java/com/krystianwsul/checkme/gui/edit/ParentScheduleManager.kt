@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Bundle
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey

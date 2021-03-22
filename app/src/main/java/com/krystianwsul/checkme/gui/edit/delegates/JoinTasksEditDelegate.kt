@@ -7,11 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
-import com.krystianwsul.checkme.gui.edit.EditActivity
-import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
-import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey

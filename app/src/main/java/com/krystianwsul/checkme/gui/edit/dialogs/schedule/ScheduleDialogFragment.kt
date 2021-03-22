@@ -27,11 +27,11 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute

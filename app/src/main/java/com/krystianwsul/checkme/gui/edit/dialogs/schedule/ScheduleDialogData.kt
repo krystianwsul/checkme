@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.gui.edit.dialogs.schedule
 
 import android.os.Parcelable
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePairPersist

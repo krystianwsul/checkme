@@ -7,10 +7,10 @@ import arrow.syntax.function.invoke
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.viewmodels.EditViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair

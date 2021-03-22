@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.loaders
 
-import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import org.junit.Assert
 import org.junit.Test

@@ -9,7 +9,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
-import com.krystianwsul.checkme.viewmodels.EditViewModel
+import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.kotlin.plusAssign

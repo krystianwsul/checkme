@@ -1,7 +1,13 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.krystianwsul.checkme.GlideApp
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.upload.Uploader
@@ -12,25 +18,59 @@ class ImageLoader(val imageState: ImageState) {
 
     companion object {
 
-        fun load(imageView: ImageView, uuid: String, circle: Boolean = false) {
+        fun loadFromFirebase(
+                imageView: ImageView,
+                uuid: String,
+                circle: Boolean = false,
+                applyListener: RequestBuilder<Drawable>.() -> RequestBuilder<Drawable> = { this },
+        ) {
             GlideApp.with(imageView)
                     .load(Uploader.getReference(uuid))
                     .circle(circle)
+                    .applyListener()
                     .into(imageView)
         }
     }
 
-    fun load(imageView: ImageView, circle: Boolean = false) {
+    fun load(imageView: ImageView, circle: Boolean = false, onSuccess: (() -> Unit)? = null) {
+        val applyListener: RequestBuilder<Drawable>.() -> RequestBuilder<Drawable> = {
+            onSuccess?.let {
+                listener(object : RequestListener<Drawable> {
+
+                    override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean,
+                    ): Boolean {
+                        onSuccess.invoke()
+
+                        return false
+                    }
+
+                    override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean,
+                    ) = false
+                })
+            }
+                    ?: this
+        }
+
         when (imageState) {
             is ImageState.Local -> {
                 Uploader.getPath(imageState)?.let {
                     Glide.with(imageView)
                             .load(it)
                             .circle(circle)
+                            .applyListener()
                             .into(imageView)
-                } ?: load(imageView, imageState.uuid)
+                } ?: loadFromFirebase(imageView, imageState.uuid, circle, applyListener)
             }
-            is ImageState.Remote -> load(imageView, imageState.uuid, circle)
+            is ImageState.Remote -> loadFromFirebase(imageView, imageState.uuid, circle, applyListener)
             ImageState.Uploading -> Unit
         }
     }

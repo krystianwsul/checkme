@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tree
 
 import android.app.Activity
 import android.graphics.Color
+import android.util.Log
 import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.RowListImageBinding
 import com.krystianwsul.checkme.domainmodel.toImageLoader
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
@@ -49,10 +51,15 @@ class ImageNode(
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
+        Log.e("asdf", "magic 1")
+
         (viewHolder as Holder).apply {
             imageData.imageState
                     .toImageLoader()
-                    .load(rowBigImage)
+                    .load(rowBigImage) {
+                        Log.e("asdf", "magic 2")
+                        animateVisibility(listOf(), listOf(progress))
+                    }
 
             if (imageData.showImage) showImage(rowBigImage, imageData)
         }
@@ -111,6 +118,7 @@ class ImageNode(
             binding: RowListImageBinding,
     ) : AbstractHolder(binding.root) {
 
+        val progress = binding.rowListImageProgress
         val rowBigImage = binding.rowListImageBigImage
         override val rowSeparator = binding.rowListImageSeparator
     }

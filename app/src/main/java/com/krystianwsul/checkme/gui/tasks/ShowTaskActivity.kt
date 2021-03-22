@@ -49,7 +49,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var taskListFragment: TaskListFragment
 
-    private lateinit var showTaskViewModel: ShowTaskViewModel
+    private val showTaskViewModel by lazy { getViewModel<ShowTaskViewModel>() }
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showTaskViewModel.stop()
@@ -105,10 +105,10 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
             TaskListFragment.newInstance()
         }.also { it.setFab(bottomBinding.bottomFab) }
 
-        showTaskViewModel = getViewModel<ShowTaskViewModel>().apply {
+        showTaskViewModel.apply {
             start(taskKey)
 
-            createDisposable += data.subscribe { onLoadFinished(it) }
+            createDisposable += data.subscribe(::onLoadFinished)
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_REMOVE_INSTANCES)?.listener = deleteInstancesListener

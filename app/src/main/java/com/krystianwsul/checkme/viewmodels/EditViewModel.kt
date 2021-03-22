@@ -43,7 +43,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         )
     }
 
-    val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
+    private val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
+    val editImageStateObservable = editImageStateRelay.hide()!!
     val editImageState get() = editImageStateRelay.value!!
 
     lateinit var delegate: EditDelegate
@@ -91,6 +92,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         this.editParameters = editParameters
 
         internalStart()
+    }
+
+    fun setEditImageState(editImageState: EditImageState) {
+        editImageStateRelay.accept(editImageState)
     }
 
     sealed class ScheduleDataWrapper : Serializable {

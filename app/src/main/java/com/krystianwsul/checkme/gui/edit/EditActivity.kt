@@ -349,8 +349,7 @@ class EditActivity : NavBarActivity() {
                 val file = it.data().file
                 it.targetUI()
                         .editViewModel
-                        .editImageStateRelay
-                        .accept(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
+                        .setEditImageState(EditImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
     }
@@ -635,7 +634,7 @@ class EditActivity : NavBarActivity() {
                     .takeIf { it >= 0 }
                     ?.let { items[it] }
 
-            editViewModel.editImageStateRelay
+            editViewModel.editImageStateObservable
                     .subscribe { getItem()?.onNewImageState(it, holder) }
                     .addTo(holder.compositeDisposable)
 

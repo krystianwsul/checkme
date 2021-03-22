@@ -284,7 +284,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 updateInstance(it, now)
             }
         } else {
-
             if (notificationInstances.size > MAX_NOTIFICATIONS_Q) {
                 Preferences.tickLog.logLineHour("showing group")
                 NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)

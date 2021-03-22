@@ -34,14 +34,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     }
 
     private lateinit var editParameters: EditParameters
-    private lateinit var startParameters: StartParameters
-    private var parentTaskKeyHint: TaskKey? = null
 
     override val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
-                startParameters,
-                parentTaskKeyHint
+                editParameters.startParameters,
+                editParameters.parentTaskKeyHint,
         )
     }
 
@@ -75,7 +73,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                             clearedDisposable,
                     )
 
-                    initializeEditImageState(delegate) // todo image merge
+                    check(editImageStateRelay.value == null)
+
+                    val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
+                            ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
+
+                    editImageStateRelay.accept(delegate.getInitialEditImageState(savedEditImageState))
                 }
                 .addTo(clearedDisposable)
 
@@ -87,26 +90,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     fun start(editParameters: EditParameters) {
         this.editParameters = editParameters
 
-        editParameters.startViewModel(this) // todo image invert
-    }
-
-    fun start(
-            startParameters: StartParameters = StartParameters.Create,
-            parentTaskKeyHint: TaskKey? = null,
-    ) {
-        this.startParameters = startParameters
-        this.parentTaskKeyHint = parentTaskKeyHint
-
         internalStart()
-    }
-
-    fun initializeEditImageState(editDelegate: EditDelegate) {
-        if (editImageStateRelay.value == null) {
-            val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
-                    ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
-
-            editImageStateRelay.accept(editDelegate.getInitialEditImageState(savedEditImageState))
-        }
     }
 
     sealed class ScheduleDataWrapper : Serializable {
@@ -124,7 +108,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
             private fun timePairCallback(
                     timePair: TimePair,
                     customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-                    dayOfWeek: DayOfWeek? = null
+                    dayOfWeek: DayOfWeek? = null,
             ): String {
                 return timePair.customTimeKey?.let {
                     val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
@@ -336,7 +320,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     data class CustomTimeData(
             val customTimeKey: CustomTimeKey<*>,
             val name: String,
-            val hourMinutes: SortedMap<DayOfWeek, HourMinute>
+            val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
     )
 
     data class TaskData(

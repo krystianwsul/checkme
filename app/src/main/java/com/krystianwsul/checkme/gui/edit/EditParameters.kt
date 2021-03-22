@@ -64,31 +64,29 @@ sealed class EditParameters : Parcelable {
         }
     }
 
-    abstract fun startViewModel(viewModel: EditViewModel)
+    open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
+    open val parentTaskKeyHint: TaskKey? = null
 
     @Parcelize
     class Create(
             val hint: EditActivity.Hint? = null,
             val parentScheduleState: ParentScheduleState? = null,
             val nameHint: String? = null,
-            val showFirstSchedule: Boolean = true
+            val showFirstSchedule: Boolean = true,
     ) : EditParameters() {
 
-        override fun startViewModel(viewModel: EditViewModel) =
-                viewModel.start(parentTaskKeyHint = (hint as? EditActivity.Hint.Task)?.taskKey)
+        override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
     }
 
     @Parcelize
     class Join(val joinables: List<Joinable>, val hint: EditActivity.Hint? = null) : EditParameters() {
 
+        override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
+        override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
+
         init {
             check(joinables.size > 1)
         }
-
-        override fun startViewModel(viewModel: EditViewModel) = viewModel.start(
-                EditViewModel.StartParameters.Join(joinables),
-                (hint as? EditActivity.Hint.Task)?.taskKey
-        )
 
         sealed class Joinable : Parcelable {
 
@@ -113,8 +111,7 @@ sealed class EditParameters : Parcelable {
     @Parcelize
     class Copy(val taskKey: TaskKey) : EditParameters() {
 
-        override fun startViewModel(viewModel: EditViewModel) =
-                viewModel.start(EditViewModel.StartParameters.Task(taskKey))
+        override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
     }
 
     @Parcelize
@@ -122,21 +119,16 @@ sealed class EditParameters : Parcelable {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
-        override fun startViewModel(viewModel: EditViewModel) =
-                viewModel.start(EditViewModel.StartParameters.Task(taskKey))
+        override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
     }
 
     @Parcelize
-    class Shortcut(val parentTaskKeyHint: TaskKey) : EditParameters() {
-
-        override fun startViewModel(viewModel: EditViewModel) =
-                viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
-    }
+    class Shortcut(override val parentTaskKeyHint: TaskKey) : EditParameters()
 
     @Parcelize
     class Share private constructor(
             val nameHint: String? = null,
-            val parentTaskKeyHint: TaskKey? = null,
+            override val parentTaskKeyHint: TaskKey? = null,
             val uri: Uri? = null,
     ) : EditParameters() {
 
@@ -146,14 +138,8 @@ sealed class EditParameters : Parcelable {
 
             fun fromUri(uri: Uri) = Share(uri = uri)
         }
-
-        override fun startViewModel(viewModel: EditViewModel) =
-                viewModel.start(parentTaskKeyHint = parentTaskKeyHint)
     }
 
     @Parcelize
-    object None : EditParameters() {
-
-        override fun startViewModel(viewModel: EditViewModel) = viewModel.start()
-    }
+    object None : EditParameters()
 }

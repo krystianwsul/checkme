@@ -353,9 +353,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             tag: String?,
             highPriority: Boolean,
     ) {
+        val notificationHashCode = notificationHash.hashCode()
+
         val unchanged = notificationManager.activeNotifications
                 ?.singleOrNull { it.id == notificationHash.id }
-                ?.let { it.notification.extras.getInt(KEY_HASH_CODE) == notificationHash.hashCode() }
+                ?.let { it.notification.extras.getInt(KEY_HASH_CODE) == notificationHashCode }
                 ?: false
 
         if (unchanged) {
@@ -383,6 +385,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         @Suppress("Deprecation")
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
+
+        notification.extras.putInt(KEY_HASH_CODE, notificationHashCode)
 
         MyCrashlytics.log("NotificationManager.notify $notificationId silent? $silent")
         notificationManager.notify(tag, notificationId, notification)

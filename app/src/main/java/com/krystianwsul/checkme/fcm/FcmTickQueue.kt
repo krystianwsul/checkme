@@ -1,20 +1,16 @@
 package com.krystianwsul.checkme.fcm
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.ticks.Ticker
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Completable
 
-class FcmTickQueue {
+class FcmTickQueue<T : Any>(private val completable: (T) -> Completable) {
 
-    private val queue = PublishRelay.create<Unit>()
+    private val queue = PublishRelay.create<T>()
 
     fun subscribe() = queue.toFlowable(BackpressureStrategy.LATEST)
-            .flatMapCompletable(
-                    { Ticker.tick("MyFirebaseMessagingService", true) },
-                    false,
-                    1,
-            )
+            .flatMapCompletable(completable, false, 1)
             .subscribe()!!
 
-    fun enqueue() = queue.accept(Unit)
+    fun enqueue(value: T) = queue.accept(value)
 }

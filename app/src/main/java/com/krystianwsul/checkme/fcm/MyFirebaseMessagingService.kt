@@ -5,6 +5,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.ticks.Ticker
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -13,7 +14,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         private const val REFRESH_KEY = "refresh"
 
-        private val fcmTickQueue = FcmTickQueue().apply { subscribe() }
+        private val fcmTickQueue = FcmTickQueue<Unit> {
+            Ticker.tick("MyFirebaseMessagingService", true)
+        }.apply { subscribe() }
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -22,7 +25,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (data.containsKey(REFRESH_KEY)) {
             check(data.getValue(REFRESH_KEY) == "true")
 
-            if (MyApplication.instance.hasUserInfo) fcmTickQueue.enqueue()
+            if (MyApplication.instance.hasUserInfo) fcmTickQueue.enqueue(Unit)
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

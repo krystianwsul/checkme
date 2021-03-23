@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.fcm
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.domainmodel.subscribeOnDomain
+import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.ticks.Ticker
-import io.mockk.every
 import io.mockk.mockkObject
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.observers.TestObserver
 import org.junit.After
@@ -16,11 +14,13 @@ class FcmTickQueueTest {
 
     companion object {
 
-        private const val DELAY = 1000L
-        private const val HALF = 500L
+        private const val DELAY = 100L
+        private const val HALF = DELAY / 2
     }
 
-    private lateinit var fcmTickQueue: FcmTickQueue
+    private var ordinal = 0
+
+    private lateinit var fcmTickQueue: FcmTickQueue<Int>
     private lateinit var disposable: Disposable
 
     private lateinit var tickEventsRelay: PublishRelay<TickEvent>
@@ -28,25 +28,24 @@ class FcmTickQueueTest {
 
     @Before
     fun before() {
-        fcmTickQueue = FcmTickQueue()
+        ordinal = 0
+
+        fcmTickQueue = FcmTickQueue {
+            completeOnDomain {
+                tickEventsRelay.accept(TickEvent.Begin(it))
+
+                Thread.sleep(DELAY)
+
+                tickEventsRelay.accept(TickEvent.End(it))
+            }
+        }
+
         disposable = fcmTickQueue.subscribe()
 
         tickEventsRelay = PublishRelay.create()
         testObserver = tickEventsRelay.test()
 
         mockkObject(Ticker)
-
-        var ordinal = 0
-
-        every { Ticker.tick(any(), any()) } answers {
-            Completable.fromCallable {
-                tickEventsRelay.accept(TickEvent.Begin(ordinal))
-
-                Thread.sleep(DELAY)
-
-                tickEventsRelay.accept(TickEvent.End(ordinal++))
-            }.subscribeOnDomain()
-        }
     }
 
     @After
@@ -54,11 +53,15 @@ class FcmTickQueueTest {
         disposable.dispose()
     }
 
+    private fun enqueue() {
+        fcmTickQueue.enqueue(ordinal++)
+    }
+
     @Test
     fun testOne() {
         testObserver.assertEmpty()
 
-        fcmTickQueue.enqueue()
+        enqueue()
         Thread.sleep(HALF)
         testObserver.assertValue(TickEvent.Begin(0))
 
@@ -70,8 +73,8 @@ class FcmTickQueueTest {
     fun testTwo() {
         testObserver.assertEmpty()
 
-        fcmTickQueue.enqueue()
-        fcmTickQueue.enqueue()
+        enqueue()
+        enqueue()
 
         Thread.sleep(HALF + DELAY * 2)
 
@@ -87,9 +90,9 @@ class FcmTickQueueTest {
     fun testThree() {
         testObserver.assertEmpty()
 
-        fcmTickQueue.enqueue()
-        fcmTickQueue.enqueue()
-        fcmTickQueue.enqueue()
+        enqueue()
+        enqueue()
+        enqueue()
 
         Thread.sleep(HALF + DELAY * 2)
 
@@ -98,6 +101,37 @@ class FcmTickQueueTest {
                 TickEvent.End(0),
                 TickEvent.Begin(2),
                 TickEvent.End(2),
+        )
+    }
+
+    @Test
+    fun testThreeThenDelayed() {
+        testObserver.assertEmpty()
+
+        enqueue()
+        enqueue()
+        enqueue()
+
+        Thread.sleep(HALF + DELAY * 2)
+
+        testObserver.assertValues(
+                TickEvent.Begin(0),
+                TickEvent.End(0),
+                TickEvent.Begin(2),
+                TickEvent.End(2),
+        )
+
+        enqueue()
+
+        Thread.sleep(HALF + DELAY)
+
+        testObserver.assertValues(
+                TickEvent.Begin(0),
+                TickEvent.End(0),
+                TickEvent.Begin(2),
+                TickEvent.End(2),
+                TickEvent.Begin(3),
+                TickEvent.End(3),
         )
     }
 

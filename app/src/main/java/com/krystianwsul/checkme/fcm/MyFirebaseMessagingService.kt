@@ -12,6 +12,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     companion object {
 
         private const val REFRESH_KEY = "refresh"
+
+        private val fcmTickQueue = FcmTickQueue().apply { subscribe() }
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -20,7 +22,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (data.containsKey(REFRESH_KEY)) {
             check(data.getValue(REFRESH_KEY) == "true")
 
-            if (MyApplication.instance.hasUserInfo) FcmTickQueue.enqueue()
+            if (MyApplication.instance.hasUserInfo) fcmTickQueue.enqueue()
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

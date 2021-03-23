@@ -6,7 +6,9 @@ import com.krystianwsul.checkme.ticks.Ticker
 import io.mockk.every
 import io.mockk.mockkObject
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.observers.TestObserver
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -18,11 +20,17 @@ class FcmTickQueueTest {
         private const val HALF = 500L
     }
 
+    private lateinit var fcmTickQueue: FcmTickQueue
+    private lateinit var disposable: Disposable
+
     private lateinit var tickEventsRelay: PublishRelay<TickEvent>
     private lateinit var testObserver: TestObserver<TickEvent>
 
     @Before
     fun before() {
+        fcmTickQueue = FcmTickQueue()
+        disposable = fcmTickQueue.subscribe()
+
         tickEventsRelay = PublishRelay.create()
         testObserver = tickEventsRelay.test()
 
@@ -41,11 +49,16 @@ class FcmTickQueueTest {
         }
     }
 
+    @After
+    fun after() {
+        disposable.dispose()
+    }
+
     @Test
     fun testOne() {
         testObserver.assertEmpty()
 
-        FcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
         Thread.sleep(HALF)
         testObserver.assertValue(TickEvent.Begin(0))
 
@@ -57,8 +70,8 @@ class FcmTickQueueTest {
     fun testTwo() {
         testObserver.assertEmpty()
 
-        FcmTickQueue.enqueue()
-        FcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
 
         Thread.sleep(HALF + DELAY * 2)
 
@@ -74,9 +87,9 @@ class FcmTickQueueTest {
     fun testThree() {
         testObserver.assertEmpty()
 
-        FcmTickQueue.enqueue()
-        FcmTickQueue.enqueue()
-        FcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
+        fcmTickQueue.enqueue()
 
         Thread.sleep(HALF + DELAY * 2)
 

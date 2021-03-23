@@ -5,7 +5,6 @@ import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.ticks.Ticker
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -19,12 +18,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val data = remoteMessage.data
 
         if (data.containsKey(REFRESH_KEY)) {
-            val refresh = data[REFRESH_KEY]!!
-            check(refresh.isNotEmpty())
-            check(data[REFRESH_KEY] == "true")
+            check(data.getValue(REFRESH_KEY) == "true")
 
-            if (MyApplication.instance.hasUserInfo)
-                Ticker.tick("MyFirebaseMessagingService", true).subscribe()
+            if (MyApplication.instance.hasUserInfo) FcmTickQueue.enqueue()
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }
@@ -38,7 +34,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         companion object {
 
-            private fun getMessage(data: Map<String, String>) = data.entries.joinToString("\n") { it.key + ": " + it.value }
+            private fun getMessage(data: Map<String, String>) =
+                    data.entries.joinToString("\n") { it.key + ": " + it.value }
         }
     }
 }

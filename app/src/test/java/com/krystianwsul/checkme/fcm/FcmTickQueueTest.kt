@@ -28,13 +28,15 @@ class FcmTickQueueTest {
 
         mockkObject(Ticker)
 
+        var ordinal = 0
+
         every { Ticker.tick(any(), any()) } answers {
             Completable.fromCallable {
-                tickEventsRelay.accept(TickEvent.BEGIN)
+                tickEventsRelay.accept(TickEvent.Begin(ordinal))
 
                 Thread.sleep(DELAY)
 
-                tickEventsRelay.accept(TickEvent.END)
+                tickEventsRelay.accept(TickEvent.End(ordinal++))
             }.subscribeOnDomain()
         }
     }
@@ -45,10 +47,10 @@ class FcmTickQueueTest {
 
         FcmTickQueue.enqueue()
         Thread.sleep(HALF)
-        testObserver.assertValue(TickEvent.BEGIN)
+        testObserver.assertValue(TickEvent.Begin(0))
 
         Thread.sleep(DELAY)
-        testObserver.assertValues(TickEvent.BEGIN, TickEvent.END)
+        testObserver.assertValues(TickEvent.Begin(0), TickEvent.End(0))
     }
 
     @Test
@@ -59,11 +61,18 @@ class FcmTickQueueTest {
         FcmTickQueue.enqueue()
 
         Thread.sleep(HALF + DELAY * 2)
-        testObserver.assertValues(TickEvent.BEGIN, TickEvent.END, TickEvent.BEGIN, TickEvent.END)
+
+        testObserver.assertValues(
+                TickEvent.Begin(0),
+                TickEvent.End(0),
+                TickEvent.Begin(1),
+                TickEvent.End(1),
+        )
     }
 
-    enum class TickEvent {
+    sealed class TickEvent {
 
-        BEGIN, END
+        data class Begin(val ordinal: Int) : TickEvent()
+        data class End(val ordinal: Int) : TickEvent()
     }
 }

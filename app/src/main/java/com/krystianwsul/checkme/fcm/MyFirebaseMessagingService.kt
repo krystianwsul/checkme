@@ -1,7 +1,10 @@
-package com.krystianwsul.checkme
+package com.krystianwsul.checkme.fcm
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.ticks.Ticker
 
 

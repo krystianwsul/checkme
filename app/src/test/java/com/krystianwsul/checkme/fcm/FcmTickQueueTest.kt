@@ -70,6 +70,24 @@ class FcmTickQueueTest {
         )
     }
 
+    @Test
+    fun testThree() {
+        testObserver.assertEmpty()
+
+        FcmTickQueue.enqueue()
+        FcmTickQueue.enqueue()
+        FcmTickQueue.enqueue()
+
+        Thread.sleep(HALF + DELAY * 2)
+
+        testObserver.assertValues(
+                TickEvent.Begin(0),
+                TickEvent.End(0),
+                TickEvent.Begin(2),
+                TickEvent.End(2),
+        )
+    }
+
     sealed class TickEvent {
 
         data class Begin(val ordinal: Int) : TickEvent()

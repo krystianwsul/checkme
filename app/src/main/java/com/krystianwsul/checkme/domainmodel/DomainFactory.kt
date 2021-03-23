@@ -226,7 +226,6 @@ class DomainFactory(
     fun save(
             notificationType: NotificationType,
             forceDomainChanged: Boolean = false,
-            values: MutableMap<String, Any?> = mutableMapOf(),
     ) {
         DomainThreadChecker.instance.requireDomainThread()
 
@@ -240,17 +239,18 @@ class DomainFactory(
         }
 
         val localChanges = localFactory.save()
+
+        val values = mutableMapOf<String, Any?>()
         projectsFactory.save(values)
         myUserFactory.save(values)
         friendsFactory.save(values)
 
-        val changes = localChanges || values.isNotEmpty()
-
         if (values.isNotEmpty())
             AndroidDatabaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
-        if (changes || forceDomainChanged) domainListenerManager.notify(notificationType)
+        val changes = localChanges || values.isNotEmpty()
 
+        if (changes || forceDomainChanged) domainListenerManager.notify(notificationType)
         if (changes) updateIsSaved()
     }
 

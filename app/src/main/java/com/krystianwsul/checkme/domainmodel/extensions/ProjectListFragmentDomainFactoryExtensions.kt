@@ -71,6 +71,8 @@ fun DomainFactory.clearProjectEndTimeStamps(
 ) = completeOnDomain {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
+    check(projectUndoData.projectIds.isNotEmpty())
+
     val now = ExactTimeStamp.Local.now
 
     val remoteProjects = projectUndoData.projectIds

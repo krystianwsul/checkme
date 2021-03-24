@@ -355,7 +355,7 @@ class DomainFactory(
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
-                notifyCloudPrivateFixed(notificationProjects, notificationUserKeys)
+                notifyCloud(notificationProjects, notificationUserKeys)
         }
     }
 
@@ -674,17 +674,18 @@ class DomainFactory(
                 }
     }
 
-    fun notifyCloud(project: Project<*>) = notifyCloud(setOf(project))
+    fun notifyCloud(
+            project: Project<*>,
+            userKeys: Collection<UserKey> = emptySet(),
+    ) = notifyCloud(setOf(project), userKeys)
 
-    fun notifyCloud(projects: Set<Project<*>>) {
-        if (projects.isNotEmpty())
-            notifyCloudPrivateFixed(projects.toMutableSet(), mutableListOf())
-    }
-
-    fun notifyCloudPrivateFixed(
-            projects: MutableSet<Project<*>>,
-            userKeys: MutableCollection<UserKey>,
+    fun notifyCloud(
+            inProjects: Collection<Project<*>>,
+            inUserKeys: Collection<UserKey> = emptySet(),
     ) {
+        val projects = inProjects.toMutableSet()
+        val userKeys = inUserKeys.toMutableSet()
+
         aggregateData?.run {
             notificationProjects.addAll(projects)
             notificationUserKeys.addAll(userKeys)

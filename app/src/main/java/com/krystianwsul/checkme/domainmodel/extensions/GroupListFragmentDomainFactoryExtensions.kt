@@ -18,6 +18,8 @@ fun DomainFactory.setInstancesDone(
     MyCrashlytics.log("DomainFactory.setInstancesDone")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
+    check(instanceKeys.isNotEmpty())
+
     val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map(this::getInstance)

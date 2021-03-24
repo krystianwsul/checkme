@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -106,8 +105,3 @@ fun DomainFactory.updateProject(
 
     notifyCloud(remoteProject, removedFriends)
 }
-
-private fun DomainFactory.notifyCloud(
-    project: Project<*>,
-    userKeys: Collection<UserKey>
-) = notifyCloudPrivateFixed(mutableSetOf(project), userKeys.toMutableList())

@@ -44,6 +44,8 @@ fun DomainFactory.clearTaskEndTimeStamps(
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
+    check(taskUndoData.taskKeys.isNotEmpty())
+
     val now = ExactTimeStamp.Local.now
 
     processTaskUndoData(taskUndoData, now)
@@ -115,6 +117,8 @@ fun DomainFactory.setInstancesAddHourActivity(
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
+    check(instanceKeys.isNotEmpty())
+
     val now = ExactTimeStamp.Local.now
     val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
@@ -153,6 +157,8 @@ fun DomainFactory.undoInstancesAddHour(
     if (projectsFactory.isSaved) throw SavedFactoryException()
 
     val now = ExactTimeStamp.Local.now
+
+    check(hourUndoData.instanceDateTimes.isNotEmpty())
 
     val instances = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
         getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, instanceDateTime) }
@@ -361,6 +367,7 @@ fun DomainFactory.undo(
     val now = ExactTimeStamp.Local.now
 
     val projects = undoData.undo(this, now)
+    check(projects.isNotEmpty())
 
     notifier.updateNotifications(now)
 

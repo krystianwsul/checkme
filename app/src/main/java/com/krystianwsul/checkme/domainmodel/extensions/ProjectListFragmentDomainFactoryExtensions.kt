@@ -56,9 +56,7 @@ fun DomainUpdater.setProjectEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Result(projectUndoData, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Result(projectUndoData, notificationType, DomainFactory.CloudParams(remoteProjects))
 }
 
 @CheckResult
@@ -85,7 +83,5 @@ fun DomainUpdater.clearProjectEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProjects))
 }

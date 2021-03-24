@@ -11,9 +11,15 @@ class DomainUpdater(domainFactory: DomainFactory? = null) {
         return domainFactorySingle.doOnSuccess { check(!it.isSaved.value!!) }
                 .map { it to it.action() }
                 .doOnSuccess { (domainFactory, result) ->
-                    result.params
-                            .cloudParams
-                            ?.let(domainFactory::notifyCloud)
+                    domainFactory.apply {
+                        result.params
+                                .notificationType
+                                ?.let(::save)
+
+                        result.params
+                                .cloudParams
+                                ?.let(::notifyCloud)
+                    }
                 }
                 .map { it.second.data }
     }
@@ -23,8 +29,15 @@ class DomainUpdater(domainFactory: DomainFactory? = null) {
 
     data class Result<T : Any>(val data: T, val params: Params) {
 
-        constructor(data: T, cloudParams: DomainFactory.CloudParams) : this(data, Params(cloudParams))
+        constructor(
+                data: T,
+                notificationType: DomainListenerManager.NotificationType?,
+                cloudParams: DomainFactory.CloudParams,
+        ) : this(data, Params(notificationType, cloudParams))
     }
 
-    data class Params(val cloudParams: DomainFactory.CloudParams? = null)
+    data class Params(
+            val notificationType: DomainListenerManager.NotificationType? = null,
+            val cloudParams: DomainFactory.CloudParams? = null,
+    )
 }

@@ -52,13 +52,11 @@ fun DomainUpdater.clearTaskEndTimeStamps(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
     val remoteProjects = taskUndoData.taskKeys
             .map { getTaskForce(it).project }
             .toSet()
 
-    DomainUpdater.Params(DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProjects))
 }
 
 @CheckResult
@@ -77,9 +75,7 @@ fun DomainUpdater.setOrdinal(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(task.project))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -137,11 +133,13 @@ fun DomainUpdater.setInstancesAddHourActivity(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Result(DomainFactory.HourUndoData(instanceDateTimes), DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Result(
+            DomainFactory.HourUndoData(instanceDateTimes),
+            notificationType,
+            DomainFactory.CloudParams(remoteProjects),
+    )
 }
 
 @CheckResult
@@ -161,11 +159,9 @@ fun DomainUpdater.undoInstancesAddHour(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Params(DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProjects))
 }
 
 @CheckResult
@@ -183,9 +179,11 @@ fun DomainUpdater.setInstanceDone(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Result(NullableWrapper(instance.done), DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Result(
+            NullableWrapper(instance.done),
+            notificationType,
+            DomainFactory.CloudParams(instance.task.project),
+    )
 }
 
 @CheckResult
@@ -362,9 +360,7 @@ fun DomainUpdater.undo(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(projects))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(projects))
 }
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(

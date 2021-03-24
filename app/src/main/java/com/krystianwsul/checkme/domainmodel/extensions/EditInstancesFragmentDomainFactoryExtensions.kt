@@ -131,9 +131,7 @@ fun DomainUpdater.setInstancesDateTime(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Result(editInstancesUndoData, DomainFactory.CloudParams(projects))
+    DomainUpdater.Result(editInstancesUndoData, notificationType, DomainFactory.CloudParams(projects))
 }
 
 private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
@@ -191,9 +189,7 @@ fun DomainUpdater.setInstancesParent(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Result(ListUndoData(undoDatas), DomainFactory.CloudParams(projects))
+    DomainUpdater.Result(ListUndoData(undoDatas), notificationType, DomainFactory.CloudParams(projects))
 }
 
 fun DomainFactory.getEditInstancesSearchData(

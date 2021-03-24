@@ -70,9 +70,7 @@ fun DomainUpdater.createProject(
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    save(notificationType)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(remoteProject))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProject))
 }
 
 @CheckResult
@@ -101,7 +99,5 @@ fun DomainUpdater.updateProject(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(remoteProject, removedFriends))
+    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
 }

@@ -35,9 +35,7 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey) = updateDo
 
     notifier.updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
-    save(DomainListenerManager.NotificationType.All)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(DomainListenerManager.NotificationType.All, DomainFactory.CloudParams(instance.task.project))
 }
 
 fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) = updateDomainCompletable {
@@ -53,9 +51,10 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) =
 
     notifier.updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
-    save(DomainListenerManager.NotificationType.All)
-
-    DomainUpdater.Params(DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(
+            DomainListenerManager.NotificationType.All,
+            DomainFactory.CloudParams(instance.task.project),
+    )
 }
 
 fun DomainFactory.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) {
@@ -78,8 +77,6 @@ fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: Strin
     } else {
         task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
-        save(DomainListenerManager.NotificationType.All)
-
-        DomainUpdater.Params(DomainFactory.CloudParams(task.project))
+        DomainUpdater.Params(DomainListenerManager.NotificationType.All, DomainFactory.CloudParams(task.project))
     }
 }

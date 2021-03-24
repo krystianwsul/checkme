@@ -29,7 +29,5 @@ fun DomainUpdater.setInstancesDone(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
-
-    DomainUpdater.Result(now, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Result(now, notificationType, DomainFactory.CloudParams(remoteProjects))
 }

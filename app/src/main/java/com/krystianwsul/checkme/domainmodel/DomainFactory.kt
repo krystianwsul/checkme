@@ -392,9 +392,7 @@ class DomainFactory(
 
         notifier.updateNotifications(now)
 
-        save(notificationType)
-
-        return taskUndoData to DomainUpdater.Params(CloudParams(remoteProjects))
+        return taskUndoData to DomainUpdater.Params(notificationType, CloudParams(remoteProjects))
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {

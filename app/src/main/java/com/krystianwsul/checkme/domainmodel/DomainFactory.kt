@@ -279,7 +279,7 @@ class DomainFactory(
     override fun clearUserInfo() {
         DomainThreadChecker.instance.requireDomainThread()
 
-        notifier.updateNotifications(ExactTimeStamp.Local.now, true)
+        notifier.updateNotifications(ExactTimeStamp.Local.now, clear = true)
     }
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
@@ -328,8 +328,8 @@ class DomainFactory(
         fun tick(tickData: TickData, forceNotify: Boolean) {
             notifier.updateNotificationsTick(
                     now,
-                    tickData.silent && !forceNotify,
-                    "${tickData.source}, runType: $runType"
+                    "${tickData.source}, runType: $runType",
+                    tickData.silent && !forceNotify
             )
 
             if (!tickData.waiting) tickData.release()
@@ -338,7 +338,7 @@ class DomainFactory(
         fun notify() {
             check(tickData == null)
 
-            notifier.updateNotifications(now, silent = false, sourceName = source)
+            notifier.updateNotifications(now, sourceName = source, silent = false)
         }
 
         when (runType) {
@@ -420,7 +420,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        notifier.updateNotificationsTick(now, silent, sourceName)
+        notifier.updateNotificationsTick(now, sourceName, silent)
 
         save(NotificationType.All)
     }

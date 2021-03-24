@@ -27,8 +27,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private const val MAX_NOTIFICATIONS_Q = 10
     }
 
-    fun updateNotificationsTick(now: ExactTimeStamp.Local, silent: Boolean, sourceName: String) {
-        updateNotifications(now, silent = silent, sourceName = sourceName)
+    fun updateNotificationsTick(now: ExactTimeStamp.Local, sourceName: String, silent: Boolean) {
+        updateNotifications(now, sourceName = sourceName, silent = silent)
 
         setIrrelevant(now)
 
@@ -87,9 +87,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     fun updateNotifications(
             now: ExactTimeStamp.Local,
-            clear: Boolean = false,
-            silent: Boolean = true,
             sourceName: String = "other",
+            silent: Boolean = true,
+            clear: Boolean = false,
     ) {
         val skipSave = domainFactory.aggregateData != null
 

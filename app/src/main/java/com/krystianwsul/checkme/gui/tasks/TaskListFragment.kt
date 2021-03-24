@@ -15,8 +15,8 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentTaskListBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
@@ -103,16 +103,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        DomainFactory.instance
-                .setTaskEndTimeStamps(
-                        DomainListenerManager.NotificationType.First(data!!.dataId),
-                        taskKeys as Set<TaskKey>,
-                        removeInstances,
-                )
+        DomainUpdater().setTaskEndTimeStamps(
+                DomainListenerManager.NotificationType.First(data!!.dataId),
+                taskKeys as Set<TaskKey>,
+                removeInstances,
+        )
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { listener.showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(
+                    DomainUpdater().clearTaskEndTimeStamps(
                             DomainListenerManager.NotificationType.First(data!!.dataId),
                             it,
                     )
@@ -829,8 +828,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun getOrdinal() = childTaskData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            DomainFactory.instance
-                    .setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
+            DomainUpdater().setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
                     .subscribe()
                     .addTo(createDisposable)
         }

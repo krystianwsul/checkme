@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.updateChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -50,16 +51,16 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .updateScheduleTask(
-                        DomainListenerManager.NotificationType.All,
-                        parameters.taskKey,
-                        createParameters.name,
-                        scheduleDatas,
-                        createParameters.note,
-                        sharedProjectParameters,
-                        createParameters.editImageState.writeImagePath,
-                )
+        return DomainUpdater().updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
+                parameters.taskKey,
+                createParameters.name,
+                scheduleDatas,
+                createParameters.note,
+                sharedProjectParameters,
+                createParameters.editImageState.writeImagePath,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
     }
 
@@ -67,17 +68,17 @@ class EditExistingTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey,
     ): Single<CreateResult> {
-        return DomainFactory.instance
-                .updateChildTask(
-                        DomainListenerManager.NotificationType.All,
-                        parameters.taskKey,
-                        createParameters.name,
-                        parentTaskKey,
-                        createParameters.note,
-                        createParameters.editImageState.writeImagePath,
-                        parameters.openedFromInstanceKey,
-                        createParameters.allReminders,
-                )
+        return DomainUpdater().updateChildTask(
+                DomainListenerManager.NotificationType.All,
+                parameters.taskKey,
+                createParameters.name,
+                parentTaskKey,
+                createParameters.note,
+                createParameters.editImageState.writeImagePath,
+                parameters.openedFromInstanceKey,
+                createParameters.allReminders,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
     }
 
@@ -87,15 +88,15 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .updateRootTask(
-                        DomainListenerManager.NotificationType.All,
-                        parameters.taskKey,
-                        createParameters.name,
-                        createParameters.note,
-                        sharedProjectKey,
-                        createParameters.editImageState.writeImagePath,
-                )
+        return DomainUpdater().updateRootTask(
+                DomainListenerManager.NotificationType.All,
+                parameters.taskKey,
+                createParameters.name,
+                createParameters.note,
+                sharedProjectKey,
+                createParameters.editImageState.writeImagePath,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
     }
 }

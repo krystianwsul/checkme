@@ -3,20 +3,19 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.Single
 
 @CheckResult
-fun DomainFactory.setInstancesDone(
+fun DomainUpdater.setInstancesDone(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: List<InstanceKey>,
         done: Boolean,
-): Single<ExactTimeStamp.Local> = scheduleOnDomain {
+): Single<ExactTimeStamp.Local> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.setInstancesDone")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(instanceKeys.isNotEmpty())
 
@@ -32,7 +31,5 @@ fun DomainFactory.setInstancesDone(
 
     save(notificationType)
 
-    notifyCloud(remoteProjects)
-
-    now
+    DomainUpdater.Result(now, DomainFactory.CloudParams(remoteProjects))
 }

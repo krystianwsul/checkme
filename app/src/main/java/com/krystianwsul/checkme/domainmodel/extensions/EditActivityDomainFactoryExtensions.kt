@@ -3,11 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import android.net.Uri
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -136,7 +132,7 @@ fun DomainFactory.getCreateTaskData(
 }
 
 @CheckResult
-fun DomainFactory.createScheduleRootTask(
+fun DomainUpdater.createScheduleRootTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -145,9 +141,8 @@ fun DomainFactory.createScheduleRootTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = scheduleOnDomain {
+): Single<EditDelegate.CreateResult> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -173,13 +168,11 @@ fun DomainFactory.createScheduleRootTask(
 
     save(notificationType)
 
-    notifyCloud(task.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    task.toCreateResult(now)
+    DomainUpdater.Result(task.toCreateResult(now), DomainFactory.CloudParams(task.project))
 }
 
 private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) =
@@ -188,7 +181,7 @@ private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) 
                 ?: EditDelegate.CreateResult.Task(taskKey)
 
 @CheckResult
-fun DomainFactory.createChildTask(
+fun DomainUpdater.createChildTask(
         notificationType: DomainListenerManager.NotificationType,
         parentTaskKey: TaskKey,
         name: String,
@@ -196,9 +189,8 @@ fun DomainFactory.createChildTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = scheduleOnDomain {
+): Single<EditDelegate.CreateResult> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createChildTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -220,17 +212,15 @@ fun DomainFactory.createChildTask(
 
     save(notificationType)
 
-    notifyCloud(childTask.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    childTask.toCreateResult(now)
+    DomainUpdater.Result(childTask.toCreateResult(now), DomainFactory.CloudParams(childTask.project))
 }
 
 @CheckResult
-fun DomainFactory.createRootTask(
+fun DomainUpdater.createRootTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         note: String?,
@@ -238,9 +228,8 @@ fun DomainFactory.createRootTask(
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = scheduleOnDomain {
+): Single<EditDelegate.CreateResult> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createRootTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -263,17 +252,15 @@ fun DomainFactory.createRootTask(
 
     save(notificationType)
 
-    notifyCloud(task.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
     }
 
-    task.toCreateResult(now)
+    DomainUpdater.Result(task.toCreateResult(now), DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
-fun DomainFactory.updateScheduleTask(
+fun DomainUpdater.updateScheduleTask(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -282,9 +269,8 @@ fun DomainFactory.updateScheduleTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -318,17 +304,15 @@ fun DomainFactory.updateScheduleTask(
 
     save(notificationType)
 
-    notifyCloud(task.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    task.taskKey
+    DomainUpdater.Result(task.taskKey, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
-fun DomainFactory.updateChildTask(
+fun DomainUpdater.updateChildTask(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -338,9 +322,8 @@ fun DomainFactory.updateChildTask(
         removeInstanceKey: InstanceKey?,
         allReminders: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.updateChildTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -390,17 +373,15 @@ fun DomainFactory.updateChildTask(
 
     save(notificationType)
 
-    notifyCloud(task.project) // todo image on server, purge images after this call
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    task.taskKey
+    DomainUpdater.Result(task.taskKey, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
-fun DomainFactory.updateRootTask(
+fun DomainUpdater.updateRootTask(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -408,9 +389,8 @@ fun DomainFactory.updateRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.updateRootTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -435,17 +415,15 @@ fun DomainFactory.updateRootTask(
 
     save(notificationType)
 
-    notifyCloud(task.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    task.taskKey
+    DomainUpdater.Result(task.taskKey, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
-fun DomainFactory.createScheduleJoinRootTask(
+fun DomainUpdater.createScheduleJoinRootTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -455,9 +433,8 @@ fun DomainFactory.createScheduleJoinRootTask(
         imagePath: Pair<String, Uri>?,
         allReminders: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
@@ -504,17 +481,15 @@ fun DomainFactory.createScheduleJoinRootTask(
 
     save(notificationType)
 
-    notifyCloud(newParentTask.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
     }
 
-    newParentTask.taskKey
+    DomainUpdater.Result(newParentTask.taskKey, DomainFactory.CloudParams(newParentTask.project))
 }
 
 @CheckResult
-fun DomainFactory.createJoinChildTask(
+fun DomainUpdater.createJoinChildTask(
         notificationType: DomainListenerManager.NotificationType,
         parentTaskKey: TaskKey,
         name: String,
@@ -522,9 +497,8 @@ fun DomainFactory.createJoinChildTask(
         note: String?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createJoinChildTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
@@ -556,17 +530,15 @@ fun DomainFactory.createJoinChildTask(
 
     save(notificationType)
 
-    notifyCloud(childTask.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    childTask.taskKey
+    DomainUpdater.Result(childTask.taskKey, DomainFactory.CloudParams(childTask.project))
 }
 
 @CheckResult
-fun DomainFactory.createJoinRootTask(
+fun DomainUpdater.createJoinRootTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -574,9 +546,8 @@ fun DomainFactory.createJoinRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = scheduleOnDomain {
+): Single<TaskKey> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createJoinRootTask")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
@@ -609,13 +580,11 @@ fun DomainFactory.createJoinRootTask(
 
     save(notificationType)
 
-    notifyCloud(newParentTask.project)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
     }
 
-    newParentTask.taskKey
+    DomainUpdater.Result(newParentTask.taskKey, DomainFactory.CloudParams(newParentTask.project))
 }
 
 private fun DomainFactory.getParentTreeDatas(

@@ -355,7 +355,7 @@ class DomainFactory(
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
-                notifyCloud(notificationProjects, notificationUserKeys)
+                notifyCloud(CloudParams(notificationProjects, notificationUserKeys))
         }
     }
 
@@ -371,7 +371,7 @@ class DomainFactory(
             taskKeys: Set<TaskKey>,
             deleteInstances: Boolean,
             now: ExactTimeStamp.Local,
-    ): TaskUndoData {
+    ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
         fun Task<*>.getAllChildren(): List<Task<*>> = listOf(this) + getChildTaskHierarchies(now).map {
@@ -394,9 +394,7 @@ class DomainFactory(
 
         save(notificationType)
 
-        notifyCloud(remoteProjects)
-
-        return taskUndoData
+        return taskUndoData to DomainUpdater.Params(CloudParams(remoteProjects))
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
@@ -674,17 +672,14 @@ class DomainFactory(
                 }
     }
 
-    fun notifyCloud(
-            project: Project<*>,
-            userKeys: Collection<UserKey> = emptySet(),
-    ) = notifyCloud(setOf(project), userKeys)
+    data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {
 
-    fun notifyCloud(
-            inProjects: Collection<Project<*>>,
-            inUserKeys: Collection<UserKey> = emptySet(),
-    ) {
-        val projects = inProjects.toMutableSet()
-        val userKeys = inUserKeys.toMutableSet()
+        constructor(project: Project<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
+    }
+
+    fun notifyCloud(cloudParams: CloudParams) {
+        val projects = cloudParams.projects.toMutableSet()
+        val userKeys = cloudParams.userKeys.toMutableSet()
 
         aggregateData?.run {
             notificationProjects.addAll(projects)

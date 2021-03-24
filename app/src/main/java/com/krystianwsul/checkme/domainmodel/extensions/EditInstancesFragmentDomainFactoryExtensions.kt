@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -84,14 +84,13 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
 }
 
 @CheckResult
-fun DomainFactory.setInstancesDateTime(
+fun DomainUpdater.setInstancesDateTime(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): Single<UndoData> = scheduleOnDomain {
+): Single<UndoData> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(instanceKeys.isNotEmpty())
 
@@ -134,9 +133,7 @@ fun DomainFactory.setInstancesDateTime(
 
     save(notificationType)
 
-    notifyCloud(projects)
-
-    editInstancesUndoData
+    DomainUpdater.Result(editInstancesUndoData, DomainFactory.CloudParams(projects))
 }
 
 private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
@@ -161,13 +158,12 @@ private class SetInstanceParentUndoData(
 }
 
 @CheckResult
-fun DomainFactory.setInstancesParent(
+fun DomainUpdater.setInstancesParent(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
-): Single<UndoData> = scheduleOnDomain {
+): Single<UndoData> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.setInstancesParent")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     val now = ExactTimeStamp.Local.now
 
@@ -197,9 +193,7 @@ fun DomainFactory.setInstancesParent(
 
     save(notificationType)
 
-    notifyCloud(projects)
-
-    ListUndoData(undoDatas)
+    DomainUpdater.Result(ListUndoData(undoDatas), DomainFactory.CloudParams(projects))
 }
 
 fun DomainFactory.getEditInstancesSearchData(

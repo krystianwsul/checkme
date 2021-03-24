@@ -5,6 +5,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDoneService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
@@ -50,9 +51,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstanceNotificationDoneService(instanceKey) }
-                    .ignoreElement()
+            return DomainUpdater().setInstanceNotificationDoneService(instanceKey)
         }
     }
 
@@ -71,9 +70,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstanceAddHourService(instanceKey) }
-                    .ignoreElement()
+            return DomainUpdater().setInstanceAddHourService(instanceKey)
         }
     }
 

@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -242,26 +242,25 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        return DomainFactory.instance
-                .run {
-                    if (projectId == null) {
-                        check(saveState.removedIds.isEmpty())
+        return DomainUpdater().run {
+            if (projectId == null) {
+                check(saveState.removedIds.isEmpty())
 
-                        createProject(
-                                DomainListenerManager.NotificationType.All,
-                                name,
-                                saveState.addedIds,
-                        )
-                    } else {
-                        updateProject(
-                                DomainListenerManager.NotificationType.All,
-                                projectId!!,
-                                name,
-                                saveState.addedIds,
-                                saveState.removedIds,
-                        )
-                    }
-                }
+                createProject(
+                        DomainListenerManager.NotificationType.All,
+                        name,
+                        saveState.addedIds,
+                )
+            } else {
+                updateProject(
+                        DomainListenerManager.NotificationType.All,
+                        projectId!!,
+                        name,
+                        saveState.addedIds,
+                        saveState.removedIds,
+                )
+            }
+        }
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {

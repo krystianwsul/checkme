@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -24,6 +24,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 
 class DoneInstanceNode(
@@ -133,15 +134,15 @@ class DoneInstanceNode(
                 val nodeCollection = dividerNode.nodeCollection
                 val groupAdapter = nodeCollection.groupAdapter
 
-                DomainFactory.instance
-                        .setInstanceDone(
-                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                instanceData.instanceKey,
-                                false,
-                        )
+                DomainUpdater().setInstanceDone(
+                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                        instanceData.instanceKey,
+                        false,
+                )
+                        .observeOn(AndroidSchedulers.mainThread())
                         .flatMapMaybe { groupListFragment.listener.showSnackbarNotDoneMaybe(1) }
                         .flatMapSingle {
-                            DomainFactory.instance.setInstanceDone(
+                            DomainUpdater().setInstanceDone(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     instanceData.instanceKey,
                                     true,

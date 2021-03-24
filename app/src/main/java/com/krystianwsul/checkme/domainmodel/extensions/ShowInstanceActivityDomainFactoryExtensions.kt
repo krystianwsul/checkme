@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -65,20 +65,25 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 }
 
 @CheckResult
-fun DomainFactory.setTaskEndTimeStamps(
+fun DomainUpdater.setTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey,
-): Single<Pair<TaskUndoData, Boolean>> = scheduleOnDomain {
+): Single<Pair<TaskUndoData, Boolean>> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     val now = ExactTimeStamp.Local.now
 
-    val taskUndoData = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
+    val (taskUndoData, params) = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
 
-    Pair(taskUndoData, debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)))
+    DomainUpdater.Result(
+            Pair(
+                    taskUndoData,
+                    debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)),
+            ),
+            params,
+    )
 }
 
 private fun DomainFactory.getGroupListData(

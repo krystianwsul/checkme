@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -89,13 +90,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showInstanceViewModel.stop()
 
-        val undoTaskDataSingle = DomainFactory.instance
-                .setTaskEndTimeStamps(
-                        showInstanceViewModel.dataId.toFirst(),
-                        taskKeys as Set<TaskKey>,
-                        removeInstances,
-                        instanceKey,
-                )
+        val undoTaskDataSingle = DomainUpdater().setTaskEndTimeStamps(
+                showInstanceViewModel.dataId.toFirst(),
+                taskKeys as Set<TaskKey>,
+                removeInstances,
+                instanceKey,
+        )
                 .observeOn(AndroidSchedulers.mainThread())
                 .cache()
 
@@ -104,7 +104,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .doOnSuccess { showInstanceViewModel.start(instanceKey) }
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
+                    DomainUpdater().clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)
@@ -164,17 +164,16 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 R.id.instanceMenuHour -> {
                                     check(showHour())
 
-                                    DomainFactory.instance
-                                            .setInstancesAddHourActivity(
-                                                    showInstanceViewModel.dataId.toFirst(),
-                                                    listOf(instanceKey),
-                                            )
+                                    DomainUpdater().setInstancesAddHourActivity(
+                                            showInstanceViewModel.dataId.toFirst(),
+                                            listOf(instanceKey),
+                                    )
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .flatMapMaybe {
                                                 showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
                                             }
                                             .flatMapCompletable {
-                                                DomainFactory.instance.undoInstancesAddHour(
+                                                DomainUpdater().undoInstancesAddHour(
                                                         showInstanceViewModel.dataId.toFirst(),
                                                         it,
                                                 )
@@ -340,8 +339,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.instance
-                .setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
+        DomainUpdater().setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
                 .subscribe()
                 .addTo(createDisposable)
     }

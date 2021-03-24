@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -55,16 +55,15 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         @Suppress("UNCHECKED_CAST")
-        DomainFactory.instance
-                .setTaskEndTimeStamps(
-                        showTaskInstancesViewModel.dataId.toFirst(),
-                        taskKeys as Set<TaskKey>,
-                        removeInstances,
-                )
+        DomainUpdater().setTaskEndTimeStamps(
+                showTaskInstancesViewModel.dataId.toFirst(),
+                taskKeys as Set<TaskKey>,
+                removeInstances,
+        )
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainFactory.instance.clearTaskEndTimeStamps(showTaskInstancesViewModel.dataId.toFirst(), it)
+                    DomainUpdater().clearTaskEndTimeStamps(showTaskInstancesViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

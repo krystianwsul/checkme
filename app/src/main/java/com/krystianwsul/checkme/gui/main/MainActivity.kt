@@ -26,8 +26,8 @@ import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.ActivityMainBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -158,16 +158,12 @@ class MainActivity :
         val (dataId, taskKeys) = deleteTasksData as DeleteTasksData
 
         @Suppress("UNCHECKED_CAST")
-        DomainFactory.instance
-                .setTaskEndTimeStamps(dataId.toFirst(), taskKeys, removeInstances)
+        DomainUpdater().setTaskEndTimeStamps(dataId.toFirst(), taskKeys, removeInstances)
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
                     // todo get dataId from current screen
-                    DomainFactory.instance.clearTaskEndTimeStamps(
-                            DomainListenerManager.NotificationType.First(dataId),
-                            it,
-                    )
+                    DomainUpdater().clearTaskEndTimeStamps(DomainListenerManager.NotificationType.First(dataId), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

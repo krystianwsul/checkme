@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -72,19 +73,19 @@ class JoinTasksEditDelegate(
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult> {
-        return DomainFactory.instance
-                .createScheduleJoinRootTask(
-                        DomainListenerManager.NotificationType.All,
-                        createParameters.name,
-                        scheduleDatas,
-                        parameters.joinables,
-                        createParameters.note,
-                        sharedProjectParameters,
-                        createParameters.editImageState
-                                .writeImagePath
-                                ?.value,
-                        createParameters.allReminders,
-                )
+        return DomainUpdater().createScheduleJoinRootTask(
+                DomainListenerManager.NotificationType.All,
+                createParameters.name,
+                scheduleDatas,
+                parameters.joinables,
+                createParameters.note,
+                sharedProjectParameters,
+                createParameters.editImageState
+                        .writeImagePath
+                        ?.value,
+                createParameters.allReminders,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
                 .applyCreatedTaskKey()
     }
@@ -95,18 +96,18 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .createJoinChildTask(
-                        DomainListenerManager.NotificationType.All,
-                        parentTaskKey,
-                        createParameters.name,
-                        taskKeys,
-                        createParameters.note,
-                        createParameters.editImageState
-                                .writeImagePath
-                                ?.value,
-                        instanceKeys,
-                )
+        return DomainUpdater().createJoinChildTask(
+                DomainListenerManager.NotificationType.All,
+                parentTaskKey,
+                createParameters.name,
+                taskKeys,
+                createParameters.note,
+                createParameters.editImageState
+                        .writeImagePath
+                        ?.value,
+                instanceKeys,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
                 .applyCreatedTaskKey()
     }
@@ -117,18 +118,18 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainFactory.instance
-                .createJoinRootTask(
-                        DomainListenerManager.NotificationType.All,
-                        createParameters.name,
-                        taskKeys,
-                        createParameters.note,
-                        sharedProjectKey,
-                        createParameters.editImageState
-                                .writeImagePath
-                                ?.value,
-                        instanceKeys,
-                )
+        return DomainUpdater().createJoinRootTask(
+                DomainListenerManager.NotificationType.All,
+                createParameters.name,
+                taskKeys,
+                createParameters.note,
+                sharedProjectKey,
+                createParameters.editImageState
+                        .writeImagePath
+                        ?.value,
+                instanceKeys,
+        )
+                .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
                 .applyCreatedTaskKey()
     }

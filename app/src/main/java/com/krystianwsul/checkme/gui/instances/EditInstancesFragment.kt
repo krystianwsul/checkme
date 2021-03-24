@@ -21,7 +21,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
@@ -227,17 +227,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            DomainFactory.instance
-                    .run {
-                        state.parentInstanceData
-                                ?.let { setInstancesParent(dataId.toFirst(), data.instanceKeys, it.instanceKey) }
-                                ?: setInstancesDateTime(
-                                        dataId.toFirst(),
-                                        data.instanceKeys,
-                                        state.date,
-                                        state.timePairPersist.timePair,
-                                )
-                    }
+            DomainUpdater().run {
+                state.parentInstanceData
+                        ?.let { setInstancesParent(dataId.toFirst(), data.instanceKeys, it.instanceKey) }
+                        ?: setInstancesDateTime(
+                                dataId.toFirst(),
+                                data.instanceKeys,
+                                state.date,
+                                state.timePairPersist.timePair,
+                        )
+            }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy {
                         dismiss()

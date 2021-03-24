@@ -4,7 +4,7 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.completeOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.SharedProject
@@ -41,11 +41,11 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
 }
 
 @CheckResult
-fun DomainFactory.createProject(
+fun DomainUpdater.createProject(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         friends: Set<UserKey>,
-) = completeOnDomain {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -72,17 +72,17 @@ fun DomainFactory.createProject(
 
     save(notificationType)
 
-    notifyCloud(remoteProject)
+    DomainUpdater.Params(DomainFactory.CloudParams(remoteProject))
 }
 
 @CheckResult
-fun DomainFactory.updateProject(
+fun DomainUpdater.updateProject(
         notificationType: DomainListenerManager.NotificationType,
         projectId: ProjectKey.Shared,
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-) = completeOnDomain {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())
@@ -103,5 +103,5 @@ fun DomainFactory.updateProject(
 
     save(notificationType)
 
-    notifyCloud(remoteProject, removedFriends)
+    DomainUpdater.Params(DomainFactory.CloudParams(remoteProject, removedFriends))
 }

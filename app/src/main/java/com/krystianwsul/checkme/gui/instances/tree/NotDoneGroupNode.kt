@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -29,6 +29,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import java.util.*
 
@@ -243,15 +244,14 @@ class NotDoneGroupNode(
                 CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(
+                    fun setDone(done: Boolean) = DomainUpdater().setInstanceDone(
                             groupAdapter.dataId.toFirst(),
                             instanceKey,
                             done,
                     )
 
-                    setDone(true).flatMapMaybe {
-                        groupListFragment.listener.showSnackbarDoneMaybe(1)
-                    }
+                    setDone(true).observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
                             .flatMapSingle { setDone(false) }
                             .subscribe()
                             .addTo(groupListFragment.attachedToWindowDisposable)
@@ -378,12 +378,11 @@ class NotDoneGroupNode(
     override fun getOrdinal() = singleInstanceData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
-        DomainFactory.instance
-                .setOrdinal(
-                        groupListFragment.parameters.dataId.toFirst(),
-                        singleInstanceData.taskKey,
-                        ordinal,
-                )
+        DomainUpdater().setOrdinal(
+                groupListFragment.parameters.dataId.toFirst(),
+                singleInstanceData.taskKey,
+                ordinal,
+        )
                 .subscribe()
                 .addTo(groupListFragment.attachedToWindowDisposable)
     }
@@ -571,15 +570,15 @@ class NotDoneGroupNode(
                     val groupAdapter = parentNodeCollection.groupAdapter
                     val instanceKey = instanceData.instanceKey
 
-                    DomainFactory.instance
-                            .setInstanceDone(
-                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                    instanceKey,
-                                    true
-                            )
+                    DomainUpdater().setInstanceDone(
+                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                            instanceKey,
+                            true
+                    )
+                            .observeOn(AndroidSchedulers.mainThread())
                             .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
                             .flatMapSingle {
-                                DomainFactory.instance.setInstanceDone(
+                                DomainUpdater().setInstanceDone(
                                         DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                         instanceKey,
                                         false,
@@ -630,12 +629,11 @@ class NotDoneGroupNode(
         override fun getOrdinal() = instanceData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            DomainFactory.instance
-                    .setOrdinal(
-                            groupListFragment.parameters.dataId.toFirst(),
-                            instanceData.taskKey,
-                            ordinal,
-                    )
+            DomainUpdater().setOrdinal(
+                    groupListFragment.parameters.dataId.toFirst(),
+                    instanceData.taskKey,
+                    ordinal,
+            )
                     .subscribe()
                     .addTo(groupListFragment.attachedToWindowDisposable)
         }

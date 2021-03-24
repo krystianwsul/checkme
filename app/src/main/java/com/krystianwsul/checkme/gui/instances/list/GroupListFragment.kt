@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.gui.base.AbstractActivity
@@ -166,7 +167,7 @@ class GroupListFragment @JvmOverloads constructor(
             fun setInstancesDone(
                     instanceKeys: List<InstanceKey>,
                     done: Boolean,
-            ) = DomainFactory.instance.setInstancesDone(
+            ) = DomainUpdater().setInstancesDone(
                     DomainListenerManager.NotificationType.First(parameters.dataId),
                     instanceKeys,
                     done,
@@ -177,16 +178,14 @@ class GroupListFragment @JvmOverloads constructor(
                     check(showHour(selectedDatas))
                     val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
-
-                    DomainFactory.instance
-                            .setInstancesAddHourActivity(
-                                    DomainListenerManager.NotificationType.First(parameters.dataId),
-                                    instanceKeys,
-                            )
+                    DomainUpdater().setInstancesAddHourActivity(
+                            DomainListenerManager.NotificationType.First(parameters.dataId),
+                            instanceKeys,
+                    )
                             .observeOn(AndroidSchedulers.mainThread())
                             .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
                             .flatMapCompletable {
-                                DomainFactory.instance.undoInstancesAddHour(
+                                DomainUpdater().undoInstancesAddHour(
                                         DomainListenerManager.NotificationType.First(parameters.dataId),
                                         it,
                                 )
@@ -944,10 +943,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         listener.showSnackbarHourMaybe(count)
                 .flatMapCompletable {
-                    DomainFactory.instance.undo(
-                            DomainListenerManager.NotificationType.First(parameters.dataId),
-                            undoData,
-                    )
+                    DomainUpdater().undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
                 }
                 .subscribe()
                 .addTo(attachedToWindowDisposable)

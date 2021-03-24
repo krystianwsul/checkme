@@ -411,11 +411,7 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    private fun updateNotificationsTick(
-            silent: Boolean,
-            sourceName: String,
-            domainChanged: Boolean = false,
-    ) {
+    private fun updateNotificationsTick(silent: Boolean, sourceName: String) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
 
         DomainThreadChecker.instance.requireDomainThread()
@@ -424,7 +420,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        notifier.updateNotificationsTick(now, silent, sourceName, domainChanged)
+        notifier.updateNotificationsTick(now, silent, sourceName)
 
         save(NotificationType.All)
     }

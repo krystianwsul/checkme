@@ -22,16 +22,14 @@ sealed class TickData {
 
     override fun toString() = super.toString() + " silent: $silent, source: $source"
 
-    class Normal(
-            override val silent: Boolean,
-            override val source: String,
-            override val domainChanged: Boolean = false,
-    ) : TickData() {
+    class Normal(override val silent: Boolean, override val source: String) : TickData() {
 
         override var shouldClear = false
             private set
 
         override val waiting = false
+
+        override val domainChanged = false
 
         override fun release() {
             shouldClear = true

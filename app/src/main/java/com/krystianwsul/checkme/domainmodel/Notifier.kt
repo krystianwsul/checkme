@@ -27,13 +27,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private const val MAX_NOTIFICATIONS_Q = 10
     }
 
-    fun updateNotificationsTick(
-            now: ExactTimeStamp.Local,
-            silent: Boolean,
-            sourceName: String,
-            domainChanged: Boolean = false,
-    ) {
-        updateNotifications(now, silent = silent, sourceName = sourceName, domainChanged = domainChanged)
+    fun updateNotificationsTick(now: ExactTimeStamp.Local, silent: Boolean, sourceName: String) {
+        updateNotifications(now, silent = silent, sourceName = sourceName)
 
         setIrrelevant(now)
 
@@ -94,16 +89,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             now: ExactTimeStamp.Local,
             clear: Boolean = false,
             silent: Boolean = true,
-            removedTaskKeys: List<TaskKey> = listOf(),
             sourceName: String = "other",
-            domainChanged: Boolean = false,
     ) {
         val skipSave = domainFactory.aggregateData != null
 
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(silent, sourceName, domainChanged))
+            TickHolder.addTickData(TickData.Normal(silent, sourceName))
             return
         }
 
@@ -117,7 +110,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         it.done == null
                                 && !it.getNotified(domainFactory.localFactory)
                                 && it.instanceDateTime.toLocalExactTimeStamp() <= now
-                                && !removedTaskKeys.contains(it.taskKey)
                                 && it.isAssignedToMe(now, domainFactory.myUserFactory.user)
                     }
                     .associateBy { it.instanceKey }

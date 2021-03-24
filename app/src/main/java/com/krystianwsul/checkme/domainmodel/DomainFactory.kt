@@ -59,8 +59,6 @@ class DomainFactory(
 
         val instance get() = nullableInstance!!
 
-        private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
-
         var firstRun = false
 
         val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
@@ -300,12 +298,9 @@ class DomainFactory(
 
         aggregateData = AggregateData()
 
-        Preferences.tickLog.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
+        Preferences.tickLog.logLineHour("DomainFactory: notifiying listeners")
 
         updateIsSaved()
-
-        firebaseListeners.forEach { it(this) }
-        firebaseListeners.clear()
 
         val copyAggregateData = aggregateData!!
         aggregateData = null

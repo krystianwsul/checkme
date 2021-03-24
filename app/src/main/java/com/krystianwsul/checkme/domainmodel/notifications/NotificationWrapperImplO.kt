@@ -17,7 +17,7 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
         private val HIGH_CHANNEL = NotificationChannel(
                 HIGH_CHANNEL_ID,
                 "Heads-up reminders",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH,
         )
 
         private const val MEDIUM_CHANNEL_ID = "mediumChannel"
@@ -25,7 +25,7 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
         private val MEDIUM_CHANNEL = NotificationChannel(
                 MEDIUM_CHANNEL_ID,
                 "Regular reminders",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
         )
 
         private const val SILENT_CHANNEL_ID = "silentChannel"
@@ -33,7 +33,7 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
         private val SILENT_CHANNEL = NotificationChannel(
                 SILENT_CHANNEL_ID,
                 "Silent reminders",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
         )
     }
 
@@ -50,6 +50,6 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
                 silent -> SILENT_CHANNEL_ID
                 highPriority -> HIGH_CHANNEL_ID
                 else -> MEDIUM_CHANNEL_ID
-            }
+            },
     )
 }

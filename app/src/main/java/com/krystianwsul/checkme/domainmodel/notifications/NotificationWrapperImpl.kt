@@ -43,7 +43,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         @JvmStatic
         protected val KEY_HASH_CODE = "com.krystianwsul.checkme.notification_hash_code"
 
-        private const val NOTIFICATION_ID_GROUP = 0
+        @JvmStatic
+        protected val NOTIFICATION_ID_GROUP = 0
+        private const val NOTIFICATION_ID_GROUP_NOT_SUMMARY = 1
 
         private const val TAG_TEMPORARY = "temporary"
 
@@ -56,7 +58,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open val maxInboxLines = 5
 
-    protected val notificationManager by lazy { MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    protected val notificationManager by lazy {
+        MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
 
     private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
@@ -435,8 +439,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 NotificationAction.DeleteGroupNotification(instanceKeys)
         )
 
-        val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val notificationId = if (groupData.summary) NOTIFICATION_ID_GROUP else NOTIFICATION_ID_GROUP_NOT_SUMMARY
+
+        val pendingContentIntent = PendingIntent.getActivity(
+                MyApplication.instance,
+                notificationId,
+                ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys),
+                PendingIntent.FLAG_UPDATE_CURRENT,
+        )
 
         val (inboxStyle, styleHash) = getInboxStyle(
                 groupData.instances
@@ -451,18 +461,18 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val notificationHash = NotificationHash(
                 title,
                 text,
-                NOTIFICATION_ID_GROUP,
+                notificationId,
                 null,
                 styleHash,
-                "0",
+                notificationId.toString(),
                 null,
-                null
+                null,
         )
 
         notify(
                 title,
                 text,
-                NOTIFICATION_ID_GROUP,
+                notificationId,
                 pendingDeleteIntent,
                 pendingContentIntent,
                 groupData.silent,
@@ -470,12 +480,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 null,
                 inboxStyle,
                 autoCancel = false,
-                summary = true,
-                sortKey = "0",
+                summary = groupData.summary,
+                sortKey = notificationId.toString(),
                 largeIcon = null,
                 notificationHash = notificationHash,
                 tag = null,
-                highPriority = groupData.highPriority
+                highPriority = groupData.highPriority,
         )
     }
 
@@ -487,7 +497,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent(), PendingIntent.FLAG_UPDATE_CURRENT)!!
+        val pendingIntent = PendingIntent.getBroadcast(
+                MyApplication.instance,
+                0,
+                AlarmReceiver.newIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT,
+        )!!
+
         alarmManager.cancel(pendingIntent)
         nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
     }
@@ -503,9 +519,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val pendingContentIntent = PendingIntent.getActivity(
                 MyApplication.context,
-                0,
+                notificationId,
                 MainActivity.newIntent(),
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
         notify(
@@ -520,7 +536,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 null,
                 autoCancel = true,
                 summary = false,
-                sortKey = "1",
+                sortKey = notificationId.toString(),
                 largeIcon = null,
                 notificationHash = NotificationHash(
                         source,
@@ -528,12 +544,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         notificationId,
                         null,
                         null,
-                        "1",
+                        notificationId.toString(),
                         null,
                         TAG_TEMPORARY
                 ),
                 TAG_TEMPORARY,
-                highPriority
+                highPriority,
         )
     }
 

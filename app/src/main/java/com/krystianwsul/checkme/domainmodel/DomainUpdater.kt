@@ -7,29 +7,32 @@ import io.reactivex.rxjava3.core.Single
 
 class DomainUpdater(domainFactory: DomainFactory? = null) {
 
-    private val domainFactorySingle = Single.just(domainFactory) ?: DomainFactory.instanceRelay
+    private val domainFactorySingle = domainFactory?.let { Single.just(it) } ?: DomainFactory.instanceRelay
             .filterNotNull()
             .firstOrError()
 
     fun <T : Any> updateDomainSingle(action: DomainFactory.() -> Result<T>): Single<T> {
-        return domainFactorySingle.flatMap { it.onReady() }
+        val resultSingle = domainFactorySingle.flatMap { it.onReady() }
                 .observeOnDomain()
                 .doOnSuccess { check(!it.isSaved.value!!) }
                 .map { it to it.action() }
-                .doOnSuccess { (domainFactory, result) ->
-                    domainFactory.apply {
-                        result.params.notifierParams?.let(notifier::updateNotifications)
+                .cache()
 
-                        result.params
-                                .notificationType
-                                ?.let(::save)
+        resultSingle.subscribe { (domainFactory, result) ->
+            domainFactory.apply {
+                result.params.notifierParams?.let(notifier::updateNotifications)
 
-                        result.params
-                                .cloudParams
-                                ?.let(::notifyCloud)
-                    }
-                }
-                .map { it.second.data }
+                result.params
+                        .notificationType
+                        ?.let(::save)
+
+                result.params
+                        .cloudParams
+                        ?.let(::notifyCloud)
+            }
+        }
+
+        return resultSingle.map { (_, result) -> result.data }
     }
 
     fun updateDomainCompletable(action: DomainFactory.() -> Params) =

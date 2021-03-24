@@ -30,15 +30,15 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
                         MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
 
                     // guessing, basically
-                    cancelNotification(0)
+                    cancelNotification(NOTIFICATION_ID_GROUP)
                     cancelNotification(lastNotificationId)
                 }
                 2 -> {
-                    if (statusBarNotifications.none { it.id == 0 })
+                    if (statusBarNotifications.none { it.id == NOTIFICATION_ID_GROUP })
                         throw NotificationException(lastNotificationId, statusBarNotifications)
 
                     if (statusBarNotifications.any { it.id == lastNotificationId }) {
-                        cancelNotification(0)
+                        cancelNotification(NOTIFICATION_ID_GROUP)
                         cancelNotification(lastNotificationId)
                     }
                 }
@@ -48,9 +48,9 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             if (statusBarNotifications.size != 1)
                 return
 
-            check(statusBarNotifications.single().id == 0)
+            check(statusBarNotifications.single().id == NOTIFICATION_ID_GROUP)
 
-            cancelNotification(0)
+            cancelNotification(NOTIFICATION_ID_GROUP)
         }
     }
 
@@ -95,10 +95,15 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
         if (summary) setGroupSummary(true)
     }
 
-    override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
+    override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour(
+            "NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id }
+    )
 
     private class NotificationException(
             lastNotificationId: Int,
-            statusBarNotifications: Iterable<StatusBarNotification>
-    ) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
+            statusBarNotifications: Iterable<StatusBarNotification>,
+    ) : RuntimeException(
+            "last id: $lastNotificationId, shown ids: " +
+                    statusBarNotifications.joinToString(", ") { it.id.toString() }
+    )
 }

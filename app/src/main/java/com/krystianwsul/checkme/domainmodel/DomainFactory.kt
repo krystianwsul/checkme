@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.firebase.loaders.Snapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -68,13 +67,6 @@ class DomainFactory(
                 .distinctUntilChanged()
                 .replay(1)!!
                 .apply { connect() }
-
-        // emits on domain thread
-        fun onReady() = instanceRelay.subscribeOnDomain()
-                .filterNotNull()
-                .firstOrError()
-                .flatMap { it.onReady() }
-                .observeOnDomain()
 
         @CheckResult
         fun setFirebaseTickListener(newTickData: TickData) = completeOnDomain {

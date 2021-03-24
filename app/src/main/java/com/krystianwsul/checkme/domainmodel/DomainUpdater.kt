@@ -1,15 +1,20 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Single
 
 
 class DomainUpdater(domainFactory: DomainFactory? = null) {
 
-    private val domainFactorySingle = domainFactory?.onReady() ?: DomainFactory.onReady()
+    private val domainFactorySingle = Single.just(domainFactory) ?: DomainFactory.instanceRelay
+            .filterNotNull()
+            .firstOrError()
 
     fun <T : Any> updateDomainSingle(action: DomainFactory.() -> Result<T>): Single<T> {
-        return domainFactorySingle.doOnSuccess { check(!it.isSaved.value!!) }
+        return domainFactorySingle.flatMap { it.onReady() }
+                .observeOnDomain()
+                .doOnSuccess { check(!it.isSaved.value!!) }
                 .map { it to it.action() }
                 .doOnSuccess { (domainFactory, result) ->
                     domainFactory.apply {

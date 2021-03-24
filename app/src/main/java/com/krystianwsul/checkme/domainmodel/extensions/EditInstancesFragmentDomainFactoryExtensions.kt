@@ -129,9 +129,7 @@ fun DomainUpdater.setInstancesDateTime(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Result(editInstancesUndoData, notificationType, DomainFactory.CloudParams(projects))
+    DomainUpdater.Result(editInstancesUndoData, now, notificationType, DomainFactory.CloudParams(projects))
 }
 
 private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
@@ -187,9 +185,7 @@ fun DomainUpdater.setInstancesParent(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Result(ListUndoData(undoDatas), notificationType, DomainFactory.CloudParams(projects))
+    DomainUpdater.Result(ListUndoData(undoDatas), now, notificationType, DomainFactory.CloudParams(projects))
 }
 
 fun DomainFactory.getEditInstancesSearchData(

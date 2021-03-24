@@ -164,13 +164,9 @@ fun DomainUpdater.createScheduleRootTask(
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
-    }
-
-    DomainUpdater.Result(task.toCreateResult(now), notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.toCreateResult(now), now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) =
@@ -206,13 +202,14 @@ fun DomainUpdater.createChildTask(
             copyTaskKey
     )
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
-    }
-
-    DomainUpdater.Result(childTask.toCreateResult(now), notificationType, DomainFactory.CloudParams(childTask.project))
+    DomainUpdater.Result(
+            childTask.toCreateResult(now),
+            now,
+            notificationType,
+            DomainFactory.CloudParams(childTask.project),
+    )
 }
 
 @CheckResult
@@ -244,13 +241,9 @@ fun DomainUpdater.createRootTask(
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
-    }
-
-    DomainUpdater.Result(task.toCreateResult(now), notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.toCreateResult(now), now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -294,13 +287,9 @@ fun DomainUpdater.updateScheduleTask(
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-    }
-
-    DomainUpdater.Result(task.taskKey, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -361,13 +350,9 @@ fun DomainUpdater.updateChildTask(
         }
     }
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-    }
-
-    DomainUpdater.Result(task.taskKey, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -401,13 +386,11 @@ fun DomainUpdater.updateRootTask(
     if (imagePath != null)
         task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
-    notifier.updateNotifications(now)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    DomainUpdater.Result(task.taskKey, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -465,13 +448,9 @@ fun DomainUpdater.createScheduleJoinRootTask(
     else
         joinJoinables(newParentTask, joinables, now)
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
-    }
-
-    DomainUpdater.Result(newParentTask.taskKey, notificationType, DomainFactory.CloudParams(newParentTask.project))
+    DomainUpdater.Result(newParentTask.taskKey, now, notificationType, DomainFactory.CloudParams(newParentTask.project))
 }
 
 @CheckResult
@@ -512,13 +491,11 @@ fun DomainUpdater.createJoinChildTask(
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
-    notifier.updateNotifications(now)
-
     imageUuid?.let {
         Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
     }
 
-    DomainUpdater.Result(childTask.taskKey, notificationType, DomainFactory.CloudParams(childTask.project))
+    DomainUpdater.Result(childTask.taskKey, now, notificationType, DomainFactory.CloudParams(childTask.project))
 }
 
 @CheckResult
@@ -560,13 +537,9 @@ fun DomainUpdater.createJoinRootTask(
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
-    notifier.updateNotifications(now)
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
-    }
-
-    DomainUpdater.Result(newParentTask.taskKey, notificationType, DomainFactory.CloudParams(newParentTask.project))
+    DomainUpdater.Result(newParentTask.taskKey, now, notificationType, DomainFactory.CloudParams(newParentTask.project))
 }
 
 private fun DomainFactory.getParentTreeDatas(

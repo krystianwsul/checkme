@@ -27,12 +27,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private const val MAX_NOTIFICATIONS_Q = 10
     }
 
-    fun updateNotificationsTick(now: ExactTimeStamp.Local, sourceName: String, silent: Boolean) {
-        updateNotifications(now, sourceName = sourceName, silent = silent)
+    fun updateNotificationsTick(params: Params) {
+        updateNotifications(params)
 
-        setIrrelevant(now)
+        setIrrelevant(params.now)
 
-        domainFactory.projectsFactory.let { domainFactory.localFactory.deleteInstanceShownRecords(it.taskKeys) }
+        domainFactory.run { localFactory.deleteInstanceShownRecords(projectsFactory.taskKeys) }
     }
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {
@@ -85,12 +85,16 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
-    fun updateNotifications(
-            now: ExactTimeStamp.Local,
-            sourceName: String = "other",
-            silent: Boolean = true,
-            clear: Boolean = false,
-    ) {
+    data class Params(
+            val now: ExactTimeStamp.Local,
+            val sourceName: String = "other",
+            val silent: Boolean = true,
+            val clear: Boolean = false,
+    )
+
+    fun updateNotifications(params: Params) {
+        val (now, sourceName, silent, clear) = params
+
         val skipSave = domainFactory.aggregateData != null
 
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")

@@ -24,5 +24,5 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) = updateDomainC
 
     projectsFactory.updateDeviceInfo(deviceDbInfo)
 
-    DomainUpdater.Params(DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
 }

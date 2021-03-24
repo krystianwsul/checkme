@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.Notifier
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
@@ -33,9 +34,11 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey) = updateDo
     )
     instance.setNotificationShown(localFactory, false)
 
-    notifier.updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
-
-    DomainUpdater.Params(DomainListenerManager.NotificationType.All, DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(
+            Notifier.Params(now, "setInstanceAddHourService ${instance.name}"),
+            DomainListenerManager.NotificationType.All,
+            DomainFactory.CloudParams(instance.task.project),
+    )
 }
 
 fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) = updateDomainCompletable {
@@ -49,9 +52,8 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) =
     instance.setDone(localFactory, true, now)
     instance.setNotificationShown(localFactory, false)
 
-    notifier.updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
-
     DomainUpdater.Params(
+            Notifier.Params(now, "setInstanceNotificationDone ${instance.name}"),
             DomainListenerManager.NotificationType.All,
             DomainFactory.CloudParams(instance.task.project),
     )
@@ -64,7 +66,7 @@ fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) =
 
     instanceKeys.forEach(::setInstanceNotified)
 
-    DomainUpdater.Params(DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
 }
 
 fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: String) = updateDomainCompletable {
@@ -76,6 +78,9 @@ fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: Strin
     } else {
         task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
-        DomainUpdater.Params(DomainListenerManager.NotificationType.All, DomainFactory.CloudParams(task.project))
+        DomainUpdater.Params(
+                notificationType = DomainListenerManager.NotificationType.All,
+                cloudParams = DomainFactory.CloudParams(task.project),
+        )
     }
 }

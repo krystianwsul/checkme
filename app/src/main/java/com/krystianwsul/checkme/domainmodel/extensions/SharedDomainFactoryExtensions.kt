@@ -50,13 +50,11 @@ fun DomainUpdater.clearTaskEndTimeStamps(
 
     processTaskUndoData(taskUndoData, now)
 
-    notifier.updateNotifications(now)
-
     val remoteProjects = taskUndoData.taskKeys
             .map { getTaskForce(it).project }
             .toSet()
 
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
 }
 
 @CheckResult
@@ -73,9 +71,7 @@ fun DomainUpdater.setOrdinal(
 
     task.ordinal = ordinal
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(task.project))
 }
 
 @CheckResult
@@ -98,9 +94,7 @@ fun DomainUpdater.setInstancesNotNotified(
         instance.setNotificationShown(localFactory, false)
     }
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Params(notificationType)
+    DomainUpdater.Params(now, notificationType)
 }
 
 @CheckResult
@@ -130,12 +124,11 @@ fun DomainUpdater.setInstancesAddHourActivity(
         )
     }
 
-    notifier.updateNotifications(now)
-
     val remoteProjects = instances.map { it.task.project }.toSet()
 
     DomainUpdater.Result(
             DomainFactory.HourUndoData(instanceDateTimes),
+            now,
             notificationType,
             DomainFactory.CloudParams(remoteProjects),
     )
@@ -156,11 +149,9 @@ fun DomainUpdater.undoInstancesAddHour(
         getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, instanceDateTime) }
     }
 
-    notifier.updateNotifications(now)
-
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
 }
 
 @CheckResult
@@ -176,10 +167,9 @@ fun DomainUpdater.setInstanceDone(
 
     instance.setDone(localFactory, done, now)
 
-    notifier.updateNotifications(now)
-
     DomainUpdater.Result(
             NullableWrapper(instance.done),
+            now,
             notificationType,
             DomainFactory.CloudParams(instance.task.project),
     )
@@ -197,7 +187,7 @@ fun DomainUpdater.setInstanceNotified(
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
     setInstanceNotified(instanceKey)
 
-    DomainUpdater.Params(notificationType)
+    DomainUpdater.Params(notificationType = notificationType)
 }
 
 fun DomainUpdater.updatePhotoUrl(
@@ -213,7 +203,7 @@ fun DomainUpdater.updatePhotoUrl(
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
-    DomainUpdater.Params(notificationType)
+    DomainUpdater.Params(notificationType = notificationType)
 }
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
@@ -359,9 +349,7 @@ fun DomainUpdater.undo(
     val projects = undoData.undo(this, now)
     check(projects.isNotEmpty())
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(projects))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(projects))
 }
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(

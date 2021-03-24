@@ -32,7 +32,6 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -109,10 +108,6 @@ class DomainFactory(
                 ChangeType.LOCAL -> RunType.LOCAL
                 ChangeType.REMOTE -> RunType.REMOTE
             }
-
-        @CheckResult
-        fun <T : Any> scheduleOnDomain(action: () -> T) =
-                Single.fromCallable(action).subscribeOnDomain().observeOn(AndroidSchedulers.mainThread())!!
     }
 
     var remoteReadTimes: ReadTimes
@@ -182,7 +177,7 @@ class DomainFactory(
                 .values
                 .forEach { it.fixOffsets() }
 
-        DomainUpdater.Params(NotificationType.All)
+        DomainUpdater.Params(notificationType = NotificationType.All)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -252,7 +247,7 @@ class DomainFactory(
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
-            notifier.updateNotifications(ExactTimeStamp.Local.now)
+            notifier.updateNotifications(Notifier.Params(ExactTimeStamp.Local.now))
         }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
@@ -279,7 +274,7 @@ class DomainFactory(
     override fun clearUserInfo() {
         DomainThreadChecker.instance.requireDomainThread()
 
-        notifier.updateNotifications(ExactTimeStamp.Local.now, clear = true)
+        notifier.updateNotifications(Notifier.Params(ExactTimeStamp.Local.now, clear = true))
     }
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
@@ -326,11 +321,11 @@ class DomainFactory(
         val tickData = TickHolder.getTickData()
 
         fun tick(tickData: TickData, forceNotify: Boolean) {
-            notifier.updateNotificationsTick(
+            notifier.updateNotificationsTick(Notifier.Params(
                     now,
                     "${tickData.source}, runType: $runType",
-                    tickData.silent && !forceNotify
-            )
+                    tickData.silent && !forceNotify,
+            ))
 
             if (!tickData.waiting) tickData.release()
         }
@@ -338,7 +333,7 @@ class DomainFactory(
         fun notify() {
             check(tickData == null)
 
-            notifier.updateNotifications(now, sourceName = source, silent = false)
+            notifier.updateNotifications(Notifier.Params(now, source, false))
         }
 
         when (runType) {
@@ -386,9 +381,7 @@ class DomainFactory(
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
-        notifier.updateNotifications(now)
-
-        return taskUndoData to DomainUpdater.Params(notificationType, CloudParams(remoteProjects))
+        return taskUndoData to DomainUpdater.Params(now, notificationType, CloudParams(remoteProjects))
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
@@ -420,7 +413,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        notifier.updateNotificationsTick(now, sourceName, silent)
+        notifier.updateNotificationsTick(Notifier.Params(now, sourceName, silent))
 
         save(NotificationType.All)
     }

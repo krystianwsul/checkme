@@ -70,7 +70,7 @@ fun DomainUpdater.createProject(
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProject))
+    DomainUpdater.Params(notificationType = notificationType, cloudParams = DomainFactory.CloudParams(remoteProject))
 }
 
 @CheckResult
@@ -90,14 +90,13 @@ fun DomainUpdater.updateProject(
     val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
 
     remoteProject.name = name
+
     remoteProject.updateUsers(
             addedFriends.map { friendsFactory.getFriend(it) }.toSet(),
-            removedFriends
+            removedFriends,
     )
 
     friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
 
-    notifier.updateNotifications(now)
-
-    DomainUpdater.Params(notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
 }

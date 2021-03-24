@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
 import com.krystianwsul.checkme.gui.base.AbstractFragment
@@ -249,13 +249,10 @@ class FriendListFragment : AbstractFragment(), FabUser {
             val userPairs = userListDatas.associate { it.id to it.userWrapper }
             val friendIds = userPairs.map { it.key }.toSet()
 
-            DomainFactory.instance
-                    .removeFriends(friendListViewModel.dataId.toFirst(), friendIds)
+            DomainUpdater().removeFriends(friendListViewModel.dataId.toFirst(), friendIds)
                     .observeOn(AndroidSchedulers.mainThread())
                     .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
-                    .flatMapCompletable {
-                        DomainFactory.instance.addFriends(friendListViewModel.dataId.toFirst(), userPairs)
-                    }
+                    .flatMapCompletable { DomainUpdater().addFriends(friendListViewModel.dataId.toFirst(), userPairs) }
                     .subscribe()
                     .addTo(createDisposable)
         }

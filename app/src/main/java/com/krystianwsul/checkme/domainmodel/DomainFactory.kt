@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.filterNotNull
-import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -74,11 +73,9 @@ class DomainFactory(
         // emits on domain thread
         fun onReady() = instanceRelay.subscribeOnDomain()
                 .filterNotNull()
-                .switchMap { domainFactory -> domainFactory.isSaved.map { domainFactory to it } }
+                .firstOrError()
+                .flatMap { it.onReady() }
                 .observeOnDomain()
-                .filter { (_, isSaved) -> !isSaved }
-                .map { (domainFactory, _) -> domainFactory }
-                .firstOrError()!!
 
         @CheckResult
         fun setFirebaseTickListener(newTickData: TickData) = completeOnDomain {
@@ -126,9 +123,12 @@ class DomainFactory(
     val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
-        private set
 
     val isSaved = BehaviorRelay.createDefault(false)!!
+
+    fun onReady() = isSaved.filter { !it }
+            .firstOrError()
+            .map { this }!!
 
     private val changeTypeRelay = PublishRelay.create<ChangeType>()
 
@@ -160,33 +160,29 @@ class DomainFactory(
         updateShortcuts(now)
 
         listOf(
-                changeTypeRelay.filter { it == ChangeType.REMOTE }
+                changeTypeRelay.filter { it == ChangeType.REMOTE } // todo changetype debounce
                         .firstOrError()
                         .map { "remote change" },
                 Single.just(Unit)
                         .delay(1, TimeUnit.MINUTES)
                         .observeOnDomain()
-                        .map { "timeout" }
+                        .map { "timeout" },
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .flatMap { onReady().mapWith(it) }
-                .subscribe { (domainFactory, source) -> domainFactory.fixOffsets(source) }
+                .flatMapCompletable { DomainUpdater().fixOffsets(it) }
+                .subscribe()
                 .addTo(domainDisposable)
     }
 
-    private fun fixOffsets(source: String) {
+    private fun DomainUpdater.fixOffsets(source: String) = updateDomainCompletable {
         MyCrashlytics.log("triggering fixing offsets from $source")
-
-        DomainThreadChecker.instance.requireDomainThread()
-
-        if (projectsFactory.isSaved) throw SavedFactoryException()
 
         projectsFactory.projects
                 .values
                 .forEach { it.fixOffsets() }
 
-        save(NotificationType.All)
+        DomainUpdater.Params(NotificationType.All)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -429,25 +425,6 @@ class DomainFactory(
         val now = ExactTimeStamp.Local.now
 
         notifier.updateNotificationsTick(now, silent, sourceName, domainChanged)
-
-        save(NotificationType.All)
-    }
-
-    override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
-        MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
-
-        DomainThreadChecker.instance.requireDomainThread()
-
-        if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
-
-        this.deviceDbInfo = deviceDbInfo
-
-        myUserFactory.user.apply {
-            name = deviceDbInfo.name
-            setToken(deviceDbInfo)
-        }
-
-        projectsFactory.updateDeviceInfo(deviceDbInfo)
 
         save(NotificationType.All)
     }

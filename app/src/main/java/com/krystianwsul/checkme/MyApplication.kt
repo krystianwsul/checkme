@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.mapNotNull
-import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -157,10 +156,10 @@ class MyApplication : Application() {
                     ?: Maybe.empty()
         }
                 .mapNotNull { it.value?.photoUrl }
-                .switchMapSingle { DomainFactory.onReady().mapWith(it) }
-                .subscribe { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(DomainListenerManager.NotificationType.All, url.toString())
+                .flatMapCompletable {
+                    DomainUpdater().updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
                 }
+                .subscribe()
 
         RxPaparazzo.register(this)
 

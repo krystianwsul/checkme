@@ -79,12 +79,11 @@ fun DomainUpdater.setOrdinal(
 }
 
 @CheckResult
-fun DomainFactory.setInstancesNotNotified(
+fun DomainUpdater.setInstancesNotNotified(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: List<InstanceKey>,
-) = completeOnDomain {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     val now = ExactTimeStamp.Local.now
 
@@ -101,7 +100,7 @@ fun DomainFactory.setInstancesNotNotified(
 
     notifier.updateNotifications(now)
 
-    save(notificationType)
+    DomainUpdater.Params(notificationType)
 }
 
 @CheckResult
@@ -187,22 +186,24 @@ fun DomainUpdater.setInstanceDone(
 }
 
 @CheckResult
-fun DomainFactory.setInstanceNotified(
+fun DomainUpdater.setInstanceNotified(
         notificationType: DomainListenerManager.NotificationType,
         instanceKey: InstanceKey,
-) = completeOnDomain {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     val instance = getInstance(instanceKey)
 
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
     setInstanceNotified(instanceKey)
 
-    save(notificationType)
+    DomainUpdater.Params(notificationType)
 }
 
-fun DomainFactory.updatePhotoUrl(notificationType: DomainListenerManager.NotificationType, photoUrl: String) {
+fun DomainUpdater.updatePhotoUrl(
+        notificationType: DomainListenerManager.NotificationType,
+        photoUrl: String,
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -212,7 +213,7 @@ fun DomainFactory.updatePhotoUrl(notificationType: DomainListenerManager.Notific
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
-    save(notificationType)
+    DomainUpdater.Params(notificationType)
 }
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =

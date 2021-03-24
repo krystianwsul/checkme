@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.notifications
 import android.os.Parcelable
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
@@ -30,9 +29,7 @@ sealed class NotificationAction : Parcelable {
         override fun perform(): Completable {
             check(instanceKeys.isNotEmpty())
 
-            return DomainFactory.onReady()
-                    .doOnSuccess { it.setInstancesNotifiedService(instanceKeys) }
-                    .ignoreElement()
+            return DomainUpdater().setInstancesNotifiedService(instanceKeys)
         }
     }
 
@@ -41,7 +38,7 @@ sealed class NotificationAction : Parcelable {
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
             private val name: String,
-            private val actionId: Int = 2
+            private val actionId: Int = 2,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
@@ -60,7 +57,7 @@ sealed class NotificationAction : Parcelable {
             private val instanceKey: InstanceKey,
             private val notificationId: Int,
             private val name: String,
-            private val actionId: Int = 3
+            private val actionId: Int = 3,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
@@ -82,8 +79,7 @@ sealed class NotificationAction : Parcelable {
 
         override val requestCode get() = hashCode()
 
-        override fun perform() = DomainFactory.onReady().flatMapCompletable {
-            it.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
-        }!!
+        override fun perform() =
+                DomainUpdater().setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
     }
 }

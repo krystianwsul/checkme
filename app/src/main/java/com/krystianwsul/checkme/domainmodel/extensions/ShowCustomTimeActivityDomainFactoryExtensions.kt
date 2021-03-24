@@ -3,9 +3,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.completeOnDomain
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
@@ -27,14 +26,13 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): S
 }
 
 @CheckResult
-fun DomainFactory.updateCustomTime(
+fun DomainUpdater.updateCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         customTimeId: CustomTimeKey.Private,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-) = completeOnDomain {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.updateCustomTime")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -49,17 +47,16 @@ fun DomainFactory.updateCustomTime(
             customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    save(notificationType)
+    DomainUpdater.Params(notificationType)
 }
 
 @CheckResult
-fun DomainFactory.createCustomTime(
+fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Private> = scheduleOnDomain {
+): Single<CustomTimeKey.Private> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createCustomTime")
-    if (projectsFactory.isSaved) throw SavedFactoryException()
 
     check(name.isNotEmpty())
 
@@ -81,12 +78,10 @@ fun DomainFactory.createCustomTime(
             hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
             hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
             hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-            true
+            true,
     )
 
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
 
-    save(notificationType)
-
-    remoteCustomTime.key
+    DomainUpdater.Result(remoteCustomTime.key, notificationType)
 }

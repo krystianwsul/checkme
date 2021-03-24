@@ -19,8 +19,8 @@ import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
@@ -146,8 +146,10 @@ class FindFriendActivity : NavBarActivity() {
                         hideSoftKeyboard(binding.root)
 
                         if (contact.userWrapper != null) {
-                            DomainFactory.instance
-                                    .tryAddFriend(DomainListenerManager.NotificationType.All, contact.userWrapper)
+                            DomainUpdater().tryAddFriend(
+                                    DomainListenerManager.NotificationType.All,
+                                    contact.userWrapper,
+                            )
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribeBy {
                                         if (it) {
@@ -160,7 +162,7 @@ class FindFriendActivity : NavBarActivity() {
                                             Snackbar.make(
                                                     binding.root,
                                                     getString(R.string.userAlreadyInFriends),
-                                                    Snackbar.LENGTH_SHORT
+                                                    Snackbar.LENGTH_SHORT,
                                             ).show()
                                         }
                                     }

@@ -57,15 +57,14 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) =
     )
 }
 
-fun DomainFactory.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) {
+fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.setInstancesNotified")
 
     check(instanceKeys.isNotEmpty())
 
-    for (instanceKey in instanceKeys)
-        setInstanceNotified(instanceKey)
+    instanceKeys.forEach(::setInstanceNotified)
 
-    save(DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(DomainListenerManager.NotificationType.All)
 }
 
 fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: String) = updateDomainCompletable {

@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -152,11 +151,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     // to ignore double taps
                                     if (!it.notificationShown) {
-                                        DomainFactory.instance
-                                                .setInstancesNotNotified(
-                                                        showInstanceViewModel.dataId.toFirst(),
-                                                        listOf(instanceKey),
-                                                )
+                                        DomainUpdater().setInstancesNotNotified(
+                                                showInstanceViewModel.dataId.toFirst(),
+                                                listOf(instanceKey),
+                                        )
                                                 .subscribe()
                                                 .addTo(createDisposable)
                                     }
@@ -305,8 +303,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainFactory.onReady()
-                    .flatMapCompletable { it.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey) }
+            DomainUpdater().setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey)
                     .subscribe()
                     .addTo(createDisposable)
         }

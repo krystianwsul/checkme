@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
@@ -291,11 +290,10 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    DomainFactory.instance
-                            .setInstancesNotNotified(
-                                    DomainListenerManager.NotificationType.First(parameters.dataId),
-                                    instanceKeys,
-                            )
+                    DomainUpdater().setInstancesNotNotified(
+                            DomainListenerManager.NotificationType.First(parameters.dataId),
+                            instanceKeys,
+                    )
                             .subscribe()
                             .addTo(attachedToWindowDisposable)
                 }

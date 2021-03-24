@@ -13,12 +13,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
-import com.krystianwsul.checkme.utils.mapWith
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxjava3.core.Completable
@@ -69,12 +68,9 @@ class SettingsActivity : NavBarActivity() {
     private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount): Completable {
         Snackbar.make(binding.settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
 
-        return Maybe.fromCallable { googleSignInAccount.photoUrl }
-                .flatMapSingle { DomainFactory.onReady().mapWith(it!!) }
-                .doOnSuccess { (domainFactory, url) ->
-                    domainFactory.updatePhotoUrl(DomainListenerManager.NotificationType.All, url.toString())
-                }
-                .ignoreElement()
+        return Maybe.fromCallable { googleSignInAccount.photoUrl }.flatMapCompletable {
+            DomainUpdater().updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
+        }
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
@@ -212,12 +208,13 @@ class SettingsActivity : NavBarActivity() {
             val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
             val account = result.signInAccount
 
-            if (account != null)
+            if (account != null) {
                 settingsActivity.updateFromAccount(account)
                         .subscribe()
                         .addTo(createDisposable)
-            else
+            } else {
                 MyCrashlytics.logException(SettingsSignInException(result.status.toString()))
+            }
         }
 
         override fun onDestroy() {

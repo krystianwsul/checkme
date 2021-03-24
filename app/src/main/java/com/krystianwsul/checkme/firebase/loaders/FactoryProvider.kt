@@ -56,8 +56,6 @@ interface FactoryProvider {
         fun updateUserRecord(snapshot: Snapshot)
 
         fun clearUserInfo()
-
-        fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo)
     }
 
     interface Local : Instance.ShownFactory {

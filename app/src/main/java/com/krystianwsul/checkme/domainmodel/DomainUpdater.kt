@@ -5,7 +5,7 @@ import io.reactivex.rxjava3.core.Single
 
 class DomainUpdater(domainFactory: DomainFactory? = null) {
 
-    private val domainFactorySingle = domainFactory?.let { Single.just(it) } ?: DomainFactory.onReady()
+    private val domainFactorySingle = domainFactory?.onReady() ?: DomainFactory.onReady()
 
     fun <T : Any> updateDomainSingle(action: DomainFactory.() -> Result<T>): Single<T> {
         return domainFactorySingle.doOnSuccess { check(!it.isSaved.value!!) }
@@ -31,8 +31,8 @@ class DomainUpdater(domainFactory: DomainFactory? = null) {
 
         constructor(
                 data: T,
-                notificationType: DomainListenerManager.NotificationType?,
-                cloudParams: DomainFactory.CloudParams,
+                notificationType: DomainListenerManager.NotificationType? = null,
+                cloudParams: DomainFactory.CloudParams? = null,
         ) : this(data, Params(notificationType, cloudParams))
     }
 

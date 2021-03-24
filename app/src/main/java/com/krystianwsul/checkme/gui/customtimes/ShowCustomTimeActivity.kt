@@ -15,8 +15,8 @@ import androidx.transition.TransitionManager
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.gui.base.NavBarActivity
@@ -133,23 +133,21 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainFactory.instance
-                                .updateCustomTime(
-                                        DomainListenerManager.NotificationType.All,
-                                        data!!.key,
-                                        name,
-                                        hourMinutes
-                                )
+                        DomainUpdater().updateCustomTime(
+                                DomainListenerManager.NotificationType.All,
+                                data!!.key,
+                                name,
+                                hourMinutes
+                        )
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe { finish() }
                                 .addTo(createDisposable)
                     } else {
-                        DomainFactory.instance
-                                .createCustomTime(
-                                        DomainListenerManager.NotificationType.All,
-                                        name,
-                                        hourMinutes,
-                                )
+                        DomainUpdater().createCustomTime(
+                                DomainListenerManager.NotificationType.All,
+                                name,
+                                hourMinutes,
+                        )
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribeBy {
                                     setResult(

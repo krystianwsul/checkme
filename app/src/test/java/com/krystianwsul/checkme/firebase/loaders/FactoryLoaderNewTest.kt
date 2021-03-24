@@ -74,8 +74,6 @@ class FactoryLoaderNewTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) = Unit
-
         override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
             TODO("Not yet implemented")
         }

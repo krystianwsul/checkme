@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
@@ -285,8 +286,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             }
         } else {
             if (notificationInstances.size > MAX_NOTIFICATIONS_Q) {
-                Preferences.tickLog.logLineHour("showing group")
+                Preferences.tickLog.logLineHour("showing summary")
                 NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
+                Preferences.tickLog.logLineHour("showing group")
                 NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)
 
                 for (shownInstanceKey in shownInstanceKeys) {
@@ -295,11 +297,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     NotificationWrapper.instance.cancelNotification(instance.notificationId)
                 }
             } else {
+                Preferences.tickLog.logLineHour("hiding group")
+                NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP_NOT_SUMMARY)
+
                 if (notificationInstances.isEmpty()) {
-                    Preferences.tickLog.logLineHour("hiding group")
-                    NotificationWrapper.instance.cancelNotification(0)
+                    Preferences.tickLog.logLineHour("hiding summary")
+                    NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
                 } else {
-                    Preferences.tickLog.logLineHour("showing group")
+                    Preferences.tickLog.logLineHour("showing summary")
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
                 }
 

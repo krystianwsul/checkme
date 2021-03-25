@@ -425,10 +425,16 @@ class DomainFactoryTest {
         val date = Date(2021, 3, 25)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
+        val privateCustomTimeKey = domainFactory.createCustomTime(
+                DomainListenerManager.NotificationType.All,
+                "customTime",
+                DayOfWeek.values().associateWith { HourMinute(2, 0) },
+        ).blockingGet()
+
         val privateTaskKey = domainFactory.createScheduleRootTask(
                 DomainListenerManager.NotificationType.All,
                 "task",
-                listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
+                listOf(ScheduleData.Single(date, TimePair(privateCustomTimeKey))),
                 null,
                 null,
                 null,
@@ -437,12 +443,6 @@ class DomainFactoryTest {
         )
                 .blockingGet()
                 .taskKey
-
-        val privateCustomTimeKey = domainFactory.createCustomTime(
-                DomainListenerManager.NotificationType.All,
-                "customTime",
-                DayOfWeek.values().associateWith { HourMinute(3, 0) },
-        ).blockingGet()
 
         val sharedProjectKey = domainFactory.createProject(
                 DomainListenerManager.NotificationType.All,
@@ -456,7 +456,20 @@ class DomainFactoryTest {
                 DomainListenerManager.NotificationType.All,
                 privateTaskKey,
                 "task",
-                listOf(ScheduleData.Single(date, TimePair(privateCustomTimeKey))),
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
+                null,
+                null,
+                null,
+                now,
+        ).blockingGet()
+
+        now += 1.hours // now 3
+
+        domainFactory.updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
+                privateTaskKey,
+                "task",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
                 null,
                 EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
                 null,

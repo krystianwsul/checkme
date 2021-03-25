@@ -1000,11 +1000,8 @@ class Task<T : ProjectType>(
         }
 
         scheduleIntervals.forEach { it.schedule.fixOffsets() }
-
         parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
-
         noScheduleOrParentIntervals.forEach { it.noScheduleOrParent.fixOffsets() }
-
         existingInstances.values.forEach { it.fixOffsets() }
     }
 

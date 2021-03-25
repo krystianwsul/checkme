@@ -251,7 +251,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                                 DomainListenerManager.NotificationType.All,
                                 name,
                                 saveState.addedIds,
-                        )
+                        ).ignoreElement()
                     } else {
                         updateProject(
                                 DomainListenerManager.NotificationType.All,

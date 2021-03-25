@@ -53,7 +53,7 @@ class SharedTaskRecord private constructor(
             true,
             projectRecord.getTaskRecordId(),
             projectRecord,
-            taskJson
+            taskJson,
     )
 
     override fun newScheduleWrapper(

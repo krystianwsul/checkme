@@ -36,7 +36,7 @@ class IrrelevantTest {
         }
 
         private val databaseWrapper = mockk<DatabaseWrapper> {
-            every { getPrivateTaskRecordId(any()) } returns "taskRecordId"
+            every { newPrivateTaskRecordId(any()) } returns "taskRecordId"
             every { newPrivateNoScheduleOrParentRecordId(any(), any()) } returns "noScheduleOrParentRecordId"
         }
 

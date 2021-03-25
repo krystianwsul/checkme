@@ -483,5 +483,13 @@ class DomainFactoryTest {
         ).blockingGet()
 
         domainFactory.getShowInstanceData(instanceKey)
+
+        assertEquals(
+                1,
+                domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                        .groupListDataWrapper
+                        .instanceDatas
+                        .size,
+        )
     }
 }

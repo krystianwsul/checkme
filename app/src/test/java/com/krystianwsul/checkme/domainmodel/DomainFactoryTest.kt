@@ -463,6 +463,12 @@ class DomainFactoryTest {
                 now,
         ).blockingGet()
 
+        val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .instanceKey
+
         now += 1.hours // now 3
 
         domainFactory.updateScheduleTask(
@@ -476,6 +482,6 @@ class DomainFactoryTest {
                 now,
         ).blockingGet()
 
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+        domainFactory.getShowInstanceData(instanceKey)
     }
 }

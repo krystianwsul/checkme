@@ -24,7 +24,16 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
     DomainThreadChecker.instance.requireDomainThread()
 
     val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
-            ?.let { requestInstanceKey.copy(taskKey = it) }
+            ?.let {
+                val newScheduleKey = projectsFactory.getProjectForce(it.projectKey).convertScheduleKey(
+                        deviceDbInfo.userInfo,
+                        getTaskForce(requestInstanceKey.taskKey),
+                        requestInstanceKey.scheduleKey,
+                        false,
+                )
+
+                InstanceKey(it, newScheduleKey)
+            }
             ?: requestInstanceKey
 
     val task = getTaskForce(instanceKey.taskKey)

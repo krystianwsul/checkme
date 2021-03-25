@@ -43,9 +43,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         @JvmStatic
         protected val KEY_HASH_CODE = "com.krystianwsul.checkme.notification_hash_code"
 
-        @JvmStatic
-        protected val NOTIFICATION_ID_GROUP = 0
-        private const val NOTIFICATION_ID_GROUP_NOT_SUMMARY = 1
+        const val NOTIFICATION_ID_GROUP = 0
+        const val NOTIFICATION_ID_GROUP_NOT_SUMMARY = 1
 
         private const val TAG_TEMPORARY = "temporary"
 

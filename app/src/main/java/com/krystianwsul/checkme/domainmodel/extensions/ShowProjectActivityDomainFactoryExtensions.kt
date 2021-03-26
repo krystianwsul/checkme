@@ -70,11 +70,11 @@ fun DomainUpdater.createProject(
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    save(notificationType)
-
-    notifyCloud(remoteProject)
-
-    DomainUpdater.Result(remoteProject.projectKey, DomainUpdater.Params(notificationType = notificationType, cloudParams = DomainFactory.CloudParams(remoteProject)))
+    DomainUpdater.Result(
+            remoteProject.projectKey,
+            notificationType = notificationType,
+            cloudParams = DomainFactory.CloudParams(remoteProject),
+    )
 }
 
 @CheckResult

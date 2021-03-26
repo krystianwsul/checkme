@@ -426,13 +426,13 @@ class DomainFactoryTest {
         val date = Date(2021, 3, 25)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val privateCustomTimeKey = domainFactory.createCustomTime(
+        val privateCustomTimeKey = domainUpdater().createCustomTime(
                 DomainListenerManager.NotificationType.All,
                 "customTime",
                 DayOfWeek.values().associateWith { HourMinute(2, 0) },
         ).blockingGet()
 
-        val privateTaskKey = domainFactory.createScheduleRootTask(
+        val privateTaskKey = domainUpdater().createScheduleRootTask(
                 DomainListenerManager.NotificationType.All,
                 "task",
                 listOf(ScheduleData.Single(date, TimePair(privateCustomTimeKey))),
@@ -445,7 +445,7 @@ class DomainFactoryTest {
                 .blockingGet()
                 .taskKey
 
-        val sharedProjectKey = domainFactory.createProject(
+        val sharedProjectKey = domainUpdater().createProject(
                 DomainListenerManager.NotificationType.All,
                 "project",
                 setOf(),
@@ -453,7 +453,7 @@ class DomainFactoryTest {
 
         now += 1.hours // now 2
 
-        domainFactory.updateScheduleTask(
+        domainUpdater().updateScheduleTask(
                 DomainListenerManager.NotificationType.All,
                 privateTaskKey,
                 "task",
@@ -472,7 +472,7 @@ class DomainFactoryTest {
 
         now += 1.hours // now 3
 
-        domainFactory.updateScheduleTask(
+        domainUpdater().updateScheduleTask(
                 DomainListenerManager.NotificationType.All,
                 privateTaskKey,
                 "task",

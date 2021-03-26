@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDo
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotifiedService
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
@@ -29,7 +29,7 @@ sealed class NotificationAction : Parcelable {
         override fun perform(): Completable {
             check(instanceKeys.isNotEmpty())
 
-            return DomainUpdater().setInstancesNotifiedService(instanceKeys)
+            return AndroidDomainUpdater.setInstancesNotifiedService(instanceKeys)
         }
     }
 
@@ -48,7 +48,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainUpdater().setInstanceNotificationDoneService(instanceKey)
+            return AndroidDomainUpdater.setInstanceNotificationDoneService(instanceKey)
         }
     }
 
@@ -67,7 +67,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return DomainUpdater().setInstanceAddHourService(instanceKey)
+            return AndroidDomainUpdater.setInstanceAddHourService(instanceKey)
         }
     }
 
@@ -80,6 +80,6 @@ sealed class NotificationAction : Parcelable {
         override val requestCode get() = hashCode()
 
         override fun perform() =
-                DomainUpdater().setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
+                AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
     }
 }

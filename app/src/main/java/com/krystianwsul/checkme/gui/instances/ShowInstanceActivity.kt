@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -89,7 +89,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         showInstanceViewModel.stop()
 
-        val undoTaskDataSingle = DomainUpdater().setTaskEndTimeStamps(
+        val undoTaskDataSingle = AndroidDomainUpdater.setTaskEndTimeStamps(
                 showInstanceViewModel.dataId.toFirst(),
                 taskKeys as Set<TaskKey>,
                 removeInstances,
@@ -103,7 +103,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .doOnSuccess { showInstanceViewModel.start(instanceKey) }
                 .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainUpdater().clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
+                    AndroidDomainUpdater.clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)
@@ -151,7 +151,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                                     // to ignore double taps
                                     if (!it.notificationShown) {
-                                        DomainUpdater().setInstancesNotNotified(
+                                        AndroidDomainUpdater.setInstancesNotNotified(
                                                 showInstanceViewModel.dataId.toFirst(),
                                                 listOf(instanceKey),
                                         )
@@ -162,7 +162,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 R.id.instanceMenuHour -> {
                                     check(showHour())
 
-                                    DomainUpdater().setInstancesAddHourActivity(
+                                    AndroidDomainUpdater.setInstancesAddHourActivity(
                                             showInstanceViewModel.dataId.toFirst(),
                                             listOf(instanceKey),
                                     )
@@ -171,7 +171,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                                 showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
                                             }
                                             .flatMapCompletable {
-                                                DomainUpdater().undoInstancesAddHour(
+                                                AndroidDomainUpdater.undoInstancesAddHour(
                                                         showInstanceViewModel.dataId.toFirst(),
                                                         it,
                                                 )
@@ -303,7 +303,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainUpdater().setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey)
+            AndroidDomainUpdater.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey)
                     .subscribe()
                     .addTo(createDisposable)
         }
@@ -336,7 +336,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun setDone(done: Boolean) {
-        DomainUpdater().setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
+        AndroidDomainUpdater.setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
                 .subscribe()
                 .addTo(createDisposable)
     }

@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
@@ -227,7 +227,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            DomainUpdater().run {
+            AndroidDomainUpdater.run {
                 state.parentInstanceData
                         ?.let { setInstancesParent(dataId.toFirst(), data.instanceKeys, it.instanceKey) }
                         ?: setInstancesDateTime(

@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
@@ -103,7 +103,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        DomainUpdater().setTaskEndTimeStamps(
+        AndroidDomainUpdater.setTaskEndTimeStamps(
                 DomainListenerManager.NotificationType.First(data!!.dataId),
                 taskKeys as Set<TaskKey>,
                 removeInstances,
@@ -111,7 +111,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { listener.showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainUpdater().clearTaskEndTimeStamps(
+                    AndroidDomainUpdater.clearTaskEndTimeStamps(
                             DomainListenerManager.NotificationType.First(data!!.dataId),
                             it,
                     )
@@ -828,7 +828,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun getOrdinal() = childTaskData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            DomainUpdater().setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
+            AndroidDomainUpdater.setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
                     .subscribe()
                     .addTo(createDisposable)
         }

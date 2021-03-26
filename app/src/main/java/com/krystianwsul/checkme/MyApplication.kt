@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -158,7 +158,7 @@ class MyApplication : Application() {
         }
                 .mapNotNull { it.value?.photoUrl }
                 .flatMapCompletable {
-                    DomainUpdater().updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
+                    AndroidDomainUpdater.updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
                 }
                 .subscribe()
 

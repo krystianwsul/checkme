@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -135,7 +135,7 @@ class DoneInstanceNode(
                 val nodeCollection = dividerNode.nodeCollection
                 val groupAdapter = nodeCollection.groupAdapter
 
-                DomainUpdater().setInstanceDone(
+                AndroidDomainUpdater.setInstanceDone(
                         DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                         instanceData.instanceKey,
                         false,
@@ -143,7 +143,7 @@ class DoneInstanceNode(
                         .observeOn(AndroidSchedulers.mainThread())
                         .andThen(Maybe.defer { groupListFragment.listener.showSnackbarNotDoneMaybe(1) })
                         .flatMapCompletable {
-                            DomainUpdater().setInstanceDone(
+                            AndroidDomainUpdater.setInstanceDone(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     instanceData.instanceKey,
                                     true,

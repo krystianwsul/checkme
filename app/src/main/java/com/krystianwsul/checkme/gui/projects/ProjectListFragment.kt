@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
 import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setProjectEndTimeStamps
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
@@ -135,7 +135,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         checkNotNull(data)
 
         @Suppress("UNCHECKED_CAST")
-        DomainUpdater().setProjectEndTimeStamps(
+        AndroidDomainUpdater.setProjectEndTimeStamps(
                 projectListViewModel.dataId.toFirst(),
                 projectIds as Set<ProjectKey.Shared>,
                 removeInstances,
@@ -143,7 +143,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe { mainActivity.showSnackbarRemovedMaybe(projectIds.size).map { _ -> it } }
                 .flatMapCompletable {
-                    DomainUpdater().clearProjectEndTimeStamps(projectListViewModel.dataId.toFirst(), it)
+                    AndroidDomainUpdater.clearProjectEndTimeStamps(projectListViewModel.dataId.toFirst(), it)
                 }
                 .subscribe()
                 .addTo(createDisposable)

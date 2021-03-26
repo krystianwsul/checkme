@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -187,7 +187,7 @@ class TaskNode(
     override fun getOrdinal() = taskData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
-        DomainUpdater().setOrdinal(groupListFragment.parameters.dataId.toFirst(), taskData.taskKey, ordinal)
+        AndroidDomainUpdater.setOrdinal(groupListFragment.parameters.dataId.toFirst(), taskData.taskKey, ordinal)
                 .subscribe()
                 .addTo(groupListFragment.attachedToWindowDisposable)
     }

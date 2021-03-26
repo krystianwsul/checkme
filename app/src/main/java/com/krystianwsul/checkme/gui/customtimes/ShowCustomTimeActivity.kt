@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.newMaterialTimePicker
@@ -133,7 +133,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainUpdater().updateCustomTime(
+                        AndroidDomainUpdater.updateCustomTime(
                                 DomainListenerManager.NotificationType.All,
                                 data!!.key,
                                 name,
@@ -143,7 +143,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                                 .subscribe { finish() }
                                 .addTo(createDisposable)
                     } else {
-                        DomainUpdater().createCustomTime(
+                        AndroidDomainUpdater.createCustomTime(
                                 DomainListenerManager.NotificationType.All,
                                 name,
                                 hourMinutes,

@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.updateProject
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.main.FabUser
@@ -242,7 +242,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        return DomainUpdater().run {
+        return AndroidDomainUpdater.run {
             if (projectId == null) {
                 check(saveState.removedIds.isEmpty())
 

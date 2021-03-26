@@ -25,7 +25,7 @@ import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -167,7 +167,7 @@ class GroupListFragment @JvmOverloads constructor(
             fun setInstancesDone(
                     instanceKeys: List<InstanceKey>,
                     done: Boolean,
-            ) = DomainUpdater().setInstancesDone(
+            ) = AndroidDomainUpdater.setInstancesDone(
                     DomainListenerManager.NotificationType.First(parameters.dataId),
                     instanceKeys,
                     done,
@@ -178,14 +178,14 @@ class GroupListFragment @JvmOverloads constructor(
                     check(showHour(selectedDatas))
                     val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
-                    DomainUpdater().setInstancesAddHourActivity(
+                    AndroidDomainUpdater.setInstancesAddHourActivity(
                             DomainListenerManager.NotificationType.First(parameters.dataId),
                             instanceKeys,
                     )
                             .observeOn(AndroidSchedulers.mainThread())
                             .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
                             .flatMapCompletable {
-                                DomainUpdater().undoInstancesAddHour(
+                                AndroidDomainUpdater.undoInstancesAddHour(
                                         DomainListenerManager.NotificationType.First(parameters.dataId),
                                         it,
                                 )
@@ -291,7 +291,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
-                    DomainUpdater().setInstancesNotNotified(
+                    AndroidDomainUpdater.setInstancesNotNotified(
                             DomainListenerManager.NotificationType.First(parameters.dataId),
                             instanceKeys,
                     )
@@ -945,7 +945,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         listener.showSnackbarHourMaybe(count)
                 .flatMapCompletable {
-                    DomainUpdater().undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
+                    AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
                 }
                 .subscribe()
                 .addTo(attachedToWindowDisposable)

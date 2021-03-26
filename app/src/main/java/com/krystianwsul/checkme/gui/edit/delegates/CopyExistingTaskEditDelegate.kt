@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -29,7 +29,7 @@ class CopyExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainUpdater().createScheduleRootTask(
+        return AndroidDomainUpdater.createScheduleRootTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 scheduleDatas,
@@ -50,7 +50,7 @@ class CopyExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainUpdater().createChildTask(
+        return AndroidDomainUpdater.createChildTask(
                 DomainListenerManager.NotificationType.All,
                 parentTaskKey,
                 createParameters.name,
@@ -70,7 +70,7 @@ class CopyExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return DomainUpdater().createRootTask(
+        return AndroidDomainUpdater.createRootTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 createParameters.note,

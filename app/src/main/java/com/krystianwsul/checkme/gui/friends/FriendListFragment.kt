@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
 import com.krystianwsul.checkme.domainmodel.extensions.removeFriends
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
@@ -249,10 +249,10 @@ class FriendListFragment : AbstractFragment(), FabUser {
             val userPairs = userListDatas.associate { it.id to it.userWrapper }
             val friendIds = userPairs.map { it.key }.toSet()
 
-            DomainUpdater().removeFriends(friendListViewModel.dataId.toFirst(), friendIds)
+            AndroidDomainUpdater.removeFriends(friendListViewModel.dataId.toFirst(), friendIds)
                     .observeOn(AndroidSchedulers.mainThread())
                     .andThen(mainActivity.showSnackbarRemovedMaybe(userListDatas.size))
-                    .flatMapCompletable { DomainUpdater().addFriends(friendListViewModel.dataId.toFirst(), userPairs) }
+                    .flatMapCompletable { AndroidDomainUpdater.addFriends(friendListViewModel.dataId.toFirst(), userPairs) }
                     .subscribe()
                     .addTo(createDisposable)
         }

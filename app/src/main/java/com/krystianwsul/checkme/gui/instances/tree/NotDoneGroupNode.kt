@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -245,7 +245,7 @@ class NotDoneGroupNode(
                 CheckBoxState.Visible(checked) {
                     val instanceKey = singleInstanceData.instanceKey
 
-                    fun setDone(done: Boolean) = DomainUpdater().setInstanceDone(
+                    fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
                             groupAdapter.dataId.toFirst(),
                             instanceKey,
                             done,
@@ -379,7 +379,7 @@ class NotDoneGroupNode(
     override fun getOrdinal() = singleInstanceData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
-        DomainUpdater().setOrdinal(
+        AndroidDomainUpdater.setOrdinal(
                 groupListFragment.parameters.dataId.toFirst(),
                 singleInstanceData.taskKey,
                 ordinal,
@@ -571,7 +571,7 @@ class NotDoneGroupNode(
                     val groupAdapter = parentNodeCollection.groupAdapter
                     val instanceKey = instanceData.instanceKey
 
-                    DomainUpdater().setInstanceDone(
+                    AndroidDomainUpdater.setInstanceDone(
                             DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                             instanceKey,
                             true
@@ -579,7 +579,7 @@ class NotDoneGroupNode(
                             .observeOn(AndroidSchedulers.mainThread())
                             .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
                             .flatMapCompletable {
-                                DomainUpdater().setInstanceDone(
+                                AndroidDomainUpdater.setInstanceDone(
                                         DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                         instanceKey,
                                         false,
@@ -630,7 +630,7 @@ class NotDoneGroupNode(
         override fun getOrdinal() = instanceData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            DomainUpdater().setOrdinal(
+            AndroidDomainUpdater.setOrdinal(
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.taskKey,
                     ordinal,

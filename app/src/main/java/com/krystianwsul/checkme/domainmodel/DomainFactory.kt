@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationTy
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -159,12 +160,12 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .flatMapCompletable { DomainUpdater().fixOffsets(it) }
+                .flatMapCompletable { AndroidDomainUpdater.fixOffsets(it) }
                 .subscribe()
                 .addTo(domainDisposable)
     }
 
-    private fun DomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
+    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
         MyCrashlytics.log("triggering fixing offsets from $source")
 
         projectsFactory.projects

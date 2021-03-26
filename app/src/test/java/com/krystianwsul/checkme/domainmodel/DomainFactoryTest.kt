@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.time.*
@@ -20,7 +19,7 @@ class DomainFactoryTest {
     val domainFactoryRule = DomainFactoryRule()
 
     private val domainFactory get() = domainFactoryRule.domainFactory
-    private fun domainUpdater() = DomainUpdater(domainFactory)
+    private fun domainUpdater() = TestDomainUpdater(domainFactory)
 
     @Test
     fun testCreatingTask() {

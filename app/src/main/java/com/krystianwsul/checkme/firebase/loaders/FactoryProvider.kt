@@ -99,7 +99,8 @@ interface FactoryProvider {
                 deviceDbInfo,
                 startTime,
                 readTime,
-                domainDisposable
+                domainDisposable,
+                database,
         )
     }
 }

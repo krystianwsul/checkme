@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowProjectData")
@@ -45,12 +46,11 @@ fun DomainUpdater.createProject(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         friends: Set<UserKey>,
-) = updateDomainCompletable {
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
+): Single<ProjectKey.Shared> = updateDomainSingle {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val recordOf = friends.toMutableSet()
 
@@ -64,13 +64,17 @@ fun DomainUpdater.createProject(
             recordOf,
             myUserFactory.user,
             deviceDbInfo.userInfo,
-            friendsFactory
+            friendsFactory,
     )
 
     myUserFactory.user.addProject(remoteProject.projectKey)
     friendsFactory.updateProjects(remoteProject.projectKey, friends, setOf())
 
-    DomainUpdater.Params(notificationType = notificationType, cloudParams = DomainFactory.CloudParams(remoteProject))
+    save(notificationType)
+
+    notifyCloud(remoteProject)
+
+    DomainUpdater.Result(remoteProject.projectKey, DomainUpdater.Params(notificationType = notificationType, cloudParams = DomainFactory.CloudParams(remoteProject)))
 }
 
 @CheckResult

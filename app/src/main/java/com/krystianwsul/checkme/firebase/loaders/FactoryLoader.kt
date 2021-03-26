@@ -130,13 +130,13 @@ class FactoryLoader(
                                 getDeviceDbInfo(),
                                 startTime,
                                 ExactTimeStamp.Local.now,
-                                domainDisposable
+                                domainDisposable,
                         )
                     }.cacheImmediate()
 
                     val changeTypes = listOf(
                             projectsFactorySingle.flatMapObservable { it.changeTypes },
-                            friendsFactorySingle.flatMapObservable { it.changeTypes }
+                            friendsFactorySingle.flatMapObservable { it.changeTypes },
                     ).merge()
 
                     domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { Pair(domainFactory, it) } }

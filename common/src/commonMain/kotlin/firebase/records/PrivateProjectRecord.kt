@@ -95,12 +95,12 @@ class PrivateProjectRecord(
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
     fun getCustomTimeRecordId() =
-            CustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(projectKey))
+            CustomTimeId.Private(databaseWrapper.newPrivateCustomTimeRecordId(projectKey))
 
-    override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(projectKey)
+    override fun getTaskRecordId() = databaseWrapper.newPrivateTaskRecordId(projectKey)
 
     override fun getScheduleRecordId(taskId: String) =
-            databaseWrapper.getPrivateScheduleRecordId(projectKey, taskId)
+            databaseWrapper.newPrivateScheduleRecordId(projectKey, taskId)
 
     override fun getTaskHierarchyRecordId() =
             databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)

@@ -19,15 +19,15 @@ abstract class DatabaseWrapper {
 
     abstract fun update(values: Map<String, Any?>, callback: DatabaseCallback)
 
-    fun getPrivateScheduleRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${ScheduleRecord.SCHEDULES}")
+    fun newPrivateScheduleRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${ScheduleRecord.SCHEDULES}")
 
     fun newPrivateNoScheduleOrParentRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
 
-    fun getPrivateTaskRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}")
+    fun newPrivateTaskRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}")
 
     fun getPrivateTaskHierarchyRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskHierarchyRecord.TASK_HIERARCHIES}")
 
-    fun getPrivateCustomTimeRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
+    fun newPrivateCustomTimeRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
 
     fun newSharedProjectRecordId() = ProjectKey.Shared(getNewId(RECORDS_KEY))
 

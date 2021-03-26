@@ -143,8 +143,14 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>): SharedCustomTime {
+    override fun getOrCreateCustomTime(
+            ownerKey: UserKey,
+            customTime: Time.Custom<*>,
+            allowCopy: Boolean,
+    ): SharedCustomTime {
         fun copy(): SharedCustomTime {
+            if (!allowCopy) throw UnsupportedOperationException()
+
             val private = customTime as? PrivateCustomTime
 
             val customTimeJson = SharedCustomTimeJson(

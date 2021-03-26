@@ -23,9 +23,23 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
     DomainThreadChecker.instance.requireDomainThread()
 
+    /*
     val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
-            ?.let { requestInstanceKey.copy(taskKey = it) }
+            ?.let {
+                val newScheduleKey = projectsFactory.getProjectForce(it.projectKey).convertScheduleKey(
+                        deviceDbInfo.userInfo,
+                        getTaskForce(requestInstanceKey.taskKey),
+                        requestInstanceKey.scheduleKey,
+                        false,
+                )
+
+                requestInstanceKey.copy(taskKey = it)
+            }
             ?: requestInstanceKey
+            */
+
+    // todo migrate tasks
+    val instanceKey = requestInstanceKey
 
     val task = getTaskForce(instanceKey.taskKey)
 
@@ -112,7 +126,7 @@ private fun DomainFactory.getGroupListData(
                         childTask.current(now),
                         childTask.isVisible(now),
                         childInstance.isRootInstance(),
-                        childInstance.getCreateTaskTimePair(ownerKey),
+                        childInstance.getCreateTaskTimePair(now, projectsFactory.privateProject),
                         childTask.note,
                         children,
                         childTask.ordinal,

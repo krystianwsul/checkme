@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationTy
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -27,6 +26,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.RemoteToRemoteConversion
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
@@ -49,6 +49,7 @@ class DomainFactory(
         startTime: ExactTimeStamp.Local,
         readTime: ExactTimeStamp.Local,
         domainDisposable: CompositeDisposable,
+        private val databaseWrapper: DatabaseWrapper,
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -227,7 +228,7 @@ class DomainFactory(
         friendsFactory.save(values)
 
         if (values.isNotEmpty())
-            AndroidDatabaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
+            databaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
         val changes = localChanges || values.isNotEmpty()
 
@@ -456,7 +457,7 @@ class DomainFactory(
                 instance.task.current(now),
                 instance.canAddSubtask(now),
                 instance.isRootInstance(),
-                instance.getCreateTaskTimePair(ownerKey),
+                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
                 instance.task.note,
                 children,
                 instance.task.ordinal,
@@ -531,7 +532,7 @@ class DomainFactory(
                     pair.first,
                     pair.second,
                     now,
-                    newProject.projectKey
+                    newProject.projectKey,
             )
 
             remoteToRemoteConversion.endTasks[pair.first.id] = task
@@ -549,7 +550,7 @@ class DomainFactory(
                     now,
                     startTaskHierarchy,
                     parentTask.id,
-                    childTask.id
+                    childTask.id,
             )
 
             remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)

@@ -155,7 +155,7 @@ fun DomainFactory.getGroupListData(
                 task.current(now),
                 instance.canAddSubtask(now),
                 instance.isRootInstance(),
-                instance.getCreateTaskTimePair(ownerKey),
+                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
                 task.note,
                 children,
                 instance.task.ordinal,

@@ -152,7 +152,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                                 .subscribeBy {
                                     setResult(
                                             Activity.RESULT_OK,
-                                            Intent().putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable)
+                                            Intent().putExtra(CUSTOM_TIME_KEY, it as Parcelable)
                                     )
 
                                     finish()

@@ -507,7 +507,7 @@ class DomainFactory(
                 instance.task.current(now),
                 instance.canAddSubtask(now),
                 instance.isRootInstance(),
-                instance.getCreateTaskTimePair(ownerKey),
+                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
                 instance.task.note,
                 children,
                 instance.task.ordinal,

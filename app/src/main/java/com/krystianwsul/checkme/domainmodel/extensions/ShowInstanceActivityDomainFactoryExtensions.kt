@@ -107,7 +107,7 @@ private fun DomainFactory.getGroupListData(
                         childTask.current(now),
                         childTask.isVisible(now),
                         childInstance.isRootInstance(),
-                        childInstance.getCreateTaskTimePair(ownerKey),
+                        childInstance.getCreateTaskTimePair(now, projectsFactory.privateProject),
                         childTask.note,
                         children,
                         childTask.ordinal,

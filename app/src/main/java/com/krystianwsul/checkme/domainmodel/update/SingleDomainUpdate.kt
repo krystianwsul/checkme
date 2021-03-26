@@ -11,5 +11,5 @@ class SingleDomainUpdate<T : Any>(val action: DomainFactory.() -> DomainUpdater.
                 SingleDomainUpdate(action)
     }
 
-    fun perform(domainUpdater: DomainUpdater) = domainUpdater.updateDomainSingle(this)
+    fun perform(domainUpdater: DomainUpdater) = domainUpdater.performDomainUpdate(action)
 }

@@ -11,5 +11,7 @@ class CompletableDomainUpdate(val action: DomainFactory.() -> DomainUpdater.Para
                 CompletableDomainUpdate(action)
     }
 
-    fun perform(domainUpdater: DomainUpdater) = domainUpdater.updateDomainCompletable(this)
+    fun perform(domainUpdater: DomainUpdater) = domainUpdater.performDomainUpdate { domainFactory ->
+        DomainUpdater.Result(Unit, action(domainFactory))
+    }.ignoreElement()!!
 }

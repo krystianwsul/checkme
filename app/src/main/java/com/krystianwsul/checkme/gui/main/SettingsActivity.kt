@@ -14,8 +14,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.databinding.SettingsActivityBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel

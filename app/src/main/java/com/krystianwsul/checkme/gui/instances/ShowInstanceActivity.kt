@@ -10,9 +10,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity

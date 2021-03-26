@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.gui.instances.tree
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper

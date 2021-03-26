@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.update
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 
 class CompletableDomainUpdate(val action: DomainFactory.() -> DomainUpdater.Params) : DomainUpdate {
 

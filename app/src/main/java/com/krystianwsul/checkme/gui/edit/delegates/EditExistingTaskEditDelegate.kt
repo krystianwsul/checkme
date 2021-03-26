@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.updateChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry

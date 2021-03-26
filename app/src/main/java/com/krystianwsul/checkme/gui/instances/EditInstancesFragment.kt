@@ -21,10 +21,10 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*

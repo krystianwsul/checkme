@@ -4,12 +4,12 @@ import android.os.Parcelable
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDoneService
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotifiedService
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize

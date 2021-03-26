@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory

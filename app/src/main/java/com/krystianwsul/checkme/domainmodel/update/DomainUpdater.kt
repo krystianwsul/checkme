@@ -1,5 +1,9 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.update
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.Notifier
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Single

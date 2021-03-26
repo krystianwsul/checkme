@@ -20,8 +20,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityFindFriendBinding
 import com.krystianwsul.checkme.databinding.RowListAvatarBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.tryAddFriend
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.FindFriendViewEvent

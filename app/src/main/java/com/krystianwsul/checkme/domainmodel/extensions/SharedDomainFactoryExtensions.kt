@@ -5,9 +5,13 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment

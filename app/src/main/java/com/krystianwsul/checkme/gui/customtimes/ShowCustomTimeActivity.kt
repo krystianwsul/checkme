@@ -16,9 +16,9 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.newMaterialTimePicker

@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.os.Bundle
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData

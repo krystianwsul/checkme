@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager

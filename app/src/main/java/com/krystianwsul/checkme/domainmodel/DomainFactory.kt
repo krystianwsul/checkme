@@ -165,7 +165,7 @@ class DomainFactory(
                 .addTo(domainDisposable)
     }
 
-    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
+    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create { now ->
         MyCrashlytics.log("triggering fixing offsets from $source")
 
         projectsFactory.projects

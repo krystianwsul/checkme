@@ -10,47 +10,47 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import java.util.*
 
-fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
+fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completable =
+        CompletableDomainUpdate.create { now ->
+            MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
 
-    val instance = getInstance(instanceKey)
-    Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
+            val instance = getInstance(instanceKey)
+            Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
-    val now = ExactTimeStamp.Local.now
-    val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-    val date = Date(calendar.toDateTimeTz())
-    val hourMinute = HourMinute(calendar.toDateTimeTz())
+            val date = Date(calendar.toDateTimeTz())
+            val hourMinute = HourMinute(calendar.toDateTimeTz())
 
-    instance.setInstanceDateTime(
-            localFactory,
-            ownerKey,
-            DateTime(date, Time.Normal(hourMinute)),
-    )
-    instance.setNotificationShown(localFactory, false)
+            instance.setInstanceDateTime(
+                    localFactory,
+                    ownerKey,
+                    DateTime(date, Time.Normal(hourMinute)),
+            )
+            instance.setNotificationShown(localFactory, false)
 
-    DomainUpdater.Params(
-            Notifier.Params(now, "setInstanceAddHourService ${instance.name}"),
-            DomainListenerManager.NotificationType.All,
-            DomainFactory.CloudParams(instance.task.project),
-    )
-}.perform(this)
+            DomainUpdater.Params(
+                    Notifier.Params(now, "setInstanceAddHourService ${instance.name}"),
+                    DomainListenerManager.NotificationType.All,
+                    DomainFactory.CloudParams(instance.task.project),
+            )
+        }.perform(this)
 
 fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): Completable =
-        CompletableDomainUpdate.create {
+        CompletableDomainUpdate.create { now ->
             MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
 
             val instance = getInstance(instanceKey)
             Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
-
-            val now = ExactTimeStamp.Local.now
 
             instance.setDone(localFactory, true, now)
             instance.setNotificationShown(localFactory, false)
@@ -63,7 +63,7 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
         }.perform(this)
 
 fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): Completable =
-        CompletableDomainUpdate.create {
+        CompletableDomainUpdate.create { now ->
             MyCrashlytics.log("DomainFactory.setInstancesNotified")
 
             check(instanceKeys.isNotEmpty())
@@ -76,7 +76,7 @@ fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): 
 fun DomainUpdater.setTaskImageUploadedService(
         taskKey: TaskKey,
         imageUuid: String,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     val task = getTaskIfPresent(taskKey)

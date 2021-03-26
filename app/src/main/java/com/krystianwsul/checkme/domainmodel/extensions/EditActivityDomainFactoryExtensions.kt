@@ -145,8 +145,7 @@ fun DomainUpdater.createScheduleRootTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create {
+): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createScheduleRootTask")
 
     check(name.isNotEmpty())
@@ -187,8 +186,7 @@ fun DomainUpdater.createChildTask(
         note: String?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create {
+): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createChildTask")
 
     check(name.isNotEmpty())
@@ -225,8 +223,7 @@ fun DomainUpdater.createRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create {
+): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createRootTask")
 
     check(name.isNotEmpty())
@@ -260,8 +257,7 @@ fun DomainUpdater.updateScheduleTask(
         note: String?,
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updateScheduleTask")
 
     check(name.isNotEmpty())
@@ -307,8 +303,7 @@ fun DomainUpdater.updateChildTask(
         imagePath: NullableWrapper<Pair<String, Uri>>?,
         removeInstanceKey: InstanceKey?,
         allReminders: Boolean,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updateChildTask")
 
     check(name.isNotEmpty())
@@ -368,8 +363,7 @@ fun DomainUpdater.updateRootTask(
         note: String?,
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updateRootTask")
 
     check(name.isNotEmpty())
@@ -408,8 +402,7 @@ fun DomainUpdater.createScheduleJoinRootTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         allReminders: Boolean,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
 
     check(name.isNotEmpty())
@@ -467,13 +460,11 @@ fun DomainUpdater.createJoinChildTask(
         note: String?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createJoinChildTask")
 
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
-
-    val now = ExactTimeStamp.Local.now
 
     val parentTask = getTaskForce(parentTaskKey)
     parentTask.requireCurrent(now)
@@ -512,13 +503,11 @@ fun DomainUpdater.createJoinRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = SingleDomainUpdate.create {
+): Single<TaskKey> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createJoinRootTask")
 
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
-
-    val now = ExactTimeStamp.Local.now
 
     val finalProjectId = sharedProjectKey ?: joinTaskKeys.map { it.projectKey }
             .distinct()

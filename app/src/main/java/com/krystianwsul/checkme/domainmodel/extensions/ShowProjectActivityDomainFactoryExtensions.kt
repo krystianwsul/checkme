@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.SharedProject
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Completable
@@ -49,8 +48,7 @@ fun DomainUpdater.createProject(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         friends: Set<UserKey>,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<ProjectKey.Shared> = SingleDomainUpdate.create {
+): Single<ProjectKey.Shared> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -87,12 +85,10 @@ fun DomainUpdater.updateProject(
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
 

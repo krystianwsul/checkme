@@ -90,12 +90,10 @@ fun DomainUpdater.setInstancesDateTime(
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): Single<UndoData> = SingleDomainUpdate.create {
+): Single<UndoData> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
 
     check(instanceKeys.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map(this::getInstance)
 
@@ -164,10 +162,8 @@ fun DomainUpdater.setInstancesParent(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
-): Single<UndoData> = SingleDomainUpdate.create {
+): Single<UndoData> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstancesParent")
-
-    val now = ExactTimeStamp.Local.now
 
     check(instanceKeys.isNotEmpty())
 

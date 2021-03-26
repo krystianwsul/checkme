@@ -41,12 +41,10 @@ fun DomainUpdater.setProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         projectIds: Set<ProjectKey<*>>,
         removeInstances: Boolean,
-): Single<ProjectUndoData> = SingleDomainUpdate.create {
+): Single<ProjectUndoData> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
     check(projectIds.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val projectUndoData = ProjectUndoData()
 
@@ -64,12 +62,10 @@ fun DomainUpdater.setProjectEndTimeStamps(
 fun DomainUpdater.clearProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         projectUndoData: ProjectUndoData,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     check(projectUndoData.projectIds.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val remoteProjects = projectUndoData.projectIds
             .map { projectsFactory.getProjectForce(it) }

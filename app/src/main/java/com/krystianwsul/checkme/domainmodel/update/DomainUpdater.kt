@@ -9,13 +9,17 @@ import io.reactivex.rxjava3.core.Single
 
 abstract class DomainUpdater {
 
-    protected abstract fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T>
+    protected abstract fun <T : Any> performDomainUpdate(
+            action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,
+    ): Single<T>
 
     fun <T : Any> updateDomainSingle(singleDomainUpdate: SingleDomainUpdate<T>): Single<T> =
             performDomainUpdate(singleDomainUpdate.action)
 
     fun updateDomainCompletable(completableDomainUpdate: CompletableDomainUpdate) =
-            performDomainUpdate { Result(Unit, completableDomainUpdate.action(it)) }.ignoreElement()!!
+            performDomainUpdate { domainFactory, now ->
+                Result(Unit, completableDomainUpdate.action(domainFactory, now))
+            }.ignoreElement()!!
 
     data class Result<T : Any>(val data: T, val params: Params) {
 

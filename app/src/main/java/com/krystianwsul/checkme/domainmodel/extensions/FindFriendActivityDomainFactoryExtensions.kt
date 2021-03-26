@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainUpdater.tryAddFriend(
         notificationType: DomainListenerManager.NotificationType,
         userWrapper: UserWrapper,
-): Single<Boolean> = SingleDomainUpdate.create {
+): Single<Boolean> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.tryAddFriend")
 
     val userKey = UserData.getKey(userWrapper.userData.email)

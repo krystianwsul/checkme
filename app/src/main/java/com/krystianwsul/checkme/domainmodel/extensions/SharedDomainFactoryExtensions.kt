@@ -35,7 +35,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
-): Single<TaskUndoData> = SingleDomainUpdate.create {
+): Single<TaskUndoData> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
 
     val (taskUndoData, params) =
@@ -48,12 +48,10 @@ fun DomainUpdater.setTaskEndTimeStamps(
 fun DomainUpdater.clearTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         taskUndoData: TaskUndoData,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
 
     check(taskUndoData.taskKeys.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     processTaskUndoData(taskUndoData, now)
 
@@ -69,10 +67,8 @@ fun DomainUpdater.setOrdinal(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         ordinal: Double,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setOrdinal")
-
-    val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
 
@@ -85,10 +81,8 @@ fun DomainUpdater.setOrdinal(
 fun DomainUpdater.setInstancesNotNotified(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: List<InstanceKey>,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
-
-    val now = ExactTimeStamp.Local.now
 
     instanceKeys.forEach {
         val instance = getInstance(it)
@@ -108,12 +102,11 @@ fun DomainUpdater.setInstancesNotNotified(
 fun DomainUpdater.setInstancesAddHourActivity(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: Collection<InstanceKey>,
-): Single<DomainFactory.HourUndoData> = SingleDomainUpdate.create {
+): Single<DomainFactory.HourUndoData> = SingleDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
 
     check(instanceKeys.isNotEmpty())
 
-    val now = ExactTimeStamp.Local.now
     val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
     val date = Date(calendar.toDateTimeTz())
@@ -145,10 +138,8 @@ fun DomainUpdater.setInstancesAddHourActivity(
 fun DomainUpdater.undoInstancesAddHour(
         notificationType: DomainListenerManager.NotificationType,
         hourUndoData: DomainFactory.HourUndoData,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-
-    val now = ExactTimeStamp.Local.now
 
     check(hourUndoData.instanceDateTimes.isNotEmpty())
 
@@ -166,8 +157,7 @@ fun DomainUpdater.setInstanceDone(
         notificationType: DomainListenerManager.NotificationType,
         instanceKey: InstanceKey,
         done: Boolean,
-        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstanceDone")
 
     val instance = getInstance(instanceKey)
@@ -181,7 +171,7 @@ fun DomainUpdater.setInstanceDone(
 fun DomainUpdater.setInstanceNotified(
         notificationType: DomainListenerManager.NotificationType,
         instanceKey: InstanceKey,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
 
     val instance = getInstance(instanceKey)
@@ -195,7 +185,7 @@ fun DomainUpdater.setInstanceNotified(
 fun DomainUpdater.updatePhotoUrl(
         notificationType: DomainListenerManager.NotificationType,
         photoUrl: String,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -343,10 +333,8 @@ fun addChildToParent(
 fun DomainUpdater.undo(
         notificationType: DomainListenerManager.NotificationType,
         undoData: UndoData,
-): Completable = CompletableDomainUpdate.create {
+): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.undo")
-
-    val now = ExactTimeStamp.Local.now
 
     val projects = undoData.undo(this, now)
     check(projects.isNotEmpty())

@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import io.reactivex.rxjava3.core.Completable
 
 @CheckResult
-fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable = CompletableDomainUpdate.create {
+fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable = CompletableDomainUpdate.create { now ->
     MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
 
     DomainThreadChecker.instance.requireDomainThread()

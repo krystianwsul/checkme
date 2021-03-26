@@ -90,7 +90,7 @@ fun DomainUpdater.setInstancesDateTime(
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): Single<UndoData> = SingleDomainUpdate.create { now ->
+): Single<UndoData> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
 
     check(instanceKeys.isNotEmpty())
@@ -130,7 +130,7 @@ fun DomainUpdater.setInstancesDateTime(
 
     DomainUpdater.Result(
             editInstancesUndoData as UndoData,
-            now,
+            true,
             notificationType,
             DomainFactory.CloudParams(projects),
     )
@@ -189,7 +189,7 @@ fun DomainUpdater.setInstancesParent(
 
     DomainUpdater.Result(
             ListUndoData(undoDatas) as UndoData,
-            now,
+            true,
             notificationType,
             DomainFactory.CloudParams(projects),
     )

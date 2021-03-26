@@ -170,7 +170,12 @@ fun DomainUpdater.createScheduleRootTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(task.toCreateResult(now), now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(
+            task.toCreateResult(now),
+            true,
+            notificationType,
+            DomainFactory.CloudParams(task.project),
+    )
 }.perform(this)
 
 private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) =
@@ -209,7 +214,7 @@ fun DomainUpdater.createChildTask(
 
     DomainUpdater.Result(
             childTask.toCreateResult(now),
-            now,
+            true,
             notificationType,
             DomainFactory.CloudParams(childTask.project),
     )
@@ -245,7 +250,7 @@ fun DomainUpdater.createRootTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(task.toCreateResult(now), now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.toCreateResult(now), true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -290,7 +295,7 @@ fun DomainUpdater.updateScheduleTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -352,7 +357,7 @@ fun DomainUpdater.updateChildTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -389,7 +394,7 @@ fun DomainUpdater.updateRootTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    DomainUpdater.Result(task.taskKey, now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -448,7 +453,12 @@ fun DomainUpdater.createScheduleJoinRootTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(newParentTask.taskKey, now, notificationType, DomainFactory.CloudParams(newParentTask.project))
+    DomainUpdater.Result(
+            newParentTask.taskKey,
+            true,
+            notificationType,
+            DomainFactory.CloudParams(newParentTask.project),
+    )
 }.perform(this)
 
 @CheckResult
@@ -487,11 +497,9 @@ fun DomainUpdater.createJoinChildTask(
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
-    }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(childTask.taskKey, now, notificationType, DomainFactory.CloudParams(childTask.project))
+    DomainUpdater.Result(childTask.taskKey, true, notificationType, DomainFactory.CloudParams(childTask.project))
 }.perform(this)
 
 @CheckResult
@@ -533,7 +541,12 @@ fun DomainUpdater.createJoinRootTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(newParentTask.taskKey, now, notificationType, DomainFactory.CloudParams(newParentTask.project))
+    DomainUpdater.Result(
+            newParentTask.taskKey,
+            true,
+            notificationType,
+            DomainFactory.CloudParams(newParentTask.project),
+    )
 }.perform(this)
 
 private fun DomainFactory.getParentTreeDatas(

@@ -17,12 +17,17 @@ object AndroidDomainUpdater : DomainUpdater() {
         val resultSingle = domainFactorySingle.flatMap { it.onReady() }
                 .observeOnDomain()
                 .doOnSuccess { check(!it.isSaved.value!!) }
-                .map { it to action(it, ExactTimeStamp.Local.now) }
+                .map {
+                    val now = ExactTimeStamp.Local.now
+                    Triple(it, action(it, now), now)
+                }
                 .cache()
 
-        resultSingle.subscribe { (domainFactory, result) ->
+        resultSingle.subscribe { (domainFactory, result, now) ->
             domainFactory.apply {
-                result.params.notifierParams?.let(notifier::updateNotifications)
+                result.params.notifierParams
+                        ?.fix(now)
+                        ?.let(notifier::updateNotifications)
 
                 result.params
                         .notificationType

@@ -35,7 +35,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
-): Single<TaskUndoData> = SingleDomainUpdate.create { now ->
+): Single<TaskUndoData> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
 
     val (taskUndoData, params) =
@@ -59,7 +59,7 @@ fun DomainUpdater.clearTaskEndTimeStamps(
             .map { getTaskForce(it).project }
             .toSet()
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)
 
 @CheckResult
@@ -67,14 +67,14 @@ fun DomainUpdater.setOrdinal(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         ordinal: Double,
-): Completable = CompletableDomainUpdate.create { now ->
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setOrdinal")
 
     val task = getTaskForce(taskKey)
 
     task.ordinal = ordinal
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -95,7 +95,7 @@ fun DomainUpdater.setInstancesNotNotified(
         instance.setNotificationShown(localFactory, false)
     }
 
-    DomainUpdater.Params(now, notificationType)
+    DomainUpdater.Params(true, notificationType)
 }.perform(this)
 
 @CheckResult
@@ -128,7 +128,7 @@ fun DomainUpdater.setInstancesAddHourActivity(
 
     DomainUpdater.Result(
             DomainFactory.HourUndoData(instanceDateTimes),
-            now,
+            true,
             notificationType,
             DomainFactory.CloudParams(remoteProjects),
     )
@@ -138,7 +138,7 @@ fun DomainUpdater.setInstancesAddHourActivity(
 fun DomainUpdater.undoInstancesAddHour(
         notificationType: DomainListenerManager.NotificationType,
         hourUndoData: DomainFactory.HourUndoData,
-): Completable = CompletableDomainUpdate.create { now ->
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
 
     check(hourUndoData.instanceDateTimes.isNotEmpty())
@@ -149,7 +149,7 @@ fun DomainUpdater.undoInstancesAddHour(
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)
 
 @CheckResult
@@ -164,14 +164,14 @@ fun DomainUpdater.setInstanceDone(
 
     instance.setDone(localFactory, done, now)
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project))
 }.perform(this)
 
 @CheckResult
 fun DomainUpdater.setInstanceNotified(
         notificationType: DomainListenerManager.NotificationType,
         instanceKey: InstanceKey,
-): Completable = CompletableDomainUpdate.create { now ->
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstanceNotified")
 
     val instance = getInstance(instanceKey)
@@ -185,7 +185,7 @@ fun DomainUpdater.setInstanceNotified(
 fun DomainUpdater.updatePhotoUrl(
         notificationType: DomainListenerManager.NotificationType,
         photoUrl: String,
-): Completable = CompletableDomainUpdate.create { now ->
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.updatePhotoUrl")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -339,7 +339,7 @@ fun DomainUpdater.undo(
     val projects = undoData.undo(this, now)
     check(projects.isNotEmpty())
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(projects))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(projects))
 }.perform(this)
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(

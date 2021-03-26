@@ -165,7 +165,7 @@ class DomainFactory(
                 .addTo(domainDisposable)
     }
 
-    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create { now ->
+    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
         MyCrashlytics.log("triggering fixing offsets from $source")
 
         projectsFactory.projects
@@ -373,7 +373,7 @@ class DomainFactory(
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
-        return taskUndoData to DomainUpdater.Params(now, notificationType, CloudParams(remoteProjects))
+        return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(remoteProjects))
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {

@@ -85,7 +85,7 @@ fun DomainUpdater.updateProject(
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-): Completable = CompletableDomainUpdate.create { now ->
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())
@@ -101,5 +101,5 @@ fun DomainUpdater.updateProject(
 
     friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
 
-    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
 }.perform(this)

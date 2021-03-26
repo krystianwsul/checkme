@@ -25,29 +25,38 @@ abstract class DomainUpdater {
 
         constructor(
                 data: T,
-                notifierParams: Notifier.Params? = null,
+                notifierParams: NotifierParams? = null,
                 notificationType: DomainListenerManager.NotificationType? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
         ) : this(data, Params(notifierParams, notificationType, cloudParams))
 
         constructor(
                 data: T,
-                now: ExactTimeStamp.Local,
+                notify: Boolean,
                 notificationType: DomainListenerManager.NotificationType? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
-        ) : this(data, Params(now, notificationType, cloudParams))
+        ) : this(data, Params(if (notify) NotifierParams() else null, notificationType, cloudParams))
     }
 
     data class Params(
-            val notifierParams: Notifier.Params? = null,
+            val notifierParams: NotifierParams? = null,
             val notificationType: DomainListenerManager.NotificationType? = null,
             val cloudParams: DomainFactory.CloudParams? = null,
     ) {
 
         constructor(
-                now: ExactTimeStamp.Local,
+                notify: Boolean,
                 notificationType: DomainListenerManager.NotificationType? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
-        ) : this(Notifier.Params(now), notificationType, cloudParams)
+        ) : this(if (notify) NotifierParams() else null, notificationType, cloudParams)
+    }
+
+    data class NotifierParams(
+            val sourceName: String = "other",
+            val silent: Boolean = true,
+            val clear: Boolean = false,
+    ) {
+
+        fun fix(now: ExactTimeStamp.Local) = Notifier.Params(now, sourceName, silent, clear)
     }
 }

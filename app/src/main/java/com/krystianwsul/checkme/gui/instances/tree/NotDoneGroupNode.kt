@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 import java.util.*
 
@@ -251,8 +252,8 @@ class NotDoneGroupNode(
                     )
 
                     setDone(true).observeOn(AndroidSchedulers.mainThread())
-                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
-                            .flatMapSingle { setDone(false) }
+                            .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
+                            .flatMapCompletable { setDone(false) }
                             .subscribe()
                             .addTo(groupListFragment.attachedToWindowDisposable)
 
@@ -576,8 +577,8 @@ class NotDoneGroupNode(
                             true
                     )
                             .observeOn(AndroidSchedulers.mainThread())
-                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(1) }
-                            .flatMapSingle {
+                            .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
+                            .flatMapCompletable {
                                 DomainUpdater().setInstanceDone(
                                         DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                         instanceKey,

@@ -160,19 +160,14 @@ fun DomainUpdater.setInstanceDone(
         instanceKey: InstanceKey,
         done: Boolean,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<NullableWrapper<ExactTimeStamp.Local>> = updateDomainSingle {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.setInstanceDone")
 
     val instance = getInstance(instanceKey)
 
     instance.setDone(localFactory, done, now)
 
-    DomainUpdater.Result(
-            NullableWrapper(instance.done),
-            now,
-            notificationType,
-            DomainFactory.CloudParams(instance.task.project),
-    )
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(instance.task.project))
 }
 
 @CheckResult

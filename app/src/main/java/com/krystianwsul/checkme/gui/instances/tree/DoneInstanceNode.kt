@@ -25,6 +25,7 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 
 class DoneInstanceNode(
@@ -140,8 +141,8 @@ class DoneInstanceNode(
                         false,
                 )
                         .observeOn(AndroidSchedulers.mainThread())
-                        .flatMapMaybe { groupListFragment.listener.showSnackbarNotDoneMaybe(1) }
-                        .flatMapSingle {
+                        .andThen(Maybe.defer { groupListFragment.listener.showSnackbarNotDoneMaybe(1) })
+                        .flatMapCompletable {
                             DomainUpdater().setInstanceDone(
                                     DomainListenerManager.NotificationType.First(groupAdapter.dataId),
                                     instanceData.instanceKey,

@@ -50,6 +50,7 @@ import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -260,8 +261,8 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
                     setInstancesDone(instanceKeys, true).observeOn(AndroidSchedulers.mainThread())
-                            .flatMapMaybe { listener.showSnackbarDoneMaybe(instanceKeys.size) }
-                            .flatMapSingle { setInstancesDone(instanceKeys, false) }
+                            .andThen(Maybe.defer { listener.showSnackbarDoneMaybe(instanceKeys.size) })
+                            .flatMapCompletable { setInstancesDone(instanceKeys, false) }
                             .subscribe()
                             .addTo(attachedToWindowDisposable)
                 }
@@ -273,8 +274,8 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
                     setInstancesDone(instanceKeys, false).observeOn(AndroidSchedulers.mainThread())
-                            .flatMapMaybe { listener.showSnackbarDoneMaybe(instanceKeys.size) }
-                            .flatMapSingle { setInstancesDone(instanceKeys, true) }
+                            .andThen(Maybe.defer { listener.showSnackbarDoneMaybe(instanceKeys.size) })
+                            .flatMapCompletable { setInstancesDone(instanceKeys, true) }
                             .subscribe()
                             .addTo(attachedToWindowDisposable)
                 }

@@ -7,14 +7,13 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import io.reactivex.rxjava3.core.Single
 
 @CheckResult
 fun DomainUpdater.setInstancesDone(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: List<InstanceKey>,
         done: Boolean,
-): Single<ExactTimeStamp.Local> = updateDomainSingle {
+) = updateDomainCompletable {
     MyCrashlytics.log("DomainFactory.setInstancesDone")
 
     check(instanceKeys.isNotEmpty())
@@ -27,5 +26,5 @@ fun DomainUpdater.setInstancesDone(
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Result(now, now, notificationType, DomainFactory.CloudParams(remoteProjects))
+    DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
 }

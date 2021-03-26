@@ -23,6 +23,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
 
     DomainThreadChecker.instance.requireDomainThread()
 
+    /*
     val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
             ?.let {
                 val newScheduleKey = projectsFactory.getProjectForce(it.projectKey).convertScheduleKey(
@@ -32,9 +33,13 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
                         false,
                 )
 
-                InstanceKey(it, newScheduleKey)
+                requestInstanceKey.copy(taskKey = it)
             }
             ?: requestInstanceKey
+            */
+
+    // todo migrate tasks
+    val instanceKey = requestInstanceKey
 
     val task = getTaskForce(instanceKey.taskKey)
 

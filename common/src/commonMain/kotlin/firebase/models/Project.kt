@@ -99,7 +99,7 @@ abstract class Project<T : ProjectType>(
             instanceJsons: MutableMap<String, InstanceJson>,
     ): TaskRecord<T>
 
-    fun convertScheduleKey(
+    private fun convertScheduleKey(
             userInfo: UserInfo,
             oldTask: Task<*>,
             oldScheduleKey: ScheduleKey,
@@ -138,7 +138,9 @@ abstract class Project<T : ProjectType>(
             Triple(oldInstance, newInstance, updater)
         }
 
-        val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
+        // todo migrate tasks this just makes a bigger mess of things
+        @Suppress("SimplifyBooleanWithConstants")
+        val instanceJsons = if (Task.USE_ROOT_INSTANCES || true) {
             mutableMapOf()
         } else {
             instanceDatas.associate {

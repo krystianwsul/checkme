@@ -4,11 +4,13 @@ import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import io.reactivex.rxjava3.core.Completable
 
 @CheckResult
-fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) = updateDomainCompletable {
+fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.updateDeviceDbInfo")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -25,4 +27,4 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) = updateDomainC
     projectsFactory.updateDeviceInfo(deviceDbInfo)
 
     DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
-}
+}.perform(this)

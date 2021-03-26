@@ -5,12 +5,15 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
+import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
@@ -31,7 +34,7 @@ fun DomainUpdater.updateCustomTime(
         customTimeId: CustomTimeKey.Private,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.updateCustomTime")
 
     check(name.isNotEmpty())
@@ -48,14 +51,14 @@ fun DomainUpdater.updateCustomTime(
     }
 
     DomainUpdater.Params(notificationType = notificationType)
-}
+}.perform(this)
 
 @CheckResult
 fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Private> = updateDomainSingle {
+): Single<CustomTimeKey.Private> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.createCustomTime")
 
     check(name.isNotEmpty())
@@ -84,4 +87,4 @@ fun DomainUpdater.createCustomTime(
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
 
     DomainUpdater.Result(remoteCustomTime.key, notificationType = notificationType)
-}
+}.perform(this)

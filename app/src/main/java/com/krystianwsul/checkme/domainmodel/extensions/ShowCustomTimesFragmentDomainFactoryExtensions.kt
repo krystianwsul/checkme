@@ -5,12 +5,14 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
+import io.reactivex.rxjava3.core.Completable
 
 fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
@@ -48,7 +50,7 @@ fun DomainUpdater.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
         customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
         current: Boolean,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
 
     check(customTimeIds.isNotEmpty())
@@ -63,4 +65,4 @@ fun DomainUpdater.setCustomTimesCurrent(
     }
 
     DomainUpdater.Params(notificationType = notificationType)
-}
+}.perform(this)

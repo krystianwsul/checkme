@@ -5,10 +5,12 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.core.Completable
 
 fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
     MyCrashlytics.log("DomainFactory.getFriendListData")
@@ -34,19 +36,19 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
 fun DomainUpdater.removeFriends(
         notificationType: DomainListenerManager.NotificationType,
         keys: Set<UserKey>,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.removeFriends")
 
     keys.forEach { myUserFactory.user.removeFriend(it) }
 
     DomainUpdater.Params(notificationType = notificationType)
-}
+}.perform(this)
 
 @CheckResult
 fun DomainUpdater.addFriends(
         notificationType: DomainListenerManager.NotificationType,
         userMap: Map<UserKey, UserWrapper>,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.addFriends")
 
     userMap.forEach {
@@ -55,4 +57,4 @@ fun DomainUpdater.addFriends(
     }
 
     DomainUpdater.Params(notificationType = notificationType)
-}
+}.perform(this)

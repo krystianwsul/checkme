@@ -5,12 +5,15 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
+import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
@@ -47,7 +50,7 @@ fun DomainUpdater.createProject(
         name: String,
         friends: Set<UserKey>,
         now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
-): Single<ProjectKey.Shared> = updateDomainSingle {
+): Single<ProjectKey.Shared> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
@@ -75,7 +78,7 @@ fun DomainUpdater.createProject(
             notificationType = notificationType,
             cloudParams = DomainFactory.CloudParams(remoteProject),
     )
-}
+}.perform(this)
 
 @CheckResult
 fun DomainUpdater.updateProject(
@@ -84,7 +87,7 @@ fun DomainUpdater.updateProject(
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.updateProject")
 
     check(name.isNotEmpty())
@@ -103,4 +106,4 @@ fun DomainUpdater.updateProject(
     friendsFactory.updateProjects(projectId, addedFriends, removedFriends)
 
     DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProject, removedFriends))
-}
+}.perform(this)

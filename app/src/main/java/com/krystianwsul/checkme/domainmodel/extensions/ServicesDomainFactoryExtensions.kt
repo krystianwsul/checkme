@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.Notifier
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
@@ -13,9 +14,10 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Completable
 import java.util.*
 
-fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey) = updateDomainCompletable {
+fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
 
     val instance = getInstance(instanceKey)
@@ -39,37 +41,42 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey) = updateDo
             DomainListenerManager.NotificationType.All,
             DomainFactory.CloudParams(instance.task.project),
     )
-}
+}.perform(this)
 
-fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey) = updateDomainCompletable {
-    MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
+fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): Completable =
+        CompletableDomainUpdate.create {
+            MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
 
-    val instance = getInstance(instanceKey)
-    Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
+            val instance = getInstance(instanceKey)
+            Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
 
-    val now = ExactTimeStamp.Local.now
+            val now = ExactTimeStamp.Local.now
 
-    instance.setDone(localFactory, true, now)
-    instance.setNotificationShown(localFactory, false)
+            instance.setDone(localFactory, true, now)
+            instance.setNotificationShown(localFactory, false)
 
-    DomainUpdater.Params(
-            Notifier.Params(now, "setInstanceNotificationDone ${instance.name}"),
-            DomainListenerManager.NotificationType.All,
-            DomainFactory.CloudParams(instance.task.project),
-    )
-}
+            DomainUpdater.Params(
+                    Notifier.Params(now, "setInstanceNotificationDone ${instance.name}"),
+                    DomainListenerManager.NotificationType.All,
+                    DomainFactory.CloudParams(instance.task.project),
+            )
+        }.perform(this)
 
-fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>) = updateDomainCompletable {
-    MyCrashlytics.log("DomainFactory.setInstancesNotified")
+fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): Completable =
+        CompletableDomainUpdate.create {
+            MyCrashlytics.log("DomainFactory.setInstancesNotified")
 
-    check(instanceKeys.isNotEmpty())
+            check(instanceKeys.isNotEmpty())
 
-    instanceKeys.forEach(::setInstanceNotified)
+            instanceKeys.forEach(::setInstanceNotified)
 
-    DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
-}
+            DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
+        }.perform(this)
 
-fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: String) = updateDomainCompletable {
+fun DomainUpdater.setTaskImageUploadedService(
+        taskKey: TaskKey,
+        imageUuid: String,
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     val task = getTaskIfPresent(taskKey)
@@ -83,4 +90,4 @@ fun DomainUpdater.setTaskImageUploadedService(taskKey: TaskKey, imageUuid: Strin
                 cloudParams = DomainFactory.CloudParams(task.project),
         )
     }
-}
+}.perform(this)

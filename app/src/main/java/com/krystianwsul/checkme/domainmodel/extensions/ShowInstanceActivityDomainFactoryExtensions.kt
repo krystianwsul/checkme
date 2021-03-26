@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -84,7 +85,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey,
-): Single<Pair<TaskUndoData, Boolean>> = updateDomainSingle {
+): Single<Pair<TaskUndoData, Boolean>> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
 
     val now = ExactTimeStamp.Local.now
@@ -98,7 +99,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
             ),
             params,
     )
-}
+}.perform(this)
 
 private fun DomainFactory.getGroupListData(
         instance: Instance<*>,

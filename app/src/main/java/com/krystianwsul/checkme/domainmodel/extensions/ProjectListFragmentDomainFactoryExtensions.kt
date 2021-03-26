@@ -5,11 +5,14 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
+import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
@@ -38,7 +41,7 @@ fun DomainUpdater.setProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         projectIds: Set<ProjectKey<*>>,
         removeInstances: Boolean,
-): Single<ProjectUndoData> = updateDomainSingle {
+): Single<ProjectUndoData> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
     check(projectIds.isNotEmpty())
@@ -55,13 +58,13 @@ fun DomainUpdater.setProjectEndTimeStamps(
     }
 
     DomainUpdater.Result(projectUndoData, now, notificationType, DomainFactory.CloudParams(remoteProjects))
-}
+}.perform(this)
 
 @CheckResult
 fun DomainUpdater.clearProjectEndTimeStamps(
         notificationType: DomainListenerManager.NotificationType,
         projectUndoData: ProjectUndoData,
-) = updateDomainCompletable {
+): Completable = CompletableDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
 
     check(projectUndoData.projectIds.isNotEmpty())
@@ -80,4 +83,4 @@ fun DomainUpdater.clearProjectEndTimeStamps(
     processTaskUndoData(projectUndoData.taskUndoData, now)
 
     DomainUpdater.Params(now, notificationType, DomainFactory.CloudParams(remoteProjects))
-}
+}.perform(this)

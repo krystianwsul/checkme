@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationTy
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -31,6 +32,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -161,7 +163,7 @@ class DomainFactory(
                 .addTo(domainDisposable)
     }
 
-    private fun DomainUpdater.fixOffsets(source: String) = updateDomainCompletable {
+    private fun DomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
         MyCrashlytics.log("triggering fixing offsets from $source")
 
         projectsFactory.projects
@@ -169,7 +171,7 @@ class DomainFactory(
                 .forEach { it.fixOffsets() }
 
         DomainUpdater.Params(notificationType = NotificationType.All)
-    }
+    }.perform(this)
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
 

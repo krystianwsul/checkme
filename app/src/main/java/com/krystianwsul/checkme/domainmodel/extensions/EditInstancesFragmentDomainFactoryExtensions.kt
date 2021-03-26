@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
+import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
@@ -89,7 +90,7 @@ fun DomainUpdater.setInstancesDateTime(
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): Single<UndoData> = updateDomainSingle {
+): Single<UndoData> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstancesDateTime")
 
     check(instanceKeys.isNotEmpty())
@@ -129,8 +130,13 @@ fun DomainUpdater.setInstancesDateTime(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Result(editInstancesUndoData, now, notificationType, DomainFactory.CloudParams(projects))
-}
+    DomainUpdater.Result(
+            editInstancesUndoData as UndoData,
+            now,
+            notificationType,
+            DomainFactory.CloudParams(projects),
+    )
+}.perform(this)
 
 private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
 
@@ -158,7 +164,7 @@ fun DomainUpdater.setInstancesParent(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: Set<InstanceKey>,
         parentInstanceKey: InstanceKey,
-): Single<UndoData> = updateDomainSingle {
+): Single<UndoData> = SingleDomainUpdate.create {
     MyCrashlytics.log("DomainFactory.setInstancesParent")
 
     val now = ExactTimeStamp.Local.now
@@ -185,8 +191,13 @@ fun DomainUpdater.setInstancesParent(
 
     val projects = instances.map { it.task.project }.toSet()
 
-    DomainUpdater.Result(ListUndoData(undoDatas), now, notificationType, DomainFactory.CloudParams(projects))
-}
+    DomainUpdater.Result(
+            ListUndoData(undoDatas) as UndoData,
+            now,
+            notificationType,
+            DomainFactory.CloudParams(projects),
+    )
+}.perform(this)
 
 fun DomainFactory.getEditInstancesSearchData(
         searchCriteria: SearchCriteria,

@@ -7,9 +7,15 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Single
 
 
-interface DomainUpdater {
+abstract class DomainUpdater {
 
-    fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T>
+    protected abstract fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T>
+
+    fun <T : Any> updateDomainSingle(singleDomainUpdate: SingleDomainUpdate<T>): Single<T> =
+            performDomainUpdate(singleDomainUpdate.action)
+
+    fun updateDomainCompletable(completableDomainUpdate: CompletableDomainUpdate) =
+            performDomainUpdate { Result(Unit, completableDomainUpdate.action(it)) }.ignoreElement()!!
 
     data class Result<T : Any>(val data: T, val params: Params) {
 

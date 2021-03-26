@@ -4,11 +4,11 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import io.reactivex.rxjava3.core.Single
 
 
-class TestDomainUpdater(domainFactory: DomainFactory) : DomainUpdater {
+class TestDomainUpdater(domainFactory: DomainFactory) : DomainUpdater() {
 
     private val domainFactorySingle = Single.just(domainFactory)
 
-    override fun <T : Any> performDomainUpdate(action: (DomainFactory) -> DomainUpdater.Result<T>): Single<T> {
+    override fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T> {
         val resultSingle = domainFactorySingle.flatMap { it.onReady() }
                 .observeOnDomain()
                 .doOnSuccess { check(!it.isSaved.value!!) }

@@ -6,13 +6,13 @@ import com.krystianwsul.checkme.utils.filterNotNull
 import io.reactivex.rxjava3.core.Single
 
 
-object AndroidDomainUpdater : DomainUpdater {
+object AndroidDomainUpdater : DomainUpdater() {
 
     private val domainFactorySingle = DomainFactory.instanceRelay
             .filterNotNull()
             .firstOrError()
 
-    override fun <T : Any> performDomainUpdate(action: (DomainFactory) -> DomainUpdater.Result<T>): Single<T> {
+    override fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T> {
         val resultSingle = domainFactorySingle.flatMap { it.onReady() }
                 .observeOnDomain()
                 .doOnSuccess { check(!it.isSaved.value!!) }

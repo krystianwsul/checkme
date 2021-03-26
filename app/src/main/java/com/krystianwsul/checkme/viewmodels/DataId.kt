@@ -8,5 +8,4 @@ import kotlinx.parcelize.Parcelize
 data class DataId(val value: Int) : Parcelable {
 
     fun toFirst() = DomainListenerManager.NotificationType.First(this)
-    fun toSkip() = DomainListenerManager.NotificationType.Skip(this)
 }

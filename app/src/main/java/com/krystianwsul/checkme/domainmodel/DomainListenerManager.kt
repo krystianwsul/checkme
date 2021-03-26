@@ -27,24 +27,23 @@ class DomainListenerManager {
     fun notify(notificationType: NotificationType) {
         fun Map.Entry<DomainListener<*>, *>.dataId() = key.dataId
 
-        val eligibleListeners = when (notificationType) {
-            NotificationType.All -> domainListeners.values
-            is NotificationType.Skip ->
-                domainListeners.filter { it.dataId() != notificationType.dataId }.map { it.value }
-            is NotificationType.First -> domainListeners.entries
-                    .sortedByDescending { it.dataId() == notificationType.dataId }
-                    .map { it.value }
-        }
-
-        eligibleListeners.forEach { it.accept(Unit) }
+        domainListeners.entries
+                .sortedByDescending { it.dataId() in notificationType.dataIds }
+                .forEach { it.value.accept(Unit) }
     }
 
     sealed class NotificationType {
 
-        object All : NotificationType()
+        abstract val dataIds: Set<DataId>
 
-        data class Skip(val dataId: DataId) : NotificationType()
+        object All : NotificationType() {
 
-        data class First(val dataId: DataId) : NotificationType()
+            override val dataIds = emptySet<DataId>()
+        }
+
+        data class First(override val dataIds: Set<DataId>) : NotificationType() {
+
+            constructor(dataId: DataId) : this(setOf(dataId))
+        }
     }
 }

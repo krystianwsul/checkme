@@ -4,31 +4,19 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import io.reactivex.rxjava3.core.Single
 
 
-class TestDomainUpdater(domainFactory: DomainFactory) : DomainUpdater() {
-
-    private val domainFactorySingle = Single.just(domainFactory)
+class TestDomainUpdater(private val domainFactory: DomainFactory) : DomainUpdater() {
 
     override fun <T : Any> performDomainUpdate(action: (DomainFactory) -> Result<T>): Single<T> {
-        val resultSingle = domainFactorySingle.flatMap { it.onReady() }
-                .observeOnDomain()
-                .doOnSuccess { check(!it.isSaved.value!!) }
-                .map { it to action(it) }
-                .cache()
+        val (data, params) = action(domainFactory)
 
-        resultSingle.subscribe { (domainFactory, result) ->
-            domainFactory.apply {
-                result.params.notifierParams?.let(notifier::updateNotifications)
+        domainFactory.apply {
+            params.notifierParams?.let(notifier::updateNotifications)
 
-                result.params
-                        .notificationType
-                        ?.let(::save)
+            params.notificationType?.let(::save)
 
-                result.params
-                        .cloudParams
-                        ?.let(::notifyCloud)
-            }
+            params.cloudParams?.let(::notifyCloud)
         }
 
-        return resultSingle.map { (_, result) -> result.data }
+        return Single.just(data)
     }
 }

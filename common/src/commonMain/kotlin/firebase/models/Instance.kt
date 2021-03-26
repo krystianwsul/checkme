@@ -477,22 +477,34 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-    fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
+    fun getCreateTaskTimePair(now: ExactTimeStamp.Local, privateProject: PrivateProject): TimePair {
         val instanceTimePair = instanceTime.timePair
-        val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
-        return if (shared != null) {
-            val sharedCustomTime = task.project.getCustomTime(shared.customTimeId) as SharedCustomTime
+        return if (instanceTimePair.customTimeKey != null) {
+            val customTime = task.project.getCustomTime(instanceTimePair.customTimeKey.customTimeId)
 
-            if (sharedCustomTime.ownerKey == ownerKey) {
-                val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
+            val privateCustomTime = when (customTime) {
+                is SharedCustomTime -> {
+                    val ownerKey = privateProject.projectKey.toUserKey()
 
-                TimePair(privateCustomTimeKey)
-            } else {
-                val hourMinute = sharedCustomTime.getHourMinute(instanceDate.dayOfWeek)
+                    if (customTime.ownerKey == ownerKey) {
+                        val privateCustomTimeKey = CustomTimeKey.Private(
+                                ownerKey.toPrivateProjectKey(),
+                                customTime.privateKey!!,
+                        )
 
-                TimePair(hourMinute)
+                        privateProject.getCustomTime(privateCustomTimeKey)
+                    } else {
+                        null
+                    }
+                }
+                is PrivateCustomTime -> customTime
+                else -> throw UnsupportedOperationException()
             }
+
+            privateCustomTime?.takeIf { it.current(now) }
+                    ?.let { TimePair(it.key) }
+                    ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {
             instanceTimePair
         }

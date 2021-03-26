@@ -87,12 +87,18 @@ class PrivateProject(
     override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getCustomTime(customTimeKey.customTimeId)
     override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Private(customTimeId))
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom<*>) = when (customTime) {
+    override fun getOrCreateCustomTime(
+            ownerKey: UserKey,
+            customTime: Time.Custom<*>,
+            allowCopy: Boolean,
+    ) = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {
                 customTimes.single { it.id == customTime.privateKey }
             } else {
+                if (!allowCopy) throw UnsupportedOperationException()
+
                 val customTimeJson = PrivateCustomTimeJson(
                         customTime.name,
                         customTime.getHourMinute(DayOfWeek.SUNDAY).hour,

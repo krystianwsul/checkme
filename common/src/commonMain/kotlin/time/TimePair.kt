@@ -3,10 +3,7 @@ package com.krystianwsul.common.time
 import com.krystianwsul.common.utils.*
 
 @Parcelize
-data class TimePair(
-        val customTimeKey: CustomTimeKey<*>?,
-        val hourMinute: HourMinute?
-) : Parcelable, Serializable {
+data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMinute?) : Parcelable, Serializable {
 
     constructor(customTimeKey: CustomTimeKey<*>) : this(customTimeKey, null)
 

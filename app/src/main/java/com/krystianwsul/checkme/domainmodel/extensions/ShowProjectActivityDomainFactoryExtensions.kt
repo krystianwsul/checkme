@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory.Companion.scheduleOnDomain
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.completeOnDomain
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
@@ -12,6 +13,7 @@ import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowProjectData")
@@ -46,12 +48,11 @@ fun DomainFactory.createProject(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         friends: Set<UserKey>,
-) = completeOnDomain {
+        now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
+): Single<ProjectKey.Shared> = scheduleOnDomain {
     MyCrashlytics.log("DomainFactory.createProject")
 
     check(name.isNotEmpty())
-
-    val now = ExactTimeStamp.Local.now
 
     val recordOf = friends.toMutableSet()
 
@@ -65,7 +66,7 @@ fun DomainFactory.createProject(
             recordOf,
             myUserFactory.user,
             deviceDbInfo.userInfo,
-            friendsFactory
+            friendsFactory,
     )
 
     myUserFactory.user.addProject(remoteProject.projectKey)
@@ -74,6 +75,8 @@ fun DomainFactory.createProject(
     save(notificationType)
 
     notifyCloud(remoteProject)
+
+    remoteProject.projectKey
 }
 
 @CheckResult

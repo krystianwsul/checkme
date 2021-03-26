@@ -3,10 +3,8 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.hours
 import org.junit.Assert.*
@@ -420,5 +418,78 @@ class DomainFactoryTest {
 
         assertEquals(1, getTodayInstanceDatas(now).size)
         assertEquals(2, getTodayInstanceDatas(now).single().children.size)
+    }
+
+    @Test
+    fun testCopyingCustomTime() {
+        val date = Date(2021, 3, 25)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val privateCustomTimeKey = domainFactory.createCustomTime(
+                DomainListenerManager.NotificationType.All,
+                "customTime",
+                DayOfWeek.values().associateWith { HourMinute(2, 0) },
+        ).blockingGet()
+
+        val privateTaskKey = domainFactory.createScheduleRootTask(
+                DomainListenerManager.NotificationType.All,
+                "task",
+                listOf(ScheduleData.Single(date, TimePair(privateCustomTimeKey))),
+                null,
+                null,
+                null,
+                null,
+                now,
+        )
+                .blockingGet()
+                .taskKey
+
+        val sharedProjectKey = domainFactory.createProject(
+                DomainListenerManager.NotificationType.All,
+                "project",
+                setOf(),
+        ).blockingGet()
+
+        now += 1.hours // now 2
+
+        domainFactory.updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
+                privateTaskKey,
+                "task",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
+                null,
+                null,
+                null,
+                now,
+        ).blockingGet()
+
+        val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .instanceKey
+
+        now += 1.hours // now 3
+
+        domainFactory.updateScheduleTask(
+                DomainListenerManager.NotificationType.All,
+                privateTaskKey,
+                "task",
+                listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
+                null,
+                EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
+                null,
+                now,
+        ).blockingGet()
+
+        domainFactory.getShowInstanceData(instanceKey)
+
+        assertEquals(
+                1,
+                domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                        .groupListDataWrapper
+                        .instanceDatas
+                        .size,
+        )
     }
 }

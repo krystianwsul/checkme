@@ -47,7 +47,7 @@ fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTas
                 task.current(now),
                 it.canAddSubtask(now),
                 it.isRootInstance(),
-                it.getCreateTaskTimePair(ownerKey),
+                it.getCreateTaskTimePair(now, projectsFactory.privateProject),
                 task.note,
                 children,
                 it.task.ordinal,

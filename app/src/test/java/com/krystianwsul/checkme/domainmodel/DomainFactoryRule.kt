@@ -10,6 +10,9 @@ import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
+import com.krystianwsul.checkme.firebase.loaders.mockBase64
+import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -20,6 +23,7 @@ import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
@@ -100,6 +104,10 @@ class DomainFactoryRule : TestRule {
 
         RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+
+        mockBase64()
+
+        ErrorLogger.instance = mockk(relaxed = true)
     }
 
     private fun before() {
@@ -110,11 +118,22 @@ class DomainFactoryRule : TestRule {
         }
 
         val databaseWrapper = mockk<DatabaseWrapper> {
-            var taskId = 0
-            every { getPrivateTaskRecordId(any()) } answers { "taskId" + ++taskId }
+            var sharedProjectId = 0
+            every { newSharedProjectRecordId() } answers {
+                ProjectKey.Shared("sharedProjectId" + ++sharedProjectId)
+            }
 
-            var scheduleId = 0
-            every { getPrivateScheduleRecordId(any(), any()) } answers { "scheduleId" + ++scheduleId }
+            var privateTaskId = 0
+            every { newPrivateTaskRecordId(any()) } answers { "privateTaskId" + ++privateTaskId }
+
+            var sharedTaskId = 0
+            every { newSharedTaskRecordId(any()) } answers { "sharedTaskId" + ++sharedTaskId }
+
+            var privateScheduleId = 0
+            every { newPrivateScheduleRecordId(any(), any()) } answers { "privateScheduleId" + ++privateScheduleId }
+
+            var sharedScheduleId = 0
+            every { newSharedScheduleRecordId(any(), any()) } answers { "sharedScheduleId" + ++sharedScheduleId }
 
             var noScheduleOrParentId = 0
             every { newPrivateNoScheduleOrParentRecordId(any(), any()) } answers {
@@ -124,8 +143,19 @@ class DomainFactoryRule : TestRule {
             var taskHierarchyId = 0
             every { getPrivateTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
 
-            var customTimeId = 0
-            every { getPrivateCustomTimeRecordId(any()) } answers { "customTimeId" + ++customTimeId }
+            var privateCustomTimeId = 0
+            every { newPrivateCustomTimeRecordId(any()) } answers { "privateCustomTimeId" + ++privateCustomTimeId }
+
+            var sharedCustomTimeId = 0
+            every { newSharedCustomTimeRecordId(any()) } answers { "sharedCustomTimeId" + ++sharedCustomTimeId }
+
+            every { update(any(), any()) } returns Unit
+        }
+
+        val sharedProjectsLoader = mockk<SharedProjectsLoader>(relaxed = true) {
+            every { projectManager } returns spyk(AndroidSharedProjectManager(databaseWrapper)) {
+                every { save(any()) } returns Unit
+            }
         }
 
         val projectsFactory = ProjectsFactory(
@@ -136,11 +166,14 @@ class DomainFactoryRule : TestRule {
                         PrivateProjectRecord(
                                 databaseWrapper,
                                 deviceDbInfo.userInfo,
-                                PrivateProjectJson(startTime = domainFactoryStartTime.long, startTimeOffset = domainFactoryStartTime.offset)
+                                PrivateProjectJson(
+                                        startTime = domainFactoryStartTime.long,
+                                        startTimeOffset = domainFactoryStartTime.offset,
+                                ),
                         ),
-                        mapOf()
+                        mapOf(),
                 ),
-                mockk(relaxed = true),
+                sharedProjectsLoader,
                 SharedProjectsLoader.InitialProjectsEvent(listOf()),
                 domainFactoryStartTime,
                 mockk(relaxed = true),
@@ -150,6 +183,8 @@ class DomainFactoryRule : TestRule {
         val friendsFactory = mockk<FriendsFactory> {
             every { isSaved } returns false
             every { save(any()) } returns Unit
+            every { getUserJsons(any()) } returns mapOf()
+            every { updateProjects(any(), any(), any()) } returns Unit
         }
 
         domainFactory = DomainFactory(
@@ -161,6 +196,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 domainFactoryStartTime,
                 compositeDisposable,
+                databaseWrapper,
         )
     }
 

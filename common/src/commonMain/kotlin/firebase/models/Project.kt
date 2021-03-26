@@ -1,10 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.ProjectUndoData
-import com.krystianwsul.common.domain.RemoteToRemoteConversion
-import com.krystianwsul.common.domain.TaskHierarchyContainer
+import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
@@ -102,6 +99,31 @@ abstract class Project<T : ProjectType>(
             instanceJsons: MutableMap<String, InstanceJson>,
     ): TaskRecord<T>
 
+    private fun convertScheduleKey(
+            userInfo: UserInfo,
+            oldTask: Task<*>,
+            oldScheduleKey: ScheduleKey,
+            allowCopy: Boolean,
+    ): ScheduleKey {
+        check(oldTask.project != this)
+
+        val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
+
+        if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
+
+        val oldCustomTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey.customTimeId)
+
+        val ownerKey = when (oldCustomTime) {
+            is PrivateCustomTime -> userInfo.key
+            is SharedCustomTime -> oldCustomTime.ownerKey!!
+            else -> throw IllegalStateException()
+        }
+
+        val newCustomTime = getOrCreateCustomTime(ownerKey, oldCustomTime, allowCopy)
+
+        return ScheduleKey(oldScheduleDate, TimePair(newCustomTime.key))
+    }
+
     @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
@@ -116,11 +138,20 @@ abstract class Project<T : ProjectType>(
             Triple(oldInstance, newInstance, updater)
         }
 
-        val instanceJsons = if (Task.USE_ROOT_INSTANCES) {
+        // todo migrate tasks this just makes a bigger mess of things
+        @Suppress("SimplifyBooleanWithConstants")
+        val instanceJsons = if (Task.USE_ROOT_INSTANCES || true) {
             mutableMapOf()
         } else {
             instanceDatas.associate {
-                InstanceRecord.scheduleKeyToString(it.first.scheduleKey) to it.second
+                val newScheduleKey = convertScheduleKey(
+                        deviceDbInfo.userInfo,
+                        oldTask,
+                        it.first.scheduleKey,
+                        true,
+                )
+
+                InstanceRecord.scheduleKeyToString(newScheduleKey) to it.second
             }.toMutableMap()
         }
 
@@ -158,6 +189,7 @@ abstract class Project<T : ProjectType>(
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
             customTime: Time.Custom<*>,
+            allowCopy: Boolean = true,
     ): Time.Custom<T>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {

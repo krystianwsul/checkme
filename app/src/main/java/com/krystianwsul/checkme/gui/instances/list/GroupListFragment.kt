@@ -805,9 +805,12 @@ class GroupListFragment @JvmOverloads constructor(
                         }
                         canAddSubtask -> getStartEditActivityFabState(
                                 EditActivity.Hint.Task(singleSelectedData.taskKey),
-                                true
+                                true,
                         )
-                        canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
+                        canAddToTime -> getStartEditActivityFabState(
+                                listOf(instanceData!!).getHint(),
+                                true,
+                        )
                         else -> FabState.Hidden
                     }
                 } else if (parameters.fabActionMode.showTime

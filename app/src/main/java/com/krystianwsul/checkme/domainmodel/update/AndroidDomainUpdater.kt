@@ -1,44 +1,103 @@
 package com.krystianwsul.checkme.domainmodel.update
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
-import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.subjects.SingleSubject
 
 
 object AndroidDomainUpdater : DomainUpdater() {
 
-    private val domainFactorySingle = DomainFactory.instanceRelay
-            .filterNotNull()
-            .firstOrError()
+    private lateinit var queue: Queue
 
-    override fun <T : Any> performDomainUpdate(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
-        val resultSingle = domainFactorySingle.flatMap { it.onReady() }
-                .observeOnDomain()
-                .doOnSuccess { check(!it.isSaved.value!!) }
-                .map {
-                    val now = ExactTimeStamp.Local.now
-                    Triple(it, action(it, now), now)
-                }
-                .cache()
-
-        resultSingle.subscribe { (domainFactory, result, now) ->
-            domainFactory.apply {
-                result.params.notifierParams
-                        ?.fix(now)
-                        ?.let(notifier::updateNotifications)
-
-                result.params
-                        .notificationType
-                        ?.let(::save)
-
-                result.params
-                        .cloudParams
-                        ?.let(::notifyCloud)
+    fun init() {
+        val isReady = DomainFactory.instanceRelay.switchMap { domainFactoryWrapper ->
+            if (domainFactoryWrapper.value == null) {
+                Observable.just(NullableWrapper())
+            } else {
+                domainFactoryWrapper.value
+                        .isSaved
+                        .map { isSaved ->
+                            if (isSaved) {
+                                NullableWrapper()
+                            } else {
+                                NullableWrapper(domainFactoryWrapper.value)
+                            }
+                        }
             }
         }
 
-        return resultSingle.map { (_, result) -> result.data }
+        Queue(isReady).subscribe()
+    }
+
+    override fun <T : Any> performDomainUpdate(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> =
+            queue.add(action)
+
+    class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
+
+        private val itemsRelay = BehaviorRelay.createDefault(listOf<Item>())
+
+        fun subscribe(): Disposable {
+            return Observables.combineLatest(itemsRelay, isReady)
+                    .observeOnDomain()
+                    .subscribe { (items, domainFactoryWrapper) -> dispatchItems(items, domainFactoryWrapper.value) }
+        }
+
+        @Synchronized
+        fun <T : Any> add(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
+            val subject = SingleSubject.create<T>()
+
+            val item = object : Item {
+
+                private lateinit var result: Result<T>
+
+                override fun getParams(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Params {
+                    result = action(domainFactory, now)
+
+                    return result.params
+                }
+
+                override fun dispatchResult() = subject.onSuccess(result.data)
+            }
+
+            itemsRelay.accept(itemsRelay.value + item)
+
+            return subject
+        }
+
+        private fun dispatchItems(items: List<Item>, domainFactory: DomainFactory?) {
+            DomainThreadChecker.instance.requireDomainThread()
+
+            if (domainFactory == null || items.isEmpty()) return
+
+            val now = ExactTimeStamp.Local.now
+
+            val params = Params.merge(items.map { it.getParams(domainFactory, now) })
+
+            domainFactory.apply {
+                params.notifierParams
+                        ?.fix(now)
+                        ?.let(notifier::updateNotifications)
+
+                params.notificationType?.let(::save)
+
+                params.cloudParams?.let(::notifyCloud)
+            }
+
+            items.forEach { it.dispatchResult() }
+        }
+
+        private interface Item {
+
+            fun getParams(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Params
+            fun dispatchResult()
+        }
     }
 }

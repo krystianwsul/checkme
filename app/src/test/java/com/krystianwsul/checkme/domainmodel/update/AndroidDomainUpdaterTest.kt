@@ -108,4 +108,53 @@ class AndroidDomainUpdaterTest {
         testObserver1.assertValue("1")
         testObserver2.assertValue("2")
     }
+
+    @Test
+    fun testToggleReady() {
+        acceptNotReady()
+
+        val testObserver1 = addItem()
+
+        assertEquals(listOf<Int>(), results)
+        testObserver1.assertEmpty()
+
+        val testObserver2 = addItem()
+
+        assertEquals(listOf<Int>(), results)
+        testObserver2.assertEmpty()
+
+        acceptReady()
+
+        assertEquals(listOf(1, 2), results)
+        testObserver1.assertValue("1")
+        testObserver2.assertValue("2")
+
+        val testObserver3 = addItem()
+
+        assertEquals(listOf(1, 2, 3), results)
+        testObserver3.assertValue("3")
+
+        val testObserver4 = addItem()
+
+        assertEquals(listOf(1, 2, 3, 4), results)
+        testObserver4.assertValue("4")
+
+        acceptNotReady()
+
+        val testObserver5 = addItem()
+
+        assertEquals(listOf(1, 2, 3, 4), results)
+        testObserver5.assertEmpty()
+
+        val testObserver6 = addItem()
+
+        assertEquals(listOf(1, 2, 3, 4), results)
+        testObserver6.assertEmpty()
+
+        acceptReady()
+
+        assertEquals(listOf(1, 2, 3, 4, 5, 6), results)
+        testObserver5.assertValue("5")
+        testObserver6.assertValue("6")
+    }
 }

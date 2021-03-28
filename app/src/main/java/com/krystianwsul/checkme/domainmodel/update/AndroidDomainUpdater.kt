@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.update
 
-import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -42,14 +43,22 @@ object AndroidDomainUpdater : DomainUpdater() {
 
     class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
 
-        // todo queue neither a relay of a list, nor @Synchronized make any sense for what I need here.
+        private val items = mutableListOf<Item>()
 
-        private val itemsRelay = BehaviorRelay.createDefault(listOf<Item>())
+        private val trigger = PublishRelay.create<Unit>()
 
         fun subscribe(): Disposable {
-            return Observables.combineLatest(itemsRelay, isReady)
+            return Observables.combineLatest(trigger, isReady)
+                    .map { (_, domainFactoryWrapper) -> domainFactoryWrapper }
+                    .filterNotNull()
+                    .map {
+                        it to synchronized(items) {
+                            items.toMutableList().also { items -= it }
+                        }
+                    }
+                    .filter { (_, items) -> items.isNotEmpty() }
                     .observeOnDomain()
-                    .subscribe { (items, domainFactoryWrapper) -> dispatchItems(items, domainFactoryWrapper.value) }
+                    .subscribe { (domainFactory, items) -> dispatchItems(domainFactory, items) }
         }
 
         @Synchronized
@@ -69,15 +78,17 @@ object AndroidDomainUpdater : DomainUpdater() {
                 override fun dispatchResult() = subject.onSuccess(result.data)
             }
 
-            itemsRelay.accept(itemsRelay.value + item)
+            synchronized(items) { items += item }
+
+            trigger.accept(Unit)
 
             return subject
         }
 
-        private fun dispatchItems(items: List<Item>, domainFactory: DomainFactory?) {
+        private fun dispatchItems(domainFactory: DomainFactory, items: List<Item>) {
             DomainThreadChecker.instance.requireDomainThread()
 
-            if (domainFactory == null || items.isEmpty()) return
+            check(items.isNotEmpty())
 
             val now = ExactTimeStamp.Local.now
 
@@ -94,8 +105,6 @@ object AndroidDomainUpdater : DomainUpdater() {
             }
 
             items.forEach { it.dispatchResult() }
-
-            itemsRelay.accept(listOf())
         }
 
         private interface Item {

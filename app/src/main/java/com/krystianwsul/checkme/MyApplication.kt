@@ -101,6 +101,8 @@ class MyApplication : Application() {
             runOnDomain { it.setDomainThread() }
         }
 
+        AndroidDomainUpdater.init()
+
         Preferences.language.applySettingStartup()
 
         Preferences.tickLog.logLineDate("MyApplication.onCreate")

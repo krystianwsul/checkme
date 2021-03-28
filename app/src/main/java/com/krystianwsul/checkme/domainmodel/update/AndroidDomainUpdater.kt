@@ -19,23 +19,19 @@ object AndroidDomainUpdater : DomainUpdater() {
     private lateinit var queue: Queue
 
     fun init() {
-        val isReady = DomainFactory.instanceRelay.switchMap { domainFactoryWrapper ->
-            if (domainFactoryWrapper.value == null) {
-                Observable.just(NullableWrapper())
-            } else {
-                domainFactoryWrapper.value
-                        .isSaved
-                        .map { isSaved ->
-                            if (isSaved) {
-                                NullableWrapper()
-                            } else {
-                                NullableWrapper(domainFactoryWrapper.value)
-                            }
-                        }
-            }
-        }
+        val isReady = DomainFactory.instanceRelay
+                .observeOnDomain()
+                .switchMap {
+                    if (it.value == null) {
+                        Observable.just(NullableWrapper())
+                    } else {
+                        it.value
+                                .isSaved
+                                .map { isSaved -> NullableWrapper(it.value.takeUnless { isSaved }) }
+                    }
+                }
 
-        Queue(isReady).subscribe()
+        queue = Queue(isReady).apply { subscribe() }
     }
 
     override fun <T : Any> performDomainUpdate(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> =
@@ -91,6 +87,8 @@ object AndroidDomainUpdater : DomainUpdater() {
             check(items.isNotEmpty())
 
             val now = ExactTimeStamp.Local.now
+
+            check(!domainFactory.isSaved.value)
 
             val params = Params.merge(items.map { it.getParams(domainFactory, now) })
 

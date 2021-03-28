@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.domainmodel.update
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.observers.TestObserver
@@ -41,7 +43,10 @@ class AndroidDomainUpdaterTest {
     }
 
     private fun acceptNotReady() = isReady.accept(NullableWrapper())
-    private fun acceptReady() = isReady.accept(NullableWrapper(mockk(relaxed = true)))
+
+    private fun acceptReady() = isReady.accept(NullableWrapper(mockk(relaxed = true) {
+        every { isSaved } returns BehaviorRelay.createDefault(false)
+    }))
 
     @Test
     fun testInitQueue() {

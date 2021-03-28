@@ -40,9 +40,12 @@ class AndroidDomainUpdaterTest {
         queueDisposable.dispose()
     }
 
+    private fun acceptNotReady() = isReady.accept(NullableWrapper())
+    private fun acceptReady() = isReady.accept(NullableWrapper(mockk(relaxed = true)))
+
     @Test
     fun testInitQueue() {
-        isReady.accept(NullableWrapper())
+        acceptNotReady()
     }
 
     private fun addItem(): TestObserver<String> {
@@ -57,7 +60,7 @@ class AndroidDomainUpdaterTest {
 
     @Test
     fun testNotReady() {
-        isReady.accept(NullableWrapper())
+        acceptNotReady()
 
         val testObserver1 = addItem()
 
@@ -70,11 +73,9 @@ class AndroidDomainUpdaterTest {
         testObserver2.assertEmpty()
     }
 
-    private fun mockedDomainFactory() = mockk<DomainFactory>(relaxed = true)
-
     @Test
     fun testInitiallyReady() {
-        isReady.accept(NullableWrapper(mockedDomainFactory()))
+        acceptReady()
 
         val testObserver1 = addItem()
 

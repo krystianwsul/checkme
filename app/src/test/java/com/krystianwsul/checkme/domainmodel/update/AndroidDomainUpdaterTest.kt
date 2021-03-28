@@ -87,4 +87,25 @@ class AndroidDomainUpdaterTest {
         assertEquals(listOf(1, 2), results)
         testObserver2.assertValue("2")
     }
+
+    @Test
+    fun testInitiallyNotReady() {
+        acceptNotReady()
+
+        val testObserver1 = addItem()
+
+        assertEquals(listOf<Int>(), results)
+        testObserver1.assertEmpty()
+
+        val testObserver2 = addItem()
+
+        assertEquals(listOf<Int>(), results)
+        testObserver2.assertEmpty()
+
+        acceptReady()
+
+        assertEquals(listOf(1, 2), results)
+        testObserver1.assertValue("1")
+        testObserver2.assertValue("2")
+    }
 }

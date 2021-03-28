@@ -14,6 +14,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.LocalDateTime
 import java.util.*
 import kotlin.collections.HashMap
@@ -186,29 +188,43 @@ object Preferences {
 
         private var logString by ReadWriteStrPref(key)
 
+        private lateinit var lineList: List<String>
+
         val log get() = logString
 
+        private fun runOnIo(action: () -> Unit) {
+            Single.fromCallable(action)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe()
+        }
+
         fun logLineDate(line: String) {
-            logLine("")
-            logLine(ExactTimeStamp.Local.now.date.toString())
-            logLineHour(line)
+            runOnIo {
+                logLine("")
+                logLine(ExactTimeStamp.Local.now.date.toString())
+                logLineHour(line)
+            }
         }
 
         fun logLineHour(line: String, separator: Boolean = false) {
-            if (separator)
-                logLine("")
+            runOnIo {
+                if (separator)
+                    logLine("")
 
-            logLine(ExactTimeStamp.Local.now.hourMilli.toString() + " " + line)
+                logLine(ExactTimeStamp.Local.now.hourMilli.toString() + " " + line)
+            }
         }
 
         private fun logLine(line: String) {
             MyCrashlytics.log("Preferences.logLine: $line")
 
-            logString = logString.split('\n')
-                    .take(length)
+            if (!this::lineList.isInitialized) lineList = logString.split('\n')
+
+            lineList = lineList.take(length)
                     .toMutableList()
                     .apply { add(0, line) }
-                    .joinToString("\n")
+
+            logString = lineList.joinToString("\n")
         }
     }
 

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -188,6 +189,8 @@ class FactoryLoaderNewTest {
         override val shownFactory = mockk<Instance.ShownFactory>()
 
         lateinit var friendsFactory: FriendsFactory
+
+        override val domainUpdater get() = mockk<DomainUpdater>(relaxed = true)
 
         override fun newDomain(
                 localFactory: FactoryProvider.Local,

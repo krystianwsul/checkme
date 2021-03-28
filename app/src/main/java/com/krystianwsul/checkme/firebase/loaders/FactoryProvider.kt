@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -38,6 +40,8 @@ interface FactoryProvider {
             override val database = this@FactoryProvider.database
         }
 
+    val domainUpdater: DomainUpdater
+
     fun newDomain(
             localFactory: Local,
             myUserFactory: MyUserFactory,
@@ -68,7 +72,6 @@ interface FactoryProvider {
         abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot>
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot>
-
     }
 
     class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {
@@ -81,6 +84,8 @@ interface FactoryProvider {
 
             override val database = this@Impl.database
         }
+
+        override val domainUpdater = AndroidDomainUpdater
 
         override fun newDomain(
                 localFactory: Local,

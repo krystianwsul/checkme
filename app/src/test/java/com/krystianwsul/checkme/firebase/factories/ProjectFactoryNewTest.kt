@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -81,6 +82,9 @@ class ProjectFactoryNewTest {
 
         override val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
 
+        override val domainUpdater: DomainUpdater
+            get() = TODO("Not yet implemented")
+
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
                 myUserFactory: MyUserFactory,
@@ -100,7 +104,7 @@ class ProjectFactoryNewTest {
         ) {
             sharedProjectObservables.getValue(projectKey).accept(ValueTestSnapshot(
                     JsonWrapper(projectJson),
-                    projectKey.key
+                    projectKey.key,
             ))
         }
     }

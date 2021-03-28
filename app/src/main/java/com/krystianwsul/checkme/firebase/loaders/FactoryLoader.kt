@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -150,7 +149,7 @@ class FactoryLoader(
                             .addTo(domainDisposable)
 
                     tokenObservable.flatMapCompletable {
-                        AndroidDomainUpdater.updateDeviceDbInfo(
+                        factoryProvider.domainUpdater.updateDeviceDbInfo(
                                 DeviceDbInfo(DeviceInfo(userInfo, it.value), localFactory.uuid)
                         )
                     }

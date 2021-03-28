@@ -42,6 +42,8 @@ object AndroidDomainUpdater : DomainUpdater() {
 
     class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
 
+        // todo queue neither a relay of a list, nor @Synchronized make any sense for what I need here.
+
         private val itemsRelay = BehaviorRelay.createDefault(listOf<Item>())
 
         fun subscribe(): Disposable {
@@ -92,6 +94,8 @@ object AndroidDomainUpdater : DomainUpdater() {
             }
 
             items.forEach { it.dispatchResult() }
+
+            itemsRelay.accept(listOf())
         }
 
         private interface Item {

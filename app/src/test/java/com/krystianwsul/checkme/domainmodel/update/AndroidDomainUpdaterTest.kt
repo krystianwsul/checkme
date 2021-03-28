@@ -45,11 +45,15 @@ class AndroidDomainUpdaterTest {
         isReady.accept(NullableWrapper())
     }
 
-    private fun addItem(): TestObserver<String> = queue.add { _, _ ->
-        results.add(--counter)
+    private fun addItem(): TestObserver<String> {
+        val myCounter = ++counter
 
-        DomainUpdater.Result(counter.toString(), mockk<DomainUpdater.Params>())
-    }.test()
+        return queue.add { _, _ ->
+            results.add(myCounter)
+
+            DomainUpdater.Result(myCounter.toString(), mockk<DomainUpdater.Params>(relaxed = true))
+        }.test()
+    }
 
     @Test
     fun testNotReady() {
@@ -64,5 +68,22 @@ class AndroidDomainUpdaterTest {
 
         assertEquals(listOf<Int>(), results)
         testObserver2.assertEmpty()
+    }
+
+    private fun mockedDomainFactory() = mockk<DomainFactory>(relaxed = true)
+
+    @Test
+    fun testInitiallyReady() {
+        isReady.accept(NullableWrapper(mockedDomainFactory()))
+
+        val testObserver1 = addItem()
+
+        assertEquals(listOf(1), results)
+        testObserver1.assertValue("1")
+
+        val testObserver2 = addItem()
+
+        assertEquals(listOf(1, 2), results)
+        testObserver2.assertValue("2")
     }
 }

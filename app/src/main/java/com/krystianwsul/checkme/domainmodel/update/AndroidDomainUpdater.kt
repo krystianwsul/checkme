@@ -57,7 +57,6 @@ object AndroidDomainUpdater : DomainUpdater() {
                     .subscribe { (domainFactory, items) -> dispatchItems(domainFactory, items) }
         }
 
-        @Synchronized
         fun <T : Any> add(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
             val subject = SingleSubject.create<T>()
 

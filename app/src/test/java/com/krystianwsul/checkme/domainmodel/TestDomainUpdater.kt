@@ -11,6 +11,7 @@ class TestDomainUpdater(
 ) : DomainUpdater() {
 
     override fun <T : Any> performDomainUpdate(
+            trigger: Boolean,
             action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,
     ): Single<T> {
         val (data, params) = action(domainFactory, now)

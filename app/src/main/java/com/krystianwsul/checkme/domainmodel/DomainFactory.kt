@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -55,6 +54,7 @@ class DomainFactory(
         readTime: ExactTimeStamp.Local,
         domainDisposable: CompositeDisposable,
         private val databaseWrapper: DatabaseWrapper,
+        private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
 
     companion object {
@@ -157,7 +157,7 @@ class DomainFactory(
         ).map { it.toObservable() }
                 .merge()
                 .firstOrError()
-                .flatMapCompletable { AndroidDomainUpdater.fixOffsets(it) }
+                .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
                 .subscribe()
                 .addTo(domainDisposable)
     }
@@ -234,7 +234,7 @@ class DomainFactory(
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
-            AndroidDomainUpdater.updateNotifications(Notifier.Params()).subscribe()
+            getDomainUpdater(this).updateNotifications(Notifier.Params()).subscribe()
         }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
@@ -258,7 +258,7 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() = AndroidDomainUpdater.updateNotifications(Notifier.Params(clear = true))
+    override fun clearUserInfo() = getDomainUpdater(this).updateNotifications(Notifier.Params(clear = true))
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
@@ -313,6 +313,9 @@ class DomainFactory(
          *
          * I think that TickData.Lock should trigger updateNotifications once for the initial tick, and a second time
          * only for RunType.REMOTE.
+         *
+         * For that matter, it's not like a single run from RunType.REMOTE is guaranteed to be the specific update we're
+         * waiting for.
          */
 
         val notifyParams = when (runType) {
@@ -321,7 +324,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        AndroidDomainUpdater.updateDomainCompletable(
+        getDomainUpdater(this).updateDomainCompletable(
                 CompletableDomainUpdate.create {
                     DomainUpdater.Params(
                             notifyParams,

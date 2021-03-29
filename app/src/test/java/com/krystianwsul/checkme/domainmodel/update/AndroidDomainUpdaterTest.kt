@@ -56,7 +56,7 @@ class AndroidDomainUpdaterTest {
     private fun addItem(): TestObserver<String> {
         val myCounter = ++counter
 
-        return queue.add { _, _ ->
+        return queue.add(true) { _, _ ->
             results.add(myCounter)
 
             DomainUpdater.Result(myCounter.toString(), mockk<DomainUpdater.Params>(relaxed = true))

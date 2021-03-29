@@ -197,7 +197,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 compositeDisposable,
                 databaseWrapper,
-        )
+        ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 
     private fun after() {

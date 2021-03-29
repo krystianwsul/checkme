@@ -109,6 +109,6 @@ interface FactoryProvider {
                 readTime,
                 domainDisposable,
                 database,
-        )
+        ) { AndroidDomainUpdater }
     }
 }

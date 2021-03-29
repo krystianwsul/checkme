@@ -32,14 +32,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
         val (sourceName, silent, _, clear) = params
 
-        val skipSave = domainFactory.aggregateData != null
-
-        Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
-
-        if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(params))
-            return
-        }
+        Preferences.tickLog.logLineDate("updateNotifications start $sourceName")
 
         notificationWrapper.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
 

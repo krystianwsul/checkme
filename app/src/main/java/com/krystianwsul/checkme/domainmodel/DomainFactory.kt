@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -111,8 +112,6 @@ class DomainFactory(
     var remoteReadTimes: ReadTimes
         private set
 
-    var aggregateData: AggregateData? = null
-
     val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
@@ -139,7 +138,6 @@ class DomainFactory(
         }
 
         tryNotifyListeners(
-                now,
                 "DomainFactory.init",
                 if (firstRun) RunType.APP_START else RunType.SIGN_IN,
         )
@@ -216,14 +214,7 @@ class DomainFactory(
     fun save(saveParams: SaveParams) {
         DomainThreadChecker.instance.requireDomainThread()
 
-        val skipping = aggregateData != null
-        Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
-
-        if (skipping) {
-            check(saveParams.notificationType is NotificationType.All)
-
-            return
-        }
+        Preferences.tickLog.logLineHour("DomainFactory.save")
 
         val localChanges = localFactory.save()
 
@@ -276,7 +267,7 @@ class DomainFactory(
 
         updateShortcuts(now)
 
-        tryNotifyListeners(now, "DomainFactory.onChangeTypeEvent", changeType.runType)
+        tryNotifyListeners("DomainFactory.onChangeTypeEvent", changeType.runType)
 
         changeTypeRelay.accept(changeType)
     }
@@ -288,24 +279,15 @@ class DomainFactory(
 
         val runType = myUserFactory.onNewSnapshot(snapshot).runType
 
-        tryNotifyListeners(ExactTimeStamp.Local.now, "DomainFactory.updateUserRecord", runType)
+        tryNotifyListeners("DomainFactory.updateUserRecord", runType)
     }
 
-    private fun tryNotifyListeners(now: ExactTimeStamp.Local, source: String, runType: RunType) {
+    private fun tryNotifyListeners(source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
         if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
 
-        check(aggregateData == null)
-
-        aggregateData = AggregateData()
-
-        Preferences.tickLog.logLineHour("DomainFactory: notifiying listeners")
-
-        updateIsSaved()
-
-        val copyAggregateData = aggregateData!!
-        aggregateData = null
+        Preferences.tickLog.logLineHour("DomainFactory: notifying listeners")
 
         val tickData = TickHolder.getTickData()
 
@@ -325,20 +307,20 @@ class DomainFactory(
             return Notifier.Params(source, false)
         }
 
-        val notifierType = when (runType) {
+        val notifyParams = when (runType) {
             RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
             RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        notifierType?.let { notifier.updateNotifications(now, it) }
+        CompletableDomainUpdate.create {
+            DomainUpdater.Params(
+                    notifyParams,
+                    SaveParams(NotificationType.All, runType == RunType.REMOTE),
+            )
+        }.perform(AndroidDomainUpdater)
 
-        save(SaveParams(NotificationType.All, runType == RunType.REMOTE))
-
-        copyAggregateData.run {
-            if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
-                notifyCloud(CloudParams(notificationProjects, notificationUserKeys))
-        }
+        updateIsSaved()
     }
 
     private enum class RunType {
@@ -636,13 +618,6 @@ class DomainFactory(
         val projects = cloudParams.projects.toMutableSet()
         val userKeys = cloudParams.userKeys.toMutableSet()
 
-        aggregateData?.run {
-            notificationProjects.addAll(projects)
-            notificationUserKeys.addAll(userKeys)
-
-            return
-        }
-
         val remotePrivateProject = projects.singleOrNull { it is PrivateProject }
 
         remotePrivateProject?.let {
@@ -677,10 +652,4 @@ class DomainFactory(
 
     inner class SavedFactoryException :
             Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
-
-    class AggregateData {
-
-        val notificationProjects = mutableSetOf<Project<*>>()
-        val notificationUserKeys = mutableSetOf<UserKey>()
-    }
 }

@@ -11,6 +11,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
@@ -87,7 +88,9 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         started.accept(true)
     }
 
-    private fun tick(source: String) = DomainFactory.setFirebaseTickListener(TickData.Normal(true, source))
+    private fun tick(source: String) = DomainFactory.setFirebaseTickListener(
+            TickData.Normal(true, DomainUpdater.NotifierParams(source)),
+    )
             .subscribe()
             .addTo(createDisposable)
 

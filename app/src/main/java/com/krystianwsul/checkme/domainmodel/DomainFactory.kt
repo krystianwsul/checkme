@@ -87,7 +87,7 @@ class DomainFactory(
 
                 if (notifyListeners) domainFactory.domainListenerManager.notify(NotificationType.All)
 
-                domainFactory.updateNotificationsTick(silent, newTickData.source)
+                domainFactory.updateNotificationsTick(silent, newTickData.notifierParams.sourceName)
 
                 if (tickData?.waiting == true) {
                     TickHolder.addTickData(newTickData)
@@ -297,7 +297,7 @@ class DomainFactory(
         fun tick(tickData: TickData, forceNotify: Boolean) {
             notifier.updateNotifications(Notifier.Params(
                     now,
-                    "${tickData.source}, runType: $runType",
+                    "${tickData.notifierParams.sourceName}, runType: $runType",
                     tickData.silent && !forceNotify,
                     tick = true,
             ))

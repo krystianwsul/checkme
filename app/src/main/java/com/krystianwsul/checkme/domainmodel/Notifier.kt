@@ -5,6 +5,7 @@ import android.util.Log
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
@@ -36,7 +37,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(silent, sourceName))
+            TickHolder.addTickData(TickData.Normal(silent, DomainUpdater.NotifierParams(sourceName)))
             return
         }
 

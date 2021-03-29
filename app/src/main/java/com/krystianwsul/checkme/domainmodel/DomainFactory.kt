@@ -309,30 +309,29 @@ class DomainFactory(
 
         val tickData = TickHolder.getTickData()
 
-        fun tick(tickData: TickData, forceNotify: Boolean) {
-            notifier.updateNotifications(
-                    now,
-                    Notifier.Params(
-                            "${tickData.notifierParams.sourceName}, runType: $runType",
-                            tickData.notifierParams.silent && !forceNotify,
-                            tick = true,
-                    ),
-            )
-
+        fun tick(tickData: TickData, forceNotify: Boolean): Notifier.Params {
             if (!tickData.waiting) tickData.release()
+
+            return Notifier.Params(
+                    "${tickData.notifierParams.sourceName}, runType: $runType",
+                    tickData.notifierParams.silent && !forceNotify,
+                    tick = true,
+            )
         }
 
-        fun notify() {
+        fun notify(): Notifier.Params {
             check(tickData == null)
 
-            notifier.updateNotifications(now, Notifier.Params(source, false))
+            return Notifier.Params(source, false)
         }
 
-        when (runType) {
+        val notifierType = when (runType) {
             RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
             RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
+
+        notifierType?.let { notifier.updateNotifications(now, it) }
 
         save(SaveParams(NotificationType.All, runType == RunType.REMOTE))
 

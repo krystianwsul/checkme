@@ -307,6 +307,14 @@ class DomainFactory(
             return Notifier.Params(source, false)
         }
 
+        /**
+         * todo there's a logical mistake here: TickData.Lock gets set in order to wait for any possible remote changes.
+         * But, after it's set, it triggers notification updates for RunType.LOCAL as well.
+         *
+         * I think that TickData.Lock should trigger updateNotifications once for the initial tick, and a second time
+         * only for RunType.REMOTE.
+         */
+
         val notifyParams = when (runType) {
             RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
             RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()

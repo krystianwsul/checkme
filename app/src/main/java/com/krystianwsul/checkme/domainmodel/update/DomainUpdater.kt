@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.Notifier
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.singleOrEmpty
 import io.reactivex.rxjava3.core.Single
 
 
@@ -47,17 +48,7 @@ abstract class DomainUpdater {
         companion object {
 
             fun merge(params: List<Params>): Params {
-                val notifierParams: NotifierParams? = params.mapNotNull { it.notifierParams }.let {
-                    if (it.size == 1) {
-                        it.single()
-                    } else {
-                        check(it.none { it.clear })
-
-                        it.map { it.sourceName }
-                                .takeIf { it.isNotEmpty() }
-                                ?.let { NotifierParams("merged: " + it.joinToString(", ")) }
-                    }
-                }
+                val notifierParams = NotifierParams.merge(params.mapNotNull { it.notifierParams })
 
                 val notificationType = params.mapNotNull { it.notificationType }
                         .takeIf { it.isNotEmpty() }
@@ -79,6 +70,18 @@ abstract class DomainUpdater {
     }
 
     data class NotifierParams(val sourceName: String = "other", val clear: Boolean = false) {
+
+        companion object {
+
+            fun merge(notifierParams: List<NotifierParams>): NotifierParams? {
+                if (notifierParams.size < 2) return notifierParams.singleOrEmpty()
+
+                check(notifierParams.none { it.clear })
+
+                val sourceName = notifierParams.joinToString(", ") { it.sourceName }
+                return NotifierParams(sourceName)
+            }
+        }
 
         fun fix(now: ExactTimeStamp.Local) = Notifier.Params(now, sourceName)
     }

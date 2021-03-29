@@ -89,7 +89,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
     }
 
     private fun tick(source: String) = DomainFactory.setFirebaseTickListener(
-            TickData.Normal(DomainUpdater.NotifierParams(source, true)),
+            TickData.Normal(DomainUpdater.NotifierParams(source, true, true)),
     )
             .subscribe()
             .addTo(createDisposable)

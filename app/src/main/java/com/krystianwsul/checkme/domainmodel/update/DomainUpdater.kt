@@ -69,7 +69,7 @@ abstract class DomainUpdater {
         ) : this(if (notify) NotifierParams() else null, notificationType, cloudParams)
     }
 
-    data class NotifierParams(val sourceName: String = "other", val silent: Boolean = true, val clear: Boolean = false) {
+    data class NotifierParams(val sourceName: String = "other", val silent: Boolean = true, val tick: Boolean = false, val clear: Boolean = false) {
 
         companion object {
 
@@ -83,10 +83,11 @@ abstract class DomainUpdater {
                 return NotifierParams(
                         sourceName,
                         notifierParams.all { it.silent },
+                        notifierParams.any { it.tick },
                 )
             }
         }
 
-        fun fix() = Notifier.Params(sourceName, silent, clear = clear)
+        fun fix() = Notifier.Params(sourceName, silent, tick, clear)
     }
 }

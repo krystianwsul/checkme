@@ -28,7 +28,7 @@ object Ticker {
 
             Completable.complete()
         } else {
-            DomainFactory.setFirebaseTickListener(TickData.Lock(DomainUpdater.NotifierParams(source, false), domainChanged))
+            DomainFactory.setFirebaseTickListener(TickData.Lock(DomainUpdater.NotifierParams(source, false, true), domainChanged))
         }
     }
 }

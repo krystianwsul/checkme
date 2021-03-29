@@ -47,9 +47,17 @@ abstract class DomainUpdater {
         companion object {
 
             fun merge(params: List<Params>): Params {
-                val notifierParams = params.mapNotNull { it.notifierParams?.sourceName }
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { NotifierParams("merged: " + it.joinToString(", ")) }
+                val notifierParams: NotifierParams? = params.mapNotNull { it.notifierParams }.let {
+                    if (it.size == 1) {
+                        it.single()
+                    } else {
+                        check(it.none { it.clear })
+
+                        it.map { it.sourceName }
+                                .takeIf { it.isNotEmpty() }
+                                ?.let { NotifierParams("merged: " + it.joinToString(", ")) }
+                    }
+                }
 
                 val notificationType = params.mapNotNull { it.notificationType }
                         .takeIf { it.isNotEmpty() }
@@ -70,7 +78,7 @@ abstract class DomainUpdater {
         ) : this(if (notify) NotifierParams() else null, notificationType, cloudParams)
     }
 
-    data class NotifierParams(val sourceName: String = "other") {
+    data class NotifierParams(val sourceName: String = "other", val clear: Boolean = false) {
 
         fun fix(now: ExactTimeStamp.Local) = Notifier.Params(now, sourceName)
     }

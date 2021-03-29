@@ -159,7 +159,9 @@ class FactoryLoader(
                     domainFactorySingle.map(::NullableWrapper)
                 }
             } else {
-                factoryProvider.nullableInstance?.clearUserInfo()
+                factoryProvider.nullableInstance
+                        ?.clearUserInfo()
+                        ?.subscribe()
 
                 Single.just(NullableWrapper())
             }

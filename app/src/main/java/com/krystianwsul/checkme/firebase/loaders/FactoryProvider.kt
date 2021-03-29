@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -13,6 +14,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -59,7 +61,8 @@ interface FactoryProvider {
 
         fun updateUserRecord(snapshot: Snapshot)
 
-        fun clearUserInfo()
+        @CheckResult
+        fun clearUserInfo(): Completable
     }
 
     interface Local : Instance.ShownFactory {

@@ -351,3 +351,10 @@ fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData
 )
 
 fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)
+
+@CheckResult
+fun DomainUpdater.updateNotifications(notifierParams: DomainUpdater.NotifierParams) = CompletableDomainUpdate.create {
+    MyCrashlytics.logMethod("DomainFactory.updateNotifications")
+
+    DomainUpdater.Params(notifierParams, DomainListenerManager.NotificationType.All)
+}.perform(this)

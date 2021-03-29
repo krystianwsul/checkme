@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
 import com.krystianwsul.checkme.domainmodel.extensions.fixOffsets
+import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -251,11 +252,7 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() {
-        DomainThreadChecker.instance.requireDomainThread()
-
-        notifier.updateNotifications(Notifier.Params(ExactTimeStamp.Local.now, clear = true))
-    }
+    override fun clearUserInfo() = AndroidDomainUpdater.updateNotifications(DomainUpdater.NotifierParams(clear = true))
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")

@@ -22,6 +22,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -71,7 +72,7 @@ class FactoryLoaderOldTest {
 
     private open class TestDomain : FactoryProvider.Domain {
 
-        override fun clearUserInfo() {
+        override fun clearUserInfo(): Completable {
             TODO("Not yet implemented")
         }
 

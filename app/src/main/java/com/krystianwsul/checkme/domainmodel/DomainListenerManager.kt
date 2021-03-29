@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.DomainListener
+import com.krystianwsul.common.utils.singleOrEmpty
 import io.reactivex.rxjava3.core.Observable
 
 class DomainListenerManager {
@@ -33,6 +34,15 @@ class DomainListenerManager {
     }
 
     sealed class NotificationType {
+
+        companion object {
+
+            fun merge(notificationTypes: List<NotificationType>): NotificationType? {
+                if (notificationTypes.size < 2) return notificationTypes.singleOrEmpty()
+
+                return First(notificationTypes.map { it.dataIds }.flatten().toSet())
+            }
+        }
 
         abstract val dataIds: Set<DataId>
 

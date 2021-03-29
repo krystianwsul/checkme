@@ -49,9 +49,8 @@ abstract class DomainUpdater {
             fun merge(params: List<Params>): Params {
                 val notifierParams = Notifier.Params.merge(params.mapNotNull { it.notifierParams })
 
-                val notificationType = params.mapNotNull { it.notificationType }
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { DomainListenerManager.NotificationType.First(it.map { it.dataIds }.flatten().toSet()) }
+                val notificationType =
+                        DomainListenerManager.NotificationType.merge(params.mapNotNull { it.notificationType })
 
                 val cloudParams = params.mapNotNull { it.cloudParams }
                         .takeIf { it.isNotEmpty() }

@@ -82,12 +82,15 @@ class DomainFactory(
             } else {
                 val tickData = TickHolder.getTickData()
 
-                val silent = (tickData?.silent ?: true) && newTickData.silent
+                val mergedNotifierParams = DomainUpdater.NotifierParams.merge(
+                        listOfNotNull(tickData, newTickData).map { it.notifierParams }
+                )!!
+
                 val notifyListeners = (tickData?.domainChanged ?: false) || newTickData.domainChanged
 
                 if (notifyListeners) domainFactory.domainListenerManager.notify(NotificationType.All)
 
-                domainFactory.updateNotificationsTick(silent, newTickData.notifierParams.sourceName)
+                domainFactory.updateNotificationsTick(mergedNotifierParams.silent, mergedNotifierParams.sourceName)
 
                 if (tickData?.waiting == true) {
                     TickHolder.addTickData(newTickData)
@@ -299,7 +302,7 @@ class DomainFactory(
                     now,
                     Notifier.Params(
                             "${tickData.notifierParams.sourceName}, runType: $runType",
-                            tickData.silent && !forceNotify,
+                            tickData.notifierParams.silent && !forceNotify,
                             tick = true,
                     ),
             )
@@ -381,7 +384,7 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    private fun updateNotificationsTick(silent: Boolean, sourceName: String) {
+    private fun updateNotificationsTick(silent: Boolean, sourceName: String) { // todo notifier tick true
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
 
         DomainThreadChecker.instance.requireDomainThread()

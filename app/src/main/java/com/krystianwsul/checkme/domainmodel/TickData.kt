@@ -12,8 +12,6 @@ sealed class TickData {
 
     abstract val notifierParams: DomainUpdater.NotifierParams
 
-    abstract val silent: Boolean
-
     abstract val shouldClear: Boolean
 
     abstract val waiting: Boolean
@@ -22,9 +20,9 @@ sealed class TickData {
 
     abstract fun release()
 
-    override fun toString() = super.toString() + " silent: $silent, notifierParams: $notifierParams"
+    override fun toString() = super.toString() + ", notifierParams: $notifierParams"
 
-    class Normal(override val silent: Boolean, override val notifierParams: DomainUpdater.NotifierParams) : TickData() {
+    class Normal(override val notifierParams: DomainUpdater.NotifierParams) : TickData() {
 
         override var shouldClear = false
             private set
@@ -45,8 +43,6 @@ sealed class TickData {
                     .plusMillis(DURATION)
                     .toExactTimeStamp(),
     ) : TickData() {
-
-        override val silent = false
 
         companion object {
 

@@ -37,7 +37,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(silent, DomainUpdater.NotifierParams(sourceName)))
+            TickHolder.addTickData(TickData.Normal(DomainUpdater.NotifierParams(sourceName, silent, clear)))
             return
         }
 

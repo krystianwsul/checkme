@@ -14,8 +14,6 @@ object TickHolder {
                 listOf(oldTickData, newTickData).map { it.notifierParams },
         )!!
 
-        val silent = oldTickData.silent && newTickData.silent
-
         val tickDatas = listOf(oldTickData, newTickData)
 
         return if (tickDatas.any { it is TickData.Lock }) {
@@ -26,7 +24,7 @@ object TickHolder {
 
             TickData.Lock(notifierParams, domainChanged, expires)
         } else {
-            TickData.Normal(silent, notifierParams)
+            TickData.Normal(notifierParams)
         }
     }
 

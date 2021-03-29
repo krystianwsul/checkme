@@ -16,13 +16,7 @@ class TestDomainUpdater(
     ): Single<T> {
         val (data, params) = action(domainFactory, now)
 
-        domainFactory.apply {
-            params.notifierParams?.let { notifier.updateNotifications(now, it) }
-
-            params.saveParams?.let(::save)
-
-            params.cloudParams?.let(::notifyCloud)
-        }
+        domainFactory.applyParams(params, now)
 
         return Single.just(data)
     }

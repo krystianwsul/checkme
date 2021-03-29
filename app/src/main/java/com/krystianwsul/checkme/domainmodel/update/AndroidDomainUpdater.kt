@@ -93,13 +93,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             val params = Params.merge(items.map { it.getParams(domainFactory, now) })
 
-            domainFactory.apply {
-                params.notifierParams?.let { notifier.updateNotifications(now, it) }
-
-                params.saveParams?.let(::save)
-
-                params.cloudParams?.let(::notifyCloud)
-            }
+            domainFactory.applyParams(params, now)
 
             items.forEach { it.dispatchResult() }
         }

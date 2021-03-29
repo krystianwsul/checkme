@@ -9,6 +9,19 @@ import io.reactivex.rxjava3.core.Single
 
 abstract class DomainUpdater {
 
+    companion object {
+
+        fun DomainFactory.applyParams(params: Params, now: ExactTimeStamp.Local) {
+            params.apply {
+                notifierParams?.let { notifier.updateNotifications(now, it) }
+
+                saveParams?.let(::save)
+
+                cloudParams?.let(::notifyCloud)
+            }
+        }
+    }
+
     protected abstract fun <T : Any> performDomainUpdate(
             trigger: Boolean,
             action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,

@@ -16,7 +16,7 @@ class TestDomainUpdater(
         val (data, params) = action(domainFactory, now)
 
         domainFactory.apply {
-            params.notifierParams?.let { notifier.updateNotifications(now, it.fix()) }
+            params.notifierParams?.let { notifier.updateNotifications(now, it) }
 
             params.notificationType?.let(::save)
 

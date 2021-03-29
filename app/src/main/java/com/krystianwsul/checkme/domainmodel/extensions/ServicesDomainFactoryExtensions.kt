@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.Notifier
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.time.calendar
@@ -38,7 +39,7 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
             instance.setNotificationShown(localFactory, false)
 
             DomainUpdater.Params(
-                    DomainUpdater.NotifierParams("setInstanceAddHourService ${instance.name}"),
+                    Notifier.Params("setInstanceAddHourService ${instance.name}"),
                     DomainListenerManager.NotificationType.All,
                     DomainFactory.CloudParams(instance.task.project),
             )
@@ -55,7 +56,7 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
             instance.setNotificationShown(localFactory, false)
 
             DomainUpdater.Params(
-                    DomainUpdater.NotifierParams("setInstanceNotificationDone ${instance.name}"),
+                    Notifier.Params("setInstanceNotificationDone ${instance.name}"),
                     DomainListenerManager.NotificationType.All,
                     DomainFactory.CloudParams(instance.task.project),
             )

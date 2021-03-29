@@ -5,7 +5,6 @@ import android.util.Log
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
@@ -14,6 +13,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.singleOrEmpty
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.Time
 import com.soywiz.klock.days
@@ -37,7 +37,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData.Normal(DomainUpdater.NotifierParams(sourceName, silent, true, clear)))
+            TickHolder.addTickData(TickData.Normal(params))
             return
         }
 
@@ -370,5 +370,23 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             val silent: Boolean = true,
             val tick: Boolean = false,
             val clear: Boolean = false,
-    )
+    ) {
+
+        companion object {
+
+            fun merge(paramsList: List<Params>): Params? {
+                if (paramsList.size < 2) return paramsList.singleOrEmpty()
+
+                check(paramsList.none { it.clear })
+
+                val sourceName = "merged: (" + paramsList.joinToString(", ") { it.sourceName } + ")"
+
+                return Params(
+                        sourceName,
+                        paramsList.all { it.silent },
+                        paramsList.any { it.tick },
+                )
+            }
+        }
+    }
 }

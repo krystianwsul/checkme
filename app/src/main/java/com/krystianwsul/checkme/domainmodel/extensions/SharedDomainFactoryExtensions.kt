@@ -5,10 +5,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -353,7 +350,7 @@ fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData
 fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)
 
 @CheckResult
-fun DomainUpdater.updateNotifications(notifierParams: DomainUpdater.NotifierParams) = CompletableDomainUpdate.create {
+fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) = CompletableDomainUpdate.create {
     MyCrashlytics.logMethod("DomainFactory.updateNotifications")
 
     DomainUpdater.Params(notifierParams, DomainListenerManager.NotificationType.All)

@@ -3,14 +3,13 @@ package com.krystianwsul.checkme.domainmodel
 import android.content.Context
 import android.os.PowerManager
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.time.toExactTimeStamp
 import com.krystianwsul.common.time.ExactTimeStamp
 import org.joda.time.DateTime
 
 sealed class TickData {
 
-    abstract val notifierParams: DomainUpdater.NotifierParams
+    abstract val notifierParams: Notifier.Params
 
     abstract val shouldClear: Boolean
 
@@ -22,7 +21,7 @@ sealed class TickData {
 
     override fun toString() = super.toString() + ", notifierParams: $notifierParams"
 
-    class Normal(override val notifierParams: DomainUpdater.NotifierParams) : TickData() {
+    class Normal(override val notifierParams: Notifier.Params) : TickData() {
 
         override var shouldClear = false
             private set
@@ -37,7 +36,7 @@ sealed class TickData {
     }
 
     class Lock(
-            override val notifierParams: DomainUpdater.NotifierParams,
+            override val notifierParams: Notifier.Params,
             override val domainChanged: Boolean,
             val expires: ExactTimeStamp.Local = DateTime.now()
                     .plusMillis(DURATION)

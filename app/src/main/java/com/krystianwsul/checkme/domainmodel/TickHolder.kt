@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
-
 object TickHolder {
 
     private var tickData: TickData? = null
@@ -10,7 +8,7 @@ object TickHolder {
         oldTickData.release()
         newTickData.release()
 
-        val notifierParams = DomainUpdater.NotifierParams.merge(
+        val notifierParams = Notifier.Params.merge(
                 listOf(oldTickData, newTickData).map { it.notifierParams },
         )!!
 

@@ -82,7 +82,7 @@ class DomainFactory(
             } else {
                 val tickData = TickHolder.getTickData()
 
-                val mergedNotifierParams = DomainUpdater.NotifierParams.merge(
+                val mergedNotifierParams = Notifier.Params.merge(
                         listOfNotNull(tickData, newTickData).map { it.notifierParams }
                 )!!
 
@@ -231,7 +231,7 @@ class DomainFactory(
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
-            AndroidDomainUpdater.updateNotifications(DomainUpdater.NotifierParams()).subscribe()
+            AndroidDomainUpdater.updateNotifications(Notifier.Params()).subscribe()
         }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
@@ -255,7 +255,7 @@ class DomainFactory(
 
     // firebase
 
-    override fun clearUserInfo() = AndroidDomainUpdater.updateNotifications(DomainUpdater.NotifierParams(clear = true))
+    override fun clearUserInfo() = AndroidDomainUpdater.updateNotifications(Notifier.Params(clear = true))
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
@@ -384,7 +384,7 @@ class DomainFactory(
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 
-    private fun updateNotificationsTick(notifierParams: DomainUpdater.NotifierParams) {
+    private fun updateNotificationsTick(notifierParams: Notifier.Params) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick notifierParams: $notifierParams")
 
         DomainThreadChecker.instance.requireDomainThread()
@@ -393,7 +393,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        notifier.updateNotifications(now, Notifier.Params(notifierParams.sourceName, notifierParams.silent, tick = true))
+        notifier.updateNotifications(now, notifierParams)
 
         save(NotificationType.All)
     }

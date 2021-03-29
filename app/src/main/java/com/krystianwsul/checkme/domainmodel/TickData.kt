@@ -38,7 +38,7 @@ sealed class TickData {
 
     class Lock(
             override val notifierParams: DomainUpdater.NotifierParams,
-            override val domainChanged: Boolean = false,
+            override val domainChanged: Boolean,
             val expires: ExactTimeStamp.Local = DateTime.now()
                     .plusMillis(DURATION)
                     .toExactTimeStamp(),

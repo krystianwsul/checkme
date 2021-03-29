@@ -368,7 +368,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     data class Params(
             val sourceName: String = "other",
             val silent: Boolean = true,
-            val clear: Boolean = false,
+            val clear: Boolean = false, // todo notifier change order params
             val tick: Boolean = false,
     )
 }

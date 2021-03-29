@@ -33,10 +33,13 @@ object TickHolder {
 
     fun getTickData(): TickData? {
         tryClearTickData()
+
         return tickData
     }
 
     fun addTickData(newTickData: TickData) {
+        tryClearTickData()
+
         tickData = tickData?.let { mergeTickDatas(it, newTickData) } ?: newTickData
     }
 }

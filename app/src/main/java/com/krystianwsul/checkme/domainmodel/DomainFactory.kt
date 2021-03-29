@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import androidx.annotation.CheckResult
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -71,36 +70,6 @@ class DomainFactory(
                 .distinctUntilChanged()
                 .replay(1)!!
                 .apply { connect() }
-
-        @CheckResult
-        fun setFirebaseTickListener(newTickData: TickData) = completeOnDomain {
-            check(MyApplication.instance.hasUserInfo)
-
-            val domainFactory = nullableInstance
-
-            if (domainFactory?.projectsFactory?.isSaved != false) {
-                TickHolder.addTickData(newTickData)
-            } else {
-                val tickData = TickHolder.getTickData()
-
-                val mergedNotifierParams = Notifier.Params.merge(
-                        listOfNotNull(tickData, newTickData).map { it.notifierParams }
-                )!!
-
-                val notifyListeners = (tickData?.domainChanged ?: false) || newTickData.domainChanged
-
-                if (notifyListeners) domainFactory.domainListenerManager.notify(NotificationType.All)
-
-                domainFactory.updateNotificationsTick(mergedNotifierParams)
-
-                if (tickData?.waiting == true) {
-                    TickHolder.addTickData(newTickData)
-                } else {
-                    tickData?.release()
-                    newTickData.release()
-                }
-            }
-        }
 
         private val ChangeType.runType
             get() = when (this) {
@@ -389,20 +358,6 @@ class DomainFactory(
                 .asSequence()
                 .map { projectsFactory.getSchedule(it) }
                 .forEach { it.clearEndExactTimeStamp(now) }
-    }
-
-    private fun updateNotificationsTick(notifierParams: Notifier.Params) {
-        MyCrashlytics.log("DomainFactory.updateNotificationsTick notifierParams: $notifierParams")
-
-        DomainThreadChecker.instance.requireDomainThread()
-
-        if (projectsFactory.isSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.Local.now
-
-        notifier.updateNotifications(now, notifierParams)
-
-        save(SaveParams(NotificationType.All))
     }
 
     // internal

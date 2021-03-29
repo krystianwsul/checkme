@@ -3,10 +3,11 @@ package com.krystianwsul.checkme.ticks
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Notifier
 import com.krystianwsul.checkme.domainmodel.TickData
+import com.krystianwsul.checkme.domainmodel.extensions.setFirebaseTickListener
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import io.reactivex.rxjava3.core.Completable
 
 
@@ -28,7 +29,10 @@ object Ticker {
 
             Completable.complete()
         } else {
-            DomainFactory.setFirebaseTickListener(TickData.Lock(Notifier.Params(source, false, true), domainChanged))
+            AndroidDomainUpdater.setFirebaseTickListener(TickData.Lock(
+                    Notifier.Params(source, false, true),
+                    domainChanged,
+            ))
         }
     }
 }

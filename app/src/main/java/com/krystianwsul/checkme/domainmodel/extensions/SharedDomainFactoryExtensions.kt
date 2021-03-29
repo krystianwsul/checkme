@@ -355,3 +355,32 @@ fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) = Complet
 
     DomainUpdater.Params(notifierParams, DomainFactory.SaveParams(DomainListenerManager.NotificationType.All))
 }.perform(this)
+
+@CheckResult
+fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
+    TickHolder.addTickData(newTickData)
+
+    /**
+     * this can potentially enqueue a few identical DomainUpdates, of which only the first one may actually get the
+     * TickData, but I think that's harmless
+     */
+    return CompletableDomainUpdate.create {
+        TickHolder.getTickData()
+                ?.let {
+                    /**
+                     * If this is a TickData.Normal - meaning we're not waiting for a RunType.REMOTE - then we don't
+                     * need it to stick around.
+                     *
+                     * I don't know for sure if that's what I'm actually doing here, but I'll take my chances.
+                     */
+
+                    if (!it.waiting) it.release()
+
+                    DomainUpdater.Params(
+                            it.notifierParams,
+                            DomainFactory.SaveParams(DomainListenerManager.NotificationType.All, it.domainChanged),
+                    )
+                }
+                ?: DomainUpdater.Params()
+    }.perform(this)
+}

@@ -11,10 +11,12 @@ abstract class DomainUpdater {
 
     companion object {
 
-        fun DomainFactory.applyParams(params: Params, now: ExactTimeStamp.Local) {
-            params.apply {
-                notifierParams?.let { notifier.updateNotifications(now, it) }
+        fun DomainFactory.updateNotifications(params: Params, now: ExactTimeStamp.Local) {
+            params.notifierParams?.let { notifier.updateNotifications(now, it) }
+        }
 
+        fun DomainFactory.saveAndNotifyCloud(params: Params) {
+            params.apply {
                 saveParams?.let(::save)
 
                 cloudParams?.let(::notifyCloud)

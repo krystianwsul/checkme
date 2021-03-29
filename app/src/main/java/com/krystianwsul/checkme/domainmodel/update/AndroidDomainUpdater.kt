@@ -93,9 +93,11 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             val params = Params.merge(items.map { it.getParams(domainFactory, now) })
 
-            domainFactory.applyParams(params, now)
+            domainFactory.updateNotifications(params, now)
 
             items.forEach { it.dispatchResult() }
+
+            domainFactory.saveAndNotifyCloud(params)
         }
 
         private interface Item {

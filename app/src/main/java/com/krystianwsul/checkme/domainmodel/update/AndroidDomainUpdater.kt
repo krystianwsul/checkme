@@ -92,9 +92,7 @@ object AndroidDomainUpdater : DomainUpdater() {
             val params = Params.merge(items.map { it.getParams(domainFactory, now) })
 
             domainFactory.apply {
-                params.notifierParams
-                        ?.fix(now)
-                        ?.let(notifier::updateNotifications)
+                params.notifierParams?.let { notifier.updateNotifications(now, it.fix()) }
 
                 params.notificationType?.let(::save)
 

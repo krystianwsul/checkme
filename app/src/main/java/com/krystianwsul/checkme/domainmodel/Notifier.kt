@@ -29,8 +29,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private const val MAX_NOTIFICATIONS_Q = 10
     }
 
-    fun updateNotifications(params: Params) {
-        val (now, sourceName, silent, clear) = params
+    fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
+        val (sourceName, silent, clear) = params
 
         val skipSave = domainFactory.aggregateData != null
 
@@ -303,7 +303,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         nextAlarm?.let { Preferences.tickLog.logLineHour("next tick: $it") }
 
         if (params.tick) {
-            setIrrelevant(params.now)
+            setIrrelevant(now)
 
             domainFactory.run { localFactory.deleteInstanceShownRecords(projectsFactory.taskKeys) }
         }
@@ -366,7 +366,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     }
 
     data class Params(
-            val now: ExactTimeStamp.Local,
             val sourceName: String = "other",
             val silent: Boolean = true,
             val clear: Boolean = false,

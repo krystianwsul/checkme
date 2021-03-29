@@ -83,6 +83,6 @@ abstract class DomainUpdater {
             }
         }
 
-        fun fix(now: ExactTimeStamp.Local) = Notifier.Params(now, sourceName, clear = clear)
+        fun fix() = Notifier.Params(sourceName, clear = clear)
     }
 }

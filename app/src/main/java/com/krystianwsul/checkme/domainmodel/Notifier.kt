@@ -30,7 +30,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     }
 
     fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
-        val (sourceName, silent, clear) = params
+        val (sourceName, silent, _, clear) = params
 
         val skipSave = domainFactory.aggregateData != null
 
@@ -368,7 +368,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     data class Params(
             val sourceName: String = "other",
             val silent: Boolean = true,
-            val clear: Boolean = false, // todo notifier change order params
             val tick: Boolean = false,
+            val clear: Boolean = false,
     )
 }

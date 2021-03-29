@@ -28,71 +28,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private const val MAX_NOTIFICATIONS_Q = 10
     }
 
-    fun updateNotificationsTick(params: Params) {
-        updateNotifications(params)
-
-        setIrrelevant(params.now)
-
-        domainFactory.run { localFactory.deleteInstanceShownRecords(projectsFactory.taskKeys) }
-    }
-
-    private fun setIrrelevant(now: ExactTimeStamp.Local) {
-        @Suppress("ConstantConditionIf")
-        if (false) {
-            val tomorrow = (DateTimeSoy.now() + 1.days).date
-            val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
-            val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
-
-            domainFactory.projectsFactory
-                    .projects
-                    .values
-                    .forEach {
-                        val results = Irrelevant.setIrrelevant(
-                                object : Project.Parent {
-
-                                    override fun deleteProject(project: Project<*>) = throw NotImplementedError()
-                                },
-                                it,
-                                exactTimeStamp,
-                                false
-                        )
-
-                        results.irrelevantExistingInstances
-                                .sortedBy { it.scheduleDateTime }
-                                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
-
-                        results.irrelevantSchedules
-                                .sortedBy { it.startExactTimeStamp }
-                                .forEach {
-                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.rootTask}")
-                                }
-                    }
-
-            throw Exception("Irrelevant.setIrrelevant write prevented")
-        }
-
-        val instances = domainFactory.projectsFactory.projects
-                .values
-                .map {
-                    it.existingInstances + it.getRootInstances(null, now.toOffset().plusOne(), now)
-                }
-                .flatten()
-
-        val irrelevantInstanceShownRecords = domainFactory.localFactory
-                .instanceShownRecords
-                .toMutableList()
-                .apply { removeAll(instances.map { it.getShown(domainFactory.localFactory) }) }
-
-        irrelevantInstanceShownRecords.forEach { it.delete() }
-    }
-
-    data class Params(
-            val now: ExactTimeStamp.Local,
-            val sourceName: String = "other",
-            val silent: Boolean = true,
-            val clear: Boolean = false,
-    )
-
     fun updateNotifications(params: Params) {
         val (now, sourceName, silent, clear) = params
 
@@ -365,6 +300,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         notificationWrapper.updateAlarm(nextAlarm)
 
         nextAlarm?.let { Preferences.tickLog.logLineHour("next tick: $it") }
+
+        if (params.tick) {
+            setIrrelevant(params.now)
+
+            domainFactory.run { localFactory.deleteInstanceShownRecords(projectsFactory.taskKeys) }
+        }
     }
 
     private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp.Local) =
@@ -372,4 +313,62 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp.Local) =
             notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, true, now)
+
+    private fun setIrrelevant(now: ExactTimeStamp.Local) {
+        @Suppress("ConstantConditionIf")
+        if (false) {
+            val tomorrow = (DateTimeSoy.now() + 1.days).date
+            val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
+            val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
+
+            domainFactory.projectsFactory
+                    .projects
+                    .values
+                    .forEach {
+                        val results = Irrelevant.setIrrelevant(
+                                object : Project.Parent {
+
+                                    override fun deleteProject(project: Project<*>) = throw NotImplementedError()
+                                },
+                                it,
+                                exactTimeStamp,
+                                false
+                        )
+
+                        results.irrelevantExistingInstances
+                                .sortedBy { it.scheduleDateTime }
+                                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
+
+                        results.irrelevantSchedules
+                                .sortedBy { it.startExactTimeStamp }
+                                .forEach {
+                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.rootTask}")
+                                }
+                    }
+
+            throw Exception("Irrelevant.setIrrelevant write prevented")
+        }
+
+        val instances = domainFactory.projectsFactory.projects
+                .values
+                .map {
+                    it.existingInstances + it.getRootInstances(null, now.toOffset().plusOne(), now)
+                }
+                .flatten()
+
+        val irrelevantInstanceShownRecords = domainFactory.localFactory
+                .instanceShownRecords
+                .toMutableList()
+                .apply { removeAll(instances.map { it.getShown(domainFactory.localFactory) }) }
+
+        irrelevantInstanceShownRecords.forEach { it.delete() }
+    }
+
+    data class Params(
+            val now: ExactTimeStamp.Local,
+            val sourceName: String = "other",
+            val silent: Boolean = true,
+            val clear: Boolean = false,
+            val tick: Boolean = false,
+    )
 }

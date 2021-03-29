@@ -295,10 +295,11 @@ class DomainFactory(
         val tickData = TickHolder.getTickData()
 
         fun tick(tickData: TickData, forceNotify: Boolean) {
-            notifier.updateNotificationsTick(Notifier.Params(
+            notifier.updateNotifications(Notifier.Params(
                     now,
                     "${tickData.source}, runType: $runType",
                     tickData.silent && !forceNotify,
+                    tick = true,
             ))
 
             if (!tickData.waiting) tickData.release()
@@ -387,7 +388,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.Local.now
 
-        notifier.updateNotificationsTick(Notifier.Params(now, sourceName, silent))
+        notifier.updateNotifications(Notifier.Params(now, sourceName, silent, tick = true))
 
         save(NotificationType.All)
     }

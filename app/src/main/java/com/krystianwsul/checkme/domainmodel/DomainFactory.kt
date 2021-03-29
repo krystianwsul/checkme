@@ -198,17 +198,16 @@ class DomainFactory(
         }
     }
 
-    fun save(
-            notificationType: NotificationType,
-            forceDomainChanged: Boolean = false,
-    ) {
+    data class SaveParams(val notificationType: NotificationType, val forceDomainChanged: Boolean = false)
+
+    fun save(saveParams: SaveParams) {
         DomainThreadChecker.instance.requireDomainThread()
 
         val skipping = aggregateData != null
         Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
-            check(notificationType is NotificationType.All)
+            check(saveParams.notificationType is NotificationType.All)
 
             return
         }
@@ -225,7 +224,7 @@ class DomainFactory(
 
         val changes = localChanges || values.isNotEmpty()
 
-        if (changes || forceDomainChanged) domainListenerManager.notify(notificationType)
+        if (changes || saveParams.forceDomainChanged) domainListenerManager.notify(saveParams.notificationType)
         if (changes) updateIsSaved()
     }
 
@@ -322,7 +321,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        save(NotificationType.All, runType == RunType.REMOTE)
+        save(SaveParams(NotificationType.All, runType == RunType.REMOTE))
 
         copyAggregateData.run {
             if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
@@ -395,7 +394,7 @@ class DomainFactory(
 
         notifier.updateNotifications(now, notifierParams)
 
-        save(NotificationType.All)
+        save(SaveParams(NotificationType.All))
     }
 
     // internal

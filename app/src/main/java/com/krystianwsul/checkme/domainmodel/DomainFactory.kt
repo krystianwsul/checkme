@@ -8,11 +8,11 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
+import com.krystianwsul.checkme.domainmodel.extensions.fixOffsets
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -34,7 +34,6 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -116,10 +115,6 @@ class DomainFactory(
 
     val isSaved = BehaviorRelay.createDefault(false)!!
 
-    fun onReady() = isSaved.filter { !it }
-            .firstOrError()
-            .map { this }!!
-
     private val changeTypeRelay = PublishRelay.create<ChangeType>()
 
     val notifier = Notifier(this, NotificationWrapper.instance)
@@ -164,16 +159,6 @@ class DomainFactory(
                 .subscribe()
                 .addTo(domainDisposable)
     }
-
-    private fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDomainUpdate.create {
-        MyCrashlytics.log("triggering fixing offsets from $source")
-
-        projectsFactory.projects
-                .values
-                .forEach { it.fixOffsets() }
-
-        DomainUpdater.Params(notificationType = NotificationType.All)
-    }.perform(this)
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
 

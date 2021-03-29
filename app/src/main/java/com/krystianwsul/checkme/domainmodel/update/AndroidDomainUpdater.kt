@@ -34,17 +34,19 @@ object AndroidDomainUpdater : DomainUpdater() {
         queue = Queue(isReady).apply { subscribe() }
     }
 
-    override fun <T : Any> performDomainUpdate(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> =
-            queue.add(action)
+    override fun <T : Any> performDomainUpdate(
+            trigger: Boolean,
+            action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,
+    ): Single<T> = queue.add(trigger, action)
 
     class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
 
         private val items = mutableListOf<Item>()
 
-        private val trigger = PublishRelay.create<Unit>()
+        private val triggerRelay = PublishRelay.create<Unit>()
 
         fun subscribe(): Disposable {
-            return Observables.combineLatest(trigger, isReady)
+            return Observables.combineLatest(triggerRelay, isReady)
                     .map { (_, domainFactoryWrapper) -> domainFactoryWrapper }
                     .filterNotNull()
                     .map {
@@ -57,7 +59,7 @@ object AndroidDomainUpdater : DomainUpdater() {
                     .subscribe { (domainFactory, items) -> dispatchItems(domainFactory, items) }
         }
 
-        fun <T : Any> add(action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
+        fun <T : Any> add(trigger: Boolean, action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
             val subject = SingleSubject.create<T>()
 
             val item = object : Item {
@@ -75,7 +77,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             synchronized(items) { items += item }
 
-            trigger.accept(Unit)
+            if (trigger) triggerRelay.accept(Unit)
 
             return subject
         }

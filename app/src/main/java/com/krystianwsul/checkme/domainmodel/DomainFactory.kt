@@ -313,12 +313,15 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        CompletableDomainUpdate.create {
-            DomainUpdater.Params(
-                    notifyParams,
-                    SaveParams(NotificationType.All, runType == RunType.REMOTE),
-            )
-        }.perform(AndroidDomainUpdater)
+        AndroidDomainUpdater.updateDomainCompletable(
+                CompletableDomainUpdate.create {
+                    DomainUpdater.Params(
+                            notifyParams,
+                            SaveParams(NotificationType.All, runType == RunType.REMOTE),
+                    )
+                },
+                false,
+        )
 
         updateIsSaved()
     }

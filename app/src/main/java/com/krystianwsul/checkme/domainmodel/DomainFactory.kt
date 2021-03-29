@@ -228,7 +228,7 @@ class DomainFactory(
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
         ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
-            notifier.updateNotifications(Notifier.Params(ExactTimeStamp.Local.now))
+            AndroidDomainUpdater.updateNotifications(DomainUpdater.NotifierParams()).subscribe()
         }
 
         val shortcutTasks = ShortcutManager.getShortcuts()

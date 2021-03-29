@@ -41,7 +41,7 @@ fun DomainUpdater.removeFriends(
 
     keys.forEach { myUserFactory.user.removeFriend(it) }
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
 @CheckResult
@@ -56,5 +56,5 @@ fun DomainUpdater.addFriends(
         friendsFactory.addFriend(it.key, it.value)
     }
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)

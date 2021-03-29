@@ -73,8 +73,9 @@ fun DomainUpdater.createProject(
 
     DomainUpdater.Result(
             remoteProject.projectKey,
-            notificationType = notificationType,
-            cloudParams = DomainFactory.CloudParams(remoteProject),
+            false,
+            notificationType,
+            DomainFactory.CloudParams(remoteProject),
     )
 }.perform(this)
 

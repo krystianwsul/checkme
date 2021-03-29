@@ -200,13 +200,16 @@ class DomainFactory(
 
     data class SaveParams(val notificationType: NotificationType, val forceDomainChanged: Boolean = false) {
 
-        fun merge(saveParamsList: List<SaveParams>): SaveParams? {
-            if (saveParamsList.size < 2) return saveParamsList.singleOrEmpty()
+        companion object {
 
-            return SaveParams(
-                    NotificationType.merge(saveParamsList.map { it.notificationType })!!,
-                    saveParamsList.any { it.forceDomainChanged },
-            )
+            fun merge(saveParamsList: List<SaveParams>): SaveParams? {
+                if (saveParamsList.size < 2) return saveParamsList.singleOrEmpty()
+
+                return SaveParams(
+                        NotificationType.merge(saveParamsList.map { it.notificationType })!!,
+                        saveParamsList.any { it.forceDomainChanged },
+                )
+            }
         }
     }
 

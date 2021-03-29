@@ -40,7 +40,7 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
 
             DomainUpdater.Params(
                     Notifier.Params("setInstanceAddHourService ${instance.name}"),
-                    DomainListenerManager.NotificationType.All,
+                    DomainFactory.SaveParams(DomainListenerManager.NotificationType.All),
                     DomainFactory.CloudParams(instance.task.project),
             )
         }.perform(this)
@@ -57,7 +57,7 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
 
             DomainUpdater.Params(
                     Notifier.Params("setInstanceNotificationDone ${instance.name}"),
-                    DomainListenerManager.NotificationType.All,
+                    DomainFactory.SaveParams(DomainListenerManager.NotificationType.All),
                     DomainFactory.CloudParams(instance.task.project),
             )
         }.perform(this)
@@ -70,7 +70,7 @@ fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): 
 
             instanceKeys.forEach(::setInstanceNotified)
 
-            DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
+            DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
         }.perform(this)
 
 fun DomainUpdater.setTaskImageUploadedService(
@@ -86,8 +86,9 @@ fun DomainUpdater.setTaskImageUploadedService(
         task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
         DomainUpdater.Params(
-                notificationType = DomainListenerManager.NotificationType.All,
-                cloudParams = DomainFactory.CloudParams(task.project),
+                false,
+                DomainListenerManager.NotificationType.All,
+                DomainFactory.CloudParams(task.project),
         )
     }
 }.perform(this)

@@ -14,5 +14,5 @@ fun AndroidDomainUpdater.fixOffsets(source: String): Completable = CompletableDo
             .values
             .forEach { it.fixOffsets() }
 
-    DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
 }.perform(this)

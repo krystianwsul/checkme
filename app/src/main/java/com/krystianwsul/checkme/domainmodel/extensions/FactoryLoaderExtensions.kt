@@ -26,5 +26,5 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable = 
 
     projectsFactory.updateDeviceInfo(deviceDbInfo)
 
-    DomainUpdater.Params(notificationType = DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
 }.perform(this)

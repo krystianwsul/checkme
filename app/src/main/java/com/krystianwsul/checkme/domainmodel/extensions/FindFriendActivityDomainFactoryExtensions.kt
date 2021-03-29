@@ -24,6 +24,6 @@ fun DomainUpdater.tryAddFriend(
         myUserFactory.user.addFriend(userKey)
         friendsFactory.addFriend(userKey, userWrapper)
 
-        DomainUpdater.Result(true, notificationType = notificationType)
+        DomainUpdater.Result(true, false, notificationType)
     }
 }.perform(this)

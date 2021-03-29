@@ -63,5 +63,5 @@ fun DomainUpdater.setCustomTimesCurrent(
         remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
     }
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)

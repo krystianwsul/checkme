@@ -176,7 +176,7 @@ fun DomainUpdater.setInstanceNotified(
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
     setInstanceNotified(instanceKey)
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
 fun DomainUpdater.updatePhotoUrl(
@@ -192,7 +192,7 @@ fun DomainUpdater.updatePhotoUrl(
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
@@ -353,5 +353,5 @@ fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplicati
 fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) = CompletableDomainUpdate.create {
     MyCrashlytics.logMethod("DomainFactory.updateNotifications")
 
-    DomainUpdater.Params(notifierParams, DomainListenerManager.NotificationType.All)
+    DomainUpdater.Params(notifierParams, DomainFactory.SaveParams(DomainListenerManager.NotificationType.All))
 }.perform(this)

@@ -18,7 +18,7 @@ class TestDomainUpdater(
         domainFactory.apply {
             params.notifierParams?.let { notifier.updateNotifications(now, it) }
 
-            params.notificationType?.let { save(DomainFactory.SaveParams(it)) }
+            params.saveParams?.let(::save)
 
             params.cloudParams?.let(::notifyCloud)
         }

@@ -26,21 +26,21 @@ abstract class DomainUpdater {
         constructor(
                 data: T,
                 notifierParams: Notifier.Params? = null,
-                notificationType: DomainListenerManager.NotificationType? = null,
+                saveParams: DomainFactory.SaveParams? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
-        ) : this(data, Params(notifierParams, notificationType, cloudParams))
+        ) : this(data, Params(notifierParams, saveParams, cloudParams))
 
         constructor(
                 data: T,
                 notify: Boolean,
                 notificationType: DomainListenerManager.NotificationType? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
-        ) : this(data, Params(if (notify) Notifier.Params() else null, notificationType, cloudParams))
+        ) : this(data, Params(notify, notificationType, cloudParams))
     }
 
     data class Params(
             val notifierParams: Notifier.Params? = null,
-            val notificationType: DomainListenerManager.NotificationType? = null,
+            val saveParams: DomainFactory.SaveParams? = null,
             val cloudParams: DomainFactory.CloudParams? = null,
     ) {
 
@@ -49,14 +49,13 @@ abstract class DomainUpdater {
             fun merge(params: List<Params>): Params {
                 val notifierParams = Notifier.Params.merge(params.mapNotNull { it.notifierParams })
 
-                val notificationType =
-                        DomainListenerManager.NotificationType.merge(params.mapNotNull { it.notificationType })
+                val saveParams = DomainFactory.SaveParams.merge(params.mapNotNull { it.saveParams })
 
                 val cloudParams = params.mapNotNull { it.cloudParams }
                         .takeIf { it.isNotEmpty() }
                         ?.let { DomainFactory.CloudParams(it.flatMap { it.projects }, it.flatMap { it.userKeys }) }
 
-                return Params(notifierParams, notificationType, cloudParams)
+                return Params(notifierParams, saveParams, cloudParams)
             }
         }
 
@@ -64,6 +63,10 @@ abstract class DomainUpdater {
                 notify: Boolean,
                 notificationType: DomainListenerManager.NotificationType? = null,
                 cloudParams: DomainFactory.CloudParams? = null,
-        ) : this(if (notify) Notifier.Params() else null, notificationType, cloudParams)
+        ) : this(
+                if (notify) Notifier.Params() else null,
+                notificationType?.let(DomainFactory::SaveParams),
+                cloudParams,
+        )
     }
 }

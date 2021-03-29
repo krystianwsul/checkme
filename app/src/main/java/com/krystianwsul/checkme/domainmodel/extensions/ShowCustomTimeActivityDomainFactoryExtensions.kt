@@ -50,7 +50,7 @@ fun DomainUpdater.updateCustomTime(
             customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    DomainUpdater.Params(notificationType = notificationType)
+    DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
 @CheckResult
@@ -86,5 +86,5 @@ fun DomainUpdater.createCustomTime(
 
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
 
-    DomainUpdater.Result(remoteCustomTime.key, notificationType = notificationType)
+    DomainUpdater.Result(remoteCustomTime.key, false, notificationType)
 }.perform(this)

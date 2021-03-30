@@ -7,7 +7,6 @@
 /captures
 /backend/build
 
-*.iml
 /.idea/caches/build_file_checksums.ser
 /app/fabric.properties
 /app/google-services.json

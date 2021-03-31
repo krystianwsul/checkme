@@ -40,7 +40,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private lateinit var editParameters: EditParameters
 
-    private val domainListener = object : DomainListener<Data>() {
+    private val mainDomainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
@@ -48,7 +48,16 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         )
     }
 
-    val data get() = domainListener.data
+    private val parentPickerDomainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
+                editParameters.startParameters,
+                currentParentSource!!,
+        )
+    }
+
+    val mainData get() = mainDomainListener.data
+    val parentPickerData get() = parentPickerDomainListener.data
 
     private val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
     val editImageStateObservable = editImageStateRelay.hide()!!
@@ -73,7 +82,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             if (hasDelegate) delegate.saveState() else Bundle()
         }
 
-        data.firstOrError()
+        mainData.firstOrError()
                 .subscribeBy {
                     check(!this::delegate.isInitialized)
 
@@ -85,12 +94,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     ) { parentKey, refresh ->
                         currentParentSource = CurrentParentSource.Set(parentKey)
 
-                        if (refresh) domainListener.start(true)
+                        if (refresh) mainDomainListener.start(true)
                     }
                 }
                 .addTo(clearedDisposable)
 
-        data.skip(1)
+        mainData.skip(1)
                 .subscribe { delegate.newData(it) }
                 .addTo(clearedDisposable)
     }
@@ -100,7 +109,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         this.editParameters = editParameters
 
-        domainListener.start()
+        mainDomainListener.start()
+        parentPickerDomainListener.start()
 
         if (editImageStateRelay.value != null) return
 
@@ -109,7 +119,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         editParameters.getInitialEditImageStateSingle(
                 savedEditImageState,
-                data.firstOrError().map { NullableWrapper(it.taskData) },
+                parentPickerData.firstOrError().map { NullableWrapper(it.taskData) },
                 editActivity,
         )
                 .doOnSuccess { check(editImageStateRelay.value == null) }
@@ -123,7 +133,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         editImageStateRelay.accept(editImageState)
     }
 
-    fun stop() = domainListener.stop()
+    fun stop() {
+        mainDomainListener.stop()
+        parentPickerDomainListener.stop()
+    }
 
     override fun onCleared() {
         stop()

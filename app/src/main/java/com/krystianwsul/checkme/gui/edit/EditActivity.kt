@@ -109,7 +109,7 @@ class EditActivity : NavBarActivity() {
     private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
 
         override val adapterDataObservable by lazy {
-            editViewModel.data.map { ParentPickerFragment.AdapterData(it.parentTreeDatas) }
+            editViewModel.parentPickerData.map { ParentPickerFragment.AdapterData(it.parentTreeDatas) }
         }
 
         private val queryRelay = BehaviorRelay.create<String>()
@@ -262,7 +262,7 @@ class EditActivity : NavBarActivity() {
         editViewModel.apply {
             start(parameters, this@EditActivity)
 
-            createDisposable += data.subscribe { onLoadFinished() }
+            createDisposable += mainData.subscribe { onLoadFinished() }
         }
 
         hideKeyboardOnClickOutside(binding.root)

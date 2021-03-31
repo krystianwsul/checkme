@@ -58,8 +58,8 @@ abstract class EditDelegate(
 
         override fun getInitialParent() = data.currentParent
 
-        override fun storeParent(parentTreeData: EditViewModel.ParentTreeData?) =
-                this@EditDelegate.storeParentKey(parentTreeData?.parentKey, false)
+        override fun storeParent(parentKey: EditViewModel.ParentKey?) =
+                this@EditDelegate.storeParentKey(parentKey, false)
     }
 
     protected abstract var data: EditViewModel.Data

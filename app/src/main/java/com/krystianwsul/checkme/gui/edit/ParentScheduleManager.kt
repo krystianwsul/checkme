@@ -34,6 +34,6 @@ interface ParentScheduleManager {
 
         fun getInitialParent(): EditViewModel.ParentTreeData?
 
-        fun storeParent(parentTreeData: EditViewModel.ParentTreeData?)
+        fun storeParent(parentKey: EditViewModel.ParentKey?)
     }
 }

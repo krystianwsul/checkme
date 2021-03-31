@@ -21,7 +21,7 @@ class ParentMultiScheduleManager(
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(callbacks.getInitialParent()) {
-        callbacks.storeParent(it)
+        callbacks.storeParent(it?.parentKey)
 
         if (it?.parentKey is EditViewModel.ParentKey.Task) mutateSchedules { it.clear() }
 

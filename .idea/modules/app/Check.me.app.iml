@@ -302,7 +302,7 @@
     <orderEntry type="library" name="Gradle: com.akexorcist:localization:1.2.6@aar" level="project" />
     <orderEntry type="module" module-name="Check.me.treeadapter" />
     <orderEntry type="module" module-name="Check.me.common" />
-    <orderEntry type="module" module-name="StudioProjects.Check.me.common.commonMain" />
-    <orderEntry type="module" module-name="StudioProjects.Check.me.common.commonTest" scope="TEST" production-on-test="" />
+    <orderEntry type="module" module-name="Check.me.common.commonMain" />
+    <orderEntry type="module" module-name="Check.me.common.commonTest" scope="TEST" production-on-test="" />
   </component>
 </module>

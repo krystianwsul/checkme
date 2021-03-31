@@ -127,7 +127,7 @@
     <orderEntry type="library" name="Gradle: androidx.annotation:annotation-experimental:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: io.reactivex.rxjava3:rxandroid:3.0.0@aar" level="project" />
     <orderEntry type="module" module-name="Check.me.common" />
-    <orderEntry type="module" module-name="StudioProjects.Check.me.common.commonMain" />
-    <orderEntry type="module" module-name="StudioProjects.Check.me.common.commonTest" scope="TEST" production-on-test="" />
+    <orderEntry type="module" module-name="Check.me.common.commonMain" />
+    <orderEntry type="module" module-name="Check.me.common.commonTest" scope="TEST" production-on-test="" />
   </component>
 </module>

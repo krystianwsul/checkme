@@ -73,7 +73,6 @@ sealed class EditParameters : Parcelable {
     }
 
     open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
-    open val parentTaskKeyHint: TaskKey? = null
 
     abstract val currentParentSource: EditViewModel.CurrentParentSource
 
@@ -94,8 +93,6 @@ sealed class EditParameters : Parcelable {
             val showFirstSchedule: Boolean = true,
     ) : EditParameters() {
 
-        override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
-
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
     }
 
@@ -103,7 +100,6 @@ sealed class EditParameters : Parcelable {
     class Join(val joinables: List<Joinable>, val hint: EditActivity.Hint? = null) : EditParameters() {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
-        override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
 
@@ -167,7 +163,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Shortcut(override val parentTaskKeyHint: TaskKey) : EditParameters() {
+    class Shortcut(private val parentTaskKeyHint: TaskKey) : EditParameters() {
 
         override val currentParentSource
             get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
@@ -176,7 +172,7 @@ sealed class EditParameters : Parcelable {
     @Parcelize
     class Share private constructor(
             val nameHint: String? = null,
-            override val parentTaskKeyHint: TaskKey? = null,
+            val parentTaskKeyHint: TaskKey? = null,
             val uri: Uri? = null,
     ) : EditParameters() {
 

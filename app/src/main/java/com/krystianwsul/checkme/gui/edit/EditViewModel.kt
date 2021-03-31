@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
+import com.krystianwsul.checkme.gui.utils.SavedStateProperty
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.DomainViewModel
@@ -41,7 +42,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
                 editParameters.parentTaskKeyHint,
-                editParameters.currentParentSource, // todo edit update if overridden
+                currentParentSource!!,
         )
     }
 
@@ -53,6 +54,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         private set
 
     val hasDelegate get() = this::delegate.isInitialized
+
+    private var currentParentSource by
+    SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
 
     init {
         savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {
@@ -84,6 +88,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     }
 
     fun start(editParameters: EditParameters, editActivity: EditActivity) {
+        if (currentParentSource == null) currentParentSource = editParameters.currentParentSource
+
         this.editParameters = editParameters
 
         internalStart()
@@ -425,12 +431,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         }
     }
 
-    sealed class CurrentParentSource {
+    sealed class CurrentParentSource : Parcelable {
 
+        @Parcelize
         object None : CurrentParentSource()
 
+        @Parcelize
         data class Set(val parentKey: ParentKey) : CurrentParentSource()
 
+        @Parcelize
         data class FromTask(val taskKey: TaskKey) : CurrentParentSource()
     }
 

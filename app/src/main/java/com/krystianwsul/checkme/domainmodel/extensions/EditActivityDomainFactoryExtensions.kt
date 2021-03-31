@@ -26,10 +26,9 @@ import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
-        parentTaskKeyHint: TaskKey?,
         currentParentSource: EditViewModel.CurrentParentSource,
 ): EditViewModel.Data {
-    MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
+    MyCrashlytics.logMethod(this)
 
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -38,21 +37,6 @@ fun DomainFactory.getCreateTaskData(
     val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
     }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-    val includedTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
-
-    fun checkHintPresent(
-            task: EditViewModel.ParentKey.Task,
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-    ): Boolean = parentTreeDatas.containsKey(task) || parentTreeDatas.any {
-        checkHintPresent(task, it.value.parentTreeDatas)
-    }
-
-    fun checkHintPresent(
-            parentTreeDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-    ) = parentTaskKeyHint?.let {
-        checkHintPresent(EditViewModel.ParentKey.Task(it), parentTreeDatas)
-    } ?: true
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
@@ -86,7 +70,6 @@ fun DomainFactory.getCreateTaskData(
         } else {
             val parentTask = task.getParentTask(now)!!
             parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
-            includedTaskKeys.add(parentTask.taskKey)
         }
 
         EditViewModel.TaskData(
@@ -102,9 +85,7 @@ fun DomainFactory.getCreateTaskData(
         )
     }
 
-    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, includedTaskKeys)
-
-    check(checkHintPresent(parentTreeDatas))
+    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys)
 
     val customTimeDatas = customTimes.values.associate {
         it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
@@ -155,7 +136,7 @@ fun DomainFactory.getCreateTaskData(
 
             EditViewModel.ParentTreeData(
                     task.name,
-                    getTaskListChildTaskDatas(now, task, startParameters.excludedTaskKeys, includedTaskKeys),
+                    getTaskListChildTaskDatas(now, task, startParameters.excludedTaskKeys),
                     taskParentKey,
                     task.getScheduleText(ScheduleText, now),
                     task.note,
@@ -172,7 +153,7 @@ fun DomainFactory.getCreateTaskData(
             val users = project.users.joinToString(", ") { it.name }
             val parentTreeData = EditViewModel.ParentTreeData(
                     project.name,
-                    getProjectTaskTreeDatas(now, project, startParameters.excludedTaskKeys, includedTaskKeys),
+                    getProjectTaskTreeDatas(now, project, startParameters.excludedTaskKeys),
                     projectParentKey,
                     users,
                     null,
@@ -611,21 +592,20 @@ fun DomainUpdater.createJoinRootTask(
 private fun DomainFactory.getParentTreeDatas(
         now: ExactTimeStamp.Local,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     val parentTreeDatas = mutableMapOf<EditViewModel.ParentKey, EditViewModel.ParentTreeData>()
 
     parentTreeDatas += projectsFactory.privateProject
             .tasks
             .asSequence()
-            .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+            .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isRootTask(now) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, includedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
@@ -647,7 +627,7 @@ private fun DomainFactory.getParentTreeDatas(
                 val users = it.users.joinToString(", ") { it.name }
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys),
+                        getProjectTaskTreeDatas(now, it, excludedTaskKeys),
                         projectParentKey,
                         users,
                         null,
@@ -666,18 +646,17 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         now: ExactTimeStamp.Local,
         project: Project<*>,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> {
     return project.tasks
             .asSequence()
-            .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+            .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isRootTask(now) }
             .associate {
                 val taskParentKey = EditViewModel.ParentKey.Task(it.taskKey)
 
                 val parentTreeData = EditViewModel.ParentTreeData(
                         it.name,
-                        getTaskListChildTaskDatas(now, it, excludedTaskKeys, includedTaskKeys),
+                        getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                         taskParentKey,
                         it.getScheduleText(ScheduleText, now),
                         it.note,
@@ -693,23 +672,10 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 private fun Task<*>.showAsParent(
         now: ExactTimeStamp.Local,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>,
 ): Boolean {
-    check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
-
-    if (!current(now)) {
-        check(!includedTaskKeys.contains(taskKey))
-
-        return false
-    }
+    if (!current(now)) return false
 
     if (excludedTaskKeys.contains(taskKey)) return false
-
-    if (includedTaskKeys.contains(taskKey)) {
-        check(this.isVisible(now, true)) // exception for editing task that's child of done task
-
-        return true
-    }
 
     if (!isVisible(now)) return false
 
@@ -776,18 +742,17 @@ private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp.Local,
         parentTask: Task<*>,
         excludedTaskKeys: Set<TaskKey>,
-        includedTaskKeys: Set<TaskKey>,
 ): Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
                 .asSequence()
                 .map { it.childTask }
-                .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
+                .filter { it.showAsParent(now, excludedTaskKeys) }
                 .associate { childTask ->
                     val taskParentKey = EditViewModel.ParentKey.Task(childTask.taskKey)
 
                     val parentTreeData = EditViewModel.ParentTreeData(
                             childTask.name,
-                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys, includedTaskKeys),
+                            getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
                             EditViewModel.ParentKey.Task(childTask.taskKey),
                             childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
                             childTask.note,

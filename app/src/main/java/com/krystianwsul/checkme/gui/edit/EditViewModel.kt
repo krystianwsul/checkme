@@ -41,7 +41,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
-                editParameters.parentTaskKeyHint,
                 currentParentSource!!,
         )
     }

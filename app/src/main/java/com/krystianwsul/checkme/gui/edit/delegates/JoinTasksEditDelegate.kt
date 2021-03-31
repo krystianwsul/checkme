@@ -20,7 +20,8 @@ class JoinTasksEditDelegate(
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-) : EditDelegate(compositeDisposable) {
+        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+) : EditDelegate(compositeDisposable, storeParent) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 
@@ -52,7 +53,8 @@ class JoinTasksEditDelegate(
     override val parentScheduleManager = ParentMultiScheduleManager(
             savedInstanceState,
             this::initialStateGetter,
-            parentLookup
+            parentLookup,
+            callbacks,
     )
 
     override fun showAllRemindersDialog(): Boolean? {

@@ -10,7 +10,8 @@ import com.krystianwsul.common.utils.UserKey
 class ParentMultiScheduleManager(
         savedInstanceState: Bundle?,
         initialStateGetter: () -> ParentScheduleState,
-        private val parentLookup: EditDelegate.ParentLookup,
+        private val parentLookup: EditDelegate.ParentLookup, // todo edit remove this
+        private val callbacks: ParentScheduleManager.Callbacks,
 ) : ParentScheduleManager {
 
     companion object {
@@ -22,7 +23,9 @@ class ParentMultiScheduleManager(
     private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE) ?: initialStateGetter()
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
-    private val parentProperty = NullableRelayProperty(state.parentKey?.let { parentLookup.findTaskData(it) }) {
+    private val parentProperty = NullableRelayProperty(callbacks.getInitialParent()) {
+        callbacks.storeParent(it)
+
         if (it?.parentKey is EditViewModel.ParentKey.Task) mutateSchedules { it.clear() }
 
         assignedTo = setOf()

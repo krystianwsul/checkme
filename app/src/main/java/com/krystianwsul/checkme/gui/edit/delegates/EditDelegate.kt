@@ -21,7 +21,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
+abstract class EditDelegate(
+        compositeDisposable: CompositeDisposable,
+        private val storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+) {
 
     companion object {
 
@@ -30,6 +33,7 @@ abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
                 data: EditViewModel.Data,
                 savedInstanceState: Bundle?,
                 compositeDisposable: CompositeDisposable,
+                storeParent: (EditViewModel.ParentTreeData?) -> Unit,
         ): EditDelegate {
             return when (parameters) {
                 is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
@@ -37,7 +41,7 @@ abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
                 is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
                 is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
                     (::CreateTaskEditDelegate)(parameters)
-            }(data, savedInstanceState, compositeDisposable)
+            }(data, savedInstanceState, compositeDisposable, storeParent)
         }
 
         fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
@@ -51,6 +55,14 @@ abstract class EditDelegate(compositeDisposable: CompositeDisposable) {
             check(parentScheduleManager.trySetParentTask(it))
             tmpParentTaskKey = null
         }
+    }
+
+    protected val callbacks = object : ParentScheduleManager.Callbacks {
+
+        override fun getInitialParent() = data.currentParent
+
+        override fun storeParent(parentTreeData: EditViewModel.ParentTreeData?) =
+                this@EditDelegate.storeParent(parentTreeData)
     }
 
     protected abstract var data: EditViewModel.Data

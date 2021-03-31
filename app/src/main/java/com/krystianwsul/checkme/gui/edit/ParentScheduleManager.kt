@@ -32,4 +32,11 @@ interface ParentScheduleManager {
     fun saveState(): Bundle
 
     fun removeAssignedTo(userKey: UserKey)
+
+    interface Callbacks {
+
+        fun getInitialParent(): EditViewModel.ParentTreeData?
+
+        fun storeParent(parentTreeData: EditViewModel.ParentTreeData?)
+    }
 }

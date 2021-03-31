@@ -78,7 +78,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                             it,
                             savedStateHandle.get(KEY_DELEGATE_STATE),
                             clearedDisposable,
-                    )
+                    ) {
+                        currentParentSource = CurrentParentSource.Set(it?.parentKey)
+                    }
                 }
                 .addTo(clearedDisposable)
 
@@ -125,6 +127,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                 is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
                 is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
                 is ScheduleData.Yearly -> Yearly(scheduleData)
+                else -> throw UnsupportedOperationException()
             }
 
             private fun timePairCallback(
@@ -437,7 +440,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         object None : CurrentParentSource()
 
         @Parcelize
-        data class Set(val parentKey: ParentKey) : CurrentParentSource()
+        data class Set(val parentKey: ParentKey?) : CurrentParentSource()
 
         @Parcelize
         data class FromTask(val taskKey: TaskKey) : CurrentParentSource()

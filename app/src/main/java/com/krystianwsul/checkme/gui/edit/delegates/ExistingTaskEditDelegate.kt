@@ -8,7 +8,8 @@ abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-) : EditDelegate(compositeDisposable) {
+        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+) : EditDelegate(compositeDisposable, storeParent) {
 
     protected val taskData get() = data.taskData!!
 
@@ -27,6 +28,7 @@ abstract class ExistingTaskEditDelegate(
                 )
             },
             parentLookup,
+            callbacks,
     )
 
     override fun checkImageChanged(editImageState: EditImageState): Boolean {

@@ -21,7 +21,8 @@ class EditExistingTaskEditDelegate(
         data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable) {
+        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParent) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)

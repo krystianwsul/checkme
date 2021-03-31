@@ -18,7 +18,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class EditExistingTaskEditDelegate(
         private val parameters: EditParameters.Edit,
-        data: EditViewModel.Data,
+        data: EditViewModel.MainData,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
         storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,

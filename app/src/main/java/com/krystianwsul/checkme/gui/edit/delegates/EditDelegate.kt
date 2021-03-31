@@ -30,7 +30,7 @@ abstract class EditDelegate(
 
         fun fromParameters(
                 parameters: EditParameters,
-                data: EditViewModel.Data,
+                data: EditViewModel.MainData,
                 savedInstanceState: Bundle?,
                 compositeDisposable: CompositeDisposable,
                 storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
@@ -48,7 +48,7 @@ abstract class EditDelegate(
         fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }!!
     }
 
-    fun newData(data: EditViewModel.Data) {
+    fun newData(data: EditViewModel.MainData) {
         this.data = data
 
         parentScheduleManager.parent = data.currentParent
@@ -62,7 +62,7 @@ abstract class EditDelegate(
                 this@EditDelegate.storeParentKey(parentKey, false)
     }
 
-    protected abstract var data: EditViewModel.Data
+    protected abstract var data: EditViewModel.MainData
 
     open val initialName: String? = null
     open val initialNote: String? = null

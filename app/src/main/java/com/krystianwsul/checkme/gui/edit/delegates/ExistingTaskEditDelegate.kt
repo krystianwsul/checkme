@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.gui.edit.*
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(
-        final override var data: EditViewModel.Data,
+        final override var data: EditViewModel.MainData,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
         storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,

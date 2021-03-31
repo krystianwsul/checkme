@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
         private val parameters: EditParameters.Join,
-        override var data: EditViewModel.Data,
+        override var data: EditViewModel.MainData,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
         storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,

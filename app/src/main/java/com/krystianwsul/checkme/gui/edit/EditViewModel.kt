@@ -9,6 +9,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
+import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
@@ -40,7 +41,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private lateinit var editParameters: EditParameters
 
-    private val mainDomainListener = object : DomainListener<Data>() {
+    private val mainDomainListener = object : DomainListener<MainData>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
@@ -48,12 +49,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         )
     }
 
-    private val parentPickerDomainListener = object : DomainListener<Data>() {
+    private val parentPickerDomainListener = object : DomainListener<ParentPickerData>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
-                editParameters.startParameters,
-                currentParentSource!!,
-        )
+        override fun getData(domainFactory: DomainFactory) =
+                domainFactory.getCreateTaskParentPickerData(editParameters.startParameters)
     }
 
     val mainData get() = mainDomainListener.data
@@ -119,7 +118,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         editParameters.getInitialEditImageStateSingle(
                 savedEditImageState,
-                parentPickerData.firstOrError().map { NullableWrapper(it.taskData) },
+                mainData.firstOrError().map { NullableWrapper(it.taskData) },
                 editActivity,
         )
                 .doOnSuccess { check(editImageStateRelay.value == null) }
@@ -363,13 +362,14 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
     }
 
-    data class Data(
+    data class MainData(
             val taskData: TaskData?,
-            val parentTreeDatas: List<ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
             val showAllInstancesDialog: Boolean?,
             val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
+
+    data class ParentPickerData(val parentTreeDatas: List<ParentTreeData>) : DomainData()
 
     data class CustomTimeData(
             val customTimeKey: CustomTimeKey<*>,

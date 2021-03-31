@@ -28,7 +28,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
         currentParentSource: EditViewModel.CurrentParentSource,
-): EditViewModel.Data {
+): EditViewModel.MainData {
     MyCrashlytics.logMethod(this)
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -85,8 +85,6 @@ fun DomainFactory.getCreateTaskData(
                         .toSet()
         )
     }
-
-    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys)
 
     val customTimeDatas = customTimes.values.associate {
         it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
@@ -151,9 +149,8 @@ fun DomainFactory.getCreateTaskData(
         null -> null
     }
 
-    return EditViewModel.Data(
+    return EditViewModel.MainData(
             taskData,
-            parentTreeDatas,
             customTimeDatas,
             showAllInstancesDialog,
             currentParent,
@@ -162,137 +159,16 @@ fun DomainFactory.getCreateTaskData(
 
 fun DomainFactory.getCreateTaskParentPickerData(
         startParameters: EditViewModel.StartParameters,
-        currentParentSource: EditViewModel.CurrentParentSource,
-): EditViewModel.Data {
+): EditViewModel.ParentPickerData {
     MyCrashlytics.logMethod(this)
 
     DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-        it.key
-    }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
-
-    val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
-        val task = getTaskForce(it.taskKey)
-
-        val parentKey: EditViewModel.ParentKey?
-        var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
-        var assignedTo: Set<UserKey> = setOf()
-
-        if (task.isRootTask(now)) {
-            val schedules = task.getCurrentScheduleIntervals(now)
-
-            customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                it to task.project.getCustomTime(it.customTimeId)
-            }
-
-            parentKey = task.project
-                    .projectKey
-                    .let {
-                        (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                    }
-
-            if (schedules.isNotEmpty()) {
-                scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
-                    EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
-                }
-
-                assignedTo = schedules.map { it.schedule.assignedTo }
-                        .distinct()
-                        .single()
-            }
-        } else {
-            val parentTask = task.getParentTask(now)!!
-            parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
-        }
-
-        EditViewModel.TaskData(
-                task.name,
-                parentKey,
-                scheduleDataWrappers,
-                task.note,
-                task.getImage(deviceDbInfo),
-                task.project
-                        .getAssignedTo(assignedTo)
-                        .map { it.key }
-                        .toSet()
-        )
-    }
-
     val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys)
 
-    val customTimeDatas = customTimes.values.associate {
-        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
-    }
-
-    val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { it.taskKey.projectKey }.distinct().size == 1 && any {
-                getTaskForce(it.taskKey).let { task ->
-                    if (it.instanceKey != null) {
-                        task.hasOtherVisibleInstances(now, it.instanceKey)
-                    } else {
-                        task.getInstances(null, null, now)
-                                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                                .takeAndHasMore(1)
-                                .second
-                    }
-                }
-            }
-        }
-        is EditViewModel.StartParameters.Task -> null
-        is EditViewModel.StartParameters.Create -> null
-    }
-
-    val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
-        is EditViewModel.CurrentParentSource.None -> null
-        is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
-        is EditViewModel.CurrentParentSource.FromTask -> {
-            val task = getTaskForce(currentParentSource.taskKey)
-
-            if (task.isRootTask(now)) {
-                when (val projectKey = task.project.projectKey) {
-                    is ProjectKey.Private -> null
-                    is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
-                    else -> throw UnsupportedOperationException()
-                }
-            } else {
-                task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
-            }
-        }
-    }
-
-    val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
-        is EditViewModel.ParentKey.Task -> {
-            val task = getTaskForce(currentParentKey.taskKey)
-
-            ParentScheduleManager.Parent(
-                    task.name,
-                    EditViewModel.ParentKey.Task(task.taskKey),
-                    mapOf(),
-            )
-        }
-        is EditViewModel.ParentKey.Project -> {
-            val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
-
-            ParentScheduleManager.Parent(
-                    project.name,
-                    EditViewModel.ParentKey.Project(project.projectKey),
-                    project.users.toUserDatas(),
-            )
-        }
-        null -> null
-    }
-
-    return EditViewModel.Data(
-            taskData,
-            parentTreeDatas,
-            customTimeDatas,
-            showAllInstancesDialog,
-            currentParent,
-    )
+    return EditViewModel.ParentPickerData(parentTreeDatas)
 }
 
 @CheckResult

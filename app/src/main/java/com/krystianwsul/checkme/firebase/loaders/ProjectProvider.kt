@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.managers.SnapshotRecordManager
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.managers.RecordManager

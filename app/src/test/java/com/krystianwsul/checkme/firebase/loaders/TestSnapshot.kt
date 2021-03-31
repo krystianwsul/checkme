@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.GenericTypeIndicator
+import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
 
 open class TestSnapshot : Snapshot {
 

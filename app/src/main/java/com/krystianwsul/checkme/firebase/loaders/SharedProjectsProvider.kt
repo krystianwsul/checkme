@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Observable
 

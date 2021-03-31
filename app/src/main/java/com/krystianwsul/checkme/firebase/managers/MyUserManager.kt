@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.firebase.loaders.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserJson

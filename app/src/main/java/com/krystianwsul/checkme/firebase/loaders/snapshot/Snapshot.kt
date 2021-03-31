@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.loaders
+package com.krystianwsul.checkme.firebase.loaders.snapshot
 
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.GenericTypeIndicator

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.factories
 import com.badoo.reaktive.rxjavainterop.asRxJava3Observable
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.loaders.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType

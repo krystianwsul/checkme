@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
@@ -14,20 +15,20 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.utils.SavedStateProperty
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
-import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.Month
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.*
 
-class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainViewModel<EditViewModel.Data>() {
+class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     companion object {
 
@@ -35,15 +36,19 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         private const val KEY_DELEGATE_STATE = "delegateState"
     }
 
+    private val clearedDisposable = CompositeDisposable()
+
     private lateinit var editParameters: EditParameters
 
-    override val domainListener = object : DomainListener<Data>() {
+    private val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
                 currentParentSource!!,
         )
     }
+
+    val data get() = domainListener.data
 
     private val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
     val editImageStateObservable = editImageStateRelay.hide()!!
@@ -80,7 +85,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                     ) { parentKey, refresh ->
                         currentParentSource = CurrentParentSource.Set(parentKey)
 
-                        if (refresh) refresh()
+                        if (refresh) domainListener.start(true)
                     }
                 }
                 .addTo(clearedDisposable)
@@ -95,7 +100,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
 
         this.editParameters = editParameters
 
-        internalStart()
+        domainListener.start()
 
         if (editImageStateRelay.value != null) return
 
@@ -116,6 +121,14 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         checkNotNull(editImageStateRelay.value)
 
         editImageStateRelay.accept(editImageState)
+    }
+
+    fun stop() = domainListener.stop()
+
+    override fun onCleared() {
+        stop()
+
+        clearedDisposable.dispose()
     }
 
     sealed class ScheduleDataWrapper : Serializable {

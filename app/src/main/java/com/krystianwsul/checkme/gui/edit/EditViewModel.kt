@@ -342,7 +342,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
             val showAllInstancesDialog: Boolean?,
-            val currentParent: ParentTreeData?, // todo make separate class for this, without stuff like children
+            val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
 
     data class CustomTimeData(
@@ -363,13 +363,13 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     data class ParentTreeData(
             override val name: String,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
-            override val parentKey: ParentKey,
+            val parentKey: ParentKey,
             override val details: String?,
             override val note: String?,
             override val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
-            override val projectUsers: Map<UserKey, UserData>,
-    ) : ParentPickerFragment.EntryData, ParentScheduleManager.Parent {
+            val projectUsers: Map<UserKey, UserData>,
+    ) : ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
@@ -379,6 +379,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         override fun normalize() {
             normalizedFields
         }
+
+        fun toParent() = ParentScheduleManager.Parent(name, parentKey, projectUsers)
     }
 
     sealed class ParentKey : Parcelable {

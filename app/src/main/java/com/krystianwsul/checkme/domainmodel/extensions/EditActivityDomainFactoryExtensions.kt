@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
@@ -128,41 +129,24 @@ fun DomainFactory.getCreateTaskData(
         }
     }
 
-    val currentParent: EditViewModel.ParentTreeData? = when (currentParentKey) {
+    val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
         is EditViewModel.ParentKey.Task -> {
             val task = getTaskForce(currentParentKey.taskKey)
 
-            val taskParentKey = EditViewModel.ParentKey.Task(task.taskKey)
-
-            EditViewModel.ParentTreeData(
+            ParentScheduleManager.Parent(
                     task.name,
-                    getTaskListChildTaskDatas(now, task, startParameters.excludedTaskKeys),
-                    taskParentKey,
-                    task.getScheduleText(ScheduleText, now),
-                    task.note,
-                    EditViewModel.SortKey.TaskSortKey(task.startExactTimeStamp),
-                    (task.project as? SharedProject)?.projectKey,
+                    EditViewModel.ParentKey.Task(task.taskKey),
                     mapOf(),
             )
         }
         is EditViewModel.ParentKey.Project -> {
             val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
 
-            val projectParentKey = EditViewModel.ParentKey.Project(project.projectKey)
-
-            val users = project.users.joinToString(", ") { it.name }
-            val parentTreeData = EditViewModel.ParentTreeData(
+            ParentScheduleManager.Parent(
                     project.name,
-                    getProjectTaskTreeDatas(now, project, startParameters.excludedTaskKeys),
-                    projectParentKey,
-                    users,
-                    null,
-                    EditViewModel.SortKey.ProjectSortKey(project.projectKey),
-                    project.projectKey,
+                    EditViewModel.ParentKey.Project(project.projectKey),
                     project.users.toUserDatas(),
             )
-
-            parentTreeData
         }
         null -> null
     }

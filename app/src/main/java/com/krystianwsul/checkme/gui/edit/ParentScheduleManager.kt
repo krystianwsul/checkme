@@ -32,15 +32,14 @@ interface ParentScheduleManager {
 
     interface Callbacks {
 
-        fun getInitialParent(): EditViewModel.ParentTreeData?
+        fun getInitialParent(): Parent?
 
         fun storeParent(parentKey: EditViewModel.ParentKey?)
     }
 
-    interface Parent {
-
-        val name: String
-        val parentKey: EditViewModel.ParentKey
-        val projectUsers: Map<UserKey, EditViewModel.UserData>
-    }
+    data class Parent(
+            val name: String,
+            val parentKey: EditViewModel.ParentKey,
+            val projectUsers: Map<UserKey, EditViewModel.UserData>,
+    )
 }

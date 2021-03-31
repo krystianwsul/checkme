@@ -118,7 +118,7 @@ class EditActivity : NavBarActivity() {
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             editViewModel.delegate
                     .parentScheduleManager
-                    .parent = entryData as EditViewModel.ParentTreeData
+                    .parent = (entryData as EditViewModel.ParentTreeData).toParent()
         }
 
         override fun onEntryDeleted() {

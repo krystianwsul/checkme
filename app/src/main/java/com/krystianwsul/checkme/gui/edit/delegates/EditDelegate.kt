@@ -69,7 +69,6 @@ abstract class EditDelegate(
     open val scheduleHint: EditActivity.Hint.Schedule? = null
     open val showSaveAndOpen = false
 
-    val parentTreeDatas get() = data.parentTreeDatas
     val customTimeDatas get() = data.customTimeDatas
 
     protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)

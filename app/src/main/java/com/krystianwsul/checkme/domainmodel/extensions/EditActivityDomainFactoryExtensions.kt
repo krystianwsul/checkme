@@ -27,6 +27,7 @@ import io.reactivex.rxjava3.core.Single
 fun DomainFactory.getCreateTaskData(
         startParameters: EditViewModel.StartParameters,
         parentTaskKeyHint: TaskKey?,
+        currentParentSource: EditViewModel.CurrentParentSource,
 ): EditViewModel.Data {
     MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
@@ -38,7 +39,7 @@ fun DomainFactory.getCreateTaskData(
         it.key
     }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
 
-    val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
+    val includedTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
     fun checkHintPresent(
             task: EditViewModel.ParentKey.Task,
@@ -85,7 +86,7 @@ fun DomainFactory.getCreateTaskData(
         } else {
             val parentTask = task.getParentTask(now)!!
             parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
-            includeTaskKeys.add(parentTask.taskKey)
+            includedTaskKeys.add(parentTask.taskKey)
         }
 
         EditViewModel.TaskData(
@@ -101,7 +102,7 @@ fun DomainFactory.getCreateTaskData(
         )
     }
 
-    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, includeTaskKeys)
+    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, includedTaskKeys)
 
     check(checkHintPresent(parentTreeDatas))
 
@@ -128,11 +129,69 @@ fun DomainFactory.getCreateTaskData(
         is EditViewModel.StartParameters.Create -> null
     }
 
+    val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
+        is EditViewModel.CurrentParentSource.None -> null
+        is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
+        is EditViewModel.CurrentParentSource.FromTask -> {
+            val task = getTaskForce(currentParentSource.taskKey)
+
+            if (task.isRootTask(now)) {
+                when (val projectKey = task.project.projectKey) {
+                    is ProjectKey.Private -> null
+                    is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
+                    else -> throw UnsupportedOperationException()
+                }
+            } else {
+                task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+            }
+        }
+    }
+
+    val currentParent: EditViewModel.ParentTreeData? = when (currentParentKey) {
+        is EditViewModel.ParentKey.Task -> {
+            val task = getTaskForce(currentParentKey.taskKey)
+
+            val taskParentKey = EditViewModel.ParentKey.Task(task.taskKey)
+
+            EditViewModel.ParentTreeData(
+                    task.name,
+                    getTaskListChildTaskDatas(now, task, startParameters.excludedTaskKeys, includedTaskKeys),
+                    taskParentKey,
+                    task.getScheduleText(ScheduleText, now),
+                    task.note,
+                    EditViewModel.SortKey.TaskSortKey(task.startExactTimeStamp),
+                    (task.project as? SharedProject)?.projectKey,
+                    mapOf(),
+            )
+        }
+        is EditViewModel.ParentKey.Project -> {
+            val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
+
+            val projectParentKey = EditViewModel.ParentKey.Project(project.projectKey)
+
+            val users = project.users.joinToString(", ") { it.name }
+            val parentTreeData = EditViewModel.ParentTreeData(
+                    project.name,
+                    getProjectTaskTreeDatas(now, project, startParameters.excludedTaskKeys, includedTaskKeys),
+                    projectParentKey,
+                    users,
+                    null,
+                    EditViewModel.SortKey.ProjectSortKey(project.projectKey),
+                    project.projectKey,
+                    project.users.toUserDatas(),
+            )
+
+            parentTreeData
+        }
+        null -> null
+    }
+
     return EditViewModel.Data(
             taskData,
             parentTreeDatas,
             customTimeDatas,
             showAllInstancesDialog,
+            currentParent,
     )
 }
 

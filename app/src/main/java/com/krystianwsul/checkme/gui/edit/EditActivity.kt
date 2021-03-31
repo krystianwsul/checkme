@@ -541,6 +541,8 @@ class EditActivity : NavBarActivity() {
 
     sealed class Hint : Parcelable {
 
+        abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
+
         @Parcelize
         class Schedule(val date: Date, val timePair: TimePair) : Hint() {
 
@@ -548,13 +550,22 @@ class EditActivity : NavBarActivity() {
                     date: Date,
                     pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
             ) : this(pair.first, TimePair(pair.second))
+
+            override fun toCurrentParent() = EditViewModel.CurrentParentSource.None
         }
 
         @Parcelize
-        class Task(val taskKey: TaskKey) : Hint()
+        class Task(val taskKey: TaskKey) : Hint() {
+
+            override fun toCurrentParent() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+        }
 
         @Parcelize
-        class Project(val projectKey: ProjectKey.Shared) : Hint()
+        class Project(val projectKey: ProjectKey.Shared) : Hint() {
+
+            override fun toCurrentParent() =
+                    EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(projectKey))
+        }
     }
 
     enum class HolderType {

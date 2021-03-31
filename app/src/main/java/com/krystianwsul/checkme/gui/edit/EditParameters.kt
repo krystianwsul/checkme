@@ -75,6 +75,8 @@ sealed class EditParameters : Parcelable {
     open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
     open val parentTaskKeyHint: TaskKey? = null
 
+    abstract val currentParentSource: EditViewModel.CurrentParentSource
+
     protected fun getInitialEditImageState(savedEditImageState: EditImageState?) =
             savedEditImageState ?: EditImageState.None
 
@@ -93,6 +95,8 @@ sealed class EditParameters : Parcelable {
     ) : EditParameters() {
 
         override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
+
+        override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
     }
 
     @Parcelize
@@ -100,6 +104,8 @@ sealed class EditParameters : Parcelable {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
         override val parentTaskKeyHint get() = (hint as? EditActivity.Hint.Task)?.taskKey
+
+        override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
 
         init {
             check(joinables.size > 1)
@@ -129,6 +135,8 @@ sealed class EditParameters : Parcelable {
     class Copy(val taskKey: TaskKey) : EditParameters() {
 
         override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.None
     }
 
     @Parcelize
@@ -137,6 +145,8 @@ sealed class EditParameters : Parcelable {
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
         override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
 
         override fun getInitialEditImageStateSingle(
                 savedEditImageState: EditImageState?,
@@ -157,7 +167,11 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Shortcut(override val parentTaskKeyHint: TaskKey) : EditParameters()
+    class Shortcut(override val parentTaskKeyHint: TaskKey) : EditParameters() {
+
+        override val currentParentSource
+            get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
+    }
 
     @Parcelize
     class Share private constructor(
@@ -172,6 +186,11 @@ sealed class EditParameters : Parcelable {
 
             fun fromUri(uri: Uri) = Share(uri = uri)
         }
+
+        override val currentParentSource
+            get() = parentTaskKeyHint?.let {
+                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(it))
+            } ?: EditViewModel.CurrentParentSource.None
 
         override fun getInitialEditImageStateSingle(
                 savedEditImageState: EditImageState?,
@@ -219,5 +238,8 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    object None : EditParameters()
+    object None : EditParameters() {
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.None
+    }
 }

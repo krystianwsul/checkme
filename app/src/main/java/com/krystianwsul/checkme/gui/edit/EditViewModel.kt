@@ -41,6 +41,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
         override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
                 editParameters.startParameters,
                 editParameters.parentTaskKeyHint,
+                editParameters.currentParentSource, // todo edit update if overridden
         )
     }
 
@@ -331,6 +332,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
             val showAllInstancesDialog: Boolean?,
+            val currentParent: ParentTreeData?, // todo make separate class for this, without stuff like children
     ) : DomainData()
 
     data class CustomTimeData(
@@ -421,6 +423,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
         }
+    }
+
+    sealed class CurrentParentSource {
+
+        object None : CurrentParentSource()
+
+        data class Set(val parentKey: ParentKey) : CurrentParentSource()
+
+        data class FromTask(val taskKey: TaskKey) : CurrentParentSource()
     }
 
     @Parcelize

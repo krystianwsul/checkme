@@ -49,6 +49,14 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         )
     }
 
+    /**
+     * todo: This should be either completely moved into a ViewModel dedicated to ParentPickerFragment, but I'm avoiding
+     * that because of the complexity of the Delegate that's shared with EditInstancesFragment.
+     *
+     * If it stays here, then it would probably make sense to start/stop it when the ParentPickerFragment is visible,
+     * but I don't care right now.  The objective I achieved was being able to display the main screen, without waiting
+     * for this stupid list to be generated.
+     */
     private val parentPickerDomainListener = object : DomainListener<ParentPickerData>() {
 
         override fun getData(domainFactory: DomainFactory) =

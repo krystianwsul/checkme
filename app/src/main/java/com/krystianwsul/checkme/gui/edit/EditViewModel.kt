@@ -363,13 +363,13 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
     data class ParentTreeData(
             override val name: String,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
-            val parentKey: ParentKey,
+            override val parentKey: ParentKey,
             override val details: String?,
             override val note: String?,
             override val sortKey: SortKey,
             val projectId: ProjectKey.Shared?,
-            val projectUsers: Map<UserKey, UserData>,
-    ) : ParentPickerFragment.EntryData {
+            override val projectUsers: Map<UserKey, UserData>,
+    ) : ParentPickerFragment.EntryData, ParentScheduleManager.Parent {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 

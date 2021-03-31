@@ -7,8 +7,8 @@ import io.reactivex.rxjava3.core.Observable
 
 interface ParentScheduleManager {
 
-    var parent: EditViewModel.ParentTreeData?
-    val parentObservable: Observable<NullableWrapper<EditViewModel.ParentTreeData>>
+    var parent: Parent?
+    val parentObservable: Observable<NullableWrapper<Parent>>
 
     val schedules: List<ScheduleEntry>
     val scheduleObservable: Observable<List<ScheduleEntry>>
@@ -35,5 +35,12 @@ interface ParentScheduleManager {
         fun getInitialParent(): EditViewModel.ParentTreeData?
 
         fun storeParent(parentKey: EditViewModel.ParentKey?)
+    }
+
+    interface Parent {
+
+        val name: String
+        val parentKey: EditViewModel.ParentKey
+        val projectUsers: Map<UserKey, EditViewModel.UserData>
     }
 }

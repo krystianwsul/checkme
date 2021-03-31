@@ -5,22 +5,17 @@ import com.krystianwsul.common.utils.UserKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ParentScheduleState(
-        val parentKey: EditViewModel.ParentKey?,
-        val schedules: List<ScheduleEntry>,
-        val assignedTo: Set<UserKey>,
-) : Parcelable {
+data class ParentScheduleState(val schedules: List<ScheduleEntry>, val assignedTo: Set<UserKey>) : Parcelable {
 
     companion object {
 
         fun create(
-                parentKey: EditViewModel.ParentKey?,
                 assignedTo: Set<UserKey>,
                 schedules: List<ScheduleEntry>? = null,
-        ) = ParentScheduleState(parentKey, schedules.orEmpty().toMutableList(), assignedTo)
+        ) = ParentScheduleState(schedules.orEmpty().toMutableList(), assignedTo)
     }
 
-    override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + getScheduleDatas().hashCode()
+    override fun hashCode() = getScheduleDatas().hashCode()
 
     fun getScheduleDatas() = schedules.map { it.scheduleDataWrapper }
 
@@ -29,8 +24,6 @@ data class ParentScheduleState(
 
         if (other !is ParentScheduleState) return false
 
-        return parentKey == other.parentKey
-                && getScheduleDatas() == other.getScheduleDatas()
-                && assignedTo == other.assignedTo
+        return getScheduleDatas() == other.getScheduleDatas() && assignedTo == other.assignedTo
     }
 }

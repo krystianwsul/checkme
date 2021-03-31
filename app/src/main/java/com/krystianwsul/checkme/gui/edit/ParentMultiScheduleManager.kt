@@ -64,7 +64,7 @@ class ParentMultiScheduleManager(
         assignedTo -= userKey
     }
 
-    private fun toState() = ParentScheduleState(parent?.parentKey, schedules, assignedTo)
+    private fun toState() = ParentScheduleState(schedules, assignedTo)
 
     override fun saveState() = Bundle().apply {
         putParcelable(KEY_STATE, toState())

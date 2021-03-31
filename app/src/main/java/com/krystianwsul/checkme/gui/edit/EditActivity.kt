@@ -134,9 +134,8 @@ class EditActivity : NavBarActivity() {
                                 .parentScheduleManager
                                 .run {
                                     ParentScheduleState(
-                                            parent?.parentKey,
                                             schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList(),
-                                            assignedTo
+                                            assignedTo,
                                     )
                                 },
                         nameHint,

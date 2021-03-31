@@ -41,7 +41,6 @@ class CreateTaskEditDelegate(
                 val initialParentKey = parameters.hint?.toParentKey()
                 initialStateGetter = {
                     parameters.parentScheduleState ?: ParentScheduleState(
-                            initialParentKey,
                             listOfNotNull(
                                     firstScheduleEntry.takeIf {
                                         initialParentKey !is EditViewModel.ParentKey.Task
@@ -60,7 +59,6 @@ class CreateTaskEditDelegate(
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
                 initialStateGetter = {
                     ParentScheduleState(
-                            initialParentKey,
                             listOfNotNull(
                                     firstScheduleEntry.takeIf {
                                         initialParentKey == null && Preferences.addDefaultReminder
@@ -74,10 +72,7 @@ class CreateTaskEditDelegate(
                 initialName = null
                 scheduleHint = null
 
-                val initialParentKey = parameters.parentTaskKeyHint.toParentKey()
-                initialStateGetter = {
-                    ParentScheduleState.create(initialParentKey, setOf())
-                }
+                initialStateGetter = { ParentScheduleState.create(setOf()) }
             }
             EditParameters.None -> {
                 initialName = null
@@ -85,9 +80,8 @@ class CreateTaskEditDelegate(
 
                 initialStateGetter = {
                     ParentScheduleState(
-                            null,
                             listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
-                            setOf()
+                            setOf(),
                     )
                 }
             }

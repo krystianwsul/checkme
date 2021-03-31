@@ -29,25 +29,13 @@ class JoinTasksEditDelegate(
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
     private fun initialStateGetter(): ParentScheduleState {
-        val (initialParentKey, schedule) = if (parameters.hint is EditActivity.Hint.Task) {
-            Pair(parameters.hint.toParentKey(), null)
+        val schedule = if (parameters.hint is EditActivity.Hint.Task) {
+            null
         } else {
-            Pair(
-                    taskKeys.map { it.projectKey }
-                            .distinct()
-                            .singleOrNull()
-                            ?.let {
-                                (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                            },
-                    firstScheduleEntry.takeIf { Preferences.addDefaultReminder },
-            )
+            firstScheduleEntry.takeIf { Preferences.addDefaultReminder }
         }
 
-        return ParentScheduleState(
-                initialParentKey,
-                listOfNotNull(schedule),
-                setOf()
-        )
+        return ParentScheduleState(listOfNotNull(schedule), setOf())
     }
 
     override val parentScheduleManager = ParentMultiScheduleManager(

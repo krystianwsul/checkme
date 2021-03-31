@@ -20,7 +20,6 @@ abstract class ExistingTaskEditDelegate(
             savedInstanceState,
             {
                 ParentScheduleState.create(
-                        taskData.parentKey,
                         taskData.assignedTo,
                         taskData.scheduleDataWrappers
                                 ?.map { ScheduleEntry(it) }

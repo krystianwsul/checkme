@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 
@@ -20,8 +19,6 @@ interface ParentScheduleManager {
     val assignedToUsers: Map<UserKey, EditViewModel.UserData>
 
     val changed: Boolean
-
-    fun trySetParentTask(taskKey: TaskKey): Boolean
 
     fun addSchedule(scheduleEntry: ScheduleEntry)
 

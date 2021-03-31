@@ -23,7 +23,7 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(
         compositeDisposable: CompositeDisposable,
-        private val storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+        private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) {
 
     companion object {
@@ -33,7 +33,7 @@ abstract class EditDelegate(
                 data: EditViewModel.Data,
                 savedInstanceState: Bundle?,
                 compositeDisposable: CompositeDisposable,
-                storeParent: (EditViewModel.ParentTreeData?) -> Unit,
+                storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
         ): EditDelegate {
             return when (parameters) {
                 is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
@@ -41,7 +41,7 @@ abstract class EditDelegate(
                 is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
                 is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
                     (::CreateTaskEditDelegate)(parameters)
-            }(data, savedInstanceState, compositeDisposable, storeParent)
+            }(data, savedInstanceState, compositeDisposable, storeParentKey)
         }
 
         fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
@@ -51,10 +51,7 @@ abstract class EditDelegate(
     fun newData(data: EditViewModel.Data) {
         this.data = data
 
-        tmpParentTaskKey?.let {
-            check(parentScheduleManager.trySetParentTask(it))
-            tmpParentTaskKey = null
-        }
+        parentScheduleManager.parent = data.currentParent
     }
 
     protected val callbacks = object : ParentScheduleManager.Callbacks {
@@ -62,12 +59,10 @@ abstract class EditDelegate(
         override fun getInitialParent() = data.currentParent
 
         override fun storeParent(parentTreeData: EditViewModel.ParentTreeData?) =
-                this@EditDelegate.storeParent(parentTreeData)
+                this@EditDelegate.storeParentKey(parentTreeData?.parentKey, false)
     }
 
     protected abstract var data: EditViewModel.Data
-
-    private var tmpParentTaskKey: TaskKey? = null
 
     open val initialName: String? = null
     open val initialNote: String? = null
@@ -97,8 +92,6 @@ abstract class EditDelegate(
     }
 
     abstract val parentScheduleManager: ParentScheduleManager
-
-    protected val parentLookup by lazy { ParentLookup() }
 
     val adapterItemObservable by lazy {
         parentScheduleManager.let {
@@ -187,39 +180,13 @@ abstract class EditDelegate(
     fun removeSchedule(adapterPosition: Int) =
             parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
-    inner class ParentLookup {
-
-        fun findTaskData(parentKey: EditViewModel.ParentKey) = tryFindTaskData(parentKey)!!
-
-        fun tryFindTaskData(parentKey: EditViewModel.ParentKey): EditViewModel.ParentTreeData? {
-            fun helper(
-                    taskDatas: Map<EditViewModel.ParentKey, EditViewModel.ParentTreeData>,
-                    parentKey: EditViewModel.ParentKey,
-            ): EditViewModel.ParentTreeData? {
-                if (taskDatas.containsKey(parentKey))
-                    return taskDatas.getValue(parentKey)
-
-                return taskDatas.values
-                        .mapNotNull { helper(it.parentTreeDatas, parentKey) }
-                        .singleOrNull()
-            }
-
-            return helper(data.parentTreeDatas, parentKey)
-        }
-    }
-
     open fun showAllRemindersDialog(): Boolean? { // null = no, true/false = plural
         check(data.showAllInstancesDialog == null)
 
         return null
     }
 
-    fun setParentTask(taskKey: TaskKey) {
-        check(tmpParentTaskKey == null)
-
-        if (!parentScheduleManager.trySetParentTask(taskKey))
-            tmpParentTaskKey = taskKey
-    }
+    fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
     fun createTask(createParameters: CreateParameters): Single<CreateResult> {
         check(createParameters.allReminders || showAllRemindersDialog() != null)

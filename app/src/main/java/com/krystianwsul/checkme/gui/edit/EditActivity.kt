@@ -310,7 +310,7 @@ class EditActivity : NavBarActivity() {
                 keyboardInsetRelay,
                 noteHasFocusRelay,
                 noteChanges,
-                imageHeightRelay
+                imageHeightRelay,
         ) { keyboardInset, noteHasFocus, _, imageHeight ->
             if (noteHasFocus) {
                 binding.editToolbarEditTextInclude
@@ -364,6 +364,9 @@ class EditActivity : NavBarActivity() {
     private var first = true
 
     private fun onLoadFinished() {
+        if (!first) return
+        first = false
+
         binding.editToolbarEditTextInclude
                 .toolbarLayout
                 .run {
@@ -374,25 +377,20 @@ class EditActivity : NavBarActivity() {
         binding.editToolbarEditTextInclude
                 .toolbarEditText
                 .run {
-                    if (first) {
-                        // first doesn't handle activity recreated
-                        if (savedInstanceState == null) setText(editViewModel.delegate.initialName)
+                    if (savedInstanceState == null) setText(editViewModel.delegate.initialName)
 
-                        addTextChangedListener(object : TextWatcher {
+                    addTextChangedListener(object : TextWatcher {
 
-                            private var skip = savedInstanceState != null
+                        private var skip = savedInstanceState != null
 
-                            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
-                            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
-                            override fun afterTextChanged(s: Editable) {
-                                if (skip) skip = false else updateNameError()
-                            }
-                        })
-
-                        first = false
-                    }
+                        override fun afterTextChanged(s: Editable) {
+                            if (skip) skip = false else updateNameError()
+                        }
+                    })
                 }
 
         if (savedInstanceState?.containsKey(NOTE_HAS_FOCUS_KEY) == true) {

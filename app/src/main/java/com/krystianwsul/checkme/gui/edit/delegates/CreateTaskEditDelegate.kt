@@ -21,8 +21,8 @@ class CreateTaskEditDelegate(
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
-) : EditDelegate(compositeDisposable, storeParent) {
+        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val initialName: String?
     override val scheduleHint: EditActivity.Hint.Schedule?
@@ -97,7 +97,6 @@ class CreateTaskEditDelegate(
         parentScheduleManager = ParentMultiScheduleManager(
                 savedInstanceState,
                 initialStateGetter,
-                parentLookup,
                 callbacks,
         )
     }

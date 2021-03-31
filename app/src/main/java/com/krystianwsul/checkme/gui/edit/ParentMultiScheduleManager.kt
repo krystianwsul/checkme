@@ -1,16 +1,13 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Bundle
-import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.utils.NonNullRelayProperty
 import com.krystianwsul.checkme.utils.NullableRelayProperty
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 
 class ParentMultiScheduleManager(
         savedInstanceState: Bundle?,
         initialStateGetter: () -> ParentScheduleState,
-        private val parentLookup: EditDelegate.ParentLookup, // todo edit remove this
         private val callbacks: ParentScheduleManager.Callbacks,
 ) : ParentScheduleManager {
 
@@ -52,12 +49,6 @@ class ParentMultiScheduleManager(
     override val assignedToUsers get() = assignedTo.associateWith { parent!!.projectUsers.getValue(it) }
 
     override val changed get() = toState() != initialState
-
-    override fun trySetParentTask(taskKey: TaskKey): Boolean {
-        parent = parentLookup.tryFindTaskData(EditViewModel.ParentKey.Task(taskKey)) ?: return false
-
-        return true
-    }
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
             scheduleProperty.mutate { it.toMutableList().also(action) }

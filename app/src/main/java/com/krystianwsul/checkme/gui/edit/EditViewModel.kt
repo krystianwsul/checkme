@@ -78,8 +78,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : DomainView
                             it,
                             savedStateHandle.get(KEY_DELEGATE_STATE),
                             clearedDisposable,
-                    ) {
-                        currentParentSource = CurrentParentSource.Set(it?.parentKey)
+                    ) { parentKey, refresh ->
+                        currentParentSource = CurrentParentSource.Set(parentKey)
+
+                        if (refresh) refresh()
                     }
                 }
                 .addTo(clearedDisposable)

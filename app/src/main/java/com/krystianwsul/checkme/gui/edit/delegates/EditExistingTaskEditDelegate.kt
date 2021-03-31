@@ -21,8 +21,8 @@ class EditExistingTaskEditDelegate(
         data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
-) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParent) {
+        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)
@@ -33,9 +33,9 @@ class EditExistingTaskEditDelegate(
         if (taskData.parentKey == parentKey)
             return true
 
-        fun EditViewModel.ParentKey.getProjectId() = when (this) {
+        fun EditViewModel.ParentKey.getProjectId(): ProjectKey<*> = when (this) {
             is EditViewModel.ParentKey.Project -> projectId
-            is EditViewModel.ParentKey.Task -> parentLookup.findTaskData(this).projectId
+            is EditViewModel.ParentKey.Task -> taskKey.projectKey
         }
 
         val initialProject = taskData.parentKey?.getProjectId()

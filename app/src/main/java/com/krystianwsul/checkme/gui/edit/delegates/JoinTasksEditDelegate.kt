@@ -20,8 +20,8 @@ class JoinTasksEditDelegate(
         override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
-) : EditDelegate(compositeDisposable, storeParent) {
+        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
 
@@ -53,7 +53,6 @@ class JoinTasksEditDelegate(
     override val parentScheduleManager = ParentMultiScheduleManager(
             savedInstanceState,
             this::initialStateGetter,
-            parentLookup,
             callbacks,
     )
 

@@ -8,8 +8,8 @@ abstract class ExistingTaskEditDelegate(
         final override var data: EditViewModel.Data,
         savedInstanceState: Bundle?,
         compositeDisposable: CompositeDisposable,
-        storeParent: (EditViewModel.ParentTreeData?) -> Unit,
-) : EditDelegate(compositeDisposable, storeParent) {
+        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+) : EditDelegate(compositeDisposable, storeParentKey) {
 
     protected val taskData get() = data.taskData!!
 
@@ -27,7 +27,6 @@ abstract class ExistingTaskEditDelegate(
                                 ?.toList(),
                 )
             },
-            parentLookup,
             callbacks,
     )
 

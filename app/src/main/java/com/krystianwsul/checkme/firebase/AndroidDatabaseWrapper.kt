@@ -4,8 +4,7 @@ import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
+import com.google.firebase.database.core.Path
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -14,6 +13,7 @@ import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -21,22 +21,23 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import com.pacoworks.rxpaper2.RxPaperBook
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
-    val root: String by lazy {
-        MyApplication.instance
-                .resources
-                .getString(R.string.firebase_root)
-    }
+    val root: String = "production" // todo
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
                 .reference
                 .child(root)
     }
+
+    private val rxPaperBook = RxPaperBook.with("firebaseCache")
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
@@ -49,13 +50,45 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .map<UntypedSnapshot>(UntypedSnapshot::Impl)
             .observeOnDomain()
 
-    private inline fun <reified T : Any> Query.typedSnapshotChanges() = dataChanges().toV3()
-            .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it, T::class) }
-            .observeOnDomain()
+    private fun Path.toKey() = toString().replace('/', '-')
 
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges() = dataChanges().toV3()
-            .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
-            .observeOnDomain()
+    private inline fun <reified T : Any> writeNullable(path: Path, value: T?) =
+            rxPaperBook.write(path.toKey(), NullableWrapper(value)).toV3()
+
+    private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
+        val key = path.toKey()
+
+        return rxPaperBook.contains(key)
+                .toV3()
+                .filter { it }
+                .flatMapSingle { rxPaperBook.read<NullableWrapper<T>>(path.toKey()).toV3() }
+    }
+
+    private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> {
+        val firebaseObservable = dataChanges().toV3()
+                .observeOn(Schedulers.computation())
+                .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it, T::class) }
+                .share()
+
+        firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
+
+        // readNullable<T>(path) todo paper read this callable
+
+        return firebaseObservable.observeOnDomain()
+    }
+
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> {
+        val firebaseObservable = dataChanges().toV3()
+                .observeOn(Schedulers.computation())
+                .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
+                .share()
+
+        firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
+
+        // readNullable<T>(path) todo paper
+
+        return firebaseObservable.observeOnDomain()
+    }
 
     override fun getNewId(path: String) = rootReference.child(path)
             .push()
@@ -101,6 +134,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override fun exists() = false
 
-        override fun getValue() = throw UnsupportedOperationException()
+        override fun getValue(): T? = null
     }
 }

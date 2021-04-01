@@ -7,12 +7,14 @@ interface TypedSnapshot<T : Any> : Snapshot {
 
     fun getValue(): T? // todo remove param
 
-    class Impl<T : Any>(private val dataSnapshot: DataSnapshot, private val kClass: KClass<T>) : TypedSnapshot<T> {
+    class Impl<T : Any>(private val dataSnapshot: DataSnapshot, kClass: KClass<T>) : TypedSnapshot<T> {
+
+        private val value = dataSnapshot.getValue(kClass.java)
 
         override val key get() = dataSnapshot.key!!
 
-        override fun exists() = dataSnapshot.exists()
+        override fun exists() = value != null
 
-        override fun getValue() = dataSnapshot.getValue(kClass.java)
+        override fun getValue() = value
     }
 }

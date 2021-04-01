@@ -9,13 +9,15 @@ interface IndicatorSnapshot<T : Any> : Snapshot {
 
     class Impl<T : Any>(
             private val dataSnapshot: DataSnapshot,
-            private val genericTypeIndicator: GenericTypeIndicator<T>,
+            genericTypeIndicator: GenericTypeIndicator<T>,
     ) : IndicatorSnapshot<T> {
+
+        private val value = dataSnapshot.getValue(genericTypeIndicator)
 
         override val key get() = dataSnapshot.key!!
 
-        override fun exists() = dataSnapshot.exists()
+        override fun exists() = value != null
 
-        override fun getValue() = dataSnapshot.getValue(genericTypeIndicator)
+        override fun getValue() = value
     }
 }

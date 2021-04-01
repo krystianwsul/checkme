@@ -127,6 +127,8 @@ class MyApplication : Application() {
 
         val localFactory = LocalFactory(PersistenceManager.instance)
 
+        RxPaperBook.init(this)
+
         FactoryLoader(
                 localFactory,
                 userInfoRelay,
@@ -165,8 +167,6 @@ class MyApplication : Application() {
                 .subscribe()
 
         RxPaparazzo.register(this)
-
-        RxPaperBook.init(this)
 
         Queue.init()
 

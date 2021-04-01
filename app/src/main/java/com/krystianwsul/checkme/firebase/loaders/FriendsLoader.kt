@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
@@ -64,7 +63,7 @@ class FriendsLoader(
             .filter { it.userKeys.isNotEmpty() }
             .replayImmediate()
 
-    class InitialFriendsEvent(val snapshots: Iterable<ValueSnapshot>)
+    class InitialFriendsEvent(val snapshots: Iterable<TypedSnapshot<UserWrapper>>)
 
     class AddChangeFriendEvent(val snapshot: TypedSnapshot<UserWrapper>)
 

@@ -2,7 +2,9 @@ package com.krystianwsul.checkme.firebase.snapshot
 
 import com.google.firebase.database.DataSnapshot
 
-interface TypedSnapshot<T : Any> : ValueSnapshot {
+interface TypedSnapshot<T : Any> : Snapshot {
+
+    fun <T> getValue(valueType: Class<T>): T? // todo remove param
 
     class Impl<T : Any>(private val dataSnapshot: DataSnapshot) : TypedSnapshot<T> {
 

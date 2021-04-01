@@ -7,8 +7,9 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -82,7 +83,7 @@ class FactoryLoaderOldTest {
             TODO("Not yet implemented")
         }
 
-        override fun updateUserRecord(snapshot: UntypedSnapshot) {
+        override fun updateUserRecord(snapshot: TypedSnapshot<UserWrapper>) {
             TODO("Not yet implemented")
         }
     }
@@ -116,7 +117,7 @@ class FactoryLoaderOldTest {
             changeListenerWrapper!!.result = changeType
         }
 
-        override fun updateUserRecord(snapshot: UntypedSnapshot) {
+        override fun updateUserRecord(snapshot: TypedSnapshot<UserWrapper>) {
             assertNotNull(userListener)
 
             userListener!!(snapshot)
@@ -128,18 +129,18 @@ class FactoryLoaderOldTest {
     private class TestDatabase : FactoryProvider.Database() {
 
         val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()!!
-        val sharedProjectObservable = PublishRelay.create<UntypedSnapshot>()!!
-        val userObservable = PublishRelay.create<UntypedSnapshot>()!!
+        val sharedProjectObservable = PublishRelay.create<TypedSnapshot<JsonWrapper>>()!!
+        val userObservable = PublishRelay.create<TypedSnapshot<UserWrapper>>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-                privateProjectObservable.map<UntypedSnapshot> { ValueTestUntypedSnapshot(it, key.key) }!!
+                privateProjectObservable.map<TypedSnapshot<PrivateProjectJson>> { ValueTestTypedSnapshot(it, key.key) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
         override fun getUserObservable(userKey: UserKey) = userObservable
 
         override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                Observable.just<UntypedSnapshot>(EmptyTestUntypedSnapshot())!!
+                Observable.just<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>(EmptyTestIndicatorSnapshot())!!
 
         override fun getNewId(path: String) = "id"
 
@@ -228,7 +229,7 @@ class FactoryLoaderOldTest {
     private fun initializeEmpty() {
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestUntypedSnapshot(UserWrapper(), userInfo.key.key))
+                .accept(ValueTestTypedSnapshot(UserWrapper(), userInfo.key.key))
 
         assertNull(domainFactoryRelay.value)
 
@@ -251,7 +252,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestUntypedSnapshot(
+                        ValueTestTypedSnapshot(
                                 UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                                 userInfo.key.key,
                         )
@@ -265,7 +266,7 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestUntypedSnapshot(
+                .accept(ValueTestTypedSnapshot(
                         JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
                         sharedProjectKey,
                 ))
@@ -280,7 +281,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestUntypedSnapshot(
+                        ValueTestTypedSnapshot(
                                 UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                                 userInfo.key.key,
                         )
@@ -298,7 +299,7 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestUntypedSnapshot(
+                .accept(ValueTestTypedSnapshot(
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
@@ -314,7 +315,7 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestUntypedSnapshot(
+                        ValueTestTypedSnapshot(
                                 UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                                 userInfo.key.key,
                         )
@@ -330,7 +331,7 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestUntypedSnapshot(
+                .accept(ValueTestTypedSnapshot(
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))

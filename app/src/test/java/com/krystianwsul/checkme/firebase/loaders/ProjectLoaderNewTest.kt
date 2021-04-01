@@ -4,7 +4,8 @@ import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
@@ -41,11 +42,11 @@ class ProjectLoaderNewTest {
 
     class TestProjectProvider : ProjectProvider {
 
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<UntypedSnapshot>>()
+        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>>()
 
         override val database = object : ProjectProvider.Database() {
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
                 if (!rootInstanceObservables.containsKey(taskFirebaseKey))
                     rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
                 return rootInstanceObservables.getValue(taskFirebaseKey)
@@ -64,7 +65,7 @@ class ProjectLoaderNewTest {
                 map: Map<String, Map<String, InstanceJson>>
         ) {
             val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(ValueTestUntypedSnapshot(map, key))
+            rootInstanceObservables.getValue(key).accept(ValueTestIndicatorSnapshot(map, key))
         }
     }
 
@@ -72,15 +73,15 @@ class ProjectLoaderNewTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var projectSnapshotRelay: BehaviorRelay<UntypedSnapshot>
+    private lateinit var projectSnapshotRelay: BehaviorRelay<TypedSnapshot<PrivateProjectJson>>
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectManager: AndroidPrivateProjectManager
-    private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
+    private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
-            projectSnapshotRelay.accept(ValueTestUntypedSnapshot(privateProjectJson, projectKey.key))
+            projectSnapshotRelay.accept(ValueTestTypedSnapshot(privateProjectJson, projectKey.key))
 
-    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private>>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>
     private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
@@ -102,7 +103,7 @@ class ProjectLoaderNewTest {
                 projectSnapshotRelay,
                 compositeDisposable,
                 projectProvider,
-                projectManager
+                projectManager,
         )
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)

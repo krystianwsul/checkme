@@ -4,16 +4,14 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.PrivateTaskJson
-import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
@@ -49,27 +47,27 @@ class ProjectFactoryNewTest {
 
     class TestFactoryProvider : FactoryProvider {
 
-        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<UntypedSnapshot>>()
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<TypedSnapshot<JsonWrapper>>>()
 
         override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<UntypedSnapshot> {
+            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<TypedSnapshot<PrivateProjectJson>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<UntypedSnapshot> {
+            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<TypedSnapshot<JsonWrapper>> {
                 if (!sharedProjectObservables.containsKey(projectKey))
                     sharedProjectObservables[projectKey] = PublishRelay.create()
                 return sharedProjectObservables.getValue(projectKey)
             }
 
-            override fun getUserObservable(userKey: UserKey): Observable<UntypedSnapshot> {
+            override fun getUserObservable(userKey: UserKey): Observable<TypedSnapshot<UserWrapper>> {
                 TODO("Not yet implemented")
             }
 
@@ -103,14 +101,14 @@ class ProjectFactoryNewTest {
                 projectKey: ProjectKey.Shared,
                 projectJson: SharedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(ValueTestUntypedSnapshot(
+            sharedProjectObservables.getValue(projectKey).accept(ValueTestTypedSnapshot(
                     JsonWrapper(projectJson),
                     projectKey.key,
             ))
         }
     }
 
-    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private> {
+    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private, PrivateProjectJson> {
 
         private val userInfo = UserInfo("email", "name", "uid")
 
@@ -192,7 +190,7 @@ class ProjectFactoryNewTest {
                                     projectLoader.projectRecord,
                                     PrivateTaskJson("task")
                             ),
-                            EmptyTestUntypedSnapshot(),
+                            EmptyTestIndicatorSnapshot(),
                     )
             ))
         }

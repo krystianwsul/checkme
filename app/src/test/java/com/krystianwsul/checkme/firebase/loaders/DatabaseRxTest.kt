@@ -16,7 +16,7 @@ class DatabaseRxTest {
 
     private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var databaseObservable: PublishRelay<UntypedSnapshot>
-    private lateinit var databaseRx: DatabaseRx
+    private lateinit var databaseRx: DatabaseRx<UntypedSnapshot>
 
     @Before
     fun before() {

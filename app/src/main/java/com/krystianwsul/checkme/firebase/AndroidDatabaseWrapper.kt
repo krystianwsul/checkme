@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.androidhuman.rxfirebase2.database.dataChanges
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
@@ -11,6 +12,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -29,7 +31,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
-    val root: String = "production" // todo
+    val root: String = "production" // todo paper
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
@@ -64,28 +66,22 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .flatMapSingle { rxPaperBook.read<NullableWrapper<T>>(path.toKey()).toV3() }
     }
 
-    private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> {
-        val firebaseObservable = dataChanges().toV3()
+    private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
+            cache { TypedSnapshot.Impl(it, T::class) }
+
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
+            cache { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
+
+    private inline fun <reified T : Any, U : ValueSnapshot<T>> Query.cache(
+            crossinline mapToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+    ): Observable<U> {
+        val firebaseObservable = dataChanges()
+                .toV3()
                 .observeOn(Schedulers.computation())
-                .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it, T::class) }
+                .map { mapToSnapshot(it) }
                 .share()
 
         firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
-
-        // readNullable<T>(path) todo paper read this callable
-
-        return firebaseObservable.observeOnDomain()
-    }
-
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> {
-        val firebaseObservable = dataChanges().toV3()
-                .observeOn(Schedulers.computation())
-                .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
-                .share()
-
-        firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
-
-        // readNullable<T>(path) todo paper
 
         return firebaseObservable.observeOnDomain()
     }

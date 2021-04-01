@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -49,27 +49,27 @@ class ProjectFactoryOldTest {
 
     class TestFactoryProvider : FactoryProvider {
 
-        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot>>()
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<UntypedSnapshot>>()
 
         override val projectProvider = ProjectLoaderOldTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot> {
+            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<UntypedSnapshot> {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot> {
                 TODO("Not yet implemented")
             }
 
-            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot> {
+            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<UntypedSnapshot> {
                 if (!sharedProjectObservables.containsKey(projectKey))
                     sharedProjectObservables[projectKey] = PublishRelay.create()
                 return sharedProjectObservables.getValue(projectKey)
             }
 
-            override fun getUserObservable(userKey: UserKey): Observable<Snapshot> {
+            override fun getUserObservable(userKey: UserKey): Observable<UntypedSnapshot> {
                 TODO("Not yet implemented")
             }
 
@@ -103,7 +103,7 @@ class ProjectFactoryOldTest {
                 projectKey: ProjectKey.Shared,
                 projectJson: SharedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(ValueTestSnapshot(
+            sharedProjectObservables.getValue(projectKey).accept(ValueTestUntypedSnapshot(
                     JsonWrapper(projectJson),
                     projectKey.key,
             ))
@@ -192,7 +192,7 @@ class ProjectFactoryOldTest {
                                     projectLoader.projectRecord,
                                     PrivateTaskJson("task")
                             ),
-                            EmptyTestSnapshot()
+                            EmptyTestUntypedSnapshot(),
                     )
             ))
         }

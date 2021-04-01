@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
@@ -41,7 +41,8 @@ class ProjectLoaderOldTest {
 
         override val database = object : ProjectProvider.Database() {
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String) = Observable.just<Snapshot>(EmptyTestSnapshot())
+            override fun getRootInstanceObservable(taskFirebaseKey: String) =
+                    Observable.just<UntypedSnapshot>(EmptyTestUntypedSnapshot())
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")
@@ -55,13 +56,13 @@ class ProjectLoaderOldTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot>
+    private lateinit var projectSnapshotRelay: BehaviorRelay<UntypedSnapshot>
     private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectManager: AndroidPrivateProjectManager
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
-            projectSnapshotRelay.accept(ValueTestSnapshot(privateProjectJson, projectKey.key))
+            projectSnapshotRelay.accept(ValueTestUntypedSnapshot(privateProjectJson, projectKey.key))
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private>>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>

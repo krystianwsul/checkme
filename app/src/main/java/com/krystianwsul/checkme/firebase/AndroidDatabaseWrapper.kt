@@ -67,23 +67,35 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
-            cache { TypedSnapshot.Impl(it, T::class) }
+            cache(
+                    { TypedSnapshot.Impl(it, T::class) },
+                    { TypedSnapshot.Wrapper(path.back.asString(), it.value) },
+            )
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
-            cache { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
+            cache(
+                    { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) },
+                    { IndicatorSnapshot.Wrapper(path.back.asString(), it.value) },
+            )
 
     private inline fun <reified T : Any, U : ValueSnapshot<T>> Query.cache(
-            crossinline mapToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+            crossinline firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+            crossinline paperToSnapshot: (NullableWrapper<T>) -> U,
     ): Observable<U> {
         val firebaseObservable = dataChanges()
                 .toV3()
                 .observeOn(Schedulers.computation())
-                .map { mapToSnapshot(it) }
+                .map { firebaseToSnapshot(it) }
                 .share()
 
         firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
 
-        return firebaseObservable.observeOnDomain()
+        return mergePaperAndRx(
+                readNullable<T>(path),
+                firebaseObservable,
+                paperToSnapshot,
+                { paper, firebase -> paper.value == firebase.getValue() },
+        ).observeOnDomain()
     }
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -131,5 +143,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         override fun exists() = false
 
         override fun getValue(): T? = null
+    }
+
+    sealed class LoadState<T : Any> {
+
+        class Initial<T : Any> : LoadState<T>()
+
+        class Loaded<T : Any>(val value: T) : LoadState<T>()
     }
 }

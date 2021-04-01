@@ -18,4 +18,11 @@ interface IndicatorSnapshot<T : Any> : ValueSnapshot<T> {
 
         override fun getValue() = value
     }
+
+    class Wrapper<T : Any>(override val key: String, private val value: T?) : IndicatorSnapshot<T> {
+
+        override fun exists() = value != null
+
+        override fun getValue() = value
+    }
 }

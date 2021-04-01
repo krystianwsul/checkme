@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.google.firebase.database.GenericTypeIndicator
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -20,9 +19,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
 
     companion object {
 
-        private val typeToken = object : GenericTypeIndicator<Map<String, Map<String, InstanceJson>>>() {}
-
-        private fun IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?.toSnapshotInfos() = this?.getValue(typeToken)
+        private fun IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?.toSnapshotInfos() = this?.getValue()
                 ?.map { (dateString, timeMap) ->
                     timeMap.map { (timeString, instanceJson) -> SnapshotInfo(dateString, timeString, instanceJson) }
                 }

@@ -53,8 +53,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it, T::class) }
             .observeOnDomain()
 
-    private fun <T : Any> Query.indicatorSnapshotChanges() = dataChanges().toV3()
-            .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it) }
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges() = dataChanges().toV3()
+            .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) }
             .observeOnDomain()
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -101,6 +101,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override fun exists() = false
 
-        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = throw UnsupportedOperationException()
+        override fun getValue() = throw UnsupportedOperationException()
     }
 }

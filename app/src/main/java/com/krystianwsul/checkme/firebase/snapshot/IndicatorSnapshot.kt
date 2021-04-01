@@ -5,15 +5,17 @@ import com.google.firebase.database.GenericTypeIndicator
 
 interface IndicatorSnapshot<T : Any> : Snapshot {
 
-    fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
+    fun getValue(): T?
 
-    class Impl<T : Any>(private val dataSnapshot: DataSnapshot) : IndicatorSnapshot<T> {
+    class Impl<T : Any>(
+            private val dataSnapshot: DataSnapshot,
+            private val genericTypeIndicator: GenericTypeIndicator<T>,
+    ) : IndicatorSnapshot<T> {
 
         override val key get() = dataSnapshot.key!!
 
         override fun exists() = dataSnapshot.exists()
 
-        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) =
-                dataSnapshot.getValue(genericTypeIndicator)
+        override fun getValue() = dataSnapshot.getValue(genericTypeIndicator)
     }
 }

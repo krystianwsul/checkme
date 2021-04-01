@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType

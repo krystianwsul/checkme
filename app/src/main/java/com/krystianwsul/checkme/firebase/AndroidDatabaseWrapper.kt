@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.DatabaseCallback

@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager

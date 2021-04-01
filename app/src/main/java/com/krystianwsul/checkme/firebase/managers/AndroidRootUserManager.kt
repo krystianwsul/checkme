@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord

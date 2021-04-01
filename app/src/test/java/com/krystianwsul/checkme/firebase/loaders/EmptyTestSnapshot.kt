@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.google.firebase.database.GenericTypeIndicator
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 
 open class EmptyTestSnapshot(private val _key: String? = null) : Snapshot {
 

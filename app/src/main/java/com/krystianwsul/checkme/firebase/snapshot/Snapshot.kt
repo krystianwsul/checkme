@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.loaders.snapshot
+package com.krystianwsul.checkme.firebase.snapshot
 
 interface Snapshot {
 

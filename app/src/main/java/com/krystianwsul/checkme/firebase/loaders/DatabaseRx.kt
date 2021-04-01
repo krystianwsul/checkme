@@ -1,21 +1,21 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-class DatabaseRx(
+class DatabaseRx<T : Snapshot>(
         domainDisposable: CompositeDisposable,
-        databaseObservable: Observable<UntypedSnapshot>,
+        databaseObservable: Observable<T>,
 ) {
 
     val disposable = CompositeDisposable().also { domainDisposable += it }
 
     val observable = databaseObservable.publish()!!
 
-    private val cached = BehaviorRelay.create<UntypedSnapshot>()
+    private val cached = BehaviorRelay.create<T>()
 
     init {
         disposable += observable.subscribe(cached::accept)

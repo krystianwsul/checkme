@@ -1,11 +1,12 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -25,7 +26,7 @@ class FriendsLoader(
             { _, userKey ->
                 DatabaseRx(
                         domainDisposable,
-                        friendsProvider.database.getUserObservable(userKey)
+                        friendsProvider.database.getUserObservable(userKey),
                 )
             },
             { it.disposable.dispose() }
@@ -65,7 +66,7 @@ class FriendsLoader(
 
     class InitialFriendsEvent(val snapshots: Iterable<ValueSnapshot>)
 
-    class AddChangeFriendEvent(val snapshot: UntypedSnapshot)
+    class AddChangeFriendEvent(val snapshot: TypedSnapshot<UserWrapper>)
 
     class RemoveFriendsEvent(val userChangeType: ChangeType, val userKeys: Set<UserKey>)
 }

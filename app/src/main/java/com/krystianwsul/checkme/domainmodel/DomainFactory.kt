@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
@@ -31,6 +31,7 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -241,7 +242,7 @@ class DomainFactory(
         changeTypeRelay.accept(changeType)
     }
 
-    override fun updateUserRecord(snapshot: UntypedSnapshot) {
+    override fun updateUserRecord(snapshot: TypedSnapshot<UserWrapper>) {
         MyCrashlytics.log("DomainFactory.updateUserRecord")
 
         DomainThreadChecker.instance.requireDomainThread()

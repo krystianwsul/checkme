@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
@@ -11,17 +12,17 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class SharedProjectFactory(
-        projectLoader: ProjectLoader<ProjectType.Shared>,
-        initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared>,
+        projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
+        initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
-        deviceDbInfo: () -> DeviceDbInfo
-) : ProjectFactory<ProjectType.Shared>(
+        deviceDbInfo: () -> DeviceDbInfo,
+) : ProjectFactory<ProjectType.Shared, JsonWrapper>(
         projectLoader,
         initialProjectEvent,
         factoryProvider,
         domainDisposable,
-        deviceDbInfo
+        deviceDbInfo,
 ) {
 
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) = SharedProject(

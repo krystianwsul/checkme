@@ -144,7 +144,9 @@ class FactoryLoader(
 
                     userDatabaseRx.changes
                             .subscribe {
-                                domainFactorySingle.subscribe { domainFactory -> domainFactory.updateUserRecord(it) }.addTo(domainDisposable)
+                                domainFactorySingle.subscribe { domainFactory ->
+                                    domainFactory.updateUserRecord(it)
+                                }.addTo(domainDisposable)
                             }
                             .addTo(domainDisposable)
 

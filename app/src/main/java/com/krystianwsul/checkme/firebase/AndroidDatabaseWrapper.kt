@@ -9,11 +9,16 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
@@ -34,7 +39,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
-    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).snapshotChanges()
+    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
             .orderByKey()
@@ -42,6 +47,14 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun Query.snapshotChanges() = dataChanges().toV3()
             .map<UntypedSnapshot>(UntypedSnapshot::Impl)
+            .observeOnDomain()
+
+    private fun <T : Any> Query.typedSnapshotChanges() = dataChanges().toV3()
+            .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it) }
+            .observeOnDomain()
+
+    private fun <T : Any> Query.indicatorSnapshotChanges() = dataChanges().toV3()
+            .map<IndicatorSnapshot<T>> { IndicatorSnapshot.Impl(it) }
             .observeOnDomain()
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -52,7 +65,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-            sharedProjectQuery(projectKey).snapshotChanges()
+            sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.updateChildren(values).addOnCompleteListener {
@@ -63,43 +76,31 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun privateProjectQuery(key: ProjectKey.Private) =
             rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
-    override fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).snapshotChanges()
+    override fun getPrivateProjectObservable(key: ProjectKey.Private) =
+            privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>()
 
     private fun rootInstanceQuery(taskFirebaseKey: String) =
             rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
 
-    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot> {
+    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
         return RemoteConfig.observable
                 .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
                 .observeOnDomain()
                 .switchMap {
                     if (it)
-                        rootInstanceQuery(taskFirebaseKey).snapshotChanges()
+                        rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges()
                     else
-                        Observable.just(EmptyUntypedSnapshot())
+                        Observable.just(EmptyIndicatorSnapshot())
                 }
     }
 
-    private class EmptyUntypedSnapshot : UntypedSnapshot {
-
-        override val key get() = throw UnsupportedOperationException()
-
-        override val children get() = throw UnsupportedOperationException()
-
-        override fun exists() = false
-
-        override fun <T> getValue(valueType: Class<T>) = throw UnsupportedOperationException()
-
-        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T? = null
-    }
-
-    private class EmptyValueSnapshot : ValueSnapshot {
+    private class EmptyIndicatorSnapshot<T : Any> : IndicatorSnapshot<T> {
 
         override val key get() = throw UnsupportedOperationException()
 
         override fun exists() = false
 
-        override fun <T> getValue(valueType: Class<T>) = throw UnsupportedOperationException()
+        override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>) = throw UnsupportedOperationException()
     }
 }

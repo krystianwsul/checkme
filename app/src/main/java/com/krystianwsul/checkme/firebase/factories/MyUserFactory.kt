@@ -3,11 +3,12 @@ package com.krystianwsul.checkme.firebase.factories
 import com.badoo.reaktive.rxjavainterop.asRxJava3Observable
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
 import io.reactivex.rxjava3.core.Observable
 
@@ -45,7 +46,7 @@ class MyUserFactory(userSnapshot: ValueSnapshot, deviceDbInfo: DeviceDbInfo) {
         user.setToken(deviceDbInfo)
     }
 
-    fun onNewSnapshot(snapshot: UntypedSnapshot): ChangeType {
+    fun onNewSnapshot(snapshot: TypedSnapshot<UserWrapper>): ChangeType {
         val changeWrapper = myUserManager.set(snapshot)
         user = MyUser(changeWrapper.data)
 

@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -36,12 +38,12 @@ interface SharedProjectsLoader {
         private data class ProjectData(
                 val userChangeType: ChangeType,
                 val projectKeys: Set<ProjectKey.Shared>,
-                val newMap: Map<ProjectKey.Shared, ProjectEntry>
+                val newMap: Map<ProjectKey.Shared, ProjectEntry>,
         )
 
         private data class ProjectEntry(
                 val userChangeType: ChangeType,
-                val databaseRx: DatabaseRx
+                val databaseRx: DatabaseRx<TypedSnapshot<JsonWrapper>>,
         )
 
         private val projectDatabaseRxObservable = projectKeysObservable.distinctUntilChanged()
@@ -52,7 +54,7 @@ interface SharedProjectsLoader {
                                     changeType,
                                     DatabaseRx(
                                             domainDisposable,
-                                            sharedProjectsProvider.getSharedProjectObservable(projectKey)
+                                            sharedProjectsProvider.getSharedProjectObservable(projectKey),
                                     )
                             )
                         },
@@ -63,9 +65,9 @@ interface SharedProjectsLoader {
 
         private data class LoaderData(
                 val userChangeType: ChangeType,
-                val newLoaderMap: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared>>,
-                val addedLoaderEntries: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared>>,
-                val removedProjectKeys: Set<ProjectKey.Shared>
+                val newLoaderMap: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared, JsonWrapper>>,
+                val addedLoaderEntries: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared, JsonWrapper>>,
+                val removedProjectKeys: Set<ProjectKey.Shared>,
         )
 
         private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
@@ -78,7 +80,7 @@ interface SharedProjectsLoader {
                                     .observable,
                             domainDisposable,
                             sharedProjectsProvider.projectProvider,
-                            projectManager
+                            projectManager,
                     )
                 }
         )
@@ -130,12 +132,12 @@ interface SharedProjectsLoader {
     }
 
     class InitialProjectsEvent(
-            val pairs: List<Pair<ProjectLoader<ProjectType.Shared>, ProjectLoader.InitialProjectEvent<ProjectType.Shared>>>
+            val pairs: List<Pair<ProjectLoader<ProjectType.Shared, JsonWrapper>, ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>>>,
     )
 
     class AddProjectEvent(
-            val projectLoader: ProjectLoader<ProjectType.Shared>,
-            val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared>
+            val projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
+            val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
     )
 
     class RemoveProjectsEvent(val projectKeys: Set<ProjectKey.Shared>)

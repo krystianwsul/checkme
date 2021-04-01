@@ -11,6 +11,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
@@ -23,8 +24,8 @@ import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
         localFactory: FactoryProvider.Local,
-        private val privateProjectLoader: ProjectLoader<ProjectType.Private>,
-        privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private>,
+        private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>,
+        privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
         private val sharedProjectsLoader: SharedProjectsLoader,
         sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
         now: ExactTimeStamp.Local,

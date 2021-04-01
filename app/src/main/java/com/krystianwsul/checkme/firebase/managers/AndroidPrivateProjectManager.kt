@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -14,8 +14,8 @@ import com.krystianwsul.common.utils.ProjectType
 
 class AndroidPrivateProjectManager(
         private val userInfo: UserInfo,
-        override val databaseWrapper: DatabaseWrapper
-) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private> {
+        override val databaseWrapper: DatabaseWrapper,
+) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateProjectJson> {
 
     override lateinit var value: List<PrivateProjectRecord>
 
@@ -27,7 +27,7 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun set(snapshot: UntypedSnapshot): ChangeWrapper<PrivateProjectRecord> {
+    override fun set(snapshot: TypedSnapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord> {
         val changeWrapper = set {
             val record = if (first) {
                 first = false // for new users, the project may not exist yet

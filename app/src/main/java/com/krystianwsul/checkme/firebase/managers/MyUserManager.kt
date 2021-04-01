@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -14,7 +14,7 @@ import com.krystianwsul.common.utils.UserKey
 class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         snapshot: ValueSnapshot,
-) : ValueRecordManager<MyUserRecord>(), SnapshotRecordManager<MyUserRecord> {
+) : ValueRecordManager<MyUserRecord>(), SnapshotRecordManager<MyUserRecord, TypedSnapshot<UserWrapper>> {
 
     companion object {
 
@@ -37,5 +37,5 @@ class MyUserManager(
 
     override val records = listOf(value)
 
-    override fun set(snapshot: UntypedSnapshot) = set { snapshot.toRecord() }
+    override fun set(snapshot: TypedSnapshot<UserWrapper>) = set { snapshot.toRecord() }
 }

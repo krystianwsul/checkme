@@ -75,7 +75,7 @@ class FactoryLoader(
                     val startTime = ExactTimeStamp.Local.now
 
                     val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider) }
+                            .map { MyUserFactory(it, getDeviceDbInfo()) }
                             .cacheImmediate()
 
                     val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)

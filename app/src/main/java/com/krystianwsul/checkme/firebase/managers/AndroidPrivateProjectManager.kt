@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -19,7 +19,7 @@ class AndroidPrivateProjectManager(
 
     override lateinit var value: List<PrivateProjectRecord>
 
-    private fun Snapshot.toRecord() = PrivateProjectRecord(
+    private fun ValueSnapshot.toRecord() = PrivateProjectRecord(
             databaseWrapper,
             userInfo.key.toPrivateProjectKey(),
             getValue(PrivateProjectJson::class.java)!!

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.snapshot
 
 import com.google.firebase.database.DataSnapshot
 
-interface TypedSnapshot<T : Any> : Snapshot {
+interface TypedSnapshot<T : Any> : ValueSnapshot {
 
     class Impl<T : Any>(private val dataSnapshot: DataSnapshot) : TypedSnapshot<T> {
 

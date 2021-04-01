@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 
-open class TestSnapshot : Snapshot {
+open class TestSnapshot : ValueSnapshot {
 
     override val key: String
         get() = TODO("Not yet implemented")

@@ -2,18 +2,20 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager(), SnapshotRecordManager<RootUserRecord> {
+class AndroidRootUserManager(children: Iterable<ValueSnapshot>) : RootUserManager(),
+        SnapshotRecordManager<RootUserRecord> {
 
     companion object {
 
         private fun Snapshot.toKey() = UserKey(key)
 
-        private fun Snapshot.toRecord() = RootUserRecord(
+        private fun ValueSnapshot.toRecord() = RootUserRecord(
                 false,
                 getValue(UserWrapper::class.java)!!,
                 toKey()

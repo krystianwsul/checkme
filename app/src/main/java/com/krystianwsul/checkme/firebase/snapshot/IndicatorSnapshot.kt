@@ -3,17 +3,13 @@ package com.krystianwsul.checkme.firebase.snapshot
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.GenericTypeIndicator
 
-interface UntypedSnapshot : ValueSnapshot, IndicatorSnapshot {
+interface IndicatorSnapshot : ValueSnapshot {
 
-    val children: Iterable<UntypedSnapshot>
+    fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
 
-    override fun <T> getValue(genericTypeIndicator: GenericTypeIndicator<T>): T?
-
-    class Impl(private val dataSnapshot: DataSnapshot) : UntypedSnapshot {
+    class Impl(private val dataSnapshot: DataSnapshot) : IndicatorSnapshot {
 
         override val key get() = dataSnapshot.key!!
-
-        override val children get() = dataSnapshot.children.map(::Impl)
 
         override fun exists() = dataSnapshot.exists()
 

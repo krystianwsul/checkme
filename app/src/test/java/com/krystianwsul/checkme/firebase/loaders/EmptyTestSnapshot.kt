@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 
-open class EmptyTestSnapshot(private val _key: String? = null) : Snapshot {
+open class EmptyTestSnapshot(private val _key: String? = null) : ValueSnapshot {
 
     override val key get() = _key!!
 

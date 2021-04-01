@@ -21,7 +21,7 @@ class AndroidPrivateProjectManager(
     private fun TypedSnapshot<PrivateProjectJson>.toRecord() = PrivateProjectRecord(
             databaseWrapper,
             userInfo.key.toPrivateProjectKey(),
-            getValue(PrivateProjectJson::class.java)!!,
+            getValue()!!,
     )
 
     private var first = true

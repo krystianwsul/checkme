@@ -49,8 +49,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .map<UntypedSnapshot>(UntypedSnapshot::Impl)
             .observeOnDomain()
 
-    private fun <T : Any> Query.typedSnapshotChanges() = dataChanges().toV3()
-            .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it) }
+    private inline fun <reified T : Any> Query.typedSnapshotChanges() = dataChanges().toV3()
+            .map<TypedSnapshot<T>> { TypedSnapshot.Impl(it, T::class) }
             .observeOnDomain()
 
     private fun <T : Any> Query.indicatorSnapshotChanges() = dataChanges().toV3()

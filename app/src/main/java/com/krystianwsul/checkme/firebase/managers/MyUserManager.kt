@@ -19,8 +19,7 @@ class MyUserManager(
 
         private fun Snapshot.toKey() = UserKey(key)
 
-        private fun TypedSnapshot<UserWrapper>.toRecord() =
-                MyUserRecord(false, getValue(UserWrapper::class.java)!!, toKey())
+        private fun TypedSnapshot<UserWrapper>.toRecord() = MyUserRecord(false, getValue()!!, toKey())
     }
 
     override val databasePrefix = DatabaseWrapper.USERS_KEY

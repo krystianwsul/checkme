@@ -20,7 +20,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
             databaseWrapper,
             this@AndroidSharedProjectManager,
             toKey(),
-            getValue(JsonWrapper::class.java)!!,
+            getValue()!!,
     )
 
     override fun set(snapshot: TypedSnapshot<JsonWrapper>) = setNullable(snapshot.toKey()) {

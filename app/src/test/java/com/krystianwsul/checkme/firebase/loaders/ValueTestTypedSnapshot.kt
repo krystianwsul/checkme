@@ -7,5 +7,5 @@ class ValueTestTypedSnapshot<T : Any>(private val value: T, override val key: St
 
     override fun exists() = true
 
-    override fun <T> getValue(valueType: Class<T>) = value as T
+    override fun getValue() = value
 }

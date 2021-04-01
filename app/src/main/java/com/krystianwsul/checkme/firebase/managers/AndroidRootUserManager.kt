@@ -14,11 +14,7 @@ class AndroidRootUserManager(children: Iterable<TypedSnapshot<UserWrapper>>) : R
 
         private fun Snapshot.toKey() = UserKey(key)
 
-        private fun TypedSnapshot<UserWrapper>.toRecord() = RootUserRecord(
-                false,
-                getValue(UserWrapper::class.java)!!,
-                toKey(),
-        )
+        private fun TypedSnapshot<UserWrapper>.toRecord() = RootUserRecord(false, getValue()!!, toKey())
     }
 
     override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()

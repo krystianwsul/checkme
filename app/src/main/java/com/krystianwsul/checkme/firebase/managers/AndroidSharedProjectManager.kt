@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -22,7 +23,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
             getValue(JsonWrapper::class.java)!!
     )
 
-    override fun set(snapshot: Snapshot) = setNullable(snapshot.toKey()) {
+    override fun set(snapshot: UntypedSnapshot) = setNullable(snapshot.toKey()) {
         snapshot.takeIf { it.exists() }?.toRecord()
     }
 }

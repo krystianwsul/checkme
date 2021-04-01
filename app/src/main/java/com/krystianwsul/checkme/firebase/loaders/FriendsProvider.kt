@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 
@@ -10,6 +10,6 @@ interface FriendsProvider {
 
     abstract class Database : ProjectProvider.Database() {
 
-        abstract fun getUserObservable(userKey: UserKey): Observable<Snapshot>
+        abstract fun getUserObservable(userKey: UserKey): Observable<UntypedSnapshot>
     }
 }

@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -40,7 +40,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .snapshotChanges()
 
     private fun Query.snapshotChanges() = dataChanges().toV3()
-            .map<Snapshot>(Snapshot::Impl)
+            .map<UntypedSnapshot>(UntypedSnapshot::Impl)
             .observeOnDomain()
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -67,7 +67,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun rootInstanceQuery(taskFirebaseKey: String) =
             rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
 
-    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot> {
+    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot> {
         return RemoteConfig.observable
                 .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
@@ -80,7 +80,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 }
     }
 
-    private class EmptySnapshot : Snapshot {
+    private class EmptySnapshot : UntypedSnapshot {
 
         override val key get() = throw UnsupportedOperationException()
 

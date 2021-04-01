@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.firebase.managers.SnapshotRecordManager
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.managers.RecordManager
@@ -14,7 +14,7 @@ interface ProjectProvider {
 
     abstract class Database : DatabaseWrapper() {
 
-        abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot>
+        abstract fun getRootInstanceObservable(taskFirebaseKey: String): Observable<UntypedSnapshot>
     }
 
     interface ProjectManager<T : ProjectType> : RecordManager, SnapshotRecordManager<ProjectRecord<T>>

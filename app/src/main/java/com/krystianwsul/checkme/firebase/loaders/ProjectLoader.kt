@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
@@ -34,31 +34,31 @@ interface ProjectLoader<T : ProjectType> {
     class InitialProjectEvent<T : ProjectType>(
             val projectManager: ProjectProvider.ProjectManager<T>,
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, Snapshot>
+            val instanceSnapshots: Map<TaskKey, UntypedSnapshot>,
     )
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: Snapshot
+            val instanceSnapshot: UntypedSnapshot,
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: Snapshot
+            val instanceSnapshot: UntypedSnapshot,
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, Snapshot>
+            val instanceSnapshots: Map<TaskKey, UntypedSnapshot>,
     )
 
     class Impl<T : ProjectType>(
-            snapshotObservable: Observable<Snapshot>,
+            snapshotObservable: Observable<UntypedSnapshot>,
             private val domainDisposable: CompositeDisposable,
             projectProvider: ProjectProvider,
-            override val projectManager: ProjectProvider.ProjectManager<T>
+            override val projectManager: ProjectProvider.ProjectManager<T>,
     ) : ProjectLoader<T> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!

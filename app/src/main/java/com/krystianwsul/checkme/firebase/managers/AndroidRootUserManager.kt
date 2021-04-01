@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
@@ -21,7 +22,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot>) : RootUserManager(), 
 
     override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()
 
-    override fun set(snapshot: Snapshot) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
+    override fun set(snapshot: UntypedSnapshot) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
 
     fun addFriend(
             userKey: UserKey,

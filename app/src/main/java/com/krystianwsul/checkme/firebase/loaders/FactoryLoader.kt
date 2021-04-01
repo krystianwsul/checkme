@@ -53,14 +53,14 @@ class FactoryLoader(
 
                     val userDatabaseRx = DatabaseRx(
                             domainDisposable,
-                            factoryProvider.database.getUserObservable(getDeviceInfo().key)
+                            factoryProvider.database.getUserObservable(getDeviceInfo().key),
                     )
 
                     val privateProjectKey = getDeviceInfo().key.toPrivateProjectKey()
 
                     val privateProjectDatabaseRx = DatabaseRx(
                             domainDisposable,
-                            factoryProvider.database.getPrivateProjectObservable(privateProjectKey)
+                            factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
                     )
 
                     val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
@@ -69,7 +69,7 @@ class FactoryLoader(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             factoryProvider.projectProvider,
-                            privateProjectManager
+                            privateProjectManager,
                     )
 
                     val startTime = ExactTimeStamp.Local.now

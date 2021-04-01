@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
-import com.krystianwsul.checkme.firebase.loaders.snapshot.Snapshot
+import com.krystianwsul.checkme.firebase.loaders.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -38,7 +38,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
-            snapshots: Map<TaskKey, Snapshot>
+            snapshots: Map<TaskKey, UntypedSnapshot>,
     ) = projectRecord.taskRecords
         .values
         .associate {
@@ -52,7 +52,7 @@ abstract class ProjectFactory<T : ProjectType>(
 
     protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
-            snapshot: Snapshot?
+            snapshot: UntypedSnapshot?,
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
@@ -69,10 +69,7 @@ abstract class ProjectFactory<T : ProjectType>(
         rootInstanceManagers = initialProjectEvent.run { newRootInstanceManagers(projectRecord, instanceSnapshots) }
         project = newProject(initialProjectEvent.projectRecord)
 
-        fun updateRootInstanceManager(
-                taskRecord: TaskRecord<T>,
-                snapshot: Snapshot
-        ): ChangeType {
+        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: UntypedSnapshot): ChangeType {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 
             return if (rootInstanceManager != null) {

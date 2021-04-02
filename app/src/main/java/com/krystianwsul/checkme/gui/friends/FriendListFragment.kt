@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.extensions.addFriends
@@ -105,6 +106,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var friendListFab: FloatingActionButton? = null
 
+    private val isVisible = BehaviorRelay.createDefault(false)
     private lateinit var friendListViewModel: FriendListViewModel
 
     private val mainActivity get() = activity as MainActivity
@@ -124,7 +126,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             selectedIds = savedInstanceState.getParcelableArrayList(SELECTED_IDS_KEY)!!
 
         friendListViewModel = getViewModel<FriendListViewModel>().apply {
-            start()
+            viewCreatedDisposable += isVisible.subscribe { if (it) start() else stop() }
 
             viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -196,6 +198,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListFab!!.setOnClickListener { startActivity(FindFriendActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
+
+        isVisible.accept(true)
     }
 
     private fun updateFabVisibility() {
@@ -209,6 +213,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
+        isVisible.accept(false)
+
         friendListFab = null
     }
 

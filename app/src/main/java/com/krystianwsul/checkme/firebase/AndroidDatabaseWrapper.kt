@@ -24,6 +24,7 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.pacoworks.rxpaper2.RxPaperBook
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -70,17 +71,23 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             cache(
                     { TypedSnapshot.Impl(it, T::class) },
                     { TypedSnapshot.Wrapper(path.back.asString(), it.value) },
+                    { readNullable(it) },
+                    { path, value -> writeNullable(path, value) },
             )
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
             cache(
                     { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) },
                     { IndicatorSnapshot.Wrapper(path.back.asString(), it.value) },
+                    { readNullable(it) },
+                    { path, value -> writeNullable(path, value) },
             )
 
-    private inline fun <reified T : Any, U : ValueSnapshot<T>> Query.cache(
-            crossinline firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
-            crossinline paperToSnapshot: (NullableWrapper<T>) -> U,
+    private fun <T : Any, U : ValueSnapshot<T>> Query.cache(
+            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+            paperToSnapshot: (NullableWrapper<T>) -> U,
+            readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
+            writeNullable: (path: Path, T?) -> Completable,
     ): Observable<U> {
         val firebaseObservable = dataChanges()
                 .toV3()
@@ -91,7 +98,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
 
         return mergePaperAndRx(
-                readNullable<T>(path),
+                readNullable(path),
                 firebaseObservable,
                 paperToSnapshot,
                 { paper, firebase -> paper.value == firebase.getValue() },

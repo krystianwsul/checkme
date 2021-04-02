@@ -6,11 +6,11 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.merge
 
-inline fun <T : Any, U : Any> mergePaperAndRx(
+fun <T : Any, U : Any> mergePaperAndRx(
         paperMaybe: Maybe<T>,
         firebaseObservable: Observable<U>,
-        crossinline paperToSnapshot: (T) -> U,
-        crossinline equal: (T, U) -> Boolean,
+        paperToSnapshot: (T) -> U,
+        equal: (T, U) -> Boolean,
 ): Observable<U> {
     val permutationObservable = Observables.combineLatest(
             paperMaybe.toObservable()

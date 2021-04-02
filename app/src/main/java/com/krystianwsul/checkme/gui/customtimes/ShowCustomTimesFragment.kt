@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
 import com.krystianwsul.checkme.domainmodel.extensions.setCustomTimesCurrent
@@ -114,6 +115,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private lateinit var data: ShowCustomTimesViewModel.Data
 
+    private val isVisible = BehaviorRelay.createDefault(false)
     private lateinit var showCustomTimesViewModel: ShowCustomTimesViewModel
 
     private val customTimesListListener get() = activity as CustomTimesListListener
@@ -140,7 +142,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
 
         showCustomTimesViewModel = getViewModel<ShowCustomTimesViewModel>().apply {
-            start()
+            viewCreatedDisposable += isVisible.subscribe { if (it) start() else stop() }
 
             viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -216,6 +218,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesFab!!.setOnClickListener { startActivity(ShowCustomTimeActivity.getCreateIntent(requireActivity())) }
 
         updateFabVisibility()
+
+        isVisible.accept(true)
     }
 
     private fun updateFabVisibility() {
@@ -225,6 +229,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
+        isVisible.accept(false)
+
         showTimesFab = null
     }
 

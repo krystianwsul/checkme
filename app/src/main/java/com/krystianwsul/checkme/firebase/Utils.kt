@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.kotlin.Observables
 fun <T : Any, U : Any> mergePaperAndRx(
         paperMaybe: Maybe<T>,
         firebaseObservable: Observable<U>,
-        paperToSnapshot: (T) -> U,
+        converter: Converter<T, U>,
 ): Observable<U> {
     val permutationObservable = Observables.combineLatest(
             paperMaybe.toObservable()
@@ -18,12 +18,14 @@ fun <T : Any, U : Any> mergePaperAndRx(
             firebaseObservable.take(1)
                     .map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
-    ).scan<PairState<T, U>>(PairState.Initial(paperToSnapshot)) { oldPairState, (newPaperState, newFirebaseState) ->
+    ).scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newPaperState, newFirebaseState) ->
         oldPairState.processNextPair(newPaperState, newFirebaseState)
     }
 
     return permutationObservable.mapNotNull { it.emission }.mergeWith(firebaseObservable.skip(1))
 }
+
+class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T)
 
 private sealed class PairState<T : Any, U : Any> {
 
@@ -34,7 +36,7 @@ private sealed class PairState<T : Any, U : Any> {
             newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
     ): PairState<T, U>
 
-    class Initial<T : Any, U : Any>(private val paperToSnapshot: (T) -> U) : PairState<T, U>() {
+    class Initial<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
 
         override val emission: U? get() = null
 
@@ -45,11 +47,11 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-            return SkippingFirst(paperToSnapshot)
+            return SkippingFirst(converter)
         }
     }
 
-    class SkippingFirst<T : Any, U : Any>(private val paperToSnapshot: (T) -> U) : PairState<T, U>() {
+    class SkippingFirst<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
 
         override val emission: U? = null
 
@@ -65,7 +67,7 @@ private sealed class PairState<T : Any, U : Any> {
                 check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-                PaperCameFirst(newPaperState.value, paperToSnapshot)
+                PaperCameFirst(newPaperState.value, converter)
             }
         }
     }
@@ -90,9 +92,12 @@ private sealed class PairState<T : Any, U : Any> {
         }
     }
 
-    class PaperCameFirst<T : Any, U : Any>(private val paper: T, paperToSnapshot: (T) -> U) : PairState<T, U>() {
+    class PaperCameFirst<T : Any, U : Any>(
+            private val paper: T,
+            private val converter: Converter<T, U>,
+    ) : PairState<T, U>() {
 
-        override val emission = paperToSnapshot(paper)
+        override val emission = converter.paperToSnapshot(paper)
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,
@@ -101,7 +106,7 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
-            return if (newFirebaseState.value == paper) {
+            return if (converter.snapshotToPaper(newFirebaseState.value) == paper) {
                 Terminal(null)
             } else {
                 /**

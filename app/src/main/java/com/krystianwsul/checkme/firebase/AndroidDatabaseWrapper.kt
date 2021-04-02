@@ -70,7 +70,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
             cache(
                     { TypedSnapshot.Impl(it, T::class) },
-                    { TypedSnapshot.Wrapper(path.back.asString(), it.value) },
+                    Converter(
+                            { TypedSnapshot.Wrapper(path.back.asString(), it.value) },
+                            { NullableWrapper(it.getValue()) },
+                    ),
                     { readNullable(it) },
                     { path, value -> writeNullable(path, value) },
             )
@@ -78,14 +81,17 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
             cache(
                     { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) },
-                    { IndicatorSnapshot.Wrapper(path.back.asString(), it.value) },
+                    Converter(
+                            { IndicatorSnapshot.Wrapper(path.back.asString(), it.value) },
+                            { NullableWrapper(it.getValue()) },
+                    ),
                     { readNullable(it) },
                     { path, value -> writeNullable(path, value) },
             )
 
     private fun <T : Any, U : ValueSnapshot<T>> Query.cache(
             firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
-            paperToSnapshot: (NullableWrapper<T>) -> U,
+            converter: Converter<NullableWrapper<T>, U>,
             readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
             writeNullable: (path: Path, T?) -> Completable,
     ): Observable<U> {
@@ -97,7 +103,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
 
-        return mergePaperAndRx(readNullable(path), firebaseObservable, paperToSnapshot).observeOnDomain()
+        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain()
     }
 
     override fun getNewId(path: String) = rootReference.child(path)

@@ -28,7 +28,7 @@ class UtilsKtTest {
         testObserver = mergePaperAndRx(
                 paperSubject.firstElement(),
                 firebaseSubject,
-                { it },
+                Converter({ it }, { it }),
         ).test()
 
         mockkObject(MyApplication)
@@ -94,7 +94,7 @@ class UtilsKtTest {
         paperSubject.accept(1)
 
         firebaseSubject.accept(2)
-        verify(exactly = 1) { MyCrashlytics.logException(any()) }
+//        verify(exactly = 1) { MyCrashlytics.logException(any()) }
 
         firebaseSubject.accept(3)
 

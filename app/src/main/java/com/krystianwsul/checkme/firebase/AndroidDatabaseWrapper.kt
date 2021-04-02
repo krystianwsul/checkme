@@ -32,6 +32,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
+    const val ENABLE_PAPER = true // todo paper
+
     val root: String = "production" // todo paper
 
     private val rootReference by lazy {
@@ -55,16 +57,24 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun Path.toKey() = toString().replace('/', '-')
 
-    private inline fun <reified T : Any> writeNullable(path: Path, value: T?) =
+    private inline fun <reified T : Any> writeNullable(path: Path, value: T?): Completable {
+        return if (ENABLE_PAPER)
             rxPaperBook.write(path.toKey(), NullableWrapper(value)).toV3()
+        else
+            Completable.complete()
+    }
 
     private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
-        val key = path.toKey()
+        if (ENABLE_PAPER) {
+            val key = path.toKey()
 
-        return rxPaperBook.contains(key)
-                .toV3()
-                .filter { it }
-                .flatMapSingle { rxPaperBook.read<NullableWrapper<T>>(path.toKey()).toV3() }
+            return rxPaperBook.contains(key)
+                    .toV3()
+                    .filter { it }
+                    .flatMapSingle { rxPaperBook.read<NullableWrapper<T>>(path.toKey()).toV3() }
+        } else {
+            return Maybe.never()
+        }
     }
 
     private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =

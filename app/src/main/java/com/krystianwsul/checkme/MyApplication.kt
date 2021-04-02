@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Maybe
@@ -54,6 +55,8 @@ class MyApplication : Application() {
 
         var _sharedPreferences: SharedPreferences? = null
         val sharedPreferences get() = _sharedPreferences!!
+
+        val start = ExactTimeStamp.Local.now // todo paper
     }
 
     val googleSignInClient by lazy { getClient() }

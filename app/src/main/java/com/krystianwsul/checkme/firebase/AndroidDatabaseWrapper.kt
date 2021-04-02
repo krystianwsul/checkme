@@ -6,6 +6,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
+import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -32,9 +34,13 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
-    const val ENABLE_PAPER = true // todo paper
+    const val ENABLE_PAPER = false // todo paper
 
-    val root: String = "production" // todo paper
+    val root: String by lazy {
+        MyApplication.instance
+                .resources
+                .getString(R.string.firebase_root)
+    }
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()

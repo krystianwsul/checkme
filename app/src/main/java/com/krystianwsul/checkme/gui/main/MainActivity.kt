@@ -123,7 +123,7 @@ class MainActivity :
     private var calendarOpen = false
     private var calendarInitial: Boolean = true
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel by lazy { getViewModel<MainViewModel>() }
 
     val dayViewModel by lazy { getViewModel<DayViewModel>() }
     private val searchInstancesViewModel by lazy { getViewModel<SearchInstancesViewModel>() }
@@ -581,9 +581,7 @@ class MainActivity :
             }
         }
 
-        mainViewModel = getViewModel<MainViewModel>().apply {
-            start()
-
+        mainViewModel.apply {
             createDisposable += data.subscribe {
                 taskListFragment.parameters = TaskListFragment.Parameters.All(
                         TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
@@ -906,6 +904,10 @@ class MainActivity :
         }
 
         if (tab == Tab.ABOUT) aboutFragment.onShown()
+
+        mainViewModel.apply {
+            if (tab == Tab.TASKS) start() else stop()
+        }
 
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 

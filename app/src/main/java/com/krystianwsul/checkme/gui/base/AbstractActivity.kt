@@ -9,10 +9,6 @@ import com.akexorcist.localizationactivity.core.LocalizationActivityDelegate
 import com.akexorcist.localizationactivity.core.OnLocaleChangedListener
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.Notifier
-import com.krystianwsul.checkme.domainmodel.TickData
-import com.krystianwsul.checkme.domainmodel.extensions.setFirebaseTickListener
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.utils.SnackbarData
 import com.krystianwsul.checkme.gui.utils.TaskSnackbarData
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
@@ -20,7 +16,6 @@ import com.krystianwsul.common.domain.TaskUndoData
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 import java.util.*
 
 abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
@@ -89,12 +84,6 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         started.accept(true)
     }
 
-    private fun tick(source: String) = AndroidDomainUpdater.setFirebaseTickListener(
-            TickData.Normal(Notifier.Params(source, true, true)),
-    )
-            .subscribe()
-            .addTo(createDisposable)
-
     protected open val tickOnResume = true
 
     override fun onResume() {
@@ -114,8 +103,6 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
             }
         }
         snackbarData = null // shouldn't this be moved into `apply` or `addOneShotGlobalLayoutListener`?
-
-        if (tickOnResume) resumeDisposable += tick("AbstractActivity.onResume")
     }
 
     override fun onPause() {

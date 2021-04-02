@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
 import com.krystianwsul.checkme.domainmodel.extensions.clearProjectEndTimeStamps
@@ -129,6 +130,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var selectedProjectIds: Set<ProjectKey.Shared> = setOf()
 
+    private val isVisible = BehaviorRelay.createDefault(false)
     private lateinit var projectListViewModel: ProjectListViewModel
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { projectIds, removeInstances ->
@@ -173,7 +175,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         binding.projectListRecycler.layoutManager = LinearLayoutManager(activity)
 
         projectListViewModel = getViewModel<ProjectListViewModel>().apply {
-            start()
+            viewCreatedDisposable += isVisible.subscribe { if (it) start() else stop() }
 
             viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -245,6 +247,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         projectListFab!!.setOnClickListener { startActivity(ShowProjectActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
+
+        isVisible.accept(true)
     }
 
     private fun updateFabVisibility() {
@@ -260,6 +264,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() = mainActivity.setProjectSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     override fun clearFab() {
+        isVisible.accept(false)
+
         projectListFab = null
     }
 

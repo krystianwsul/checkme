@@ -54,6 +54,8 @@ inline fun <T : Any, U : Any> mergePaperAndRx(
 
 private sealed class PairState<T : Any, U : Any> {
 
+    abstract val emission: U?
+
     abstract fun processNextPair(
             newPaperState: AndroidDatabaseWrapper.LoadState<T>,
             newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
@@ -61,7 +63,9 @@ private sealed class PairState<T : Any, U : Any> {
 
     // todo fun emit U
 
-    class Initial<T : Any, U : Any> : PairState<T, U>() {
+    class Initial<T : Any, U : Any>(private val paperToSnapshot: (T) -> U) : PairState<T, U>() {
+
+        override val emission: U? get() = null
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,
@@ -70,11 +74,13 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-            return SkippingFirst()
+            return SkippingFirst(paperToSnapshot)
         }
     }
 
-    class SkippingFirst<T : Any, U : Any> : PairState<T, U>() {
+    class SkippingFirst<T : Any, U : Any>(private val paperToSnapshot: (T) -> U) : PairState<T, U>() {
+
+        override val emission: U? = null
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,
@@ -88,7 +94,7 @@ private sealed class PairState<T : Any, U : Any> {
                 check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-                PaperCameFirst(newPaperState.value, newFirebaseState)
+                PaperCameFirst(newPaperState.value, newFirebaseState, paperToSnapshot)
             }
         }
     }
@@ -97,6 +103,8 @@ private sealed class PairState<T : Any, U : Any> {
             paperState: AndroidDatabaseWrapper.LoadState.Initial<T>,
             private val firebase: U,
     ) : PairState<T, U>() {
+
+        override val emission = firebase
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,
@@ -107,16 +115,19 @@ private sealed class PairState<T : Any, U : Any> {
 
             check(newFirebaseState.value == firebase)
 
-            // todo paper log warning
+            // todo paper log warning.  Investigate if this happens
 
-            return Terminal()
+            return Terminal(null)
         }
     }
 
     class PaperCameFirst<T : Any, U : Any>(
             private val paper: T,
             private val firebaseState: AndroidDatabaseWrapper.LoadState<U>,
+            private val paperToSnapshot: (T) -> U,
     ) : PairState<T, U>() {
+
+        override val emission = paperToSnapshot(paper)
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,
@@ -125,13 +136,17 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
-            // todo emit firebase if different from paper
+            return if (newFirebaseState.value == paper) {
+                Terminal(null)
+            } else {
+                // todo warn that firebase differed.  Make it clear that this will probably happen at some point
 
-            return Terminal()
+                Terminal(newFirebaseState.value)
+            }
         }
     }
 
-    class Terminal<T : Any, U : Any>() : PairState<T, U>() {
+    class Terminal<T : Any, U : Any>(override val emission: U?) : PairState<T, U>() {
 
         override fun processNextPair(
                 newPaperState: AndroidDatabaseWrapper.LoadState<T>,

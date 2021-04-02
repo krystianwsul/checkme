@@ -12,7 +12,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class UtilsKtTest {
+class MergePaperAndRxTest {
 
     private lateinit var paperSubject: PublishRelay<Int>
     private lateinit var firebaseSubject: PublishRelay<Int>
@@ -46,9 +46,12 @@ class UtilsKtTest {
     @Test
     fun testFirebaseOnly() {
         firebaseSubject.accept(1)
-        firebaseSubject.accept(2)
-        firebaseSubject.accept(3)
+        testObserver.assertValues(1)
 
+        firebaseSubject.accept(2)
+        testObserver.assertValues(1, 2)
+
+        firebaseSubject.accept(3)
         testObserver.assertValues(1, 2, 3)
 
         verify(exactly = 0) { MyCrashlytics.logException(any()) }
@@ -57,20 +60,21 @@ class UtilsKtTest {
     @Test
     fun testFirebaseFirst() {
         firebaseSubject.accept(1)
+        testObserver.assertValues(1)
 
         paperSubject.accept(10)
         verify(exactly = 1) { MyCrashlytics.logException(any()) }
 
         firebaseSubject.accept(2)
-        firebaseSubject.accept(3)
+        testObserver.assertValues(1, 2)
 
+        firebaseSubject.accept(3)
         testObserver.assertValues(1, 2, 3)
     }
 
     @Test
     fun testPaperOnly() {
         paperSubject.accept(1)
-
         testObserver.assertValues(1)
 
         verify(exactly = 0) { MyCrashlytics.logException(any()) }
@@ -79,11 +83,15 @@ class UtilsKtTest {
     @Test
     fun testPaperFirstSameVal() {
         paperSubject.accept(1)
+        testObserver.assertValues(1)
 
         firebaseSubject.accept(1)
-        firebaseSubject.accept(2)
-        firebaseSubject.accept(3)
+        testObserver.assertValues(1)
 
+        firebaseSubject.accept(2)
+        testObserver.assertValues(1, 2)
+
+        firebaseSubject.accept(3)
         testObserver.assertValues(1, 2, 3)
 
         verify(exactly = 0) { MyCrashlytics.logException(any()) }
@@ -92,12 +100,13 @@ class UtilsKtTest {
     @Test
     fun testPaperFirstDifferentVal() {
         paperSubject.accept(1)
+        testObserver.assertValues(1)
 
         firebaseSubject.accept(2)
-//        verify(exactly = 1) { MyCrashlytics.logException(any()) }
+        testObserver.assertValues(1, 2)
+        verify(exactly = 1) { MyCrashlytics.logException(any()) }
 
         firebaseSubject.accept(3)
-
         testObserver.assertValues(1, 2, 3)
     }
 }

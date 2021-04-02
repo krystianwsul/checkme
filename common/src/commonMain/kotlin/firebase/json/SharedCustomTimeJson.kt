@@ -1,10 +1,9 @@
 package com.krystianwsul.common.firebase.json
 
-import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class SharedCustomTimeJson @JvmOverloads constructor(
+data class SharedCustomTimeJson @JvmOverloads constructor(
         override var name: String = "",
         override var sundayHour: Int = 0,
         override var sundayMinute: Int = 0,
@@ -21,5 +20,5 @@ class SharedCustomTimeJson @JvmOverloads constructor(
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
         val ownerKey: String? = null,
-        val privateKey: String? = null
+        val privateKey: String? = null,
 ) : CustomTimeJson

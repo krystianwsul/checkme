@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.json
 
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
-import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
@@ -12,5 +11,5 @@ data class UserJson @JvmOverloads constructor(
         var name: String = "",
         val tokens: MutableMap<String, String?> = mutableMapOf(),
         var photoUrl: String? = null,
-        var uid: String? = null
+        var uid: String? = null,
 ) : Parcelable

@@ -58,16 +58,21 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .snapshotChanges()
 
     private fun Query.snapshotChanges() = dataChanges().toV3()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.computation())
             .map<UntypedSnapshot>(UntypedSnapshot::Impl)
             .observeOnDomain()
 
     private fun Path.toKey() = toString().replace('/', '-')
 
     private inline fun <reified T : Any> writeNullable(path: Path, value: T?): Completable {
-        return if (ENABLE_PAPER)
-            rxPaperBook.write(path.toKey(), NullableWrapper(value)).toV3()
-        else
+        return if (ENABLE_PAPER) {
+            rxPaperBook.write(path.toKey(), NullableWrapper(value))
+                    .toV3()
+                    .subscribeOn(Schedulers.io())
+        } else {
             Completable.complete()
+        }
     }
 
     private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
@@ -76,8 +81,13 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
             return rxPaperBook.contains(key)
                     .toV3()
+                    .subscribeOn(Schedulers.io())
                     .filter { it }
-                    .flatMapSingle { rxPaperBook.read<NullableWrapper<T>>(path.toKey()).toV3() }
+                    .flatMapSingle {
+                        rxPaperBook.read<NullableWrapper<T>>(path.toKey())
+                                .toV3()
+                                .subscribeOn(Schedulers.io())
+                    }
         } else {
             return Maybe.never()
         }
@@ -111,8 +121,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
             writeNullable: (path: Path, T?) -> Completable,
     ): Observable<U> {
-        val firebaseObservable = dataChanges()
-                .toV3()
+        val firebaseObservable = dataChanges().toV3()
+                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map { firebaseToSnapshot(it) }
                 .share()
@@ -151,7 +161,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         return RemoteConfig.observable
                 .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
-                .observeOnDomain()
                 .switchMap {
                     if (it)
                         rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges()

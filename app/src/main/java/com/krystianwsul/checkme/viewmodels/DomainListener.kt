@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
@@ -24,8 +23,6 @@ abstract class DomainListener<D : DomainData> {
     private var disposable: Disposable? = null
 
     fun start(forced: Boolean = false) {
-        Log.e("asdf", "magic start $this") // todo paper
-
         if (disposable != null) {
             if (forced)
                 stop()

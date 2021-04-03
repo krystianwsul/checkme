@@ -12,13 +12,13 @@ fun <T : Any, U : Any> mergePaperAndRx(
         converter: Converter<T, U>,
 ): Observable<U> {
     val permutationObservable = Observables.combineLatest(
+            firebaseObservable.map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
+                    .take(1)
+                    .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
             paperMaybe.toObservable()
                     .map<AndroidDatabaseWrapper.LoadState<T>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
-            firebaseObservable.take(1)
-                    .map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
-                    .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
-    ).scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newPaperState, newFirebaseState) ->
+    ).scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newFirebaseState, newPaperState) ->
         oldPairState.processNextPair(newPaperState, newFirebaseState)
     }
 

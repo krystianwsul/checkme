@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -15,7 +14,6 @@ import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -95,7 +93,7 @@ class DomainFactory(
     val notifier = Notifier(this, NotificationWrapper.instance)
 
     init {
-        Log.e("asdf", "magic DomainFactory init paper: ${AndroidDatabaseWrapper.ENABLE_PAPER}, delay: " + (ExactTimeStamp.Local.now.long - MyApplication.start.long)) // todo paper
+        MyApplication.logDelay("DomainFactory.init")
 
         Preferences.tickLog.logLineHour("DomainFactory.init")
 

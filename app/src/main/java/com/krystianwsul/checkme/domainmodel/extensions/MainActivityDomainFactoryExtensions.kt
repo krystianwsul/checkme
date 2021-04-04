@@ -1,13 +1,11 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.util.Log
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
@@ -180,7 +178,7 @@ fun DomainFactory.getGroupListData(
     )
 
     if (position == 0) { // todo paper
-        Log.e("asdf", "magic groupList paper: ${AndroidDatabaseWrapper.ENABLE_PAPER}, delay: " + (ExactTimeStamp.Local.now.long - MyApplication.start.long))
+        MyApplication.logDelay("groupList")
     }
 
     return DayViewModel.DayData(dataWrapper)

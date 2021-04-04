@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.akexorcist.localizationactivity.core.LocalizationApplicationDelegate
 import com.akexorcist.localizationactivity.core.LocalizationUtility
@@ -21,6 +22,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -57,6 +59,10 @@ class MyApplication : Application() {
         val sharedPreferences get() = _sharedPreferences!!
 
         val start = ExactTimeStamp.Local.now // todo paper
+
+        fun logDelay(description: String) {
+            Log.e("asdf", "magic $description, paper: ${AndroidDatabaseWrapper.ENABLE_PAPER} instances: ${AndroidDatabaseWrapper.ENABLE_INSTANCES}, delay: " + (ExactTimeStamp.Local.now.long - start.long)) // todo paper
+        }
     }
 
     val googleSignInClient by lazy { getClient() }

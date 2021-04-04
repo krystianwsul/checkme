@@ -6,8 +6,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
@@ -34,13 +32,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
-    const val ENABLE_PAPER = false // todo paper
+    const val ENABLE_PAPER = true // todo paper
+    const val ENABLE_INSTANCES = true // todo paper
 
-    val root: String by lazy {
-        MyApplication.instance
-                .resources
-                .getString(R.string.firebase_root)
-    }
+    val root: String = "production"
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
@@ -159,7 +154,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
         return RemoteConfig.observable
-                .map { it.queryRemoteInstances }
+                .map { it.queryRemoteInstances || ENABLE_INSTANCES }
                 .distinctUntilChanged()
                 .switchMap {
                     if (it)

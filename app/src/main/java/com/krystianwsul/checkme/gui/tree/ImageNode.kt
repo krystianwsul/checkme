@@ -51,15 +51,10 @@ class ImageNode(
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         super.onBindViewHolder(viewHolder, startingDrag)
 
-        Log.e("asdf", "magic 1")
-
         (viewHolder as Holder).apply {
             imageData.imageState
                     .toImageLoader()
-                    .load(rowBigImage) {
-                        Log.e("asdf", "magic 2")
-                        animateVisibility(listOf(), listOf(progress))
-                    }
+                    .load(rowBigImage) { animateVisibility(listOf(), listOf(progress)) }
 
             if (imageData.showImage) showImage(rowBigImage, imageData)
         }

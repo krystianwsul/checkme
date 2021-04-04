@@ -11,6 +11,10 @@ fun <T : Any, U : Any> mergePaperAndRx(
         firebaseObservable: Observable<U>,
         converter: Converter<T, U>,
 ): Observable<U> {
+    /**
+     * Order is significant in this operation.  FirebaseObservable has to be first, because of a weird race condition
+     * that was happening.
+     */
     val permutationObservable = Observables.combineLatest(
             firebaseObservable.map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .take(1)

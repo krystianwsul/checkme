@@ -5,5 +5,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 interface DomainUpdate<T : Any> {
 
+    val name: String
+
     fun doAction(domainFactory: DomainFactory, now: ExactTimeStamp.Local): DomainUpdater.Result<T>
 }

@@ -294,7 +294,7 @@ class DomainFactory(
         }
 
         getDomainUpdater(this).performDomainUpdate(
-                CompletableDomainUpdate.create {
+                CompletableDomainUpdate.create("tryNotifyListeners") {
                     DomainUpdater.Params(
                             notifyParams,
                             SaveParams(NotificationType.All, runType == RunType.REMOTE),

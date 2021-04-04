@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
@@ -13,9 +12,7 @@ fun DomainUpdater.setInstancesDone(
         notificationType: DomainListenerManager.NotificationType,
         instanceKeys: List<InstanceKey>,
         done: Boolean,
-) = CompletableDomainUpdate.create { now ->
-    MyCrashlytics.log("DomainFactory.setInstancesDone")
-
+) = CompletableDomainUpdate.create("setInstancesDone") { now ->
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)

@@ -34,9 +34,7 @@ fun DomainUpdater.updateCustomTime(
         customTimeId: CustomTimeKey.Private,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.updateCustomTime")
-
+): Completable = CompletableDomainUpdate.create("updateCustomTime") {
     check(name.isNotEmpty())
 
     val customTime = projectsFactory.privateProject.getCustomTime(customTimeId)
@@ -58,9 +56,7 @@ fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Private> = SingleDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.createCustomTime")
-
+): Single<CustomTimeKey.Private> = SingleDomainUpdate.create("createCustomTime") {
     check(name.isNotEmpty())
 
     check(DayOfWeek.values().all { hourMinutes[it] != null })

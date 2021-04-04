@@ -36,9 +36,7 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
 fun DomainUpdater.removeFriends(
         notificationType: DomainListenerManager.NotificationType,
         keys: Set<UserKey>,
-): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.removeFriends")
-
+): Completable = CompletableDomainUpdate.create("removeFriends") {
     keys.forEach { myUserFactory.user.removeFriend(it) }
 
     DomainUpdater.Params(false, notificationType)
@@ -48,9 +46,7 @@ fun DomainUpdater.removeFriends(
 fun DomainUpdater.addFriends(
         notificationType: DomainListenerManager.NotificationType,
         userMap: Map<UserKey, UserWrapper>,
-): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.addFriends")
-
+): Completable = CompletableDomainUpdate.create("addFriends") {
     userMap.forEach {
         myUserFactory.user.addFriend(it.key)
         friendsFactory.addFriend(it.key, it.value)

@@ -85,9 +85,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
         taskKeys: Set<TaskKey>,
         deleteInstances: Boolean,
         instanceKey: InstanceKey,
-): Single<Pair<TaskUndoData, Boolean>> = SingleDomainUpdate.create { now ->
-    MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-
+): Single<Pair<TaskUndoData, Boolean>> = SingleDomainUpdate.create("setTaskEndTimeStamps") { now ->
     val (taskUndoData, params) = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
 
     DomainUpdater.Result(

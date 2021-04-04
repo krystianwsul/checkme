@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.*
@@ -330,8 +329,6 @@ fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplicati
 @CheckResult
 fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) =
         CompletableDomainUpdate.create("updateNotifications") {
-            MyCrashlytics.logMethod("DomainFactory.")
-
             DomainUpdater.Params(notifierParams, DomainFactory.SaveParams(DomainListenerManager.NotificationType.All))
         }.perform(this)
 

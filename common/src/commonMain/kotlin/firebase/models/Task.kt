@@ -16,7 +16,6 @@ import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.*
 
 class Task<T : ProjectType>(
@@ -376,20 +375,6 @@ class Task<T : ProjectType>(
 
             return combineInstanceSequences(instanceSequences, bySchedule)
         }
-    }
-
-    fun getNextAlarm(now: ExactTimeStamp.Local, myUser: MyUser): TimeStamp? {
-        val existingInstances = existingInstances.values
-        val scheduleNextInstances = getCurrentScheduleIntervals(now).mapNotNull {
-            it.getDateTimesInRange(now.toOffset(), null)
-                    .firstOrNull()
-                    ?.let(::getInstance)
-        }
-
-        return (existingInstances + scheduleNextInstances).filter { it.isAssignedToMe(now, myUser) }
-                .map { it.instanceDateTime.timeStamp }
-                .filter { it.toLocalExactTimeStamp() > now }
-                .minOrNull()
     }
 
     private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)

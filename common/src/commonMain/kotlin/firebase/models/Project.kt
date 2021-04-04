@@ -418,7 +418,7 @@ abstract class Project<T : ProjectType>(
                     endExactTimeStamp,
                     now,
                     onlyRoot = true,
-                    filterVisible = filterVisible
+                    filterVisible = filterVisible,
             )
         }
 

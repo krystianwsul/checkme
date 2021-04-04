@@ -285,15 +285,21 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         if (!silent) Preferences.lastTick = now.long
 
-        val nextAlarm = domainFactory.getTasks()
-                .filter { it.current(now) && it.isRootTask(now) }
-                .mapNotNull { it.getNextAlarm(now, domainFactory.myUserFactory.user) }
-                .minOrNull()
-                .takeUnless { clear }
+        if (clear) {
+            notificationWrapper.updateAlarm(null)
+        } else {
+            val nextAlarm = domainFactory.getRootInstances(now.toOffset(), null, now)
+                    .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
+                    .first()
+                    .instanceDateTime
+                    .timeStamp
 
-        notificationWrapper.updateAlarm(nextAlarm)
+            check(nextAlarm.toLocalExactTimeStamp() > now)
 
-        nextAlarm?.let { Preferences.tickLog.logLineHour("next tick: $it") }
+            notificationWrapper.updateAlarm(nextAlarm)
+
+            Preferences.tickLog.logLineHour("next tick: $nextAlarm")
+        }
 
         if (params.tick) {
             setIrrelevant(now)

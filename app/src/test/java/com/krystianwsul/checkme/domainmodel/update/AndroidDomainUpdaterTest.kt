@@ -5,6 +5,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.ExactTimeStamp
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.Disposable
@@ -56,11 +57,20 @@ class AndroidDomainUpdaterTest {
     private fun addItem(): TestObserver<String> {
         val myCounter = ++counter
 
-        return queue.add(true) { _, _ ->
-            results.add(myCounter)
+        return queue.add(
+                true,
+                object : DomainUpdate<String> {
 
-            DomainUpdater.Result(myCounter.toString(), mockk<DomainUpdater.Params>(relaxed = true))
-        }.test()
+                    override fun doAction(
+                            domainFactory: DomainFactory,
+                            now: ExactTimeStamp.Local,
+                    ): DomainUpdater.Result<String> {
+                        results.add(myCounter)
+
+                        return DomainUpdater.Result(myCounter.toString(), mockk<DomainUpdater.Params>(relaxed = true))
+                    }
+                }
+        ).test()
     }
 
     @Test

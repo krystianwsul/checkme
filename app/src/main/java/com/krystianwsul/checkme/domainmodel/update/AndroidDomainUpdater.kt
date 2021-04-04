@@ -34,10 +34,8 @@ object AndroidDomainUpdater : DomainUpdater() {
         queue = Queue(isReady).apply { subscribe() }
     }
 
-    override fun <T : Any> performDomainUpdate(
-            trigger: Boolean,
-            action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,
-    ): Single<T> = queue.add(trigger, action)
+    override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean): Single<T> =
+            queue.add(trigger, domainUpdate)
 
     class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
 
@@ -59,7 +57,7 @@ object AndroidDomainUpdater : DomainUpdater() {
                     .subscribe { (domainFactory, items) -> dispatchItems(domainFactory, items) }
         }
 
-        fun <T : Any> add(trigger: Boolean, action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>): Single<T> {
+        fun <T : Any> add(trigger: Boolean, domainUpdate: DomainUpdate<T>): Single<T> {
             val subject = SingleSubject.create<T>()
 
             val item = object : Item {
@@ -67,7 +65,7 @@ object AndroidDomainUpdater : DomainUpdater() {
                 private lateinit var result: Result<T>
 
                 override fun getParams(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Params {
-                    result = action(domainFactory, now)
+                    result = domainUpdate.doAction(domainFactory, now)
 
                     return result.params
                 }

@@ -293,7 +293,7 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        getDomainUpdater(this).updateDomainCompletable(
+        getDomainUpdater(this).performDomainUpdate(
                 CompletableDomainUpdate.create {
                     DomainUpdater.Params(
                             notifyParams,

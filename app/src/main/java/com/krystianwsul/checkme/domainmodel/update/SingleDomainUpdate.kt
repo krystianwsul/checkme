@@ -5,7 +5,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 class SingleDomainUpdate<T : Any>(
         val action: DomainFactory.(ExactTimeStamp.Local) -> DomainUpdater.Result<T>,
-) : DomainUpdate {
+) : DomainUpdate<T> {
 
     companion object {
 
@@ -13,5 +13,7 @@ class SingleDomainUpdate<T : Any>(
                 SingleDomainUpdate(action)
     }
 
-    fun perform(domainUpdater: DomainUpdater) = domainUpdater.updateDomainSingle(this)
+    override fun doAction(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = action(domainFactory, now)
+
+    fun perform(domainUpdater: DomainUpdater) = domainUpdater.performDomainUpdate(this)
 }

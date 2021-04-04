@@ -5,7 +5,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 class CompletableDomainUpdate(
         val action: DomainFactory.(ExactTimeStamp.Local) -> DomainUpdater.Params,
-) : DomainUpdate {
+) : DomainUpdate<Unit> {
 
     companion object {
 
@@ -13,5 +13,8 @@ class CompletableDomainUpdate(
                 CompletableDomainUpdate(action)
     }
 
-    fun perform(domainUpdater: DomainUpdater) = domainUpdater.updateDomainCompletable(this)
+    override fun doAction(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
+            DomainUpdater.Result(Unit, action(domainFactory, now))
+
+    fun perform(domainUpdater: DomainUpdater) = domainUpdater.performDomainUpdate(this).ignoreElement()!!
 }

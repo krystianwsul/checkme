@@ -35,7 +35,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     const val ENABLE_PAPER = true // todo paper
     const val ENABLE_INSTANCES = true // todo paper
 
-    val root: String = "production"
+    val root: String = "production" // todo paper
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
@@ -120,9 +120,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map { firebaseToSnapshot(it) }
-                .share()
-
-        firebaseObservable.flatMapCompletable { writeNullable(path, it.getValue()) }.subscribe()
+                .doOnNext { writeNullable(path, it.getValue()).subscribe() }
 
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain()
     }

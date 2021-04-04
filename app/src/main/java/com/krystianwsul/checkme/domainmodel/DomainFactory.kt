@@ -303,6 +303,8 @@ class DomainFactory(
                 },
                 false,
         )
+
+        updateIsSaved()
     }
 
     private enum class RunType {

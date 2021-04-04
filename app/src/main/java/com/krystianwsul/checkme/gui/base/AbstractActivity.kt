@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.base
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.akexorcist.localizationactivity.core.LocalizationActivityDelegate
@@ -24,7 +23,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
         private var snackbarData: SnackbarData? = null
 
-        fun setSnackbar(snackbarData: SnackbarData) {
+        private fun setSnackbar(snackbarData: SnackbarData) {
             check(Companion.snackbarData == null)
 
             Companion.snackbarData = snackbarData
@@ -42,7 +41,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
     val started = BehaviorRelay.createDefault(false)!!
 
-    private val localizationDelegate = LocalizationActivityDelegate(this)
+    private val localizationDelegate by lazy { LocalizationActivityDelegate(this) }
 
     protected open val titleId: Int? = null
 
@@ -51,19 +50,17 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         super.attachBaseContext(newBase)
     }
 
-    override fun getApplicationContext(): Context {
-        return localizationDelegate.getApplicationContext(super.getApplicationContext())
-    }
+    override fun getApplicationContext() = localizationDelegate.getApplicationContext(super.getApplicationContext())
 
-    override fun getResources(): Resources {
-        return localizationDelegate.getResources(super.getResources())
-    }
+    override fun getResources() = localizationDelegate.getResources(super.getResources())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         MyCrashlytics.logMethod(this)
 
-        localizationDelegate.addOnLocaleChangedListener(this)
-        localizationDelegate.onCreate()
+        localizationDelegate.let {
+            it.addOnLocaleChangedListener(this)
+            it.onCreate()
+        }
 
         titleId?.let(::setTitle)
 
@@ -137,21 +134,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
         super.onDestroy()
     }
 
-    fun setLanguage(language: String) {
-        localizationDelegate.setLanguage(this, language)
-    }
-
-    fun setLanguage(language: String, country: String) {
-        localizationDelegate.setLanguage(this, language, country)
-    }
-
-    fun setLanguage(locale: Locale) {
-        localizationDelegate.setLanguage(this, locale)
-    }
-
-    fun getCurrentLanguage(): Locale {
-        return localizationDelegate.getLanguage(this)
-    }
+    fun setLanguage(locale: Locale) = localizationDelegate.setLanguage(this, locale)
 
     override fun onBeforeLocaleChanged() {}
 

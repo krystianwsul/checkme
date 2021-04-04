@@ -86,7 +86,7 @@ object AndroidDomainUpdater : DomainUpdater() {
         }
 
         private fun dispatchItems(domainFactory: DomainFactory, items: List<Item>) {
-            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems: " + items.joinToString(", ") { it.name })
+            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems begin: " + items.joinToString(", ") { it.name })
 
             DomainThreadChecker.instance.requireDomainThread()
 
@@ -97,18 +97,20 @@ object AndroidDomainUpdater : DomainUpdater() {
             check(!domainFactory.isSaved.value)
 
             val params = Params.merge(items.map {
-                MyCrashlytics.log("AndroidDomainUpdater getParams " + it.name)
+                MyCrashlytics.log("AndroidDomainUpdater.dispatchItems getParams " + it.name)
                 it.getParams(domainFactory, now)
             })
 
             domainFactory.updateNotifications(params, now)
 
             items.forEach {
-                MyCrashlytics.log("AndroidDomainUpdater dispatchResult " + it.name)
+                MyCrashlytics.log("AndroidDomainUpdater.dispatchItems dispatchResult " + it.name)
                 it.dispatchResult()
             }
 
             domainFactory.saveAndNotifyCloud(params)
+
+            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end")
         }
 
         private interface Item {

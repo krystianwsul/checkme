@@ -50,9 +50,7 @@ fun DomainUpdater.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
         customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
         current: Boolean,
-): Completable = CompletableDomainUpdate.create { now ->
-    MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
-
+): Completable = CompletableDomainUpdate.create("setCustomTimesCurrent") { now ->
     check(customTimeIds.isNotEmpty())
 
     val endExactTimeStamp = now.takeUnless { current }

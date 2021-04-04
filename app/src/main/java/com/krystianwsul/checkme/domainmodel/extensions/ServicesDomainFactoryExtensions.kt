@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -20,9 +19,7 @@ import io.reactivex.rxjava3.core.Completable
 import java.util.*
 
 fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completable =
-        CompletableDomainUpdate.create { now ->
-            MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
-
+        CompletableDomainUpdate.create("setInstanceAddHourService") { now ->
             val instance = getInstance(instanceKey)
             Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
@@ -46,9 +43,7 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
         }.perform(this)
 
 fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): Completable =
-        CompletableDomainUpdate.create { now ->
-            MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
-
+        CompletableDomainUpdate.create("setInstanceNotificationDone") { now ->
             val instance = getInstance(instanceKey)
             Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
 
@@ -63,9 +58,7 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
         }.perform(this)
 
 fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): Completable =
-        CompletableDomainUpdate.create {
-            MyCrashlytics.log("DomainFactory.setInstancesNotified")
-
+        CompletableDomainUpdate.create("setInstancesNotified") {
             check(instanceKeys.isNotEmpty())
 
             instanceKeys.forEach(::setInstanceNotified)
@@ -76,9 +69,7 @@ fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): 
 fun DomainUpdater.setTaskImageUploadedService(
         taskKey: TaskKey,
         imageUuid: String,
-): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
-
+): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
     val task = getTaskIfPresent(taskKey)
     if (task?.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) {
         DomainUpdater.Params()

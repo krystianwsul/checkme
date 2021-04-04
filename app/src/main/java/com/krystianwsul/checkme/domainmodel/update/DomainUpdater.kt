@@ -24,18 +24,7 @@ abstract class DomainUpdater {
         }
     }
 
-    protected abstract fun <T : Any> performDomainUpdate(
-            trigger: Boolean,
-            action: (DomainFactory, ExactTimeStamp.Local) -> Result<T>,
-    ): Single<T>
-
-    fun <T : Any> updateDomainSingle(singleDomainUpdate: SingleDomainUpdate<T>): Single<T> =
-            performDomainUpdate(true, singleDomainUpdate.action)
-
-    fun updateDomainCompletable(completableDomainUpdate: CompletableDomainUpdate, trigger: Boolean = true) =
-            performDomainUpdate(trigger) { domainFactory, now ->
-                Result(Unit, completableDomainUpdate.action(domainFactory, now))
-            }.ignoreElement()!!
+    abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean = true): Single<T>
 
     data class Result<T : Any>(val data: T, val params: Params) {
 

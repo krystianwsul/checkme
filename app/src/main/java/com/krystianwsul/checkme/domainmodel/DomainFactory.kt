@@ -158,6 +158,7 @@ class DomainFactory(
     private fun updateIsSaved() {
         val oldSaved = isSaved.value!!
         val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
+        MyCrashlytics.log("DomainFactory.updateIsSaved $oldSaved -> $newSaved")
         isSaved.accept(newSaved)
 
         if (newSaved || oldSaved) {
@@ -298,8 +299,8 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
-        getDomainUpdater(this).updateDomainCompletable(
-                CompletableDomainUpdate.create {
+        getDomainUpdater(this).performDomainUpdate(
+                CompletableDomainUpdate.create("tryNotifyListeners") {
                     DomainUpdater.Params(
                             notifyParams,
                             SaveParams(NotificationType.All, runType == RunType.REMOTE),

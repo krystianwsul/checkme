@@ -48,9 +48,7 @@ fun DomainUpdater.createProject(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         friends: Set<UserKey>,
-): Single<ProjectKey.Shared> = SingleDomainUpdate.create { now ->
-    MyCrashlytics.log("DomainFactory.createProject")
-
+): Single<ProjectKey.Shared> = SingleDomainUpdate.create("createProject") { now ->
     check(name.isNotEmpty())
 
     val recordOf = friends.toMutableSet()
@@ -86,9 +84,7 @@ fun DomainUpdater.updateProject(
         name: String,
         addedFriends: Set<UserKey>,
         removedFriends: Set<UserKey>,
-): Completable = CompletableDomainUpdate.create {
-    MyCrashlytics.log("DomainFactory.updateProject")
-
+): Completable = CompletableDomainUpdate.create("updateProject") {
     check(name.isNotEmpty())
 
     val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject

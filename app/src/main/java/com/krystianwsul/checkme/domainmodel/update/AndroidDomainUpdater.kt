@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.update
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
@@ -58,11 +59,15 @@ object AndroidDomainUpdater : DomainUpdater() {
         }
 
         fun <T : Any> add(trigger: Boolean, domainUpdate: DomainUpdate<T>): Single<T> {
+            MyCrashlytics.log("AndroidDomainUpdater.add ${domainUpdate.name}")
+
             val subject = SingleSubject.create<T>()
 
             val item = object : Item {
 
                 private lateinit var result: Result<T>
+
+                override val name = domainUpdate.name
 
                 override fun getParams(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Params {
                     result = domainUpdate.doAction(domainFactory, now)
@@ -81,6 +86,8 @@ object AndroidDomainUpdater : DomainUpdater() {
         }
 
         private fun dispatchItems(domainFactory: DomainFactory, items: List<Item>) {
+            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems: " + items.joinToString(", ") { it.name })
+
             DomainThreadChecker.instance.requireDomainThread()
 
             check(items.isNotEmpty())
@@ -89,16 +96,24 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             check(!domainFactory.isSaved.value)
 
-            val params = Params.merge(items.map { it.getParams(domainFactory, now) })
+            val params = Params.merge(items.map {
+                MyCrashlytics.log("AndroidDomainUpdater getParams " + it.name)
+                it.getParams(domainFactory, now)
+            })
 
             domainFactory.updateNotifications(params, now)
 
-            items.forEach { it.dispatchResult() }
+            items.forEach {
+                MyCrashlytics.log("AndroidDomainUpdater dispatchResult " + it.name)
+                it.dispatchResult()
+            }
 
             domainFactory.saveAndNotifyCloud(params)
         }
 
         private interface Item {
+
+            val name: String
 
             fun getParams(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Params
             fun dispatchResult()

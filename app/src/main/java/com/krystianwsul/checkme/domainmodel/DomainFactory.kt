@@ -153,6 +153,7 @@ class DomainFactory(
     private fun updateIsSaved() {
         val oldSaved = isSaved.value!!
         val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
+        MyCrashlytics.log("DomainFactory.updateIsSaved $oldSaved -> $newSaved")
         isSaved.accept(newSaved)
 
         if (newSaved || oldSaved) {
@@ -302,8 +303,6 @@ class DomainFactory(
                 },
                 false,
         )
-
-        updateIsSaved()
     }
 
     private enum class RunType {

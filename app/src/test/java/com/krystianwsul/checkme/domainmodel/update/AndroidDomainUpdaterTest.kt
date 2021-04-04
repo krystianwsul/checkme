@@ -61,6 +61,8 @@ class AndroidDomainUpdaterTest {
                 true,
                 object : DomainUpdate<String> {
 
+                    override val name = "test"
+
                     override fun doAction(
                             domainFactory: DomainFactory,
                             now: ExactTimeStamp.Local,

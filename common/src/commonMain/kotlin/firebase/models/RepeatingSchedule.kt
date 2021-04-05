@@ -25,6 +25,26 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     override val oldestVisible
         get() = oldestVisibleDate?.let { OldestVisible.RepeatingNonNull(it) } ?: OldestVisible.RepeatingNull
 
+    private val intrinsicStartExactTimeStamp by lazy {
+        listOfNotNull(
+                startExactTimeStampOffset,
+                repeatingScheduleRecord.from?.let {
+                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+                },
+        ).maxOrNull()!!
+    }
+
+    private val intrinsicEndExactTimeStamp by lazy {
+        listOfNotNull(
+                endExactTimeStampOffset,
+                repeatingScheduleRecord.until
+                        ?.let { DateTime(it, HourMinute(0, 0)) }
+                        ?.toDateTimeSoy()
+                        ?.plus(1.days)
+                        ?.let(ExactTimeStamp::Local),
+        ).minOrNull()
+    }
+
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval<T>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
@@ -33,30 +53,18 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
             checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
         val startExactTimeStamp = listOfNotNull(
-                startExactTimeStampOffset,
-                repeatingScheduleRecord.from?.let {
-                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
-                },
+                intrinsicStartExactTimeStamp,
                 givenStartExactTimeStamp,
                 oldestVisibleDate?.takeIf { checkOldestVisible }?.let {
                     ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
                 },
-                scheduleInterval.startExactTimeStampOffset
+                scheduleInterval.startExactTimeStampOffset,
         ).maxOrNull()!!
-
-        val intrinsicEndExactTimeStamp = listOfNotNull(
-                endExactTimeStampOffset,
-                repeatingScheduleRecord.until
-                        ?.let { DateTime(it, HourMinute(0, 0)) }
-                        ?.toDateTimeSoy()
-                        ?.plus(1.days)
-                        ?.let { ExactTimeStamp.Local(it).toOffset() },
-                scheduleInterval.endExactTimeStampOffset
-        ).minOrNull()
 
         val endExactTimeStamp = listOfNotNull(
                 intrinsicEndExactTimeStamp,
-                givenEndExactTimeStamp
+                givenEndExactTimeStamp,
+                scheduleInterval.endExactTimeStampOffset,
         ).minOrNull()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()

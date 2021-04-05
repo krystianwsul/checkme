@@ -35,31 +35,13 @@ sealed class Type<T : ProjectType> {
     }
 
     data class Schedule<T : ProjectType>(
-            private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>
+            private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>,
     ) : Type<T>() {
 
         override val taskParentEntries get() = schedules
 
-        fun getScheduleIntervals(interval: Interval<T>): List<ScheduleInterval<T>> {
-            val minStartExactTimeStamp = schedules.map { it.startExactTimeStampOffset }.minOrNull()!!
-            check(minStartExactTimeStamp == interval.startExactTimeStampOffset)
-
-            val endExactTimeStamps = schedules.map { it.endExactTimeStampOffset }
-            if (endExactTimeStamps.all { it != null }) {
-                val intervalEndExactTimeStamp = interval.endExactTimeStampOffset
-                checkNotNull(intervalEndExactTimeStamp)
-
-                val maxEndExactTimeStamp = endExactTimeStamps.requireNoNulls().maxOrNull()!!
-                check(maxEndExactTimeStamp >= intervalEndExactTimeStamp)
-            }
-
-            return schedules.map {
-                ScheduleInterval(
-                        interval.startExactTimeStampOffset,
-                        interval.endExactTimeStampOffset,
-                        it
-                )
-            }
+        fun getScheduleIntervals(interval: Interval<T>) = schedules.map {
+            ScheduleInterval(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
         }
     }
 

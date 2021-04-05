@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.util.Log
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -108,6 +109,9 @@ class DomainFactoryRule : TestRule {
         mockBase64()
 
         ErrorLogger.instance = mockk(relaxed = true)
+
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } returns 0
     }
 
     private fun before() {

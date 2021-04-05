@@ -288,7 +288,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
-            val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset(), null, now)
+            val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
                     .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
                     .firstOrNull()
 

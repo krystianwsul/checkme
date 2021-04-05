@@ -4,10 +4,10 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.invalidatableLazy
 import com.soywiz.klock.days
+import com.soywiz.klock.plus
 
 abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
@@ -69,53 +69,33 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
-        val nullableSequence: Sequence<DateTime?>
-        if (startExactTimeStamp.date == endExactTimeStamp?.date) {
-            nullableSequence = sequenceOf(getDateTimeInDate(
-                    startExactTimeStamp.date,
-                    startExactTimeStamp.hourMilli,
-                    endExactTimeStamp.hourMilli,
-            ))
-        } else {
-            fun Date.toDateTimeSoy() = DateTimeSoy(year, month, day)
-            fun DateTimeSoy.toDate() = Date(yearInt, month1, dayOfMonth)
+        fun DateSoy.toDate() = Date(year, month1, day)
 
-            val loopStartCalendar2 = startExactTimeStamp.date.toDateTimeSoy()
-            var loopCurrentCalendar = loopStartCalendar2
+        val startSoyDate = startExactTimeStamp.date.toDateSoy()
+        var currentSoyDate = startSoyDate
 
-            val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeSoy()
+        val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
 
-            nullableSequence = generateSequence {
-                val dateTime = when {
-                    loopEndCalendar?.let { it < loopCurrentCalendar } == true -> { // after last
-                        return@generateSequence null
-                    }
-                    loopStartCalendar2 == loopCurrentCalendar -> { // first
-                        getDateTimeInDate(
-                                startExactTimeStamp.date,
-                                startExactTimeStamp.hourMilli,
-                                null,
-                        )
-                    }
-                    loopEndCalendar?.let { it == loopCurrentCalendar } == true -> { // last
-                        getDateTimeInDate(
-                                endExactTimeStamp.date,
-                                null,
-                                endExactTimeStamp.hourMilli,
-                        )
-                    }
-                    else -> { // intermediate
-                        getDateTimeInDate(loopCurrentCalendar.toDate(), null, null)
-                    }
+        // ridiculous optimizations
+        return generateSequence {
+            var endHourMilli: HourMilli? = null
+            if (endSoyDate != null) {
+                val comparison = currentSoyDate.compareTo(endSoyDate)
+                if (comparison > 0) { // passed the end
+                    return@generateSequence null
+                } else if (comparison == 0) { // last day
+                    endHourMilli = endExactTimeStamp.hourMilli
                 }
+            }
 
-                loopCurrentCalendar += 1.days
+            // first day
+            val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
 
-                NullableWrapper(dateTime)
-            }.map { it.value }
-        }
+            val date = currentSoyDate.toDate()
+            currentSoyDate += 1.days
 
-        return nullableSequence.filterNotNull()
+            getDateTimeInDate(date, startHourMilli, endHourMilli) ?: Unit
+        }.filterIsInstance<DateTime>()
     }
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {

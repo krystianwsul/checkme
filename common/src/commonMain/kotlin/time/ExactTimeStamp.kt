@@ -46,11 +46,6 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         override fun toString() = "$date $hourMilli"
 
-        override fun compareTo(other: ExactTimeStamp) = when (other) {
-            is Local -> long.compareTo(other.long)
-            is Offset -> Offset.compare(toOffset(other), other)
-        }
-
         private val offsetExactTimeStamp by lazy { Offset.fromOffset(long, null) }
 
         fun toOffset(offset: Double? = null) = offset?.let { Offset.fromOffset(long, offset) } ?: offsetExactTimeStamp
@@ -62,24 +57,15 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
         override fun details() = "Local(long = $long, offset = $offset)" + ", " + toString()
     }
 
-    data class Offset(
-            override val long: Long,
-            override val offset: Double,
-    ) : ExactTimeStamp() {
+    data class Offset(override val long: Long, override val offset: Double) : ExactTimeStamp() {
 
         companion object {
 
             fun fromOffset(long: Long, offset: Double?): Offset {
-                val dateTimeSoy = DateTimeSoy.fromUnix(long)
+                val finalOffset = offset ?: Local(long).offset
 
-                val timezoneOffset = offset?.let { TimezoneOffset(it) } ?: dateTimeSoy.localOffset
-
-                val dateTimeTz = DateTimeTz.utc(dateTimeSoy, timezoneOffset)
-
-                return Offset(dateTimeTz)
+                return Offset(long, finalOffset)
             }
-
-            fun compare(a: Offset, b: Offset) = compareValuesBy(a, b, { it.date }, { it.hourMilli })
         }
 
         override val date get() = Date(toDateTimeTz())
@@ -94,15 +80,6 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         override fun toString() = "$date $hourMilli"
 
-        override fun compareTo(other: ExactTimeStamp): Int {
-            val otherOffset = when (other) {
-                is Local -> other.toOffset(this)
-                is Offset -> other
-            }
-
-            return compare(this, otherOffset)
-        }
-
         override fun details() = "Offset(long = $long, offset = $offset), " + toString()
     }
 
@@ -115,4 +92,6 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
     fun toDateTimeTz() = toDateTimeSoy().toOffset(TimezoneOffset(offset))
 
     abstract fun details(): String
+
+    override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
 }

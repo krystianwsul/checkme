@@ -14,33 +14,15 @@ object IntervalBuilder {
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
-        val schedules = task.schedules.toMutableList()
-        val parentTaskHierarchies = task.parentTaskHierarchies.toMutableList()
-        val noScheduleOrParents = task.noScheduleOrParents.toMutableList()
+        val allTypeBuilders = listOf(
+                task.schedules.map { TypeBuilder.Schedule(it) },
+                task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
+                task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
+        ).flatten()
+                .sortedBy { it.startExactTimeStampOffset }
+                .toMutableList()
 
-        fun getNextTypeBuilder(): TypeBuilder<T>? {
-            val nextSchedule = schedules.minByOrNull { it.startExactTimeStampOffset }?.let { TypeBuilder.Schedule(it) }
-
-            val nextParentTaskHierarchy = parentTaskHierarchies.minByOrNull {
-                it.startExactTimeStampOffset
-            }?.let { TypeBuilder.Parent(it) }
-
-            val nextNoScheduleOrParent = noScheduleOrParents.minByOrNull {
-                it.startExactTimeStampOffset
-            }?.let { TypeBuilder.NoScheduleOrParent(it) }
-
-            return listOfNotNull(
-                    nextNoScheduleOrParent,
-                    nextParentTaskHierarchy,
-                    nextSchedule
-            ).minByOrNull { it.startExactTimeStampOffset }?.also {
-                when (it) {
-                    is TypeBuilder.NoScheduleOrParent -> noScheduleOrParents.remove(it.noScheduleOrParent)
-                    is TypeBuilder.Parent -> parentTaskHierarchies.remove(it.parentTaskHierarchy)
-                    is TypeBuilder.Schedule -> schedules.remove(it.schedule)
-                }
-            }
-        }
+        fun getNextTypeBuilder() = allTypeBuilders.takeIf { it.isNotEmpty() }?.removeAt(0)
 
         val taskStartExactTimeStampOffset = task.startExactTimeStampOffset
         val taskEndExactTimeStampOffset = task.endExactTimeStampOffset

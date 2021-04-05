@@ -70,42 +70,49 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
         val nullableSequence: Sequence<DateTime?>
-
         if (startExactTimeStamp.date == endExactTimeStamp?.date) {
             nullableSequence = sequenceOf(getDateTimeInDate(
                     startExactTimeStamp.date,
                     startExactTimeStamp.hourMilli,
-                    endExactTimeStamp.hourMilli
+                    endExactTimeStamp.hourMilli,
             ))
         } else {
-            val startSequence = sequenceOf(getDateTimeInDate(
-                    startExactTimeStamp.date,
-                    startExactTimeStamp.hourMilli,
-                    null
-            ))
-
             fun Date.toDateTimeSoy() = DateTimeSoy(year, month, day)
             fun DateTimeSoy.toDate() = Date(yearInt, month1, dayOfMonth)
 
-            var loopStartCalendar = startExactTimeStamp.date.toDateTimeSoy() + 1.days
+            val loopStartCalendar2 = startExactTimeStamp.date.toDateTimeSoy()
+            var loopCurrentCalendar = loopStartCalendar2
 
             val loopEndCalendar = endExactTimeStamp?.date?.toDateTimeSoy()
 
-            val calendarSequence = generateSequence {
-                if (loopEndCalendar?.let { it <= loopStartCalendar } == true)
-                    return@generateSequence null
+            nullableSequence = generateSequence {
+                val dateTime = when {
+                    loopEndCalendar?.let { it < loopCurrentCalendar } == true -> { // after last
+                        return@generateSequence null
+                    }
+                    loopStartCalendar2 == loopCurrentCalendar -> { // first
+                        getDateTimeInDate(
+                                startExactTimeStamp.date,
+                                startExactTimeStamp.hourMilli,
+                                null,
+                        )
+                    }
+                    loopEndCalendar?.let { it == loopCurrentCalendar } == true -> { // last
+                        getDateTimeInDate(
+                                endExactTimeStamp.date,
+                                null,
+                                endExactTimeStamp.hourMilli,
+                        )
+                    }
+                    else -> { // intermediate
+                        getDateTimeInDate(loopCurrentCalendar.toDate(), null, null)
+                    }
+                }
 
-                val date = loopStartCalendar.toDate()
-                loopStartCalendar += 1.days
+                loopCurrentCalendar += 1.days
 
-                NullableWrapper(getDateTimeInDate(date, null, null))
-            }
-
-            val endSequence = listOfNotNull(
-                    endExactTimeStamp?.let { getDateTimeInDate(it.date, null, it.hourMilli) }
-            ).asSequence()
-
-            nullableSequence = startSequence + calendarSequence.map { it.value } + endSequence
+                NullableWrapper(dateTime)
+            }.map { it.value }
         }
 
         return nullableSequence.filterNotNull()

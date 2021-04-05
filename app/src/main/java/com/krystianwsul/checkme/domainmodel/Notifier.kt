@@ -288,17 +288,19 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
-            val nextAlarm = domainFactory.getRootInstances(now.toOffset(), null, now)
+            val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset(), null, now)
                     .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
-                    .first()
-                    .instanceDateTime
-                    .timeStamp
+                    .firstOrNull()
 
-            check(nextAlarm.toLocalExactTimeStamp() > now)
+            if (nextAlarmInstance != null) {
+                val nextAlarmTimeStamp = nextAlarmInstance.instanceDateTime.timeStamp
 
-            notificationWrapper.updateAlarm(nextAlarm)
+                check(nextAlarmTimeStamp.toLocalExactTimeStamp() > now)
 
-            Preferences.tickLog.logLineHour("next tick: $nextAlarm")
+                notificationWrapper.updateAlarm(nextAlarmTimeStamp)
+
+                Preferences.tickLog.logLineHour("next tick: $nextAlarmTimeStamp")
+            }
         }
 
         if (params.tick) {

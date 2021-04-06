@@ -43,7 +43,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     .filter {
                         it.done == null
                                 && !it.getNotified(domainFactory.localFactory)
-                                && it.instanceDateTime.toLocalExactTimeStamp() <= now
                                 && it.isAssignedToMe(now, domainFactory.myUserFactory.user)
                     }
                     .associateBy { it.instanceKey }
@@ -351,12 +350,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             throw Exception("Irrelevant.setIrrelevant write prevented")
         }
 
-        val instances = domainFactory.projectsFactory.projects
-                .values
-                .map {
-                    it.existingInstances + it.getRootInstances(null, now.toOffset().plusOne(), now)
-                }
-                .flatten()
+        val instances = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now).toList()
 
         val irrelevantInstanceShownRecords = domainFactory.localFactory
                 .instanceShownRecords

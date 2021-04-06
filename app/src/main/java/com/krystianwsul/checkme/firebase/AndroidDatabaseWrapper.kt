@@ -34,8 +34,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
-    const val ENABLE_PAPER = true // todo paper
-    const val ENABLE_INSTANCES = false // todo paper
+    private const val ENABLE_PAPER = true
 
     val root: String by lazy {
         MyApplication.instance
@@ -158,7 +157,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
         return RemoteConfig.observable
-                .map { it.queryRemoteInstances || ENABLE_INSTANCES }
+                .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
                 .switchMap {
                     if (it)

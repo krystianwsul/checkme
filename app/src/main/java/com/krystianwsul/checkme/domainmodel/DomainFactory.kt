@@ -93,8 +93,6 @@ class DomainFactory(
     val notifier = Notifier(this, NotificationWrapper.instance)
 
     init {
-        MyApplication.logDelay("DomainFactory.init")
-
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
         val now = ExactTimeStamp.Local.now

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -176,10 +175,6 @@ fun DomainFactory.getGroupListData(
             null,
             null
     )
-
-    if (position == 0) { // todo paper
-        MyApplication.logDelay("groupList")
-    }
 
     return DayViewModel.DayData(dataWrapper)
 }

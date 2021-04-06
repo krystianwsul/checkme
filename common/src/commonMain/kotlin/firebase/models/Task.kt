@@ -335,6 +335,8 @@ class Task<T : ProjectType>(
         }
     }
 
+    fun mayHaveRootInstances() = _schedules.isNotEmpty() || _existingInstances.isNotEmpty()
+
     fun getInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,

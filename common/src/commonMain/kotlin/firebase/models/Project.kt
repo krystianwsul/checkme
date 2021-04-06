@@ -409,6 +409,7 @@ abstract class Project<T : ProjectType>(
         InterruptionChecker.throwIfInterrupted()
 
         val filteredTasks = tasks.asSequence()
+                .filter { it.mayHaveRootInstances() }
                 .filterQuery(searchData?.searchCriteria?.query).map { it.first }
                 .toList()
 

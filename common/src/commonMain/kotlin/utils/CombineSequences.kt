@@ -6,7 +6,7 @@ fun <T : Any> combineSequencesGrouping(
         sequences: List<Sequence<T>>,
         selector: (List<T?>) -> List<Int>,
 ): Sequence<List<T>> {
-    val sequenceHolders = sequences.map(::SequenceHolder)
+    val sequenceHolders by lazy { sequences.map(::SequenceHolder) }
 
     return generateSequence {
         val nextValues = sequenceHolders.map { it.nextValue }
@@ -27,7 +27,7 @@ fun <T : Any> combineSequencesGrouping(
 }
 
 fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>) -> Int): Sequence<T> {
-    val sequenceHolders = sequences.map(::SequenceHolder)
+    val sequenceHolders by lazy { sequences.map(::SequenceHolder) }
 
     return generateSequence {
         val nextValues = sequenceHolders.map { it.nextValue }

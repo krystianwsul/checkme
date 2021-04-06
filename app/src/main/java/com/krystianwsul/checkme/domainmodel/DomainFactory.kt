@@ -157,7 +157,6 @@ class DomainFactory(
         val oldSaved = isSaved.value!!
         val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
         MyCrashlytics.log("DomainFactory.updateIsSaved $oldSaved -> $newSaved")
-        isSaved.accept(newSaved)
 
         if (newSaved || oldSaved) {
             val savedList =
@@ -167,6 +166,8 @@ class DomainFactory(
                     .joinToString("\n")
             Preferences.saveLog.logLineHour(entry, true)
         }
+
+        isSaved.accept(newSaved)
     }
 
     data class SaveParams(val notificationType: NotificationType, val forceDomainChanged: Boolean = false) {

@@ -246,7 +246,8 @@ class ProjectsFactory(
         val sharedProjectJson = SharedProjectJson(
                 name,
                 now.long,
-                users = userJsons.mapKeys { it.key.key }.toMutableMap()
+                now.offset,
+                users = userJsons.mapKeys { it.key.key }.toMutableMap(),
         )
 
         val sharedProjectRecord =

@@ -38,10 +38,7 @@ class AndroidPrivateProjectManager(
                         ?: PrivateProjectRecord(
                                 databaseWrapper,
                                 userInfo,
-                                PrivateProjectJson(
-                                        startTime = now.long,
-                                        startTimeOffset = now.offset
-                                )
+                                PrivateProjectJson(startTime = now.long, startTimeOffset = now.offset),
                         )
             } else {
                 snapshot.toRecord()

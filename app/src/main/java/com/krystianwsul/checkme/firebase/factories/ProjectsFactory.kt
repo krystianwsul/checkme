@@ -60,16 +60,7 @@ class ProjectsFactory(
 
     val privateProject get() = privateProjectFactory.project as PrivateProject
 
-    private val factorySharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
-
-    private val addedSharedProjects = mutableMapOf<ProjectKey<ProjectType.Shared>, SharedProject>()
-
-    val sharedProjects: Map<ProjectKey<ProjectType.Shared>, SharedProject>
-        get() {
-            check(factorySharedProjects.keys.intersect(addedSharedProjects.keys).isEmpty())
-
-            return factorySharedProjects + addedSharedProjects
-        }
+    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
 
     val changeTypes: Observable<ChangeType>
 
@@ -94,20 +85,6 @@ class ProjectsFactory(
 
                     sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
-                    /**
-                     * todo isSaved this will later happen only on remote changes
-                     */
-                    if (addedSharedProjects.containsKey(projectKey)) {
-                        check(changeType == ChangeType.LOCAL)
-
-                        val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
-                        val newRecord = sharedProjectFactory.project.projectRecord
-
-                        check(oldRecord == newRecord)
-
-                        addedSharedProjects.remove(projectKey)
-                    }
-
                     changeType
                 }
 
@@ -116,7 +93,6 @@ class ProjectsFactory(
                     check(changeType == ChangeType.REMOTE)
 
                     removeProjectEvent.projectKeys.forEach {
-                        check(!addedSharedProjects.containsKey(it))
                         check(sharedProjectFactories.containsKey(it))
 
                         sharedProjectFactoriesProperty.remove(it)
@@ -254,7 +230,7 @@ class ProjectsFactory(
         )
 
         val sharedProjectRecord =
-                sharedProjectsLoader.projectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
+                sharedProjectsLoader.addProject(JsonWrapper(sharedProjectJson))
 
         val sharedProject = SharedProject(
                 sharedProjectRecord,
@@ -262,9 +238,6 @@ class ProjectsFactory(
         ) { AndroidRootInstanceManager(it, null, factoryProvider) }
 
         check(!projects.containsKey(sharedProject.projectKey))
-
-        // todo isSaved manually add new listeners to loader
-        addedSharedProjects[sharedProject.projectKey] = sharedProject
 
         return sharedProject
     }

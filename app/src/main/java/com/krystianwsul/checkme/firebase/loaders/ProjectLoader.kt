@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.Parsable
@@ -63,11 +64,19 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             private val domainDisposable: CompositeDisposable,
             projectProvider: ProjectProvider,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
+            initialProjectRecord: ProjectRecord<T>?,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }
+
+        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }.let {
+            if (initialProjectRecord != null) {
+                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+            } else {
+                it
+            }
+        }
 
         private data class ProjectData<T : ProjectType>(
                 val changeWrapper: ChangeWrapper<out ProjectRecord<T>>,

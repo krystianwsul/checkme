@@ -9,7 +9,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
-import io.reactivex.rxjava3.core.Observable
 
 class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbInfo) {
 
@@ -23,12 +22,8 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
 
     val isSaved get() = myUserManager.isSaved
 
-    val sharedProjectKeysObservable = Observable.merge(
-            userRelay.map { ChangeType.REMOTE },
-            userRelay.switchMap { it.projectChanges.asRxJava3Observable() }.map { ChangeType.LOCAL }
-    )
-            .map { ChangeWrapper(it, user.projectIds) }
-            .distinctUntilChanged()!!
+    val sharedProjectKeysObservable =
+            userRelay.map { ChangeWrapper(ChangeType.REMOTE, it.projectIds) }.distinctUntilChanged()!!
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges

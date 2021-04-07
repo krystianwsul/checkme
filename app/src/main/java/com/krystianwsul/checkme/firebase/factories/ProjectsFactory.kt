@@ -94,6 +94,9 @@ class ProjectsFactory(
 
                     sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
+                    /**
+                     * todo isSaved this will later happen only on remote changes
+                     */
                     if (addedSharedProjects.containsKey(projectKey)) {
                         check(changeType == ChangeType.LOCAL)
 
@@ -260,6 +263,7 @@ class ProjectsFactory(
 
         check(!projects.containsKey(sharedProject.projectKey))
 
+        // todo isSaved manually add new listeners to loader
         addedSharedProjects[sharedProject.projectKey] = sharedProject
 
         return sharedProject

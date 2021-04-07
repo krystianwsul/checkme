@@ -233,6 +233,8 @@ class DomainFactory(
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
 
+        // check(changeType == ChangeType.REMOTE) todo issaved
+
         DomainThreadChecker.instance.requireDomainThread()
 
         updateShortcuts(now)

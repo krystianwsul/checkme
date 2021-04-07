@@ -275,13 +275,6 @@ class ProjectsFactory(
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) =
             projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
 
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*>? {
-        val taskKey = instanceKey.taskKey
-
-        return getProjectForce(taskKey).getTaskIfPresent(taskKey.taskId)
-                ?.getExistingInstanceIfPresent(instanceKey.scheduleKey)
-    }
-
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
 
     private fun getProjectIfPresent(taskKey: TaskKey) = projects[taskKey.projectKey]

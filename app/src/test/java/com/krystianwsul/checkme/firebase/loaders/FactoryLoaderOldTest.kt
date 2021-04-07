@@ -140,7 +140,7 @@ class FactoryLoaderOldTest {
         override fun getUserObservable(userKey: UserKey) = userObservable
 
         override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                Observable.just<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>(EmptyTestIndicatorSnapshot())!!
+                Observable.just<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>(IndicatorSnapshot("", null))!!
 
         override fun getNewId(path: String) = "id"
 

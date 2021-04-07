@@ -65,7 +65,7 @@ class ProjectLoaderNewTest {
                 map: Map<String, Map<String, InstanceJson>>
         ) {
             val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(ValueTestIndicatorSnapshot(map, key))
+            rootInstanceObservables.getValue(key).accept(IndicatorSnapshot(key, map))
         }
     }
 

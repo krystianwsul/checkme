@@ -44,7 +44,7 @@ class ProjectLoaderOldTest {
         override val database = object : ProjectProvider.Database() {
 
             override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                    Observable.just<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>(EmptyTestIndicatorSnapshot())
+                    Observable.just<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>(IndicatorSnapshot("", null))
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")

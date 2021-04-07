@@ -103,9 +103,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
             cache(
-                    { IndicatorSnapshot.Impl(it, object : GenericTypeIndicator<T>() {}) },
+                    { IndicatorSnapshot(it, object : GenericTypeIndicator<T>() {}) },
                     Converter(
-                            { IndicatorSnapshot.Wrapper(path.back.asString(), it.value) },
+                            { IndicatorSnapshot(path.back.asString(), it.value) },
                             { NullableWrapper(it.getValue()) },
                     ),
                     { readNullable(it) },
@@ -161,17 +161,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                     if (it)
                         rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges()
                     else
-                        Observable.just(EmptyIndicatorSnapshot())
+                        Observable.just(IndicatorSnapshot("", null))
                 }
-    }
-
-    private class EmptyIndicatorSnapshot<T : Any> : IndicatorSnapshot<T> {
-
-        override val key get() = throw UnsupportedOperationException()
-
-        override fun exists() = false
-
-        override fun getValue(): T? = null
     }
 
     sealed class LoadState<T : Any> {

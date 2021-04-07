@@ -190,7 +190,7 @@ class ProjectFactoryNewTest {
                                     projectLoader.projectRecord,
                                     PrivateTaskJson("task")
                             ),
-                            EmptyTestIndicatorSnapshot(),
+                            IndicatorSnapshot("", null),
                     )
             ))
         }

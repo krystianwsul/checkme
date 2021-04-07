@@ -48,14 +48,16 @@ object AndroidDomainUpdater : DomainUpdater() {
             return Observables.combineLatest(triggerRelay, isReady)
                     .map { (_, domainFactoryWrapper) -> domainFactoryWrapper }
                     .filterNotNull()
-                    .map {
-                        it to synchronized(items) {
-                            items.toMutableList().also { items -= it }
+                    .observeOnDomain()
+                    .subscribe { domainFactory ->
+                        if (!domainFactory.isSaved.value) {
+                            val currItems = synchronized(items) {
+                                items.toMutableList().also { items -= it }
+                            }
+
+                            if (currItems.isNotEmpty()) dispatchItems(domainFactory, currItems)
                         }
                     }
-                    .filter { (_, items) -> items.isNotEmpty() }
-                    .observeOnDomain()
-                    .subscribe { (domainFactory, items) -> dispatchItems(domainFactory, items) }
         }
 
         fun <T : Any> add(trigger: Boolean, domainUpdate: DomainUpdate<T>): Single<T> {

@@ -147,7 +147,7 @@ class FactoryLoaderNewTest {
         fun acceptUser(
                 userKey: UserKey,
                 userWrapper: UserWrapper,
-        ) = userObservables.getValue(userKey).accept(ValueTestTypedSnapshot(userWrapper, userKey.key))
+        ) = userObservables.getValue(userKey).accept(TypedSnapshot(userKey.key, userWrapper))
 
         private fun getOrInitUserObservable(userKey: UserKey): PublishRelay<TypedSnapshot<UserWrapper>> {
             if (!userObservables.containsKey(userKey))
@@ -156,7 +156,7 @@ class FactoryLoaderNewTest {
         }
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-                privateProjectObservable.map<TypedSnapshot<PrivateProjectJson>> { ValueTestTypedSnapshot(it, key.key) }!!
+                privateProjectObservable.map<TypedSnapshot<PrivateProjectJson>> { TypedSnapshot(key.key, it) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
@@ -267,7 +267,7 @@ class FactoryLoaderNewTest {
     private fun initializeEmpty() {
         testFactoryProvider.database
                 .myUserObservable
-                .accept(ValueTestTypedSnapshot(UserWrapper(), userInfo.key.key))
+                .accept(TypedSnapshot(userInfo.key.key, UserWrapper()))
 
         assertNull(domainFactoryRelay.value)
 
@@ -290,9 +290,9 @@ class FactoryLoaderNewTest {
         testFactoryProvider.database
                 .myUserObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -304,9 +304,9 @@ class FactoryLoaderNewTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
-                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
+                .accept(TypedSnapshot(
                         sharedProjectKey,
+                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
                 ))
 
         assertNotNull(domainFactoryRelay.value)
@@ -319,9 +319,9 @@ class FactoryLoaderNewTest {
         testFactoryProvider.database
                 .myUserObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -337,12 +337,12 @@ class FactoryLoaderNewTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
+                .accept(TypedSnapshot(
+                        sharedProjectKey,
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
-                        sharedProjectKey,
                 ))
 
         assertNull(domainFactoryRelay.value)
@@ -362,9 +362,9 @@ class FactoryLoaderNewTest {
         testFactoryProvider.database
                 .myUserObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -376,12 +376,12 @@ class FactoryLoaderNewTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
+                .accept(TypedSnapshot(
+                        sharedProjectKey,
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
-                        sharedProjectKey,
                 ))
 
         assertNull(domainFactoryRelay.value)
@@ -416,9 +416,9 @@ class FactoryLoaderNewTest {
     fun testFriendsInitial() {
         testFactoryProvider.database
                 .myUserObservable
-                .accept(ValueTestTypedSnapshot(
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                .accept(TypedSnapshot(
                         userInfo.key.key,
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
                 ))
 
         testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
@@ -444,9 +444,9 @@ class FactoryLoaderNewTest {
     fun testFriendsChangeAfterDomainInit() {
         testFactoryProvider.database
                 .myUserObservable
-                .accept(ValueTestTypedSnapshot(
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                .accept(TypedSnapshot(
                         userInfo.key.key,
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
                 ))
 
         testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
@@ -478,9 +478,9 @@ class FactoryLoaderNewTest {
     fun testFriendsChangeAfterFriendsFactoryInit() {
         testFactoryProvider.database
                 .myUserObservable
-                .accept(ValueTestTypedSnapshot(
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                .accept(TypedSnapshot(
                         userInfo.key.key,
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
                 ))
 
         testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
@@ -510,9 +510,9 @@ class FactoryLoaderNewTest {
     fun testFriendsChangeBeforeFriendsFactoryInit() {
         testFactoryProvider.database
                 .myUserObservable
-                .accept(ValueTestTypedSnapshot(
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
+                .accept(TypedSnapshot(
                         userInfo.key.key,
+                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
                 ))
 
         testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())

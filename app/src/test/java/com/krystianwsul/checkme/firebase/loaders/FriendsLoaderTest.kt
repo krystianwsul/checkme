@@ -29,7 +29,7 @@ class FriendsLoaderTest {
             fun acceptUser(
                     userKey: UserKey,
                     userWrapper: UserWrapper,
-            ) = userObservables.getValue(userKey).accept(ValueTestTypedSnapshot(userWrapper, userKey.key))
+            ) = userObservables.getValue(userKey).accept(TypedSnapshot(userKey.key, userWrapper))
 
             override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
                 TODO("Not yet implemented")

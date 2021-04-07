@@ -64,7 +64,7 @@ class ProjectLoaderOldTest {
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
-            projectSnapshotRelay.accept(ValueTestTypedSnapshot(privateProjectJson, projectKey.key))
+            projectSnapshotRelay.accept(TypedSnapshot(projectKey.key, privateProjectJson))
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>

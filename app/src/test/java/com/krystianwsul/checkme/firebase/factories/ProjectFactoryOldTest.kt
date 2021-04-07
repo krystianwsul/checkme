@@ -101,9 +101,9 @@ class ProjectFactoryOldTest {
                 projectKey: ProjectKey.Shared,
                 projectJson: SharedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(ValueTestTypedSnapshot(
-                    JsonWrapper(projectJson),
+            sharedProjectObservables.getValue(projectKey).accept(TypedSnapshot(
                     projectKey.key,
+                    JsonWrapper(projectJson),
             ))
         }
     }

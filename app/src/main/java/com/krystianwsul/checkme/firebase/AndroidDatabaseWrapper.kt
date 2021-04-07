@@ -92,9 +92,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
             cache(
-                    { TypedSnapshot.Impl(it, T::class) },
+                    { TypedSnapshot(it, T::class) },
                     Converter(
-                            { TypedSnapshot.Wrapper(path.back.asString(), it.value) },
+                            { TypedSnapshot(path.back.asString(), it.value) },
                             { NullableWrapper(it.getValue()) },
                     ),
                     { readNullable(it) },

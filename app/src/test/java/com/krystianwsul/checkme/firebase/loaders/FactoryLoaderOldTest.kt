@@ -133,7 +133,7 @@ class FactoryLoaderOldTest {
         val userObservable = PublishRelay.create<TypedSnapshot<UserWrapper>>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-                privateProjectObservable.map<TypedSnapshot<PrivateProjectJson>> { ValueTestTypedSnapshot(it, key.key) }!!
+                privateProjectObservable.map<TypedSnapshot<PrivateProjectJson>> { TypedSnapshot(key.key, it) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
@@ -229,7 +229,7 @@ class FactoryLoaderOldTest {
     private fun initializeEmpty() {
         testFactoryProvider.database
                 .userObservable
-                .accept(ValueTestTypedSnapshot(UserWrapper(), userInfo.key.key))
+                .accept(TypedSnapshot(userInfo.key.key, UserWrapper()))
 
         assertNull(domainFactoryRelay.value)
 
@@ -252,9 +252,9 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -266,9 +266,9 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
-                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
+                .accept(TypedSnapshot(
                         sharedProjectKey,
+                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
                 ))
 
         assertNotNull(domainFactoryRelay.value)
@@ -281,9 +281,9 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -299,12 +299,12 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
+                .accept(TypedSnapshot(
+                        sharedProjectKey,
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
-                        sharedProjectKey,
                 ))
 
         assertNotNull(domainFactoryRelay.value)
@@ -315,9 +315,9 @@ class FactoryLoaderOldTest {
         testFactoryProvider.database
                 .userObservable
                 .accept(
-                        ValueTestTypedSnapshot(
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
+                        TypedSnapshot(
                                 userInfo.key.key,
+                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                         )
                 )
 
@@ -331,12 +331,12 @@ class FactoryLoaderOldTest {
 
         testFactoryProvider.database
                 .sharedProjectObservable
-                .accept(ValueTestTypedSnapshot(
+                .accept(TypedSnapshot(
+                        sharedProjectKey,
                         JsonWrapper(SharedProjectJson(
                                 users = mutableMapOf(userInfo.key.key to UserJson()),
                                 tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )),
-                        sharedProjectKey,
                 ))
 
         assertNotNull(domainFactoryRelay.value)

@@ -89,7 +89,7 @@ class ProjectsFactory(
                             addProjectEvent.initialProjectEvent,
                             factoryProvider,
                             domainDisposable,
-                            deviceDbInfo
+                            deviceDbInfo,
                     )
 
                     sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory

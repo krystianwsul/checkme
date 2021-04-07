@@ -58,7 +58,7 @@ interface SharedProjectsLoader {
                                     )
                             )
                         },
-                        { it.databaseRx.disposable.dispose() }
+                        { it.databaseRx.disposable.dispose() },
                 )
                 .map { ProjectData(it.original.changeType, it.original.data, it.newMap) }
                 .replayImmediate()
@@ -89,7 +89,7 @@ interface SharedProjectsLoader {
                             it.original.userChangeType,
                             it.newMap,
                             it.addedEntries,
-                            it.removedEntries.keys
+                            it.removedEntries.keys,
                     )
                 }
                 .replayImmediate()

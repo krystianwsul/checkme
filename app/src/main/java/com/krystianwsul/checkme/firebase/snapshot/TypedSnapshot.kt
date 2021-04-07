@@ -1,11 +1,12 @@
 package com.krystianwsul.checkme.firebase.snapshot
 
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.common.firebase.json.Parsable
 import kotlin.reflect.KClass
 
-interface TypedSnapshot<T : Any> : ValueSnapshot<T> {
+interface TypedSnapshot<T : Parsable> : ValueSnapshot<T> {
 
-    class Impl<T : Any>(private val dataSnapshot: DataSnapshot, kClass: KClass<T>) : TypedSnapshot<T> {
+    class Impl<T : Parsable>(private val dataSnapshot: DataSnapshot, kClass: KClass<T>) : TypedSnapshot<T> {
 
         private val value = dataSnapshot.getValue(kClass.java)
 
@@ -16,7 +17,7 @@ interface TypedSnapshot<T : Any> : ValueSnapshot<T> {
         override fun getValue() = value
     }
 
-    class Wrapper<T : Any>(override val key: String, private val value: T?) : TypedSnapshot<T> {
+    class Wrapper<T : Parsable>(override val key: String, private val value: T?) : TypedSnapshot<T> {
 
         override fun exists() = value != null
 

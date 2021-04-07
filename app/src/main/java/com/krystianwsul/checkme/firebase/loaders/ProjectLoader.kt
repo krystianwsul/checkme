@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -17,7 +18,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
+interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
     val projectManager: ProjectProvider.ProjectManager<T, U>
 
@@ -33,7 +34,7 @@ interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
 
-    class InitialProjectEvent<T : ProjectType, U : Any>(
+    class InitialProjectEvent<T : ProjectType, U : Parsable>(
             // U: Project JSON type
             val projectManager: ProjectProvider.ProjectManager<T, U>,
             val projectRecord: ProjectRecord<T>,
@@ -57,7 +58,7 @@ interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
             val instanceSnapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
     )
 
-    class Impl<T : ProjectType, U : Any>(
+    class Impl<T : ProjectType, U : Parsable>(
             // U: Project JSON type
             snapshotObservable: Observable<TypedSnapshot<U>>,
             private val domainDisposable: CompositeDisposable,

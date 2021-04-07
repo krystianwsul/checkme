@@ -11,4 +11,4 @@ data class UserWrapper @JvmOverloads constructor(
         val userData: UserJson = UserJson(),
         val projects: MutableMap<String, Boolean> = mutableMapOf(),
         val friends: MutableMap<String, Boolean> = mutableMapOf(),
-) : Parcelable
+) : Parcelable, Parsable

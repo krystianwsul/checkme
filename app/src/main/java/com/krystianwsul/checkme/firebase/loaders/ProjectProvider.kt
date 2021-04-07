@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.managers.RecordManager
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -22,7 +23,7 @@ interface ProjectProvider {
     }
 
     // U: Project JSON type
-    interface ProjectManager<T : ProjectType, U : Any> :
+    interface ProjectManager<T : ProjectType, U : Parsable> :
             RecordManager,
             SnapshotRecordManager<ProjectRecord<T>, TypedSnapshot<U>>
 }

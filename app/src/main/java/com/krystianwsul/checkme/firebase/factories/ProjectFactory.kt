@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -18,7 +19,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 @Suppress("LeakingThis")
-abstract class ProjectFactory<T : ProjectType, U : Any>(
+abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 // U: Project JSON type
         projectLoader: ProjectLoader<T, U>,
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,

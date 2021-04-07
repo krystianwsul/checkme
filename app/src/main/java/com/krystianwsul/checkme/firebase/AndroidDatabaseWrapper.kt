@@ -19,10 +19,7 @@ import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.pacoworks.rxpaper2.RxPaperBook
@@ -93,7 +90,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         }
     }
 
-    private inline fun <reified T : Any> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
+    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
             cache(
                     { TypedSnapshot.Impl(it, T::class) },
                     Converter(
@@ -121,6 +118,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
             writeNullable: (path: Path, T?) -> Completable,
     ): Observable<U> {
+
         val firebaseObservable = dataChanges().toV3()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())

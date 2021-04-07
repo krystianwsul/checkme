@@ -10,7 +10,7 @@ sealed class DatabaseState(viewModel: FindFriendViewModel) :
 
     override val nextStateSingle = viewModel.usersObservable
             .firstOrError()
-            .map { Loaded(viewModel, it.children.map { it.getValue(UserWrapper::class.java)!! }) }!!
+            .map { Loaded(viewModel, it.getValue()!!.values.toList()) }!!
 
     abstract override fun toSerializableState(): SerializableState?
 

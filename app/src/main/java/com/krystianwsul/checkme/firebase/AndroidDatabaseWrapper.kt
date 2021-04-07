@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
@@ -52,13 +51,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
             .orderByKey()
-            .snapshotChanges()
-
-    private fun Query.snapshotChanges() = dataChanges().toV3()
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.computation())
-            .map<UntypedSnapshot>(UntypedSnapshot::Impl)
-            .observeOnDomain()
+            .indicatorSnapshotChanges<Map<String, UserWrapper>>()
 
     private fun Path.toKey() = toString().replace('/', '-')
 

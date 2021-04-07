@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.snapshot.UntypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.utils.getCurrentValue
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -15,8 +15,10 @@ import org.junit.Test
 class DatabaseRxTest {
 
     private lateinit var compositeDisposable: CompositeDisposable
-    private lateinit var databaseObservable: PublishRelay<UntypedSnapshot>
-    private lateinit var databaseRx: DatabaseRx<UntypedSnapshot>
+    private lateinit var databaseObservable: PublishRelay<TypedSnapshot<*>>
+    private lateinit var databaseRx: DatabaseRx<TypedSnapshot<*>>
+
+    private fun newSnapshot() = TypedSnapshot("", null)
 
     @Before
     fun before() {
@@ -37,20 +39,20 @@ class DatabaseRxTest {
                 .subscribe(replayRelay)
                 .addTo(compositeDisposable)
 
-        databaseObservable.accept(TestUntypedSnapshot())
-        databaseObservable.accept(TestUntypedSnapshot())
-        databaseObservable.accept(TestUntypedSnapshot())
+        databaseObservable.accept(newSnapshot())
+        databaseObservable.accept(newSnapshot())
+        databaseObservable.accept(newSnapshot())
 
         assertEquals(replayRelay.values.size, 3)
     }
 
     @Test
     fun testFirst() {
-        val testSnapshot = TestUntypedSnapshot()
+        val testSnapshot = newSnapshot()
 
         databaseObservable.accept(testSnapshot)
-        databaseObservable.accept(TestUntypedSnapshot())
-        databaseObservable.accept(TestUntypedSnapshot())
+        databaseObservable.accept(newSnapshot())
+        databaseObservable.accept(newSnapshot())
 
         assertEquals(databaseRx.first.getCurrentValue(), testSnapshot)
     }
@@ -62,10 +64,10 @@ class DatabaseRxTest {
                 .subscribe(replayRelay)
                 .addTo(compositeDisposable)
 
-        val testSnapshot2 = TestUntypedSnapshot()
-        val testSnapshot3 = TestUntypedSnapshot()
+        val testSnapshot2 = newSnapshot()
+        val testSnapshot3 = newSnapshot()
 
-        databaseObservable.accept(TestUntypedSnapshot())
+        databaseObservable.accept(newSnapshot())
         databaseObservable.accept(testSnapshot2)
         databaseObservable.accept(testSnapshot3)
 
@@ -77,15 +79,15 @@ class DatabaseRxTest {
 
     @Test
     fun testLatest() {
-        val testSnapshot1 = TestUntypedSnapshot()
+        val testSnapshot1 = newSnapshot()
         databaseObservable.accept(testSnapshot1)
         assertEquals(databaseRx.latest().getCurrentValue(), testSnapshot1)
 
-        val testSnapshot2 = TestUntypedSnapshot()
+        val testSnapshot2 = newSnapshot()
         databaseObservable.accept(testSnapshot2)
         assertEquals(databaseRx.latest().getCurrentValue(), testSnapshot2)
 
-        val testSnapshot3 = TestUntypedSnapshot()
+        val testSnapshot3 = newSnapshot()
         databaseObservable.accept(testSnapshot3)
         assertEquals(databaseRx.latest().getCurrentValue(), testSnapshot3)
     }

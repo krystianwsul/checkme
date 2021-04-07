@@ -14,7 +14,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -63,8 +62,6 @@ interface FactoryProvider {
     interface Domain {
 
         fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local)
-
-        fun updateUserRecord(snapshot: Snapshot<UserWrapper>)
 
         @CheckResult
         fun clearUserInfo(): Completable

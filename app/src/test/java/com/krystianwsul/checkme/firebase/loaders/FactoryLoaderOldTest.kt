@@ -80,15 +80,10 @@ class FactoryLoaderOldTest {
         override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
             TODO("Not yet implemented")
         }
-
-        override fun updateUserRecord(snapshot: Snapshot<UserWrapper>) {
-            TODO("Not yet implemented")
-        }
     }
 
     private class ExpectTestDomain : TestDomain() {
 
-        private var userListener: ((dataSnapshot: Snapshot<UserWrapper>) -> Unit)? = null
         private var changeListenerWrapper: ListenerWrapper<ChangeType>? = null
 
         class ListenerWrapper<T> {
@@ -113,14 +108,6 @@ class FactoryLoaderOldTest {
             assertNull(changeListenerWrapper!!.result)
 
             changeListenerWrapper!!.result = changeType
-        }
-
-        override fun updateUserRecord(snapshot: Snapshot<UserWrapper>) {
-            assertNotNull(userListener)
-
-            userListener!!(snapshot)
-
-            userListener = null
         }
     }
 

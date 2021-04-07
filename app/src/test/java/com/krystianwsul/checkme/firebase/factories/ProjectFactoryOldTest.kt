@@ -4,8 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -47,27 +46,27 @@ class ProjectFactoryOldTest {
 
     class TestFactoryProvider : FactoryProvider {
 
-        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<TypedSnapshot<JsonWrapper>>>()
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
         override val projectProvider = ProjectLoaderOldTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<TypedSnapshot<PrivateProjectJson>> {
+            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<TypedSnapshot<JsonWrapper>> {
+            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
                 if (!sharedProjectObservables.containsKey(projectKey))
                     sharedProjectObservables[projectKey] = PublishRelay.create()
                 return sharedProjectObservables.getValue(projectKey)
             }
 
-            override fun getUserObservable(userKey: UserKey): Observable<TypedSnapshot<UserWrapper>> {
+            override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {
                 TODO("Not yet implemented")
             }
 
@@ -101,7 +100,7 @@ class ProjectFactoryOldTest {
                 projectKey: ProjectKey.Shared,
                 projectJson: SharedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(TypedSnapshot(
+            sharedProjectObservables.getValue(projectKey).accept(Snapshot(
                     projectKey.key,
                     JsonWrapper(projectJson),
             ))
@@ -190,7 +189,7 @@ class ProjectFactoryOldTest {
                                     projectLoader.projectRecord,
                                     PrivateTaskJson("task")
                             ),
-                            IndicatorSnapshot("", null),
+                            Snapshot("", null),
                     )
             ))
         }

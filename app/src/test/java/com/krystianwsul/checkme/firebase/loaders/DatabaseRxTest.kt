@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.ReplayRelay
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.getCurrentValue
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -14,10 +14,10 @@ import org.junit.Test
 class DatabaseRxTest {
 
     private lateinit var compositeDisposable: CompositeDisposable
-    private lateinit var databaseObservable: PublishRelay<TypedSnapshot<*>>
-    private lateinit var databaseRx: DatabaseRx<TypedSnapshot<*>>
+    private lateinit var databaseObservable: PublishRelay<Snapshot<*>>
+    private lateinit var databaseRx: DatabaseRx<Snapshot<*>>
 
-    private fun newSnapshot() = TypedSnapshot("", null)
+    private fun newSnapshot() = Snapshot("", null)
 
     @Before
     fun before() {
@@ -33,7 +33,7 @@ class DatabaseRxTest {
 
     @Test
     fun testObservable() {
-        val replayRelay = ReplayRelay.create<TypedSnapshot<*>>()
+        val replayRelay = ReplayRelay.create<Snapshot<*>>()
         databaseRx.observable
                 .subscribe(replayRelay)
                 .addTo(compositeDisposable)
@@ -58,7 +58,7 @@ class DatabaseRxTest {
 
     @Test
     fun testChanges() {
-        val replayRelay = ReplayRelay.create<TypedSnapshot<*>>()
+        val replayRelay = ReplayRelay.create<Snapshot<*>>()
         databaseRx.changes
                 .subscribe(replayRelay)
                 .addTo(compositeDisposable)

@@ -11,9 +11,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -83,23 +81,23 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         }
     }
 
-    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<TypedSnapshot<T>> =
+    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<Snapshot<T>> =
             cache(
-                    { TypedSnapshot(it, T::class) },
+                    { Snapshot.fromParsable(it, T::class) },
                     Converter(
-                            { TypedSnapshot(path.back.asString(), it.value) },
-                            { NullableWrapper(it.getValue()) },
+                            { Snapshot(path.back.asString(), it.value) },
+                            { NullableWrapper(it.value) },
                     ),
                     { readNullable(it) },
                     { path, value -> writeNullable(path, value) },
             )
 
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<IndicatorSnapshot<T>> =
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<Snapshot<T>> =
             cache(
-                    { IndicatorSnapshot(it, object : GenericTypeIndicator<T>() {}) },
+                    { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
                     Converter(
-                            { IndicatorSnapshot(path.back.asString(), it.value) },
-                            { NullableWrapper(it.getValue()) },
+                            { Snapshot(path.back.asString(), it.value) },
+                            { NullableWrapper(it.value) },
                     ),
                     { readNullable(it) },
                     { path, value -> writeNullable(path, value) },
@@ -116,7 +114,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .map { firebaseToSnapshot(it) }
-                .doOnNext { writeNullable(path, it.getValue()).subscribe() }
+                .doOnNext { writeNullable(path, it.value).subscribe() }
 
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain()
     }
@@ -146,7 +144,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun rootInstanceQuery(taskFirebaseKey: String) =
             rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
 
-    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
+    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
         return RemoteConfig.observable
                 .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
@@ -154,7 +152,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                     if (it)
                         rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges()
                     else
-                        Observable.just(IndicatorSnapshot("", null))
+                        Observable.just(Snapshot("", null))
                 }
     }
 

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -43,7 +43,7 @@ interface SharedProjectsLoader {
 
         private data class ProjectEntry(
                 val userChangeType: ChangeType,
-                val databaseRx: DatabaseRx<TypedSnapshot<JsonWrapper>>,
+                val databaseRx: DatabaseRx<Snapshot<JsonWrapper>>,
         )
 
         private val projectDatabaseRxObservable = projectKeysObservable.distinctUntilChanged()

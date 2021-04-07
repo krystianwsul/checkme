@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -30,11 +30,11 @@ class SharedProjectsLoaderOldTest {
 
     private class TestSharedProjectsProvider : SharedProjectsProvider {
 
-        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<TypedSnapshot<JsonWrapper>>>()
+        private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
         override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
 
-        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<TypedSnapshot<JsonWrapper>> {
+        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
             if (!sharedProjectObservables.containsKey(projectKey))
                 sharedProjectObservables[projectKey] = PublishRelay.create()
             return sharedProjectObservables.getValue(projectKey)
@@ -44,7 +44,7 @@ class SharedProjectsLoaderOldTest {
                 projectKey: ProjectKey.Shared,
                 projectJson: SharedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(TypedSnapshot(
+            sharedProjectObservables.getValue(projectKey).accept(Snapshot(
                     projectKey.key,
                     JsonWrapper(projectJson),
             ))

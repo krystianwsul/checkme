@@ -1,8 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -24,18 +23,18 @@ class FriendsLoaderTest {
 
         class TestDatabase : FriendsProvider.Database() {
 
-            private val userObservables = mutableMapOf<UserKey, PublishRelay<TypedSnapshot<UserWrapper>>>()
+            private val userObservables = mutableMapOf<UserKey, PublishRelay<Snapshot<UserWrapper>>>()
 
             fun acceptUser(
                     userKey: UserKey,
                     userWrapper: UserWrapper,
-            ) = userObservables.getValue(userKey).accept(TypedSnapshot(userKey.key, userWrapper))
+            ) = userObservables.getValue(userKey).accept(Snapshot(userKey.key, userWrapper))
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getUserObservable(userKey: UserKey): Observable<TypedSnapshot<UserWrapper>> {
+            override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {
                 if (!userObservables.containsKey(userKey))
                     userObservables[userKey] = PublishRelay.create()
                 return userObservables.getValue(userKey)

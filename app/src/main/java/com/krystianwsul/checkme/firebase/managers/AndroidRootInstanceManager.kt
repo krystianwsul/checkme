@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.RootInstanceRecord
@@ -11,15 +11,15 @@ import com.krystianwsul.common.utils.ProjectType
 
 class AndroidRootInstanceManager<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?,
+        snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>?,
         factoryProvider: FactoryProvider,
 ) :
         RootInstanceManager<T>(taskRecord, snapshot.toSnapshotInfos(), factoryProvider.database),
-        SnapshotRecordManager<MutableMap<InstanceKey, RootInstanceRecord<T>>, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>> {
+        SnapshotRecordManager<MutableMap<InstanceKey, RootInstanceRecord<T>>, Snapshot<Map<String, Map<String, InstanceJson>>>> {
 
     companion object {
 
-        private fun IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?.toSnapshotInfos() = this?.getValue()
+        private fun Snapshot<Map<String, Map<String, InstanceJson>>>?.toSnapshotInfos() = this?.value
                 ?.map { (dateString, timeMap) ->
                     timeMap.map { (timeString, instanceJson) -> SnapshotInfo(dateString, timeString, instanceJson) }
                 }
@@ -27,7 +27,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
                 ?: listOf()
     }
 
-    override fun set(snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>) = set {
+    override fun set(snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>) = set {
         snapshot.toSnapshotInfos()
                 .map { it.toRecord() }
                 .associateBy { it.instanceKey }

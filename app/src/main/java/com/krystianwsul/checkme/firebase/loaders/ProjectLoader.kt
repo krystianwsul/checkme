@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
@@ -38,29 +37,29 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             // U: Project JSON type
             val projectManager: ProjectProvider.ProjectManager<T, U>,
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            val instanceSnapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     )
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>,
+            val instanceSnapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>,
+            val instanceSnapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            val instanceSnapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     )
 
     class Impl<T : ProjectType, U : Parsable>(
             // U: Project JSON type
-            snapshotObservable: Observable<TypedSnapshot<U>>,
+            snapshotObservable: Observable<Snapshot<U>>,
             private val domainDisposable: CompositeDisposable,
             projectProvider: ProjectProvider,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
@@ -77,7 +76,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         private data class InstanceData<T : ProjectType>(
                 val taskRecord: TaskRecord<T>,
-                val databaseRx: DatabaseRx<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+                val databaseRx: DatabaseRx<Snapshot<Map<String, Map<String, InstanceJson>>>>,
         )
 
         private val rootInstanceDatabaseRx = projectRecordObservable.map {

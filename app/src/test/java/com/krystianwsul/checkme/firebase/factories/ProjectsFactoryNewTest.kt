@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -49,7 +49,7 @@ class ProjectsFactoryNewTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var privateProjectRelay: PublishRelay<TypedSnapshot<PrivateProjectJson>>
+    private lateinit var privateProjectRelay: PublishRelay<Snapshot<PrivateProjectJson>>
     private lateinit var factoryProvider: ProjectFactoryNewTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
     private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private, PrivateProjectJson>
@@ -137,12 +137,12 @@ class ProjectsFactoryNewTest {
     @Test
     fun testProjectEventsBeforeProjectsFactory() {
         val privateProjectKey = ProjectKey.Private("key")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         val name = "privateProject"
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson(name)))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name)))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
 
@@ -162,7 +162,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testLocalPrivateProjectChange() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -171,7 +171,7 @@ class ProjectsFactoryNewTest {
         val name1 = "name1"
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson(name1)))
+            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name1)))
         }
         assertEquals(projectsFactory.privateProject.name, name1)
 
@@ -181,7 +181,7 @@ class ProjectsFactoryNewTest {
         projectsFactory.save()
 
         emissionChecker.checkLocal {
-            privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson(name2)))
+            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name2)))
         }
         assertEquals(projectsFactory.privateProject.name, name2)
     }
@@ -191,13 +191,13 @@ class ProjectsFactoryNewTest {
         val privateProjectKey = ProjectKey.Private("key")
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(TypedSnapshot(
+        privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
@@ -213,13 +213,13 @@ class ProjectsFactoryNewTest {
         val privateProjectKey = ProjectKey.Private("key")
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(TypedSnapshot(
+        privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
@@ -250,7 +250,7 @@ class ProjectsFactoryNewTest {
     fun testLocalPrivateAddTaskNoInstances() {
         val privateProjectKey = ProjectKey.Private("key")
 
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -264,7 +264,7 @@ class ProjectsFactoryNewTest {
 
         projectsFactory.save()
 
-        privateProjectRelay.accept(TypedSnapshot(
+        privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
         ))
@@ -280,7 +280,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
-                TypedSnapshot(
+                Snapshot(
                         privateProjectKey.key,
                         PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
         )
@@ -294,7 +294,7 @@ class ProjectsFactoryNewTest {
         val name = "task1"
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(TypedSnapshot(
+            privateProjectRelay.accept(Snapshot(
                     privateProjectKey.key,
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
             ))
@@ -308,7 +308,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
-                TypedSnapshot(
+                Snapshot(
                         privateProjectKey.key,
                         PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
         )
@@ -328,7 +328,7 @@ class ProjectsFactoryNewTest {
         projectsFactory.save()
 
         emissionChecker.checkLocal {
-            privateProjectRelay.accept(TypedSnapshot(
+            privateProjectRelay.accept(Snapshot(
                     privateProjectKey.key,
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
             ))
@@ -342,7 +342,7 @@ class ProjectsFactoryNewTest {
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
-                TypedSnapshot(
+                Snapshot(
                         privateProjectKey.key,
                         PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
         )
@@ -354,7 +354,7 @@ class ProjectsFactoryNewTest {
         initProjectsFactory()
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
         }
         assertTrue(projectsFactory.privateProject.tasks.isEmpty())
     }
@@ -365,7 +365,7 @@ class ProjectsFactoryNewTest {
 
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(TypedSnapshot(
+        privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
@@ -413,7 +413,7 @@ class ProjectsFactoryNewTest {
 
         val taskKey = TaskKey(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(TypedSnapshot(
+        privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
@@ -448,7 +448,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testAddSharedProjectRemote() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -470,7 +470,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testAddSharedProjectLocal() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -502,7 +502,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testRemoveSharedProjectRemote() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
@@ -523,7 +523,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testChangeSharedProjectRemote() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
@@ -560,7 +560,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testChangeSharedProjectRemoteAddRemoteTaskWithInstances() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
@@ -646,7 +646,7 @@ class ProjectsFactoryNewTest {
     @Test
     fun testChangeSharedProjectLocal() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(TypedSnapshot(privateProjectKey.key, PrivateProjectJson()))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))

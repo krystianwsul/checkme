@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -41,7 +41,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
-            snapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            snapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     ) = projectRecord.taskRecords
         .values
         .associate {
@@ -55,7 +55,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 
     protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
-            snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?,
+            snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>?,
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
@@ -72,7 +72,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         rootInstanceManagers = initialProjectEvent.run { newRootInstanceManagers(projectRecord, instanceSnapshots) }
         project = newProject(initialProjectEvent.projectRecord)
 
-        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>): ChangeType {
+        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>): ChangeType {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 
             return if (rootInstanceManager != null) {

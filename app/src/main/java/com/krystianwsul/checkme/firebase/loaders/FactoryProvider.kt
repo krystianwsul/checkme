@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -64,7 +64,7 @@ interface FactoryProvider {
 
         fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local)
 
-        fun updateUserRecord(snapshot: TypedSnapshot<UserWrapper>)
+        fun updateUserRecord(snapshot: Snapshot<UserWrapper>)
 
         @CheckResult
         fun clearUserInfo(): Completable
@@ -77,9 +77,9 @@ interface FactoryProvider {
 
     abstract class Database : FriendsProvider.Database() {
 
-        abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<TypedSnapshot<PrivateProjectJson>>
+        abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
 
-        abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<TypedSnapshot<JsonWrapper>>
+        abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }
 
     class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {

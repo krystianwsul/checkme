@@ -17,8 +17,8 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
             remoteMyUserRecord.photoUrl = value
         }
 
-    val projectChanges = PublishSubject<Unit>()// todo isSaved this won't be needed anymore
-    val friendChanges = PublishSubject<Unit>()
+    val projectChanges = PublishSubject<Unit>() // todo isSaved this won't be needed anymore
+    val friendChanges = PublishSubject<Unit>() // todo isSaved this won't be needed anymore
 
     override fun addProject(projectKey: ProjectKey.Shared) {
         super.addProject(projectKey)

@@ -231,7 +231,7 @@ class DomainFactory(
     override fun clearUserInfo() = getDomainUpdater(this).updateNotifications(Notifier.Params(clear = true))
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
-        MyCrashlytics.log("DomainFactory.onChangeTypeEvent")
+        MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType")
 
         // check(changeType == ChangeType.REMOTE) todo issaved
 

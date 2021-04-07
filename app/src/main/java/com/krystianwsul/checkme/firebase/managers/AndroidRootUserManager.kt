@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
@@ -12,7 +12,7 @@ class AndroidRootUserManager(children: Iterable<TypedSnapshot<UserWrapper>>) : R
 
     companion object {
 
-        private fun ValueSnapshot<*>.toKey() = UserKey(key)
+        private fun Snapshot<*>.toKey() = UserKey(key)
 
         private fun TypedSnapshot<UserWrapper>.toRecord() = RootUserRecord(false, getValue()!!, toKey())
     }

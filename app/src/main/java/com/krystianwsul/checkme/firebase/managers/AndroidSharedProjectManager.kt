@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -14,7 +14,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
         SharedProjectManager(),
         ProjectProvider.ProjectManager<ProjectType.Shared, JsonWrapper> {
 
-    private fun ValueSnapshot<*>.toKey() = ProjectKey.Shared(key)
+    private fun Snapshot<*>.toKey() = ProjectKey.Shared(key)
 
     private fun TypedSnapshot<JsonWrapper>.toRecord() = SharedProjectRecord(
             databaseWrapper,

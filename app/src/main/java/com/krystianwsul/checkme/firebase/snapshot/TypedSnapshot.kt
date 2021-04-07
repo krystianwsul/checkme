@@ -4,7 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.common.firebase.json.Parsable
 import kotlin.reflect.KClass
 
-class TypedSnapshot<T : Parsable>(override val key: String, private val value: T?) : ValueSnapshot<T> {
+class TypedSnapshot<T : Parsable>(override val key: String, private val value: T?) : Snapshot<T> {
 
     constructor(dataSnapshot: DataSnapshot, kClass: KClass<T>) :
             this(dataSnapshot.key!!, dataSnapshot.getValue(kClass.java))

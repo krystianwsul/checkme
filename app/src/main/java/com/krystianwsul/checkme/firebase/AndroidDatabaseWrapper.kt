@@ -12,8 +12,8 @@ import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.ValueSnapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -105,7 +105,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                     { path, value -> writeNullable(path, value) },
             )
 
-    private fun <T : Any, U : ValueSnapshot<T>> Query.cache(
+    private fun <T : Any, U : Snapshot<T>> Query.cache(
             firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
             converter: Converter<NullableWrapper<T>, U>,
             readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,

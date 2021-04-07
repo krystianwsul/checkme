@@ -87,6 +87,7 @@ class ProjectsFactoryOldTest {
                 compositeDisposable,
                 factoryProvider.projectProvider,
                 privateProjectManager,
+                null,
         )
 
         initialProjectEvent = null
@@ -411,16 +412,18 @@ class ProjectsFactoryOldTest {
 
         initProjectsFactory()
 
-        val sharedProject = projectsFactory.createProject(
-                "sharedProject",
-                ExactTimeStamp.Local.now,
-                setOf(),
-                mockk(relaxed = true) {
-                    every { userJson } returns UserJson()
-                },
-                userInfo,
-                mockk(relaxed = true)
-        )
+        val sharedProject = emissionChecker.checkLocal {
+            projectsFactory.createProject(
+                    "sharedProject",
+                    ExactTimeStamp.Local.now,
+                    setOf(),
+                    mockk(relaxed = true) {
+                        every { userJson } returns UserJson()
+                    },
+                    userInfo,
+                    mockk(relaxed = true)
+            )
+        }
         projectsFactory.save()
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))

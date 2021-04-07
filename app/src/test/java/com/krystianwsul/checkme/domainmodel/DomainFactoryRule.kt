@@ -17,6 +17,8 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
@@ -28,6 +30,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -156,11 +159,16 @@ class DomainFactoryRule : TestRule {
             every { update(any(), any()) } returns Unit
         }
 
-        val sharedProjectsLoader = mockk<SharedProjectsLoader>(relaxed = true) {
-            every { projectManager } returns spyk(AndroidSharedProjectManager(databaseWrapper)) {
-                every { save(any()) } returns Unit
-            }
-        }
+        val sharedProjectsLoader = SharedProjectsLoader.Impl(
+                Observable.just(ChangeWrapper(ChangeType.LOCAL, setOf())),
+                spyk(AndroidSharedProjectManager(databaseWrapper)) {
+                    every { save(any()) } returns Unit
+                },
+                compositeDisposable,
+                mockk(relaxed = true) {
+                    every { getSharedProjectObservable(any()) } returns Observable.never()
+                },
+        )
 
         val projectsFactory = ProjectsFactory(
                 mockk(),

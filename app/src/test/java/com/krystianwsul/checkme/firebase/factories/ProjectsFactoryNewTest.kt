@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.checkLocal
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
@@ -26,12 +27,9 @@ import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 @ExperimentalStdlibApi
 class ProjectsFactoryNewTest {
@@ -44,6 +42,9 @@ class ProjectsFactoryNewTest {
             Task.USE_ROOT_INSTANCES = true
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -85,7 +86,8 @@ class ProjectsFactoryNewTest {
                 privateProjectRelay,
                 compositeDisposable,
                 factoryProvider.projectProvider,
-                privateProjectManager
+                privateProjectManager,
+                null,
         )
 
         initialProjectEvent = null
@@ -476,16 +478,18 @@ class ProjectsFactoryNewTest {
 
         initProjectsFactory()
 
-        val sharedProject = projectsFactory.createProject(
-                "sharedProject",
-                ExactTimeStamp.Local.now,
-                setOf(),
-                mockk(relaxed = true) {
-                    every { userJson } returns UserJson()
-                },
-                userInfo,
-                mockk(relaxed = true)
-        )
+        val sharedProject = emissionChecker.checkLocal {
+            projectsFactory.createProject(
+                    "sharedProject",
+                    ExactTimeStamp.Local.now,
+                    setOf(),
+                    mockk(relaxed = true) {
+                        every { userJson } returns UserJson()
+                    },
+                    userInfo,
+                    mockk(relaxed = true)
+            )
+        }
         projectsFactory.save()
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))

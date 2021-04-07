@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
-import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -229,17 +228,9 @@ class ProjectsFactory(
                 users = userJsons.mapKeys { it.key.key }.toMutableMap(),
         )
 
-        val sharedProjectRecord =
-                sharedProjectsLoader.addProject(JsonWrapper(sharedProjectJson))
+        val sharedProjectRecord = sharedProjectsLoader.addProject(JsonWrapper(sharedProjectJson))
 
-        val sharedProject = SharedProject(
-                sharedProjectRecord,
-                mapOf()
-        ) { AndroidRootInstanceManager(it, null, factoryProvider) }
-
-        check(!projects.containsKey(sharedProject.projectKey))
-
-        return sharedProject
+        return sharedProjects.getValue(sharedProjectRecord.projectKey)
     }
 
     fun save(values: MutableMap<String, Any?>) {

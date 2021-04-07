@@ -103,6 +103,7 @@ class ProjectLoaderNewTest {
                 compositeDisposable,
                 projectProvider,
                 projectManager,
+                null,
         )
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)

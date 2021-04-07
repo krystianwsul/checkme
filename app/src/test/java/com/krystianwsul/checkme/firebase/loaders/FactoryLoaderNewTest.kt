@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -90,7 +89,7 @@ class FactoryLoaderNewTest {
 
     private class ExpectTestDomain : TestDomain() {
 
-        private var userListener: ((dataSnapshot: Snapshot) -> Unit)? = null
+        private var userListener: ((dataSnapshot: TypedSnapshot<UserWrapper>) -> Unit)? = null
         private var changeListenerWrapper: ListenerWrapper<ChangeType>? = null
 
         class ListenerWrapper<T> {

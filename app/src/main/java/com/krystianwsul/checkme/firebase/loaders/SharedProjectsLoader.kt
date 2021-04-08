@@ -168,7 +168,7 @@ interface SharedProjectsLoader {
 
             addedProjectDatas[sharedProjectRecord.projectKey] = AddedProjectData(sharedProjectRecord)
 
-            addedProjectDatasRelay.accept(ChangeWrapper(ChangeType.LOCAL, addedProjectDatas))
+            addedProjectDatasRelay.accept(ChangeWrapper(ChangeType.LOCAL, addedProjectDatas)) // todo issaved emit
 
             return sharedProjectRecord
         }

@@ -181,7 +181,7 @@ class DomainFactory(
         }
     }
 
-    fun save(saveParams: SaveParams) {
+    fun save(saveParams: SaveParams, now: ExactTimeStamp.Local) {
         DomainThreadChecker.instance.requireDomainThread()
 
         Preferences.tickLog.logLineHour("DomainFactory.save")
@@ -198,7 +198,12 @@ class DomainFactory(
 
         val changes = localChanges || values.isNotEmpty()
 
-        if (changes || saveParams.forceDomainChanged) domainListenerManager.notify(saveParams.notificationType)
+        if (changes || saveParams.forceDomainChanged) {
+            domainListenerManager.notify(saveParams.notificationType)
+
+            updateShortcuts(now)
+        }
+
         if (changes) updateIsSaved()
     }
 
@@ -233,7 +238,7 @@ class DomainFactory(
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType")
 
-        // check(changeType == ChangeType.REMOTE) todo issaved
+        // check(changeType == ChangeType.REMOTE) // todo issaved emit
 
         DomainThreadChecker.instance.requireDomainThread()
 

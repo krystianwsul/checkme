@@ -72,7 +72,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }.let {
             if (initialProjectRecord != null) {
-                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord)) // todo issaved emit
             } else {
                 it
             }

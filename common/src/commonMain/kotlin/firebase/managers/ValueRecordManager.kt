@@ -40,7 +40,7 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
 
             isSaved = false
 
-            ChangeWrapper(ChangeType.LOCAL, value)
+            ChangeWrapper(ChangeType.LOCAL, value) // todo issaved emit
         } else {
             value = valueCallback()
 

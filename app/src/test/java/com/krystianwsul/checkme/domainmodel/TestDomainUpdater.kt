@@ -15,7 +15,7 @@ class TestDomainUpdater(
         val (data, params) = domainUpdate.doAction(domainFactory, now)
 
         domainFactory.updateNotifications(params, now)
-        domainFactory.saveAndNotifyCloud(params)
+        domainFactory.saveAndNotifyCloud(params, now)
 
         return Single.just(data)
     }

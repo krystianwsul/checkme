@@ -110,7 +110,7 @@ object AndroidDomainUpdater : DomainUpdater() {
                 it.dispatchResult()
             }
 
-            domainFactory.saveAndNotifyCloud(params)
+            domainFactory.saveAndNotifyCloud(params, now)
 
             MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end")
         }

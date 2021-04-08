@@ -28,7 +28,7 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
                 .asRxJava3Observable()
-                .map { ChangeType.LOCAL }
+                .map { ChangeType.LOCAL } // todo issaved emit
                 .startWithItem(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!

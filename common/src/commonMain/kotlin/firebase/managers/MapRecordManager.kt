@@ -51,7 +51,7 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
 
             recordPairs[key] = Pair(pair.first, false)
 
-            ChangeWrapper(ChangeType.LOCAL, pair.first)
+            ChangeWrapper(ChangeType.LOCAL, pair.first) // todo issaved emit
         } else {
             val record = recordCallback() ?: return null
 

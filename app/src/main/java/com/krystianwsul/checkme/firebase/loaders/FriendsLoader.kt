@@ -97,7 +97,7 @@ class FriendsLoader(
 
         addFriendDatas[rootUserRecord.userKey] = AddFriendData(rootUserRecord.key, rootUserRecord.userWrapper)
 
-        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
+        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas)) // todo issaved emit
     }
 
     class InitialFriendsEvent(val snapshots: Iterable<Snapshot<UserWrapper>>)

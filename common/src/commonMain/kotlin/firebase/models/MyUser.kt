@@ -16,7 +16,7 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
             remoteMyUserRecord.photoUrl = value
         }
 
-    val friendChanges = PublishSubject<Unit>() // todo isSaved this won't be needed anymore
+    val friendChanges = PublishSubject<Unit>()
 
     override fun removeFriend(userKey: UserKey) {
         super.removeFriend(userKey)

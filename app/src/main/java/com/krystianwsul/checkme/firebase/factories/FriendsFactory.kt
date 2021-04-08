@@ -105,6 +105,6 @@ class FriendsFactory(
         val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
         friendsLoader.addFriend(rootUserRecord)
 
-        check(_friends.containsKey(rootUserRecord.userKey)) // todo issaved also do for removing
+        check(_friends.containsKey(rootUserRecord.userKey))
     }
 }

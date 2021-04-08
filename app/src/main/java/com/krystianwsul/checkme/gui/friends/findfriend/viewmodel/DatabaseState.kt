@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 sealed class DatabaseState(viewModel: FindFriendViewModel) :
         ModelState<FindFriendViewEvent, FindFriendViewModel> {
 
-    override val nextStateSingle = viewModel.usersObservable
+    override val nextStateSingle = viewModel.usersSubject
             .firstOrError()
             .map { Loaded(viewModel, it.value!!.values.toList()) }!!
 

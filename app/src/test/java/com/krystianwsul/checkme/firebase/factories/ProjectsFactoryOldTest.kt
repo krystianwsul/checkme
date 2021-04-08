@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.firebase.checkLocal
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -186,9 +185,8 @@ class ProjectsFactoryOldTest {
         projectsFactory.privateProject.name = name2
         projectsFactory.save()
 
-        emissionChecker.checkLocal {
-            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name2)))
-        }
+        // doesn't emit ChangeType.LOCAL
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name2)))
         assertEquals(projectsFactory.privateProject.name, name2)
     }
 
@@ -250,12 +248,11 @@ class ProjectsFactoryOldTest {
 
         projectsFactory.save()
 
-        emissionChecker.checkLocal {
-            privateProjectRelay.accept(Snapshot(
-                    privateProjectKey.key,
-                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
-            ))
-        }
+        // doesn't emit ChangeType.LOCAL
+        privateProjectRelay.accept(Snapshot(
+                privateProjectKey.key,
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
+        ))
     }
 
     @Test
@@ -309,12 +306,11 @@ class ProjectsFactoryOldTest {
                 .setName(name, null)
         projectsFactory.save()
 
-        emissionChecker.checkLocal {
-            privateProjectRelay.accept(Snapshot(
-                    privateProjectKey.key,
-                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
-            ))
-        }
+        // doesn't emit ChangeType.LOCAL
+        privateProjectRelay.accept(Snapshot(
+                privateProjectKey.key,
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
+        ))
         assertEquals(projectsFactory.privateProject.tasks.single().name, name)
     }
 
@@ -419,33 +415,31 @@ class ProjectsFactoryOldTest {
         val name = "sharedProject"
         val now = ExactTimeStamp.Local.now
 
-        val sharedProject = emissionChecker.checkLocal {
-            projectsFactory.createProject(
-                    name,
-                    now,
-                    setOf(),
-                    mockk(relaxed = true) {
-                        every { userJson } returns UserJson()
-                    },
-                    userInfo,
-                    mockk(relaxed = true)
-            )
-        }
+        // doesn't emit ChangeType.LOCAL
+        val sharedProject = projectsFactory.createProject(
+                name,
+                now,
+                setOf(),
+                mockk(relaxed = true) {
+                    every { userJson } returns UserJson()
+                },
+                userInfo,
+                mockk(relaxed = true)
+        )
         projectsFactory.save()
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))
 
-        emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(
-                    sharedProject.projectKey,
-                    SharedProjectJson(
-                            name,
-                            now.long,
-                            now.offset,
-                            users = mutableMapOf(userInfo.key.key to newUserJson()),
-                    ),
-            )
-        }
+        // doesn't emit ChangeType.LOCAL
+        factoryProvider.acceptSharedProject(
+                sharedProject.projectKey,
+                SharedProjectJson(
+                        name,
+                        now.long,
+                        now.offset,
+                        users = mutableMapOf(userInfo.key.key to newUserJson()),
+                ),
+        )
     }
 
     @Test
@@ -533,15 +527,14 @@ class ProjectsFactoryOldTest {
 
         projectsFactory.save()
 
-        emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(
-                    sharedProjectKey,
-                    SharedProjectJson(
-                            name = name,
-                            users = mutableMapOf(userInfo.key.key to newUserJson()),
-                    ),
-            )
-        }
+        // doesn't emit ChangeType.LOCAL
+        factoryProvider.acceptSharedProject(
+                sharedProjectKey,
+                SharedProjectJson(
+                        name = name,
+                        users = mutableMapOf(userInfo.key.key to newUserJson()),
+                ),
+        )
         assertEquals(
                 projectsFactory.sharedProjects
                         .values

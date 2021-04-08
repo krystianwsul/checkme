@@ -1,34 +1,59 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FriendsLoader(
         friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
         private val domainDisposable: CompositeDisposable,
-        private val friendsProvider: FriendsProvider
+        private val friendsProvider: FriendsProvider,
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-    private val databaseRx = friendKeysObservable.processChanges(
-            { it.data },
-            { _, userKey ->
+    private data class AddFriendData(val key: String, val userWrapper: UserWrapper)
+
+    private val addFriendDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, AddFriendData?>>>()
+
+    init {
+        friendKeysObservable.map {
+            ChangeWrapper<Map<UserKey, AddFriendData?>>(it.changeType, it.data.associateWith { null })
+        }
+                .subscribe(addFriendDataRelay)
+                .addTo(domainDisposable)
+    }
+
+    private val databaseRx = addFriendDataRelay.processChanges(
+            { it.data.keys },
+            { (_, addFriendDatas), userKey ->
+                val addFriendData = addFriendDatas.getValue(userKey)
+
                 DatabaseRx(
                         domainDisposable,
-                        friendsProvider.database.getUserObservable(userKey),
+                        friendsProvider.database
+                                .getUserObservable(userKey)
+                                .let {
+                                    if (addFriendData != null) {
+                                        it.startWithItem(Snapshot(addFriendData.key, addFriendData.userWrapper))
+                                    } else {
+                                        it
+                                    }
+                                },
                 )
             },
-            { it.disposable.dispose() }
+            { it.disposable.dispose() },
     ).replayImmediate()
 
     val initialFriendsEvent = databaseRx.firstOrError()
@@ -62,6 +87,18 @@ class FriendsLoader(
     val removeFriendEvents = databaseRx.map { RemoveFriendsEvent(it.original.changeType, it.removedEntries.keys) }
             .filter { it.userKeys.isNotEmpty() }
             .replayImmediate()
+
+    fun addFriend(rootUserRecord: RootUserRecord) {
+        val addFriendDatas = addFriendDataRelay.value
+                .data
+                .toMutableMap()
+
+        check(!addFriendDatas.containsKey(rootUserRecord.userKey))
+
+        addFriendDatas[rootUserRecord.userKey] = AddFriendData(rootUserRecord.key, rootUserRecord.userWrapper)
+
+        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
+    }
 
     class InitialFriendsEvent(val snapshots: Iterable<Snapshot<UserWrapper>>)
 

@@ -18,12 +18,6 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
 
     val friendChanges = PublishSubject<Unit>() // todo isSaved this won't be needed anymore
 
-    override fun addFriend(userKey: UserKey) {
-        super.addFriend(userKey)
-
-        friendChanges.onNext(Unit)
-    }
-
     override fun removeFriend(userKey: UserKey) {
         super.removeFriend(userKey)
 

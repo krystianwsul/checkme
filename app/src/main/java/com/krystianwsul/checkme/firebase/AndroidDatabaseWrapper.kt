@@ -116,7 +116,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .map { firebaseToSnapshot(it) }
                 .doOnNext { writeNullable(path, it.value).subscribe() }
 
-        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain()
+        return mergePaperAndRx(readNullable(path), firebaseObservable, converter, path.toString()).observeOnDomain()
     }
 
     override fun getNewId(path: String) = rootReference.child(path)

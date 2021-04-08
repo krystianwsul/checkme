@@ -10,6 +10,7 @@ fun <T : Any, U : Any> mergePaperAndRx(
         paperMaybe: Maybe<T>,
         firebaseObservable: Observable<U>,
         converter: Converter<T, U>,
+        path: String,
 ): Observable<U> {
     /**
      * Order is significant in this operation.  FirebaseObservable has to be first, because of a weird race condition
@@ -22,7 +23,7 @@ fun <T : Any, U : Any> mergePaperAndRx(
             paperMaybe.toObservable()
                     .map<AndroidDatabaseWrapper.LoadState<T>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
-    ).scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newFirebaseState, newPaperState) ->
+    ).scan<PairState<T, U>>(PairState.Initial(converter, path)) { oldPairState, (newFirebaseState, newPaperState) ->
         oldPairState.processNextPair(newPaperState, newFirebaseState)
     }
 
@@ -40,7 +41,10 @@ private sealed class PairState<T : Any, U : Any> {
             newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
     ): PairState<T, U>
 
-    class Initial<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
+    class Initial<T : Any, U : Any>(
+            private val converter: Converter<T, U>,
+            private val path: String,
+    ) : PairState<T, U>() {
 
         override val emission: U? get() = null
 
@@ -51,11 +55,14 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-            return SkippingFirst(converter)
+            return SkippingFirst(converter, path)
         }
     }
 
-    class SkippingFirst<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
+    class SkippingFirst<T : Any, U : Any>(
+            private val converter: Converter<T, U>,
+            private val path: String,
+    ) : PairState<T, U>() {
 
         override val emission: U? = null
 
@@ -71,7 +78,7 @@ private sealed class PairState<T : Any, U : Any> {
                 check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-                PaperCameFirst(newPaperState.value, converter)
+                PaperCameFirst(newPaperState.value, converter, path)
             }
         }
     }
@@ -99,6 +106,7 @@ private sealed class PairState<T : Any, U : Any> {
     class PaperCameFirst<T : Any, U : Any>(
             private val paper: T,
             private val converter: Converter<T, U>,
+            private val path: String,
     ) : PairState<T, U>() {
 
         override val emission = converter.paperToSnapshot(paper)
@@ -117,7 +125,7 @@ private sealed class PairState<T : Any, U : Any> {
                  * This isn't necessarily an issue, but I'm expecting them always to be consistent.  It would be nice
                  * to know what happened.
                  */
-                MyCrashlytics.logException(PaperCacheException("firebase was different than paper"))
+                MyCrashlytics.logException(PaperCacheException("firebase was different than paper, path: $path"))
 
                 Terminal(newFirebaseState.value)
             }

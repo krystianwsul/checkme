@@ -43,7 +43,7 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
         recordPairs[key] = Pair(record, false)
     }
 
-    protected fun setNullable(key: T, throwIfUnequal: (U) -> Unit, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+    protected fun set(key: T, throwIfUnequal: (U) -> Unit, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
         val pair = recordPairs[key]
 
         return if (pair?.second == true) { // todo isSaved propagate
@@ -51,7 +51,7 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
 
             recordPairs[key] = Pair(pair.first, false)
 
-            ChangeWrapper(ChangeType.LOCAL, pair.first) // todo issaved emit
+            null
         } else {
             val record = recordCallback() ?: return null
 
@@ -60,7 +60,4 @@ abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
             ChangeWrapper(ChangeType.REMOTE, record)
         }
     }
-
-    protected fun setNonNull(key: T, throwIfUnequal: (U) -> Unit, recordCallback: () -> U) =
-            setNullable(key, throwIfUnequal, recordCallback)!!
 }

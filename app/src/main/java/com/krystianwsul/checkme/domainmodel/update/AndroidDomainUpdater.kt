@@ -20,23 +20,12 @@ object AndroidDomainUpdater : DomainUpdater() {
     private lateinit var queue: Queue
 
     fun init() {
-        val isReady = DomainFactory.instanceRelay
-                .observeOnDomain()
-                .switchMap {
-                    if (it.value == null) {
-                        Observable.just(NullableWrapper())
-                    } else {
-                        it.value
-                                .isSaved
-                                .map { isSaved -> NullableWrapper(it.value.takeUnless { isSaved }) }
-                    }
-                }
+        val isReady = DomainFactory.instanceRelay.observeOnDomain()
 
         queue = Queue(isReady).apply { subscribe() }
     }
 
-    override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean): Single<T> =
-            queue.add(trigger, domainUpdate)
+    override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T> = queue.add(domainUpdate)
 
     class Queue(private val isReady: Observable<NullableWrapper<DomainFactory>>) {
 
@@ -50,17 +39,15 @@ object AndroidDomainUpdater : DomainUpdater() {
                     .filterNotNull()
                     .observeOnDomain()
                     .subscribe { domainFactory ->
-                        if (!domainFactory.isSaved.value) {
-                            val currItems = synchronized(items) {
-                                items.toMutableList().also { items -= it }
-                            }
-
-                            if (currItems.isNotEmpty()) dispatchItems(domainFactory, currItems)
+                        val currItems = synchronized(items) {
+                            items.toMutableList().also { items -= it }
                         }
+
+                        if (currItems.isNotEmpty()) dispatchItems(domainFactory, currItems)
                     }
         }
 
-        fun <T : Any> add(trigger: Boolean, domainUpdate: DomainUpdate<T>): Single<T> {
+        fun <T : Any> add(domainUpdate: DomainUpdate<T>): Single<T> {
             MyCrashlytics.log("AndroidDomainUpdater.add ${domainUpdate.name}")
 
             val subject = SingleSubject.create<T>()
@@ -82,7 +69,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             synchronized(items) { items += item }
 
-            if (trigger) triggerRelay.accept(Unit)
+            triggerRelay.accept(Unit)
 
             return subject
         }
@@ -95,8 +82,6 @@ object AndroidDomainUpdater : DomainUpdater() {
             check(items.isNotEmpty())
 
             val now = ExactTimeStamp.Local.now
-
-            check(!domainFactory.isSaved.value)
 
             val params = Params.merge(items.map {
                 MyCrashlytics.log("AndroidDomainUpdater.dispatchItems getParams " + it.name)

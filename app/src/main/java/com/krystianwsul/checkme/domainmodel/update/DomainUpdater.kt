@@ -24,7 +24,7 @@ abstract class DomainUpdater {
         }
     }
 
-    abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean = true): Single<T>
+    abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T>
 
     data class Result<T : Any>(val data: T, val params: Params) {
 

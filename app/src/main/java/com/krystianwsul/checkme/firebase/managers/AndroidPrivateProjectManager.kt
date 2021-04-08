@@ -27,7 +27,7 @@ class AndroidPrivateProjectManager(
 
     private var first = true
 
-    override fun set(snapshot: Snapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord> {
+    override fun set(snapshot: Snapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord>? {
         val changeWrapper = set(
                 { JsonDifferenceException.compare(it.single().createObject, snapshot.value) },
                 {
@@ -51,6 +51,6 @@ class AndroidPrivateProjectManager(
                 }
         )
 
-        return ChangeWrapper(changeWrapper.changeType, changeWrapper.data.single())
+        return changeWrapper?.run { ChangeWrapper(changeType, data.single()) }
     }
 }

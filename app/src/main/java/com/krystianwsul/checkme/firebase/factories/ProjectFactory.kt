@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -72,11 +73,14 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         rootInstanceManagers = initialProjectEvent.run { newRootInstanceManagers(projectRecord, instanceSnapshots) }
         project = newProject(initialProjectEvent.projectRecord)
 
-        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>): ChangeType {
+        fun updateRootInstanceManager(
+                taskRecord: TaskRecord<T>,
+                snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
+        ): ChangeType? {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 
             return if (rootInstanceManager != null) {
-                rootInstanceManager.set(snapshot).changeType
+                rootInstanceManager.set(snapshot)?.changeType
             } else {
                 newRootInstanceManager(taskRecord, snapshot)
 
@@ -105,7 +109,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
             projectChangeType
         }
 
-        val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.map { changeInstancesEvent ->
+        val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.mapNotNull { changeInstancesEvent ->
             val instanceChangeType = changeInstancesEvent.run { updateRootInstanceManager(taskRecord, instanceSnapshot) }
 
             project = newProject(changeInstancesEvent.projectRecord)

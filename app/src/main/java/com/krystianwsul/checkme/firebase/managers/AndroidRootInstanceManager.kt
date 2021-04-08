@@ -30,7 +30,9 @@ class AndroidRootInstanceManager<T : ProjectType>(
                 ?: listOf()
     }
 
-    override fun set(snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>): ChangeWrapper<MutableMap<InstanceKey, RootInstanceRecord<T>>> {
+    override fun set(
+            snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
+    ): ChangeWrapper<MutableMap<InstanceKey, RootInstanceRecord<T>>>? {
         val newSnapshotInfos = snapshot.toSnapshotInfos()
 
         return set(

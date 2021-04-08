@@ -19,7 +19,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot<UserWrapper>>) : RootUs
 
     override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()
 
-    override fun set(snapshot: Snapshot<UserWrapper>) = setNonNull(
+    override fun set(snapshot: Snapshot<UserWrapper>) = set(
             snapshot.toKey(),
             { JsonDifferenceException.compare(it.createObject, snapshot.value) },
             { snapshot.toRecord() },

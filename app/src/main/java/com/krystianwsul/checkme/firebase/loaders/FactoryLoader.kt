@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.utils.cacheImmediate
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -136,8 +137,8 @@ class FactoryLoader(
                         )
                     }.cacheImmediate()
 
-                    val userFactoryChangeTypes = userDatabaseRx.changes.flatMapSingle { snapshot ->
-                        userFactorySingle.map { it.onNewSnapshot(snapshot) }
+                    val userFactoryChangeTypes = userDatabaseRx.changes.flatMapMaybe { snapshot ->
+                        userFactorySingle.mapNotNull { it.onNewSnapshot(snapshot) }
                     }
 
                     val changeTypes = listOf(

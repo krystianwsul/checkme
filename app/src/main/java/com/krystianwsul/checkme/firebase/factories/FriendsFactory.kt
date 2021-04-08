@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.UserJson
@@ -40,13 +41,13 @@ class FriendsFactory(
     val savedList get() = rootUserManager.savedList
 
     init {
-        val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents.map {
-            val (changeType, rootUserRecord) = rootUserManager.set(it.snapshot)
+        val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
+                .mapNotNull { rootUserManager.set(it.snapshot) }
+                .map { (changeType, rootUserRecord) ->
+                    _friends[rootUserRecord.userKey] = RootUser(rootUserRecord)
 
-            _friends[rootUserRecord.userKey] = RootUser(rootUserRecord)
-
-            changeType
-        }
+                    changeType
+                }
 
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
             it.userKeys.forEach {
@@ -87,7 +88,7 @@ class FriendsFactory(
     fun updateProjects(
             projectId: ProjectKey.Shared,
             addedUsers: Set<UserKey>,
-            removedUsers: Set<UserKey>
+            removedUsers: Set<UserKey>,
     ) {
         val addedFriends = addedUsers.mapNotNull(_friends::get)
         val addedStrangers = addedUsers - addedFriends.map { it.userKey }

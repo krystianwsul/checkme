@@ -157,6 +157,9 @@ fun Context.startDate(receiver: BroadcastReceiver) {
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() =
         filter { it.value != null }.map { it.value!! }!!
 
+fun <T> Single<NullableWrapper<T>>.filterNotNull() =
+        filter { it.value != null }.map { it.value!! }!!
+
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
@@ -356,6 +359,9 @@ fun <T> Single<T>.tryGetCurrentValue(): T? {
 fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
 
 fun <T : Any, U : Any> Observable<T>.mapNotNull(mapper: (T) -> U?) =
+        map { NullableWrapper(mapper(it)) }.filterNotNull()
+
+fun <T : Any, U : Any> Single<T>.mapNotNull(mapper: (T) -> U?) =
         map { NullableWrapper(mapper(it)) }.filterNotNull()
 
 fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =

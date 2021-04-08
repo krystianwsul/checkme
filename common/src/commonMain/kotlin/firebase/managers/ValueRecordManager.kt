@@ -35,7 +35,7 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
     }
 
     protected fun set(valueCallback: () -> T): ChangeWrapper<T> { // lazy to prevent parsing if LOCAL
-        return if (isSaved) {
+        return if (isSaved) { // todo isSaved propagate
             isSaved = false
 
             ChangeWrapper(ChangeType.LOCAL, value)

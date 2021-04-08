@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -27,25 +28,31 @@ class AndroidPrivateProjectManager(
     private var first = true
 
     override fun set(snapshot: Snapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord> {
-        val changeWrapper = set {
-            val record = if (first) {
-                first = false // for new users, the project may not exist yet
+        val changeWrapper = set(
+                {
+                    if (it.single().createObject != snapshot.value)
+                        throw JsonDifferenceException(it.single().createObject, snapshot.value)
+                },
+                {
+                    val record = if (first) {
+                        first = false // for new users, the project may not exist yet
 
-                val now = ExactTimeStamp.Local.now
+                        val now = ExactTimeStamp.Local.now
 
-                snapshot.takeIf { it.exists }
-                        ?.toRecord()
-                        ?: PrivateProjectRecord(
-                                databaseWrapper,
-                                userInfo,
-                                PrivateProjectJson(startTime = now.long, startTimeOffset = now.offset),
-                        )
-            } else {
-                snapshot.toRecord()
-            }
+                        snapshot.takeIf { it.exists }
+                                ?.toRecord()
+                                ?: PrivateProjectRecord(
+                                        databaseWrapper,
+                                        userInfo,
+                                        PrivateProjectJson(startTime = now.long, startTimeOffset = now.offset),
+                                )
+                    } else {
+                        snapshot.toRecord()
+                    }
 
-            listOf(record)
-        }
+                    listOf(record)
+                }
+        )
 
         return ChangeWrapper(changeWrapper.changeType, changeWrapper.data.single())
     }

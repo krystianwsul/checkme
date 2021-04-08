@@ -241,8 +241,8 @@ class ProjectsFactoryNewTest {
                     mapOf(
                             InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
                                     Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
+                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
+                                            InstanceJson(done = done.long),
                                     )
                             )
                     )
@@ -403,8 +403,8 @@ class ProjectsFactoryNewTest {
                     mapOf(
                             InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
                                     Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
+                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
+                                            InstanceJson(done = done.long, doneOffset = done.offset)
                                     )
                             )
                     )
@@ -441,8 +441,8 @@ class ProjectsFactoryNewTest {
                     mapOf(
                             InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
                                     Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
+                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
+                                            InstanceJson(done = done.long),
                                     )
                             )
                     )
@@ -630,8 +630,8 @@ class ProjectsFactoryNewTest {
                     mapOf(
                             InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
                                     Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true) as String,
-                                            InstanceJson(done = done.long)
+                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
+                                            InstanceJson(done = done.long),
                                     )
                             )
                     )

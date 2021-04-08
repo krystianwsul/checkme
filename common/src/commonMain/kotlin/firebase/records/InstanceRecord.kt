@@ -39,7 +39,7 @@ abstract class InstanceRecord<T : ProjectType>(
         fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
             fun Int.pad() = pad(padding)
 
-            customTimeKey?.customTimeId ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
+            customTimeKey?.customTimeId?.value ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
         }
 
         fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {

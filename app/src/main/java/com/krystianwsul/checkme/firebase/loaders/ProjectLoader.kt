@@ -69,10 +69,9 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-
         private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }.let {
             if (initialProjectRecord != null) {
-                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord)) // todo issaved emit
+                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
             } else {
                 it
             }
@@ -138,6 +137,8 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .switchMap {
                     val (changeType, projectRecord) = it.original.changeWrapper
 
+                    check(changeType == ChangeType.REMOTE)
+
                     it.addedEntries
                             .values
                             .map { (taskRecord, databaseRx) ->
@@ -175,6 +176,8 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .filter { it.addedEntries.isEmpty() }
                 .switchMapSingle {
                     val (changeType, projectRecord) = it.original.changeWrapper
+
+                    check(changeType == ChangeType.REMOTE)
 
                     it.newMap
                             .values

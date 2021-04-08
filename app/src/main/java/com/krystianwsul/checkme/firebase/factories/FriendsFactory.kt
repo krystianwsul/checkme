@@ -61,7 +61,7 @@ class FriendsFactory(
                 addChangeFriendChangeTypes,
                 removeFriendsChangeTypes
         ).merge()
-                .filter { it == ChangeType.REMOTE }
+                .filter { it == ChangeType.REMOTE } // filtering out events for internal changes
                 .publishImmediate(domainDisposable)
     }
 

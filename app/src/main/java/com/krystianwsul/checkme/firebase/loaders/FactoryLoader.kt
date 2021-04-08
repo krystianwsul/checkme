@@ -89,8 +89,10 @@ class FactoryLoader(
                     )
 
                     val projectsFactorySingle = Single.zip(
-                            privateProjectLoader.initialProjectEvent,
-                            sharedProjectsLoader.initialProjectsEvent
+                            privateProjectLoader.initialProjectEvent.doOnSuccess {
+                                check(it.changeType == ChangeType.REMOTE)
+                            },
+                            sharedProjectsLoader.initialProjectsEvent,
                     ) { (changeType, initialPrivateProjectEvent), initialSharedProjectsEvent ->
                         check(changeType == ChangeType.REMOTE)
 

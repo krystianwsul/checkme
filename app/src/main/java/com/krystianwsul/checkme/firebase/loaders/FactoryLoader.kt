@@ -144,9 +144,8 @@ class FactoryLoader(
                             userFactoryChangeTypes,
                     ).merge()
 
-                    changeTypes.flatMapSingle { changeType ->
-                        domainFactorySingle.map { it to changeType }
-                    }
+                    // ignore all change events that come in before the DomainFactory is initialized
+                    domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { domainFactory to it } }
                             .subscribe { (domainFactory, changeType) ->
                                 domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
                             }

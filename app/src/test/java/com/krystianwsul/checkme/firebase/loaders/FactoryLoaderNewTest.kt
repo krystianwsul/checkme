@@ -62,7 +62,7 @@ class FactoryLoaderNewTest {
         override fun createShown(
                 remoteTaskId: String,
                 scheduleDateTime: DateTime,
-                projectId: ProjectKey<*>
+                projectId: ProjectKey<*>,
         ) = object : Instance.Shown {
 
             override var notified = false
@@ -218,7 +218,7 @@ class FactoryLoaderNewTest {
     private lateinit var domainFactoryRelay: BehaviorRelay<NullableWrapper<FactoryProvider.Domain>>
 
     private lateinit var errors: MutableList<Throwable>
-    
+
     @Before
     fun before() {
         mockBase64()
@@ -476,15 +476,9 @@ class FactoryLoaderNewTest {
 
         assertNull(domainFactoryRelay.value)
 
-        /**
-         *  since there are two friend factory events, the domainFactory receives a change immediately when it's
-         *  initialized
-         */
-        testFactoryProvider.domain.checkChange {
-            testFactoryProvider.database
-                    .privateProjectObservable
-                    .accept(PrivateProjectJson())
-        }
+        testFactoryProvider.database
+                .privateProjectObservable
+                .accept(PrivateProjectJson())
 
         assertNotNull(domainFactoryRelay.value)
 
@@ -493,7 +487,7 @@ class FactoryLoaderNewTest {
                 testFactoryProvider.friendsFactory
                         .friends
                         .single { it.userKey == friendKey2 }
-                        .email
+                        .email,
         )
     }
 

@@ -87,6 +87,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 val databaseRx: DatabaseRx<Snapshot<Map<String, Map<String, InstanceJson>>>>,
         )
 
+        // todo instances: this doesn't seem to get updated when a task is added, without ChangeType.LOCAL propagation
         private val rootInstanceDatabaseRx = projectRecordObservable.map {
             ProjectData(
                     it,

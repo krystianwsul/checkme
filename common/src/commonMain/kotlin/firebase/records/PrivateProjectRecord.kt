@@ -22,21 +22,18 @@ class PrivateProjectRecord(
         projectKey.key
 ) {
 
-    override lateinit var taskRecords: MutableMap<String, PrivateTaskRecord>
-        private set
+    override val taskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
+
+                PrivateTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
         private set
 
     init {
-        taskRecords = projectJson.tasks
-                .mapValues { (id, taskJson) ->
-                    check(id.isNotEmpty())
-
-                    PrivateTaskRecord(id, this, taskJson)
-                }
-                .toMutableMap()
-
         initTaskHierarchyRecords()
 
         customTimeRecords = projectJson.customTimes

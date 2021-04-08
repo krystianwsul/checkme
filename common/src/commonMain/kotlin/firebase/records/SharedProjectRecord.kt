@@ -20,8 +20,13 @@ class SharedProjectRecord(
         "${projectKey.key}/$PROJECT_JSON"
 ) {
 
-    override lateinit var taskRecords: MutableMap<String, SharedTaskRecord>
-        private set
+    override val taskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
+
+                SharedTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
         private set
@@ -32,14 +37,6 @@ class SharedProjectRecord(
     private val projectJson get() = jsonWrapper.projectJson
 
     init {
-        taskRecords = projectJson.tasks
-                .mapValues { (id, taskJson) ->
-                    check(id.isNotEmpty())
-
-                    SharedTaskRecord(id, this, taskJson)
-                }
-                .toMutableMap()
-
         initTaskHierarchyRecords()
 
         customTimeRecords = jsonWrapper.projectJson

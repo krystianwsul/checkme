@@ -11,7 +11,7 @@ class TestDomainUpdater(
         private val now: ExactTimeStamp.Local,
 ) : DomainUpdater() {
 
-    override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean): Single<T> {
+    override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T> {
         val (data, params) = domainUpdate.doAction(domainFactory, now)
 
         domainFactory.updateNotifications(params, now)

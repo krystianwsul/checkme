@@ -157,14 +157,10 @@ interface SharedProjectsLoader {
                 .replayImmediate()
 
         override val removeProjectEvents = projectLoadersObservable.map {
-            check(it.userChangeType == ChangeType.REMOTE)
-
-            ChangeWrapper(
-                    it.userChangeType,
-                    RemoveProjectsEvent(it.removedProjectKeys)
-            )
+            ChangeWrapper(it.userChangeType, RemoveProjectsEvent(it.removedProjectKeys))
         }
                 .filter { it.data.projectKeys.isNotEmpty() }
+                .doOnNext { check(it.changeType == ChangeType.REMOTE) }
                 .replayImmediate()
 
         override fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord {

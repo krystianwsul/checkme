@@ -74,7 +74,7 @@ class FriendsLoaderTest {
         friendsProvider = TestFriendsProvider()
 
         friendsLoader = FriendsLoader(
-                friendsKeysRelay.map { ChangeWrapper(ChangeType.LOCAL, it) },
+                friendsKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
                 compositeDisposable,
                 friendsProvider
         )

@@ -36,6 +36,9 @@ class ProjectsFactoryNewTest {
 
     companion object {
 
+        private val userInfo = UserInfo("email", "name", "uid")
+        private val deviceDbInfo = DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid")
+
         @BeforeClass
         @JvmStatic
         fun beforeClassStatic() {
@@ -131,7 +134,7 @@ class ProjectsFactoryNewTest {
                 ExactTimeStamp.Local.now,
                 factoryProvider,
                 compositeDisposable
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
     }
@@ -478,10 +481,13 @@ class ProjectsFactoryNewTest {
 
         initProjectsFactory()
 
+        val name = "sharedProject"
+        val now = ExactTimeStamp.Local.now
+
         val sharedProject = emissionChecker.checkLocal {
             projectsFactory.createProject(
-                    "sharedProject",
-                    ExactTimeStamp.Local.now,
+                    name,
+                    now,
                     setOf(),
                     mockk(relaxed = true) {
                         every { userJson } returns UserJson()
@@ -495,11 +501,15 @@ class ProjectsFactoryNewTest {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))
 
         emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(sharedProject.projectKey, SharedProjectJson(users = mutableMapOf(
-                    userInfo.key.key to mockk(relaxed = true) {
-                        every { tokens } returns mutableMapOf()
-                    }
-            )))
+            factoryProvider.acceptSharedProject(
+                    sharedProject.projectKey,
+                    SharedProjectJson(
+                            name,
+                            now.long,
+                            now.offset,
+                            users = mutableMapOf(userInfo.key.key to newUserJson()),
+                    )
+            )
         }
     }
 
@@ -647,6 +657,9 @@ class ProjectsFactoryNewTest {
         )
     }
 
+    private fun newUserJson() =
+            UserJson(name = userInfo.name, tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token))
+
     @Test
     fun testChangeSharedProjectLocal() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
@@ -655,11 +668,10 @@ class ProjectsFactoryNewTest {
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
 
-        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
-        )))
+        factoryProvider.acceptSharedProject(
+                sharedProjectKey,
+                SharedProjectJson(users = mutableMapOf(userInfo.key.key to newUserJson())),
+        )
 
         initProjectsFactory()
 
@@ -673,21 +685,20 @@ class ProjectsFactoryNewTest {
         projectsFactory.save()
 
         emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
-                    name = name,
-                    users = mutableMapOf(
-                            userInfo.key.key to mockk(relaxed = true) {
-                                every { tokens } returns mutableMapOf()
-                            }
-                    )
-            ))
+            factoryProvider.acceptSharedProject(
+                    sharedProjectKey,
+                    SharedProjectJson(
+                            name = name,
+                            users = mutableMapOf(userInfo.key.key to newUserJson())
+                    ),
+            )
         }
         assertEquals(
                 projectsFactory.sharedProjects
                         .values
                         .single()
                         .name,
-                name
+                name,
         )
     }
 }

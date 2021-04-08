@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
@@ -22,7 +23,11 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
             value!!,
     )
 
-    override fun set(snapshot: Snapshot<JsonWrapper>) = setNullable(snapshot.toKey()) {
-        snapshot.takeIf { it.exists }?.toRecord()
-    }
+    override fun set(snapshot: Snapshot<JsonWrapper>) = setNullable(
+            snapshot.toKey(),
+            {
+                if (it.createObject != snapshot.value) throw JsonDifferenceException(it.createObject, snapshot.value)
+            },
+            { snapshot.takeIf { it.exists }?.toRecord() },
+    )
 }

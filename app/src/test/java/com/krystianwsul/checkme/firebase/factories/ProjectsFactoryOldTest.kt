@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.checkLocal
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
@@ -27,17 +28,17 @@ import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 @ExperimentalStdlibApi
 class ProjectsFactoryOldTest {
 
     companion object {
+
+        private val userInfo = UserInfo("email", "name", "uid")
+        private val deviceDbInfo = DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid")
 
         @BeforeClass
         @JvmStatic
@@ -45,6 +46,9 @@ class ProjectsFactoryOldTest {
             Task.USE_ROOT_INSTANCES = false
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -131,7 +135,7 @@ class ProjectsFactoryOldTest {
                 ExactTimeStamp.Local.now,
                 factoryProvider,
                 compositeDisposable,
-        ) { DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid") }
+        ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
     }
@@ -412,10 +416,13 @@ class ProjectsFactoryOldTest {
 
         initProjectsFactory()
 
+        val name = "sharedProject"
+        val now = ExactTimeStamp.Local.now
+
         val sharedProject = emissionChecker.checkLocal {
             projectsFactory.createProject(
-                    "sharedProject",
-                    ExactTimeStamp.Local.now,
+                    name,
+                    now,
                     setOf(),
                     mockk(relaxed = true) {
                         every { userJson } returns UserJson()
@@ -429,11 +436,15 @@ class ProjectsFactoryOldTest {
         projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))
 
         emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(sharedProject.projectKey, SharedProjectJson(users = mutableMapOf(
-                    userInfo.key.key to mockk(relaxed = true) {
-                        every { tokens } returns mutableMapOf()
-                    }
-            )))
+            factoryProvider.acceptSharedProject(
+                    sharedProject.projectKey,
+                    SharedProjectJson(
+                            name,
+                            now.long,
+                            now.offset,
+                            users = mutableMapOf(userInfo.key.key to newUserJson()),
+                    ),
+            )
         }
     }
 
@@ -495,6 +506,9 @@ class ProjectsFactoryOldTest {
         )
     }
 
+    private fun newUserJson() =
+            UserJson(name = userInfo.name, tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token))
+
     @Test
     fun testChangeSharedProjectLocal() {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
@@ -503,11 +517,10 @@ class ProjectsFactoryOldTest {
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
 
-        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
-        )))
+        factoryProvider.acceptSharedProject(
+                sharedProjectKey,
+                SharedProjectJson(users = mutableMapOf(userInfo.key.key to newUserJson())),
+        )
 
         initProjectsFactory()
 
@@ -521,14 +534,13 @@ class ProjectsFactoryOldTest {
         projectsFactory.save()
 
         emissionChecker.checkLocal {
-            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
-                    name = name,
-                    users = mutableMapOf(
-                            userInfo.key.key to mockk(relaxed = true) {
-                                every { tokens } returns mutableMapOf()
-                            }
-                    )
-            ))
+            factoryProvider.acceptSharedProject(
+                    sharedProjectKey,
+                    SharedProjectJson(
+                            name = name,
+                            users = mutableMapOf(userInfo.key.key to newUserJson()),
+                    ),
+            )
         }
         assertEquals(
                 projectsFactory.sharedProjects

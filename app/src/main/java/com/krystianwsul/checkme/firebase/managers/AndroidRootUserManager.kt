@@ -21,9 +21,7 @@ class AndroidRootUserManager(children: Iterable<Snapshot<UserWrapper>>) : RootUs
 
     override fun set(snapshot: Snapshot<UserWrapper>) = setNonNull(
             snapshot.toKey(),
-            {
-                if (it.createObject == snapshot.value) throw JsonDifferenceException(it.createObject, snapshot.value)
-            },
+            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
             { snapshot.toRecord() },
     )
 

@@ -25,9 +25,7 @@ class AndroidSharedProjectManager(override val databaseWrapper: DatabaseWrapper)
 
     override fun set(snapshot: Snapshot<JsonWrapper>) = setNullable(
             snapshot.toKey(),
-            {
-                if (it.createObject != snapshot.value) throw JsonDifferenceException(it.createObject, snapshot.value)
-            },
+            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
             { snapshot.takeIf { it.exists }?.toRecord() },
     )
 }

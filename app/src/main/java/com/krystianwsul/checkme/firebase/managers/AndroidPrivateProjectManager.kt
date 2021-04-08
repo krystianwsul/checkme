@@ -29,10 +29,7 @@ class AndroidPrivateProjectManager(
 
     override fun set(snapshot: Snapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord> {
         val changeWrapper = set(
-                {
-                    if (it.single().createObject != snapshot.value)
-                        throw JsonDifferenceException(it.single().createObject, snapshot.value)
-                },
+                { JsonDifferenceException.compare(it.single().createObject, snapshot.value) },
                 {
                     val record = if (first) {
                         first = false // for new users, the project may not exist yet

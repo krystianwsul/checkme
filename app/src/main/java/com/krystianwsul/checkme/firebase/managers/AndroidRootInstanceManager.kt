@@ -43,8 +43,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
                         )
                     }
 
-                    if (oldSnapshotInfos != newSnapshotInfos)
-                        throw JsonDifferenceException(oldSnapshotInfos, newSnapshotInfos)
+                    JsonDifferenceException.compare(oldSnapshotInfos, newSnapshotInfos)
                 },
                 {
                     newSnapshotInfos.map { it.toRecord() }

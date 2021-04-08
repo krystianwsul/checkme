@@ -37,9 +37,7 @@ class MyUserManager(
     override val records = listOf(value)
 
     override fun set(snapshot: Snapshot<UserWrapper>) = set(
-            {
-                if (it.createObject != snapshot.value) throw JsonDifferenceException(it.createObject, snapshot.value)
-            },
+            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
             { snapshot.toRecord() },
     )
 }

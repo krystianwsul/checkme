@@ -57,6 +57,7 @@ class FriendsLoader(
     ).replayImmediate()
 
     val initialFriendsEvent = databaseRx.firstOrError()
+            .doOnSuccess { check(it.original.changeType == ChangeType.REMOTE) }
             .flatMap {
                 it.newMap
                         .values
@@ -97,7 +98,7 @@ class FriendsLoader(
 
         addFriendDatas[rootUserRecord.userKey] = AddFriendData(rootUserRecord.key, rootUserRecord.userWrapper)
 
-        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas)) // todo issaved emit
+        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
     }
 
     class InitialFriendsEvent(val snapshots: Iterable<Snapshot<UserWrapper>>)

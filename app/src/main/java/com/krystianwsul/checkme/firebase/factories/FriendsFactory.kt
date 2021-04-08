@@ -60,7 +60,9 @@ class FriendsFactory(
         changeTypes = listOf(
                 addChangeFriendChangeTypes,
                 removeFriendsChangeTypes
-        ).merge().publishImmediate(domainDisposable)
+        ).merge()
+                .filter { it == ChangeType.REMOTE }
+                .publishImmediate(domainDisposable)
     }
 
     fun save(values: MutableMap<String, Any?>) {

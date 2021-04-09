@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.records.CustomTimeRecord
 import com.krystianwsul.common.firebase.records.PrivateCustomTimeRecord
+import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -19,7 +19,7 @@ class PrivateCustomTime(
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
             .map { (it as Custom<*>).customTimeRecord }
-            .toMutableList<CustomTimeRecord<*>>()
+            .toMutableList<ProjectCustomTimeRecord<*>>()
             .apply { add(customTimeRecord) }
 
     fun current(exactTimeStamp: ExactTimeStamp.Local): Boolean {

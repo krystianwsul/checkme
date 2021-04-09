@@ -1,7 +1,7 @@
 package com.krystianwsul.common.time
 
 import com.krystianwsul.common.firebase.models.Project
-import com.krystianwsul.common.firebase.records.CustomTimeRecord
+import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -29,7 +29,7 @@ sealed class Time {
 
         protected abstract val project: Project<T>
 
-        abstract val customTimeRecord: CustomTimeRecord<T>
+        abstract val customTimeRecord: ProjectCustomTimeRecord<T>
 
         abstract val id: CustomTimeId.Project<T>
 

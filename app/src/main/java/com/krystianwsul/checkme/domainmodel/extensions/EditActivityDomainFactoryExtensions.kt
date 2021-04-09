@@ -37,7 +37,7 @@ fun DomainFactory.getCreateTaskData(
 
     val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
-    }.toMutableMap<CustomTimeKey.Project<*>, Time.Custom<*>>()
+    }.toMutableMap<CustomTimeKey.Project<*>, Time.Custom.Project<*>>()
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)

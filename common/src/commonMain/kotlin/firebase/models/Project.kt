@@ -28,7 +28,7 @@ abstract class Project<T : ProjectType>(
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
-    protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom<T>>
+    protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom.Project<T>>
 
     abstract val projectKey: ProjectKey<T>
 
@@ -48,7 +48,7 @@ abstract class Project<T : ProjectType>(
     val taskIds: Set<String> get() = _tasks.keys
     val tasks: Collection<Task<T>> get() = _tasks.values
 
-    abstract val customTimes: Collection<Time.Custom<T>>
+    abstract val customTimes: Collection<Time.Custom.Project<T>>
 
     val taskHierarchies get() = taskHierarchyContainer.all
 
@@ -188,14 +188,15 @@ abstract class Project<T : ProjectType>(
 
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom<*>,
+            customTime: Time.Custom.Project<*>,
             allowCopy: Boolean = true,
-    ): Time.Custom<T>
+    ): Time.Custom.Project<T>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {
-            is Time.Custom<*> -> getOrCreateCustomTime(ownerKey, it)
+            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
             is Time.Normal -> it
+            else -> throw UnsupportedOperationException() // todo customTime
         }
     }
 
@@ -204,8 +205,9 @@ abstract class Project<T : ProjectType>(
             ownerKey: UserKey,
             time: Time,
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId.Project<T>, null, null)
+        is Time.Custom.Project<*> -> Triple(newTime.key.customTimeId as CustomTimeId.Project<T>, null, null)
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
+        else -> throw UnsupportedOperationException() // todo customTime
     }
 
     private fun getInstanceJson(
@@ -219,16 +221,18 @@ abstract class Project<T : ProjectType>(
 
         val newInstanceTime = instance.instanceTime.let {
             when (it) {
-                is Time.Custom<*> -> getOrCreateCustomTime(ownerKey, it)
+                is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
                 is Time.Normal -> it
+                else -> throw UnsupportedOperationException() // todo customtime
             }
         }
 
         val instanceTimeString = when (newInstanceTime) {
-            is Time.Custom<*> -> newInstanceTime.key
+            is Time.Custom.Project<*> -> newInstanceTime.key
                     .customTimeId
                     .value
             is Time.Normal -> newInstanceTime.hourMinute.toJson()
+            else -> throw UnsupportedOperationException() // todo customtime
         }
 
         val parentState = instance.parentState
@@ -345,11 +349,11 @@ abstract class Project<T : ProjectType>(
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun deleteCustomTime(remoteCustomTime: Time.Custom<T>)
+    abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 
-    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom<T>
-    abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom<T>
-    abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
+    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom.Project<T>
+    abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
+    abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T>
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }

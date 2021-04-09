@@ -18,7 +18,7 @@ class PrivateCustomTime(
     override val id = key.customTimeId
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
-            .map { (it as Custom<*>).customTimeRecord }
+            .map { (it as Project<*>).customTimeRecord }
             .toMutableList<ProjectCustomTimeRecord<*>>()
             .apply { add(customTimeRecord) }
 

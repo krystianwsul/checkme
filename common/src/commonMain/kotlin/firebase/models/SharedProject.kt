@@ -111,7 +111,7 @@ class SharedProject(
         }
     }
 
-    override fun deleteCustomTime(remoteCustomTime: Time.Custom<ProjectType.Shared>) {
+    override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Shared>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)
@@ -147,7 +147,7 @@ class SharedProject(
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom<*>,
+            customTime: Time.Custom.Project<*>,
             allowCopy: Boolean,
     ): SharedCustomTime {
         fun copy(): SharedCustomTime {

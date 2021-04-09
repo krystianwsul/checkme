@@ -201,7 +201,7 @@ object Irrelevant {
             val irrelevantSchedules: Collection<Schedule<*>>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
             val irrelevantTasks: Collection<Task<*>>,
-            val irrelevantRemoteCustomTimes: Collection<Time.Custom<*>>,
-            val removedSharedProjects: Collection<SharedProject>
+            val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
+            val removedSharedProjects: Collection<SharedProject>,
     )
 }

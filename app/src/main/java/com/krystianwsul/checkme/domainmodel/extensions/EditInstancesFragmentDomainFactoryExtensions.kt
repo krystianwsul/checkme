@@ -33,13 +33,13 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
-    }.toMutableMap<CustomTimeKey.Project<*>, Time.Custom<*>>()
+    }.toMutableMap<CustomTimeKey.Project<*>, Time.Custom.Project<*>>()
 
     val instances = instanceKeys.map(::getInstance)
     check(instances.all { it.done == null })
 
-    instances.forEach { instance ->
-        (instance.instanceTime as? Time.Custom<*>)?.let {
+    instances.forEach { instance -> // todo customtime
+        (instance.instanceTime as? Time.Custom.Project<*>)?.let {
             customTimes[it.key] = it
         }
     }

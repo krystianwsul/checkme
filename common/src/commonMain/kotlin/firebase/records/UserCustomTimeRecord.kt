@@ -32,9 +32,5 @@ class UserCustomTimeRecord(
     var current by Committer(customTimeJson::current)
     var endTime by Committer(customTimeJson::endTime)
 
-    override fun deleteFromParent() {
-        // todo customtime
-
-        //check(projectRecord.customTimeRecords.remove(id) == this)
-    }
+    override fun deleteFromParent() = check(rootUserRecord.customTimeRecords.remove(id) == this)
 }

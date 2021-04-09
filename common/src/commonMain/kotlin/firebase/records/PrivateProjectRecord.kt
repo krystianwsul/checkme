@@ -38,8 +38,7 @@ class PrivateProjectRecord(
         taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
     }
 
-    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Project.Private, PrivateCustomTimeRecord>
-        private set
+    override val customTimeRecords: MutableMap<CustomTimeId.Project.Private, PrivateCustomTimeRecord>
 
     init {
         initTaskHierarchyRecords()

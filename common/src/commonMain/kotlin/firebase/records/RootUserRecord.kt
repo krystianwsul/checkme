@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.RootUserProperties
+import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
@@ -11,7 +12,7 @@ import com.krystianwsul.common.utils.UserKey
 open class RootUserRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        override val createObject: UserWrapper,
+        final override val createObject: UserWrapper,
         override val userKey: UserKey,
 ) : RemoteRecord(create), RootUserProperties {
 
@@ -24,7 +25,7 @@ open class RootUserRecord(
 
     final override val userJson by lazy { createObject.userData }
 
-    override val userWrapper by lazy { createObject }
+    final override val userWrapper = createObject
 
     final override val key by lazy { this.userKey.key }
 
@@ -45,6 +46,16 @@ open class RootUserRecord(
                 .keys
                 .map(::UserKey)
                 .toSet()
+
+    val customTimeRecords = userWrapper.customTimes
+            .entries
+            .associate { (key, customTimeJson) ->
+                val customTimeId = CustomTimeId.User(key)
+                val customTimeRecord = UserCustomTimeRecord(customTimeId, this, customTimeJson)
+
+                customTimeId to customTimeRecord
+            }
+            .toMutableMap()
 
     override fun addFriend(userKey: UserKey) {
         val friendId = userKey.key
@@ -94,4 +105,12 @@ open class RootUserRecord(
     }
 
     fun newCustomTimeId() = CustomTimeId.User(databaseWrapper.newRootUserCustomTimeId(userKey))
+
+    fun newCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): UserCustomTimeRecord {
+        val remoteCustomTimeRecord = UserCustomTimeRecord(this, customTimeJson)
+        check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
+
+        customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
+        return remoteCustomTimeRecord
+    }
 }

@@ -36,8 +36,7 @@ class SharedProjectRecord(
         taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
     }
 
-    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
-        private set
+    override val customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
 
     var userRecords: MutableMap<UserKey, ProjectUserRecord>
         private set

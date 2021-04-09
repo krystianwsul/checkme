@@ -9,6 +9,8 @@ sealed class JsonTime<out T : ProjectType> {
 
         private val hourMinuteRegex = Regex("^\\d\\d:\\d\\d$")
 
+        private val userRegex = Regex("^[^,]+,[^,]+$")
+
         fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime<T> {
             return if (hourMinuteRegex.find(json) != null)
                 Normal(HourMinute.fromJson(json))

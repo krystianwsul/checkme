@@ -55,7 +55,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         private val defaultHourMinute = HourMinute(9, 0)
 
         fun getEditIntent(
-                customTimeKey: CustomTimeKey.Private,
+                customTimeKey: CustomTimeKey.Project.Private,
                 context: Context,
         ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
@@ -67,7 +67,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         }
     }
 
-    private var customTimeKey: CustomTimeKey.Private? = null
+    private var customTimeKey: CustomTimeKey.Project.Private? = null
 
     private var data: ShowCustomTimeViewModel.Data? = null
 

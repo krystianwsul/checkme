@@ -119,7 +119,7 @@ class PrivateProjectRecord(
             databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId.Project<ProjectType.Private>) =
-            CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Project.Private)
+            CustomTimeKey.Project.Private(projectKey, customTimeId as CustomTimeId.Project.Private)
 
     fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord {
         val remoteTaskRecord = PrivateTaskRecord(this, taskJson)

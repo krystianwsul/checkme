@@ -56,6 +56,6 @@ class PrivateCustomTime(
 
     interface AllRecordsSource {
 
-        fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private): List<SharedCustomTime>
+        fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Project.Private): List<SharedCustomTime>
     }
 }

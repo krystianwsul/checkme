@@ -261,7 +261,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         binding.scheduleDialogTimeLayout.setDropdown {
             checkNotNull(customTimeDatas)
 
-            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
+            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Project.Private }
 
             val customTimeDatas = delegate.getCustomTimeDatas(list)
 
@@ -476,7 +476,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (resultCode == Activity.RESULT_OK)
             scheduleDialogData.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+                    data!!.getParcelableExtra<CustomTimeKey.Project.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
     }
 
     @SuppressLint("SetTextI18n")

@@ -488,7 +488,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     val ownerKey = privateProject.projectKey.toUserKey()
 
                     if (customTime.ownerKey == ownerKey) {
-                        val privateCustomTimeKey = CustomTimeKey.Private(
+                        val privateCustomTimeKey = CustomTimeKey.Project.Private(
                                 ownerKey.toPrivateProjectKey(),
                                 customTime.privateKey!!,
                         )

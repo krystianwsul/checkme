@@ -16,7 +16,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
+fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Project.Private): ShowCustomTimeViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -31,7 +31,7 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): S
 @CheckResult
 fun DomainUpdater.updateCustomTime(
         notificationType: DomainListenerManager.NotificationType,
-        customTimeId: CustomTimeKey.Private,
+        customTimeId: CustomTimeKey.Project.Private,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") {
@@ -56,7 +56,7 @@ fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Private> = SingleDomainUpdate.create("createCustomTime") {
+): Single<CustomTimeKey.Project.Private> = SingleDomainUpdate.create("createCustomTime") {
     check(name.isNotEmpty())
 
     check(DayOfWeek.values().all { hourMinutes[it] != null })

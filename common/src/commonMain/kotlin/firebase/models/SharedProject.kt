@@ -118,8 +118,8 @@ class SharedProject(
     }
 
     fun getSharedTimeIfPresent(
-            privateCustomTimeId: CustomTimeKey.Private,
-            ownerKey: UserKey
+            privateCustomTimeId: CustomTimeKey.Project.Private,
+            ownerKey: UserKey,
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId.customTimeId }
 
     override fun getCustomTime(customTimeId: CustomTimeId.Project<*>): SharedCustomTime {

@@ -333,7 +333,7 @@ class DomainFactory(
 
     // internal
 
-    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private) =
+    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Project.Private) =
             projectsFactory.sharedProjects
                     .values
                     .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }

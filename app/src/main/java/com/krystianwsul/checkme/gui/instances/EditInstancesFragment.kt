@@ -317,7 +317,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceTimeLayout.setDropdown {
             val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
-                    .filter { it.customTimeKey is CustomTimeKey.Private }
+                    .filter { it.customTimeKey is CustomTimeKey.Project.Private }
                     .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
                     .map {
                         TimeDialogFragment.CustomTimeData(
@@ -438,7 +438,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (resultCode == Activity.RESULT_OK) {
             state.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+                    data!!.getParcelableExtra<CustomTimeKey.Project.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
         }
     }
 

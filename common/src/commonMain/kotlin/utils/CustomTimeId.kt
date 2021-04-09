@@ -4,15 +4,18 @@ sealed class CustomTimeId<T : ProjectType> : Parcelable, Serializable {
 
     abstract val value: String
 
-    @Parcelize
-    data class Private(override val value: String) : CustomTimeId<ProjectType.Private>() {
+    sealed class Project<T : ProjectType> : CustomTimeId<T>() {
 
-        override fun toString() = value
-    }
+        @Parcelize
+        data class Private(override val value: String) : Project<ProjectType.Private>() {
 
-    @Parcelize
-    data class Shared(override val value: String) : CustomTimeId<ProjectType.Shared>() {
+            override fun toString() = value
+        }
 
-        override fun toString() = value
+        @Parcelize
+        data class Shared(override val value: String) : Project<ProjectType.Shared>() {
+
+            override fun toString() = value
+        }
     }
 }

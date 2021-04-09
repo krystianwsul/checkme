@@ -38,7 +38,7 @@ class PrivateProjectRecord(
         taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
     }
 
-    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
+    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Project.Private, PrivateCustomTimeRecord>
         private set
 
     init {
@@ -49,7 +49,7 @@ class PrivateProjectRecord(
                 .associate { (id, customTimeJson) ->
                     check(id.isNotEmpty())
 
-                    val customTimeId = CustomTimeId.Private(id)
+                    val customTimeId = CustomTimeId.Project.Private(id)
 
                     customTimeId to PrivateCustomTimeRecord(customTimeId, this, customTimeJson)
                 }
@@ -100,7 +100,7 @@ class PrivateProjectRecord(
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
     fun getCustomTimeRecordId() =
-            CustomTimeId.Private(databaseWrapper.newPrivateCustomTimeRecordId(projectKey))
+            CustomTimeId.Project.Private(databaseWrapper.newPrivateCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newPrivateTaskRecordId(projectKey)
 
@@ -111,15 +111,15 @@ class PrivateProjectRecord(
             databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)
 
     override fun getCustomTimeRecord(id: String) =
-            customTimeRecords.getValue(CustomTimeId.Private(id))
+            customTimeRecords.getValue(CustomTimeId.Project.Private(id))
 
-    override fun getCustomTimeId(id: String) = CustomTimeId.Private(id)
+    override fun getCustomTimeId(id: String) = CustomTimeId.Project.Private(id)
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
             databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Private>) =
-            CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Private)
+            CustomTimeKey.Private(projectKey, customTimeId as CustomTimeId.Project.Private)
 
     fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord {
         val remoteTaskRecord = PrivateTaskRecord(this, taskJson)

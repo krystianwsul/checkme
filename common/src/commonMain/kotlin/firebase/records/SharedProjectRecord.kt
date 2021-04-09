@@ -36,7 +36,7 @@ class SharedProjectRecord(
         taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
     }
 
-    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
+    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
         private set
 
     var userRecords: MutableMap<UserKey, ProjectUserRecord>
@@ -53,7 +53,7 @@ class SharedProjectRecord(
                 .associate { (id, customTimeJson) ->
                     check(id.isNotEmpty())
 
-                    val customTimeId = CustomTimeId.Shared(id)
+                    val customTimeId = CustomTimeId.Project.Shared(id)
 
                     customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
                 }
@@ -139,7 +139,7 @@ class SharedProjectRecord(
     override fun deleteFromParent() = parent.remove(projectKey)
 
     fun getCustomTimeRecordId() =
-            CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
+            CustomTimeId.Project.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey)
 
@@ -150,9 +150,9 @@ class SharedProjectRecord(
             databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
 
     override fun getCustomTimeRecord(id: String) =
-            customTimeRecords.getValue(CustomTimeId.Shared(id))
+            customTimeRecords.getValue(CustomTimeId.Project.Shared(id))
 
-    override fun getCustomTimeId(id: String) = CustomTimeId.Shared(id)
+    override fun getCustomTimeId(id: String) = CustomTimeId.Project.Shared(id)
 
     override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) =
             CustomTimeKey.Shared(projectKey, customTimeId)

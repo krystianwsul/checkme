@@ -22,7 +22,7 @@ class PrivateProject(
 
     override val projectKey = projectRecord.projectKey
 
-    override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
+    override val remoteCustomTimes = HashMap<CustomTimeId.Project.Private, PrivateCustomTime>()
     override val _tasks: MutableMap<String, Task<ProjectType.Private>>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Private>()
 
@@ -79,13 +79,13 @@ class PrivateProject(
     }
 
     override fun getCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
-        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Private))
+        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Project.Private))
 
         return remoteCustomTimes.getValue(customTimeId)
     }
 
     override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getCustomTime(customTimeKey.customTimeId)
-    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Private(customTimeId))
+    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Project.Private(customTimeId))
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,

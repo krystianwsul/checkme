@@ -32,7 +32,7 @@ class SharedProject(
 
     val users get() = remoteUsers.values
 
-    override val remoteCustomTimes = mutableMapOf<CustomTimeId.Shared, SharedCustomTime>()
+    override val remoteCustomTimes = mutableMapOf<CustomTimeId.Project.Shared, SharedCustomTime>()
     override val _tasks: MutableMap<String, Task<ProjectType.Shared>>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Shared>()
 
@@ -123,13 +123,13 @@ class SharedProject(
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId.customTimeId }
 
     override fun getCustomTime(customTimeId: CustomTimeId<*>): SharedCustomTime {
-        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Shared))
+        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Project.Shared))
 
         return remoteCustomTimes.getValue(customTimeId)
     }
 
     override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getCustomTime(customTimeKey.customTimeId)
-    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Shared(customTimeId))
+    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Project.Shared(customTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
         val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)

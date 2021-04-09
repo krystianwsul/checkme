@@ -75,5 +75,4 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
             val photoUri: String?,
             val userWrapper: UserWrapper?,
     ) : Parcelable
-
 }

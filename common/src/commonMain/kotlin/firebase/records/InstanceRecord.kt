@@ -21,8 +21,6 @@ abstract class InstanceRecord<T : ProjectType>(
 
     companion object {
 
-        private val hourMinuteRegex = Regex("^\\d\\d:\\d\\d$")
-
         private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
@@ -110,12 +108,7 @@ abstract class InstanceRecord<T : ProjectType>(
 
     @Suppress("RemoveExplicitTypeArguments")
     private fun getInitialInstanceJsonTime() = createObject.instanceTime
-            ?.let {
-                if (hourMinuteRegex.find(it) != null)
-                    JsonTime.Normal<T>(HourMinute.fromJson(it))
-                else
-                    JsonTime.Custom(taskRecord.projectRecord.getCustomTimeId(it))
-            }
+            ?.let { JsonTime.fromJson(taskRecord.projectRecord, it) }
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
         setProperty(createObject::instanceTime, value?.toJson())

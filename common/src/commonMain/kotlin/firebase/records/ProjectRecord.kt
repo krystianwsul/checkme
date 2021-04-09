@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
@@ -11,7 +12,7 @@ abstract class ProjectRecord<T : ProjectType>(
         private val projectJson: ProjectJson<T>,
         private val _id: ProjectKey<T>,
         committerKey: String,
-) : RemoteRecord(create) {
+) : RemoteRecord(create), JsonTime.ProjectIdProvider<T> {
 
     companion object {
 
@@ -71,8 +72,6 @@ abstract class ProjectRecord<T : ProjectType>(
     abstract fun getScheduleRecordId(taskId: String): String
 
     abstract fun getCustomTimeRecord(id: String): ProjectCustomTimeRecord<T>
-
-    abstract fun getCustomTimeId(id: String): CustomTimeId.Project<T>
 
     abstract fun getCustomTimeKey(customTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
 

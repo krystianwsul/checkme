@@ -4,6 +4,7 @@ import com.krystianwsul.common.firebase.records.*
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 abstract class DatabaseWrapper {
 
@@ -28,6 +29,8 @@ abstract class DatabaseWrapper {
     fun getPrivateTaskHierarchyRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskHierarchyRecord.TASK_HIERARCHIES}")
 
     fun newPrivateCustomTimeRecordId(projectId: ProjectKey<ProjectType.Private>) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
+
+    fun newRootUserCustomTimeId(userKey: UserKey) = getNewId("$USERS_KEY/${userKey.key}/${CustomTimeRecord.CUSTOM_TIMES}")
 
     fun newSharedProjectRecordId() = ProjectKey.Shared(getNewId(RECORDS_KEY))
 

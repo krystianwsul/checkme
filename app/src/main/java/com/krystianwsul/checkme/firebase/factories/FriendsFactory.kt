@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
@@ -20,6 +21,7 @@ class FriendsFactory(
         private val friendsLoader: FriendsLoader,
         initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
         domainDisposable: CompositeDisposable,
+        databaseWrapper: DatabaseWrapper,
 ) {
 
     companion object {
@@ -27,7 +29,7 @@ class FriendsFactory(
         private fun Map<UserKey, RootUserRecord>.toRootUsers() = mapValues { RootUser(it.value) }.toMutableMap()
     }
 
-    private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots)
+    private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots, databaseWrapper)
     private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = rootUserManager.records.toRootUsers()
@@ -37,8 +39,6 @@ class FriendsFactory(
     val friends: Collection<RootUser> get() = _friends.values
 
     val changeTypes: Observable<ChangeType>
-
-    val savedList get() = rootUserManager.savedList
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents

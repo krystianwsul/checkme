@@ -77,7 +77,7 @@ class FactoryLoader(
                     val startTime = ExactTimeStamp.Local.now
 
                     val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo()) }
+                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
                             .cacheImmediate()
 
                     val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
@@ -117,7 +117,7 @@ class FactoryLoader(
                     )
 
                     val friendsFactorySingle = friendsLoader.initialFriendsEvent
-                            .map { FriendsFactory(friendsLoader, it, domainDisposable) }
+                            .map { FriendsFactory(friendsLoader, it, domainDisposable, factoryProvider.database) }
                             .cacheImmediate()
 
                     val domainFactorySingle = Single.zip(

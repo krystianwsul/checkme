@@ -7,12 +7,13 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
 
-class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbInfo) {
+class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbInfo, databaseWrapper: DatabaseWrapper) {
 
-    private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot)
+    private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot, databaseWrapper)
 
     private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))
 
@@ -32,8 +33,6 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
                 .startWithItem(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!
-
-    val savedList get() = myUserManager.savedList
 
     init {
         user.name = deviceDbInfo.name

@@ -1,7 +1,9 @@
 package com.krystianwsul.common.time
 
+import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.records.CustomTimeRecord
 import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
+import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -52,6 +54,8 @@ sealed class Time {
 
         override fun toString() = name
 
+        abstract fun delete()
+
         abstract class Project<T : ProjectType> : Custom() {
 
             protected abstract val project: com.krystianwsul.common.firebase.models.Project<T>
@@ -64,8 +68,25 @@ sealed class Time {
 
             val projectId by lazy { project.projectKey }
 
-            fun delete() {
+            override fun delete() {
                 project.deleteCustomTime(this)
+
+                customTimeRecord.delete()
+            }
+        }
+
+        class User(
+                private val user: RootUser,
+                override val customTimeRecord: UserCustomTimeRecord,
+        ) : Custom() {
+
+            override val id = customTimeRecord.id
+
+            override val key = customTimeRecord.customTimeKey
+
+            override fun delete() {
+                // todo customTime
+//                user.deleteCustomTime(this)
 
                 customTimeRecord.delete()
             }

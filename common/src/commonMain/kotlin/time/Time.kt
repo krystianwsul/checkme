@@ -1,6 +1,5 @@
 package com.krystianwsul.common.time
 
-import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -27,7 +26,7 @@ sealed class Time {
 
     abstract class Custom<T : ProjectType> : Time() {
 
-        protected abstract val project: Project<T>
+        protected abstract val project: com.krystianwsul.common.firebase.models.Project<T>
 
         abstract val customTimeRecord: ProjectCustomTimeRecord<T>
 
@@ -60,5 +59,7 @@ sealed class Time {
 
             customTimeRecord.delete()
         }
+
+        abstract class Project<T : ProjectType> : Custom<T>()
     }
 }

@@ -11,8 +11,8 @@ import com.krystianwsul.common.utils.ProjectType
 
 class PrivateCustomTime(
         override val project: PrivateProject,
-        override val customTimeRecord: PrivateCustomTimeRecord
-) : Time.Custom<ProjectType.Private>() {
+        override val customTimeRecord: PrivateCustomTimeRecord,
+) : Time.Custom.Project<ProjectType.Private>() {
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId

@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.ProjectType
 class SharedCustomTime(
         override val project: SharedProject,
         override val customTimeRecord: SharedCustomTimeRecord,
-) : Time.Custom<ProjectType.Shared>() {
+) : Time.Custom.Project<ProjectType.Shared>() {
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId as CustomTimeId.Project.Shared

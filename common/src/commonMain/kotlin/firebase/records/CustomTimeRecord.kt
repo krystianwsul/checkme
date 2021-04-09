@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.CustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
@@ -47,8 +46,6 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
     val projectId get() = projectRecord.projectKey
 
     override val key get() = projectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
-
-    abstract fun mine(userInfo: UserInfo): Boolean
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
         when (dayOfWeek) {

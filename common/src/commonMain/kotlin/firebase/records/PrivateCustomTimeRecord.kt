@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -30,8 +29,6 @@ class PrivateCustomTimeRecord(
     override val createObject get() = customTimeJson
 
     override fun deleteFromParent() = check(projectRecord.customTimeRecords.remove(id) == this)
-
-    override fun mine(userInfo: UserInfo) = true
 
     var current by Committer(customTimeJson::current)
     var endTime by Committer(customTimeJson::endTime)

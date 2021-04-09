@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.utils.mapNotNull
+import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.Observables
@@ -12,22 +13,26 @@ fun <T : Any, U : Any> mergePaperAndRx(
         converter: Converter<T, U>,
         path: String,
 ): Observable<U> {
+    var startTime: ExactTimeStamp.Local? = null
+
     /**
      * Order is significant in this operation.  FirebaseObservable has to be first, because of a weird race condition
      * that was happening.
      */
-    val permutationObservable = Observables.combineLatest(
+    return Observables.combineLatest(
             firebaseObservable.map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .take(1)
                     .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
             paperMaybe.toObservable()
                     .map<AndroidDatabaseWrapper.LoadState<T>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
                     .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
-    ).scan<PairState<T, U>>(PairState.Initial(converter, path)) { oldPairState, (newFirebaseState, newPaperState) ->
-        oldPairState.processNextPair(newPaperState, newFirebaseState)
-    }
-
-    return permutationObservable.mapNotNull { it.emission }.mergeWith(firebaseObservable.skip(1))
+    )
+            .doOnSubscribe { startTime = ExactTimeStamp.Local.now }
+            .scan<PairState<T, U>>(PairState.Initial(converter, path) { startTime }) { oldPairState, (newFirebaseState, newPaperState) ->
+                oldPairState.processNextPair(newPaperState, newFirebaseState)
+            }
+            .mapNotNull { it.emission }
+            .mergeWith(firebaseObservable.skip(1))
 }
 
 class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T)
@@ -44,6 +49,7 @@ private sealed class PairState<T : Any, U : Any> {
     class Initial<T : Any, U : Any>(
             private val converter: Converter<T, U>,
             private val path: String,
+            private val getStartTime: () -> ExactTimeStamp.Local?,
     ) : PairState<T, U>() {
 
         override val emission: U? get() = null
@@ -55,13 +61,14 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-            return SkippingFirst(converter, path)
+            return SkippingFirst(converter, path, getStartTime)
         }
     }
 
     class SkippingFirst<T : Any, U : Any>(
             private val converter: Converter<T, U>,
             private val path: String,
+            private val getStartTime: () -> ExactTimeStamp.Local?,
     ) : PairState<T, U>() {
 
         override val emission: U? = null
@@ -73,7 +80,7 @@ private sealed class PairState<T : Any, U : Any> {
             return if (newPaperState is AndroidDatabaseWrapper.LoadState.Initial) {
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
-                FirebaseCameFirst(newFirebaseState.value)
+                FirebaseCameFirst(newFirebaseState.value, path, getStartTime)
             } else {
                 check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
@@ -83,7 +90,13 @@ private sealed class PairState<T : Any, U : Any> {
         }
     }
 
-    class FirebaseCameFirst<T : Any, U : Any>(private val firebase: U) : PairState<T, U>() {
+    class FirebaseCameFirst<T : Any, U : Any>(
+            private val firebase: U,
+            private val path: String,
+            private val getStartTime: () -> ExactTimeStamp.Local?,
+    ) : PairState<T, U>() {
+
+        private val firebaseTime = ExactTimeStamp.Local.now
 
         override val emission = firebase
 
@@ -96,8 +109,10 @@ private sealed class PairState<T : Any, U : Any> {
 
             check(newFirebaseState.value == firebase)
 
+            val paperTime = ExactTimeStamp.Local.now
+
             // This shouldn't happen; Paper should either come before FB, or never.  Investigate.
-            MyCrashlytics.logException(PaperCacheException("paper came after firebase"))
+            MyCrashlytics.logException(PaperCacheException("paper came after firebase, path: $path, startTime: ${getStartTime()}, firebaseTime: $firebaseTime, paperTime: $paperTime"))
 
             return Terminal(null)
         }

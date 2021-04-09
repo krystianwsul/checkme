@@ -16,7 +16,7 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    abstract val id: CustomTimeId<T>
+    abstract val id: CustomTimeId.Project<T>
     abstract val customTimeKey: CustomTimeKey<T>
     protected abstract val customTimeJson: CustomTimeJson
     protected abstract val projectRecord: ProjectRecord<T>

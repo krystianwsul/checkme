@@ -3,7 +3,7 @@ package com.krystianwsul.common.utils
 sealed class CustomTimeKey<T : ProjectType> : Parcelable, Serializable {
 
     abstract val projectId: ProjectKey<T>
-    abstract val customTimeId: CustomTimeId<T>
+    abstract val customTimeId: CustomTimeId.Project<T>
 
     @Parcelize
     data class Private(
@@ -14,6 +14,6 @@ sealed class CustomTimeKey<T : ProjectType> : Parcelable, Serializable {
     @Parcelize
     data class Shared(
             override val projectId: ProjectKey<ProjectType.Shared>,
-            override val customTimeId: CustomTimeId<ProjectType.Shared>
+            override val customTimeId: CustomTimeId.Project<ProjectType.Shared>,
     ) : CustomTimeKey<ProjectType.Shared>()
 }

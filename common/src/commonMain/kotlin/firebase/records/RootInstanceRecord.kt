@@ -15,15 +15,15 @@ class RootInstanceRecord<T : ProjectType>(
         createObject: InstanceJson,
         scheduleKey: ScheduleKey,
         firebaseKey: String,
-        scheduleCustomTimeId: CustomTimeId<T>?,
-        private val parent: Parent
+        scheduleCustomTimeId: CustomTimeId.Project<T>?,
+        private val parent: Parent,
 ) : InstanceRecord<T>(
         create,
         taskRecord,
         createObject,
         scheduleKey,
         firebaseKey,
-        scheduleCustomTimeId
+        scheduleCustomTimeId,
 ) {
 
     companion object {
@@ -43,8 +43,8 @@ class RootInstanceRecord<T : ProjectType>(
 
         private fun <T : ProjectType> timeStringToTime(
                 projectRecord: ProjectRecord<T>,
-                timeString: String
-        ): Pair<TimePair, CustomTimeId<T>?> {
+                timeString: String,
+        ): Pair<TimePair, CustomTimeId.Project<T>?> {
             val result = hourMinuteRegex.find(timeString)
 
             return if (result != null) {
@@ -62,8 +62,8 @@ class RootInstanceRecord<T : ProjectType>(
         fun <T : ProjectType> dateTimeStringsToSchedulePair(
                 projectRecord: ProjectRecord<T>,
                 dateString: String,
-                timeString: String
-        ): Pair<ScheduleKey, CustomTimeId<T>?> {
+                timeString: String,
+        ): Pair<ScheduleKey, CustomTimeId.Project<T>?> {
             val (timePair, customTimeId) = timeStringToTime(projectRecord, timeString)
             val scheduleKey = ScheduleKey(dateStringToDate(dateString), timePair)
 
@@ -75,8 +75,8 @@ class RootInstanceRecord<T : ProjectType>(
             taskRecord: TaskRecord<T>,
             createObject: InstanceJson,
             scheduleKey: ScheduleKey,
-            scheduleCustomTimeId: CustomTimeId<T>?,
-            parent: Parent
+            scheduleCustomTimeId: CustomTimeId.Project<T>?,
+            parent: Parent,
     ) : this(
             true,
             taskRecord,
@@ -84,7 +84,7 @@ class RootInstanceRecord<T : ProjectType>(
             scheduleKey,
             "${scheduleKeyToDateString(scheduleKey, true)}/${scheduleKeyToTimeString(scheduleKey, true)}",
             scheduleCustomTimeId,
-            parent
+            parent,
     )
 
     constructor(
@@ -93,10 +93,10 @@ class RootInstanceRecord<T : ProjectType>(
             dateString: String,
             timeString: String,
             parent: Parent,
-            schedulePair: Pair<ScheduleKey, CustomTimeId<T>?> = dateTimeStringsToSchedulePair(
+            schedulePair: Pair<ScheduleKey, CustomTimeId.Project<T>?> = dateTimeStringsToSchedulePair(
                     taskRecord.projectRecord,
                     dateString,
-                    timeString
+                    timeString,
             ),
     ) : this(
             false,

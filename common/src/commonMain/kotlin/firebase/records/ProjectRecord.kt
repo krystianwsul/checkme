@@ -20,7 +20,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val projectKey: ProjectKey<T>
 
-    abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
+    abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, CustomTimeRecord<T>>
 
     abstract val taskRecordsRelay: BehaviorSubject<out Map<String, TaskRecord<T>>>
 
@@ -72,9 +72,9 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T>
 
-    abstract fun getCustomTimeId(id: String): CustomTimeId<T>
+    abstract fun getCustomTimeId(id: String): CustomTimeId.Project<T>
 
-    abstract fun getCustomTimeKey(customTimeId: CustomTimeId<T>): CustomTimeKey<T>
+    abstract fun getCustomTimeKey(customTimeId: CustomTimeId.Project<T>): CustomTimeKey<T>
 
     abstract fun newNoScheduleOrParentRecordId(taskId: String): String
 

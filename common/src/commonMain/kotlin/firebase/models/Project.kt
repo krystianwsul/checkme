@@ -28,7 +28,7 @@ abstract class Project<T : ProjectType>(
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
-    protected abstract val remoteCustomTimes: Map<out CustomTimeId<T>, Time.Custom<T>>
+    protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom<T>>
 
     abstract val projectKey: ProjectKey<T>
 
@@ -204,7 +204,7 @@ abstract class Project<T : ProjectType>(
             ownerKey: UserKey,
             time: Time,
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId<T>, null, null)
+        is Time.Custom<*> -> Triple(newTime.key.customTimeId as CustomTimeId.Project<T>, null, null)
         is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
     }
 
@@ -345,7 +345,7 @@ abstract class Project<T : ProjectType>(
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun getCustomTime(customTimeId: CustomTimeId<*>): Time.Custom<T>
+    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom<T>
     abstract fun getCustomTime(customTimeKey: CustomTimeKey<T>): Time.Custom<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>
 

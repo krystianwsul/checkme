@@ -165,7 +165,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
     fun newInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            customTimeId: CustomTimeId<T>?
+            customTimeId: CustomTimeId.Project<T>?,
     ): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
@@ -175,7 +175,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                 instanceJson,
                 scheduleKey,
                 firebaseKey,
-                customTimeId
+                customTimeId,
         )
 
         check(!instanceRecords.containsKey(projectInstanceRecord.scheduleKey))

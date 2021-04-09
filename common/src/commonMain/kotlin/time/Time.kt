@@ -31,7 +31,7 @@ sealed class Time {
 
         abstract val customTimeRecord: CustomTimeRecord<T>
 
-        abstract val id: CustomTimeId<T>
+        abstract val id: CustomTimeId.Project<T>
 
         abstract val key: CustomTimeKey<T>
 

@@ -582,7 +582,7 @@ class Task<T : ProjectType>(
                         .time
                         .timePair
                         .customTimeKey
-                        ?.let { it.customTimeId as CustomTimeId<T> }
+                        ?.let { it.customTimeId as CustomTimeId.Project<T> }
         )
 
         _existingInstances[instance.scheduleKey] = instance

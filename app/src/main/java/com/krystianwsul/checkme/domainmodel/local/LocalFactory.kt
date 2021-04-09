@@ -28,9 +28,9 @@ class LocalFactory(
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
-            scheduleCustomTimeId: CustomTimeId<*>?,
+            scheduleCustomTimeId: CustomTimeId.Project<*>?,
             scheduleHour: Int?,
-            scheduleMinute: Int?
+            scheduleMinute: Int?,
     ): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>
         if (scheduleCustomTimeId != null) {

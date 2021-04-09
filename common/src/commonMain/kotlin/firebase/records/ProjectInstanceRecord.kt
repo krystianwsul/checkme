@@ -11,14 +11,14 @@ class ProjectInstanceRecord<T : ProjectType>(
         createObject: InstanceJson,
         scheduleKey: ScheduleKey,
         firebaseKey: String,
-        scheduleCustomTimeId: CustomTimeId<T>?
+        scheduleCustomTimeId: CustomTimeId.Project<T>?,
 ) : InstanceRecord<T>(
         create,
         taskRecord,
         createObject,
         scheduleKey,
         taskRecord.key + "/instances/" + firebaseKey,
-        scheduleCustomTimeId
+        scheduleCustomTimeId,
 ) {
 
     override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)

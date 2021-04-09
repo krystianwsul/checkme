@@ -7,7 +7,7 @@ sealed class JsonTime<out T : ProjectType> {
 
     abstract fun toJson(): String
 
-    data class Custom<T : ProjectType>(val id: CustomTimeId<T>) : JsonTime<T>() {
+    data class Custom<T : ProjectType>(val id: CustomTimeId.Project<T>) : JsonTime<T>() {
 
         override fun toJson() = id.toString()
     }

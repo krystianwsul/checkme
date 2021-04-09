@@ -16,7 +16,7 @@ abstract class InstanceRecord<T : ProjectType>(
         final override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         override val key: String,
-        val scheduleCustomTimeId: CustomTimeId<T>?
+        val scheduleCustomTimeId: CustomTimeId.Project<T>?,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -51,8 +51,8 @@ abstract class InstanceRecord<T : ProjectType>(
 
         fun <T : ProjectType> stringToScheduleKey(
                 projectRecord: ProjectRecord<T>,
-                key: String
-        ): Pair<ScheduleKey, CustomTimeId<T>?> {
+                key: String,
+        ): Pair<ScheduleKey, CustomTimeId.Project<T>?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
 
             if (hourMinuteMatchResult != null) {

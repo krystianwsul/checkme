@@ -78,7 +78,7 @@ class PrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
+    override fun getCustomTime(customTimeId: CustomTimeId.Project<*>): PrivateCustomTime {
         check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Project.Private))
 
         return remoteCustomTimes.getValue(customTimeId)

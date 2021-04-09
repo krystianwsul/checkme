@@ -35,7 +35,7 @@ open class RootInstanceManager<T : ProjectType>(
     fun newRootInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            scheduleCustomTimeId: CustomTimeId<T>?
+            scheduleCustomTimeId: CustomTimeId.Project<T>?,
     ) = RootInstanceRecord(
             taskRecord,
             instanceJson,

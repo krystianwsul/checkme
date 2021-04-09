@@ -13,8 +13,8 @@ data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMi
         check((customTimeKey == null) != (hourMinute == null))
     }
 
-    fun destructureRemote(): Triple<CustomTimeId<*>?, Int?, Int?> {
-        val customTimeId: CustomTimeId<*>?
+    fun destructureRemote(): Triple<CustomTimeId.Project<*>?, Int?, Int?> {
+        val customTimeId: CustomTimeId.Project<*>?
         val hour: Int?
         val minute: Int?
 

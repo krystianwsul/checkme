@@ -39,10 +39,10 @@ class PersistenceManager(
     fun createInstanceShownRecord(
             remoteTaskId: String,
             scheduleDate: Date,
-            customTimeId: CustomTimeId<*>?,
+            customTimeId: CustomTimeId.Project<*>?,
             hour: Int?,
             minute: Int?,
-            projectId: ProjectKey<*>
+            projectId: ProjectKey<*>,
     ): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
 

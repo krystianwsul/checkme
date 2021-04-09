@@ -424,7 +424,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                         .let {
                             @Suppress("UNCHECKED_CAST")
                             when (it) {
-                                is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
+                                is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId.Project<T>)
                                 is Time.Normal -> JsonTime.Normal(it.hourMinute)
                             }
                         }
@@ -599,7 +599,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val scheduleHourMinute: HourMinute?
 
-        abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>?
+        abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId.Project<T>>?
 
         abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
 
@@ -610,7 +610,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 val instanceRecord: InstanceRecord<T>,
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId<T>) = task.project.getCustomTime(customTimeId)
+            fun getCustomTime(customTimeId: CustomTimeId.Project<T>) = task.project.getCustomTime(customTimeId)
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
@@ -708,7 +708,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val scheduleHourMinute = scheduleTime.timePair.hourMinute
 
-            override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>? = null
+            override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId.Project<T>>? = null
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
 
@@ -752,7 +752,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId<*>?,
+                scheduleCustomTimeId: CustomTimeId.Project<*>?,
                 scheduleHour: Int?,
                 scheduleMinute: Int?,
         ): Shown?

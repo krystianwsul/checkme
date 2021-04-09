@@ -54,7 +54,7 @@ class FactoryLoaderNewTest {
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId<*>?,
+                scheduleCustomTimeId: CustomTimeId.Project<*>?,
                 scheduleHour: Int?,
                 scheduleMinute: Int?,
         ): Instance.Shown? = null

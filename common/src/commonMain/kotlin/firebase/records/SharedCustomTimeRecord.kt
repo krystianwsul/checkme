@@ -12,7 +12,7 @@ class SharedCustomTimeRecord(
         override val id: CustomTimeId.Project.Shared,
         override val customTimeJson: SharedCustomTimeJson,
         override val projectRecord: SharedProjectRecord,
-) : CustomTimeRecord<ProjectType.Shared>(create) {
+) : ProjectCustomTimeRecord<ProjectType.Shared>(create) {
 
     constructor(
             id: CustomTimeId.Project.Shared,
@@ -22,7 +22,7 @@ class SharedCustomTimeRecord(
 
     constructor(
             remoteProjectRecord: SharedProjectRecord,
-            customTimeJson: SharedCustomTimeJson
+            customTimeJson: SharedCustomTimeJson,
     ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
     override val customTimeKey = CustomTimeKey.Project.Shared(projectRecord.projectKey, id)

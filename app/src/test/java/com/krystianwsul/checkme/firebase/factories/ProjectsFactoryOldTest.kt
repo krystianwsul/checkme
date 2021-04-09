@@ -248,11 +248,12 @@ class ProjectsFactoryOldTest {
 
         projectsFactory.save()
 
-        // doesn't emit ChangeType.LOCAL
         privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
         ))
+
+        // doesn't emit ChangeType.LOCAL
     }
 
     @Test

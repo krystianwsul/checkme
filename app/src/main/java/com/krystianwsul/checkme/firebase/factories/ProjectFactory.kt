@@ -99,14 +99,14 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
             projectChangeType
         }
 
-        val addTaskChangeTypes = projectLoader.addTaskEvents.map { (projectChangeType, addTaskEvent) ->
+        val addTaskChangeTypes = projectLoader.addTaskEvents.mapNotNull { (projectChangeType, addTaskEvent) ->
             addTaskEvent.apply { updateRootInstanceManager(taskRecord, instanceSnapshot) }
 
             check(rootInstanceManagers.containsKey(addTaskEvent.taskRecord.taskKey))
 
             project = newProject(addTaskEvent.projectRecord)
 
-            projectChangeType
+            projectChangeType.takeIf { it == ChangeType.REMOTE }
         }
 
         val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.mapNotNull { changeInstancesEvent ->

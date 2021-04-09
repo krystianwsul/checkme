@@ -46,7 +46,7 @@ class SharedTaskRecord private constructor(
             false,
             id,
             projectRecord,
-            taskJson
+            taskJson,
     )
 
     constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
@@ -67,8 +67,12 @@ class SharedTaskRecord private constructor(
             weeklyScheduleJson as? SharedWeeklyScheduleJson,
             monthlyDayScheduleJson as? SharedMonthlyDayScheduleJson,
             monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
-            yearlyScheduleJson as? SharedYearlyScheduleJson
+            yearlyScheduleJson as? SharedYearlyScheduleJson,
     )
 
-    override fun deleteFromParent() = check(sharedProjectRecord.taskRecords.remove(id) == this)
+    override fun deleteFromParent() {
+        sharedProjectRecord.mutateTaskRecords {
+            check(it.remove(id) == this)
+        }
+    }
 }

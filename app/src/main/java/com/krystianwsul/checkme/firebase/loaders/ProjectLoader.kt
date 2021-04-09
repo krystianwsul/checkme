@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.badoo.reaktive.rxjavainterop.asRxJava3Observable
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -88,13 +89,23 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         )
 
         // todo instances: this doesn't seem to get updated when a task is added, without ChangeType.LOCAL propagation
-        private val rootInstanceDatabaseRx = projectRecordObservable.map {
-            ProjectData(
-                    it,
-                    it.data
-                            .taskRecords
-                            .mapKeys { it.value.taskKey }
-            )
+        private val rootInstanceDatabaseRx = projectRecordObservable.switchMap { changeWrapper ->
+            val taskObservable = changeWrapper.data
+                    .taskRecordsRelay
+                    .asRxJava3Observable()
+                    .map {
+                        it.mapKeys { it.value.taskKey }
+                    }
+                    .share()
+
+            listOf(
+                    taskObservable.take(1).map {
+                        ProjectData(changeWrapper, it)
+                    },
+                    taskObservable.skip(1).map {
+                        ProjectData(changeWrapper.copy(ChangeType.LOCAL), it)
+                    }
+            ).merge()
         }
                 .processChanges(
                         { it.taskMap.keys },
@@ -137,8 +148,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         override val addTaskEvents = rootInstanceDatabaseRx.skip(1)
                 .switchMap {
                     val (changeType, projectRecord) = it.original.changeWrapper
-
-                    check(changeType == ChangeType.REMOTE)
 
                     it.addedEntries
                             .values

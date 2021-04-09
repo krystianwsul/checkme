@@ -272,8 +272,9 @@ class ProjectsFactoryNewTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
         ))
 
-        // doesn't emit ChangeType.LOCAL
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+        emissionChecker.checkRemote {
+            factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+        }
     }
 
     @Test

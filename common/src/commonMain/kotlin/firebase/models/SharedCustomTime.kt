@@ -16,10 +16,4 @@ class SharedCustomTime(
 
     val ownerKey get() = customTimeRecord.ownerKey
     val privateKey get() = customTimeRecord.privateKey
-
-    override fun delete() {
-        project.deleteCustomTime(this)
-
-        customTimeRecord.delete()
-    }
 }

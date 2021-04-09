@@ -111,7 +111,7 @@ class SharedProject(
         }
     }
 
-    fun deleteCustomTime(remoteCustomTime: SharedCustomTime) {
+    override fun deleteCustomTime(remoteCustomTime: Time.Custom<ProjectType.Shared>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)

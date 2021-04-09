@@ -72,7 +72,7 @@ class PrivateProject(
         return remoteCustomTime
     }
 
-    fun deleteCustomTime(remoteCustomTime: PrivateCustomTime) {
+    override fun deleteCustomTime(remoteCustomTime: Time.Custom<ProjectType.Private>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)

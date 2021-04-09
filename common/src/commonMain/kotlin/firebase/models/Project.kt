@@ -345,6 +345,8 @@ abstract class Project<T : ProjectType>(
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
+    abstract fun deleteCustomTime(remoteCustomTime: Time.Custom<T>)
+
     abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom<T>
     abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom<T>

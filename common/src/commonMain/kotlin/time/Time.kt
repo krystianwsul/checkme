@@ -55,6 +55,10 @@ sealed class Time {
 
         override fun toString() = name
 
-        abstract fun delete()
+        fun delete() {
+            project.deleteCustomTime(this)
+
+            customTimeRecord.delete()
+        }
     }
 }

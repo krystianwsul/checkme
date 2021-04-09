@@ -425,7 +425,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                             @Suppress("UNCHECKED_CAST")
                             when (it) {
                                 // todo customtime
-                                is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId.Project<T>)
+                                is Time.Custom -> JsonTime.Custom(it.key.customTimeId as CustomTimeId.Project<T>)
                                 is Time.Normal -> JsonTime.Normal(it.hourMinute)
                             }
                         }

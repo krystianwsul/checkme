@@ -1,10 +1,10 @@
 package com.krystianwsul.common.utils
 
-sealed class CustomTimeId<T : ProjectType> : Parcelable, Serializable {
+sealed class CustomTimeId : Parcelable, Serializable {
 
     abstract val value: String
 
-    sealed class Project<T : ProjectType> : CustomTimeId<T>() {
+    sealed class Project<T : ProjectType> : CustomTimeId() {
 
         @Parcelize
         data class Private(override val value: String) : Project<ProjectType.Private>() {
@@ -17,5 +17,11 @@ sealed class CustomTimeId<T : ProjectType> : Parcelable, Serializable {
 
             override fun toString() = value
         }
+    }
+
+    @Parcelize
+    data class User(override val value: String) : CustomTimeId() {
+
+        override fun toString() = value
     }
 }

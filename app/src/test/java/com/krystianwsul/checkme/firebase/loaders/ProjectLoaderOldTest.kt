@@ -10,7 +10,6 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.models.Task
@@ -41,7 +40,7 @@ class ProjectLoaderOldTest {
         override val database = object : ProjectProvider.Database() {
 
             override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                    Observable.just<Snapshot<Map<String, Map<String, InstanceJson>>>>(Snapshot("", null))
+                    Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")

@@ -152,11 +152,15 @@ class FactoryLoaderNewTest {
                 getOrInitUserObservable(userKey)
         }
 
-        override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+        override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
             if (!rootInstanceObservables.containsKey(taskFirebaseKey))
                 rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-            return rootInstanceObservables.getValue(taskFirebaseKey)
+
+            return rootInstanceObservables.getValue(taskFirebaseKey).map {
+                ProjectProvider.RootInstanceData(true, it)
+            }
         }
+
 
         override fun getNewId(path: String) = "id"
 

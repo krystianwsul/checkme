@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
@@ -30,7 +29,7 @@ class FriendsLoaderTest {
                     userWrapper: UserWrapper,
             ) = userObservables.getValue(userKey).accept(Snapshot(userKey.key, userWrapper))
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
                 TODO("Not yet implemented")
             }
 

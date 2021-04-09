@@ -1,12 +1,11 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-class DatabaseRx<T : Snapshot<*>>(domainDisposable: CompositeDisposable, databaseObservable: Observable<T>) {
+class DatabaseRx<T : Any>(domainDisposable: CompositeDisposable, databaseObservable: Observable<T>) {
 
     val disposable = CompositeDisposable().also { domainDisposable += it }
 

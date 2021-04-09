@@ -54,7 +54,7 @@ class ProjectFactoryNewTest {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
                 TODO("Not yet implemented")
             }
 

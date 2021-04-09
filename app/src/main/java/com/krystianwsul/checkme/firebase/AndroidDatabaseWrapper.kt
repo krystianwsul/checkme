@@ -11,12 +11,17 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
+import com.krystianwsul.checkme.firebase.loaders.RootInstanceMap
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.Parsable
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.pacoworks.rxpaper2.RxPaperBook
@@ -144,15 +149,18 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun rootInstanceQuery(taskFirebaseKey: String) =
             rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
 
-    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
         return RemoteConfig.observable
                 .map { it.queryRemoteInstances }
                 .distinctUntilChanged()
                 .switchMap {
-                    if (it)
-                        rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges()
-                    else
-                        Observable.just(Snapshot("", null))
+                    if (it) {
+                        rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges<RootInstanceMap>().map {
+                            ProjectProvider.RootInstanceData(true, it)
+                        }
+                    } else {
+                        Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
+                    }
                 }
     }
 

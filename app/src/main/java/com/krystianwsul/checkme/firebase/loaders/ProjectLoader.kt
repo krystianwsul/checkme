@@ -79,13 +79,15 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         }
 
         private data class ProjectData<T : ProjectType>(
+                val internallyUpdated: Boolean,
                 val changeWrapper: ChangeWrapper<out ProjectRecord<T>>,
                 val taskMap: Map<TaskKey, TaskRecord<T>>,
         )
 
         private data class InstanceData<T : ProjectType>(
+                val internallyUpdated: Boolean,
                 val taskRecord: TaskRecord<T>,
-                val databaseRx: DatabaseRx<Snapshot<Map<String, Map<String, InstanceJson>>>>,
+                val databaseRx: DatabaseRx<ProjectProvider.RootInstanceData>,
         )
 
         // todo instances: this doesn't seem to get updated when a task is added, without ChangeType.LOCAL propagation
@@ -100,19 +102,20 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
             listOf(
                     taskObservable.take(1).map {
-                        ProjectData(changeWrapper, it)
+                        ProjectData(false, changeWrapper, it)
                     },
                     taskObservable.skip(1).map {
-                        ProjectData(changeWrapper.copy(ChangeType.LOCAL), it)
+                        ProjectData(true, changeWrapper, it)
                     }
             ).merge()
         }
                 .processChanges(
                         { it.taskMap.keys },
-                        { (_, newData), taskKey ->
+                        { (internallyUpdated, _, newData), taskKey ->
                             val taskRecord = newData.getValue(taskKey)
 
                             InstanceData(
+                                    internallyUpdated,
                                     taskRecord,
                                     DatabaseRx(
                                             domainDisposable,
@@ -131,14 +134,18 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
                     it.newMap
                             .values
-                            .map { (taskRecord, databaseRx) ->
+                            .map { (_, taskRecord, databaseRx) ->
                                 databaseRx.first.map { taskRecord.taskKey to it }
                             }
                             .zipSingle()
                             .map {
                                 ChangeWrapper(
                                         changeType,
-                                        InitialProjectEvent(projectManager, projectRecord, it.toMap()),
+                                        InitialProjectEvent(
+                                                projectManager,
+                                                projectRecord,
+                                                it.toMap().mapValues { it.value.snapshot },
+                                        ),
                                 )
                             }
                 }
@@ -147,17 +154,27 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         // Here we observe the initial instances for new tasks
         override val addTaskEvents = rootInstanceDatabaseRx.skip(1)
                 .switchMap {
-                    val (changeType, projectRecord) = it.original.changeWrapper
+                    val (originalChangeType, projectRecord) = it.original.changeWrapper
 
                     it.addedEntries
                             .values
-                            .map { (taskRecord, databaseRx) ->
+                            .map { (internallyUpdated, taskRecord, databaseRx) ->
                                 databaseRx.first
                                         .toObservable()
                                         .map {
+                                            val changeType = if (internallyUpdated) {
+                                                if (it.rootEnabled) {
+                                                    originalChangeType
+                                                } else {
+                                                    ChangeType.LOCAL
+                                                }
+                                            } else {
+                                                originalChangeType
+                                            }
+
                                             ChangeWrapper(
                                                     changeType,
-                                                    AddTaskEvent(projectRecord, taskRecord, it)
+                                                    AddTaskEvent(projectRecord, taskRecord, it.snapshot)
                                             )
                                         }
                             }
@@ -173,9 +190,11 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
             it.newMap
                     .values
-                    .map { (taskRecord, databaseRx) ->
+                    .map { (_, taskRecord, databaseRx) ->
                         databaseRx.changes.map {
-                            ChangeInstancesEvent(projectRecord, taskRecord, it)
+                            check(it.rootEnabled)
+
+                            ChangeInstancesEvent(projectRecord, taskRecord, it.snapshot)
                         }
                     }
                     .merge()
@@ -195,14 +214,14 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                                 if (it.isEmpty()) {
                                     Single.just(ChangeProjectEvent(projectRecord, mapOf()))
                                 } else {
-                                    it.map { (taskRecord, databaseRx) ->
+                                    it.map { (_, taskRecord, databaseRx) ->
                                         databaseRx.latest().map { taskRecord.taskKey to it }
                                     }
                                             .zipSingle()
                                             .map {
                                                 ChangeProjectEvent(
                                                         projectRecord,
-                                                        it.toMap().mapValues { it.value },
+                                                        it.toMap().mapValues { it.value.snapshot },
                                                 )
                                             }
                                 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.common.firebase.json.InstanceJson
 import io.reactivex.rxjava3.core.Observable
 
 fun <T : Any, U, V> Observable<T>.processChanges(
@@ -32,3 +33,5 @@ fun <T : Any, U, V> Observable<T>.processChanges(
             newMap
     )
 }.skip(1).map { MapChanges(it.first!!, it.second) }
+
+typealias RootInstanceMap = Map<String, Map<String, InstanceJson>>

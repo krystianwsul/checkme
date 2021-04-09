@@ -59,7 +59,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
 
     interface TimeDialogListener {
 
-        fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>)
+        fun onCustomTimeSelected(customTimeKey: CustomTimeKey.Project<*>)
 
         fun onOtherSelected()
 
@@ -67,7 +67,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
     }
 
     @Parcelize
-    class CustomTimeData(val customTimeKey: CustomTimeKey<*>, val name: String) : Parcelable {
+    class CustomTimeData(val customTimeKey: CustomTimeKey.Project<*>, val name: String) : Parcelable {
 
         init {
             check(!TextUtils.isEmpty(name))

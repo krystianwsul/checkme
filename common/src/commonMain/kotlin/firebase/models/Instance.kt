@@ -17,14 +17,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeKey: CustomTimeKey<*>?,
+                scheduleCustomTimeKey: CustomTimeKey.Project<*>?,
                 scheduleHourMinute: HourMinute?,
                 taskKey: TaskKey,
         ) = getNotificationId(
                 scheduleDate,
                 scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
                 scheduleHourMinute,
-                taskKey.run { Pair(projectKey.key, taskId) }
+                taskKey.run { Pair(projectKey.key, taskId) },
         )
 
         /*
@@ -601,7 +601,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId.Project<T>>?
 
-        abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
+        abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>?
 
         abstract val parentState: ParentState
 

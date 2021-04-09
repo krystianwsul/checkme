@@ -97,7 +97,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     val customTimeId = instanceShownRecord.scheduleCustomTimeId
                     val project = task!!.project
 
-                    val customTimeKey: CustomTimeKey<*>?
+                    val customTimeKey: CustomTimeKey.Project<*>?
                     val hourMinute: HourMinute?
                     if (!customTimeId.isNullOrEmpty()) {
                         check(instanceShownRecord.scheduleHour == null)

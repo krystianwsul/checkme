@@ -6,8 +6,8 @@ import com.krystianwsul.common.utils.Parcelize
 
 @Parcelize
 class TimePairPersist private constructor(
-        var customTimeKey: CustomTimeKey<*>?,
-        private var _hourMinute: HourMinute
+        var customTimeKey: CustomTimeKey.Project<*>?,
+        private var _hourMinute: HourMinute,
 ) : Parcelable {
 
     val hourMinute get() = _hourMinute

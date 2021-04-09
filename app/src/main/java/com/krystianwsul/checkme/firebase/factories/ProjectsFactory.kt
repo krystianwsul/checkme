@@ -241,7 +241,7 @@ class ProjectsFactory(
         sharedProjectFactories.forEach { it.value.saveInstances(values) }
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey<*>) =
+    fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =
             projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
 
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!

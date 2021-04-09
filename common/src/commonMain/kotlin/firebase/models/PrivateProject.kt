@@ -84,7 +84,9 @@ class PrivateProject(
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getCustomTime(customTimeKey.customTimeId)
+    override fun getCustomTime(customTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
+            getCustomTime(customTimeKey.customTimeId)
+
     override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Project.Private(customTimeId))
 
     override fun getOrCreateCustomTime(

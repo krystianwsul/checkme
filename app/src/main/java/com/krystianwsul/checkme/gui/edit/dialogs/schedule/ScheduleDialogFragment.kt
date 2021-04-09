@@ -77,7 +77,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override val backgroundView get() = binding.scheduleDialogRoot
     override val contentView get() = binding.scheduleDialogContentWrapper
 
-    private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey.Project<*>, EditViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -91,8 +91,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
-            check(customTimeDatas != null)
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey.Project<*>) {
+            checkNotNull(customTimeDatas)
 
             scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
 
@@ -429,7 +429,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (customTimeDatas != null) updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey.Project<*>, EditViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
         if (this::scheduleDialogData.isInitialized)

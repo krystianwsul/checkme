@@ -128,7 +128,9 @@ class SharedProject(
         return remoteCustomTimes.getValue(customTimeId)
     }
 
-    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getCustomTime(customTimeKey.customTimeId)
+    override fun getCustomTime(customTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
+            getCustomTime(customTimeKey.customTimeId)
+
     override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Project.Shared(customTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {

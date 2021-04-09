@@ -60,7 +60,7 @@ class InstanceRelevance(val instance: Instance<*>) {
     }
 
     fun setRemoteRelevant(
-            remoteCustomTimeRelevances: Map<CustomTimeKey<*>, RemoteCustomTimeRelevance>,
+            remoteCustomTimeRelevances: Map<CustomTimeKey.Project<*>, RemoteCustomTimeRelevance>,
             remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>,
     ) {
         check(relevant)

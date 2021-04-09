@@ -74,7 +74,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract fun getCustomTimeId(id: String): CustomTimeId.Project<T>
 
-    abstract fun getCustomTimeKey(customTimeId: CustomTimeId.Project<T>): CustomTimeKey<T>
+    abstract fun getCustomTimeKey(customTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
 
     abstract fun newNoScheduleOrParentRecordId(taskId: String): String
 

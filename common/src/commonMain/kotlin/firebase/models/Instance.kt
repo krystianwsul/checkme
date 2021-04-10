@@ -617,9 +617,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             private val recordInstanceTime: Time?
                 get() = instanceRecord.instanceJsonTime?.let {
+                    // todo customtime JsonTime
+
                     @Suppress("UNCHECKED_CAST")
                     when (it) {
-                        is JsonTime.Custom.User -> task.project.getCustomTime(it.key)
+                        is JsonTime.Custom.User -> task.project.userCustomTimeProvider.getUserCustomTime(it.key)
                         is JsonTime.Custom.Project<*> -> getCustomTime(it.id as CustomTimeId.Project<T>)
                         is JsonTime.Normal -> Time.Normal(it.hourMinute)
                         else -> throw UnsupportedOperationException() // compiler issue

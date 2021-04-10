@@ -11,14 +11,21 @@ import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         private val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
-) : Project<ProjectType.Private>(CopyScheduleHelper.Private, AssignedToHelper.Private, newRootInstanceManager) {
+) : Project<ProjectType.Private>(
+        CopyScheduleHelper.Private,
+        AssignedToHelper.Private,
+        userCustomTimeProvider,
+        newRootInstanceManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 

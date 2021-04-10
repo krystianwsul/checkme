@@ -17,8 +17,9 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper<T>,
         val assignedToHelper: AssignedToHelper<T>,
+        val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         protected val newRootInstanceManager: (taskRecord: TaskRecord<T>) -> RootInstanceManager<T>,
-) : Current {
+) : Current, JsonTime.ProjectCustomTimeProvider<T> {
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -346,9 +347,7 @@ abstract class Project<T : ProjectType>(
     abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T>
 
-    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User {
-        TODO("todo customtime fetch")
-    }
+    override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>) = getCustomTime(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }

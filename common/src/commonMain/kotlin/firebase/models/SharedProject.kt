@@ -13,14 +13,21 @@ import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
         private val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
-) : Project<ProjectType.Shared>(CopyScheduleHelper.Shared, AssignedToHelper.Shared, newRootInstanceManager) {
+) : Project<ProjectType.Shared>(
+        CopyScheduleHelper.Shared,
+        AssignedToHelper.Shared,
+        userCustomTimeProvider,
+        newRootInstanceManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 

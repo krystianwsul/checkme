@@ -424,8 +424,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                         .let {
                             @Suppress("UNCHECKED_CAST")
                             when (it) {
-                                // todo customtime
-                                is Time.Custom -> JsonTime.Custom(it.key.customTimeId as CustomTimeId.Project<T>)
+                                is Time.Custom.Project<*> ->
+                                    JsonTime.Custom.Project(it.key.customTimeId as CustomTimeId.Project<T>)
+                                is Time.Custom.User -> JsonTime.Custom.User(it.key)
                                 is Time.Normal -> JsonTime.Normal(it.hourMinute)
                             }
                         }
@@ -600,7 +601,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val scheduleHourMinute: HourMinute?
 
-        abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId.Project<T>>?
+        abstract val customTimeKey: CustomTimeKey?
 
         abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>?
 
@@ -624,9 +625,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             private val recordInstanceTime: Time?
                 get() = instanceRecord.instanceJsonTime?.let {
+                    @Suppress("UNCHECKED_CAST")
                     when (it) {
-                        is JsonTime.Custom -> getCustomTime(it.id)
+                        is JsonTime.Custom.User -> task.project.getCustomTime(it.key)
+                        is JsonTime.Custom.Project<*> -> getCustomTime(it.id as CustomTimeId.Project<T>)
                         is JsonTime.Normal -> Time.Normal(it.hourMinute)
+                        else -> throw UnsupportedOperationException() // compiler issue
                     }
                 }
 
@@ -658,7 +662,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val customTimeKey
                 get() = instanceRecord.instanceJsonTime?.let {
-                    (it as? JsonTime.Custom)?.let { Pair(task.project.projectKey, it.id) }
+                    when (it) {
+                        is JsonTime.Normal -> null
+                        is JsonTime.Custom.Project<*> -> task.project.getCustomTime(it.id).key
+                        is JsonTime.Custom.User -> it.key
+                        else -> throw UnsupportedOperationException() // compiler issue
+                    }
                 }
 
             override val scheduleCustomTimeKey
@@ -709,7 +718,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val scheduleHourMinute = scheduleTime.timePair.hourMinute
 
-            override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId.Project<T>>? = null
+            override val customTimeKey: CustomTimeKey? = null
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
 

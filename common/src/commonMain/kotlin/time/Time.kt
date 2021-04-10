@@ -27,7 +27,7 @@ sealed class Time {
         override fun toString() = hourMinute.toString()
     }
 
-    abstract class Custom : Time() {
+    sealed class Custom : Time() {
 
         abstract val customTimeRecord: CustomTimeRecord
 

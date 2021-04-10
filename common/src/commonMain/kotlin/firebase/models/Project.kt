@@ -355,6 +355,10 @@ abstract class Project<T : ProjectType>(
     abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
     abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T>
 
+    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User {
+        TODO("todo customtime")
+    }
+
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }
             ?: Time.Normal(timePair.hourMinute!!)

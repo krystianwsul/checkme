@@ -23,5 +23,22 @@ sealed class CustomTimeKey : Parcelable, Serializable {
     }
 
     @Parcelize
-    data class User(val userKey: UserKey, override val customTimeId: CustomTimeId.User) : CustomTimeKey()
+    data class User(val userKey: UserKey, override val customTimeId: CustomTimeId.User) : CustomTimeKey() {
+
+        companion object {
+
+            private val userRegex = Regex("^[^,]+,[^,]+$")
+
+            fun tryFromJson(json: String): User? {
+                val matchResult = userRegex.find(json) ?: return null
+
+                val userKey = UserKey(matchResult.groupValues[1])
+                val customTimeId = CustomTimeId.User(matchResult.groupValues[2])
+
+                return User(userKey, customTimeId)
+            }
+        }
+
+        fun toJson() = "${userKey.key},${customTimeId.value}"
+    }
 }

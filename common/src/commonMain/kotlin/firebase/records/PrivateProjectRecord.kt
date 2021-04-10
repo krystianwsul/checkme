@@ -15,12 +15,12 @@ class PrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
         override val projectKey: ProjectKey.Private,
-        private val projectJson: PrivateProjectJson
+        private val projectJson: PrivateProjectJson,
 ) : ProjectRecord<ProjectType.Private>(
         create,
         projectJson,
         projectKey,
-        projectKey.key
+        projectKey.key,
 ) {
 
     override val taskRecordsRelay = BehaviorSubject(

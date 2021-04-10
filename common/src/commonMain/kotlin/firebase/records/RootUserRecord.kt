@@ -29,6 +29,8 @@ open class RootUserRecord(
 
     final override val key by lazy { this.userKey.key }
 
+    override val children get() = customTimeRecords.values.toList()
+
     override var name by Committer(userJson::name, "$key/$USER_DATA")
 
     override val email by lazy { userJson.email }
@@ -110,7 +112,9 @@ open class RootUserRecord(
         val remoteCustomTimeRecord = UserCustomTimeRecord(this, customTimeJson)
         check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
 
+        userWrapper.customTimes[remoteCustomTimeRecord.key] = customTimeJson
         customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
+
         return remoteCustomTimeRecord
     }
 }

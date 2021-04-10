@@ -28,6 +28,15 @@ sealed class JsonTime {
                 }
             }
         }
+
+        fun <T : ProjectType> fromTime(time: Time): JsonTime {
+            @Suppress("UNCHECKED_CAST")
+            return when (time) {
+                is Time.Custom.Project<*> -> Custom.Project(time.key.customTimeId as CustomTimeId.Project<T>)
+                is Time.Custom.User -> Custom.User(time.key)
+                is Time.Normal -> Normal(time.hourMinute)
+            }
+        }
     }
 
     abstract fun toJson(): String

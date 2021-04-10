@@ -421,15 +421,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             it.instanceJsonTime = dateTime?.time?.let {
                 task.project
                         .getOrCopyTime(ownerKey, it)
-                        .let {
-                            @Suppress("UNCHECKED_CAST")
-                            when (it) {
-                                is Time.Custom.Project<*> ->
-                                    JsonTime.Custom.Project(it.key.customTimeId as CustomTimeId.Project<T>)
-                                is Time.Custom.User -> JsonTime.Custom.User(it.key)
-                                is Time.Normal -> JsonTime.Normal(it.hourMinute)
-                            }
-                        }
+                        .let { JsonTime.fromTime<T>(it) }
             }
         }
 

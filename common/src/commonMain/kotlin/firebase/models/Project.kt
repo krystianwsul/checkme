@@ -11,10 +11,7 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
@@ -195,8 +192,8 @@ abstract class Project<T : ProjectType>(
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {
             is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
+            is Time.Custom.User -> it
             is Time.Normal -> it
-            else -> throw UnsupportedOperationException() // todo customTime
         }
     }
 
@@ -222,18 +219,12 @@ abstract class Project<T : ProjectType>(
         val newInstanceTime = instance.instanceTime.let {
             when (it) {
                 is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
+                is Time.Custom.User -> it
                 is Time.Normal -> it
-                else -> throw UnsupportedOperationException() // todo customtime
             }
         }
 
-        val instanceTimeString = when (newInstanceTime) {
-            is Time.Custom.Project<*> -> newInstanceTime.key
-                    .customTimeId
-                    .value
-            is Time.Normal -> newInstanceTime.hourMinute.toJson()
-            else -> throw UnsupportedOperationException() // todo customtime
-        }
+        val instanceTimeString = JsonTime.fromTime<T>(newInstanceTime).toJson()
 
         val parentState = instance.parentState
 

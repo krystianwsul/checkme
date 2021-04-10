@@ -28,26 +28,57 @@ sealed class JsonTime {
 
     abstract fun toJson(): String
 
+    abstract fun <T : ProjectType> toTime(
+            projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            userCustomTimeProvider: UserCustomTimeProvider,
+    ): Time
+
     sealed class Custom : JsonTime() {
 
-        data class Project<T : ProjectType>(val id: CustomTimeId.Project<T>) : JsonTime() {
+        data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime() {
 
             override fun toJson() = id.toString()
+
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ProjectType> toTime(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+                    userCustomTimeProvider: UserCustomTimeProvider,
+            ) = projectCustomTimeProvider.getProjectCustomTime(id as CustomTimeId.Project<T>)
         }
 
         data class User(val key: CustomTimeKey.User) : JsonTime() {
 
             override fun toJson() = key.toJson()
+
+            override fun <T : ProjectType> toTime(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+                    userCustomTimeProvider: UserCustomTimeProvider,
+            ) = userCustomTimeProvider.getUserCustomTime(key)
         }
     }
 
     data class Normal(val hourMinute: HourMinute) : JsonTime() {
 
         override fun toJson() = hourMinute.toJson()
+
+        override fun <T : ProjectType> toTime(
+                projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+                userCustomTimeProvider: UserCustomTimeProvider,
+        ) = Time.Normal(hourMinute)
     }
 
     interface ProjectIdProvider<T : ProjectType> {
 
         fun getCustomTimeId(id: String): CustomTimeId.Project<T>
+    }
+
+    interface ProjectCustomTimeProvider<T : ProjectType> {
+
+        fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>): Time.Custom.Project<T>
+    }
+
+    interface UserCustomTimeProvider {
+
+        fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User
     }
 }

@@ -28,10 +28,17 @@ sealed class JsonTime {
 
     abstract fun toJson(): String
 
+    abstract fun <T : ProjectType> getCustomTimeKey(
+            projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+    ): CustomTimeKey?
+
     abstract fun <T : ProjectType> toTime(
             projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
             userCustomTimeProvider: UserCustomTimeProvider,
     ): Time
+
+    fun <T : ProjectType> toTime(customTimeProvider: CustomTimeProvider<T>) =
+            toTime(customTimeProvider, customTimeProvider)
 
     sealed class Custom : JsonTime() {
 
@@ -44,6 +51,11 @@ sealed class JsonTime {
                     projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = projectCustomTimeProvider.getProjectCustomTime(id as CustomTimeId.Project<T>)
+
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ProjectType> getCustomTimeKey(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            ) = projectCustomTimeProvider.getProjectCustomTime(id as CustomTimeId.Project<T>).key
         }
 
         data class User(val key: CustomTimeKey.User) : JsonTime() {
@@ -54,6 +66,10 @@ sealed class JsonTime {
                     projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = userCustomTimeProvider.getUserCustomTime(key)
+
+            override fun <T : ProjectType> getCustomTimeKey(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            ) = key
         }
     }
 
@@ -65,6 +81,10 @@ sealed class JsonTime {
                 projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
                 userCustomTimeProvider: UserCustomTimeProvider,
         ) = Time.Normal(hourMinute)
+
+        override fun <T : ProjectType> getCustomTimeKey(
+                projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+        ): CustomTimeKey? = null
     }
 
     interface ProjectIdProvider<T : ProjectType> {
@@ -81,4 +101,6 @@ sealed class JsonTime {
 
         fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User
     }
+
+    interface CustomTimeProvider<T : ProjectType> : ProjectCustomTimeProvider<T>, UserCustomTimeProvider
 }

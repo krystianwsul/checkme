@@ -19,7 +19,7 @@ abstract class Project<T : ProjectType>(
         val assignedToHelper: AssignedToHelper<T>,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         protected val newRootInstanceManager: (taskRecord: TaskRecord<T>) -> RootInstanceManager<T>,
-) : Current, JsonTime.ProjectCustomTimeProvider<T> {
+) : Current, JsonTime.CustomTimeProvider<T> {
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -348,6 +348,9 @@ abstract class Project<T : ProjectType>(
     abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T>
 
     override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>) = getCustomTime(projectCustomTimeId)
+
+    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
+            userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let { getCustomTime(it.customTimeId) }

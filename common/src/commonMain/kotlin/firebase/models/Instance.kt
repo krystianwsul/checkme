@@ -615,18 +615,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     scheduleCustomTimeId?.let { getCustomTime(it) } ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
                 }
 
-            private val recordInstanceTime: Time?
-                get() = instanceRecord.instanceJsonTime?.let {
-                    // todo customtime JsonTime
-
-                    @Suppress("UNCHECKED_CAST")
-                    when (it) {
-                        is JsonTime.Custom.User -> task.project.userCustomTimeProvider.getUserCustomTime(it.key)
-                        is JsonTime.Custom.Project<*> -> getCustomTime(it.id as CustomTimeId.Project<T>)
-                        is JsonTime.Normal -> Time.Normal(it.hourMinute)
-                        else -> throw UnsupportedOperationException() // compiler issue
-                    }
-                }
+            private val recordInstanceTime: Time? get() = instanceRecord.instanceJsonTime?.toTime(task.project)
 
             override val instanceTime get() = recordInstanceTime ?: scheduleTime
 
@@ -654,15 +643,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             override val scheduleHourMinute
                 get() = instanceRecord.scheduleHour?.let { HourMinute(it, instanceRecord.scheduleMinute!!) }
 
-            override val customTimeKey
-                get() = instanceRecord.instanceJsonTime?.let {
-                    when (it) {
-                        is JsonTime.Normal -> null
-                        is JsonTime.Custom.Project<*> -> task.project.getCustomTime(it.id).key
-                        is JsonTime.Custom.User -> it.key
-                        else -> throw UnsupportedOperationException() // compiler issue
-                    }
-                }
+            override val customTimeKey get() = instanceRecord.instanceJsonTime?.getCustomTimeKey(task.project)
 
             override val scheduleCustomTimeKey
                 get() = instanceRecord.scheduleKey

@@ -60,32 +60,19 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-            val customTimeId = instanceShownRecord.scheduleCustomTimeId
-
-            val customTimePair: Pair<String, String>?
-            val hourMinute: HourMinute?
-            if (!customTimeId.isNullOrEmpty()) {
-                check(instanceShownRecord.scheduleHour == null)
-                check(instanceShownRecord.scheduleMinute == null)
-
-                customTimePair = Pair(instanceShownRecord.projectId, customTimeId)
-                hourMinute = null
-            } else {
-                checkNotNull(instanceShownRecord.scheduleHour)
-                checkNotNull(instanceShownRecord.scheduleMinute)
-
-                customTimePair = null
-                hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-            }
 
             val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
+
+            val hourMinute = instanceShownRecord.takeIf { it.scheduleHour != null }?.let {
+                HourMinute(it.scheduleHour!!, it.scheduleMinute!!)
+            }
 
             NotificationWrapper.instance.cancelNotification(
                     Instance.getNotificationId(
                             scheduleDate,
-                            customTimePair,
+                            instanceShownRecord.scheduleCustomTimeId,
                             hourMinute,
-                            taskKey
+                            taskKey,
                     )
             )
             instanceShownRecord.notificationShown = false
@@ -94,7 +81,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
                 .map { (instanceShownRecord, task) ->
                     val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-                    val customTimeId = instanceShownRecord.scheduleCustomTimeId
+                    val customTimeId = instanceShownRecord.scheduleCustomTimeId // todo customtime shown
                     val project = task!!.project
 
                     val customTimeKey: CustomTimeKey.Project<*>?

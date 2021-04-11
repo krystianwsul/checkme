@@ -17,15 +17,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeKey: CustomTimeKey.Project<*>?,
+                scheduleCustomTimeId: CustomTimeId?,
                 scheduleHourMinute: HourMinute?,
                 taskKey: TaskKey,
-        ) = getNotificationId(
-                scheduleDate,
-                scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
-                scheduleHourMinute,
-                taskKey.run { Pair(projectKey.key, taskId) },
-        )
+        ): Int {
+            return getNotificationId(
+                    scheduleDate,
+                    scheduleCustomTimeId?.value,
+                    scheduleHourMinute,
+                    taskKey.run { Pair(projectKey.key, taskId) },
+            )
+        }
 
         /*
         I'm going to make some assumptions here:
@@ -35,24 +37,29 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
          */
 
+        /**
+         * todo: The whole scheduleCustomTimeId isn't guaranteed to be unique, but I don't feel like migrating
+         * InstanceShownRecord right now.  Move it to Paper later, and make all this strongly typed
+         */
+
         // todo just hash a data object
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeData: Pair<String, String>?,
+                scheduleCustomTimeId: String?,
                 scheduleHourMinute: HourMinute?,
                 taskKey: Pair<String, String>,
         ): Int {
-            check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
+            check(scheduleCustomTimeId == null != (scheduleHourMinute == null))
 
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
             hash += 12 * 31 * (scheduleDate.year - 2015)
 
-            if (scheduleCustomTimeData == null) {
+            if (scheduleCustomTimeId == null) {
                 hash += 12 * 31 * 73 * (scheduleHourMinute!!.hour + 1)
                 hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.minute + 1)
             } else {
-                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeData.hashCode()
+                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeId.hashCode()
             }
 
             @Suppress("INTEGER_OVERFLOW")
@@ -98,7 +105,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
-    val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, data.scheduleHourMinute, taskKey)
+    val notificationId
+        get() = getNotificationId(
+                scheduleDate,
+                scheduleCustomTimeKey?.customTimeId,
+                data.scheduleHourMinute,
+                taskKey,
+        )
 
     val hidden get() = data.hidden
 

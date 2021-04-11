@@ -64,7 +64,7 @@ sealed class Time {
 
             abstract override val id: CustomTimeId.Project<T>
 
-            abstract override val key: CustomTimeKey.Project<T>
+            abstract override val key: CustomTimeKey.Project<T> // todo customtime project
 
             val projectId by lazy { project.projectKey }
 

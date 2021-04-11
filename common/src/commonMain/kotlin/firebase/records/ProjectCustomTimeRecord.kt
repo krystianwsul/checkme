@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectType
 abstract class ProjectCustomTimeRecord<T : ProjectType>(create: Boolean) : CustomTimeRecord(create) {
 
     abstract override val id: CustomTimeId.Project<T>
-    abstract override val customTimeKey: CustomTimeKey.Project<T>
+    abstract override val customTimeKey: CustomTimeKey.Project<T> // todo customtime project
     protected abstract val projectRecord: ProjectRecord<T>
 
     val projectId get() = projectRecord.projectKey

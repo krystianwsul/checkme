@@ -335,9 +335,9 @@ abstract class Project<T : ProjectType>(
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 
-    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom.Project<T>
-    abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
-    abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T>
+    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom.Project<T> // todo customtime project
+    abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T> // todo customtime project
+    abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T> // todo customtime project
 
     override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>) = getCustomTime(projectCustomTimeId)
 

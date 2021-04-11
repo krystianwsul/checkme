@@ -63,7 +63,7 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     @Suppress("UNCHECKED_CAST") // I prefer to cast, than to have two entry points for this
     val customTimeKey
-        get() = timePair.customTimeKey as? CustomTimeKey.Project<T>
+        get() = timePair.customTimeKey as? CustomTimeKey.Project<T> // todo customtime project
 
     val assignedTo get() = taskRecord.assignedToHelper.getAssignedTo(scheduleJson)
 

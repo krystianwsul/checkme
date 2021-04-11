@@ -589,7 +589,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val customTimeKey: CustomTimeKey?
 
-        abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>?
+        abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>? // todo customtime project
 
         abstract val parentState: ParentState
 

@@ -69,7 +69,7 @@ class IrrelevantTest {
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
 
-        val project = PrivateProject(projectRecord, mapOf()) {
+        val project = PrivateProject(projectRecord, mapOf(), mockk()) {
             mockk {
                 every { records } returns mutableListOf()
             }
@@ -84,14 +84,14 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour3.hour,
-                        minute = hour3.minute
+                        minute = hour3.minute,
                 )
         )
 
         val taskJson = PrivateTaskJson(
                 name = "task",
                 startTime = now.long,
-                schedules = mutableMapOf("scheduleKey" to scheduleWrapper)
+                schedules = mutableMapOf("scheduleKey" to scheduleWrapper),
         )
 
         val task = project.newTask(taskJson)
@@ -105,7 +105,7 @@ class IrrelevantTest {
                 now.toOffset().plusOne(),
                 now,
                 bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
         ).single()
 
         instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)))
@@ -159,7 +159,7 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour2.hour,
-                        minute = hour2.minute
+                        minute = hour2.minute,
                 )
         )
 
@@ -168,7 +168,7 @@ class IrrelevantTest {
                         startTime = now.long,
                         dayOfWeek = 1, // monday
                         hour = hour1.hour,
-                        minute = hour1.minute
+                        minute = hour1.minute,
                 )
         )
 
@@ -177,8 +177,8 @@ class IrrelevantTest {
                 startTime = now.long,
                 schedules = mutableMapOf(
                         "singleScheduleKey" to singleScheduleWrapper,
-                        "weeklyScheduleKey" to weeklyScheduleWrapper
-                )
+                        "weeklyScheduleKey" to weeklyScheduleWrapper,
+                ),
         )
 
         val projectKey = ProjectKey.Private(userKey.key)
@@ -188,7 +188,7 @@ class IrrelevantTest {
 
         val projectJson = PrivateProjectJson(
                 startTime = now.long,
-                tasks = mutableMapOf(taskId to taskJson)
+                tasks = mutableMapOf(taskId to taskJson),
         )
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
 
@@ -198,7 +198,8 @@ class IrrelevantTest {
                         taskKey to mockk {
                             every { records } returns mutableListOf()
                         }
-                )
+                ),
+                mockk(),
         ) {
             mockk {
                 every { records } returns mutableListOf()
@@ -218,7 +219,7 @@ class IrrelevantTest {
                 now.toOffset().plusOne(),
                 now,
                 bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
         ).single()
 
         instance.setDone(shownFactory, true, now)
@@ -284,14 +285,14 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour2.hour,
-                        minute = hour2.minute
+                        minute = hour2.minute,
                 )
         )
 
         val parentTaskJson = PrivateTaskJson(
                 name = "parentTask",
                 startTime = now.long,
-                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper)
+                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper),
         )
         val parentTaskId = "parentTaskKey"
 
@@ -303,7 +304,7 @@ class IrrelevantTest {
         val taskHierarchy1Json = TaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
-                startTime = now.long
+                startTime = now.long,
         )
         val taskHierarchy1Id = "taskHierarchy1"
 
@@ -315,7 +316,7 @@ class IrrelevantTest {
         val taskHierarchy2Json = TaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child2TaskId,
-                startTime = now.long
+                startTime = now.long,
         )
         val taskHierarchy2Id = "taskHierarchy2"
 
@@ -324,16 +325,16 @@ class IrrelevantTest {
                 tasks = mutableMapOf(
                         parentTaskId to parentTaskJson,
                         child1TaskId to child1TaskJson,
-                        child2TaskId to child2TaskJson
+                        child2TaskId to child2TaskJson,
                 ),
                 taskHierarchies = mutableMapOf(
                         taskHierarchy1Id to taskHierarchy1Json,
-                        taskHierarchy2Id to taskHierarchy2Json
-                )
+                        taskHierarchy2Id to taskHierarchy2Json,
+                ),
         )
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
 
-        val project = PrivateProject(projectRecord, mapOf()) {
+        val project = PrivateProject(projectRecord, mapOf(), mockk()) {
             mockk {
                 every { records } returns mutableListOf()
             }

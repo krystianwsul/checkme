@@ -1,6 +1,9 @@
 package com.krystianwsul.common.time
 
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
+import com.krystianwsul.common.utils.Serializable
 
 @Parcelize
 data class TimePair(
@@ -14,25 +17,5 @@ data class TimePair(
 
     init {
         check((customTimeKey == null) != (hourMinute == null))
-    }
-
-    fun destructureRemote(): Triple<CustomTimeId.Project<*>?, Int?, Int?> {
-        val customTimeId: CustomTimeId.Project<*>?
-        val hour: Int?
-        val minute: Int?
-
-        if (customTimeKey != null) {
-            check(hourMinute == null)
-
-            customTimeId = customTimeKey.customTimeId
-            hour = null
-            minute = null
-        } else {
-            customTimeId = null
-            hour = hourMinute!!.hour
-            minute = hourMinute.minute
-        }
-
-        return Triple(customTimeId, hour, minute)
     }
 }

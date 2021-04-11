@@ -1,8 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
@@ -24,32 +22,6 @@ class RootInstanceRecord<T : ProjectType>(
         firebaseKey,
         scheduleCustomTimeId,
 ) {
-
-    companion object {
-
-        private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)$")
-
-        private fun dateStringToDate(dateString: String): Date {
-            val result = dateRegex.find(dateString)!!
-
-            val year = result.getInt(1)
-            val month = result.getInt(2)
-            val day = result.getInt(3)
-
-            return Date(year, month, day)
-        }
-
-        // todo customtime cleanup (presumably will be using JsonTime eventually)
-        fun <T : ProjectType> dateTimeStringsToScheduleKey(
-                projectRecord: ProjectRecord<T>,
-                dateString: String,
-                timeString: String,
-        ): ScheduleKey {
-            val jsonTime = JsonTime.fromJson(projectRecord, timeString)
-
-            return ScheduleKey(dateStringToDate(dateString), jsonTime.toTimePair(projectRecord))
-        }
-    }
 
     constructor(
             taskRecord: TaskRecord<T>,

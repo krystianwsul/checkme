@@ -21,6 +21,8 @@ abstract class InstanceRecord<T : ProjectType>(
 
     companion object {
 
+        private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)$")
+
         private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
@@ -77,6 +79,27 @@ abstract class InstanceRecord<T : ProjectType>(
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
             }
+        }
+
+        private fun dateStringToDate(dateString: String): Date {
+            val result = dateRegex.find(dateString)!!
+
+            val year = result.getInt(1)
+            val month = result.getInt(2)
+            val day = result.getInt(3)
+
+            return Date(year, month, day)
+        }
+
+        // todo customtime cleanup (presumably will be using JsonTime eventually)
+        fun <T : ProjectType> dateTimeStringsToScheduleKey(
+                projectRecord: ProjectRecord<T>,
+                dateString: String,
+                timeString: String,
+        ): ScheduleKey {
+            val jsonTime = JsonTime.fromJson(projectRecord, timeString)
+
+            return ScheduleKey(dateStringToDate(dateString), jsonTime.toTimePair(projectRecord))
         }
     }
 

@@ -94,7 +94,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     @Suppress("UNCHECKED_CAST")
     val instanceCustomTimeKey
-        get() = (instanceTime as? Time.Custom.Project<T>)?.key // todo customTime
+        get() = (instanceTime as? Time.Custom.Project<T>)?.key // todo customTime timepair
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 

@@ -569,7 +569,7 @@ class Task<T : ProjectType>(
 
         generatedInstances.remove(instance.instanceKey)
 
-        // todo customtime use jsontime should be ready
+        // todo customtime use jsontime ready
         val newRecord = if (USE_ROOT_INSTANCES)
             rootInstanceManager::newRootInstanceRecord
         else

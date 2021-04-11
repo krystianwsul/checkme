@@ -114,6 +114,9 @@ class PrivateProjectRecord(
 
     override fun getCustomTimeId(id: String) = CustomTimeId.Project.Private(id)
 
+    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<ProjectType.Private>) =
+            CustomTimeKey.Project.Private(projectKey, projectCustomTimeId as CustomTimeId.Project.Private)
+
     override fun newNoScheduleOrParentRecordId(taskId: String) =
             databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
 

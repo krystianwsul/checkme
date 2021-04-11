@@ -12,7 +12,7 @@ abstract class ProjectRecord<T : ProjectType>(
         private val projectJson: ProjectJson<T>,
         private val _id: ProjectKey<T>,
         committerKey: String,
-) : RemoteRecord(create), JsonTime.ProjectIdProvider<T> {
+) : RemoteRecord(create), JsonTime.ProjectIdProvider<T>, JsonTime.ProjectCustomTimeKeyProvider<T> {
 
     companion object {
 

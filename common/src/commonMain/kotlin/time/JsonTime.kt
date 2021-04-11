@@ -36,7 +36,7 @@ sealed class JsonTime {
     abstract fun toJson(): String
 
     abstract fun <T : ProjectType> getCustomTimeKey(
-            projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
     ): CustomTimeKey?
 
     abstract fun <T : ProjectType> toTime(
@@ -61,8 +61,8 @@ sealed class JsonTime {
 
             @Suppress("UNCHECKED_CAST")
             override fun <T : ProjectType> getCustomTimeKey(
-                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
-            ) = projectCustomTimeProvider.getProjectCustomTime(id as CustomTimeId.Project<T>).key
+                    projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+            ) = projectCustomTimeKeyProvider.getProjectCustomTimeKey(id as CustomTimeId.Project<T>)
         }
 
         data class User(val key: CustomTimeKey.User) : JsonTime() {
@@ -75,7 +75,7 @@ sealed class JsonTime {
             ) = userCustomTimeProvider.getUserCustomTime(key)
 
             override fun <T : ProjectType> getCustomTimeKey(
-                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+                    projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
             ) = key
         }
     }
@@ -90,7 +90,7 @@ sealed class JsonTime {
         ) = Time.Normal(hourMinute)
 
         override fun <T : ProjectType> getCustomTimeKey(
-                projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
         ): CustomTimeKey? = null
     }
 
@@ -102,6 +102,11 @@ sealed class JsonTime {
     interface ProjectCustomTimeProvider<T : ProjectType> {
 
         fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>): Time.Custom.Project<T>
+    }
+
+    interface ProjectCustomTimeKeyProvider<T : ProjectType> {
+
+        fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
     }
 
     interface UserCustomTimeProvider {

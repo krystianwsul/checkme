@@ -11,7 +11,7 @@ interface ScheduleJson<T : ProjectType> {
     var endTime: Long?
     var endTimeOffset: Double?
 
-    val customTimeId: String? // todo customtime use jsonTime below
+    val customTimeId: String? // todo customtime fill in date for when to remove this
     val hour: Int?
     val minute: Int?
 

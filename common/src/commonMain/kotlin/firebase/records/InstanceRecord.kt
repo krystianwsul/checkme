@@ -3,9 +3,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
@@ -21,10 +19,7 @@ abstract class InstanceRecord<T : ProjectType>(
 
     companion object {
 
-        private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)$")
-
-        private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
-        private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
+        private val scheduleKeyRegex = Regex("^(\\d\\d\\d\\d-\\d?\\d-\\d?\\d)-(.+)$")
 
         private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
 
@@ -46,49 +41,17 @@ abstract class InstanceRecord<T : ProjectType>(
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
-        @JvmStatic
-        protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
-
         // todo customtime use jsontime here we can just change the second type to jsontime.  Or, just use schedulekey
         fun <T : ProjectType> stringToScheduleKey(
                 projectRecord: ProjectRecord<T>,
                 key: String,
-        ): Pair<ScheduleKey, CustomTimeId.Project<T>?> {
-            val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
+        ): ScheduleKey {
+            val matchResult = scheduleKeyRegex.find(key)!!
 
-            if (hourMinuteMatchResult != null) {
-                val year = hourMinuteMatchResult.getInt(1)
-                val month = hourMinuteMatchResult.getInt(2)
-                val day = hourMinuteMatchResult.getInt(3)
-                val hour = hourMinuteMatchResult.getInt(4)
-                val minute = hourMinuteMatchResult.getInt(5)
+            val dateString = matchResult.groupValues[0]
+            val timeString = matchResult.groupValues[1]
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(HourMinute(hour, minute))), null)
-            } else {
-                val customTimeMatchResult = customTimeKeyRegex.find(key)
-                checkNotNull(customTimeMatchResult)
-
-                val year = customTimeMatchResult.getInt(1)
-                val month = customTimeMatchResult.getInt(2)
-                val day = customTimeMatchResult.getInt(3)
-
-                val customTimeId = customTimeMatchResult.groupValues[4]
-                check(customTimeId.isNotEmpty())
-
-                val customTimeKey = projectRecord.getCustomTimeKey(customTimeId)
-
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
-            }
-        }
-
-        private fun dateStringToDate(dateString: String): Date {
-            val result = dateRegex.find(dateString)!!
-
-            val year = result.getInt(1)
-            val month = result.getInt(2)
-            val day = result.getInt(3)
-
-            return Date(year, month, day)
+            return dateTimeStringsToScheduleKey(projectRecord, dateString, timeString)
         }
 
         // todo customtime cleanup (presumably will be using JsonTime eventually)
@@ -99,7 +62,7 @@ abstract class InstanceRecord<T : ProjectType>(
         ): ScheduleKey {
             val jsonTime = JsonTime.fromJson(projectRecord, timeString)
 
-            return ScheduleKey(dateStringToDate(dateString), jsonTime.toTimePair(projectRecord))
+            return ScheduleKey(Date.fromJson(dateString), jsonTime.toTimePair(projectRecord))
         }
     }
 
@@ -146,7 +109,7 @@ abstract class InstanceRecord<T : ProjectType>(
             createObject.parentJson?.let {
                 InstanceKey(
                         TaskKey(taskRecord.projectRecord.projectKey, it.taskId),
-                        stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey).first
+                        stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey),
                 )
             }
     ) { _, _, newValue ->

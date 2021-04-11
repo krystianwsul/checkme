@@ -82,7 +82,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(projectRecord, key)
+            val scheduleKey = InstanceRecord.stringToScheduleKey(projectRecord, key)
 
             val remoteInstanceRecord = ProjectInstanceRecord(
                     create,
@@ -90,7 +90,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                     instanceJson,
                     scheduleKey,
                     key,
-                    customTimeId,
+                    scheduleKey.scheduleTimePair.customTimeKey?.customTimeId as? CustomTimeId.Project<T>, // todo customtime use jsontime ready
             )
 
             instanceRecords[scheduleKey] = remoteInstanceRecord

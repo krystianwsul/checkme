@@ -4,7 +4,7 @@ import com.krystianwsul.common.utils.*
 
 @Parcelize
 data class TimePair(
-        val customTimeKey: CustomTimeKey.Project<*>?,
+        val customTimeKey: CustomTimeKey.Project<*>?, // todo customtime timepair
         val hourMinute: HourMinute?,
 ) : Parcelable, Serializable {
 

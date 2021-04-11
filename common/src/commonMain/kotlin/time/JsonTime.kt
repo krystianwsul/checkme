@@ -24,6 +24,13 @@ sealed class JsonTime {
                 is Time.Normal -> Normal(time.hourMinute)
             }
         }
+
+        fun <T : ProjectType> fromTimePair(timePair: TimePair): JsonTime {
+            timePair.hourMinute?.let { return Normal(it) }
+
+            // todo customtime timepair
+            return Custom.Project(timePair.customTimeKey!!.customTimeId)
+        }
     }
 
     abstract fun toJson(): String

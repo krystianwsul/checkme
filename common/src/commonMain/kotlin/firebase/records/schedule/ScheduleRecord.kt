@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -48,9 +49,15 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     open val timePair by lazy {
         scheduleJson.run {
-            customTimeId?.let {
-                TimePair(taskRecord.projectRecord.getCustomTimeKey(it))
-            } ?: TimePair(HourMinute(hour!!, minute!!))
+            if (time != null) {
+                val jsonTime = JsonTime.fromJson(taskRecord.projectRecord, time!!)
+
+                jsonTime.toTimePair(taskRecord.projectRecord)
+            } else {
+                customTimeId?.let {
+                    TimePair(taskRecord.projectRecord.getCustomTimeKey(it))
+                } ?: TimePair(HourMinute(hour!!, minute!!))
+            }
         }
     }
 

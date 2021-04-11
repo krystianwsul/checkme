@@ -39,6 +39,8 @@ sealed class JsonTime {
             projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
     ): CustomTimeKey?
 
+    abstract fun <T : ProjectType> toTimePair(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>): TimePair
+
     abstract fun <T : ProjectType> toTime(
             projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
             userCustomTimeProvider: UserCustomTimeProvider,
@@ -52,6 +54,10 @@ sealed class JsonTime {
         abstract override fun <T : ProjectType> getCustomTimeKey(
                 projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
         ): CustomTimeKey
+
+        override fun <T : ProjectType> toTimePair(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        ) = TimePair(getCustomTimeKey(projectCustomTimeKeyProvider) as CustomTimeKey.Project<*>, null) // todo customtime timepair
 
         data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime.Custom() {
 
@@ -96,6 +102,10 @@ sealed class JsonTime {
         override fun <T : ProjectType> getCustomTimeKey(
                 projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
         ): CustomTimeKey? = null
+
+        override fun <T : ProjectType> toTimePair(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        ) = TimePair(null, hourMinute)
     }
 
     interface ProjectIdProvider<T : ProjectType> {

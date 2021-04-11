@@ -20,6 +20,7 @@ import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
@@ -57,10 +58,10 @@ class FactoryLoaderOldTest {
                 scheduleJsonTime: JsonTime,
         ): Instance.Shown? = null
 
-        override fun createShown(
+        override fun <T : ProjectType> createShown(
                 remoteTaskId: String,
                 scheduleDateTime: DateTime,
-                projectId: ProjectKey<*>
+                projectId: ProjectKey<*>,
         ) = object : Instance.Shown {
 
             override var notified = false

@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 
 @SuppressLint("UseSparseArrays")
@@ -54,21 +55,15 @@ class LocalFactory(
         return matches.singleOrNull()
     }
 
-    override fun createShown(
+    override fun <T : ProjectType> createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
             projectId: ProjectKey<*>,
     ): InstanceShownRecord {
-        val (customTimeId, hour, minute) = scheduleDateTime.time
-                .timePair
-                .destructureRemote()
-
         return persistenceManager.createInstanceShownRecord(
                 remoteTaskId,
                 scheduleDateTime.date,
-                customTimeId,
-                hour,
-                minute,
+                JsonTime.fromTime<T>(scheduleDateTime.time),
                 projectId
         )
     }

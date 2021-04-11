@@ -713,7 +713,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
+                shown = shownFactory.createShown<T>(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
             return shown!!
         }
     }
@@ -726,7 +726,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     interface ShownFactory {
 
-        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: ProjectKey<*>): Shown
+        fun <T : ProjectType> createShown(
+                remoteTaskId: String,
+                scheduleDateTime: DateTime,
+                projectId: ProjectKey<*>,
+        ): Shown
 
         fun getShown(
                 projectId: ProjectKey<*>,

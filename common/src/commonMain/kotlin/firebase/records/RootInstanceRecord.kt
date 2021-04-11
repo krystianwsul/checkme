@@ -2,8 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
@@ -29,7 +28,6 @@ class RootInstanceRecord<T : ProjectType>(
     companion object {
 
         private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)$")
-        private val hourMinuteRegex = Regex("^(\\d\\d)-(\\d\\d)$")
 
         private fun dateStringToDate(dateString: String): Date {
             val result = dateRegex.find(dateString)!!
@@ -41,34 +39,15 @@ class RootInstanceRecord<T : ProjectType>(
             return Date(year, month, day)
         }
 
-        private fun <T : ProjectType> timeStringToTime(
-                projectRecord: ProjectRecord<T>,
-                timeString: String,
-        ): Pair<TimePair, CustomTimeId.Project<T>?> {
-            val result = hourMinuteRegex.find(timeString)
-
-            return if (result != null) {
-                val hour = result.getInt(1)
-                val minute = result.getInt(2)
-
-                Pair(TimePair(HourMinute(hour, minute)), null)
-            } else {
-                val customTimeKey = projectRecord.getCustomTimeKey(timeString)
-
-                Pair(TimePair(customTimeKey), customTimeKey.customTimeId)
-            }
-        }
-
-        // todo customtime use jsontime return scheduleKey and JsonTime
-        fun <T : ProjectType> dateTimeStringsToSchedulePair(
+        // todo customtime cleanup (presumably will be using JsonTime eventually)
+        fun <T : ProjectType> dateTimeStringsToScheduleKey(
                 projectRecord: ProjectRecord<T>,
                 dateString: String,
                 timeString: String,
-        ): Pair<ScheduleKey, CustomTimeId.Project<T>?> {
-            val (timePair, customTimeId) = timeStringToTime(projectRecord, timeString)
-            val scheduleKey = ScheduleKey(dateStringToDate(dateString), timePair)
+        ): ScheduleKey {
+            val jsonTime = JsonTime.fromJson(projectRecord, timeString)
 
-            return Pair(scheduleKey, customTimeId)
+            return ScheduleKey(dateStringToDate(dateString), jsonTime.toTimePair(projectRecord))
         }
     }
 
@@ -94,7 +73,7 @@ class RootInstanceRecord<T : ProjectType>(
             dateString: String,
             timeString: String,
             parent: Parent,
-            schedulePair: Pair<ScheduleKey, CustomTimeId.Project<T>?> = dateTimeStringsToSchedulePair(
+            scheduleKey: ScheduleKey = dateTimeStringsToScheduleKey(
                     taskRecord.projectRecord,
                     dateString,
                     timeString,
@@ -103,10 +82,10 @@ class RootInstanceRecord<T : ProjectType>(
             false,
             taskRecord,
             createObject,
-            schedulePair.first,
+            scheduleKey,
             "$dateString/$timeString",
-            schedulePair.second,
-            parent
+            scheduleKey.scheduleTimePair.customTimeKey?.customTimeId as? CustomTimeId.Project<T>, // todo customtime use jsontime ready
+            parent,
     )
 
     override fun deleteFromParent() = parent.removeRootInstanceRecord(instanceKey)

@@ -54,7 +54,7 @@ sealed class JsonTime {
             fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime {
                 CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
 
-                return Project(projectIdProvider.getCustomTimeId(json))
+                return Project(projectIdProvider.getProjectCustomTimeId(json))
             }
         }
 
@@ -117,7 +117,7 @@ sealed class JsonTime {
 
     interface ProjectIdProvider<T : ProjectType> {
 
-        fun getCustomTimeId(id: String): CustomTimeId.Project<T>
+        fun getProjectCustomTimeId(id: String): CustomTimeId.Project<T>
     }
 
     interface ProjectCustomTimeProvider<T : ProjectType> {

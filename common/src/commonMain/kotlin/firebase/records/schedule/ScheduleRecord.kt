@@ -55,7 +55,7 @@ abstract class ScheduleRecord<T : ProjectType>(
                 jsonTime.toTimePair(taskRecord.projectRecord)
             } else {
                 customTimeId?.let {
-                    TimePair(taskRecord.projectRecord.getCustomTimeKey(it))
+                    TimePair(taskRecord.projectRecord.getProjectCustomTimeKey(it))
                 } ?: TimePair(HourMinute(hour!!, minute!!))
             }
         }

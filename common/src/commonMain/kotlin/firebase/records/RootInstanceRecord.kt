@@ -59,6 +59,7 @@ class RootInstanceRecord<T : ProjectType>(
             }
         }
 
+        // todo customtime use jsontime return scheduleKey and JsonTime
         fun <T : ProjectType> dateTimeStringsToSchedulePair(
                 projectRecord: ProjectRecord<T>,
                 dateString: String,

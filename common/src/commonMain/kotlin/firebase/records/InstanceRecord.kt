@@ -47,6 +47,7 @@ abstract class InstanceRecord<T : ProjectType>(
         @JvmStatic
         protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
 
+        // todo customtime use jsontime here we can just change the second type to jsontime.  Or, just use schedulekey
         fun <T : ProjectType> stringToScheduleKey(
                 projectRecord: ProjectRecord<T>,
                 key: String,

@@ -41,7 +41,7 @@ open class RootInstanceManager<T : ProjectType>(
             instanceJson,
             scheduleKey,
             scheduleCustomTimeId,
-            this
+            this,
     ).also {
         check(!value.containsKey(it.instanceKey))
 

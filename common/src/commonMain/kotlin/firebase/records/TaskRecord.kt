@@ -90,7 +90,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                     instanceJson,
                     scheduleKey,
                     key,
-                    customTimeId
+                    customTimeId,
             )
 
             instanceRecords[scheduleKey] = remoteInstanceRecord

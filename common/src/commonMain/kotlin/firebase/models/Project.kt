@@ -160,7 +160,7 @@ abstract class Project<T : ProjectType>(
 
         if (Task.USE_ROOT_INSTANCES) {
             instanceDatas.forEach {
-                newTask.rootInstanceManager.newRootInstanceRecord(
+                newTask.rootInstanceManager.newRootInstanceRecord( // todo customtime use jsontime.  just get it from getOrCopyTime
                         it.second,
                         it.first.scheduleKey,
                         getOrCopyAndDestructureTime(deviceDbInfo.key, it.first.scheduleTime).first

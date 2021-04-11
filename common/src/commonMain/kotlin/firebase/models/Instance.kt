@@ -707,7 +707,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getShown(shownFactory: ShownFactory): Shown? {
             if (first)
-                shown = shownFactory.getShown(taskKey, scheduleDateTime)
+                shown = shownFactory.getShown<T>(taskKey, scheduleDateTime)
             return shown
         }
 
@@ -734,25 +734,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId.Project<*>?,// todo customtime project
-                scheduleHour: Int?,
-                scheduleMinute: Int?,
+                scheduleJsonTime: JsonTime,
         ): Shown?
 
-        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
-            val (customTimeId, hour, minute) = scheduleDateTime.time
-                    .timePair
-                    .destructureRemote()
-
+        fun <T : ProjectType> getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
             return getShown(
                     taskKey.projectKey,
                     taskKey.taskId,
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,
-                    customTimeId,
-                    hour,
-                    minute
+                    JsonTime.fromTime<T>(scheduleDateTime.time),
             )
         }
     }

@@ -16,6 +16,7 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
@@ -41,7 +42,8 @@ class IrrelevantTest {
         }
 
         private val shownFactory = mockk<Instance.ShownFactory> {
-            every { getShown(any(), any()) } returns mockk(relaxed = true)
+            every { getShown<ProjectType.Private>(any(), any()) } returns mockk(relaxed = true)
+            every { getShown<ProjectType.Shared>(any(), any()) } returns mockk(relaxed = true)
         }
 
         private val projectParent = mockk<Project.Parent>()

@@ -18,7 +18,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
@@ -54,9 +54,7 @@ class FactoryLoaderOldTest {
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId.Project<*>?,
-                scheduleHour: Int?,
-                scheduleMinute: Int?,
+                scheduleJsonTime: JsonTime,
         ): Instance.Shown? = null
 
         override fun createShown(

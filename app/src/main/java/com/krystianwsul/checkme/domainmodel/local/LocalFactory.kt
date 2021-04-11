@@ -6,13 +6,13 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 @SuppressLint("UseSparseArrays")
 class LocalFactory(
-        private val persistenceManager: PersistenceManager = PersistenceManager.instance
+        private val persistenceManager: PersistenceManager = PersistenceManager.instance,
 ) : Instance.ShownFactory, FactoryProvider.Local {
 
     val instanceShownRecords: Collection<InstanceShownRecord>
@@ -28,38 +28,27 @@ class LocalFactory(
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
-            scheduleCustomTimeId: CustomTimeId.Project<*>?,
-            scheduleHour: Int?,
-            scheduleMinute: Int?,
+            scheduleJsonTime: JsonTime,
     ): InstanceShownRecord? {
-        val matches: List<InstanceShownRecord>
-        if (scheduleCustomTimeId != null) {
-            check(scheduleHour == null)
-            check(scheduleMinute == null)
+        val preMatches = persistenceManager.instanceShownRecords
+                .asSequence()
+                .filter { it.projectId == projectId.key }
+                .filter { it.taskId == taskId }
+                .filter { it.scheduleYear == scheduleYear }
+                .filter { it.scheduleMonth == scheduleMonth }
+                .filter { it.scheduleDay == scheduleDay }
 
-            matches = persistenceManager.instanceShownRecords
-                    .asSequence()
-                    .filter { it.projectId == projectId.key }
-                    .filter { it.taskId == taskId }
-                    .filter { it.scheduleYear == scheduleYear }
-                    .filter { it.scheduleMonth == scheduleMonth }
-                    .filter { it.scheduleDay == scheduleDay }
-                    .filter { it.scheduleCustomTimeId == scheduleCustomTimeId.value }
-                    .toList()
-        } else {
-            checkNotNull(scheduleHour)
-            checkNotNull(scheduleMinute)
+        val matches = when (scheduleJsonTime) {
+            is JsonTime.Custom -> {
+                val json = scheduleJsonTime.toJson()
 
-            matches = persistenceManager.instanceShownRecords
-                    .asSequence()
-                    .filter { it.projectId == projectId.key }
-                    .filter { it.taskId == taskId }
-                    .filter { it.scheduleYear == scheduleYear }
-                    .filter { it.scheduleMonth == scheduleMonth }
-                    .filter { it.scheduleDay == scheduleDay }
-                    .filter { it.scheduleHour == scheduleHour }
-                    .filter { it.scheduleMinute == scheduleMinute }
-                    .toList()
+                preMatches.filter { it.scheduleCustomTimeId == json }
+            }
+            is JsonTime.Normal -> {
+                val (hour, minute) = scheduleJsonTime.hourMinute
+                preMatches.filter { it.scheduleHour == hour }.filter { it.scheduleMinute == minute }
+            }
+            else -> throw UnsupportedOperationException() // needed for compilation
         }
 
         return matches.singleOrNull()
@@ -68,7 +57,7 @@ class LocalFactory(
     override fun createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
-            projectId: ProjectKey<*>
+            projectId: ProjectKey<*>,
     ): InstanceShownRecord {
         val (customTimeId, hour, minute) = scheduleDateTime.time
                 .timePair

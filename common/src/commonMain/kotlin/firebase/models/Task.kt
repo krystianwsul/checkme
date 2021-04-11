@@ -590,7 +590,7 @@ class Task<T : ProjectType>(
         _existingInstances.remove(scheduleKey)
     }
 
-    fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
+    private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
 
     fun getInstance(scheduleDateTime: DateTime): Instance<T> {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
@@ -611,7 +611,7 @@ class Task<T : ProjectType>(
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
         for ((scheduleData, time) in scheduleDatas) {
-            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(ownerKey, time)
+            val copiedTime = project.getOrCopyTime(ownerKey, time)
 
             when (scheduleData) {
                 is ScheduleData.Single -> {
@@ -626,9 +626,7 @@ class Task<T : ProjectType>(
                                     date.year,
                                     date.month,
                                     date.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     assignedToKeys,
                             )
                     )
@@ -644,9 +642,7 @@ class Task<T : ProjectType>(
                                         null,
                                         null,
                                         dayOfWeek.ordinal,
-                                        customTimeId?.value,
-                                        hour,
-                                        minute,
+                                        copiedTime,
                                         scheduleData.from?.toJson(),
                                         scheduleData.until?.toJson(),
                                         scheduleData.interval,
@@ -668,9 +664,7 @@ class Task<T : ProjectType>(
                                     null,
                                     dayOfMonth,
                                     beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -691,9 +685,7 @@ class Task<T : ProjectType>(
                                     weekOfMonth,
                                     dayOfWeek.ordinal,
                                     beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -711,9 +703,7 @@ class Task<T : ProjectType>(
                                     null,
                                     scheduleData.month,
                                     scheduleData.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -734,7 +724,7 @@ class Task<T : ProjectType>(
             schedules: List<Schedule<*>>,
     ) {
         for (schedule in schedules) {
-            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
+            val copiedTime = project.getOrCopyTime(deviceDbInfo.key, schedule.time)
 
             val assignedTo = schedule.takeIf { it.rootTask.project == project }
                     ?.assignedTo
@@ -755,9 +745,7 @@ class Task<T : ProjectType>(
                                     date.year,
                                     date.month,
                                     date.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     assignedTo,
                             )
                     )
@@ -772,9 +760,7 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfWeek.ordinal,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     schedule.interval,
@@ -793,9 +779,7 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
@@ -814,9 +798,7 @@ class Task<T : ProjectType>(
                                     schedule.weekOfMonth,
                                     schedule.dayOfWeek.ordinal,
                                     schedule.beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
@@ -834,9 +816,7 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.month,
                                     schedule.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,

@@ -123,7 +123,6 @@ abstract class Project<T : ProjectType>(
     }
 
     private class InstanceConversionData(
-            val oldInstance: Instance<*>,
             val newInstanceJson: InstanceJson,
             val newScheduleKey: ScheduleKey,
             val updater: (Map<String, String>) -> Any?,
@@ -147,7 +146,7 @@ abstract class Project<T : ProjectType>(
                     true,
             )
 
-            InstanceConversionData(oldInstance, newInstance, newScheduleKey, updater)
+            InstanceConversionData(newInstance, newScheduleKey, updater)
         }
 
         // todo migrate tasks this just makes a bigger mess of things
@@ -199,16 +198,6 @@ abstract class Project<T : ProjectType>(
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getOrCopyAndDestructureTime(
-            ownerKey: UserKey,
-            time: Time,
-    ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is Time.Custom.Project<*> -> Triple(newTime.key.customTimeId as CustomTimeId.Project<T>, null, null)
-        is Time.Normal -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
-        else -> throw UnsupportedOperationException() // todo customTime
     }
 
     private fun getInstanceJson(

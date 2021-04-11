@@ -29,6 +29,7 @@ sealed class ScheduleText {
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
             is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
+            else -> throw UnsupportedOperationException() // compilation
         }.getScheduleText(project)
 
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
@@ -56,7 +57,7 @@ sealed class ScheduleText {
 
     protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
         return (timePair.customTimeKey?.let {
-            project.getCustomTime(it.customTimeId)
+            project.getUntypedProjectCustomTime(it.customTimeId)
         } ?: Time.Normal(timePair.hourMinute!!)).toString()
     }
 

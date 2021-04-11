@@ -56,7 +56,7 @@ fun DomainUpdater.setCustomTimesCurrent(
     val endExactTimeStamp = now.takeUnless { current }
 
     for (customTimeId in customTimeIds) {
-        val remotePrivateCustomTime = projectsFactory.privateProject.getCustomTime(customTimeId)
+        val remotePrivateCustomTime = projectsFactory.privateProject.getProjectCustomTime(customTimeId)
 
         remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
     }

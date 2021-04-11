@@ -34,7 +34,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     val time get() = timePair.toTime()
 
     protected fun TimePair.toTime() = customTimeKey
-            ?.let { rootTask.project.getCustomTime(it.customTimeId) }
+            ?.let { rootTask.project.getUntypedProjectCustomTime(it.customTimeId) }
             ?: Time.Normal(hourMinute!!)
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {

@@ -109,7 +109,7 @@ abstract class Project<T : ProjectType>(
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val oldCustomTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey.customTimeId)
+        val oldCustomTime = oldTask.project.getUntypedProjectCustomTime(oldScheduleTimePair.customTimeKey.customTimeId)
 
         val ownerKey = when (oldCustomTime) {
             is PrivateCustomTime -> userInfo.key
@@ -335,11 +335,14 @@ abstract class Project<T : ProjectType>(
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 
-    abstract fun getCustomTime(customTimeId: CustomTimeId.Project<*>): Time.Custom.Project<T> // todo customtime project
-    abstract fun getCustomTime(customTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T> // todo customtime project
-    abstract fun getCustomTime(customTimeId: String): Time.Custom.Project<T> // todo customtime project
+    abstract fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
 
-    override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>) = getCustomTime(projectCustomTimeId)
+    @Suppress("UNCHECKED_CAST")
+    fun getUntypedProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<*>) =
+            getProjectCustomTime(projectCustomTimeId as CustomTimeId.Project<T>)
+
+    fun getUntypedProjectCustomTime(projectCustomTimeId: String) =
+            getProjectCustomTime(projectRecord.getProjectCustomTimeId(projectCustomTimeId))
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
             userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
@@ -347,7 +350,7 @@ abstract class Project<T : ProjectType>(
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>) = projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { getCustomTime(it.customTimeId) }
+            ?.let { getUntypedProjectCustomTime(it.customTimeId) }
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(scheduleKey: ScheduleKey) =

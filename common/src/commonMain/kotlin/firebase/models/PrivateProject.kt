@@ -85,16 +85,16 @@ class PrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getCustomTime(customTimeId: CustomTimeId.Project<*>): PrivateCustomTime {
-        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Project.Private))
+    override fun getProjectCustomTime(
+            projectCustomTimeId: CustomTimeId.Project<ProjectType.Private>,
+    ): PrivateCustomTime {
+        check(remoteCustomTimes.containsKey(projectCustomTimeId as CustomTimeId.Project.Private))
 
-        return remoteCustomTimes.getValue(customTimeId)
+        return remoteCustomTimes.getValue(projectCustomTimeId)
     }
 
-    override fun getCustomTime(customTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
-            getCustomTime(customTimeKey.customTimeId)
-
-    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Project.Private(customTimeId))
+    override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
+            getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,

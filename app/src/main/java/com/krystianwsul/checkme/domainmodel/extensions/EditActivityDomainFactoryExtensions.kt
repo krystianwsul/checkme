@@ -50,7 +50,7 @@ fun DomainFactory.getCreateTaskData(
             val schedules = task.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                it to task.project.getCustomTime(it.customTimeId)
+                it to task.project.getUntypedProjectCustomTime(it.customTimeId)
             }
 
             parentKey = task.project

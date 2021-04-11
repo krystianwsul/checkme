@@ -21,7 +21,7 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Project.Pri
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val customTime = projectsFactory.privateProject.getCustomTime(customTimeKey)
+    val customTime = projectsFactory.privateProject.getProjectCustomTime(customTimeKey)
 
     val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
 
@@ -37,7 +37,7 @@ fun DomainUpdater.updateCustomTime(
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") {
     check(name.isNotEmpty())
 
-    val customTime = projectsFactory.privateProject.getCustomTime(customTimeId)
+    val customTime = projectsFactory.privateProject.getProjectCustomTime(customTimeId)
 
     customTime.setName(this, name)
 

@@ -49,7 +49,11 @@ sealed class JsonTime {
 
     sealed class Custom : JsonTime() {
 
-        data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime() {
+        abstract override fun <T : ProjectType> getCustomTimeKey(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        ): CustomTimeKey
+
+        data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime.Custom() {
 
             override fun toJson() = id.toString()
 
@@ -65,7 +69,7 @@ sealed class JsonTime {
             ) = projectCustomTimeKeyProvider.getProjectCustomTimeKey(id as CustomTimeId.Project<T>)
         }
 
-        data class User(val key: CustomTimeKey.User) : JsonTime() {
+        data class User(val key: CustomTimeKey.User) : JsonTime.Custom() {
 
             override fun toJson() = key.toJson()
 

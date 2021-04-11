@@ -18,4 +18,5 @@ data class PrivateYearlyScheduleJson @JvmOverloads constructor(
         override val from: String? = null,
         override val until: String? = null,
         override var oldestVisible: String? = null,
+        override val time: String? = null,
 ) : YearlyScheduleJson<ProjectType.Private>

@@ -17,4 +17,5 @@ data class SharedSingleScheduleJson @JvmOverloads constructor(
         override val hour: Int? = null,
         override val minute: Int? = null,
         override var assignedTo: Map<String, Boolean> = mapOf(),
+        override val time: String? = null,
 ) : SingleScheduleJson<ProjectType.Shared>, WriteAssignedToJson

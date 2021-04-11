@@ -758,7 +758,7 @@ class Task<T : ProjectType>(
                                     customTimeId?.value,
                                     hour,
                                     minute,
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -778,7 +778,7 @@ class Task<T : ProjectType>(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     schedule.interval,
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -798,7 +798,7 @@ class Task<T : ProjectType>(
                                     minute,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -819,7 +819,7 @@ class Task<T : ProjectType>(
                                     minute,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -839,7 +839,7 @@ class Task<T : ProjectType>(
                                     minute,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 

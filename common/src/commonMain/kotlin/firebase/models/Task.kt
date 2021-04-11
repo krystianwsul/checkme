@@ -569,22 +569,12 @@ class Task<T : ProjectType>(
 
         generatedInstances.remove(instance.instanceKey)
 
-        // todo customtime use jsontime ready
         val newRecord = if (USE_ROOT_INSTANCES)
             rootInstanceManager::newRootInstanceRecord
         else
             taskRecord::newInstanceRecord
 
-        @Suppress("UNCHECKED_CAST")
-        val instanceRecord = newRecord(
-                InstanceJson(),
-                instance.scheduleKey,
-                instance.scheduleDateTime
-                        .time
-                        .timePair
-                        .customTimeKey
-                        ?.let { it.customTimeId as CustomTimeId.Project<T> }
-        )
+        val instanceRecord = newRecord(InstanceJson(), instance.scheduleKey)
 
         _existingInstances[instance.scheduleKey] = instance
 

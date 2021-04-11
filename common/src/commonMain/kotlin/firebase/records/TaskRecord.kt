@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.records.schedule.*
-import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
@@ -90,7 +89,6 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                     instanceJson,
                     scheduleKey,
                     key,
-                    scheduleKey.scheduleTimePair.customTimeKey?.customTimeId as? CustomTimeId.Project<T>, // todo customtime use jsontime ready
             )
 
             instanceRecords[scheduleKey] = remoteInstanceRecord
@@ -162,11 +160,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         }
     }
 
-    fun newInstanceRecord(
-            instanceJson: InstanceJson,
-            scheduleKey: ScheduleKey,
-            customTimeId: CustomTimeId.Project<T>?,
-    ): InstanceRecord<T> {
+    fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
         val projectInstanceRecord = ProjectInstanceRecord(
@@ -175,7 +169,6 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                 instanceJson,
                 scheduleKey,
                 firebaseKey,
-                customTimeId,
         )
 
         check(!instanceRecords.containsKey(projectInstanceRecord.scheduleKey))

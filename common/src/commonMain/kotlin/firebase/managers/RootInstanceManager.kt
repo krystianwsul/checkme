@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.records.RootInstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
-import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
@@ -35,12 +34,10 @@ open class RootInstanceManager<T : ProjectType>(
     fun newRootInstanceRecord(
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
-            scheduleCustomTimeId: CustomTimeId.Project<T>?,
     ) = RootInstanceRecord(
             taskRecord,
             instanceJson,
             scheduleKey,
-            scheduleCustomTimeId,
             this,
     ).also {
         check(!value.containsKey(it.instanceKey))

@@ -4,7 +4,10 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
@@ -14,7 +17,6 @@ abstract class InstanceRecord<T : ProjectType>(
         final override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         override val key: String,
-        val scheduleCustomTimeId: CustomTimeId.Project<T>?,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -41,11 +43,7 @@ abstract class InstanceRecord<T : ProjectType>(
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
-        // todo customtime use jsontime here we can just change the second type to jsontime.  Or, just use schedulekey
-        fun <T : ProjectType> stringToScheduleKey(
-                projectRecord: ProjectRecord<T>,
-                key: String,
-        ): ScheduleKey {
+        fun <T : ProjectType> stringToScheduleKey(projectRecord: ProjectRecord<T>, key: String): ScheduleKey {
             val matchResult = scheduleKeyRegex.find(key)!!
 
             val dateString = matchResult.groupValues[0]

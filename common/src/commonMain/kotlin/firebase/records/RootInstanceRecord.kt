@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
@@ -12,7 +11,6 @@ class RootInstanceRecord<T : ProjectType>(
         createObject: InstanceJson,
         scheduleKey: ScheduleKey,
         firebaseKey: String,
-        scheduleCustomTimeId: CustomTimeId.Project<T>?,
         private val parent: Parent,
 ) : InstanceRecord<T>(
         create,
@@ -20,14 +18,12 @@ class RootInstanceRecord<T : ProjectType>(
         createObject,
         scheduleKey,
         firebaseKey,
-        scheduleCustomTimeId,
 ) {
 
     constructor(
             taskRecord: TaskRecord<T>,
             createObject: InstanceJson,
             scheduleKey: ScheduleKey,
-            scheduleCustomTimeId: CustomTimeId.Project<T>?,
             parent: Parent,
     ) : this(
             true,
@@ -35,7 +31,6 @@ class RootInstanceRecord<T : ProjectType>(
             createObject,
             scheduleKey,
             "${scheduleKeyToDateString(scheduleKey, true)}/${scheduleKeyToTimeString(scheduleKey, true)}",
-            scheduleCustomTimeId,
             parent,
     )
 
@@ -56,7 +51,6 @@ class RootInstanceRecord<T : ProjectType>(
             createObject,
             scheduleKey,
             "$dateString/$timeString",
-            scheduleKey.scheduleTimePair.customTimeKey?.customTimeId as? CustomTimeId.Project<T>, // todo customtime use jsontime ready
             parent,
     )
 

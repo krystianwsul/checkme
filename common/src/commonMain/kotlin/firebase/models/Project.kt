@@ -122,6 +122,13 @@ abstract class Project<T : ProjectType>(
         return ScheduleKey(oldScheduleDate, TimePair(newCustomTime.key))
     }
 
+    private class InstanceConversionData(
+            val oldInstance: Instance<*>,
+            val newInstanceJson: InstanceJson,
+            val newScheduleKey: ScheduleKey,
+            val updater: (Map<String, String>) -> Any?,
+    )
+
     @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
@@ -133,7 +140,14 @@ abstract class Project<T : ProjectType>(
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(deviceDbInfo.key, oldInstance, newProjectKey)
 
-            Triple(oldInstance, newInstance, updater)
+            val newScheduleKey = convertScheduleKey(
+                    deviceDbInfo.userInfo,
+                    oldTask,
+                    oldInstance.scheduleKey,
+                    true,
+            )
+
+            InstanceConversionData(oldInstance, newInstance, newScheduleKey, updater)
         }
 
         // todo migrate tasks this just makes a bigger mess of things
@@ -142,14 +156,7 @@ abstract class Project<T : ProjectType>(
             mutableMapOf()
         } else {
             instanceDatas.associate {
-                val newScheduleKey = convertScheduleKey(
-                        deviceDbInfo.userInfo,
-                        oldTask,
-                        it.first.scheduleKey,
-                        true,
-                )
-
-                InstanceRecord.scheduleKeyToString(newScheduleKey) to it.second
+                InstanceRecord.scheduleKeyToString(it.newScheduleKey) to it.newInstanceJson
             }.toMutableMap()
         }
 
@@ -160,11 +167,7 @@ abstract class Project<T : ProjectType>(
 
         if (Task.USE_ROOT_INSTANCES) {
             instanceDatas.forEach {
-                newTask.rootInstanceManager.newRootInstanceRecord(
-                        it.second,
-                        it.first.scheduleKey,
-                        getOrCopyTime(deviceDbInfo.key, it.first.scheduleTime).timePair.customTimeKey?.customTimeId as? CustomTimeId.Project<T>,  // todo customtime use jsontime ready
-                )
+                newTask.rootInstanceManager.newRootInstanceRecord(it.newInstanceJson, it.newScheduleKey)
             }
         }
 
@@ -181,7 +184,7 @@ abstract class Project<T : ProjectType>(
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }
 
-        return newTask to instanceDatas.map { it.third }
+        return newTask to instanceDatas.map { it.updater }
     }
 
     protected abstract fun getOrCreateCustomTime(

@@ -604,16 +604,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 val instanceRecord: InstanceRecord<T>,
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId.Project<T>) = task.project.getCustomTime(customTimeId)
-
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
             override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
-            override val scheduleTime
-                get() = instanceRecord.run {
-                    scheduleCustomTimeId?.let { getCustomTime(it) } ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
-                }
+            val scheduleJsonTime get() = JsonTime.fromTimePair<T>(instanceRecord.scheduleKey.scheduleTimePair)
+
+            override val scheduleTime get() = scheduleJsonTime.toTime(task.project)
 
             private val recordInstanceTime: Time? get() = instanceRecord.instanceJsonTime?.toTime(task.project)
 

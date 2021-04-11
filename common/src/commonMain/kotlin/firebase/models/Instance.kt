@@ -17,14 +17,12 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeId: CustomTimeId?,
-                scheduleHourMinute: HourMinute?,
+                scheduleJsonTime: JsonTime,
                 taskKey: TaskKey,
         ): Int {
             return getNotificationId(
                     scheduleDate,
-                    scheduleCustomTimeId?.value,
-                    scheduleHourMinute,
+                    TimeDescriptor.fromJsonTime(scheduleJsonTime),
                     taskKey.run { Pair(projectKey.key, taskId) },
             )
         }
@@ -45,25 +43,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         // todo just hash a data object
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeId: String?,
-                scheduleHourMinute: HourMinute?,
+                scheduleTimeDescriptor: TimeDescriptor,
                 taskKey: Pair<String, String>,
         ): Int {
-            check(scheduleCustomTimeId == null != (scheduleHourMinute == null))
-
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
             hash += 12 * 31 * (scheduleDate.year - 2015)
-
-            if (scheduleCustomTimeId == null) {
-                hash += 12 * 31 * 73 * (scheduleHourMinute!!.hour + 1)
-                hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.minute + 1)
-            } else {
-                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeId.hashCode()
-            }
-
-            @Suppress("INTEGER_OVERFLOW")
-            hash += 12 * 31 * 73 * 24 * 60 * 10000 * taskKey.hashCode()
+            hash += 12 * 31 * 73 * scheduleTimeDescriptor.hashCode()
+            hash += 12 * 31 * 73 * 13 * taskKey.hashCode()
 
             return hash
         }
@@ -105,13 +92,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
 
-    val notificationId
-        get() = getNotificationId(
-                scheduleDate,
-                scheduleCustomTimeKey?.customTimeId,
-                data.scheduleHourMinute,
-                taskKey,
-        )
+    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTime<T>(scheduleTime), taskKey)
 
     val hidden get() = data.hidden
 

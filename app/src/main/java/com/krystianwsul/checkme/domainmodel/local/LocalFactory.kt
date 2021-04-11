@@ -7,9 +7,11 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.singleOrEmpty
 
 @SuppressLint("UseSparseArrays")
 class LocalFactory(
@@ -31,28 +33,18 @@ class LocalFactory(
             scheduleDay: Int,
             scheduleJsonTime: JsonTime,
     ): InstanceShownRecord? {
-        val preMatches = persistenceManager.instanceShownRecords
+        val scheduleTimeDescriptor = TimeDescriptor.fromJsonTime(scheduleJsonTime)
+
+        return persistenceManager.instanceShownRecords
                 .asSequence()
                 .filter { it.projectId == projectId.key }
                 .filter { it.taskId == taskId }
                 .filter { it.scheduleYear == scheduleYear }
                 .filter { it.scheduleMonth == scheduleMonth }
                 .filter { it.scheduleDay == scheduleDay }
-
-        val matches = when (scheduleJsonTime) {
-            is JsonTime.Custom -> {
-                val json = scheduleJsonTime.toJson()
-
-                preMatches.filter { it.scheduleCustomTimeId == json }
-            }
-            is JsonTime.Normal -> {
-                val (hour, minute) = scheduleJsonTime.hourMinute
-                preMatches.filter { it.scheduleHour == hour }.filter { it.scheduleMinute == minute }
-            }
-            else -> throw UnsupportedOperationException() // needed for compilation
-        }
-
-        return matches.singleOrNull()
+                .filter { it.scheduleTimeDescriptor == scheduleTimeDescriptor }
+                .toList()
+                .singleOrEmpty()
     }
 
     override fun <T : ProjectType> createShown(

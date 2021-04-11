@@ -11,9 +11,7 @@ sealed class JsonTime {
         fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime {
             HourMinute.tryFromJson(json)?.let { return Normal(it) }
 
-            CustomTimeKey.User.tryFromJson(json)?.let { return Custom.User(it) }
-
-            return Custom.Project(projectIdProvider.getCustomTimeId(json))
+            return Custom.fromJson(projectIdProvider, json)
         }
 
         fun <T : ProjectType> fromTime(time: Time): JsonTime {
@@ -50,6 +48,15 @@ sealed class JsonTime {
             toTime(customTimeProvider, customTimeProvider)
 
     sealed class Custom : JsonTime() {
+
+        companion object {
+
+            fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime {
+                CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
+
+                return Project(projectIdProvider.getCustomTimeId(json))
+            }
+        }
 
         abstract override fun <T : ProjectType> getCustomTimeKey(
                 projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,

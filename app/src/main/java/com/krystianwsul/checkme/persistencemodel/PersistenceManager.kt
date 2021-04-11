@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -39,20 +40,12 @@ class PersistenceManager(
     fun createInstanceShownRecord(
             remoteTaskId: String,
             scheduleDate: Date,
-            jsonTime: JsonTime,
+            scheduleJsonTime: JsonTime,
             projectId: ProjectKey<*>,
     ): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
 
         val id = ++instanceShownMaxId
-
-        val (customTime, hour, minute) = when (jsonTime) {
-            is JsonTime.Custom -> {
-                Triple(jsonTime.toJson(), null, null)
-            }
-            is JsonTime.Normal -> Triple(null, jsonTime.hourMinute.hour, jsonTime.hourMinute.minute)
-            else -> throw UnsupportedOperationException() // needed for compilation
-        }
 
         return InstanceShownRecord(
                 false,
@@ -61,9 +54,7 @@ class PersistenceManager(
                 scheduleDate.year,
                 scheduleDate.month,
                 scheduleDate.day,
-                customTime,
-                hour,
-                minute,
+                TimeDescriptor.fromJsonTime(scheduleJsonTime),
                 mNotified = false,
                 mNotificationShown = false,
                 mProjectId = projectId.key,

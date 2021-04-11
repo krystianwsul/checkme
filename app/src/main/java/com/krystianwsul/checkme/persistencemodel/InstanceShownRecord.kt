@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.time.TimeDescriptor
 import kotlin.properties.Delegates.observable
 import kotlin.reflect.KProperty
 
@@ -14,12 +15,10 @@ class InstanceShownRecord(
         val scheduleYear: Int,
         val scheduleMonth: Int,
         val scheduleDay: Int,
-        val scheduleCustomTimeId: String?,
-        val scheduleHour: Int?,
-        val scheduleMinute: Int?,
+        val scheduleTimeDescriptor: TimeDescriptor,
         mNotified: Boolean,
         mNotificationShown: Boolean,
-        mProjectId: String // todo consider adding project type
+        mProjectId: String, // todo consider adding project type
 ) : Record(created), Instance.Shown {
 
     companion object {
@@ -90,15 +89,14 @@ class InstanceShownRecord(
             val scheduleYear = getInt(2)
             val scheduleMonth = getInt(3)
             val scheduleDay = getInt(4)
-            val scheduleCustomTimeId = if (isNull(5)) null else getString(5)
+            val scheduleCustomTimeDescriptor = if (isNull(5)) null else getString(5)
             val scheduleHour = if (isNull(6)) null else getInt(6)
             val scheduleMinute = if (isNull(7)) null else getInt(7)
             val notified = getInt(8) == 1
             val notificationShown = getInt(9) == 1
             val projectId = getString(10)
 
-            check(scheduleHour == null == (scheduleMinute == null))
-            check(scheduleHour == null != (scheduleCustomTimeId == null))
+            val scheduleTimeDescriptor = TimeDescriptor(scheduleCustomTimeDescriptor, scheduleHour, scheduleMinute)
 
             InstanceShownRecord(
                     true,
@@ -107,12 +105,10 @@ class InstanceShownRecord(
                     scheduleYear,
                     scheduleMonth,
                     scheduleDay,
-                    scheduleCustomTimeId,
-                    scheduleHour,
-                    scheduleMinute,
+                    scheduleTimeDescriptor,
                     notified,
                     notificationShown,
-                    projectId
+                    projectId,
             )
         }
 
@@ -128,8 +124,6 @@ class InstanceShownRecord(
     var projectId by observable(mProjectId, ::setChanged)
 
     init {
-        check(scheduleHour == null == (scheduleMinute == null))
-        check(scheduleHour == null != (scheduleCustomTimeId == null))
         check(mProjectId.isNotEmpty())
     }
 
@@ -139,9 +133,9 @@ class InstanceShownRecord(
             put(COLUMN_SCHEDULE_YEAR, scheduleYear)
             put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
             put(COLUMN_SCHEDULE_DAY, scheduleDay)
-            put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId)
-            put(COLUMN_SCHEDULE_HOUR, scheduleHour)
-            put(COLUMN_SCHEDULE_MINUTE, scheduleMinute)
+            put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleTimeDescriptor.customTimeDescriptor)
+            put(COLUMN_SCHEDULE_HOUR, scheduleTimeDescriptor.hour)
+            put(COLUMN_SCHEDULE_MINUTE, scheduleTimeDescriptor.minute)
             put(COLUMN_NOTIFIED, if (notified) 1 else 0)
             put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
             put(COLUMN_PROJECT_ID, projectId)

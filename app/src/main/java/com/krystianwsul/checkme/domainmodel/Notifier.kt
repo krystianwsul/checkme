@@ -9,8 +9,9 @@ import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.relevance.Irrelevant
-import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimeSoy
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -63,15 +64,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
 
-            val hourMinute = instanceShownRecord.takeIf { it.scheduleHour != null }?.let {
-                HourMinute(it.scheduleHour!!, it.scheduleMinute!!)
-            }
-
             NotificationWrapper.instance.cancelNotification(
                     Instance.getNotificationId(
                             scheduleDate,
-                            instanceShownRecord.scheduleCustomTimeId,
-                            hourMinute,
+                            instanceShownRecord.scheduleTimeDescriptor,
                             taskKey,
                     )
             )
@@ -80,28 +76,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
                 .map { (instanceShownRecord, task) ->
+                    val scheduleJsonTime =
+                            instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.project.projectRecord)
+
                     val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-                    val customTimeId = instanceShownRecord.scheduleCustomTimeId // todo customtime shown
-                    val project = task!!.project
 
-                    val customTimeKey: CustomTimeKey.Project<*>?
-                    val hourMinute: HourMinute?
-                    if (!customTimeId.isNullOrEmpty()) {
-                        check(instanceShownRecord.scheduleHour == null)
-                        check(instanceShownRecord.scheduleMinute == null)
-
-                        customTimeKey = project.getCustomTime(customTimeId).key
-                        hourMinute = null
-                    } else {
-                        checkNotNull(instanceShownRecord.scheduleHour)
-                        checkNotNull(instanceShownRecord.scheduleMinute)
-
-                        customTimeKey = null
-                        hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-                    }
-
-                    val taskKey = TaskKey(project.projectKey, instanceShownRecord.taskId)
-                    InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
+                    val taskKey = TaskKey(task.project.projectKey, instanceShownRecord.taskId)
+                    InstanceKey(taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
                 }
                 .toSet()
 

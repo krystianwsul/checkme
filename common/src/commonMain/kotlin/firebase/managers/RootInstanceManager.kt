@@ -20,12 +20,16 @@ open class RootInstanceManager<T : ProjectType>(
             instanceJson,
             snapshotKey.dateKey,
             snapshotKey.timeKey,
-            this@RootInstanceManager
+            this@RootInstanceManager,
     )
 
-    override var value = snapshotInfos.map { it.toRecord() }
-            .associateBy { it.instanceKey }
-            .toMutableMap()
+    init {
+        setInitialValue(
+                snapshotInfos.map { it.toRecord() }
+                        .associateBy { it.instanceKey }
+                        .toMutableMap()
+        )
+    }
 
     override val records get() = value.values
 

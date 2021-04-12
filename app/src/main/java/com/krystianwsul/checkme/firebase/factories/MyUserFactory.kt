@@ -21,8 +21,6 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
         get() = userRelay.value!!
         private set(value) = userRelay.accept(value)
 
-    val isSaved get() = myUserManager.isSaved
-
     val sharedProjectKeysObservable =
             userRelay.map { ChangeWrapper(ChangeType.REMOTE, it.projectIds) }.distinctUntilChanged()!!
 

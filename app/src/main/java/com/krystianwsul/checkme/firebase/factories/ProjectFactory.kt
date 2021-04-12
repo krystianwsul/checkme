@@ -36,10 +36,6 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     var project: Project<T>
         private set
 
-    val isSaved get() = projectManager.isSaved || rootInstanceManagers.values.any { it.isSaved }
-
-    val savedList get() = projectManager.savedList + rootInstanceManagers.values.flatMap { it.savedList }
-
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
             snapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
@@ -99,22 +95,28 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
             projectChangeType
         }
 
-        val addTaskChangeTypes = projectLoader.addTaskEvents.mapNotNull { (projectChangeType, addTaskEvent) ->
-            addTaskEvent.apply { updateRootInstanceManager(taskRecord, instanceSnapshot) }
+        val addTaskChangeTypes = projectLoader.addTaskEvents
+                .doOnNext { (_, addTaskEvent) ->
+                    addTaskEvent.apply { updateRootInstanceManager(taskRecord, instanceSnapshot) }
 
-            check(rootInstanceManagers.containsKey(addTaskEvent.taskRecord.taskKey))
-
-            project = newProject(addTaskEvent.projectRecord)
-
-            projectChangeType.takeIf { it == ChangeType.REMOTE }
-        }
+                    check(rootInstanceManagers.containsKey(addTaskEvent.taskRecord.taskKey))
+                }
+                .filter { (projectChangeType, _) -> projectChangeType == ChangeType.REMOTE }
+                .doOnNext { (_, addTaskEvent) -> project = newProject(addTaskEvent.projectRecord) }
+                .map { (projectChangeType, _) -> projectChangeType }
 
         val changeInstancesChangeTypes = projectLoader.changeInstancesEvents.mapNotNull { changeInstancesEvent ->
-            val instanceChangeType = changeInstancesEvent.run { updateRootInstanceManager(taskRecord, instanceSnapshot) }
+            val instanceChangeType = changeInstancesEvent.run {
+                updateRootInstanceManager(taskRecord, instanceSnapshot)
+            }
 
-            project = newProject(changeInstancesEvent.projectRecord)
+            if (instanceChangeType == ChangeType.REMOTE) {
+                project = newProject(changeInstancesEvent.projectRecord)
 
-            instanceChangeType
+                instanceChangeType
+            } else {
+                null
+            }
         }
 
         changeTypes = listOf(

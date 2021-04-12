@@ -228,8 +228,6 @@ class DomainFactory(
     private fun tryNotifyListeners(source: String, runType: RunType) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
-        if (projectsFactory.isSaved || friendsFactory.isSaved || myUserFactory.isSaved) return
-
         Preferences.tickLog.logLineHour("DomainFactory: notifying listeners")
 
         val tickData = TickHolder.getTickData()
@@ -589,7 +587,4 @@ class DomainFactory(
         val readMillis = read.long - start.long
         val instantiateMillis = stop.long - read.long
     }
-
-    inner class SavedFactoryException :
-            Exception("private.isSaved == " + projectsFactory.isPrivateSaved + ", shared.isSaved == " + projectsFactory.isSharedSaved + ", user.isSaved == " + myUserFactory.isSaved)
 }

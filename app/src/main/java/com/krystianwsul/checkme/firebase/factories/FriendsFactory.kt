@@ -34,8 +34,6 @@ class FriendsFactory(
 
     private var _friends = rootUserManager.records.toRootUsers()
 
-    val isSaved get() = rootUserManager.isSaved
-
     val friends: Collection<RootUser> get() = _friends.values
 
     val changeTypes: Observable<ChangeType>

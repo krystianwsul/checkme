@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootInstanceRecord
@@ -45,7 +44,7 @@ class AndroidRootInstanceManager<T : ProjectType>(
                         )
                     }
 
-                    JsonDifferenceException.compare(oldSnapshotInfos, newSnapshotInfos)
+                    oldSnapshotInfos != newSnapshotInfos
                 },
                 {
                     newSnapshotInfos.map { it.toRecord() }

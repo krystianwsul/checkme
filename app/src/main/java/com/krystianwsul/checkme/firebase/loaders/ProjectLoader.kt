@@ -100,12 +100,8 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                     .share()
 
             listOf(
-                    taskObservable.take(1).map {
-                        ProjectData(false, changeWrapper, it)
-                    },
-                    taskObservable.skip(1).map {
-                        ProjectData(true, changeWrapper, it)
-                    }
+                    taskObservable.take(1).map { ProjectData(false, changeWrapper, it) },
+                    taskObservable.skip(1).map { ProjectData(true, changeWrapper, it) }
             ).merge()
         }
                 .processChanges(

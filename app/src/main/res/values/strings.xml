@@ -141,7 +141,7 @@
     <string name="downloadCheckMeLink" translatable="false">https://play.google.com/store/apps/details?id=com.krystianwsul.checkme</string>
     <string name="inviteTitle">This contact doesn\'t seem to be a Check.me user.  Would you like to share a link with them to download the app?</string>
     <string name="userNotFound">User not found</string>
-    <string name="addFriend">Add a new friend</string>
+    <string name="addFriend">Add a friend</string>
     <string name="showProjects">Group by project</string>
     <string name="myTasks">My tasks</string>
     <string name="tooltip_tasks_tab">Want to see a list of your tasks?  Check the \"Tasks\" tab.</string>

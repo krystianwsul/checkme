@@ -168,8 +168,6 @@ fun DomainUpdater.updatePhotoUrl(
 ): Completable = CompletableDomainUpdate.create("updatePhotoUrl") {
     DomainThreadChecker.instance.requireDomainThread()
 
-    if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
-
     myUserFactory.user.photoUrl = photoUrl
     projectsFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 

@@ -121,7 +121,6 @@ class DomainFactoryRule : TestRule {
 
     private fun before() {
         val myUserFactory = mockk<MyUserFactory> {
-            every { isSaved } returns false
             every { save(any()) } returns Unit
             every { user } returns mockk(relaxed = true)
         }
@@ -195,7 +194,6 @@ class DomainFactoryRule : TestRule {
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {
-            every { isSaved } returns false
             every { save(any()) } returns Unit
             every { getUserJsons(any()) } returns mapOf()
             every { updateProjects(any(), any(), any()) } returns Unit

@@ -139,7 +139,7 @@
     <string name="downloadCheckMeTitle">Ściągnij Check.me</string>
     <string name="inviteTitle">Ta osoba zdaje się nie być użytkownikiem Check.me. Czy chcesz udostępnić jej link do ściągnięcia apki?</string>
     <string name="userNotFound">Nie znaleziono użytkownika</string>
-    <string name="addFriend">Dodaj nowego znajomego</string>
+    <string name="addFriend">Dodaj znajomego</string>
     <string name="showProjects">Pokaż projekty</string>
     <string name="myTasks">Moje zadania</string>
     <string name="tooltip_tasks_tab">Chcesz zobaczyć listę wszystkich zadań? Sprawdź w zakładce \"Zdania\".</string>

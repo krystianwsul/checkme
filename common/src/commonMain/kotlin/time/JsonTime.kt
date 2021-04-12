@@ -70,7 +70,7 @@ sealed class JsonTime {
 
         override fun <T : ProjectType> toTimePair(
                 projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
-        ) = TimePair(getCustomTimeKey(projectCustomTimeKeyProvider) as CustomTimeKey.Project<*>, null) // todo customtime timepair
+        ) = TimePair(getCustomTimeKey(projectCustomTimeKeyProvider), null)
 
         data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime.Custom() {
 

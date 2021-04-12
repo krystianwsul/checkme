@@ -16,9 +16,9 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class FriendsFactory(
-        friendsLoader: FriendsLoader,
+        private val friendsLoader: FriendsLoader,
         initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
-        domainDisposable: CompositeDisposable
+        domainDisposable: CompositeDisposable,
 ) {
 
     companion object {
@@ -102,6 +102,9 @@ class FriendsFactory(
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper) {
         check(!_friends.containsKey(userKey))
 
-        _friends[userKey] = RootUser(rootUserManager.addFriend(userKey, userWrapper))
+        val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
+        friendsLoader.addFriend(rootUserRecord)
+
+        check(_friends.containsKey(rootUserRecord.userKey))
     }
 }

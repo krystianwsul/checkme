@@ -70,6 +70,7 @@ class FactoryLoader(
                             domainDisposable,
                             factoryProvider.projectProvider,
                             privateProjectManager,
+                            null,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
@@ -133,20 +134,20 @@ class FactoryLoader(
                         )
                     }.cacheImmediate()
 
+                    val userFactoryChangeTypes = userDatabaseRx.changes.flatMapSingle { snapshot ->
+                        userFactorySingle.map { it.onNewSnapshot(snapshot) }
+                    }
+
                     val changeTypes = listOf(
                             projectsFactorySingle.flatMapObservable { it.changeTypes },
                             friendsFactorySingle.flatMapObservable { it.changeTypes },
+                            userFactoryChangeTypes,
                     ).merge()
 
-                    domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { Pair(domainFactory, it) } }
-                            .subscribe { (domainFactory, changeType) -> domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now) }
-                            .addTo(domainDisposable)
-
-                    userDatabaseRx.changes
-                            .subscribe {
-                                domainFactorySingle.subscribe { domainFactory ->
-                                    domainFactory.updateUserRecord(it)
-                                }.addTo(domainDisposable)
+                    // ignore all change events that come in before the DomainFactory is initialized
+                    domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { domainFactory to it } }
+                            .subscribe { (domainFactory, changeType) ->
+                                domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
                             }
                             .addTo(domainDisposable)
 

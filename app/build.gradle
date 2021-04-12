@@ -174,4 +174,6 @@ dependencies {
     kapt "io.arrow-kt:arrow-meta:$arrowVersion"
 
     implementation 'commons-io:commons-io:2.8.0'
+
+    implementation "com.github.akarnokd:rxjava3-extensions:3.0.1"
 }

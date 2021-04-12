@@ -3,11 +3,12 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -18,7 +19,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 @Suppress("LeakingThis")
-abstract class ProjectFactory<T : ProjectType, U : Any>(
+abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 // U: Project JSON type
         projectLoader: ProjectLoader<T, U>,
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
@@ -40,7 +41,7 @@ abstract class ProjectFactory<T : ProjectType, U : Any>(
 
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
-            snapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            snapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     ) = projectRecord.taskRecords
         .values
         .associate {
@@ -54,7 +55,7 @@ abstract class ProjectFactory<T : ProjectType, U : Any>(
 
     protected fun newRootInstanceManager(
             taskRecord: TaskRecord<T>,
-            snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>?,
+            snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>?,
     ): AndroidRootInstanceManager<T> {
         check(!rootInstanceManagers.containsKey(taskRecord.taskKey))
 
@@ -71,7 +72,7 @@ abstract class ProjectFactory<T : ProjectType, U : Any>(
         rootInstanceManagers = initialProjectEvent.run { newRootInstanceManagers(projectRecord, instanceSnapshots) }
         project = newProject(initialProjectEvent.projectRecord)
 
-        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>): ChangeType {
+        fun updateRootInstanceManager(taskRecord: TaskRecord<T>, snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>): ChangeType {
             val rootInstanceManager = rootInstanceManagers[taskRecord.taskKey]
 
             return if (rootInstanceManager != null) {

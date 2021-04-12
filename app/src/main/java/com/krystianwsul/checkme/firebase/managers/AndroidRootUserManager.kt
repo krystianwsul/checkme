@@ -1,28 +1,32 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.RootUserManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class AndroidRootUserManager(children: Iterable<TypedSnapshot<UserWrapper>>) : RootUserManager(),
-        SnapshotRecordManager<RootUserRecord, TypedSnapshot<UserWrapper>> {
+class AndroidRootUserManager(children: Iterable<Snapshot<UserWrapper>>) : RootUserManager(),
+        SnapshotRecordManager<RootUserRecord, Snapshot<UserWrapper>> {
 
     companion object {
 
-        private fun Snapshot.toKey() = UserKey(key)
+        private fun Snapshot<*>.toKey() = UserKey(key)
 
-        private fun TypedSnapshot<UserWrapper>.toRecord() = RootUserRecord(false, getValue()!!, toKey())
+        private fun Snapshot<UserWrapper>.toRecord() = RootUserRecord(false, value!!, toKey())
     }
 
     override var recordPairs = children.associate { it.toKey() to Pair(it.toRecord(), false) }.toMutableMap()
 
-    override fun set(snapshot: TypedSnapshot<UserWrapper>) = setNonNull(snapshot.toKey()) { snapshot.toRecord() }
+    override fun set(snapshot: Snapshot<UserWrapper>) = setNonNull(
+            snapshot.toKey(),
+            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
+            { snapshot.toRecord() },
+    )
 
     fun addFriend(
             userKey: UserKey,
-            userWrapper: UserWrapper
+            userWrapper: UserWrapper,
     ) = RootUserRecord(false, userWrapper, userKey).also { add(userKey, it) }
 }

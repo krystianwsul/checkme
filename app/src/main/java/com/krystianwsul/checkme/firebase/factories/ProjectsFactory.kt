@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
-import com.krystianwsul.checkme.firebase.managers.AndroidRootInstanceManager
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -60,16 +59,7 @@ class ProjectsFactory(
 
     val privateProject get() = privateProjectFactory.project as PrivateProject
 
-    private val factorySharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
-
-    private val addedSharedProjects = mutableMapOf<ProjectKey<ProjectType.Shared>, SharedProject>()
-
-    val sharedProjects: Map<ProjectKey<ProjectType.Shared>, SharedProject>
-        get() {
-            check(factorySharedProjects.keys.intersect(addedSharedProjects.keys).isEmpty())
-
-            return factorySharedProjects + addedSharedProjects
-        }
+    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
 
     val changeTypes: Observable<ChangeType>
 
@@ -89,21 +79,10 @@ class ProjectsFactory(
                             addProjectEvent.initialProjectEvent,
                             factoryProvider,
                             domainDisposable,
-                            deviceDbInfo
+                            deviceDbInfo,
                     )
 
                     sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
-
-                    if (addedSharedProjects.containsKey(projectKey)) {
-                        check(changeType == ChangeType.LOCAL)
-
-                        val oldRecord = addedSharedProjects.getValue(projectKey).projectRecord
-                        val newRecord = sharedProjectFactory.project.projectRecord
-
-                        check(oldRecord == newRecord)
-
-                        addedSharedProjects.remove(projectKey)
-                    }
 
                     changeType
                 }
@@ -113,7 +92,6 @@ class ProjectsFactory(
                     check(changeType == ChangeType.REMOTE)
 
                     removeProjectEvent.projectKeys.forEach {
-                        check(!addedSharedProjects.containsKey(it))
                         check(sharedProjectFactories.containsKey(it))
 
                         sharedProjectFactoriesProperty.remove(it)
@@ -246,22 +224,13 @@ class ProjectsFactory(
         val sharedProjectJson = SharedProjectJson(
                 name,
                 now.long,
-                users = userJsons.mapKeys { it.key.key }.toMutableMap()
+                now.offset,
+                users = userJsons.mapKeys { it.key.key }.toMutableMap(),
         )
 
-        val sharedProjectRecord =
-                sharedProjectsLoader.projectManager.newProjectRecord(JsonWrapper(sharedProjectJson))
+        val sharedProjectRecord = sharedProjectsLoader.addProject(JsonWrapper(sharedProjectJson))
 
-        val sharedProject = SharedProject(
-                sharedProjectRecord,
-                mapOf()
-        ) { AndroidRootInstanceManager(it, null, factoryProvider) }
-
-        check(!projects.containsKey(sharedProject.projectKey))
-
-        addedSharedProjects[sharedProject.projectKey] = sharedProject
-
-        return sharedProject
+        return sharedProjects.getValue(sharedProjectRecord.projectKey)
     }
 
     fun save(values: MutableMap<String, Any?>) {
@@ -274,13 +243,6 @@ class ProjectsFactory(
 
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) =
             projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
-
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*>? {
-        val taskKey = instanceKey.taskKey
-
-        return getProjectForce(taskKey).getTaskIfPresent(taskKey.taskId)
-                ?.getExistingInstanceIfPresent(instanceKey.scheduleKey)
-    }
 
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
 

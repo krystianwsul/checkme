@@ -29,6 +29,7 @@ class MergePaperAndRxTest {
                 paperSubject.firstElement(),
                 firebaseSubject,
                 Converter({ it }, { it }),
+                "",
         ).test()
 
         mockkObject(MyApplication)

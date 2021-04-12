@@ -8,6 +8,7 @@
           <sourceSet>Check.me.common.jsMain</sourceSet>
           <sourceSet>Check.me.common.commonTest</sourceSet>
           <sourceSet>Check.me.common.commonMain</sourceSet>
+          <sourceSet>Check.me.common.commonTest</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <testOutputPath>$MODULE_DIR$/../../../common/build/classes/kotlin/js/test/common_test.js</testOutputPath>

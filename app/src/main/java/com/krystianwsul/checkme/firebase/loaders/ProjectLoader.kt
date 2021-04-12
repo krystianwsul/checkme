@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.IndicatorSnapshot
-import com.krystianwsul.checkme.firebase.snapshot.TypedSnapshot
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.zipSingle
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
@@ -17,7 +18,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
+interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
     val projectManager: ProjectProvider.ProjectManager<T, U>
 
@@ -33,41 +34,49 @@ interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
 
-    class InitialProjectEvent<T : ProjectType, U : Any>(
+    class InitialProjectEvent<T : ProjectType, U : Parsable>(
             // U: Project JSON type
             val projectManager: ProjectProvider.ProjectManager<T, U>,
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            val instanceSnapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     )
 
     class AddTaskEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>,
+            val instanceSnapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
     )
 
     class ChangeInstancesEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
             val taskRecord: TaskRecord<T>,
-            val instanceSnapshot: IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>,
+            val instanceSnapshot: Snapshot<Map<String, Map<String, InstanceJson>>>,
     )
 
     class ChangeProjectEvent<T : ProjectType>(
             val projectRecord: ProjectRecord<T>,
-            val instanceSnapshots: Map<TaskKey, IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+            val instanceSnapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,
     )
 
-    class Impl<T : ProjectType, U : Any>(
+    class Impl<T : ProjectType, U : Parsable>(
             // U: Project JSON type
-            snapshotObservable: Observable<TypedSnapshot<U>>,
+            snapshotObservable: Observable<Snapshot<U>>,
             private val domainDisposable: CompositeDisposable,
             projectProvider: ProjectProvider,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
+            initialProjectRecord: ProjectRecord<T>?,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }
+
+        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }.let {
+            if (initialProjectRecord != null) {
+                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+            } else {
+                it
+            }
+        }
 
         private data class ProjectData<T : ProjectType>(
                 val changeWrapper: ChangeWrapper<out ProjectRecord<T>>,
@@ -76,7 +85,7 @@ interface ProjectLoader<T : ProjectType, U : Any> { // U: Project JSON type
 
         private data class InstanceData<T : ProjectType>(
                 val taskRecord: TaskRecord<T>,
-                val databaseRx: DatabaseRx<IndicatorSnapshot<Map<String, Map<String, InstanceJson>>>>,
+                val databaseRx: DatabaseRx<Snapshot<Map<String, Map<String, InstanceJson>>>>,
         )
 
         private val rootInstanceDatabaseRx = projectRecordObservable.map {

@@ -96,9 +96,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val hidden get() = data.hidden
 
-    // scenario already covered by task/schedule relevance
-    val customTimeKey get() = data.customTimeKey
-
     val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
     val parentState get() = data.parentState
@@ -587,8 +584,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val scheduleHourMinute: HourMinute?
 
-        abstract val customTimeKey: CustomTimeKey?
-
         abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>? // todo customtime project
 
         abstract val parentState: ParentState
@@ -633,8 +628,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val scheduleHourMinute
                 get() = instanceRecord.scheduleHour?.let { HourMinute(it, instanceRecord.scheduleMinute!!) }
-
-            override val customTimeKey get() = instanceRecord.instanceJsonTime?.getCustomTimeKey(task.project)
 
             override val scheduleCustomTimeKey
                 get() = instanceRecord.scheduleKey
@@ -683,8 +676,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             override val hidden = false
 
             override val scheduleHourMinute = scheduleTime.timePair.hourMinute
-
-            override val customTimeKey: CustomTimeKey? = null
 
             override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
 

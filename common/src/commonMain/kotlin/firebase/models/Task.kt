@@ -361,7 +361,7 @@ class Task<T : ProjectType>(
                     startExactTimeStamp,
                     endExactTimeStamp,
                     bySchedule,
-                    onlyRoot
+                    onlyRoot,
             )
 
             if (!onlyRoot) {
@@ -369,7 +369,7 @@ class Task<T : ProjectType>(
                         startExactTimeStamp,
                         endExactTimeStamp,
                         now,
-                        bySchedule
+                        bySchedule,
                 )
             }
 

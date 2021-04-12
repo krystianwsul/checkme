@@ -464,7 +464,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
-            val customTime = task.project.getUntypedProjectCustomTime(instanceTimePair.customTimeKey.customTimeId)
+            val customTime = task.project.getCustomTime(instanceTimePair.customTimeKey)
 
             val privateCustomTime = when (customTime) {
                 is SharedCustomTime -> {

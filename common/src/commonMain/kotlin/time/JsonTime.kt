@@ -26,8 +26,7 @@ sealed class JsonTime {
         fun <T : ProjectType> fromTimePair(timePair: TimePair): JsonTime {
             timePair.hourMinute?.let { return Normal(it) }
 
-            // todo customtime timepair
-            return Custom.Project(timePair.customTimeKey!!.customTimeId)
+            return Custom.fromCustomTimeKey<T>(timePair.customTimeKey!!)
         }
     }
 
@@ -55,6 +54,13 @@ sealed class JsonTime {
                 CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
 
                 return Project(projectIdProvider.getProjectCustomTimeId(json))
+            }
+
+            fun <T : ProjectType> fromCustomTimeKey(customTimeKey: CustomTimeKey): Custom {
+                return when (customTimeKey) {
+                    is CustomTimeKey.Project<*> -> Project(customTimeKey.customTimeId)
+                    is CustomTimeKey.User -> User(customTimeKey)
+                }
             }
         }
 
@@ -135,5 +141,15 @@ sealed class JsonTime {
         fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User
     }
 
-    interface CustomTimeProvider<T : ProjectType> : ProjectCustomTimeProvider<T>, UserCustomTimeProvider
+    interface CustomTimeProvider<T : ProjectType> : ProjectCustomTimeProvider<T>, UserCustomTimeProvider {
+
+        fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
+            @Suppress("UNCHECKED_CAST")
+            return when (customTimeKey) {
+                is CustomTimeKey.Project<*> ->
+                    getProjectCustomTime((customTimeKey as CustomTimeKey.Project<T>).customTimeId)
+                is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
+            }
+        }
+    }
 }

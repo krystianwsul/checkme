@@ -575,7 +575,7 @@ class DomainFactory(
     }
 
     fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { projectsFactory.getCustomTime(it) }
+            ?.let(::getCustomTime)
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
@@ -585,7 +585,11 @@ class DomainFactory(
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
-        TODO("todo customtime fetch")
+        return when (customTimeKey) {
+            is CustomTimeKey.Project<*> -> projectsFactory.getCustomTime(customTimeKey)
+            is CustomTimeKey.User -> friendsFactory.getCustomTime(customTimeKey)
+            else -> throw UnsupportedOperationException() // compilation
+        }
     }
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)

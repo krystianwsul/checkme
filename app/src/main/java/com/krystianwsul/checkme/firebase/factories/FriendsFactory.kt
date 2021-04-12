@@ -11,6 +11,8 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
@@ -108,4 +110,6 @@ class FriendsFactory(
 
         check(_friends.containsKey(rootUserRecord.userKey))
     }
+
+    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User = TODO("todo customtime fetch")
 }

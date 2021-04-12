@@ -109,7 +109,7 @@ abstract class Project<T : ProjectType>(
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val oldCustomTime = oldTask.project.getUntypedProjectCustomTime(oldScheduleTimePair.customTimeKey.customTimeId)
+        val oldCustomTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)
 
         val ownerKey = when (oldCustomTime) {
             is PrivateCustomTime -> userInfo.key
@@ -117,7 +117,10 @@ abstract class Project<T : ProjectType>(
             else -> throw IllegalStateException()
         }
 
-        val newCustomTime = getOrCreateCustomTime(ownerKey, oldCustomTime, allowCopy)
+        val newCustomTime = when (oldCustomTime) {
+            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, oldCustomTime, allowCopy)
+            is Time.Custom.User -> oldCustomTime
+        }
 
         return ScheduleKey(oldScheduleDate, TimePair(newCustomTime.key))
     }
@@ -350,7 +353,7 @@ abstract class Project<T : ProjectType>(
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>) = projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { getUntypedProjectCustomTime(it.customTimeId) }
+            ?.let(::getCustomTime)
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(scheduleKey: ScheduleKey) =

@@ -56,9 +56,9 @@ sealed class ScheduleText {
     abstract fun getScheduleText(project: Project<*>): String
 
     protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
-        return (timePair.customTimeKey?.let {
-            project.getUntypedProjectCustomTime(it.customTimeId)
-        } ?: Time.Normal(timePair.hourMinute!!)).toString()
+        val time = timePair.customTimeKey?.let { project.getCustomTime(it) } ?: Time.Normal(timePair.hourMinute!!)
+
+        return time.toString()
     }
 
     class Single(private val scheduleGroup: ScheduleGroup.Single<*>) : ScheduleText() {

@@ -6,12 +6,9 @@ import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.Serializable
 
 @Parcelize
-data class TimePair(
-        val customTimeKey: CustomTimeKey.Project<*>?, // todo customtime timepair
-        val hourMinute: HourMinute?,
-) : Parcelable, Serializable {
+data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinute?) : Parcelable, Serializable {
 
-    constructor(customTimeKey: CustomTimeKey.Project<*>) : this(customTimeKey, null)
+    constructor(customTimeKey: CustomTimeKey) : this(customTimeKey, null)
 
     constructor(hourMinute: HourMinute) : this(null, hourMinute)
 

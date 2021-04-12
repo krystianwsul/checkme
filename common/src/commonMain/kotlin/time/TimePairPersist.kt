@@ -15,8 +15,8 @@ class TimePairPersist private constructor(
     val timePair get() = customTimeKey?.let { TimePair(it) } ?: TimePair(hourMinute)
 
     constructor(timePair: TimePair) : this(
-            timePair.customTimeKey,
-            timePair.hourMinute ?: HourMinute.nextHour.second
+            timePair.customTimeKey as CustomTimeKey.Project<*>, // todo customtime timepairpersist
+            timePair.hourMinute ?: HourMinute.nextHour.second,
     )
 
     fun setHourMinute(hourMinute: HourMinute) {

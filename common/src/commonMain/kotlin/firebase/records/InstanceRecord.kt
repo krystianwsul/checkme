@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
@@ -52,13 +53,19 @@ abstract class InstanceRecord<T : ProjectType>(
             return dateTimeStringsToScheduleKey(projectRecord, dateString, timeString)
         }
 
+        private val hourMinuteRegex = Regex("^(\\d\\d)-(\\d\\d)$")
+
         // todo customtime cleanup (presumably will be using JsonTime eventually)
         fun <T : ProjectType> dateTimeStringsToScheduleKey(
                 projectRecord: ProjectRecord<T>,
                 dateString: String,
                 timeString: String,
         ): ScheduleKey {
-            val jsonTime = JsonTime.fromJson(projectRecord, timeString)
+            val jsonTime = hourMinuteRegex.find(timeString)?.let { matchResult ->
+                val (hour, minute) = (1..2).map { matchResult.groupValues[it].toInt() }
+
+                JsonTime.Normal(HourMinute(hour, minute))
+            } ?: JsonTime.fromJson(projectRecord, timeString)
 
             return ScheduleKey(Date.fromJson(dateString), jsonTime.toTimePair(projectRecord))
         }

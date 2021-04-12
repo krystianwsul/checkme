@@ -56,7 +56,7 @@ class FactoryLoaderNewTest {
                 scheduleJsonTime: JsonTime,
         ): Instance.Shown? = null
 
-        override fun createShown(
+        override fun <T : ProjectType> createShown(
                 remoteTaskId: String,
                 scheduleDateTime: DateTime,
                 projectId: ProjectKey<*>,

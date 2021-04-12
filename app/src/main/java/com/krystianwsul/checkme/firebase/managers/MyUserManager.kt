@@ -31,7 +31,7 @@ class MyUserManager(
                             deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
                     )
 
-                    MyUserRecord(true, userWrapper, snapshot.toKey())
+                    MyUserRecord(databaseWrapper, true, userWrapper, snapshot.toKey())
                 } else {
                     snapshot.toRecord()
                 }

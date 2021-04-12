@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Maybe
@@ -95,8 +94,6 @@ class MyApplication : Application() {
         _sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         MyCrashlytics.init()
-
-        JsonDifferenceException.throwIfDifferent = BuildConfig.DEBUG
 
         RxDogTag.install()
 

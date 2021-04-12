@@ -116,12 +116,6 @@ class ProjectsFactory(
 
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
-    val isPrivateSaved get() = privateProjectFactory.isSaved
-
-    val isSharedSaved get() = sharedProjectFactories.values.any { it.isSaved }
-
-    val isSaved get() = isPrivateSaved || isSharedSaved
-
     val tasks get() = projects.values.flatMap { it.tasks }
 
     val remoteCustomTimes get() = projects.values.flatMap { it.customTimes }
@@ -146,8 +140,6 @@ class ProjectsFactory(
         get() = projects.values
                 .map { it.tasks.size }
                 .sum()
-
-    val savedList get() = privateProjectFactory.savedList + sharedProjectFactories.values.flatMap { it.savedList }
 
     fun createScheduleRootTask(
             now: ExactTimeStamp.Local,

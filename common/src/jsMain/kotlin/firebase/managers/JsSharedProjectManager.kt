@@ -10,10 +10,10 @@ class JsSharedProjectManager(
         jsonWrappers: Map<String, JsonWrapper>
 ) : SharedProjectManager() {
 
-    override var recordPairs = jsonWrappers.entries
+    override var _records = jsonWrappers.entries
             .associate {
                 val projectKey = ProjectKey.Shared(it.key)
-                projectKey to Pair(SharedProjectRecord(databaseWrapper, this, projectKey, it.value), false)
+                projectKey to SharedProjectRecord(databaseWrapper, this, projectKey, it.value)
             }
             .toMutableMap()
 }

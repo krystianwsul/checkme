@@ -6,7 +6,6 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -29,7 +28,7 @@ class AndroidPrivateProjectManager(
 
     override fun set(snapshot: Snapshot<PrivateProjectJson>): ChangeWrapper<PrivateProjectRecord>? {
         val changeWrapper = set(
-                { JsonDifferenceException.compare(it.single().createObject, snapshot.value) },
+                { it.single().createObject != snapshot.value },
                 {
                     val record = if (first) {
                         first = false // for new users, the project may not exist yet

@@ -5,7 +5,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.ValueRecordManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.UserKey
@@ -37,7 +36,7 @@ class MyUserManager(
     override val records = listOf(value)
 
     override fun set(snapshot: Snapshot<UserWrapper>) = set(
-            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
+            { it.createObject != snapshot.value },
             { snapshot.toRecord() },
     )
 }

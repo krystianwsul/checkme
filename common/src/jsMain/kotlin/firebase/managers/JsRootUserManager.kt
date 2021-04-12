@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class JsRootUserManager(userWrappers: Map<String, UserWrapper>) : RootUserManager() {
 
-    override var recordPairs = userWrappers.map { RootUserRecord(false, it.value, UserKey(it.key)) to false }
-            .associateBy { it.first.userKey }
+    override var _records = userWrappers.map { RootUserRecord(false, it.value, UserKey(it.key)) }
+            .associateBy { it.userKey }
             .toMutableMap()
 }

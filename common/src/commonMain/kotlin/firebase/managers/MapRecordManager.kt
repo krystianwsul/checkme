@@ -7,57 +7,43 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
 
-    override val isSaved get() = recordPairs.any { it.value.second }
+    protected open var _records = mutableMapOf<T, U>()
 
-    protected open var recordPairs = mutableMapOf<T, Pair<U, Boolean>>()
-
-    val records get() = recordPairs.mapValues { it.value.first }
+    val records: Map<T, U> get() = _records
 
     protected abstract val databasePrefix: String
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
 
-        val newRecords = recordPairs.mapValues {
-            Pair(it.value.first, it.value.first.getValues(myValues))
-        }.toMutableMap()
+        records.forEach { it.value.getValues(myValues) }
 
         if (myValues.isNotEmpty()) {
             ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
-
-            check(!isSaved)
-
-            recordPairs = newRecords
 
             values += myValues.mapKeys { "$databasePrefix/${it.key}" }
         }
     }
 
     fun remove(key: T) {
-        recordPairs.remove(key)
+        _records.remove(key)
     }
 
     protected fun add(key: T, record: U) {
-        check(!recordPairs.containsKey(key))
+        check(!_records.containsKey(key))
 
-        recordPairs[key] = Pair(record, false)
+        _records[key] = record
     }
 
-    protected fun set(key: T, throwIfUnequal: (U) -> Unit, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
-        val pair = recordPairs[key]
-
-        return if (pair?.second == true) { // todo isSaved propagate
-            throwIfUnequal(pair.first)
-
-            recordPairs[key] = Pair(pair.first, false)
-
-            null
-        } else {
+    protected fun set(key: T, valueChanged: (U) -> Boolean, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+        return if (_records[key]?.let(valueChanged) != false) {
             val record = recordCallback() ?: return null
 
-            recordPairs[key] = Pair(record, false)
+            _records[key] = record
 
             ChangeWrapper(ChangeType.REMOTE, record)
+        } else {
+            null
         }
     }
 }

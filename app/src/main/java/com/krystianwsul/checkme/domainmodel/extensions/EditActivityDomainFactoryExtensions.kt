@@ -37,7 +37,7 @@ fun DomainFactory.getCreateTaskData(
 
     val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
         it.key
-    }.toMutableMap<CustomTimeKey.Project<*>, Time.Custom.Project<*>>()
+    }.toMutableMap<CustomTimeKey, Time.Custom>()
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
@@ -50,7 +50,7 @@ fun DomainFactory.getCreateTaskData(
             val schedules = task.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                it to task.project.getUntypedProjectCustomTime(it.customTimeId)
+                it to getCustomTime(it)
             }
 
             parentKey = task.project

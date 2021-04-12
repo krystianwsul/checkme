@@ -53,7 +53,7 @@ class DomainFactory(
         domainDisposable: CompositeDisposable,
         private val databaseWrapper: DatabaseWrapper,
         private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
-) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
+) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain, JsonTime.UserCustomTimeProvider {
 
     companion object {
 
@@ -359,7 +359,7 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject // todo customtime fetch
             .customTimes
             .filter { it.current(now) }
 
@@ -579,6 +579,14 @@ class DomainFactory(
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
+
+    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+        TODO("todo customtime fetch")
+    }
+
+    fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
+        TODO("todo customtime fetch")
+    }
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 

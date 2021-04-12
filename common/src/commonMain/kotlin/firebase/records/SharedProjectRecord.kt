@@ -75,13 +75,13 @@ class SharedProjectRecord(
             databaseWrapper: DatabaseWrapper,
             parent: Parent,
             id: ProjectKey.Shared,
-            jsonWrapper: JsonWrapper
+            jsonWrapper: JsonWrapper,
     ) : this(
             databaseWrapper,
             parent,
             false,
             id,
-            jsonWrapper
+            jsonWrapper,
     )
 
     constructor(
@@ -93,7 +93,7 @@ class SharedProjectRecord(
             parent,
             true,
             databaseWrapper.newSharedProjectRecordId(),
-            jsonWrapper
+            jsonWrapper,
     )
 
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): SharedCustomTimeRecord {

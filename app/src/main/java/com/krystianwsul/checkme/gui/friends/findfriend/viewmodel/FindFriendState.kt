@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
+import arrow.core.extensions.list.functorFilter.filter
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.utils.normalized
 import io.reactivex.rxjava3.kotlin.merge
 import kotlinx.parcelize.Parcelize
@@ -35,8 +37,13 @@ data class FindFriendState(
             filter { listOf(it.displayName, it.email).any { it.normalized().contains(normalizedQuery) } }
         }
 
+        val userInfo = DomainFactory.instance
+                .deviceDbInfo
+                .userInfo
+
         return FindFriendViewState.Loaded(
                 (databasePeople + phonePeople).distinctBy { it.email }
+                        .filter { it.email != userInfo.email }
                         .filterQuery()
                         .sortedBy { it.displayName },
                 searchLoading || contactsLoading

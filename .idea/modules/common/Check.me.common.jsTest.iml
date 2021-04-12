@@ -5,9 +5,9 @@
       <configuration version="3" platform="JavaScript " allPlatforms="JS []" useProjectSettings="false" isTestModule="true" externalProjectId=":common" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\commonMain\kotlin">
         <dependsOnModuleNames>:common:commonTest</dependsOnModuleNames>
         <sourceSets>
-          <sourceSet>Check.me.common.commonMain</sourceSet>
-          <sourceSet>Check.me.common.jsMain</sourceSet>
           <sourceSet>Check.me.common.commonTest</sourceSet>
+          <sourceSet>Check.me.common.jsMain</sourceSet>
+          <sourceSet>Check.me.common.commonMain</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <testOutputPath>$MODULE_DIR$/../../../common/build/classes/kotlin/js/test/common_test.js</testOutputPath>

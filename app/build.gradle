@@ -20,8 +20,8 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
 
-        versionCode 316
-        versionName "0.50.4"
+        versionCode 317
+        versionName "0.50.5"
     }
     buildTypes {
         release {
@@ -140,7 +140,7 @@ dependencies {
 
     implementation "com.github.miguelbcr:RxPaparazzo:0.6.1-2.x"
 
-    implementation 'com.github.pakoito:RxPaper2:1.4.0'
+    implementation 'com.github.pakoito:RxPaper2:1.5.0'
 
     implementation 'com.github.stfalcon:stfalcon-imageviewer:1.0.1'
 

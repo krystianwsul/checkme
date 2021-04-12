@@ -60,7 +60,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val instanceKey by lazy { InstanceKey(taskKey, scheduleKey) }
 
-    val scheduleKey by lazy { ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute)) }
+    val scheduleKey by lazy { ScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
     val scheduleTime get() = data.scheduleTime
@@ -95,8 +95,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTime<T>(scheduleTime), taskKey)
 
     val hidden get() = data.hidden
-
-    val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
     val parentState get() = data.parentState
 
@@ -582,9 +580,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val hidden: Boolean
 
-        abstract val scheduleHourMinute: HourMinute?
-
-        abstract val scheduleCustomTimeKey: CustomTimeKey.Project<*>? // todo customtime project
+        abstract val scheduleTimePair: TimePair
 
         abstract val parentState: ParentState
 
@@ -626,13 +622,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val hidden get() = instanceRecord.hidden
 
-            override val scheduleHourMinute
-                get() = instanceRecord.scheduleHour?.let { HourMinute(it, instanceRecord.scheduleMinute!!) }
-
-            override val scheduleCustomTimeKey
-                get() = instanceRecord.scheduleKey
-                        .scheduleTimePair
-                        .customTimeKey
+            override val scheduleTimePair get() = instanceRecord.scheduleKey.scheduleTimePair
 
             override var parentState: ParentState
                 get() {
@@ -675,9 +665,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val hidden = false
 
-            override val scheduleHourMinute = scheduleTime.timePair.hourMinute
-
-            override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
+            override val scheduleTimePair = scheduleTime.timePair
 
             override val parentState = ParentState.Unset
 

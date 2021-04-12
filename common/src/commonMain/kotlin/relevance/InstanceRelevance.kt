@@ -73,8 +73,9 @@ class InstanceRelevance(val instance: Instance<*>) {
 
         remoteProjectRelevances.getValue(instance.task.project.projectKey).setRelevant()
 
-        (instance.scheduleCustomTimeKey)?.let {
-            remoteCustomTimeRelevances.getValue(it).setRelevant()
-        }
+        instance.scheduleKey
+                .scheduleTimePair
+                .customTimeKey
+                ?.let { remoteCustomTimeRelevances.getValue(it).setRelevant() }
     }
 }

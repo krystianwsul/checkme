@@ -16,8 +16,6 @@ class AndroidPrivateProjectManager(
         override val databaseWrapper: DatabaseWrapper,
 ) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateProjectJson> {
 
-    override lateinit var value: List<PrivateProjectRecord>
-
     private fun Snapshot<PrivateProjectJson>.toRecord() = PrivateProjectRecord(
             databaseWrapper,
             userInfo.key.toPrivateProjectKey(),

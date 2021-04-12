@@ -84,14 +84,6 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val name get() = task.name
 
-    val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
-
-    @Suppress("UNCHECKED_CAST")
-    val instanceCustomTimeKey
-        get() = (instanceTime as? Time.Custom.Project<T>)?.key // todo customTime timepair
-
-    private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
-
     val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTime<T>(scheduleTime), taskKey)
 
     val hidden get() = data.hidden

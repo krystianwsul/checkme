@@ -85,7 +85,7 @@ class SingleSchedule<T : ProjectType>(
 
         override val date get() = instance.instanceDate
 
-        override val timePair get() = instance.instanceTimePair
+        override val timePair get() = instance.instanceTime.timePair
 
         override val originalTimePair get() = singleScheduleRecord.timePair
 

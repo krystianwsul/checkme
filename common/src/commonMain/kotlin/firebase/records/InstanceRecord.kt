@@ -50,26 +50,41 @@ abstract class InstanceRecord<T : ProjectType>(
         ): ScheduleKey {
             val matchResult = scheduleKeyRegex.find(key)!!
 
-            val dateString = matchResult.groupValues[0]
-            val timeString = matchResult.groupValues[1]
+            val dateString = matchResult.groupValues[1]
+            val timeString = matchResult.groupValues[2]
 
             return dateTimeStringsToScheduleKey(projectCustomTimeIdAndKeyProvider, dateString, timeString)
         }
 
-        private val hourMinuteRegex = Regex("^(\\d\\d)-(\\d\\d)$")
+        private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)$")
+        private val hourMinuteRegex = Regex("^(\\d?\\d)-(\\d?\\d)$")
+
+        protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
+
+        private fun dateStringToDate(dateString: String): Date {
+            val matchResult = dateRegex.find(dateString)!!
+
+            val year = matchResult.getInt(1)
+            val month = matchResult.getInt(2)
+            val day = matchResult.getInt(3)
+
+            return Date(year, month, day)
+        }
 
         fun <T : ProjectType> dateTimeStringsToScheduleKey(
                 projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
                 dateString: String,
                 timeString: String,
         ): ScheduleKey {
+            val date = dateStringToDate(dateString)
+
             val jsonTime = hourMinuteRegex.find(timeString)?.let { matchResult ->
                 val (hour, minute) = (1..2).map { matchResult.groupValues[it].toInt() }
 
                 JsonTime.Normal(HourMinute(hour, minute))
             } ?: JsonTime.fromJson(projectCustomTimeIdAndKeyProvider, timeString)
 
-            return ScheduleKey(Date.fromJson(dateString), jsonTime.toTimePair(projectCustomTimeIdAndKeyProvider))
+            return ScheduleKey(date, jsonTime.toTimePair(projectCustomTimeIdAndKeyProvider))
         }
     }
 

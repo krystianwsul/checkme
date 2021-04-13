@@ -29,7 +29,7 @@ class InstanceRecordTest {
         val scheduleKeyString = InstanceRecord.scheduleKeyToString(inputScheduleKey)
         assertEquals("2021-4-12-17-0", scheduleKeyString)
 
-        val outputScheduleKey = InstanceRecord.stringToScheduleKey<ProjectType.Private>(provider, scheduleKeyString)
+        val outputScheduleKey = InstanceRecord.stringToScheduleKey(provider, scheduleKeyString)
         assertEquals(inputScheduleKey, outputScheduleKey)
     }
 }

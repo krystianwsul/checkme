@@ -95,7 +95,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
-            state.timePairPersist.customTimeKey = customTimeKey as CustomTimeKey.Project<*> // todo customtime timepairpersist
+            state.timePairPersist.customTimeKey = customTimeKey
             updateFields()
         }
 

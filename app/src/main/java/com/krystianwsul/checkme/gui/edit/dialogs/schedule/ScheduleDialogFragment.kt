@@ -94,7 +94,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
             checkNotNull(customTimeDatas)
 
-            scheduleDialogData.timePairPersist.customTimeKey = customTimeKey as CustomTimeKey.Project<*> // todo customtime timepairpersist
+            scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
 
             updateFields()
         }

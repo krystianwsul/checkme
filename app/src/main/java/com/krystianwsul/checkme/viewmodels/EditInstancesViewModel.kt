@@ -32,13 +32,13 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
             val instanceKeys: Set<InstanceKey>,
             val parentInstanceData: ParentInstanceData?,
             val dateTime: DateTime,
-            val customTimeDatas: Map<CustomTimeKey.Project<*>, CustomTimeData>,
+            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
     ) : DomainData()
 
     data class InstanceData(val instanceDateTime: DateTime, val done: Boolean)
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey.Project<*>,
+            val customTimeKey: CustomTimeKey,
             val name: String,
             val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
     ) {

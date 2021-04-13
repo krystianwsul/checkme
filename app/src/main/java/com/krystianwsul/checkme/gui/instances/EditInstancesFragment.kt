@@ -346,7 +346,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     if (!data.customTimeDatas.containsKey(state.timePairPersist.customTimeKey)) return false
 
                     data.customTimeDatas
-                            .getValue(state.timePairPersist.customTimeKey!! as CustomTimeKey.Project<*>) // todo customtime timepairpersist
+                            .getValue(state.timePairPersist.customTimeKey!!)
                             .hourMinutes
                             .getValue(state.date.dayOfWeek)
                 } else {
@@ -387,7 +387,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         if (state.timePairPersist.customTimeKey != null) {
             binding.editInstanceTime.setText(
                     data.customTimeDatas
-                            .getValue(state.timePairPersist.customTimeKey!! as CustomTimeKey.Project<*>) // todo customtime timepairpersist
+                            .getValue(state.timePairPersist.customTimeKey!!)
                             .run { name + " (" + hourMinutes.getValue(state.date.dayOfWeek) + ")" }
             )
         } else {

@@ -18,9 +18,14 @@ import com.krystianwsul.common.utils.*
 
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
-        private val rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
+        rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
         newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
-) : Project<ProjectType.Shared>(CopyScheduleHelper.Shared, AssignedToHelper.Shared, newRootInstanceManager) {
+) : Project<ProjectType.Shared>(
+        CopyScheduleHelper.Shared,
+        AssignedToHelper.Shared,
+        rootInstanceManagers,
+        newRootInstanceManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 

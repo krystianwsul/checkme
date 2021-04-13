@@ -20,6 +20,7 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper<T>,
         val assignedToHelper: AssignedToHelper<T>,
+        protected val rootInstanceManagers: Map<TaskKey, RootInstanceManager<T>>,
         protected val newRootInstanceManager: (taskRecord: TaskRecord<T>) -> RootInstanceManager<T>,
 ) : Current {
 
@@ -157,7 +158,12 @@ abstract class Project<T : ProjectType>(
 
         val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
 
-        val newTask = Task(this, taskRecord, newRootInstanceManager(taskRecord))
+        val newTask = Task(
+                this,
+                taskRecord,
+                rootInstanceManagers[taskRecord.taskKey] ?: newRootInstanceManager(taskRecord),
+        )
+
         check(!_tasks.containsKey(newTask.id))
 
         if (Task.USE_ROOT_INSTANCES) {

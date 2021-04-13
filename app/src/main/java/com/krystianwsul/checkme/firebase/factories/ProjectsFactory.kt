@@ -39,7 +39,7 @@ class ProjectsFactory(
             privateInitialProjectEvent,
             factoryProvider,
             domainDisposable,
-            deviceDbInfo
+            deviceDbInfo,
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(
@@ -50,7 +50,7 @@ class ProjectsFactory(
                                 sharedInitialProjectEvent,
                                 factoryProvider,
                                 domainDisposable,
-                                deviceDbInfo
+                                deviceDbInfo,
                         )
                     }
                     .toMutableMap()
@@ -110,7 +110,7 @@ class ProjectsFactory(
                 privateProjectFactory.changeTypes,
                 sharedProjectFactoryChangeTypes,
                 addProjectChangeTypes,
-                removeProjectChangeTypes
+                removeProjectChangeTypes,
         ).merge().publishImmediate(domainDisposable)
     }
 

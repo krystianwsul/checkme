@@ -114,7 +114,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                                     taskRecord,
                                     DatabaseRx(
                                             domainDisposable,
-                                            projectProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey)
+                                            projectProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey),
                                     )
                             )
                         },

@@ -43,9 +43,9 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         .values
         .associate {
             it.taskKey to AndroidRootInstanceManager(
-                it,
-                snapshots.getValue(it.taskKey),
-                factoryProvider
+                    it,
+                    snapshots.getValue(it.taskKey),
+                    factoryProvider,
             )
         }
             .toMutableMap()

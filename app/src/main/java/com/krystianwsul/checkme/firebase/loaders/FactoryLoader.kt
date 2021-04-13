@@ -113,7 +113,7 @@ class FactoryLoader(
                     val friendsLoader = FriendsLoader(
                             userFactorySingle.flatMapObservable { it.friendKeysObservable },
                             domainDisposable,
-                            factoryProvider.friendsProvider
+                            factoryProvider.friendsProvider,
                     )
 
                     val friendsFactorySingle = friendsLoader.initialFriendsEvent

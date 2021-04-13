@@ -56,7 +56,7 @@ fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Project.Private> = SingleDomainUpdate.create("createCustomTime") {
+): Single<CustomTimeKey.Project.Private> = SingleDomainUpdate.create("createCustomTime") { // todo customtime edit
     check(name.isNotEmpty())
 
     check(DayOfWeek.values().all { hourMinutes[it] != null })

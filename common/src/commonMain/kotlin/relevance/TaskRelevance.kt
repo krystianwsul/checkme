@@ -71,14 +71,14 @@ class TaskRelevance(val task: Task<*>) {
     }
 
     fun setRemoteRelevant(
-            remoteCustomTimeRelevances: Map<CustomTimeKey.Project<*>, RemoteCustomTimeRelevance>,
+            remoteCustomTimeRelevances: Map<CustomTimeKey.Project<*>, RemoteCustomTimeRelevance>, // todo customtime relevance
             remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>,
     ) {
         check(relevant)
 
         task.scheduleIntervals
                 .mapNotNull { it.schedule.customTimeKey }
-                .map { remoteCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>) } // cast required for compilation
+                .map { remoteCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>) }  // todo customtime relevance
                 .forEach { it.setRelevant() }
 
         remoteProjectRelevances.getValue(task.project.projectKey).setRelevant()

@@ -51,7 +51,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
-    private var selectedCustomTimeKeys: List<CustomTimeKey.Project.Private>? = null
+    private var selectedCustomTimeKeys: List<CustomTimeKey.Project.Private>? = null // todo customtime edit
 
     private val listener get() = activity as CustomTimesListListener
 

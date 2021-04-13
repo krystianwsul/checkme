@@ -48,7 +48,7 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 @CheckResult
 fun DomainUpdater.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
-        customTimeIds: List<CustomTimeKey.Project<ProjectType.Private>>,
+        customTimeIds: List<CustomTimeKey.Project<ProjectType.Private>>, // todo customtime edit
         current: Boolean,
 ): Completable = CompletableDomainUpdate.create("setCustomTimesCurrent") { now ->
     check(customTimeIds.isNotEmpty())

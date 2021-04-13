@@ -67,7 +67,7 @@ class AssignToDialogFragment : AbstractDialogFragment() {
     }
 
     @Parcelize
-    class CustomTimeData(val customTimeKey: CustomTimeKey.Project<*>, val name: String) : Parcelable {
+    class CustomTimeData(val customTimeKey: CustomTimeKey.Project<*>, val name: String) : Parcelable { // todo customtime next
 
         init {
             check(!TextUtils.isEmpty(name))

@@ -261,7 +261,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         binding.scheduleDialogTimeLayout.setDropdown {
             checkNotNull(customTimeDatas)
 
-            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Project.Private } // todo customtime fetch
+            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Project.Private } // todo customtime edit
 
             val customTimeDatas = delegate.getCustomTimeDatas(list)
 

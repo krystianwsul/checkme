@@ -8,10 +8,10 @@ sealed class JsonTime {
 
     companion object {
 
-        fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime {
+        fun <T : ProjectType> fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider<T>, json: String): JsonTime {
             HourMinute.tryFromJson(json)?.let { return Normal(it) }
 
-            return Custom.fromJson(projectIdProvider, json)
+            return Custom.fromJson(projectCustomTimeIdProvider, json)
         }
 
         fun <T : ProjectType> fromTime(time: Time): JsonTime {
@@ -50,10 +50,10 @@ sealed class JsonTime {
 
         companion object {
 
-            fun <T : ProjectType> fromJson(projectIdProvider: ProjectIdProvider<T>, json: String): JsonTime {
+            fun <T : ProjectType> fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider<T>, json: String): JsonTime {
                 CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
 
-                return Project(projectIdProvider.getProjectCustomTimeId(json))
+                return Project(projectCustomTimeIdProvider.getProjectCustomTimeId(json))
             }
 
             fun <T : ProjectType> fromCustomTimeKey(customTimeKey: CustomTimeKey): Custom {
@@ -121,7 +121,7 @@ sealed class JsonTime {
         ) = TimePair(null, hourMinute)
     }
 
-    interface ProjectIdProvider<T : ProjectType> {
+    interface ProjectCustomTimeIdProvider<T : ProjectType> {
 
         fun getProjectCustomTimeId(id: String): CustomTimeId.Project<T>
     }
@@ -135,6 +135,9 @@ sealed class JsonTime {
 
         fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
     }
+
+    interface ProjectCustomTimeIdAndKeyProvider<T : ProjectType> :
+            ProjectCustomTimeIdProvider<T>, ProjectCustomTimeKeyProvider<T>
 
     interface UserCustomTimeProvider {
 

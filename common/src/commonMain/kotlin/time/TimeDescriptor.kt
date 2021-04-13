@@ -28,9 +28,9 @@ data class TimeDescriptor(val customTimeDescriptor: String?, val hour: Int?, val
         }
     }
 
-    fun <T : ProjectType> toJsonTime(projectIdProvider: JsonTime.ProjectIdProvider<T>): JsonTime {
+    fun <T : ProjectType> toJsonTime(projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider<T>): JsonTime {
         return if (customTimeDescriptor != null) {
-            JsonTime.Custom.fromJson(projectIdProvider, customTimeDescriptor)
+            JsonTime.Custom.fromJson(projectCustomTimeIdProvider, customTimeDescriptor)
         } else {
             JsonTime.Normal(HourMinute(hour!!, minute!!))
         }

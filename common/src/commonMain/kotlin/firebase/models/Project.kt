@@ -191,9 +191,9 @@ abstract class Project<T : ProjectType>(
 
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>,
+            customTime: Time.Custom.Project<*>, // todo customtime migrate
             allowCopy: Boolean = true,
-    ): Time.Custom.Project<T>
+    ): Time.Custom.Project<T> // todo customtime migrate
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {

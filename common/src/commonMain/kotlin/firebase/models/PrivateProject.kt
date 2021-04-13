@@ -98,7 +98,7 @@ class PrivateProject(
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>,
+            customTime: Time.Custom.Project<*>, // todo customtime migrate
             allowCopy: Boolean,
     ) = when (customTime) {
         is PrivateCustomTime -> customTime

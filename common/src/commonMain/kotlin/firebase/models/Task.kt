@@ -21,13 +21,8 @@ import com.krystianwsul.common.utils.*
 class Task<T : ProjectType>(
         val project: Project<T>,
         private val taskRecord: TaskRecord<T>,
-        val rootInstanceManager: RootInstanceManager<T>,
+        val rootInstanceManager: RootInstanceManager<T>, // todo instances remove
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
-
-    companion object {
-
-        var USE_ROOT_INSTANCES = false
-    }
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
@@ -569,12 +564,7 @@ class Task<T : ProjectType>(
 
         generatedInstances.remove(instance.instanceKey)
 
-        val newRecord = if (USE_ROOT_INSTANCES)
-            rootInstanceManager::newRootInstanceRecord
-        else
-            taskRecord::newInstanceRecord
-
-        val instanceRecord = newRecord(InstanceJson(), instance.scheduleKey)
+        val instanceRecord = taskRecord.newInstanceRecord(InstanceJson(), instance.scheduleKey)
 
         _existingInstances[instance.scheduleKey] = instance
 

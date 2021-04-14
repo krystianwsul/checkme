@@ -36,6 +36,7 @@ open class RootInstanceManager<T : ProjectType>(
     override val databasePrefix = "${DatabaseWrapper.KEY_INSTANCES}/${taskRecord.rootInstanceKey}"
 
     fun newRootInstanceRecord(
+            // todo instances remove
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
     ) = RootInstanceRecord(

@@ -6,23 +6,50 @@ import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 @ExperimentalStdlibApi
-class SharedProjectsLoaderOldTest {
+class SharedProjectsLoaderTest {
 
-    companion object {
+    class TestProjectProvider : ProjectProvider {
 
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
+        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot<Map<String, Map<String, InstanceJson>>>>>()
+
+        override val database = object : ProjectProvider.Database() {
+
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
+                if (!rootInstanceObservables.containsKey(taskFirebaseKey))
+                    rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
+
+                return rootInstanceObservables.getValue(taskFirebaseKey).map {
+                    ProjectProvider.RootInstanceData(true, it)
+                }
+            }
+
+            override fun getNewId(path: String): String {
+                TODO("Not yet implemented")
+            }
+
+            override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
+        }
+
+        fun acceptInstance(
+                projectId: String,
+                taskId: String,
+                map: Map<String, Map<String, InstanceJson>>,
+        ) {
+            val key = "$projectId-$taskId"
+            rootInstanceObservables.getValue(key).accept(Snapshot(key, map))
         }
     }
 
@@ -30,7 +57,7 @@ class SharedProjectsLoaderOldTest {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
-        override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
+        override val projectProvider = TestProjectProvider()
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
             if (!sharedProjectObservables.containsKey(projectKey))

@@ -15,7 +15,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
@@ -31,16 +30,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.*
 import org.junit.Assert.*
 
-class FactoryLoaderOldTest {
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
-        }
-    }
+class FactoryLoaderTest {
 
     @get:Rule
     val domainFactoryRule = DomainFactoryRule()

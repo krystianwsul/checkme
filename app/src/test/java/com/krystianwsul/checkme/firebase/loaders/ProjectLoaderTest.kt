@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -11,10 +10,8 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
@@ -22,50 +19,27 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertNull
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectLoaderNewTest {
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
-        }
-    }
+class ProjectLoaderTest {
 
     class TestProjectProvider : ProjectProvider {
 
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot<Map<String, Map<String, InstanceJson>>>>>()
-
         override val database = object : ProjectProvider.Database() {
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-                if (!rootInstanceObservables.containsKey(taskFirebaseKey))
-                    rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-
-                return rootInstanceObservables.getValue(taskFirebaseKey).map {
-                    ProjectProvider.RootInstanceData(true, it)
-                }
-            }
+            override fun getRootInstanceObservable(taskFirebaseKey: String) =
+                    Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")
             }
 
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
-        }
-
-        fun acceptInstance(
-                projectId: String,
-                taskId: String,
-                map: Map<String, Map<String, InstanceJson>>,
-        ) {
-            val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(Snapshot(key, map))
         }
     }
 
@@ -144,10 +118,8 @@ class ProjectLoaderNewTest {
     fun testSingleTask() {
         val taskId = "taskKey"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
     }
 
@@ -155,10 +127,8 @@ class ProjectLoaderNewTest {
     fun testSingleTaskRepeat() {
         val taskId = "taskKey"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
@@ -171,19 +141,15 @@ class ProjectLoaderNewTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                taskId1 to PrivateTaskJson("task1"),
-                taskId2 to PrivateTaskJson("task2")
-        )))
-
         addTaskEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
+            )))
         }
     }
 
@@ -192,27 +158,15 @@ class ProjectLoaderNewTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
-
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                taskId1 to PrivateTaskJson("task1"),
-                taskId2 to PrivateTaskJson("task2")
-        )))
 
         addTaskEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
-        }
-
-        changeInstancesEmissionChecker.checkOne {
-            projectProvider.acceptInstance(projectKey.key, taskId1, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
-        }
-
-        changeInstancesEmissionChecker.checkOne {
-            projectProvider.acceptInstance(projectKey.key, taskId2, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
+            )))
         }
     }
 
@@ -220,39 +174,26 @@ class ProjectLoaderNewTest {
     fun testSingleTaskRemoveTask() {
         val taskId = "taskKey"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
 
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson())
         }
-
-        projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
     }
 
     @Test
     fun testSingleTaskEmitInstancesChangeTaskEmitInstances() {
         val taskId = "taskKey"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
-        }
-
-        changeInstancesEmissionChecker.checkOne {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
-        }
-
-        changeInstancesEmissionChecker.checkOne {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf("2020-03-28" to mapOf("21:06" to InstanceJson())))
         }
     }
 
@@ -271,10 +212,8 @@ class ProjectLoaderNewTest {
     fun testChangeEmptyTask() {
         val taskId = "taskKey"
 
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkRemote {
@@ -287,16 +226,11 @@ class ProjectLoaderNewTest {
         val taskId1 = "taskKey1"
         val taskId2 = "taskKey2"
 
-
-        acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                taskId1 to PrivateTaskJson("task1"),
-                taskId2 to PrivateTaskJson("task2")
-        )))
-
-        projectProvider.acceptInstance(projectKey.key, taskId1, mapOf())
-
         initialProjectEmissionChecker.checkRemote {
-            projectProvider.acceptInstance(projectKey.key, taskId2, mapOf())
+            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
+                    taskId1 to PrivateTaskJson("task1"),
+                    taskId2 to PrivateTaskJson("task2")
+            )))
         }
 
         changeProjectEmissionChecker.checkRemote {

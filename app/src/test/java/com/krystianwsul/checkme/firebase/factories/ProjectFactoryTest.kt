@@ -13,7 +13,6 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -27,26 +26,20 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import kotlin.random.Random
 
 @ExperimentalStdlibApi
-class ProjectFactoryOldTest {
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
-        }
-    }
+class ProjectFactoryTest {
 
     class TestFactoryProvider : FactoryProvider {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
-        override val projectProvider = ProjectLoaderOldTest.TestProjectProvider()
+        override val projectProvider = ProjectLoaderTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 

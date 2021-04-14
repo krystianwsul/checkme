@@ -155,7 +155,7 @@ abstract class Project<T : ProjectType>(
 
         // todo migrate tasks this just makes a bigger mess of things
         @Suppress("SimplifyBooleanWithConstants")
-        val instanceJsons = if (Task.USE_ROOT_INSTANCES || true) {
+        val instanceJsons = if (true) {
             mutableMapOf()
         } else {
             instanceDatas.associate {
@@ -172,12 +172,6 @@ abstract class Project<T : ProjectType>(
         )
 
         check(!_tasks.containsKey(newTask.id))
-
-        if (Task.USE_ROOT_INSTANCES) {
-            instanceDatas.forEach {
-                newTask.rootInstanceManager.newRootInstanceRecord(it.newInstanceJson, it.newScheduleKey)
-            }
-        }
 
         _tasks[newTask.id] = newTask
 

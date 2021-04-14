@@ -47,10 +47,6 @@ class ProjectFactoryTest {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-                TODO("Not yet implemented")
-            }
-
             override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
                 if (!sharedProjectObservables.containsKey(projectKey))
                     sharedProjectObservables[projectKey] = PublishRelay.create()

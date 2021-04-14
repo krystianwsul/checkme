@@ -29,10 +29,6 @@ class FriendsLoaderTest {
                     userWrapper: UserWrapper,
             ) = userObservables.getValue(userKey).accept(Snapshot(userKey.key, userWrapper))
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-                TODO("Not yet implemented")
-            }
-
             override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {
                 if (!userObservables.containsKey(userKey))
                     userObservables[userKey] = PublishRelay.create()

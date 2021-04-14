@@ -17,7 +17,6 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertNull
@@ -31,9 +30,6 @@ class ProjectLoaderTest {
     class TestProjectProvider : ProjectProvider {
 
         override val database = object : ProjectProvider.Database() {
-
-            override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                    Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")
@@ -79,7 +75,6 @@ class ProjectLoaderTest {
         projectLoader = ProjectLoader.Impl(
                 projectSnapshotRelay,
                 compositeDisposable,
-                projectProvider,
                 projectManager,
                 null,
         )

@@ -107,7 +107,6 @@ interface SharedProjectsLoader {
                     ProjectLoader.Impl(
                             projectEntry.databaseRx.observable,
                             domainDisposable,
-                            sharedProjectsProvider.projectProvider,
                             projectManager,
                             projectEntry.initialProjectRecord,
                     )

@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
@@ -23,33 +22,13 @@ class SharedProjectsLoaderTest {
 
     class TestProjectProvider : ProjectProvider {
 
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot<Map<String, Map<String, InstanceJson>>>>>()
-
         override val database = object : ProjectProvider.Database() {
-
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-                if (!rootInstanceObservables.containsKey(taskFirebaseKey))
-                    rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-
-                return rootInstanceObservables.getValue(taskFirebaseKey).map {
-                    ProjectProvider.RootInstanceData(true, it)
-                }
-            }
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")
             }
 
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
-        }
-
-        fun acceptInstance(
-                projectId: String,
-                taskId: String,
-                map: Map<String, Map<String, InstanceJson>>,
-        ) {
-            val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(Snapshot(key, map))
         }
     }
 

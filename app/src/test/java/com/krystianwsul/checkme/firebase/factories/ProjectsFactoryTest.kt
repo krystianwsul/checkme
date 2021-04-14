@@ -84,7 +84,6 @@ class ProjectsFactoryTest {
         privateProjectLoader = ProjectLoader.Impl(
                 privateProjectRelay,
                 compositeDisposable,
-                factoryProvider.projectProvider,
                 privateProjectManager,
                 null,
         )

@@ -63,7 +63,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             // U: Project JSON type
             snapshotObservable: Observable<Snapshot<U>>,
             private val domainDisposable: CompositeDisposable,
-            projectProvider: ProjectProvider,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
             initialProjectRecord: ProjectRecord<T>?,
     ) : ProjectLoader<T, U> {
@@ -114,7 +113,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                                     taskRecord,
                                     DatabaseRx(
                                             domainDisposable,
-                                            projectProvider.database.getRootInstanceObservable(taskRecord.rootInstanceKey),
+                                            Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null))), // todo instances
                                     )
                             )
                         },

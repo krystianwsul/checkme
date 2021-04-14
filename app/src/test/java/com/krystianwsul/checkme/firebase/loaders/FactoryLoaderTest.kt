@@ -24,7 +24,6 @@ import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.*
@@ -112,9 +111,6 @@ class FactoryLoaderTest {
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
         override fun getUserObservable(userKey: UserKey) = userObservable
-
-        override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))!!
 
         override fun getNewId(path: String) = "id"
 

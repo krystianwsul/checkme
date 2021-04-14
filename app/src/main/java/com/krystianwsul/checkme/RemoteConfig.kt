@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme
 
+import android.annotation.SuppressLint
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.treeadapter.getCurrentValue
@@ -9,8 +10,9 @@ import java.util.concurrent.TimeUnit
 object RemoteConfig {
 
     private const val BENIA_URL_KEY = "beniaAboutUrl"
-    private const val KEY_QUERY_REMOTE_INSTANCES = "queryRemoteInstance"
+    private const val KEY_QUERY_REMOTE_INSTANCES = "queryRemoteInstance" // todo instances
 
+    @SuppressLint("StaticFieldLeak")
     private val config = FirebaseRemoteConfig.getInstance().apply {
         setDefaultsAsync(mapOf(
                 BENIA_URL_KEY to "https://www.linkedin.com/in/bernardawsul/",

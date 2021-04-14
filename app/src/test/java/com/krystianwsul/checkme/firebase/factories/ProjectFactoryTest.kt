@@ -103,7 +103,7 @@ class ProjectFactoryTest {
 
         val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
-        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord)
+        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 

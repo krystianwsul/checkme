@@ -16,7 +16,6 @@ import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable
@@ -40,29 +39,19 @@ class ProjectsFactory(
             privateInitialProjectEvent,
             factoryProvider,
             domainDisposable,
-            object : JsonTime.UserCustomTimeProvider {
-
-                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                    TODO("todo customtime load")
-                }
-            },
+            privateInitialProjectEvent.userCustomTimeProvider,
             deviceDbInfo,
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(
-            sharedInitialProjectsEvent.pairs
+            sharedInitialProjectsEvent.initialProjectDatas
                     .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
                         sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
                                 sharedProjectLoader,
                                 sharedInitialProjectEvent,
                                 factoryProvider,
                                 domainDisposable,
-                                object : JsonTime.UserCustomTimeProvider {
-
-                                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                        TODO("todo customtime load")
-                                    }
-                                },
+                                sharedInitialProjectEvent.userCustomTimeProvider,
                                 deviceDbInfo,
                         )
                     }
@@ -92,12 +81,7 @@ class ProjectsFactory(
                     addProjectEvent.initialProjectEvent,
                     factoryProvider,
                     domainDisposable,
-                    object : JsonTime.UserCustomTimeProvider {
-
-                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                            TODO("todo customtime load")
-                        }
-                    },
+                    addProjectEvent.initialProjectEvent.userCustomTimeProvider,
                     deviceDbInfo,
             )
 

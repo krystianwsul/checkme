@@ -136,7 +136,7 @@ interface SharedProjectsLoader {
                 .map {
                     check(it.all { it.second.changeType == ChangeType.REMOTE })
 
-                    InitialProjectsEvent(it.map { it.first to it.second.data })
+                    InitialProjectsEvent(it.map { InitialProjectData(it.first, it.second.data) })
                 }
                 .cacheImmediate()
 
@@ -146,9 +146,7 @@ interface SharedProjectsLoader {
                             .values
                             .map { projectLoader ->
                                 projectLoader.initialProjectEvent
-                                        .map { (changeType, initialProjectEvent) ->
-                                            ChangeWrapper(changeType, AddProjectEvent(projectLoader, initialProjectEvent))
-                                        }
+                                        .map { it.newData(AddProjectEvent(projectLoader, it.data)) }
                                         .toObservable()
                             }
                             .merge()
@@ -179,8 +177,11 @@ interface SharedProjectsLoader {
         }
     }
 
-    class InitialProjectsEvent(
-            val pairs: List<Pair<ProjectLoader<ProjectType.Shared, JsonWrapper>, ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>>>,
+    class InitialProjectsEvent(val initialProjectDatas: List<InitialProjectData>)
+
+    data class InitialProjectData(
+            val projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
+            val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
     )
 
     class AddProjectEvent(

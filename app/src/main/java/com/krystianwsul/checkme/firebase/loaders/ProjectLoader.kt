@@ -7,6 +7,9 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -27,6 +30,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             // U: Project JSON type
             val projectManager: ProjectProvider.ProjectManager<T, U>,
             val projectRecord: ProjectRecord<T>,
+            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
     class ChangeProjectEvent<T : ProjectType>(val projectRecord: ProjectRecord<T>)
@@ -53,7 +57,18 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         // first snapshot of everything
         override val initialProjectEvent = projectRecordObservable.firstOrError()
-                .map { it.newData(InitialProjectEvent(projectManager, it.data)) }
+                .map {
+                    it.newData(InitialProjectEvent(
+                            projectManager,
+                            it.data,
+                            object : JsonTime.UserCustomTimeProvider {
+
+                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                    TODO("todo customtime load")
+                                }
+                            }
+                    ))
+                }
                 .cacheImmediate(domainDisposable)
 
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables

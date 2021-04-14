@@ -184,6 +184,7 @@ class DomainFactoryRule : TestRule {
                                         startTimeOffset = domainFactoryStartTime.offset,
                                 ),
                         ),
+                        mockk(),
                 ),
                 sharedProjectsLoader,
                 SharedProjectsLoader.InitialProjectsEvent(listOf()),

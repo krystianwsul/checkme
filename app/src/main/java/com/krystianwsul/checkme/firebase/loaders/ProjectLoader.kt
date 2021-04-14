@@ -73,32 +73,33 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 val taskRecord: TaskRecord<T>,
         )
 
-        private val rootInstanceDatabaseRx = projectRecordObservable.switchMap { changeWrapper ->
-            val taskObservable = changeWrapper.data
-                    .taskRecordsRelay
-                    .asRxJava3Observable()
-                    .map {
-                        it.mapKeys { it.value.taskKey }
-                    }
-                    .share()
+        private val rootInstanceDatabaseRx: Observable<MapChanges<ProjectData<T>, TaskKey, InstanceData<T>>> =
+                projectRecordObservable.switchMap { changeWrapper ->
+                    val taskObservable = changeWrapper.data
+                            .taskRecordsRelay
+                            .asRxJava3Observable()
+                            .map {
+                                it.mapKeys { it.value.taskKey }
+                            }
+                            .share()
 
-            listOf(
-                    taskObservable.take(1).map { ProjectData(false, changeWrapper, it) },
-                    taskObservable.skip(1).map { ProjectData(true, changeWrapper, it) }
-            ).merge()
-        }
-                .processChanges(
-                        { it.taskMap.keys },
-                        { (internallyUpdated, _, newData), taskKey ->
-                            val taskRecord = newData.getValue(taskKey)
+                    listOf(
+                            taskObservable.take(1).map { ProjectData(false, changeWrapper, it) },
+                            taskObservable.skip(1).map { ProjectData(true, changeWrapper, it) }
+                    ).merge()
+                }
+                        .processChanges(
+                                { it.taskMap.keys },
+                                { (internallyUpdated, _, newData), taskKey ->
+                                    val taskRecord = newData.getValue(taskKey)
 
-                            InstanceData(
-                                    internallyUpdated,
-                                    taskRecord,
-                            )
-                        },
-                )
-                .replayImmediate()
+                                    InstanceData(
+                                            internallyUpdated,
+                                            taskRecord,
+                                    )
+                                },
+                        )
+                        .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()

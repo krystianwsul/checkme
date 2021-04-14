@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.UserKey
 class AndroidRootUserManager(
         children: Iterable<Snapshot<UserWrapper>>,
         private val databaseWrapper: DatabaseWrapper,
-) : RootUserManager(), SnapshotRecordManager<RootUserRecord, Snapshot<UserWrapper>> {
+) : RootUserManager() {
 
     companion object {
 
@@ -21,7 +21,7 @@ class AndroidRootUserManager(
 
     override var _records = children.associate { it.toKey() to it.toRecord() }.toMutableMap()
 
-    override fun set(snapshot: Snapshot<UserWrapper>) = set(
+    fun set(snapshot: Snapshot<UserWrapper>) = set(
             snapshot.toKey(),
             { it.createObject != snapshot.value },
             { snapshot.toRecord() },

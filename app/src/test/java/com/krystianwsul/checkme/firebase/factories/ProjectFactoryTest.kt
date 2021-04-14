@@ -101,7 +101,7 @@ class ProjectFactoryTest {
 
         override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
 
-        val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
+        private val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 

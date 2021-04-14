@@ -13,7 +13,7 @@ class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         snapshot: Snapshot<UserWrapper>,
         private val databaseWrapper: DatabaseWrapper,
-) : ValueRecordManager<MyUserRecord>(), SnapshotRecordManager<MyUserRecord, Snapshot<UserWrapper>> {
+) : ValueRecordManager<MyUserRecord>() {
 
     companion object {
 
@@ -40,7 +40,7 @@ class MyUserManager(
 
     override val records get() = listOf(value)
 
-    override fun set(snapshot: Snapshot<UserWrapper>) = set(
+    fun set(snapshot: Snapshot<UserWrapper>) = set(
             { it.createObject != snapshot.value },
             { snapshot.toRecord() },
     )

@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
-import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
+import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.*
@@ -42,18 +42,18 @@ class InstanceGenerationTest {
         // let's say we have a schedule that was created at 12:00, and deleted at 13:00.  It has an instance at 12:30
         val startHourMinute = HourMinute(12, 0)
         val startExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(DateTime(date, startHourMinute), offsetDouble)
+        assertEquals(startHourMinute.toHourMilli(), startExactTimeStamp.hourMilli)
 
         val endHourMinute = HourMinute(13, 0)
         val endExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(DateTime(date, endHourMinute), offsetDouble)
+        assertEquals(endHourMinute.toHourMilli(), endExactTimeStamp.hourMilli)
 
-        val singleScheduleJson = PrivateSingleScheduleJson(
+        val weeklyScheduleJson = PrivateWeeklyScheduleJson(
                 startTime = startExactTimeStamp.long,
                 startTimeOffset = startExactTimeStamp.offset,
                 endTime = endExactTimeStamp.long,
                 endTimeOffset = endExactTimeStamp.offset,
-                year = 2021,
-                month = 4,
-                day = 14,
+                dayOfWeek = date.dayOfWeek.ordinal,
                 hour = 12,
                 minute = 30,
         )
@@ -63,7 +63,7 @@ class InstanceGenerationTest {
                 startTime = startExactTimeStamp.long,
                 startTimeOffset = startExactTimeStamp.offset,
                 endData = TaskJson.EndData(endExactTimeStamp.long, endExactTimeStamp.offset),
-                schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(singleScheduleJson = singleScheduleJson)),
+                schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)),
         )
 
         return Task(
@@ -74,7 +74,15 @@ class InstanceGenerationTest {
                         taskJson,
                 ),
                 mockk(relaxed = true),
-        )
+        ).also {
+            assertEquals(startExactTimeStamp, it.startExactTimeStampOffset)
+            assertEquals(endExactTimeStamp, it.endExactTimeStampOffset)
+
+            it.schedules.single().let {
+                println("mocked schedule start: " + it.startExactTimeStampOffset)
+                println("mocked schedule end: " + it.endExactTimeStampOffset)
+            }
+        }
     }
 
     private fun testInstanceCorrectlyGeneratedForOffset(hours: Int) {

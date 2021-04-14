@@ -56,7 +56,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
         val endExactTimeStamp = listOfNotNull(
                 intrinsicEndExactTimeStamp,
-                givenEndExactTimeStamp
+                givenEndExactTimeStamp,
         ).minOrNull()
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()

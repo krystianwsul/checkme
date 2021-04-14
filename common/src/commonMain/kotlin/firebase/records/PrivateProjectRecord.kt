@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
@@ -23,20 +22,13 @@ class PrivateProjectRecord(
         projectKey.key,
 ) {
 
-    override val taskRecordsRelay = BehaviorSubject(
-            projectJson.tasks
-                    .mapValues { (id, taskJson) ->
-                        check(id.isNotEmpty())
+    override val taskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
 
-                        PrivateTaskRecord(id, this, taskJson)
-                    }
-    )
-
-    override val taskRecords: Map<String, PrivateTaskRecord> get() = taskRecordsRelay.value
-
-    fun mutateTaskRecords(action: (MutableMap<String, PrivateTaskRecord>) -> Unit) {
-        taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
-    }
+                PrivateTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
     override val customTimeRecords: MutableMap<CustomTimeId.Project.Private, PrivateCustomTimeRecord>
 
@@ -124,9 +116,7 @@ class PrivateProjectRecord(
         val remoteTaskRecord = PrivateTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 
-        mutateTaskRecords {
-            it[remoteTaskRecord.id] = remoteTaskRecord
-        }
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
 
         return remoteTaskRecord
     }

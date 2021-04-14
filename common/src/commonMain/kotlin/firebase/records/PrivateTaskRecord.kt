@@ -71,8 +71,6 @@ class PrivateTaskRecord private constructor(
     )
 
     override fun deleteFromParent() {
-        privateProjectRecord.mutateTaskRecords {
-            check(it.remove(id) == this)
-        }
+        check(privateProjectRecord.taskRecords.remove(id) == this)
     }
 }

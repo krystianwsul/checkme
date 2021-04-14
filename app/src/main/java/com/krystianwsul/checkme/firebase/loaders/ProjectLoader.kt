@@ -49,7 +49,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                         it
                     }
                 }
-                .replayImmediate() // todo instances just out of curiosity, is this ever disposed/terminated?
+                .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = projectRecordObservable.firstOrError()

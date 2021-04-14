@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -13,7 +12,7 @@ class SharedProjectRecord(
         private val parent: Parent,
         create: Boolean,
         override val projectKey: ProjectKey.Shared,
-        private val jsonWrapper: JsonWrapper
+        private val jsonWrapper: JsonWrapper,
 ) : ProjectRecord<ProjectType.Shared>(
         create,
         jsonWrapper.projectJson,
@@ -21,20 +20,13 @@ class SharedProjectRecord(
         "${projectKey.key}/$PROJECT_JSON"
 ) {
 
-    override val taskRecordsRelay = BehaviorSubject(
-            projectJson.tasks
-                    .mapValues { (id, taskJson) ->
-                        check(id.isNotEmpty())
+    override val taskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
 
-                        SharedTaskRecord(id, this, taskJson)
-                    }
-    )
-
-    override val taskRecords: Map<String, SharedTaskRecord> get() = taskRecordsRelay.value
-
-    fun mutateTaskRecords(action: (MutableMap<String, SharedTaskRecord>) -> Unit) {
-        taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
-    }
+                SharedTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
     override val customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
 
@@ -87,7 +79,7 @@ class SharedProjectRecord(
     constructor(
             databaseWrapper: DatabaseWrapper,
             parent: Parent,
-            jsonWrapper: JsonWrapper
+            jsonWrapper: JsonWrapper,
     ) : this(
             databaseWrapper,
             parent,
@@ -163,9 +155,7 @@ class SharedProjectRecord(
         val remoteTaskRecord = SharedTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 
-        mutateTaskRecords {
-            it[remoteTaskRecord.id] = remoteTaskRecord
-        }
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
 
         return remoteTaskRecord
     }

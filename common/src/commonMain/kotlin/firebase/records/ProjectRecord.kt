@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.time.JsonTime
@@ -22,8 +21,6 @@ abstract class ProjectRecord<T : ProjectType>(
     abstract val projectKey: ProjectKey<T>
 
     abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, ProjectCustomTimeRecord<T>>
-
-    abstract val taskRecordsRelay: BehaviorSubject<out Map<String, TaskRecord<T>>> // todo instances
 
     abstract val taskRecords: Map<String, TaskRecord<T>>
 

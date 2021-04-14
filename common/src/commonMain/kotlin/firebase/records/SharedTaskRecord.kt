@@ -71,8 +71,6 @@ class SharedTaskRecord private constructor(
     )
 
     override fun deleteFromParent() {
-        sharedProjectRecord.mutateTaskRecords {
-            check(it.remove(id) == this)
-        }
+        check(sharedProjectRecord.taskRecords.remove(id) == this)
     }
 }

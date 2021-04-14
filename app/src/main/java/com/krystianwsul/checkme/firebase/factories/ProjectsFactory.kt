@@ -227,10 +227,7 @@ class ProjectsFactory(
 
     fun save(values: MutableMap<String, Any?>) {
         privateProjectLoader.projectManager.save(values)
-        privateProjectFactory.saveInstances(values)
-
         sharedProjectsLoader.projectManager.save(values)
-        sharedProjectFactories.forEach { it.value.saveInstances(values) }
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =

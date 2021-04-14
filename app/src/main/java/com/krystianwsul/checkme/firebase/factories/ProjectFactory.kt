@@ -126,6 +126,4 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
                 changeInstancesChangeTypes
         ).merge().publishImmediate(domainDisposable)
     }
-
-    fun saveInstances(values: MutableMap<String, Any?>) = rootInstanceManagers.forEach { it.value.save(values) }
 }

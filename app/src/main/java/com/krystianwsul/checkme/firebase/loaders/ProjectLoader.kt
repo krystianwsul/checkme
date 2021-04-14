@@ -33,13 +33,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             val projectRecord: ProjectRecord<T>,
     )
 
-    class AddTaskEvent<T : ProjectType>(
-            val projectRecord: ProjectRecord<T>,
-    )
-
-    class ChangeProjectEvent<T : ProjectType>(
-            val projectRecord: ProjectRecord<T>,
-    )
+    class ChangeProjectEvent<T : ProjectType>(val projectRecord: ProjectRecord<T>)
 
     class Impl<T : ProjectType, U : Parsable>(
             // U: Project JSON type
@@ -115,19 +109,12 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
-                .switchMapSingle {
+                .filter { !it.original.internallyUpdated }
+                .map {
                     val (changeType, projectRecord) = it.original.changeWrapper
+                    check(changeType == ChangeType.REMOTE)
 
-                    if (it.original.internallyUpdated) {
-                        Single.never()
-                    } else {
-                        check(changeType == ChangeType.REMOTE)
-
-                        it.newMap
-                                .values
-                                .let { Single.just(ChangeProjectEvent(projectRecord)) }
-                                .map { ChangeWrapper(changeType, it) }
-                    }
+                    ChangeWrapper(changeType, ChangeProjectEvent(projectRecord))
                 }
                 .replayImmediate()
     }

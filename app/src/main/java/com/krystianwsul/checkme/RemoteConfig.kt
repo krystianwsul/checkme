@@ -10,13 +10,11 @@ import java.util.concurrent.TimeUnit
 object RemoteConfig {
 
     private const val BENIA_URL_KEY = "beniaAboutUrl"
-    private const val KEY_QUERY_REMOTE_INSTANCES = "queryRemoteInstance" // todo instances
 
     @SuppressLint("StaticFieldLeak")
     private val config = FirebaseRemoteConfig.getInstance().apply {
         setDefaultsAsync(mapOf(
                 BENIA_URL_KEY to "https://www.linkedin.com/in/bernardawsul/",
-                KEY_QUERY_REMOTE_INSTANCES to false
         ))
     }
 
@@ -34,7 +32,5 @@ object RemoteConfig {
     class Values(private val config: FirebaseRemoteConfig) {
 
         val beniaUrl get() = config.getString(BENIA_URL_KEY)
-
-        val queryRemoteInstances get() = config.getBoolean(KEY_QUERY_REMOTE_INSTANCES)
     }
 }

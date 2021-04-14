@@ -52,6 +52,8 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 it
             }
         }
+                .replay()
+                .apply { domainDisposable += connect() } // todo instances just out of curiosity, is this ever disposed/terminated?
 
         private data class ProjectData<T : ProjectType>(
                 val internallyUpdated: Boolean,
@@ -93,9 +95,9 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                         .replayImmediate()
 
         // first snapshot of everything
-        override val initialProjectEvent = rootInstanceDatabaseRx.firstOrError()
+        override val initialProjectEvent = projectRecordObservable.firstOrError()
                 .map {
-                    val (changeType, projectRecord) = it.original.changeWrapper
+                    val (changeType, projectRecord) = it
 
                     ChangeWrapper(
                             changeType,

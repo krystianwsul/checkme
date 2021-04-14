@@ -136,16 +136,13 @@ object RelevanceChecker {
 
                         val privateProject = PrivateProject(
                                 privateProjectRecord,
-                                rootInstanceManagers,
                                 object : JsonTime.UserCustomTimeProvider {
 
                                     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
                                         TODO("todo customtimes fetch")
                                     }
                                 },
-                        ) {
-                            throw UnsupportedOperationException()
-                        }
+                        )
 
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
@@ -161,7 +158,7 @@ object RelevanceChecker {
                         check(privateRootInstanceManagers.containsKey(privateProject.projectKey))
                         check(privateRootInstanceManagers[privateProject.projectKey] == null)
 
-                        privateRootInstanceManagers[privateProject.projectKey] = rootInstanceManagers.values
+                        privateRootInstanceManagers[privateProject.projectKey] = rootInstanceManagers.values // todo instance
 
                         if (privateRootInstanceManagers.none { it.value == null }) {
                             check(privateData == null)
@@ -188,16 +185,13 @@ object RelevanceChecker {
 
                                 val sharedProject = SharedProject(
                                         sharedProjectRecord,
-                                        rootInstanceManagers,
                                         object : JsonTime.UserCustomTimeProvider {
 
                                             override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
                                                 TODO("todo customtimes fetch")
                                             }
                                         },
-                                ) {
-                                    throw UnsupportedOperationException()
-                                }
+                                )
 
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 

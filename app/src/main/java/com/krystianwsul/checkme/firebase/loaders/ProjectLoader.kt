@@ -27,10 +27,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U>>>
 
     // Here we observe the initial instances for new tasks
-    val addTaskEvents: Observable<ChangeWrapper<AddTaskEvent<T>>>
+    val addTaskEvents: Observable<ChangeWrapper<AddTaskEvent<T>>> // todo instance
 
     // Here we observe changes to all the previously subscribed instances
-    val changeInstancesEvents: Observable<ChangeInstancesEvent<T>>
+    val changeInstancesEvents: Observable<ChangeInstancesEvent<T>> // todo instance
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>

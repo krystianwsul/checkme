@@ -11,10 +11,12 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -102,7 +104,7 @@ class ProjectFactoryTest {
 
         val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
-        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
+        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord)
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
@@ -172,15 +174,7 @@ class ProjectFactoryTest {
         changeTypesEmissionChecker.checkOne {
             projectLoader.addTaskEvents.accept(ChangeWrapper(
                     ChangeType.REMOTE,
-                    ProjectLoader.AddTaskEvent(
-                            projectLoader.projectRecord,
-                            PrivateTaskRecord(
-                                    taskKey.taskId,
-                                    projectLoader.projectRecord,
-                                    PrivateTaskJson("task")
-                            ),
-                            Snapshot("", null),
-                    )
+                    ProjectLoader.AddTaskEvent(projectLoader.projectRecord)
             ))
         }
     }

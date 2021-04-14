@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -20,6 +21,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
         protected val factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
+        protected val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 

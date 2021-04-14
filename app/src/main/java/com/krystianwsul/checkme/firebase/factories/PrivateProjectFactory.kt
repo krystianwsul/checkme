@@ -8,8 +8,6 @@ import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -18,22 +16,17 @@ class PrivateProjectFactory(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Private, PrivateProjectJson>(
         projectLoader,
         initialProjectEvent,
         factoryProvider,
         domainDisposable,
+        userCustomTimeProvider,
         deviceDbInfo,
 ) {
 
-    override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) = PrivateProject(
-            projectRecord as PrivateProjectRecord,
-            object : JsonTime.UserCustomTimeProvider {
-
-                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                    TODO("todo customtime fetch")
-                }
-            },
-    )
+    override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) =
+            PrivateProject(projectRecord as PrivateProjectRecord, userCustomTimeProvider)
 }

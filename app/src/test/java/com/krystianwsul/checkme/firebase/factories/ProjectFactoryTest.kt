@@ -141,7 +141,8 @@ class ProjectFactoryTest {
                             projectLoader,
                             it.data,
                             factoryProvider,
-                            compositeDisposable
+                            compositeDisposable,
+                            mockk(),
                     ) { mockk() }
 
                     changeTypesEmissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)

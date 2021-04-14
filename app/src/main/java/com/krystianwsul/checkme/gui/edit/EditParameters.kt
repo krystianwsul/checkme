@@ -210,6 +210,10 @@ sealed class EditParameters : Parcelable {
 
         private fun copyFile(editActivity: EditActivity): Single<EditImageState> {
             return Single.fromCallable<EditImageState> {
+                MyApplication.instance
+                        .getRxPaparazzoDir()
+                        .mkdirs()
+
                 val outputFile = File.createTempFile(
                         "copiedImage",
                         null,

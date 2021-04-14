@@ -8,8 +8,10 @@ import io.reactivex.rxjava3.core.Observable
 
 class UserCustomTimeProviderSource {
 
-    // todo source emit only remote changes
-    fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider> {
+    // emit only remote changes
+    fun observeUserCustomTimeProvider(
+            projectRecord: ProjectRecord<*>,
+    ): Observable<JsonTime.UserCustomTimeProvider> {
         // todo source consider way to notify that a project is removed
 
         return Observable.just(

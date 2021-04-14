@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
@@ -109,6 +110,7 @@ interface SharedProjectsLoader {
                             domainDisposable,
                             projectManager,
                             projectEntry.initialProjectRecord,
+                            UserCustomTimeProviderSource(),
                     )
                 }
         )

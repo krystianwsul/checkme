@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
@@ -76,6 +77,7 @@ class ProjectLoaderTest {
                 compositeDisposable,
                 projectManager,
                 null,
+                UserCustomTimeProviderSource(),
         )
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -8,12 +9,11 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
@@ -44,33 +44,48 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             private val domainDisposable: CompositeDisposable,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
             initialProjectRecord: ProjectRecord<T>?,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-        private val projectRecordObservable = snapshotObservable.mapNotNull { projectManager.set(it) }
-                .let {
-                    if (initialProjectRecord != null) {
-                        it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
-                    } else {
-                        it
-                    }
-                }
+        private data class ProjectRecordData<T : ProjectType>(
+                val changeType: ChangeType,
+                val projectRecord: ProjectRecord<T>,
+                val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        )
+
+        private val projectRecordObservable: Observable<ProjectRecordData<T>> =
+                snapshotObservable.mapNotNull { projectManager.set(it) }
+                        .let {
+                            if (initialProjectRecord != null) {
+                                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+                            } else {
+                                it
+                            }
+                        }
+                        .switchMap { (projectChangeType, projectRecord) ->
+                            val observable =
+                                    userCustomTimeProviderSource.observeUserCustomTimeProvider(projectRecord).share()
+
+                            listOf(
+                                    observable.take(1).map {
+                                        ProjectRecordData(projectChangeType, projectRecord, it)
+                                    },
+                                    observable.skip(1).map {
+                                        ProjectRecordData(ChangeType.REMOTE, projectRecord, it)
+                                    },
+                            ).merge()
+                        }
                 .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = projectRecordObservable.firstOrError()
                 .map {
-                    it.newData(InitialProjectEvent(
-                            projectManager,
-                            it.data,
-                            object : JsonTime.UserCustomTimeProvider {
-
-                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                    TODO("todo customtime load")
-                                }
-                            }
-                    ))
+                    ChangeWrapper(
+                            it.changeType,
+                            InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider)
+                    )
                 }
                 .cacheImmediate(domainDisposable)
 
@@ -79,15 +94,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .map {
                     check(it.changeType == ChangeType.REMOTE)
 
-                    it.newData(ChangeProjectEvent(
-                            it.data,
-                            object : JsonTime.UserCustomTimeProvider {
-
-                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                    TODO("todo customtime load")
-                                }
-                            }
-                    ))
+                    ChangeWrapper(
+                            it.changeType,
+                            ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
+                    )
                 }
                 .replayImmediate()
     }

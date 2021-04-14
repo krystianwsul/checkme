@@ -33,7 +33,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
-    class ChangeProjectEvent<T : ProjectType>(val projectRecord: ProjectRecord<T>)
+    class ChangeProjectEvent<T : ProjectType>(
+            val projectRecord: ProjectRecord<T>,
+            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    )
 
     class Impl<T : ProjectType, U : Parsable>(
             // U: Project JSON type
@@ -76,7 +79,15 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .map {
                     check(it.changeType == ChangeType.REMOTE)
 
-                    it.newData(ChangeProjectEvent(it.data))
+                    it.newData(ChangeProjectEvent(
+                            it.data,
+                            object : JsonTime.UserCustomTimeProvider {
+
+                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                    TODO("todo customtime load")
+                                }
+                            }
+                    ))
                 }
                 .replayImmediate()
     }

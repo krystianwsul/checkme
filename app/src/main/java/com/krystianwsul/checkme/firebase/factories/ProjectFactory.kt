@@ -21,7 +21,6 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
         protected val factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
-        protected val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -30,15 +29,18 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     var project: Project<T>
         private set
 
-    protected abstract fun newProject(projectRecord: ProjectRecord<T>): Project<T>
+    protected abstract fun newProject(
+            projectRecord: ProjectRecord<T>,
+            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ): Project<T>
 
     val changeTypes: Observable<ChangeType>
 
     init {
-        project = newProject(initialProjectEvent.projectRecord)
+        project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map { (projectChangeType, changeProjectEvent) ->
-            project = newProject(changeProjectEvent.projectRecord)
+            project = newProject(changeProjectEvent.projectRecord, changeProjectEvent.userCustomTimeProvider)
 
             projectChangeType
         }

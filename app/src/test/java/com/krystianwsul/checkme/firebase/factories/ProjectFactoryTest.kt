@@ -107,7 +107,8 @@ class ProjectFactoryTest {
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
-        override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
+        override val changeProjectEvents =
+                PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
 
     @get:Rule
@@ -142,10 +143,10 @@ class ProjectFactoryTest {
                             it.data,
                             factoryProvider,
                             compositeDisposable,
-                            mockk(),
                     ) { mockk() }
 
-                    changeTypesEmissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
+                    changeTypesEmissionChecker =
+                            EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
                 }
                 .addTo(compositeDisposable)
     }

@@ -39,7 +39,6 @@ class ProjectsFactory(
             privateInitialProjectEvent,
             factoryProvider,
             domainDisposable,
-            privateInitialProjectEvent.userCustomTimeProvider,
             deviceDbInfo,
     )
 
@@ -51,7 +50,6 @@ class ProjectsFactory(
                                 sharedInitialProjectEvent,
                                 factoryProvider,
                                 domainDisposable,
-                                sharedInitialProjectEvent.userCustomTimeProvider,
                                 deviceDbInfo,
                         )
                     }
@@ -81,7 +79,6 @@ class ProjectsFactory(
                     addProjectEvent.initialProjectEvent,
                     factoryProvider,
                     domainDisposable,
-                    addProjectEvent.initialProjectEvent.userCustomTimeProvider,
                     deviceDbInfo,
             )
 

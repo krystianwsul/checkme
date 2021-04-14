@@ -16,17 +16,17 @@ class PrivateProjectFactory(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
-        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Private, PrivateProjectJson>(
         projectLoader,
         initialProjectEvent,
         factoryProvider,
         domainDisposable,
-        userCustomTimeProvider,
         deviceDbInfo,
 ) {
 
-    override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) =
-            PrivateProject(projectRecord as PrivateProjectRecord, userCustomTimeProvider)
+    override fun newProject(
+            projectRecord: ProjectRecord<ProjectType.Private>,
+            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) = PrivateProject(projectRecord as PrivateProjectRecord, userCustomTimeProvider)
 }

@@ -17,20 +17,20 @@ class SharedProjectFactory(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
-        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Shared, JsonWrapper>(
         projectLoader,
         initialProjectEvent,
         factoryProvider,
         domainDisposable,
-        userCustomTimeProvider,
         deviceDbInfo,
 ) {
 
-    override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) =
-            SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider).apply {
-                fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
-                updateDeviceDbInfo(deviceDbInfo())
-            }
+    override fun newProject(
+            projectRecord: ProjectRecord<ProjectType.Shared>,
+            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) = SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider).apply {
+        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
+        updateDeviceDbInfo(deviceDbInfo())
+    }
 }

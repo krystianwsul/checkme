@@ -102,7 +102,8 @@ class ProjectsFactoryTest {
                 projectKeysRelay,
                 sharedProjectManager,
                 compositeDisposable,
-                factoryProvider.sharedProjectsProvider
+                factoryProvider.sharedProjectsProvider,
+                TestUserCustomTimeProviderSource(),
         )
 
         initialProjectsEvent = null

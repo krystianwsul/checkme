@@ -67,19 +67,22 @@ class FactoryLoader(
 
                     val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
+                    val userFactorySingle = userDatabaseRx.first
+                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
+                            .cacheImmediate()
+
+                    val userCustomTimeProviderSource =
+                            UserCustomTimeProviderSource.Impl(userInfo.key, userFactorySingle)
+
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             privateProjectManager,
                             null,
-                            UserCustomTimeProviderSource.Impl(),
+                            userCustomTimeProviderSource,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
-
-                    val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
-                            .cacheImmediate()
 
                     val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
@@ -87,7 +90,8 @@ class FactoryLoader(
                             userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },
                             sharedProjectManager,
                             domainDisposable,
-                            factoryProvider.sharedProjectsProvider
+                            factoryProvider.sharedProjectsProvider,
+                            userCustomTimeProviderSource,
                     )
 
                     val projectsFactorySingle = Single.zip(

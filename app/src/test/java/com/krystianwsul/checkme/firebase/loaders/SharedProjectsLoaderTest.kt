@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
@@ -86,12 +87,18 @@ class SharedProjectsLoaderTest {
                 projectKeysRelay,
                 projectManager,
                 compositeDisposable,
-                sharedProjectsProvider
+                sharedProjectsProvider,
+                TestUserCustomTimeProviderSource(),
         )
 
-        initialProjectsEmissionChecker = EmissionChecker("initialProjects", compositeDisposable, sharedProjectsLoader.initialProjectsEvent)
-        addProjectEmissionChecker = EmissionChecker("addProject", compositeDisposable, sharedProjectsLoader.addProjectEvents)
-        removeProjectsEmissionChecker = EmissionChecker("removeProjects", compositeDisposable, sharedProjectsLoader.removeProjectEvents)
+        initialProjectsEmissionChecker =
+                EmissionChecker("initialProjects", compositeDisposable, sharedProjectsLoader.initialProjectsEvent)
+
+        addProjectEmissionChecker =
+                EmissionChecker("addProject", compositeDisposable, sharedProjectsLoader.addProjectEvents)
+
+        removeProjectsEmissionChecker =
+                EmissionChecker("removeProjects", compositeDisposable, sharedProjectsLoader.removeProjectEvents)
     }
 
     @After

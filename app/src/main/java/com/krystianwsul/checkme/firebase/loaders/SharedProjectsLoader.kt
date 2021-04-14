@@ -36,6 +36,7 @@ interface SharedProjectsLoader {
             override val projectManager: AndroidSharedProjectManager,
             private val domainDisposable: CompositeDisposable,
             private val sharedProjectsProvider: SharedProjectsProvider,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -110,7 +111,7 @@ interface SharedProjectsLoader {
                             domainDisposable,
                             projectManager,
                             projectEntry.initialProjectRecord,
-                            UserCustomTimeProviderSource.Impl(),
+                            userCustomTimeProviderSource,
                     )
                 }
         )

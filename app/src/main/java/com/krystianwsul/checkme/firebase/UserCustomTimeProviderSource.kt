@@ -7,14 +7,19 @@ import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 interface UserCustomTimeProviderSource {
 
     // emit only remote changes
     fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider>
 
-    class Impl(private val myUserFactory: MyUserFactory) : UserCustomTimeProviderSource {
+    class Impl(
+            private val myUserKey: UserKey,
+            private val myUserFactorySingle: Single<MyUserFactory>,
+    ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(
                 projectRecord: ProjectRecord<*>,
@@ -23,20 +28,20 @@ interface UserCustomTimeProviderSource {
 
             when (projectRecord) {
                 is PrivateProjectRecord -> {
-                    check(customTimeKeys.all { it.userKey == myUserFactory.userKey })
+                    check(customTimeKeys.all { it.userKey == myUserKey })
 
-                    return Observable.just(
-                            object : JsonTime.UserCustomTimeProvider {
+                    return myUserFactorySingle.toObservable().map { myUserFactory ->
+                        object : JsonTime.UserCustomTimeProvider {
 
-                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                    check(userCustomTimeKey.userKey == myUserFactory.userKey)
+                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                check(userCustomTimeKey.userKey == myUserKey)
 
-                                    return myUserFactory.user
-                                            .customTimes
-                                            .getValue(userCustomTimeKey.customTimeId)
-                                }
+                                return myUserFactory.user
+                                        .customTimes
+                                        .getValue(userCustomTimeKey.customTimeId)
                             }
-                    )
+                        }
+                    }
                 }
                 is SharedProjectRecord -> {
                 }

@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -169,6 +170,7 @@ class DomainFactoryRule : TestRule {
                 mockk(relaxed = true) {
                     every { getSharedProjectObservable(any()) } returns Observable.never()
                 },
+                TestUserCustomTimeProviderSource(),
         )
 
         val projectsFactory = ProjectsFactory(

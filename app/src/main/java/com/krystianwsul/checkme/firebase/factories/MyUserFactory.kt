@@ -13,8 +13,6 @@ import com.krystianwsul.common.firebase.models.MyUser
 
 class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbInfo, databaseWrapper: DatabaseWrapper) {
 
-    val userKey = deviceDbInfo.key
-
     private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot, databaseWrapper)
 
     private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))

@@ -28,9 +28,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     // Here we observe the initial instances for new tasks
     val addTaskEvents: Observable<ChangeWrapper<AddTaskEvent<T>>> // todo instance
 
-    // Here we observe changes to all the previously subscribed instances
-    val changeInstancesEvents: Observable<ChangeInstancesEvent<T>> // todo instance
-
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
 
@@ -165,20 +162,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                             .merge()
                 }
                 .replayImmediate()
-
-        // Here we observe changes to all the previously subscribed instances
-        override val changeInstancesEvents = rootInstanceDatabaseRx.switchMap {
-            it.newMap
-                    .values
-                    .map { (_, _, databaseRx) ->
-                        databaseRx.changes.map {
-                            check(it.rootEnabled)
-
-                            ChangeInstancesEvent<T>()
-                        }
-                    }
-                    .merge()
-        }.replayImmediate()
 
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = rootInstanceDatabaseRx.skip(1)

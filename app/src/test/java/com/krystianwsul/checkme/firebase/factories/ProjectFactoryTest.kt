@@ -20,7 +20,6 @@ import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -110,8 +109,6 @@ class ProjectFactoryTest {
 
         override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()!!
 
-        override val changeInstancesEvents = Observable.never<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()!!
-
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
 
@@ -130,7 +127,6 @@ class ProjectFactoryTest {
     private lateinit var changeTypesEmissionChecker: EmissionChecker<ChangeType>
 
     private val projectKey = ProjectKey.Private("projectKey")
-    private val taskKey = TaskKey(projectKey, "taskKey")
 
     @Before
     fun before() {

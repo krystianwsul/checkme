@@ -23,7 +23,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, ProjectCustomTimeRecord<T>>
 
-    abstract val taskRecordsRelay: BehaviorSubject<out Map<String, TaskRecord<T>>>
+    abstract val taskRecordsRelay: BehaviorSubject<out Map<String, TaskRecord<T>>> // todo instances
 
     abstract val taskRecords: Map<String, TaskRecord<T>>
 

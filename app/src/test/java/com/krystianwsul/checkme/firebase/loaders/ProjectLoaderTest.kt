@@ -57,7 +57,6 @@ class ProjectLoaderTest {
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
     private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>
-    private lateinit var changeInstancesEmissionChecker: EmissionChecker<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
@@ -82,7 +81,6 @@ class ProjectLoaderTest {
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
         addTaskEmissionChecker = EmissionChecker("addTask", compositeDisposable, projectLoader.addTaskEvents)
-        changeInstancesEmissionChecker = EmissionChecker("changeInstances", compositeDisposable, projectLoader.changeInstancesEvents)
         changeProjectEmissionChecker = EmissionChecker("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
     }
 
@@ -92,7 +90,6 @@ class ProjectLoaderTest {
 
         initialProjectEmissionChecker.checkEmpty()
         addTaskEmissionChecker.checkEmpty()
-        changeInstancesEmissionChecker.checkEmpty()
         changeProjectEmissionChecker.checkEmpty()
 
         rxErrorChecker.check()

@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.ProjectType
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
@@ -26,10 +27,11 @@ class InstanceGenerationTest {
         private fun getOffset(hours: Int) = hours * 60 * 60 * 1000.0
 
         private val date = Date(2021, 4, 14)
-        val localOffsetForDate = getOffset(2)
+
+        private val instanceHourMinute = HourMinute(12, 30)
     }
 
-    private fun testInstanceCorrectlyGeneratedForOffset(hours: Int) {
+    private fun createMockTask(hours: Int): Task<ProjectType.Private> {
         val offsetDouble = getOffset(hours)
 
         // let's say we have a schedule that was created at 12:00, and deleted at 13:00.  It has an instance at 12:30
@@ -38,8 +40,6 @@ class InstanceGenerationTest {
 
         val endHourMinute = HourMinute(13, 0)
         val endExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(DateTime(date, endHourMinute), offsetDouble)
-
-        val instanceHourMinute = HourMinute(12, 30)
 
         val singleScheduleJson = PrivateSingleScheduleJson(
                 startTime = startExactTimeStamp.long,
@@ -61,7 +61,7 @@ class InstanceGenerationTest {
                 schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(singleScheduleJson = singleScheduleJson)),
         )
 
-        val task = Task(
+        return Task(
                 mockk(relaxed = true),
                 PrivateTaskRecord(
                         "taskKey",
@@ -70,6 +70,10 @@ class InstanceGenerationTest {
                 ),
                 mockk(relaxed = true),
         )
+    }
+
+    private fun testInstanceCorrectlyGeneratedForOffset(hours: Int) {
+        val task = createMockTask(hours)
 
         val now = ExactTimeStamp.Local(Date(2021, 4, 14), HourMilli(15, 0, 0, 0))
 
@@ -86,5 +90,10 @@ class InstanceGenerationTest {
     @Test
     fun testInstanceCorrectlyGeneratedForLocal() {
         testInstanceCorrectlyGeneratedForOffset(2)
+    }
+
+    @Test
+    fun testInstanceCorrectlyGeneratedForDifferentOffset() {
+        testInstanceCorrectlyGeneratedForOffset(5)
     }
 }

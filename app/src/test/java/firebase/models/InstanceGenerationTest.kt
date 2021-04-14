@@ -29,6 +29,9 @@ class InstanceGenerationTest {
         private val date = Date(2021, 4, 14)
 
         private val instanceHourMinute = HourMinute(12, 30)
+
+        private const val localOffsetHours = 2
+        private const val differentOffsetHours = 5
     }
 
     private fun createMockTask(hours: Int): Task<ProjectType.Private> {
@@ -89,11 +92,43 @@ class InstanceGenerationTest {
 
     @Test
     fun testInstanceCorrectlyGeneratedForLocal() {
-        testInstanceCorrectlyGeneratedForOffset(2)
+        testInstanceCorrectlyGeneratedForOffset(localOffsetHours)
     }
 
     @Test
     fun testInstanceCorrectlyGeneratedForDifferentOffset() {
-        testInstanceCorrectlyGeneratedForOffset(5)
+        testInstanceCorrectlyGeneratedForOffset(differentOffsetHours)
+    }
+
+    private fun testInstanceIsInPastInstancesWhenOneMinuteLaterForOffset(hours: Int) {
+        val task = createMockTask(hours)
+
+        val nowHourMinute = HourMinute(12, 31)
+
+        // not actually relevant to test, just need a value
+        val now = ExactTimeStamp.Local(date, nowHourMinute)
+        val endExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(
+                DateTime(date, nowHourMinute),
+                getOffset(hours),
+        )
+
+        assertEquals(
+                DateTime(date, instanceHourMinute),
+                task.getInstances(
+                        null,
+                        endExactTimeStamp.plusOne(), // offset 2
+                        now,
+                ).single().instanceDateTime,
+        )
+    }
+
+    @Test
+    fun testInstanceIsInPastInstancesWhenOneMinuteLaterForLocal() {
+        testInstanceIsInPastInstancesWhenOneMinuteLaterForOffset(localOffsetHours)
+    }
+
+    @Test
+    fun testInstanceIsInPastInstancesWhenOneMinuteLaterForDifferentOffset() {
+        testInstanceIsInPastInstancesWhenOneMinuteLaterForOffset(differentOffsetHours)
     }
 }

@@ -41,11 +41,6 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
             projectChangeType
         }
 
-        val addTaskChangeTypes = projectLoader.addTaskEvents
-                .filter { (projectChangeType, _) -> projectChangeType == ChangeType.REMOTE }
-                .doOnNext { (_, addTaskEvent) -> project = newProject(addTaskEvent.projectRecord) }
-                .map { (projectChangeType, _) -> projectChangeType }
-
-        changeTypes = listOf(changeProjectChangeTypes, addTaskChangeTypes).merge().publishImmediate(domainDisposable)
+        changeTypes = listOf(changeProjectChangeTypes).merge().publishImmediate(domainDisposable)
     }
 }

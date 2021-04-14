@@ -24,9 +24,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     // first snapshot of everything
     val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U>>>
 
-    // Here we observe the initial instances for new tasks
-    val addTaskEvents: Observable<ChangeWrapper<AddTaskEvent<T>>> // todo instance
-
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
 
@@ -116,45 +113,21 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 }
                 .cacheImmediate(domainDisposable)
 
-        // Here we observe the initial instances for new tasks
-        override val addTaskEvents = rootInstanceDatabaseRx.skip(1)
-                .switchMap {
-                    val (originalChangeType, projectRecord) = it.original.changeWrapper
-
-                    it.addedEntries
-                            .values
-                            .map { (internallyUpdated, _) ->
-                                val changeType = if (internallyUpdated) {
-                                    ChangeType.LOCAL
-                                } else {
-                                    originalChangeType
-                                }
-
-                                Observable.just(
-                                        ChangeWrapper(
-                                                changeType,
-                                                AddTaskEvent(projectRecord)
-                                        )
-                                )
-
-                            }
-                            .merge()
-                }
-                .replayImmediate()
-
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = rootInstanceDatabaseRx.skip(1)
-                .filter { it.addedEntries.isEmpty() }
                 .switchMapSingle {
                     val (changeType, projectRecord) = it.original.changeWrapper
 
-                    check(changeType == ChangeType.REMOTE)
+                    if (it.original.internallyUpdated) {
+                        Single.never()
+                    } else {
+                        check(changeType == ChangeType.REMOTE)
 
-                    it.newMap
-                            .values
-                            .let {
-                                Single.just(ChangeProjectEvent(projectRecord))
-                            }.map { ChangeWrapper(changeType, it) }
+                        it.newMap
+                                .values
+                                .let { Single.just(ChangeProjectEvent(projectRecord)) }
+                                .map { ChangeWrapper(changeType, it) }
+                    }
                 }
                 .replayImmediate()
     }

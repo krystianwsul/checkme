@@ -107,8 +107,6 @@ class ProjectFactoryTest {
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
-        override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()!!
-
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
 
@@ -163,15 +161,5 @@ class ProjectFactoryTest {
     @Test
     fun testInitial() {
 
-    }
-
-    @Test
-    fun testAddTask() {
-        changeTypesEmissionChecker.checkOne {
-            projectLoader.addTaskEvents.accept(ChangeWrapper(
-                    ChangeType.REMOTE,
-                    ProjectLoader.AddTaskEvent(projectLoader.projectRecord)
-            ))
-        }
     }
 }

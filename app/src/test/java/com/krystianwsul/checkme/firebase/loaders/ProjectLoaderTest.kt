@@ -56,7 +56,6 @@ class ProjectLoaderTest {
             projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
-    private lateinit var addTaskEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>
 
     private val projectKey = ProjectKey.Private("userKey")
@@ -80,7 +79,6 @@ class ProjectLoaderTest {
         )
 
         initialProjectEmissionChecker = EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
-        addTaskEmissionChecker = EmissionChecker("addTask", compositeDisposable, projectLoader.addTaskEvents)
         changeProjectEmissionChecker = EmissionChecker("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
     }
 
@@ -89,7 +87,6 @@ class ProjectLoaderTest {
         compositeDisposable.clear()
 
         initialProjectEmissionChecker.checkEmpty()
-        addTaskEmissionChecker.checkEmpty()
         changeProjectEmissionChecker.checkEmpty()
 
         rxErrorChecker.check()
@@ -138,7 +135,7 @@ class ProjectLoaderTest {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
-        addTaskEmissionChecker.checkRemote {
+        changeProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                     taskId1 to PrivateTaskJson("task1"),
                     taskId2 to PrivateTaskJson("task2")
@@ -155,7 +152,7 @@ class ProjectLoaderTest {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
-        addTaskEmissionChecker.checkRemote {
+        changeProjectEmissionChecker.checkRemote {
             acceptProject(PrivateProjectJson(tasks = mutableMapOf(
                     taskId1 to PrivateTaskJson("task1"),
                     taskId2 to PrivateTaskJson("task2")

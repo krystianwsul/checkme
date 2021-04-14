@@ -13,6 +13,7 @@ import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
 abstract class InstanceRecord<T : ProjectType>(
+        // todo instances merge with subclass
         create: Boolean,
         protected val taskRecord: TaskRecord<T>,
         final override val createObject: InstanceJson,

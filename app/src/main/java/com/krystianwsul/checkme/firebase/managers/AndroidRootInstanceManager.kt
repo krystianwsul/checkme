@@ -12,6 +12,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidRootInstanceManager<T : ProjectType>(
+        // todo instance
         taskRecord: TaskRecord<T>,
         snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>?,
         factoryProvider: FactoryProvider,

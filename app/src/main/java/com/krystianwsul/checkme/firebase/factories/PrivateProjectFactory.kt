@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -30,14 +29,11 @@ class PrivateProjectFactory(
 
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) = PrivateProject(
             projectRecord as PrivateProjectRecord,
-            rootInstanceManagers,
             object : JsonTime.UserCustomTimeProvider {
 
                 override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
                     TODO("todo customtime fetch")
                 }
             },
-    ) { newRootInstanceManager(it, null) }.apply {
-        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
-    }
+    )
 }

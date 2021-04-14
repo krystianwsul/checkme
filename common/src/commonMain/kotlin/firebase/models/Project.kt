@@ -5,7 +5,6 @@ import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -17,9 +16,7 @@ import com.krystianwsul.common.utils.*
 abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper<T>,
         val assignedToHelper: AssignedToHelper<T>,
-        protected val rootInstanceManagers: Map<TaskKey, RootInstanceManager<T>>,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        protected val newRootInstanceManager: (taskRecord: TaskRecord<T>) -> RootInstanceManager<T>,
 ) : Current, JsonTime.CustomTimeProvider<T>, JsonTime.ProjectCustomTimeKeyProvider<T> {
 
     abstract val projectRecord: ProjectRecord<T>
@@ -165,12 +162,7 @@ abstract class Project<T : ProjectType>(
 
         val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
 
-        val newTask = Task(
-                this,
-                taskRecord,
-                rootInstanceManagers[taskRecord.taskKey] ?: newRootInstanceManager(taskRecord),
-        )
-
+        val newTask = Task(this, taskRecord)
         check(!_tasks.containsKey(newTask.id))
 
         _tasks[newTask.id] = newTask

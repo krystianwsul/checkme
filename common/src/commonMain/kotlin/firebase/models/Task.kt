@@ -8,7 +8,6 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -18,11 +17,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class Task<T : ProjectType>(
-        val project: Project<T>,
-        private val taskRecord: TaskRecord<T>,
-        val rootInstanceManager: RootInstanceManager<T>, // todo instances remove
-) : Current, CurrentOffset, QueryMatchable, Assignable {
+class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: TaskRecord<T>) :
+        Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
@@ -95,10 +91,7 @@ class Task<T : ProjectType>(
 
     private val _existingInstances = taskRecord.instanceRecords
             .values
-            .toMutableList<InstanceRecord<T>>()
-            .apply { addAll(rootInstanceManager.records) }
             .map { Instance(this, it) }
-            .toMutableList()
             .associateBy { it.scheduleKey }
             .toMutableMap()
 

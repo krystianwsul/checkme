@@ -5,27 +5,24 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
-        rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
 ) : Project<ProjectType.Private>(
         CopyScheduleHelper.Private,
         AssignedToHelper.Private,
-        rootInstanceManagers,
         userCustomTimeProvider,
-        newRootInstanceManager,
 ) {
 
     override val projectKey = projectRecord.projectKey
@@ -52,11 +49,7 @@ class PrivateProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map {
-                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: newRootInstanceManager(it)
-
-                    Task(this, it, rootInstanceManager)
-                }
+                .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
@@ -175,12 +168,7 @@ class PrivateProject(
     fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(
-                this,
-                taskRecord,
-                rootInstanceManagers[taskRecord.taskKey] ?: newRootInstanceManager(taskRecord),
-        )
-
+        val task = Task(this, taskRecord)
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

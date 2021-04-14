@@ -17,7 +17,6 @@ import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
@@ -70,12 +69,7 @@ class IrrelevantTest {
 
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
-
-        val project = PrivateProject(projectRecord, mapOf(), mockk()) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
+        val project = PrivateProject(projectRecord, mockk())
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -186,28 +180,14 @@ class IrrelevantTest {
         val projectKey = ProjectKey.Private(userKey.key)
 
         val taskId = "taskKey"
-        val taskKey = TaskKey(ProjectKey.Private(userKey.key), taskId)
 
         val projectJson = PrivateProjectJson(
                 startTime = now.long,
                 tasks = mutableMapOf(taskId to taskJson),
         )
+
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-
-        val project = PrivateProject(
-                projectRecord,
-                mapOf(
-                        taskKey to mockk {
-                            every { records } returns mutableListOf()
-                        }
-                ),
-                mockk(),
-        ) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
-
+        val project = PrivateProject(projectRecord, mockk())
         val task = project.tasks.single()
 
         // 2. Mark single instance done
@@ -334,13 +314,9 @@ class IrrelevantTest {
                         taskHierarchy2Id to taskHierarchy2Json,
                 ),
         )
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
 
-        val project = PrivateProject(projectRecord, mapOf(), mockk()) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val project = PrivateProject(projectRecord, mockk())
 
         val parentTask = project.tasks.single { it.isRootTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)

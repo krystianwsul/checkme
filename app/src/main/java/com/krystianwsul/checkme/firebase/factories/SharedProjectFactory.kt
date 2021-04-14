@@ -30,14 +30,13 @@ class SharedProjectFactory(
 
     override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) = SharedProject(
             projectRecord as SharedProjectRecord,
-            rootInstanceManagers,
             object : JsonTime.UserCustomTimeProvider {
 
                 override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
                     TODO("todo customtime fetch")
                 }
             }
-    ) { newRootInstanceManager(it, null) }.apply {
+    ).apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
         updateDeviceDbInfo(deviceDbInfo())
     }

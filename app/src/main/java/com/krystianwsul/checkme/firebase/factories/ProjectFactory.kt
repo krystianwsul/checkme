@@ -31,7 +31,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 
     private val projectManager = initialProjectEvent.projectManager
 
-    protected val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>>
+    private val rootInstanceManagers: MutableMap<TaskKey, AndroidRootInstanceManager<T>> // todo instances
 
     var project: Project<T>
         private set
@@ -50,7 +50,8 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         }
             .toMutableMap()
 
-    protected fun newRootInstanceManager(
+    private fun newRootInstanceManager(
+            // todo instance
             taskRecord: TaskRecord<T>,
             snapshot: Snapshot<Map<String, Map<String, InstanceJson>>>?,
     ): AndroidRootInstanceManager<T> {

@@ -79,6 +79,11 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
                 return Offset(dateTimeTz)
             }
 
+            fun fromDateTime(dateTime: DateTime, offset: Double): Offset {
+                val dateTimeTz = dateTime.toDateTimeSoy().toOffset(TimezoneOffset(offset))
+                return Offset(dateTimeTz)
+            }
+
             fun compare(a: Offset, b: Offset) = compareValuesBy(a, b, { it.date }, { it.hourMilli })
         }
 

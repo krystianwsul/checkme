@@ -22,17 +22,22 @@ class InstanceGenerationTest {
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
         }
+
+        private fun getOffset(hours: Int) = hours * 60 * 60 * 1000.0
+
+        private val date = Date(2021, 4, 14)
+        val localOffsetForDate = getOffset(2)
     }
 
-    @Test
-    fun testInstanceCorrectlyGeneratedForLocal() {
+    private fun testInstanceCorrectlyGeneratedForOffset(hours: Int) {
+        val offsetDouble = getOffset(hours)
+
         // let's say we have a schedule that was created at 12:00, and deleted at 13:00.  It has an instance at 12:30
-        val date = Date(2021, 4, 14)
         val startHourMinute = HourMinute(12, 0)
-        val startExactTimeStamp = ExactTimeStamp.Local(date, startHourMinute)
+        val startExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(DateTime(date, startHourMinute), offsetDouble)
 
         val endHourMinute = HourMinute(13, 0)
-        val endExactTimeStamp = ExactTimeStamp.Local(date, endHourMinute)
+        val endExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(DateTime(date, endHourMinute), offsetDouble)
 
         val instanceHourMinute = HourMinute(12, 30)
 
@@ -76,5 +81,10 @@ class InstanceGenerationTest {
                         now,
                 ).single().instanceDateTime,
         )
+    }
+
+    @Test
+    fun testInstanceCorrectlyGeneratedForLocal() {
+        testInstanceCorrectlyGeneratedForOffset(2)
     }
 }

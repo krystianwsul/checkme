@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
@@ -22,7 +23,7 @@ class SharedProjectsLoaderTest {
 
     class TestProjectProvider : ProjectProvider {
 
-        override val database = object : ProjectProvider.Database() {
+        override val database = object : DatabaseWrapper() {
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")

@@ -10,9 +10,7 @@ import com.krystianwsul.common.utils.ProjectType
 
 interface ProjectProvider {
 
-    val database: Database
-
-    abstract class Database : DatabaseWrapper() // todo instances remove class, replace with super
+    val database: DatabaseWrapper
 
     // U: Project JSON type
     interface ProjectManager<T : ProjectType, U : Parsable> :

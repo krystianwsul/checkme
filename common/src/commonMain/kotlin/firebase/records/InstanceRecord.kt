@@ -12,13 +12,12 @@ import com.krystianwsul.common.utils.TaskKey
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
-abstract class InstanceRecord<T : ProjectType>(
-        // todo instances merge with subclass
+class InstanceRecord<T : ProjectType>(
         create: Boolean,
-        protected val taskRecord: TaskRecord<T>,
-        final override val createObject: InstanceJson,
+        private val taskRecord: TaskRecord<T>,
+        override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
-        override val key: String,
+        firebaseKey: String,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -60,7 +59,7 @@ abstract class InstanceRecord<T : ProjectType>(
         private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val hourMinuteRegex = Regex("^(\\d?\\d)-(\\d?\\d)$")
 
-        protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
+        private fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
 
         private fun dateStringToDate(dateString: String): Date {
             val matchResult = dateRegex.find(dateString)!!
@@ -72,7 +71,7 @@ abstract class InstanceRecord<T : ProjectType>(
             return Date(year, month, day)
         }
 
-        fun <T : ProjectType> dateTimeStringsToScheduleKey(
+        private fun <T : ProjectType> dateTimeStringsToScheduleKey(
                 projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
                 dateString: String,
                 timeString: String,
@@ -89,6 +88,8 @@ abstract class InstanceRecord<T : ProjectType>(
         }
     }
 
+    override val key = taskRecord.key + "/instances/" + firebaseKey
+
     var done by Committer(createObject::done)
     var doneOffset by Committer(createObject::doneOffset)
 
@@ -96,20 +97,8 @@ abstract class InstanceRecord<T : ProjectType>(
     val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
     val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
-    val scheduleHour by lazy {
-        scheduleKey.scheduleTimePair
-                .hourMinute
-                ?.hour
-    }
-
-    val scheduleMinute by lazy {
-        scheduleKey.scheduleTimePair
-                .hourMinute
-                ?.minute
-    }
-
     private fun getInitialInstanceDate() = createObject.instanceDate
-                .takeUnless { it.isNullOrEmpty() }
+            .takeUnless { it.isNullOrEmpty() }
             ?.let { Date.fromJson(it) }
 
     var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
@@ -143,4 +132,6 @@ abstract class InstanceRecord<T : ProjectType>(
     }
 
     var noParent by Committer(createObject::noParent)
+
+    override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)
 }

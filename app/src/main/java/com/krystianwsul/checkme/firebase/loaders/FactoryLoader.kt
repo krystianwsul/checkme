@@ -72,7 +72,7 @@ class FactoryLoader(
                             domainDisposable,
                             privateProjectManager,
                             null,
-                            UserCustomTimeProviderSource(),
+                            UserCustomTimeProviderSource.Impl(),
                     )
 
                     val startTime = ExactTimeStamp.Local.now

@@ -110,7 +110,7 @@ interface SharedProjectsLoader {
                             domainDisposable,
                             projectManager,
                             projectEntry.initialProjectRecord,
-                            UserCustomTimeProviderSource(),
+                            UserCustomTimeProviderSource.Impl(),
                     )
                 }
         )

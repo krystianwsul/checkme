@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models
 
+import arrow.core.extensions.sequence.foldable.isEmpty
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType

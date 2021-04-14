@@ -74,15 +74,7 @@ class InstanceGenerationTest {
                         taskJson,
                 ),
                 mockk(relaxed = true),
-        ).also {
-            assertEquals(startExactTimeStamp, it.startExactTimeStampOffset)
-            assertEquals(endExactTimeStamp, it.endExactTimeStampOffset)
-
-            it.schedules.single().let {
-                println("mocked schedule start: " + it.startExactTimeStampOffset)
-                println("mocked schedule end: " + it.endExactTimeStampOffset)
-            }
-        }
+        )
     }
 
     private fun testInstanceCorrectlyGeneratedForOffset(hours: Int) {

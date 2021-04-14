@@ -1,6 +1,5 @@
-package firebase.models
+package com.krystianwsul.common.firebase.models
 
-import arrow.core.extensions.sequence.foldable.isEmpty
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson

@@ -1,5 +1,6 @@
 package firebase.models
 
+import arrow.core.extensions.sequence.foldable.isEmpty
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
@@ -11,6 +12,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -116,7 +118,7 @@ class InstanceGenerationTest {
                 DateTime(date, instanceHourMinute),
                 task.getInstances(
                         null,
-                        endExactTimeStamp.plusOne(), // offset 2
+                        endExactTimeStamp.plusOne(),
                         now,
                 ).single().instanceDateTime,
         )
@@ -130,5 +132,36 @@ class InstanceGenerationTest {
     @Test
     fun testInstanceIsInPastInstancesWhenOneMinuteLaterForDifferentOffset() {
         testInstanceIsInPastInstancesWhenOneMinuteLaterForOffset(differentOffsetHours)
+    }
+
+    private fun testInstanceNotInPastInstancesWhenOneMinuteEarlierForOffset(hours: Int) {
+        val task = createMockTask(hours)
+
+        val nowHourMinute = HourMinute(12, 29)
+
+        // not actually relevant to test, just need a value
+        val now = ExactTimeStamp.Local(date, nowHourMinute)
+        val endExactTimeStamp = ExactTimeStamp.Offset.fromDateTime(
+                DateTime(date, nowHourMinute),
+                getOffset(hours),
+        )
+
+        assertTrue(
+                task.getInstances(
+                        null,
+                        endExactTimeStamp.plusOne(),
+                        now,
+                ).isEmpty(),
+        )
+    }
+
+    @Test
+    fun testInstanceNotInPastInstancesWhenOneMinuteEarlierForLocal() {
+        testInstanceNotInPastInstancesWhenOneMinuteEarlierForOffset(localOffsetHours)
+    }
+
+    @Test
+    fun testInstanceNotInPastInstancesWhenOneMinuteEarlierForDifferentOffset() {
+        testInstanceNotInPastInstancesWhenOneMinuteEarlierForOffset(differentOffsetHours)
     }
 }

@@ -11,6 +11,9 @@ import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 
 object RelevanceChecker {
@@ -131,7 +134,16 @@ object RelevanceChecker {
                     privateProjectManager.value.forEach { privateProjectRecord ->
                         val rootInstanceManagers = getInstances(privateProjectRecord)
 
-                        val privateProject = PrivateProject(privateProjectRecord, rootInstanceManagers) {
+                        val privateProject = PrivateProject(
+                                privateProjectRecord,
+                                rootInstanceManagers,
+                                object : JsonTime.UserCustomTimeProvider {
+
+                                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                        TODO("todo customtimes fetch")
+                                    }
+                                },
+                        ) {
                             throw UnsupportedOperationException()
                         }
 
@@ -174,7 +186,16 @@ object RelevanceChecker {
                             .map { sharedProjectRecord ->
                                 val rootInstanceManagers = getInstances(sharedProjectRecord)
 
-                                val sharedProject = SharedProject(sharedProjectRecord, rootInstanceManagers) {
+                                val sharedProject = SharedProject(
+                                        sharedProjectRecord,
+                                        rootInstanceManagers,
+                                        object : JsonTime.UserCustomTimeProvider {
+
+                                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                                TODO("todo customtimes fetch")
+                                            }
+                                        },
+                                ) {
                                     throw UnsupportedOperationException()
                                 }
 

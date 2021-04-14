@@ -16,6 +16,4 @@ interface ProjectProvider {
     interface ProjectManager<T : ProjectType, U : Parsable> :
             RecordManager,
             SnapshotRecordManager<ProjectRecord<T>, Snapshot<U>>
-
-    data class RootInstanceData(val rootEnabled: Boolean, val snapshot: Snapshot<RootInstanceMap>) // todo instances remove
 }

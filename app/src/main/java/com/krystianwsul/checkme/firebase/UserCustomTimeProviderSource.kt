@@ -26,11 +26,11 @@ interface UserCustomTimeProviderSource {
         ): Observable<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
 
-            when (projectRecord) {
+            return when (projectRecord) {
                 is PrivateProjectRecord -> {
                     check(customTimeKeys.all { it.userKey == myUserKey })
 
-                    return myUserFactorySingle.toObservable().map { myUserFactory ->
+                    myUserFactorySingle.toObservable().map { myUserFactory ->
                         object : JsonTime.UserCustomTimeProvider {
 
                             override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
@@ -44,19 +44,19 @@ interface UserCustomTimeProviderSource {
                     }
                 }
                 is SharedProjectRecord -> {
+                    // todo source consider way to notify that a project is removed
+
+                    return Observable.just(
+                            object : JsonTime.UserCustomTimeProvider {
+
+                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                    TODO("todo source")
+                                }
+                            }
+                    )
                 }
+                else -> throw UnsupportedOperationException()
             }
-
-            // todo source consider way to notify that a project is removed
-
-            return Observable.just(
-                    object : JsonTime.UserCustomTimeProvider {
-
-                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                            TODO("todo source")
-                        }
-                    }
-            )
         }
 
         private fun getUserCustomTimeKeys(projectRecord: ProjectRecord<*>): Set<CustomTimeKey.User> {

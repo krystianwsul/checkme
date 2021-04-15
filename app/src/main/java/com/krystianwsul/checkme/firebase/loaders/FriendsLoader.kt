@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
@@ -23,6 +24,21 @@ class FriendsLoader(
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
+
+    private sealed class UserData {
+
+        abstract val userLoadReason: UserLoadReason
+
+        data class Friend(val addFriendData: AddFriendData?) : UserData() {
+
+            override val userLoadReason = UserLoadReason.FRIEND
+        }
+
+        object CustomTimes : UserData() {
+
+            override val userLoadReason = UserLoadReason.CUSTOM_TIMES
+        }
+    }
 
     private data class AddFriendData(val key: String, val userWrapper: UserWrapper)
 

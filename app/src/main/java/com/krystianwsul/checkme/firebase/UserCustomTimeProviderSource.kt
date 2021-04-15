@@ -15,7 +15,7 @@ interface UserCustomTimeProviderSource {
     // emit only remote changes
     fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider>
 
-    fun onProjectRemoved(projectKey: ProjectKey<*>) {
+    fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         TODO("todo source")
     }
 

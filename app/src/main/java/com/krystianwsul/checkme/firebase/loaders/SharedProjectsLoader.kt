@@ -160,7 +160,11 @@ interface SharedProjectsLoader {
             ChangeWrapper(it.userChangeType, RemoveProjectsEvent(it.removedProjectKeys))
         }
                 .filter { it.data.projectKeys.isNotEmpty() }
-                .doOnNext { check(it.changeType == ChangeType.REMOTE) }
+                .doOnNext {
+                    check(it.changeType == ChangeType.REMOTE)
+
+                    userCustomTimeProviderSource.onProjectsRemoved(it.data.projectKeys)
+                }
                 .replayImmediate()
 
         override fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord {

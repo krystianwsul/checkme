@@ -7,4 +7,6 @@ import com.krystianwsul.common.utils.UserKey
 abstract class RootUserManager : MapRecordManager<UserKey, RootUserRecord>() {
 
     override val databasePrefix = DatabaseWrapper.USERS_KEY
+
+    override fun valueToRecord(value: RootUserRecord) = value
 }

@@ -87,10 +87,7 @@ class UserKeyStore(
                 .apply { domainDisposable += connect() }
     }
 
-    fun addFriend(rootUserRecord: RootUserRecord) {
-        // todo source account for new friend already in custom time users
-        addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
-    }
+    fun addFriend(rootUserRecord: RootUserRecord) = addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
 
     fun requestCustomTimeUsers(userKeys: Set<UserKey>) = customTimeRequests.accept(userKeys)
 

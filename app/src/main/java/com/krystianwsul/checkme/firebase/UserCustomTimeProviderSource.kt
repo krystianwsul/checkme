@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -8,7 +7,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.kotlin.Singles
+import io.reactivex.rxjava3.kotlin.Observables
 
 interface UserCustomTimeProviderSource {
 
@@ -17,7 +16,7 @@ interface UserCustomTimeProviderSource {
 
     class Impl(
             private val myUserFactorySingle: Single<MyUserFactory>,
-            private val friendsFactorySingle: Single<FriendsFactory>,
+            private val customTimeCoordinator: CustomTimeCoordinator,
     ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(
@@ -26,21 +25,19 @@ interface UserCustomTimeProviderSource {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val userKeys = customTimeKeys.map { it.userKey }.toSet()
 
-            return Singles.zip(
-                    myUserFactorySingle,
-                    friendsFactorySingle,
-            ).flatMapObservable { (myUserFactory, friendsFactory) ->
-                friendsFactory.observeCustomTimes(userKeys).map {
-                    object : JsonTime.UserCustomTimeProvider {
+            return Observables.combineLatest(
+                    myUserFactorySingle.toObservable(),
+                    customTimeCoordinator.observeCustomTimes(userKeys),
+            ).map { (myUserFactory, friendsFactory) ->
+                object : JsonTime.UserCustomTimeProvider {
 
-                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                            val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
-                                myUserFactory.user
-                            else
-                                friendsFactory
+                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                        val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
+                            myUserFactory.user
+                        else
+                            friendsFactory
 
-                            return provider.getUserCustomTime(userCustomTimeKey)
-                        }
+                        return provider.getUserCustomTime(userCustomTimeKey)
                     }
                 }
             }

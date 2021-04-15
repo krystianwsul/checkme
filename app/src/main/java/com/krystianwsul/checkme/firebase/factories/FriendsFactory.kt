@@ -25,7 +25,6 @@ class FriendsFactory(
         initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
         domainDisposable: CompositeDisposable,
         databaseWrapper: DatabaseWrapper,
-        private val myUserKey: UserKey,
 ) : JsonTime.UserCustomTimeProvider {
 
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
@@ -34,6 +33,8 @@ class FriendsFactory(
     private val userMap = rootUserManager.records
             .mapValues { it.value.newValue(RootUser(it.value.value)) }
             .toMutableMap()
+
+    fun hasUserKeys(userKeys: Set<UserKey>) = userKeys.all { it in userMap.keys }
 
     private fun getFriendMap() = userMap.filter { it.value.userLoadReason == UserLoadReason.FRIEND }
 
@@ -110,19 +111,6 @@ class FriendsFactory(
         friendsLoader.userKeyStore.addFriend(rootUserRecord)
 
         check(userMap.containsKey(rootUserRecord.userKey))
-    }
-
-    // only emit remote changes
-    fun observeCustomTimes(userKeys: Set<UserKey>): Observable<Unit> {
-        val foreignUserKeys = userKeys - myUserKey
-
-        friendsLoader.userKeyStore.requestCustomTimeUsers(foreignUserKeys)
-
-        return Observable.just(Unit) // todo source test this
-                .concatWith(changeTypes.map { })
-                .filter {
-                    foreignUserKeys.all { it in userMap.keys }
-                }
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {

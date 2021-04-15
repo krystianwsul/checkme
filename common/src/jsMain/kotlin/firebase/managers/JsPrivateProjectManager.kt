@@ -10,6 +10,9 @@ class JsPrivateProjectManager(
         privateProjectJsons: Map<String, PrivateProjectJson>
 ) : PrivateProjectManager() {
 
-    override var value =
-            privateProjectJsons.map { PrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
+    init {
+        setInitialValue(
+                privateProjectJsons.map { PrivateProjectRecord(databaseWrapper, ProjectKey.Private(it.key), it.value) }
+        )
+    }
 }

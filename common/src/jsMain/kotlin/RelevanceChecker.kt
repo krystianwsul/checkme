@@ -85,7 +85,7 @@ object RelevanceChecker {
                     saveProjects(null)
                 } else {
                     databaseWrapper.getUsers {
-                        val rootUserManager = JsRootUserManager(it)
+                        val rootUserManager = JsRootUserManager(databaseWrapper, it)
 
                         val rootUsers = rootUserManager.records
                                 .values

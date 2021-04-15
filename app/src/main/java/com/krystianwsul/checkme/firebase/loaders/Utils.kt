@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.common.firebase.json.InstanceJson
 import io.reactivex.rxjava3.core.Observable
 
 fun <T : Any, U, V> Observable<T>.processChanges(
@@ -17,6 +16,7 @@ fun <T : Any, U, V> Observable<T>.processChanges(
 
     val newMap = oldMap.toMutableMap().apply {
         addedKeys.forEach { put(it, adder(newData, it)) }
+        removedKeys.forEach { remove(it) }
     }
 
     fun Set<U>.entries(map: Map<U, V>) = associate { it to map.getValue(it) }
@@ -30,8 +30,6 @@ fun <T : Any, U, V> Observable<T>.processChanges(
             addedKeys.entries(newMap),
             unchangedKeys.entries(newMap),
             oldMap,
-            newMap
+            newMap,
     )
 }.skip(1).map { MapChanges(it.first!!, it.second) }
-
-typealias RootInstanceMap = Map<String, Map<String, InstanceJson>>

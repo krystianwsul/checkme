@@ -18,13 +18,14 @@ class UserKeyStore(
 ) {
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
+    private val customTimeRequests = PublishRelay.create<Set<UserKey>>()
 
     val loadUserDataObservable: Observable<ChangeWrapper<Map<UserKey, LoadUserData>>>
 
     init {
         val friendKeysChangeEvents = friendKeysObservable.map { FriendEvent.FriendKeysChange(it) }
 
-        loadUserDataObservable = listOf(friendKeysChangeEvents, addFriendEvents).merge()
+        val friendEvents = listOf(friendKeysChangeEvents, addFriendEvents).merge()
                 .scan(
                         ChangeWrapper<Map<UserKey, LoadUserData>>(ChangeType.LOCAL, mapOf()) // this will be ignored by skip
                 ) { oldChangeWrapper, friendEvent ->
@@ -48,6 +49,39 @@ class UserKeyStore(
                     }
                 }
                 .skip(1)
+                .map { FriendOrCustomTimeEvent.Friend(it) }
+
+        val customTimesEvents =
+                customTimeRequests.scan(setOf<UserKey>()) { oldSet, request -> oldSet + request }
+                        .skip(1)
+                        .map { FriendOrCustomTimeEvent.CustomTimes(it) }
+
+        loadUserDataObservable = listOf(friendEvents, customTimesEvents).merge()
+                .scan(Aggregate()) { aggregate, friendOrCustomTimeEvent ->
+                    // when summing maps, add friends to customTimes, since the former takes priority
+
+                    when (friendOrCustomTimeEvent) {
+                        is FriendOrCustomTimeEvent.Friend -> {
+                            val output = aggregate.customTimesToMap() + friendOrCustomTimeEvent.changeWrapper.data
+
+                            aggregate.copy(
+                                    friendMap = friendOrCustomTimeEvent.changeWrapper.data,
+                                    output = ChangeWrapper(friendOrCustomTimeEvent.changeWrapper.changeType, output),
+                            )
+                        }
+                        is FriendOrCustomTimeEvent.CustomTimes -> {
+                            val output = Aggregate.customTimesToMap(friendOrCustomTimeEvent.userKeys) +
+                                    aggregate.friendMap
+
+                            aggregate.copy(
+                                    customTimes = friendOrCustomTimeEvent.userKeys,
+                                    output = ChangeWrapper(ChangeType.REMOTE, output),
+                            )
+                        }
+                    }
+                }
+                .skip(1)
+                .map { it.output }
                 .replay()
                 .apply { domainDisposable += connect() }
     }
@@ -57,9 +91,7 @@ class UserKeyStore(
         addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
     }
 
-    fun requestCustomTimeUsers(userKeys: Set<UserKey>) {
-        // todo source
-    }
+    fun requestCustomTimeUsers(userKeys: Set<UserKey>) = customTimeRequests.accept(userKeys)
 
     sealed class LoadUserData {
 
@@ -86,5 +118,26 @@ class UserKeyStore(
         data class FriendKeysChange(val changeWrapper: ChangeWrapper<Set<UserKey>>) : FriendEvent()
 
         data class AddFriend(val rootUserRecord: RootUserRecord) : FriendEvent()
+    }
+
+    private sealed class FriendOrCustomTimeEvent {
+
+        data class Friend(val changeWrapper: ChangeWrapper<Map<UserKey, LoadUserData>>) : FriendOrCustomTimeEvent()
+
+        data class CustomTimes(val userKeys: Set<UserKey>) : FriendOrCustomTimeEvent()
+    }
+
+    private data class Aggregate(
+            val friendMap: Map<UserKey, LoadUserData> = mapOf(),
+            val customTimes: Set<UserKey> = setOf(),
+            val output: ChangeWrapper<Map<UserKey, LoadUserData>> = ChangeWrapper(ChangeType.LOCAL, mapOf()),
+    ) {
+
+        companion object {
+
+            fun customTimesToMap(customTimes: Set<UserKey>) = customTimes.associateWith { LoadUserData.CustomTimes }
+        }
+
+        fun customTimesToMap() = customTimesToMap(customTimes)
     }
 }

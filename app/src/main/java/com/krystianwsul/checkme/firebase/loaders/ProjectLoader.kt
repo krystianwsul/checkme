@@ -65,6 +65,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                             }
                         }
                         .switchMap { (projectChangeType, projectRecord) ->
+                            /**
+                             * I'm assuming here that 1. a new project doesn't have any custom times, and 2. all other
+                             * project events are remote.
+                             */
                             val observable =
                                     userCustomTimeProviderSource.observeUserCustomTimeProvider(projectRecord).share()
 

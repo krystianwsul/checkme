@@ -105,4 +105,16 @@ class UserKeyStoreTest {
                 UserKeyStore.LoadUserData.Friend(UserKeyStore.AddFriendData(userKey4.key, rootUserRecord4.userWrapper))
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.LOCAL, currentMap))
     }
+
+    @Test
+    fun testRequestCustomTimesForNewUser() {
+        // start with some dummy data from myUser
+        myUserChangeWrapperRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(userKey1)))
+        val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
+        testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
+
+        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
+        testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
+    }
 }

@@ -28,9 +28,7 @@ class FriendsLoader(
     private val addFriendDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, AddFriendData?>>>()
 
     init {
-        friendKeysObservable.map {
-            ChangeWrapper<Map<UserKey, AddFriendData?>>(it.changeType, it.data.associateWith { null })
-        }
+        friendKeysObservable.map { it.newData<Map<UserKey, AddFriendData?>>(it.data.associateWith { null }) }
                 .subscribe(addFriendDataRelay)
                 .addTo(domainDisposable)
     }

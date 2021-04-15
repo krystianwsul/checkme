@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
@@ -20,7 +19,6 @@ interface UserCustomTimeProviderSource {
     class Impl(
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
-            private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(

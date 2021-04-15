@@ -58,10 +58,7 @@ class FriendsFactory(
             it.userChangeType
         }
 
-        changeTypes = listOf(
-                addChangeFriendChangeTypes,
-                removeFriendsChangeTypes
-        ).merge()
+        changeTypes = listOf(addChangeFriendChangeTypes, removeFriendsChangeTypes).merge()
                 .filter { it == ChangeType.REMOTE } // filtering out events for internal changes
                 .publishImmediate(domainDisposable)
     }

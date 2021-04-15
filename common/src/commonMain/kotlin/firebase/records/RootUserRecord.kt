@@ -27,7 +27,7 @@ open class RootUserRecord(
 
     final override val userWrapper = createObject
 
-    final override val key by lazy { this.userKey.key }
+    final override val key by lazy { userKey.key }
 
     override val children get() = customTimeRecords.values.toList()
 

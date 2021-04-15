@@ -106,6 +106,7 @@ class UserKeyStoreTest {
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.LOCAL, currentMap))
     }
 
+    /*
     @Test
     fun testRequestCustomTimesForNewUser() {
         // start with some dummy data from myUser
@@ -116,5 +117,5 @@ class UserKeyStoreTest {
         userKeyStore.requestCustomTimeUsers(setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
-    }
+    }*/
 }

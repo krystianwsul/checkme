@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
-import com.jakewharton.rxrelay3.ReplayRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
@@ -9,35 +9,52 @@ import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class UserKeyStore(
         friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
         domainDisposable: CompositeDisposable,
 ) {
 
-    private val loadUserDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, LoadUserData>>>()
+    private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
-    val loadUserDataObservable = loadUserDataRelay.hide()
+    val loadUserDataObservable: Observable<ChangeWrapper<Map<UserKey, LoadUserData>>>
 
     init {
-        friendKeysObservable.map {
-            it.newData<Map<UserKey, LoadUserData>>(it.data.associateWith { LoadUserData.Friend(null) })
-        }
-                .subscribe(loadUserDataRelay)
-                .addTo(domainDisposable)
+        val friendKeysChangeEvents = friendKeysObservable.map { FriendEvent.FriendKeysChange(it) }
+
+        loadUserDataObservable = listOf(friendKeysChangeEvents, addFriendEvents).merge()
+                .scan(
+                        ChangeWrapper<Map<UserKey, LoadUserData>>(ChangeType.LOCAL, mapOf()) // this will be ignored by skip
+                ) { oldChangeWrapper, friendEvent ->
+                    when (friendEvent) {
+                        is FriendEvent.FriendKeysChange -> { // overwrite
+                            val changeWrapper = friendEvent.changeWrapper
+
+                            changeWrapper.newData(
+                                    changeWrapper.data.associateWith { LoadUserData.Friend(null) }
+                            )
+                        }
+                        is FriendEvent.AddFriend -> { // add to map
+                            val newMap = oldChangeWrapper.data.toMutableMap()
+                            newMap[friendEvent.rootUserRecord.userKey] = LoadUserData.Friend(AddFriendData(
+                                    friendEvent.rootUserRecord.key,
+                                    friendEvent.rootUserRecord.userWrapper
+                            ))
+
+                            ChangeWrapper(ChangeType.LOCAL, newMap)
+                        }
+                    }
+                }
+                .skip(1)
+                .replay()
+                .apply { domainDisposable += connect() }
     }
 
     fun addFriend(rootUserRecord: RootUserRecord) {
-        val addFriendDatas = loadUserDataRelay.value // todo source account for new friend already in custom time users
-                .data
-                .toMutableMap()
-
-        check(!addFriendDatas.containsKey(rootUserRecord.userKey))
-
-        addFriendDatas[rootUserRecord.userKey] = rootUserRecord.run { LoadUserData.Friend(AddFriendData(key, userWrapper)) }
-
-        loadUserDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
+        // todo source account for new friend already in custom time users
+        addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
     }
 
     fun requestCustomTimeUsers(userKeys: Set<UserKey>) {
@@ -63,4 +80,11 @@ class UserKeyStore(
     }
 
     data class AddFriendData(val key: String, val userWrapper: UserWrapper)
+
+    private sealed class FriendEvent {
+
+        data class FriendKeysChange(val changeWrapper: ChangeWrapper<Set<UserKey>>) : FriendEvent()
+
+        data class AddFriend(val rootUserRecord: RootUserRecord) : FriendEvent()
+    }
 }

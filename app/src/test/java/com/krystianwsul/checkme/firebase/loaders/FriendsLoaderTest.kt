@@ -14,10 +14,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-@ExperimentalStdlibApi
 class FriendsLoaderTest {
 
-    private class TestFriendsProvider : FriendsProvider {
+    class TestFriendsProvider : FriendsProvider {
 
         override val database = TestDatabase()
 

@@ -19,7 +19,6 @@ fun <T : Any> EmissionChecker<ChangeWrapper<T>>.checkChangeType(changeType: Chan
     checkEmpty()
 }
 
-@ExperimentalStdlibApi
 fun <T : Any> EmissionChecker<T>.checkOne(action: () -> Unit) {
     addHandler { }
     action()

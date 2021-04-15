@@ -25,16 +25,16 @@ class FriendsLoader(
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-    private sealed class UserData {
+    private sealed class LoadUserData {
 
         abstract val userLoadReason: UserLoadReason
 
-        data class Friend(val addFriendData: AddFriendData?) : UserData() {
+        data class Friend(val addFriendData: AddFriendData?) : LoadUserData() {
 
             override val userLoadReason = UserLoadReason.FRIEND
         }
 
-        object CustomTimes : UserData() {
+        object CustomTimes : LoadUserData() {
 
             override val userLoadReason = UserLoadReason.CUSTOM_TIMES
         }
@@ -42,19 +42,21 @@ class FriendsLoader(
 
     private data class AddFriendData(val key: String, val userWrapper: UserWrapper)
 
-    private val addFriendDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, AddFriendData?>>>()
+    private val addFriendDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, LoadUserData>>>()
 
     init {
-        friendKeysObservable.map { it.newData<Map<UserKey, AddFriendData?>>(it.data.associateWith { null }) }
+        friendKeysObservable.map {
+            it.newData<Map<UserKey, LoadUserData>>(it.data.associateWith { LoadUserData.Friend(null) })
+        }
                 .subscribe(addFriendDataRelay)
                 .addTo(domainDisposable)
     }
 
-    private val databaseRx: Observable<MapChanges<ChangeWrapper<Map<UserKey, AddFriendData?>>, UserKey, DatabaseRx<Snapshot<UserWrapper>>>> =
+    private val databaseRx: Observable<MapChanges<ChangeWrapper<Map<UserKey, LoadUserData>>, UserKey, DatabaseRx<Snapshot<UserWrapper>>>> =
             addFriendDataRelay.processChanges(
                     { it.data.keys },
-                    { (_, addFriendDatas), userKey ->
-                        val addFriendData = addFriendDatas.getValue(userKey)
+                    { (_, userDatas), userKey ->
+                        val addFriendData = (userDatas.getValue(userKey) as? LoadUserData.Friend)?.addFriendData
 
                         DatabaseRx(
                                 domainDisposable,
@@ -113,14 +115,16 @@ class FriendsLoader(
 
         check(!addFriendDatas.containsKey(rootUserRecord.userKey))
 
-        addFriendDatas[rootUserRecord.userKey] = AddFriendData(rootUserRecord.key, rootUserRecord.userWrapper)
+        addFriendDatas[rootUserRecord.userKey] = rootUserRecord.run { LoadUserData.Friend(AddFriendData(key, userWrapper)) }
 
         addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
     }
 
-    class InitialFriendsEvent(val snapshots: Iterable<Snapshot<UserWrapper>>)
+    class InitialFriendsEvent(val snapshots: List<Snapshot<UserWrapper>>)
 
     class AddChangeFriendEvent(val snapshot: Snapshot<UserWrapper>)
 
     class RemoveFriendsEvent(val userChangeType: ChangeType, val userKeys: Set<UserKey>)
+
+    data class UserWrapperData(val reason: UserLoadReason, val userWrapper: UserWrapper)
 }

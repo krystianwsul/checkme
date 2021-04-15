@@ -18,7 +18,7 @@ class CustomTimeCoordinator(
         friendsLoader.userKeyStore.requestCustomTimeUsers(foreignUserKeys)
 
         return friendsFactorySingle.flatMapObservable { friendsFactory ->
-            Observable.just(Unit) // todo source test this
+            Observable.just(Unit)
                     .concatWith(friendsFactory.changeTypes.map { })
                     .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
                     .map { friendsFactory }

@@ -20,7 +20,9 @@ class AndroidRootUserManager(
 
     private fun Snapshot<UserWrapper>.toRecord() = RootUserRecord(databaseWrapper, false, value!!, toKey())
 
-    override var _records = children.associate { it.snapshot.toKey() to it.snapshot.toRecord() }.toMutableMap()
+    init {
+        setInitialRecords(children.associate { it.snapshot.toKey() to it.snapshot.toRecord() })
+    }
 
     fun set(snapshot: Snapshot<UserWrapper>) = set(
             snapshot.toKey(),

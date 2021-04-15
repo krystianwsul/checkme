@@ -7,11 +7,15 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class MapRecordManager<T, U : RemoteRecord> : RecordManager {
 
-    protected open var _records = mutableMapOf<T, U>()
+    private var _records = mutableMapOf<T, U>()
 
     val records: Map<T, U> get() = _records
 
     protected abstract val databasePrefix: String
+
+    protected fun setInitialRecords(records: Map<T, U>) {
+        _records = records.toMutableMap()
+    }
 
     override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()

@@ -7,7 +7,13 @@ import com.krystianwsul.common.utils.UserKey
 
 class JsRootUserManager(databaseWrapper: DatabaseWrapper, userWrappers: Map<String, UserWrapper>) : RootUserManager() {
 
-    override var _records = userWrappers.map { RootUserRecord(databaseWrapper, false, it.value, UserKey(it.key)) }
-            .associateBy { it.userKey }
-            .toMutableMap()
+    init {
+        setInitialRecords(
+                userWrappers.entries.associate {
+                    val userKey = UserKey(it.key)
+
+                    userKey to RootUserRecord(databaseWrapper, false, it.value, userKey)
+                }
+        )
+    }
 }

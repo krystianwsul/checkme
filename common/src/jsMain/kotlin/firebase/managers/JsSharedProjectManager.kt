@@ -7,13 +7,15 @@ import com.krystianwsul.common.utils.ProjectKey
 
 class JsSharedProjectManager(
         override val databaseWrapper: DatabaseWrapper,
-        jsonWrappers: Map<String, JsonWrapper>
+        jsonWrappers: Map<String, JsonWrapper>,
 ) : SharedProjectManager() {
 
-    override var _records = jsonWrappers.entries
-            .associate {
-                val projectKey = ProjectKey.Shared(it.key)
-                projectKey to SharedProjectRecord(databaseWrapper, this, projectKey, it.value)
-            }
-            .toMutableMap()
+    init {
+        setInitialRecords(
+                jsonWrappers.entries.associate {
+                    val projectKey = ProjectKey.Shared(it.key)
+                    projectKey to SharedProjectRecord(databaseWrapper, this, projectKey, it.value)
+                }
+        )
+    }
 }

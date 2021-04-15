@@ -18,6 +18,13 @@ class CustomTimeCoordinatorTest {
     companion object {
 
         private val myUserKey = UserKey("myUserKey")
+
+        private val userKey1 = UserKey("1")
+        private val userKey2 = UserKey("2")
+        private val userKey3 = UserKey("3")
+        private val userKey4 = UserKey("4")
+        private val userKey5 = UserKey("5")
+        private val userKey6 = UserKey("6")
     }
 
     private val domainDisposable = CompositeDisposable()
@@ -35,7 +42,7 @@ class CustomTimeCoordinatorTest {
     }
 
     @Test
-    fun testEmptyEmitsAfterFriendsFactoryCreated() {
+    fun testEmptyEmitsImmediately() {
         val userKeyStore = UserKeyStore(
                 friendKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
                 domainDisposable,
@@ -44,6 +51,8 @@ class CustomTimeCoordinatorTest {
         val friendsProvider = FriendsLoaderTest.TestFriendsProvider()
 
         val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, friendsProvider)
+
+        friendKeysRelay.accept(setOf())
 
         // This is copied from FactoryLoader.  Probably should be in a class or something.
         val friendsFactorySingle = friendsLoader.initialFriendsEvent.map {
@@ -56,5 +65,8 @@ class CustomTimeCoordinatorTest {
         }
 
         val customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsLoader, friendsFactorySingle)
+
+        val testObserver = customTimeCoordinator.observeCustomTimes(setOf()).test()
+        testObserver.assertValueCount(1)
     }
 }

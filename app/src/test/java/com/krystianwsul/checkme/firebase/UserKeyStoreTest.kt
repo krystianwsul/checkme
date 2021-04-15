@@ -23,8 +23,6 @@ class UserKeyStoreTest {
         private val userKey2 = UserKey("2")
         private val userKey3 = UserKey("3")
         private val userKey4 = UserKey("4")
-        private val userKey5 = UserKey("5")
-        private val userKey6 = UserKey("6")
 
         @JvmStatic
         @BeforeClass

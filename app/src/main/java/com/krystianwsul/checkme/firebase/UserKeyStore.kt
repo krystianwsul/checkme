@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.treeadapter.tryGetCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
@@ -87,9 +88,17 @@ class UserKeyStore(
                 .apply { domainDisposable += connect() }
     }
 
-    fun addFriend(rootUserRecord: RootUserRecord) = addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
+    fun addFriend(rootUserRecord: RootUserRecord) {
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-    fun requestCustomTimeUsers(userKeys: Set<UserKey>) = customTimeRequests.accept(userKeys)
+        addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
+    }
+
+    fun requestCustomTimeUsers(userKeys: Set<UserKey>) {
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
+
+        customTimeRequests.accept(userKeys)
+    }
 
     sealed class LoadUserData {
 

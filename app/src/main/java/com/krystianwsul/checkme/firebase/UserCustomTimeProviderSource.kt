@@ -1,15 +1,14 @@
 package com.krystianwsul.checkme.firebase
 
+import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
-import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.Singles
 
 interface UserCustomTimeProviderSource {
 
@@ -17,45 +16,34 @@ interface UserCustomTimeProviderSource {
     fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider>
 
     class Impl(
-            private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
+            private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(
                 projectRecord: ProjectRecord<*>,
         ): Observable<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
+            val userKeys = customTimeKeys.map { it.userKey }.toSet()
 
-            return when (projectRecord) {
-                is PrivateProjectRecord -> {
-                    check(customTimeKeys.all { it.userKey == myUserKey })
+            return Singles.zip(
+                    myUserFactorySingle,
+                    friendsFactorySingle,
+            ).flatMapObservable { (myUserFactory, friendsFactory) ->
+                friendsFactory.observeCustomTimes(userKeys).map {
+                    object : JsonTime.UserCustomTimeProvider {
 
-                    myUserFactorySingle.toObservable().map { myUserFactory ->
-                        object : JsonTime.UserCustomTimeProvider {
-
-                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                check(userCustomTimeKey.userKey == myUserKey)
-
-                                return myUserFactory.user
+                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                            return if (userCustomTimeKey.userKey == myUserFactory.user.userKey) {
+                                myUserFactory.user
                                         .customTimes
                                         .getValue(userCustomTimeKey.customTimeId)
+                            } else {
+                                friendsFactory.getUserCustomTime(userCustomTimeKey)
                             }
                         }
                     }
                 }
-                is SharedProjectRecord -> {
-                    // todo source consider way to notify that a project is removed
-
-                    return Observable.just(
-                            object : JsonTime.UserCustomTimeProvider {
-
-                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                    TODO("todo source")
-                                }
-                            }
-                    )
-                }
-                else -> throw UnsupportedOperationException()
             }
         }
 

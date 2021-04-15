@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -24,7 +25,8 @@ class FriendsFactory(
         initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
         domainDisposable: CompositeDisposable,
         databaseWrapper: DatabaseWrapper,
-) {
+        private val myUserKey: UserKey,
+) : JsonTime.UserCustomTimeProvider {
 
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
     private val strangerProjectManager = StrangerProjectManager()
@@ -110,5 +112,16 @@ class FriendsFactory(
         check(userMap.containsKey(rootUserRecord.userKey))
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User = TODO("todo source")
+    // only emit remote changes
+    fun observeCustomTimes(userKeys: Set<UserKey>): Observable<Unit> {
+        val foreignUserKeys = userKeys - myUserKey
+
+        return Observable.just(Unit)
+
+        TODO("todo source")
+    }
+
+    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+        TODO("todo source")
+    }
 }

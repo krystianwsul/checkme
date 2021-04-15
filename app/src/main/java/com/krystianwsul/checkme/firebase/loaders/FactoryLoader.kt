@@ -71,8 +71,26 @@ class FactoryLoader(
                             .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
                             .cacheImmediate()
 
+                    val friendsLoader = FriendsLoader(
+                            userFactorySingle.flatMapObservable { it.friendKeysObservable },
+                            domainDisposable,
+                            factoryProvider.friendsProvider,
+                    )
+
+                    val friendsFactorySingle = friendsLoader.initialFriendsEvent
+                            .map {
+                                FriendsFactory(
+                                        friendsLoader,
+                                        it,
+                                        domainDisposable,
+                                        factoryProvider.database,
+                                        userInfo.key,
+                                )
+                            }
+                            .cacheImmediate()
+
                     val userCustomTimeProviderSource =
-                            UserCustomTimeProviderSource.Impl(userInfo.key, userFactorySingle)
+                            UserCustomTimeProviderSource.Impl(userFactorySingle, friendsFactorySingle)
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
@@ -114,16 +132,6 @@ class FactoryLoader(
                                 ::getDeviceDbInfo
                         )
                     }.cacheImmediate()
-
-                    val friendsLoader = FriendsLoader(
-                            userFactorySingle.flatMapObservable { it.friendKeysObservable },
-                            domainDisposable,
-                            factoryProvider.friendsProvider,
-                    )
-
-                    val friendsFactorySingle = friendsLoader.initialFriendsEvent
-                            .map { FriendsFactory(friendsLoader, it, domainDisposable, factoryProvider.database) }
-                            .cacheImmediate()
 
                     val domainFactorySingle = Single.zip(
                             userFactorySingle,

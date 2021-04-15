@@ -587,7 +587,7 @@ class DomainFactory(
     fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
         return when (customTimeKey) {
             is CustomTimeKey.Project<*> -> projectsFactory.getCustomTime(customTimeKey)
-            is CustomTimeKey.User -> friendsFactory.getCustomTime(customTimeKey)
+            is CustomTimeKey.User -> friendsFactory.getUserCustomTime(customTimeKey)
             else -> throw UnsupportedOperationException() // compilation
         }
     }

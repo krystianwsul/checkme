@@ -42,18 +42,18 @@ class FriendsLoader(
 
     private data class AddFriendData(val key: String, val userWrapper: UserWrapper)
 
-    private val addFriendDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, LoadUserData>>>()
+    private val loadUserDataRelay = ReplayRelay.create<ChangeWrapper<Map<UserKey, LoadUserData>>>()
 
     init {
         friendKeysObservable.map {
             it.newData<Map<UserKey, LoadUserData>>(it.data.associateWith { LoadUserData.Friend(null) })
         }
-                .subscribe(addFriendDataRelay)
+                .subscribe(loadUserDataRelay)
                 .addTo(domainDisposable)
     }
 
     private val databaseRx: Observable<MapChanges<ChangeWrapper<Map<UserKey, LoadUserData>>, UserKey, DatabaseRx<Snapshot<UserWrapper>>>> =
-            addFriendDataRelay.processChanges(
+            loadUserDataRelay.processChanges(
                     { it.data.keys },
                     { (_, userDatas), userKey ->
                         val addFriendData = (userDatas.getValue(userKey) as? LoadUserData.Friend)?.addFriendData
@@ -126,7 +126,7 @@ class FriendsLoader(
             .replayImmediate()
 
     fun addFriend(rootUserRecord: RootUserRecord) {
-        val addFriendDatas = addFriendDataRelay.value
+        val addFriendDatas = loadUserDataRelay.value // todo source account for new friend already in custom time users
                 .data
                 .toMutableMap()
 
@@ -134,7 +134,11 @@ class FriendsLoader(
 
         addFriendDatas[rootUserRecord.userKey] = rootUserRecord.run { LoadUserData.Friend(AddFriendData(key, userWrapper)) }
 
-        addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
+        loadUserDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
+    }
+
+    fun requestCustomTimeUsers(userKeys: Set<UserKey>) {
+        // todo source
     }
 
     class InitialFriendsEvent(val userWrapperDatas: List<UserWrapperData>)

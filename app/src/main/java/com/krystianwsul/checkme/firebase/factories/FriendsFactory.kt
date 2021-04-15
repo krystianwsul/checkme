@@ -39,7 +39,7 @@ class FriendsFactory(
 
     fun getFriends() = getFriendMap().values.map { it.value }
 
-    val changeTypes: Observable<ChangeType>
+    val changeTypes: Observable<ChangeType> // todo source don't emit remote changes for non-friend users
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
@@ -116,9 +116,13 @@ class FriendsFactory(
     fun observeCustomTimes(userKeys: Set<UserKey>): Observable<Unit> {
         val foreignUserKeys = userKeys - myUserKey
 
-        return Observable.just(Unit)
+        friendsLoader.requestCustomTimeUsers(foreignUserKeys)
 
-        TODO("todo source")
+        return Observable.just(Unit) // todo source test this
+                .concatWith(changeTypes.map { })
+                .filter {
+                    foreignUserKeys.all { it in userMap.keys }
+                }
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {

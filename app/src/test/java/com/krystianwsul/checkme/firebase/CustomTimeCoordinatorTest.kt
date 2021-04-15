@@ -6,11 +6,15 @@ import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoaderTest
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.plusAssign
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class CustomTimeCoordinatorTest {
@@ -25,34 +29,30 @@ class CustomTimeCoordinatorTest {
         private val userKey4 = UserKey("4")
         private val userKey5 = UserKey("5")
         private val userKey6 = UserKey("6")
+
+        @JvmStatic
+        @BeforeClass
+        fun beforeClass() {
+            DomainThreadChecker.instance = mockk(relaxed = true)
+        }
     }
 
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var friendKeysRelay: PublishRelay<Set<UserKey>>
 
+    private lateinit var userKeyStore: UserKeyStore
+    private lateinit var friendsProvider: FriendsLoaderTest.TestFriendsProvider
+    private lateinit var friendsLoader: FriendsLoader
+    private lateinit var customTimeCoordinator: CustomTimeCoordinator
+
     @Before
     fun before() {
         friendKeysRelay = PublishRelay.create()
-    }
 
-    @After
-    fun after() {
-        domainDisposable.clear()
-    }
-
-    @Test
-    fun testEmptyEmitsImmediately() {
-        val userKeyStore = UserKeyStore(
-                friendKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
-                domainDisposable,
-        )
-
-        val friendsProvider = FriendsLoaderTest.TestFriendsProvider()
-
-        val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, friendsProvider)
-
-        friendKeysRelay.accept(setOf())
+        userKeyStore = UserKeyStore(friendKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) }, domainDisposable)
+        friendsProvider = FriendsLoaderTest.TestFriendsProvider()
+        friendsLoader = FriendsLoader(userKeyStore, domainDisposable, friendsProvider)
 
         // This is copied from FactoryLoader.  Probably should be in a class or something.
         val friendsFactorySingle = friendsLoader.initialFriendsEvent.map {
@@ -63,10 +63,53 @@ class CustomTimeCoordinatorTest {
                     mockk(),
             )
         }
+                .cache()
+                .apply { domainDisposable += subscribe() }
 
-        val customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsLoader, friendsFactorySingle)
+        customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsLoader, friendsFactorySingle)
+    }
+
+    @After
+    fun after() {
+        domainDisposable.clear()
+    }
+
+    @Test
+    fun testEmptyEmitsImmediately() {
+        friendKeysRelay.accept(setOf())
 
         val testObserver = customTimeCoordinator.observeCustomTimes(setOf()).test()
+        testObserver.assertValueCount(1)
+    }
+
+    @Test
+    fun testEmptyPresentFriendEmitsImmediately() {
+        friendKeysRelay.accept(setOf(userKey1))
+        friendsProvider.database.acceptUser(userKey1, UserWrapper())
+
+        val testObserver = customTimeCoordinator.observeCustomTimes(setOf(userKey1)).test()
+        testObserver.assertValueCount(1)
+    }
+
+    @Test
+    fun testAbsentFriendEmitsAfterLoad() {
+        friendKeysRelay.accept(setOf(userKey1))
+
+        val testObserver = customTimeCoordinator.observeCustomTimes(setOf(userKey1)).test()
+        testObserver.assertEmpty()
+
+        friendsProvider.database.acceptUser(userKey1, UserWrapper())
+        testObserver.assertValueCount(1)
+    }
+
+    @Test
+    fun testMyUserEmitsAfterLoad() {
+        friendKeysRelay.accept(setOf(userKey1))
+
+        val testObserver = customTimeCoordinator.observeCustomTimes(setOf(myUserKey)).test()
+        testObserver.assertEmpty()
+
+        friendsProvider.database.acceptUser(userKey1, UserWrapper())
         testObserver.assertValueCount(1)
     }
 }

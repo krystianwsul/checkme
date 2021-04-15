@@ -34,13 +34,12 @@ interface UserCustomTimeProviderSource {
                     object : JsonTime.UserCustomTimeProvider {
 
                         override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                            return if (userCustomTimeKey.userKey == myUserFactory.user.userKey) {
+                            val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
                                 myUserFactory.user
-                                        .customTimes
-                                        .getValue(userCustomTimeKey.customTimeId)
-                            } else {
-                                friendsFactory.getUserCustomTime(userCustomTimeKey)
-                            }
+                            else
+                                friendsFactory
+
+                            return provider.getUserCustomTime(userCustomTimeKey)
                         }
                     }
                 }

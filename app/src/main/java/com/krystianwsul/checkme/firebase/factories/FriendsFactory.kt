@@ -122,6 +122,8 @@ class FriendsFactory(
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-        TODO("todo source")
+        return userMap.getValue(userCustomTimeKey.userKey)
+                .value
+                .getUserCustomTime(userCustomTimeKey)
     }
 }

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -13,9 +14,9 @@ class CustomTimeCoordinator(
 ) {
 
     // only emit remote changes
-    fun observeCustomTimes(userKeys: Set<UserKey>): Observable<FriendsFactory> {
+    fun observeCustomTimes(projectKey: ProjectKey<*>, userKeys: Set<UserKey>): Observable<FriendsFactory> {
         val foreignUserKeys = userKeys - myUserKey
-        friendsLoader.userKeyStore.requestCustomTimeUsers(foreignUserKeys)
+        friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey, foreignUserKeys)
 
         return friendsFactorySingle.flatMapObservable { friendsFactory ->
             Observable.just(Unit)

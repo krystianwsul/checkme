@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
+import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
@@ -89,6 +90,7 @@ class SharedProjectsLoaderTest {
                 compositeDisposable,
                 sharedProjectsProvider,
                 TestUserCustomTimeProviderSource(),
+                mockk(relaxed = true),
         )
 
         initialProjectsEmissionChecker =

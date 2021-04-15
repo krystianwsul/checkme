@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -23,6 +24,8 @@ class UserKeyStoreTest {
         private val userKey2 = UserKey("2")
         private val userKey3 = UserKey("3")
         private val userKey4 = UserKey("4")
+
+        private val projectKey1 = ProjectKey.Shared("1")
 
         @JvmStatic
         @BeforeClass
@@ -111,7 +114,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
     }
@@ -127,7 +130,7 @@ class UserKeyStoreTest {
 
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
     }
 
@@ -138,7 +141,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
@@ -154,7 +157,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
@@ -173,7 +176,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(setOf(userKey2))
+        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 

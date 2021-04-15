@@ -171,6 +171,7 @@ class DomainFactoryRule : TestRule {
                     every { getSharedProjectObservable(any()) } returns Observable.never()
                 },
                 TestUserCustomTimeProviderSource(),
+                mockk(relaxed = true),
         )
 
         val projectsFactory = ProjectsFactory(

@@ -95,14 +95,14 @@ class UserKeyStore(
         addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
     }
 
-    fun requestCustomTimeUsers(userKeys: Set<UserKey>) {
+    fun requestCustomTimeUsers(projectKey: ProjectKey<*>, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         customTimeRequests.accept(userKeys)
     }
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
-        TODO("todo source")
+        // todo source
     }
 
     sealed class LoadUserData {

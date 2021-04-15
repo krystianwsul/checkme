@@ -114,6 +114,7 @@ class FactoryLoader(
                             domainDisposable,
                             factoryProvider.sharedProjectsProvider,
                             userCustomTimeProviderSource,
+                            userKeyStore,
                     )
 
                     val projectsFactorySingle = Single.zip(

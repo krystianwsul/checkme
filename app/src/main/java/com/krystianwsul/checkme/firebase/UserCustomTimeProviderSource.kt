@@ -17,7 +17,6 @@ interface UserCustomTimeProviderSource {
     class Impl(
             private val myUserFactorySingle: Single<MyUserFactory>,
             private val customTimeCoordinator: CustomTimeCoordinator,
-            private val userKeyStore: UserKeyStore,
     ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(
@@ -28,7 +27,7 @@ interface UserCustomTimeProviderSource {
 
             return Observables.combineLatest(
                     myUserFactorySingle.toObservable(),
-                    customTimeCoordinator.observeCustomTimes(userKeys),
+                    customTimeCoordinator.observeCustomTimes(projectRecord.projectKey, userKeys),
             ).map { (myUserFactory, friendsFactory) ->
                 object : JsonTime.UserCustomTimeProvider {
 

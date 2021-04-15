@@ -104,6 +104,7 @@ class ProjectsFactoryTest {
                 compositeDisposable,
                 factoryProvider.sharedProjectsProvider,
                 TestUserCustomTimeProviderSource(),
+                mockk(relaxed = true),
         )
 
         initialProjectsEvent = null

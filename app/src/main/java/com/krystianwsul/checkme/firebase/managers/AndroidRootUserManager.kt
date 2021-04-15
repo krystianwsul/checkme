@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
+import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -8,7 +9,7 @@ import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
 class AndroidRootUserManager(
-        children: Iterable<Snapshot<UserWrapper>>,
+        children: List<FriendsLoader.UserWrapperData>,
         private val databaseWrapper: DatabaseWrapper,
 ) : RootUserManager() {
 
@@ -19,7 +20,7 @@ class AndroidRootUserManager(
 
     private fun Snapshot<UserWrapper>.toRecord() = RootUserRecord(databaseWrapper, false, value!!, toKey())
 
-    override var _records = children.associate { it.toKey() to it.toRecord() }.toMutableMap()
+    override var _records = children.associate { it.snapshot.toKey() to it.snapshot.toRecord() }.toMutableMap()
 
     fun set(snapshot: Snapshot<UserWrapper>) = set(
             snapshot.toKey(),

@@ -31,7 +31,7 @@ class FriendsFactory(
         private fun Map<UserKey, RootUserRecord>.toRootUsers() = mapValues { RootUser(it.value) }.toMutableMap()
     }
 
-    private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.snapshots, databaseWrapper)
+    private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
     private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = rootUserManager.records.toRootUsers()
@@ -42,7 +42,7 @@ class FriendsFactory(
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
-                .mapNotNull { rootUserManager.set(it.snapshot) }
+                .mapNotNull { rootUserManager.set(it.userWrapperData.snapshot) }
                 .map { (changeType, rootUserRecord) ->
                     _friends[rootUserRecord.userKey] = RootUser(rootUserRecord)
 

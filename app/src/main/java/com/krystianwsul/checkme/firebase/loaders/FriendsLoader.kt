@@ -77,9 +77,14 @@ class FriendsLoader(
     val initialFriendsEvent: Single<InitialFriendsEvent> = databaseRx.firstOrError()
             .doOnSuccess { check(it.original.changeType == ChangeType.REMOTE) }
             .flatMap {
+                val loadUserDataMap = it.original.data
+
                 it.newMap
-                        .values
-                        .map { it.first }
+                        .map { (userKey, databaseRx) ->
+                            val reason = loadUserDataMap.getValue(userKey).userLoadReason
+
+                            databaseRx.first.map { UserWrapperData(reason, it) }
+                        }
                         .zipSingle()
             }
             .map(::InitialFriendsEvent)
@@ -87,17 +92,29 @@ class FriendsLoader(
 
     private val addFriendEvents: Observable<AddChangeFriendEvent> = databaseRx.skip(1)
             .switchMap {
+                val loadUserDataMap = it.original.data
+
                 it.addedEntries
-                        .values
-                        .map { it.first.toObservable() }
+                        .map { (userKey, databaseRx) ->
+                            val reason = loadUserDataMap.getValue(userKey).userLoadReason
+
+                            databaseRx.first
+                                    .toObservable()
+                                    .map { UserWrapperData(reason, it) }
+                        }
                         .merge()
             }
             .map(::AddChangeFriendEvent)
 
     private val changeFriendEvents: Observable<AddChangeFriendEvent> = databaseRx.switchMap {
+        val loadUserDataMap = it.original.data
+
         it.newMap
-                .values
-                .map { it.changes }
+                .map { (userKey, databaseRx) ->
+                    val reason = loadUserDataMap.getValue(userKey).userLoadReason
+
+                    databaseRx.changes.map { UserWrapperData(reason, it) }
+                }
                 .merge()
     }.map(::AddChangeFriendEvent)
 
@@ -120,11 +137,11 @@ class FriendsLoader(
         addFriendDataRelay.accept(ChangeWrapper(ChangeType.LOCAL, addFriendDatas))
     }
 
-    class InitialFriendsEvent(val snapshots: List<Snapshot<UserWrapper>>)
+    class InitialFriendsEvent(val userWrapperDatas: List<UserWrapperData>)
 
-    class AddChangeFriendEvent(val snapshot: Snapshot<UserWrapper>)
+    class AddChangeFriendEvent(val userWrapperData: UserWrapperData)
 
     class RemoveFriendsEvent(val userChangeType: ChangeType, val userKeys: Set<UserKey>)
 
-    data class UserWrapperData(val reason: UserLoadReason, val userWrapper: UserWrapper)
+    data class UserWrapperData(val reason: UserLoadReason, val snapshot: Snapshot<UserWrapper>)
 }

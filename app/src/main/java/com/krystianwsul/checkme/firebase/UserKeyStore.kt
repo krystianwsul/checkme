@@ -82,6 +82,7 @@ class UserKeyStore(
                 }
                 .skip(1)
                 .map { it.output }
+                .distinctUntilChanged()
                 .replay()
                 .apply { domainDisposable += connect() }
     }

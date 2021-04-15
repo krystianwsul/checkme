@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -50,6 +51,7 @@ class FriendsLoaderTest {
     private lateinit var rxErrorChecker: RxErrorChecker
 
     private lateinit var friendsKeysRelay: PublishRelay<Set<UserKey>>
+    private lateinit var userKeyStore: UserKeyStore
     private lateinit var friendsProvider: TestFriendsProvider
 
     private lateinit var friendsLoader: FriendsLoader
@@ -68,11 +70,12 @@ class FriendsLoaderTest {
         friendsKeysRelay = PublishRelay.create()
         friendsProvider = TestFriendsProvider()
 
-        friendsLoader = FriendsLoader(
+        userKeyStore = UserKeyStore(
                 friendsKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
                 compositeDisposable,
-                friendsProvider
         )
+
+        friendsLoader = FriendsLoader(userKeyStore, compositeDisposable, friendsProvider)
 
         initialFriendsEmissionChecker = EmissionChecker("initialFriends", compositeDisposable, friendsLoader.initialFriendsEvent)
         addChangeFriendEmissionChecker = EmissionChecker("addChangeFriend", compositeDisposable, friendsLoader.addChangeFriendEvents)

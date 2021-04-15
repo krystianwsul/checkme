@@ -107,7 +107,7 @@ class FriendsFactory(
         check(!userMap.containsKey(userKey))
 
         val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
-        friendsLoader.addFriend(rootUserRecord)
+        friendsLoader.userKeyStore.addFriend(rootUserRecord)
 
         check(userMap.containsKey(rootUserRecord.userKey))
     }
@@ -116,7 +116,7 @@ class FriendsFactory(
     fun observeCustomTimes(userKeys: Set<UserKey>): Observable<Unit> {
         val foreignUserKeys = userKeys - myUserKey
 
-        friendsLoader.requestCustomTimeUsers(foreignUserKeys)
+        friendsLoader.userKeyStore.requestCustomTimeUsers(foreignUserKeys)
 
         return Observable.just(Unit) // todo source test this
                 .concatWith(changeTypes.map { })

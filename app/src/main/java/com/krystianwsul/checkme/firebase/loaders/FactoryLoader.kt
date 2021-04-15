@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -71,11 +72,12 @@ class FactoryLoader(
                             .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
                             .cacheImmediate()
 
-                    val friendsLoader = FriendsLoader(
+                    val userKeyStore = UserKeyStore(
                             userFactorySingle.flatMapObservable { it.friendKeysObservable },
                             domainDisposable,
-                            factoryProvider.friendsProvider,
                     )
+
+                    val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, factoryProvider.friendsProvider)
 
                     val friendsFactorySingle = friendsLoader.initialFriendsEvent
                             .map {

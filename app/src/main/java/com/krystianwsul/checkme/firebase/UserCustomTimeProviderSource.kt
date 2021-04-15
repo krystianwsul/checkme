@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Observables
@@ -15,13 +14,10 @@ interface UserCustomTimeProviderSource {
     // emit only remote changes
     fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider>
 
-    fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
-        TODO("todo source")
-    }
-
     class Impl(
             private val myUserFactorySingle: Single<MyUserFactory>,
             private val customTimeCoordinator: CustomTimeCoordinator,
+            private val userKeyStore: UserKeyStore,
     ) : UserCustomTimeProviderSource {
 
         override fun observeUserCustomTimeProvider(

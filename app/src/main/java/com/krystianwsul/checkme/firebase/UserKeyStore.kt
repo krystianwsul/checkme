@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.tryGetCurrentValue
 import io.reactivex.rxjava3.core.Observable
@@ -98,6 +99,10 @@ class UserKeyStore(
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         customTimeRequests.accept(userKeys)
+    }
+
+    fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
+        TODO("todo source")
     }
 
     sealed class LoadUserData {

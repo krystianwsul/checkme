@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
@@ -37,6 +38,7 @@ interface SharedProjectsLoader {
             private val domainDisposable: CompositeDisposable,
             private val sharedProjectsProvider: SharedProjectsProvider,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+            private val userKeyStore: UserKeyStore,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -163,7 +165,7 @@ interface SharedProjectsLoader {
                 .doOnNext {
                     check(it.changeType == ChangeType.REMOTE)
 
-                    userCustomTimeProviderSource.onProjectsRemoved(it.data.projectKeys)
+                    userKeyStore.onProjectsRemoved(it.data.projectKeys)
                 }
                 .replayImmediate()
 

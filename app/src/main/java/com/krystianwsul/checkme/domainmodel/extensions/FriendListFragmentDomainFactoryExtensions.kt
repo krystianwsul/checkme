@@ -17,7 +17,7 @@ fun DomainFactory.getFriendListData(): FriendListViewModel.Data {
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val friends = friendsFactory.friends
+    val friends = friendsFactory.getFriends()
 
     val userListDatas = friends.map {
         FriendListViewModel.UserListData(

@@ -7,10 +7,10 @@ import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -26,17 +26,16 @@ class FriendsFactory(
         databaseWrapper: DatabaseWrapper,
 ) {
 
-    companion object {
-
-        private fun Map<UserKey, RootUserRecord>.toRootUsers() = mapValues { RootUser(it.value) }.toMutableMap()
-    }
-
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
     private val strangerProjectManager = StrangerProjectManager()
 
-    private var _friends = rootUserManager.records.mapValues { it.value.value }.toRootUsers()
+    private val userMap = rootUserManager.records
+            .mapValues { it.value.newValue(RootUser(it.value.value)) }
+            .toMutableMap()
 
-    val friends: Collection<RootUser> get() = _friends.values
+    private fun getFriendMap() = userMap.filter { it.value.userLoadReason == UserLoadReason.FRIEND }
+
+    fun getFriends() = getFriendMap().values.map { it.value }
 
     val changeTypes: Observable<ChangeType>
 
@@ -44,7 +43,7 @@ class FriendsFactory(
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
                 .mapNotNull { rootUserManager.set(it.userWrapperData) }
                 .map { (changeType, reasonWrapper) ->
-                    _friends[reasonWrapper.value.userKey] = RootUser(reasonWrapper.value)
+                    userMap[reasonWrapper.value.userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
 
                     changeType
                 }
@@ -52,7 +51,7 @@ class FriendsFactory(
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
             it.userKeys.forEach {
                 rootUserManager.remove(it)
-                _friends.remove(it)
+                userMap.remove(it)
             }
 
             it.userChangeType
@@ -69,17 +68,20 @@ class FriendsFactory(
     }
 
     fun getUserJsons(friendIds: Set<UserKey>): Map<UserKey, UserJson> {
-        check(friendIds.all { _friends.containsKey(it) })
+        val friendMap = getFriendMap()
 
-        return _friends.entries
+        check(friendIds.all { friendMap.containsKey(it) })
+
+        return friendMap.entries
                 .filter { friendIds.contains(it.key) }
-                .associateBy({ it.key }, { it.value.userJson })
+                .associateBy({ it.key }, { it.value.value.userJson })
     }
 
     fun getFriend(friendId: UserKey): RootUser {
-        check(_friends.containsKey(friendId))
+        val friendMap = getFriendMap()
+        check(friendMap.containsKey(friendId))
 
-        return _friends[friendId]!!
+        return friendMap.getValue(friendId).value
     }
 
     fun updateProjects(
@@ -87,26 +89,26 @@ class FriendsFactory(
             addedUsers: Set<UserKey>,
             removedUsers: Set<UserKey>,
     ) {
-        val addedFriends = addedUsers.mapNotNull(_friends::get)
-        val addedStrangers = addedUsers - addedFriends.map { it.userKey }
+        val addedFriends = addedUsers.mapNotNull(userMap::get)
+        val addedStrangers = addedUsers - addedFriends.map { it.value.userKey }
 
-        val removedFriends = removedUsers.mapNotNull(_friends::get)
-        val removedStrangers = removedUsers - removedFriends.map { it.userKey }
+        val removedFriends = removedUsers.mapNotNull(userMap::get)
+        val removedStrangers = removedUsers - removedFriends.map { it.value.userKey }
 
-        addedFriends.forEach { it.addProject(projectId) }
-        removedFriends.forEach { it.removeProject(projectId) }
+        addedFriends.forEach { it.value.addProject(projectId) }
+        removedFriends.forEach { it.value.removeProject(projectId) }
 
         strangerProjectManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
     }
 
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper) {
-        check(!_friends.containsKey(userKey))
+        check(!userMap.containsKey(userKey))
 
         val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
         friendsLoader.addFriend(rootUserRecord)
 
-        check(_friends.containsKey(rootUserRecord.userKey))
+        check(userMap.containsKey(rootUserRecord.userKey))
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User = TODO("todo customtime fetch")
+    fun getCustomTime(customTimeKey: CustomTimeKey.User): Time.Custom.User = TODO("todo source")
 }

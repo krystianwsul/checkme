@@ -20,7 +20,7 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val friendDatas = friendsFactory.friends
+    val friendDatas = friendsFactory.getFriends()
             .map { ShowProjectViewModel.UserListData(it.name, it.email, it.userKey, it.photoUrl) }
             .associateBy { it.id }
 

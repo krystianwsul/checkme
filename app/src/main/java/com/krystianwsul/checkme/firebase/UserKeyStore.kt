@@ -20,7 +20,7 @@ class UserKeyStore(
 ) {
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
-    private val customTimeEvents = PublishRelay.create<CustomTimeEvent.ProjectAdded>()
+    private val customTimeEvents = PublishRelay.create<CustomTimeEvent>()
 
     val loadUserDataObservable: Observable<ChangeWrapper<Map<UserKey, LoadUserData>>>
 
@@ -55,15 +55,24 @@ class UserKeyStore(
 
         val customTimeOutputEvents =
                 customTimeEvents.scan(CustomTimeAggregate()) { aggregate, customTimeEvent ->
-                    val newProjectMap = aggregate.projectMap
-                            .toMutableMap()
-                            .also { it[customTimeEvent.projectKey] = customTimeEvent.userKeys }
+                    when (customTimeEvent) {
+                        is CustomTimeEvent.ProjectAdded -> {
+                            val newProjectMap = aggregate.projectMap
+                                    .toMutableMap()
+                                    .also { it[customTimeEvent.projectKey] = customTimeEvent.userKeys }
 
-                    val newOutput = newProjectMap.values
-                            .flatten()
-                            .toSet()
+                            CustomTimeAggregate(newProjectMap)
+                        }
+                        is CustomTimeEvent.ProjectsRemoved -> {
+                            val newProjectMap = aggregate.projectMap
+                                    .toMutableMap()
+                                    .also { map ->
+                                        customTimeEvent.projectKeys.forEach { map.remove(it) }
+                                    }
 
-                    CustomTimeAggregate(newProjectMap, newOutput)
+                            CustomTimeAggregate(newProjectMap)
+                        }
+                    }
                 }
                         .skip(1)
                         .map { FriendOrCustomTimeEvent.CustomTimes(it.output) }
@@ -112,7 +121,9 @@ class UserKeyStore(
     }
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
-        // todo source
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
+
+        customTimeEvents.accept(CustomTimeEvent.ProjectsRemoved(projectKeys))
     }
 
     sealed class LoadUserData {
@@ -145,12 +156,16 @@ class UserKeyStore(
     private sealed class CustomTimeEvent {
 
         data class ProjectAdded(val projectKey: ProjectKey.Shared, val userKeys: Set<UserKey>) : CustomTimeEvent()
+
+        data class ProjectsRemoved(val projectKeys: Set<ProjectKey.Shared>) : CustomTimeEvent()
     }
 
-    private data class CustomTimeAggregate(
-            val projectMap: Map<ProjectKey.Shared, Set<UserKey>> = mapOf(),
-            val output: Set<UserKey> = setOf(),
-    )
+    private data class CustomTimeAggregate(val projectMap: Map<ProjectKey.Shared, Set<UserKey>> = mapOf()) {
+
+        val output = projectMap.values
+                .flatten()
+                .toSet()
+    }
 
     private sealed class FriendOrCustomTimeEvent {
 

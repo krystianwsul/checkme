@@ -24,8 +24,10 @@ class UserKeyStoreTest {
         private val userKey2 = UserKey("2")
         private val userKey3 = UserKey("3")
         private val userKey4 = UserKey("4")
+        private val userKey5 = UserKey("5")
 
         private val projectKey1 = ProjectKey.Shared("1")
+        private val projectKey2 = ProjectKey.Shared("2")
 
         @JvmStatic
         @BeforeClass
@@ -186,6 +188,29 @@ class UserKeyStoreTest {
 
         myUserChangeWrapperRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(userKey1)))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
+        testObserver.assertValueAt(3, ChangeWrapper(ChangeType.REMOTE, currentMap))
+    }
+
+    @Test
+    fun testRequestCustomTimesCorrectlyDecrementAfterProjectRemoved() {
+        val project1Keys = setOf(userKey1, userKey2, userKey3)
+        val project2Keys = setOf(userKey3, userKey4, userKey5)
+
+        // start with some dummy data from myUser
+        myUserChangeWrapperRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        var currentMap = mapOf<UserKey, UserKeyStore.LoadUserData>()
+        testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
+
+        userKeyStore.requestCustomTimeUsers(projectKey1, project1Keys)
+        currentMap = project1Keys.associateWith { UserKeyStore.LoadUserData.CustomTimes }
+        testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
+
+        userKeyStore.requestCustomTimeUsers(projectKey2, project2Keys)
+        currentMap = (project1Keys + project2Keys).associateWith { UserKeyStore.LoadUserData.CustomTimes }
+        testObserver.assertValueAt(2, ChangeWrapper(ChangeType.REMOTE, currentMap))
+
+        userKeyStore.onProjectsRemoved(setOf(projectKey2))
+        currentMap = project1Keys.associateWith { UserKeyStore.LoadUserData.CustomTimes }
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.REMOTE, currentMap))
     }
 }

@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.ReasonWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
@@ -110,7 +111,16 @@ class FriendsFactory(
         val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
         friendsLoader.userKeyStore.addFriend(rootUserRecord)
 
-        check(userMap.containsKey(rootUserRecord.userKey)) // todo friend this fails
+        val existingReasonWrapper = userMap[userKey]
+        if (existingReasonWrapper != null) {
+            check(existingReasonWrapper.userLoadReason == UserLoadReason.CUSTOM_TIMES)
+
+            userMap[userKey] = existingReasonWrapper.copy(userLoadReason = UserLoadReason.FRIEND)
+        } else {
+            userMap[userKey] = ReasonWrapper(UserLoadReason.FRIEND, RootUser(rootUserRecord))
+        }
+
+        check(userMap.containsKey(rootUserRecord.userKey))
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {

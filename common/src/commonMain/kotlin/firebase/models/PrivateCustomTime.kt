@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.records.PrivateCustomTimeRecord
 import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
@@ -7,13 +8,12 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.Endable
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateCustomTime(
         override val project: PrivateProject,
         override val customTimeRecord: PrivateCustomTimeRecord,
-) : Time.Custom.Project<ProjectType.Private>(), Endable {
+) : Time.Custom.Project<ProjectType.Private>(), MyCustomTime {
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId

@@ -12,11 +12,12 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
         RootUserProperties by remoteRootUserRecord,
         JsonTime.UserCustomTimeProvider {
 
-    protected val _customTimes = remoteRootUserRecord.customTimeRecords
-            .mapValues { Time.Custom.User(this, it.value) }
-            .toMutableMap()
+    protected open val _customTimes: MutableMap<CustomTimeId.User, out Time.Custom.User> =
+            remoteRootUserRecord.customTimeRecords
+                    .mapValues { Time.Custom.User(this, it.value) }
+                    .toMutableMap()
 
-    val customTimes: Map<CustomTimeId.User, Time.Custom.User> get() = _customTimes
+    open val customTimes: Map<CustomTimeId.User, Time.Custom.User> get() = _customTimes
 
     fun deleteCustomTime(customTime: Time.Custom.User) {
         check(_customTimes.containsKey(customTime.id))

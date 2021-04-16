@@ -13,7 +13,6 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
@@ -64,22 +63,14 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                                 it
                             }
                         }
-                        .switchMap { (projectChangeType, projectRecord) ->
+                        .switchMapSingle { (projectChangeType, projectRecord) ->
                             /**
                              * I'm assuming here that 1. a new project doesn't have any custom times, and 2. all other
                              * project events are remote.
                              */
-                            val observable =
-                                    userCustomTimeProviderSource.observeUserCustomTimeProvider(projectRecord).share()
-
-                            listOf(
-                                    observable.take(1).map {
-                                        ProjectRecordData(projectChangeType, projectRecord, it)
-                                    },
-                                    observable.skip(1).map {
-                                        ProjectRecordData(ChangeType.REMOTE, projectRecord, it)
-                                    },
-                            ).merge()
+                            userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord).map {
+                                ProjectRecordData(projectChangeType, projectRecord, it)
+                            }
                         }
                 .replayImmediate()
 
@@ -88,7 +79,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .map {
                     ChangeWrapper(
                             it.changeType,
-                            InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider)
+                            InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider),
                     )
                 }
                 .cacheImmediate(domainDisposable)

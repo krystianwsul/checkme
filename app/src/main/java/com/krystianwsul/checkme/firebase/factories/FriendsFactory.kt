@@ -40,14 +40,7 @@ class FriendsFactory(
 
     fun getFriends() = getFriendMap().values.map { it.value }
 
-    val changeTypes: Observable<ChangeType> // todo source don't emit remote changes for non-friend users
-
-    /** todo source
-     *  We need to emit change types for everything (somehow) to trigger CustomTimeCoordinator.  But we shouldn't emit
-     *  those change types for DomainFactory.  Split and filter somehow.
-     *
-     *  This will also apply to removeFriendsChangeTypes later.
-     */
+    val changeTypes: Observable<ChangeType>
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents

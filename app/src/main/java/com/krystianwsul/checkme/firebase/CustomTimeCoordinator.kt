@@ -13,16 +13,16 @@ class CustomTimeCoordinator(
         private val friendsFactorySingle: Single<FriendsFactory>,
 ) {
 
-    // only emit remote changes
-    fun observeCustomTimes(projectKey: ProjectKey.Shared, foreignUserKeys: Set<UserKey>): Observable<FriendsFactory> {
+    fun getCustomTimes(projectKey: ProjectKey.Shared, foreignUserKeys: Set<UserKey>): Single<FriendsFactory> {
         check(myUserKey !in foreignUserKeys)
 
         if (foreignUserKeys.isNotEmpty()) friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey, foreignUserKeys)
 
-        return friendsFactorySingle.flatMapObservable { friendsFactory ->
+        return friendsFactorySingle.flatMap { friendsFactory ->
             Observable.just(Unit)
                     .concatWith(friendsFactory.changeTypes.map { })
                     .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
+                    .firstOrError()
                     .map { friendsFactory }
         }
     }

@@ -8,14 +8,13 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.kotlin.Singles
 
 interface UserCustomTimeProviderSource {
 
     // emit only remote changes
-    fun observeUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Observable<JsonTime.UserCustomTimeProvider>
+    fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider>
 
     class Impl(
             private val myUserKey: UserKey,
@@ -23,9 +22,9 @@ interface UserCustomTimeProviderSource {
             private val customTimeCoordinator: CustomTimeCoordinator,
     ) : UserCustomTimeProviderSource {
 
-        override fun observeUserCustomTimeProvider(
+        override fun getUserCustomTimeProvider(
                 projectRecord: ProjectRecord<*>,
-        ): Observable<JsonTime.UserCustomTimeProvider> {
+        ): Single<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val userKeys = customTimeKeys.map { it.userKey }.toSet()
             val foreignUserKeys = userKeys - myUserKey
@@ -34,7 +33,7 @@ interface UserCustomTimeProviderSource {
                 is PrivateProjectRecord -> {
                     check(foreignUserKeys.isEmpty())
 
-                    myUserFactorySingle.toObservable().map { myUserFactory ->
+                    myUserFactorySingle.map { myUserFactory ->
                         object : JsonTime.UserCustomTimeProvider {
 
                             override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
@@ -46,9 +45,9 @@ interface UserCustomTimeProviderSource {
                     }
                 }
                 is SharedProjectRecord -> {
-                    Observables.combineLatest(
-                            myUserFactorySingle.toObservable(),
-                            customTimeCoordinator.observeCustomTimes(projectRecord.projectKey, foreignUserKeys),
+                    Singles.zip(
+                            myUserFactorySingle,
+                            customTimeCoordinator.getCustomTimes(projectRecord.projectKey, foreignUserKeys),
                     ).map { (myUserFactory, friendsFactory) ->
                         object : JsonTime.UserCustomTimeProvider {
 

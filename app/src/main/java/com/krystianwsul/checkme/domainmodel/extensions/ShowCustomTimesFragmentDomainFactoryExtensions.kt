@@ -9,9 +9,10 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.PrivateCustomTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Completable
 
 fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
@@ -44,17 +45,19 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 @CheckResult
 fun DomainUpdater.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
-        customTimeIds: List<CustomTimeKey.Project<ProjectType.Private>>, // todo customtime edit
+        customTimeKeys: List<CustomTimeKey>,
         current: Boolean,
 ): Completable = CompletableDomainUpdate.create("setCustomTimesCurrent") { now ->
-    check(customTimeIds.isNotEmpty())
+    check(customTimeKeys.isNotEmpty())
 
     val endExactTimeStamp = now.takeUnless { current }
 
-    for (customTimeId in customTimeIds) {
-        val remotePrivateCustomTime = projectsFactory.privateProject.getProjectCustomTime(customTimeId)
-
-        remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
+    customTimeKeys.map(::getCustomTime).forEach {
+        when (it) {
+            is PrivateCustomTime -> it.endExactTimeStamp = endExactTimeStamp
+            is Time.Custom.User -> it.endExactTimeStamp = endExactTimeStamp
+            else -> throw IllegalArgumentException()
+        }
     }
 
     DomainUpdater.Params(false, notificationType)

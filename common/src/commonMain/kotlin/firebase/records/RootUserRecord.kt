@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.RootUserProperties
-import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
@@ -108,7 +108,7 @@ open class RootUserRecord(
 
     fun newCustomTimeId() = CustomTimeId.User(databaseWrapper.newRootUserCustomTimeId(userKey))
 
-    fun newCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): UserCustomTimeRecord {
+    fun newCustomTimeRecord(customTimeJson: UserCustomTimeJson): UserCustomTimeRecord {
         val remoteCustomTimeRecord = UserCustomTimeRecord(this, customTimeJson)
         check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
 

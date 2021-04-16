@@ -41,13 +41,13 @@ class PrivateCustomTime(
             customTimeRecord.endTime = value?.long
         }
 
-    fun setHourMinute(
+    override fun setHourMinute(
             allRecordsSource: AllRecordsSource,
             dayOfWeek: DayOfWeek,
             hourMinute: HourMinute,
     ) = getAllRecords(allRecordsSource).forEach { it.setHourMinute(dayOfWeek, hourMinute) }
 
-    fun setName(allRecordsSource: AllRecordsSource, name: String) =
+    override fun setName(allRecordsSource: AllRecordsSource, name: String) =
             getAllRecords(allRecordsSource).forEach { it.name = name }
 
     interface AllRecordsSource {

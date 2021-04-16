@@ -61,7 +61,7 @@ fun DomainUpdater.createCustomTime(
 ): Single<CustomTimeKey> = SingleDomainUpdate.create("createCustomTime") {
     check(name.isNotEmpty())
 
-    check(DayOfWeek.values() == hourMinutes.keys)
+    check(DayOfWeek.set == hourMinutes.keys)
 
     val customTime = if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
         myUserFactory.user.newCustomTime(UserCustomTimeJson(

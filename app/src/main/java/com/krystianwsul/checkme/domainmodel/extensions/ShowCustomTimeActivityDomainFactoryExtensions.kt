@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
@@ -18,14 +19,14 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Project.Private): ShowCustomTimeViewModel.Data {
+fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey): ShowCustomTimeViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val customTime = projectsFactory.privateProject.getProjectCustomTime(customTimeKey)
+    val customTime = getCustomTime(customTimeKey)
 
-    val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
+    val hourMinutes = DayOfWeek.values().associateWith { customTime.getHourMinute(it) }
 
     return ShowCustomTimeViewModel.Data(customTimeKey, customTime.name, hourMinutes)
 }
@@ -33,21 +34,20 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey.Project.Pri
 @CheckResult
 fun DomainUpdater.updateCustomTime(
         notificationType: DomainListenerManager.NotificationType,
-        customTimeId: CustomTimeKey.Project.Private,
+        customTimeId: CustomTimeKey,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") {
     check(name.isNotEmpty())
 
-    val customTime = projectsFactory.privateProject.getProjectCustomTime(customTimeId)
+    val customTime = getCustomTime(customTimeId) as MyCustomTime
 
     customTime.setName(this, name)
 
     for (dayOfWeek in DayOfWeek.values()) {
         val hourMinute = hourMinutes.getValue(dayOfWeek)
 
-        if (hourMinute != customTime.getHourMinute(dayOfWeek))
-            customTime.setHourMinute(this, dayOfWeek, hourMinute)
+        customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
     DomainUpdater.Params(false, notificationType)

@@ -13,16 +13,16 @@ class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getShowCustomTimeData(customTimeKey)
     }
 
-    private lateinit var customTimeKey: CustomTimeKey.Project.Private
+    private lateinit var customTimeKey: CustomTimeKey
 
-    fun start(customTimeKey: CustomTimeKey.Project.Private) {
+    fun start(customTimeKey: CustomTimeKey) {
         this.customTimeKey = customTimeKey
 
         internalStart()
     }
 
     data class Data(
-            val key: CustomTimeKey.Project.Private,
+            val key: CustomTimeKey,
             val name: String,
             val hourMinutes: Map<DayOfWeek, HourMinute>,
     ) : DomainData() {

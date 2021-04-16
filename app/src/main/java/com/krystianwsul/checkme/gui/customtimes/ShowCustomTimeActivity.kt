@@ -55,10 +55,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
         private val defaultHourMinute = HourMinute(9, 0)
 
         fun getEditIntent(
-                customTimeKey: CustomTimeKey.Project.Private,
+                customTimeKey: CustomTimeKey,
                 context: Context,
         ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
-            @Suppress("CAST_NEVER_SUCCEEDS")
             putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable)
         }
 
@@ -67,7 +66,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         }
     }
 
-    private var customTimeKey: CustomTimeKey.Project.Private? = null
+    private var customTimeKey: CustomTimeKey? = null
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
@@ -137,7 +136,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                                 DomainListenerManager.NotificationType.All,
                                 data!!.key,
                                 name,
-                                hourMinutes
+                                hourMinutes,
                         )
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe { finish() }

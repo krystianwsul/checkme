@@ -107,17 +107,17 @@ abstract class Project<T : ProjectType>(
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val oldCustomTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)
+        val newCustomTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
+            is Time.Custom.Project<*> -> {
+                val ownerKey = when (customTime) {
+                    is PrivateCustomTime -> userInfo.key
+                    is SharedCustomTime -> customTime.ownerKey!!
+                    else -> throw IllegalStateException()
+                }
 
-        val ownerKey = when (oldCustomTime) {
-            is PrivateCustomTime -> userInfo.key
-            is SharedCustomTime -> oldCustomTime.ownerKey!!
-            else -> throw IllegalStateException()
-        }
-
-        val newCustomTime = when (oldCustomTime) {
-            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, oldCustomTime, allowCopy)
-            is Time.Custom.User -> oldCustomTime
+                getOrCreateCustomTime(ownerKey, customTime, allowCopy)
+            }
+            is Time.Custom.User -> customTime
         }
 
         return ScheduleKey(oldScheduleDate, TimePair(newCustomTime.key))

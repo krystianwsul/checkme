@@ -27,7 +27,7 @@ sealed class CustomTimeKey : Parcelable, Serializable {
 
         companion object {
 
-            private val userRegex = Regex("^[^,]+,[^,]+$")
+            private val userRegex = Regex("^([^,]+),([^,]+)$")
 
             fun tryFromJson(json: String): User? {
                 val matchResult = userRegex.find(json) ?: return null

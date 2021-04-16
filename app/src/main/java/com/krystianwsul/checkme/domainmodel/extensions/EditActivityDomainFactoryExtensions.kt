@@ -195,7 +195,7 @@ fun DomainUpdater.createScheduleRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            assignedTo = sharedProjectParameters.nonNullAssignedTo
+            assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }

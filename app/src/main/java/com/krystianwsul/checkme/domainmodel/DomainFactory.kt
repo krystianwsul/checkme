@@ -58,7 +58,7 @@ class DomainFactory(
         PrivateCustomTime.AllRecordsSource,
         Task.ProjectUpdater,
         FactoryProvider.Domain,
-        JsonTime.UserCustomTimeProvider by friendsFactory {
+        JsonTime.UserCustomTimeProvider {
 
     companion object {
 
@@ -588,10 +588,16 @@ class DomainFactory(
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
 
+    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+        val provider = if (userCustomTimeKey.userKey == deviceDbInfo.key) myUserFactory.user else friendsFactory
+
+        return provider.getUserCustomTime(userCustomTimeKey)
+    }
+
     fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
         return when (customTimeKey) {
             is CustomTimeKey.Project<*> -> projectsFactory.getCustomTime(customTimeKey)
-            is CustomTimeKey.User -> friendsFactory.getUserCustomTime(customTimeKey)
+            is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
             else -> throw UnsupportedOperationException() // compilation
         }
     }

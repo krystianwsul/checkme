@@ -406,7 +406,7 @@ class DomainFactoryTest {
         val date = Date(2021, 3, 25)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val privateCustomTimeKey = domainUpdater().createCustomTime(
+        val customTimeKey = domainUpdater().createCustomTime(
                 DomainListenerManager.NotificationType.All,
                 "customTime",
                 DayOfWeek.values().associateWith { HourMinute(2, 0) },
@@ -415,7 +415,7 @@ class DomainFactoryTest {
         val privateTaskKey = domainUpdater(now).createScheduleRootTask(
                 DomainListenerManager.NotificationType.All,
                 "task",
-                listOf(ScheduleData.Single(date, TimePair(privateCustomTimeKey))),
+                listOf(ScheduleData.Single(date, TimePair(customTimeKey))),
                 null,
                 null,
                 null,

@@ -6,7 +6,6 @@ import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
 import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.Endable
 import com.krystianwsul.common.utils.ProjectType
 
 sealed class Time {
@@ -75,8 +74,10 @@ sealed class Time {
             }
         }
 
-        class User(private val user: RootUser, override val customTimeRecord: UserCustomTimeRecord) :
-                Custom(), Endable {
+        open class User(
+                private val user: RootUser,
+                final override val customTimeRecord: UserCustomTimeRecord,
+        ) : Custom() {
 
             companion object {
 
@@ -86,14 +87,6 @@ sealed class Time {
             override val id = customTimeRecord.id
 
             override val key = customTimeRecord.customTimeKey
-
-            override var endExactTimeStamp
-                get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }
-                set(value) {
-                    check((value == null) != (customTimeRecord.endTime == null))
-
-                    customTimeRecord.endTime = value?.long
-                }
 
             override fun delete() {
                 user.deleteCustomTime(this)

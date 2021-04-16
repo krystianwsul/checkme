@@ -477,7 +477,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 else -> throw UnsupportedOperationException()
             }
 
-            privateCustomTime?.takeIf { it.current(now) }
+            privateCustomTime?.takeIf { it.notDeleted(now) }
                     ?.let { TimePair(it.key) }
                     ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {

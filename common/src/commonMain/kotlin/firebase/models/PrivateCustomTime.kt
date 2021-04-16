@@ -7,12 +7,13 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.Endable
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateCustomTime(
         override val project: PrivateProject,
         override val customTimeRecord: PrivateCustomTimeRecord,
-) : Time.Custom.Project<ProjectType.Private>() {
+) : Time.Custom.Project<ProjectType.Private>(), Endable {
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId
@@ -22,7 +23,7 @@ class PrivateCustomTime(
             .toMutableList<ProjectCustomTimeRecord<*>>()
             .apply { add(customTimeRecord) }
 
-    fun current(exactTimeStamp: ExactTimeStamp.Local): Boolean {
+    override fun notDeleted(exactTimeStamp: ExactTimeStamp.Local): Boolean {
         val current = customTimeRecord.current
         val endExactTimeStamp = endExactTimeStamp
 
@@ -31,7 +32,7 @@ class PrivateCustomTime(
         return endExactTimeStamp?.let { it > exactTimeStamp } ?: current
     }
 
-    var endExactTimeStamp
+    override var endExactTimeStamp
         get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }
         set(value) {
             check((value == null) != (customTimeRecord.endTime == null))

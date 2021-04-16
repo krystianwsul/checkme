@@ -147,7 +147,7 @@ object Irrelevant {
 
         if (project is PrivateProject) {
             project.customTimes
-                    .filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
+                    .filter { it.notDeleted(getIrrelevantNow(it.endExactTimeStamp)) }
                     .forEach { remoteCustomTimeRelevances.getValue(it.key).setRelevant() }
         }
 

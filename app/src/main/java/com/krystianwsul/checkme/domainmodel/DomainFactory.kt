@@ -361,7 +361,7 @@ class DomainFactory(
 
     fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject // todo customtime fetch
             .customTimes
-            .filter { it.current(now) }
+            .filter { it.notDeleted(now) }
 
     fun instanceToGroupListData(
             instance: Instance<*>,

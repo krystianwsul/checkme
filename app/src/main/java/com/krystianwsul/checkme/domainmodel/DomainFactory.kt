@@ -53,7 +53,11 @@ class DomainFactory(
         domainDisposable: CompositeDisposable,
         private val databaseWrapper: DatabaseWrapper,
         private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
-) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain, JsonTime.UserCustomTimeProvider {
+) :
+        PrivateCustomTime.AllRecordsSource,
+        Task.ProjectUpdater,
+        FactoryProvider.Domain,
+        JsonTime.UserCustomTimeProvider by friendsFactory {
 
     companion object {
 
@@ -582,10 +586,6 @@ class DomainFactory(
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
-
-    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-        TODO("todo customtime fetch")
-    }
 
     fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
         return when (customTimeKey) {

@@ -359,9 +359,12 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject // todo customtime fetch
-            .customTimes
-            .filter { it.notDeleted(now) }
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local): List<Time.Custom> {
+        val projectCustomTimes = projectsFactory.privateProject.customTimes
+        val userCustomTimes = myUserFactory.user.customTimes.values
+
+        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted(now) }
+    }
 
     fun instanceToGroupListData(
             instance: Instance<*>,

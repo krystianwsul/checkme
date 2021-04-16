@@ -33,6 +33,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
@@ -51,7 +52,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
-    private var selectedCustomTimeKeys: List<CustomTimeKey.Project.Private>? = null // todo customtime edit
+    private var selectedCustomTimeKeys: List<CustomTimeKey>? = null
 
     private val listener get() = activity as CustomTimesListListener
 
@@ -78,7 +79,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
                     fun setAreCurrent(current: Boolean) = AndroidDomainUpdater.setCustomTimesCurrent(
                             showCustomTimesViewModel.dataId.toFirst(),
-                            selectedCustomTimeKeys,
+                            selectedCustomTimeKeys.map { it as CustomTimeKey.Project<ProjectType.Private> }, // todo customtime edit
                             current,
                     )
 
@@ -304,7 +305,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     false,
             )
 
-        override fun onClick(holder: AbstractHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+        override fun onClick(holder: AbstractHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id as CustomTimeKey.Project.Private, requireActivity())) // todo customtime edit
 
         private val customTimeId get() = customTimeData.id.customTimeId.value
 

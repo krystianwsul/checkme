@@ -35,11 +35,7 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
                     .prettyPrint() + it.key
         }
 
-        ShowCustomTimesViewModel.CustomTimeData(
-                it.key,
-                it.name,
-                details
-        )
+        ShowCustomTimesViewModel.CustomTimeData(it.key, it.name, details)
     }.toMutableList()
 
     return ShowCustomTimesViewModel.Data(entries)

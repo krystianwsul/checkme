@@ -63,14 +63,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     val scheduleKey by lazy { ScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
-    val scheduleTime get() = data.scheduleTime // todo customtime ref
-    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime) // todo customtime ref
+    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
 
     val instanceDate get() = data.instanceDate
-    val instanceTime get() = data.instanceTime // todo customtime ref
-    val instanceDateTime get() = DateTime(instanceDate, instanceTime) // todo customtime ref
+    val instanceTime get() = data.instanceTime
+    val instanceDateTime get() = DateTime(instanceDate, instanceTime)
 
-    val recordInstanceDateTime get() = data.recordInstanceDateTime // todo customtime ref
+    val recordInstanceDateTime get() = data.recordInstanceDateTime
 
     val taskKey by lazy { task.taskKey }
 
@@ -84,7 +83,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val name get() = task.name
 
-    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTime<T>(scheduleTime), taskKey)
+    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTimePair<T>(data.scheduleTimePair), taskKey)
 
     val hidden get() = data.hidden
 
@@ -644,7 +643,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 }
         }
 
-        class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() {
+        class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() { // todo customtime ref
 
             override val scheduleDate = scheduleDateTime.date
             override val instanceDate = scheduleDate

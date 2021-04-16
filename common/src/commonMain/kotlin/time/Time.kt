@@ -79,7 +79,7 @@ sealed class Time {
 
             companion object {
 
-                const val WRITE_USER_CUSTOM_TIMES = false
+                const val WRITE_USER_CUSTOM_TIMES = true
             }
 
             override val id = customTimeRecord.id

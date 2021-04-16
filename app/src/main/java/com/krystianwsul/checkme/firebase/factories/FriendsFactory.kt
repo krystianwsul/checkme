@@ -110,7 +110,7 @@ class FriendsFactory(
         val rootUserRecord = rootUserManager.addFriend(userKey, userWrapper)
         friendsLoader.userKeyStore.addFriend(rootUserRecord)
 
-        check(userMap.containsKey(rootUserRecord.userKey))
+        check(userMap.containsKey(rootUserRecord.userKey)) // todo friend this fails
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {

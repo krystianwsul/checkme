@@ -4,10 +4,14 @@ sealed class CustomTimeKey : Parcelable, Serializable {
 
     abstract val customTimeId: CustomTimeId
 
+    abstract fun toJson(): String
+
     sealed class Project<T : ProjectType> : CustomTimeKey() {
 
         abstract val projectId: ProjectKey<T>
         abstract override val customTimeId: CustomTimeId.Project<T>
+
+        override fun toJson() = customTimeId.value
 
         @Parcelize
         data class Private(
@@ -39,6 +43,6 @@ sealed class CustomTimeKey : Parcelable, Serializable {
             }
         }
 
-        fun toJson() = "${userKey.key},${customTimeId.value}"
+        override fun toJson() = "${userKey.key},${customTimeId.value}"
     }
 }

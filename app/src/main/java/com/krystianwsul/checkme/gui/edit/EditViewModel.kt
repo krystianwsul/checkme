@@ -398,6 +398,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             val customTimeKey: CustomTimeKey,
             val name: String,
             val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
+            val isMine: Boolean,
     )
 
     data class TaskData(

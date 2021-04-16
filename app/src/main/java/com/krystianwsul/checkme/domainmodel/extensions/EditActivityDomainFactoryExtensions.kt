@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -85,7 +86,7 @@ fun DomainFactory.getCreateTaskData(
     }
 
     val customTimeDatas = customTimes.values.associate {
-        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
+        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
     }
 
     val showAllInstancesDialog = when (startParameters) {

@@ -181,7 +181,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
 
     constructor(task: Task<T>, scheduleDateTime: DateTime) :
-            this(task, Data.Virtual(scheduleDateTime.toDateTimePair(), task.project))
+            this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime<T>(scheduleDateTime.time), task.project))
 
     init {
         addLazyCallbacks()
@@ -646,16 +646,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         }
 
         class Virtual<T : ProjectType>(
-                private val scheduleDateTimePair: DateTimePair,
+                override val scheduleDate: Date,
+                private val scheduleJsonTime: JsonTime,
                 private val customTimeProvider: JsonTime.CustomTimeProvider<T>,
-        ) : Data<T>() { // todo customtime ref use jsontime?
+        ) : Data<T>() {
 
-            override val scheduleDate = scheduleDateTimePair.date
             override val instanceDate = scheduleDate
 
-            override val scheduleTime
-                get() =
-                    JsonTime.fromTimePair<T>(scheduleDateTimePair.timePair).toTime(customTimeProvider)
+            override val scheduleTime get() = scheduleJsonTime.toTime(customTimeProvider)
             override val instanceTime get() = scheduleTime
 
             override val done: Long? = null

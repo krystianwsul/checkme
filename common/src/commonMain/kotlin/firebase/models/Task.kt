@@ -281,7 +281,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         return scheduleSequence.flatMap {
             InterruptionChecker.throwIfInterrupted()
 
-            it.asSequence().map { it.first }
+            it.asSequence()
+                    .map { it.first }
                     .distinct()
                     .map(::getInstance)
                     .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed

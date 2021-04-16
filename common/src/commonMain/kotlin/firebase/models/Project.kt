@@ -472,6 +472,6 @@ abstract class Project<T : ProjectType>(
 
     interface Parent {
 
-        fun deleteProject(project: Project<*>)
+        fun deleteProject(project: Project<*>) // todo this is never implemented, just get rid of it
     }
 }

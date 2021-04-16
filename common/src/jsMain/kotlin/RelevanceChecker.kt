@@ -45,9 +45,7 @@ object RelevanceChecker {
             databaseWrapper.getUsers { userWrapperMap ->
                 val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
-                val rootUsers = rootUserManager.records
-                        .values
-                        .map { RootUser(it.value) }
+                val rootUsers = rootUserManager.records.mapValues { RootUser(it.value.value) }
 
                 var privateData: JsPrivateProjectManager? = null
                 var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
@@ -91,7 +89,7 @@ object RelevanceChecker {
                     } else {
                         val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 
-                        rootUsers.forEach { remoteUser ->
+                        rootUsers.values.forEach { remoteUser ->
                             removedSharedProjectKeys.forEach {
                                 remoteUser.removeProject(it)
                             }
@@ -101,19 +99,18 @@ object RelevanceChecker {
                     }
                 }
 
+                val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {
+
+                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                        return rootUsers.getValue(userCustomTimeKey.userKey).getUserCustomTime(userCustomTimeKey)
+                    }
+                }
+
                 databaseWrapper.getPrivateProjects {
                     val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
                     privateProjectManager.value.forEach { privateProjectRecord ->
-                        val privateProject = PrivateProject(
-                                privateProjectRecord,
-                                object : JsonTime.UserCustomTimeProvider {
-
-                                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                        TODO("todo customtimes fetch")
-                                    }
-                                },
-                        )
+                        val privateProject = PrivateProject(privateProjectRecord, userCustomTimeProvider)
 
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
@@ -139,15 +136,7 @@ object RelevanceChecker {
                     val sharedDataInner = sharedProjectManager.records
                             .values
                             .map { sharedProjectRecord ->
-                                val sharedProject = SharedProject(
-                                        sharedProjectRecord,
-                                        object : JsonTime.UserCustomTimeProvider {
-
-                                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                                TODO("todo customtimes fetch")
-                                            }
-                                        },
-                                )
+                                val sharedProject = SharedProject(sharedProjectRecord, userCustomTimeProvider)
 
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 

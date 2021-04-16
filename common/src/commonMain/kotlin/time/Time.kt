@@ -27,17 +27,15 @@ sealed class Time {
         override fun toString() = hourMinute.toString()
     }
 
-    sealed class Custom : Time() {
+    sealed class Custom : Time(), CustomTimeProperties {
 
         abstract val customTimeRecord: CustomTimeRecord
 
         abstract val id: CustomTimeId
 
-        abstract val key: CustomTimeKey
+        override val name get() = customTimeRecord.name
 
-        val name get() = customTimeRecord.name
-
-        val hourMinutes get() = DayOfWeek.values().associate { it to getHourMinute(it) }
+        override val hourMinutes get() = DayOfWeek.values().associate { it to getHourMinute(it) }
 
         override val timePair by lazy { TimePair(key, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 

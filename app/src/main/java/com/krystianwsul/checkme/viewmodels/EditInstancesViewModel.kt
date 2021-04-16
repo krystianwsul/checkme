@@ -41,6 +41,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
             val customTimeKey: CustomTimeKey,
             val name: String,
             val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
+            val isMine: Boolean,
     ) {
 
         init {

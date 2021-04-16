@@ -30,6 +30,7 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -363,7 +364,7 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local): List<Time.Custom> {
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local): List<MyCustomTime> {
         val projectCustomTimes = projectsFactory.privateProject.customTimes
         val userCustomTimes = myUserFactory.user.customTimes.values
 

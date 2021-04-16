@@ -35,9 +35,7 @@ fun DomainFactory.getCreateTaskData(
 
     val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-        it.key
-    }.toMutableMap<CustomTimeKey, Time.Custom>()
+    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
@@ -82,7 +80,7 @@ fun DomainFactory.getCreateTaskData(
                 task.project
                         .getAssignedTo(assignedTo)
                         .map { it.key }
-                        .toSet()
+                        .toSet(),
         )
     }
 

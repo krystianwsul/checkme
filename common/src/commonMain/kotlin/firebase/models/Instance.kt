@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -474,9 +475,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                         null
                     }
                 }
-                is PrivateCustomTime -> customTime
-                else -> throw UnsupportedOperationException()
-            }
+                else -> customTime
+            } as? MyCustomTime
 
             privateCustomTime?.takeIf { it.notDeleted(now) }
                     ?.let { TimePair(it.key) }

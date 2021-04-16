@@ -21,13 +21,13 @@ class SingleSchedule<T : ProjectType>(
 
     val date get() = scheduleRecord.date
 
-    private val dateTime get() = DateTime(date, time)
+    private val dateTime get() = DateTime(date, time) // todo customtime ref
 
     override val scheduleType get() = ScheduleType.SINGLE
 
     private val originalScheduleDateTime
         get() = singleScheduleRecord.run { // specifically not scheduleRecord
-            DateTime(originalDate, originalTimePair.toTime())
+            DateTime(originalDate, originalTimePair.toTime()) // todo customtime ref
         }
 
     fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)

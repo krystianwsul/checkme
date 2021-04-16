@@ -2,7 +2,7 @@ package com.krystianwsul.common.time
 
 import com.soywiz.klock.DateTimeTz
 
-data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
+data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> { // todo customtime ref
 
     constructor(dateTimeTz: DateTimeTz) : this(Date(dateTimeTz), Time.Normal(HourMinute(dateTimeTz)))
 

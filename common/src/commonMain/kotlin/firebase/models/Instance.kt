@@ -63,14 +63,14 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     val scheduleKey by lazy { ScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
-    val scheduleTime get() = data.scheduleTime
-    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
+    val scheduleTime get() = data.scheduleTime // todo customtime ref
+    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime) // todo customtime ref
 
     val instanceDate get() = data.instanceDate
-    val instanceTime get() = data.instanceTime
-    val instanceDateTime get() = DateTime(instanceDate, instanceTime)
+    val instanceTime get() = data.instanceTime // todo customtime ref
+    val instanceDateTime get() = DateTime(instanceDate, instanceTime) // todo customtime ref
 
-    val recordInstanceDateTime get() = data.recordInstanceDateTime
+    val recordInstanceDateTime get() = data.recordInstanceDateTime // todo customtime ref
 
     val taskKey by lazy { task.taskKey }
 
@@ -562,10 +562,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         abstract val scheduleDate: Date
         abstract val instanceDate: Date
 
-        abstract val scheduleTime: Time
-        abstract val instanceTime: Time
+        abstract val scheduleTime: Time // todo customtime ref
+        abstract val instanceTime: Time // todo customtime ref
 
-        abstract val recordInstanceDateTime: DateTime?
+        abstract val recordInstanceDateTime: DateTime? // todo customtime ref
 
         abstract val done: Long?
         abstract val doneOffset: Double?
@@ -593,7 +593,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val instanceTime get() = recordInstanceTime ?: scheduleTime
 
-            override val recordInstanceDateTime: DateTime?
+            override val recordInstanceDateTime: DateTime? // todo customtime ref
                 get() {
                     val date = instanceRecord.instanceDate
                     val time = recordInstanceTime

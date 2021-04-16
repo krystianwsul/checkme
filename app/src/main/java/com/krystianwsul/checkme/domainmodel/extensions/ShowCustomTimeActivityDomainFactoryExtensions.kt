@@ -10,8 +10,10 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -56,30 +58,48 @@ fun DomainUpdater.createCustomTime(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Single<CustomTimeKey.Project.Private> = SingleDomainUpdate.create("createCustomTime") { // todo customtime edit
+): Single<CustomTimeKey> = SingleDomainUpdate.create("createCustomTime") {
     check(name.isNotEmpty())
 
     check(DayOfWeek.values() == hourMinutes.keys)
 
-    val customTimeJson = PrivateCustomTimeJson(
-            name,
-            hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
-            hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
-            hourMinutes.getValue(DayOfWeek.MONDAY).hour,
-            hourMinutes.getValue(DayOfWeek.MONDAY).minute,
-            hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
-            hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
-            hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
-            hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
-            hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
-            hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
-            hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
-            hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
-            hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
-            hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-    )
+    val customTime = if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
+        myUserFactory.user.newCustomTime(UserCustomTimeJson(
+                name,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
+                hourMinutes.getValue(DayOfWeek.MONDAY).hour,
+                hourMinutes.getValue(DayOfWeek.MONDAY).minute,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
+        ))
+    } else {
+        projectsFactory.privateProject.newRemoteCustomTime(PrivateCustomTimeJson(
+                name,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
+                hourMinutes.getValue(DayOfWeek.MONDAY).hour,
+                hourMinutes.getValue(DayOfWeek.MONDAY).minute,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
+        ))
+    }
 
-    val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)
-
-    DomainUpdater.Result(remoteCustomTime.key, false, notificationType)
+    DomainUpdater.Result(customTime.key, false, notificationType)
 }.perform(this)

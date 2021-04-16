@@ -12,7 +12,7 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
         RootUserProperties by remoteRootUserRecord,
         JsonTime.UserCustomTimeProvider {
 
-    private val _customTimes = remoteRootUserRecord.customTimeRecords
+    protected val _customTimes = remoteRootUserRecord.customTimeRecords
             .mapValues { Time.Custom.User(this, it.value) }
             .toMutableMap()
 

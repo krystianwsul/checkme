@@ -2,7 +2,9 @@ package com.krystianwsul.common.firebase.models
 
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.krystianwsul.common.firebase.MyUserProperties
+import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.firebase.records.MyUserRecord
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.UserKey
 
 
@@ -22,5 +24,15 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
         super.removeFriend(userKey)
 
         friendChanges.onNext(Unit)
+    }
+
+    fun newCustomTime(customTimeJson: UserCustomTimeJson): Time.Custom.User {
+        val userCustomTimeRecord = remoteMyUserRecord.newCustomTimeRecord(customTimeJson)
+        val userCustomTime = Time.Custom.User(this, userCustomTimeRecord)
+        check(!customTimes.containsKey(userCustomTime.id))
+
+        _customTimes[userCustomTime.id] = userCustomTime
+
+        return userCustomTime
     }
 }

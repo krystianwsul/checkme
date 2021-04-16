@@ -78,6 +78,11 @@ sealed class Time {
         class User(private val user: RootUser, override val customTimeRecord: UserCustomTimeRecord) :
                 Custom(), Endable {
 
+            companion object {
+
+                const val WRITE_USER_CUSTOM_TIMES = false
+            }
+
             override val id = customTimeRecord.id
 
             override val key = customTimeRecord.customTimeKey

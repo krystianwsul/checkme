@@ -59,7 +59,7 @@ fun DomainUpdater.createCustomTime(
 ): Single<CustomTimeKey.Project.Private> = SingleDomainUpdate.create("createCustomTime") { // todo customtime edit
     check(name.isNotEmpty())
 
-    check(DayOfWeek.values().all { hourMinutes[it] != null })
+    check(DayOfWeek.values() == hourMinutes.keys)
 
     val customTimeJson = PrivateCustomTimeJson(
             name,
@@ -77,7 +77,6 @@ fun DomainUpdater.createCustomTime(
             hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
             hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
             hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-            true,
     )
 
     val remoteCustomTime = projectsFactory.privateProject.newRemoteCustomTime(customTimeJson)

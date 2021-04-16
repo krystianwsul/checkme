@@ -102,17 +102,6 @@ class CustomTimeCoordinatorTest {
     }
 
     @Test
-    fun testMyUserEmitsAfterLoad() {
-        friendKeysRelay.accept(setOf(userKey1))
-
-        val testObserver = customTimeCoordinator.observeCustomTimes(projectKey1, setOf(myUserKey)).test()
-        testObserver.assertEmpty()
-
-        friendsProvider.database.acceptUser(userKey1, UserWrapper())
-        testObserver.assertValueCount(1)
-    }
-
-    @Test
     fun testStrangerEmitsAfterLoad() {
         friendKeysRelay.accept(setOf(userKey1))
         friendsProvider.database.acceptUser(userKey1, UserWrapper())

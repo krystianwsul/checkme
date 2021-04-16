@@ -95,7 +95,7 @@ class UserKeyStore(
         addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
     }
 
-    fun requestCustomTimeUsers(projectKey: ProjectKey<*>, userKeys: Set<UserKey>) {
+    fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         customTimeRequests.accept(userKeys)

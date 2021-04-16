@@ -92,6 +92,7 @@ class FactoryLoader(
                             .cacheImmediate()
 
                     val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
+                            userInfo.key,
                             userFactorySingle,
                             CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle),
                     )

@@ -42,55 +42,53 @@ object RelevanceChecker {
         roots.forEach { root ->
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            var privateData: JsPrivateProjectManager? = null
-            var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
+            databaseWrapper.getUsers { userWrapperMap ->
+                val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
-            fun projectCallback() {
-                if (privateData == null)
-                    return
+                val rootUsers = rootUserManager.records
+                        .values
+                        .map { RootUser(it.value) }
 
-                if (sharedData == null)
-                    return
+                var privateData: JsPrivateProjectManager? = null
+                var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
 
-                fun saveProjects(rootUserManager: JsRootUserManager?) {
-                    val values = mutableMapOf<String, Any?>()
+                fun projectCallback() {
+                    if (privateData == null) return
 
-                    privateData!!.save(values)
-                    sharedData!!.first.save(values)
-                    rootUserManager?.save(values)
+                    if (sharedData == null) return
 
-                    ErrorLogger.instance.log("updateDatabase: $updateDatabase")
-                    ErrorLogger.instance.log(
-                            "all database values: ${
-                                values.entries.joinToString(
-                                        "<br>\n"
-                                )
-                            }"
-                    )
-                    if (updateDatabase) {
-                        databaseWrapper.update(values) { message, _, exception ->
-                            ErrorLogger.instance.apply {
-                                log(message)
-                                exception?.let { logException(it) }
+                    fun saveProjects() {
+                        val values = mutableMapOf<String, Any?>()
+
+                        privateData!!.save(values)
+                        sharedData!!.first.save(values)
+                        rootUserManager.save(values)
+
+                        ErrorLogger.instance.log("updateDatabase: $updateDatabase")
+                        ErrorLogger.instance.log(
+                                "all database values: ${
+                                    values.entries.joinToString(
+                                            "<br>\n"
+                                    )
+                                }"
+                        )
+                        if (updateDatabase) {
+                            databaseWrapper.update(values) { message, _, exception ->
+                                ErrorLogger.instance.apply {
+                                    log(message)
+                                    exception?.let { logException(it) }
+                                }
+
+                                callback(root)
                             }
-
+                        } else {
                             callback(root)
                         }
-                    } else {
-                        callback(root)
                     }
-                }
 
-                if (sharedData!!.second.isEmpty()) {
-                    saveProjects(null)
-                } else {
-                    databaseWrapper.getUsers {
-                        val rootUserManager = JsRootUserManager(databaseWrapper, it)
-
-                        val rootUsers = rootUserManager.records
-                                .values
-                                .map { RootUser(it.value) }
-
+                    if (sharedData!!.second.isEmpty()) {
+                        saveProjects()
+                    } else {
                         val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 
                         rootUsers.forEach { remoteUser ->
@@ -99,80 +97,80 @@ object RelevanceChecker {
                             }
                         }
 
-                        saveProjects(rootUserManager)
+                        saveProjects()
                     }
                 }
-            }
 
-            databaseWrapper.getPrivateProjects {
-                val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
+                databaseWrapper.getPrivateProjects {
+                    val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-                privateProjectManager.value.forEach { privateProjectRecord ->
-                    val privateProject = PrivateProject(
-                            privateProjectRecord,
-                            object : JsonTime.UserCustomTimeProvider {
+                    privateProjectManager.value.forEach { privateProjectRecord ->
+                        val privateProject = PrivateProject(
+                                privateProjectRecord,
+                                object : JsonTime.UserCustomTimeProvider {
 
-                                override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                    TODO("todo customtimes fetch")
-                                }
-                            },
+                                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                        TODO("todo customtimes fetch")
+                                    }
+                                },
+                        )
+
+                        response += "checking relevance for private project ${privateProject.projectKey}"
+
+                        Irrelevant.setIrrelevant(
+                                object : Project.Parent {
+
+                                    override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
+                                },
+                                privateProject,
+                                ExactTimeStamp.Local.now
+                        )
+
+                        check(privateData == null)
+
+                        privateData = privateProjectManager
+                        projectCallback()
+                    }
+                }
+
+                databaseWrapper.getSharedProjects {
+                    val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
+
+                    val sharedDataInner = sharedProjectManager.records
+                            .values
+                            .map { sharedProjectRecord ->
+                                val sharedProject = SharedProject(
+                                        sharedProjectRecord,
+                                        object : JsonTime.UserCustomTimeProvider {
+
+                                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                                                TODO("todo customtimes fetch")
+                                            }
+                                        },
+                                )
+
+                                response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
+
+                                val removedSharedProjects = Irrelevant.setIrrelevant(
+                                        object : Project.Parent {
+
+                                            override fun deleteProject(project: Project<*>) = Unit
+                                        },
+                                        sharedProject,
+                                        ExactTimeStamp.Local.now
+                                ).removedSharedProjects
+                                check(removedSharedProjects.size < 2)
+
+                                removedSharedProjects.singleOrNull()
+                            }
+
+                    sharedData = Pair(
+                            sharedProjectManager,
+                            sharedDataInner.filterNotNull(),
                     )
 
-                    response += "checking relevance for private project ${privateProject.projectKey}"
-
-                    Irrelevant.setIrrelevant(
-                            object : Project.Parent {
-
-                                override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
-                            },
-                            privateProject,
-                            ExactTimeStamp.Local.now
-                    )
-
-                    check(privateData == null)
-
-                    privateData = privateProjectManager
                     projectCallback()
                 }
-            }
-
-            databaseWrapper.getSharedProjects {
-                val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
-
-                val sharedDataInner = sharedProjectManager.records
-                        .values
-                        .map { sharedProjectRecord ->
-                            val sharedProject = SharedProject(
-                                    sharedProjectRecord,
-                                    object : JsonTime.UserCustomTimeProvider {
-
-                                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                            TODO("todo customtimes fetch")
-                                        }
-                                    },
-                            )
-
-                            response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
-
-                            val removedSharedProjects = Irrelevant.setIrrelevant(
-                                    object : Project.Parent {
-
-                                        override fun deleteProject(project: Project<*>) = Unit
-                                    },
-                                    sharedProject,
-                                    ExactTimeStamp.Local.now
-                            ).removedSharedProjects
-                            check(removedSharedProjects.size < 2)
-
-                            removedSharedProjects.singleOrNull()
-                        }
-
-                sharedData = Pair(
-                        sharedProjectManager,
-                        sharedDataInner.filterNotNull(),
-                )
-
-                projectCallback()
             }
         }
     }

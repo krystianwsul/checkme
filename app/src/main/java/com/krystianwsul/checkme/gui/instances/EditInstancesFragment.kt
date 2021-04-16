@@ -315,16 +315,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         tryGetFragment<MaterialTimePicker>(TAG_TIME_FRAGMENT)?.setListener(timePickerDialogFragmentListener)
 
         binding.editInstanceTimeLayout.setDropdown {
-            val customTimeDatas = ArrayList(data.customTimeDatas
-                    .values
-                    .filter { it.customTimeKey is CustomTimeKey.Project.Private } // todo customtime edit
-                    .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
-                    .map {
-                        TimeDialogFragment.CustomTimeData(
-                                it.customTimeKey,
-                                it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")"
-                        )
-                    }
+            val customTimeDatas = ArrayList(
+                    data.customTimeDatas
+                            .values
+                            .filter { it.isMine }
+                            .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
+                            .map {
+                                TimeDialogFragment.CustomTimeData(
+                                        it.customTimeKey,
+                                        it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")",
+                                )
+                            }
             )
 
             TimeDialogFragment.newInstance(customTimeDatas).also {
@@ -437,8 +438,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
         if (resultCode == Activity.RESULT_OK) {
-            state.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra<CustomTimeKey.Project.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!! // todo customtime edit
+            state.timePairPersist.customTimeKey = data!!.getParcelableExtra(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
         }
     }
 

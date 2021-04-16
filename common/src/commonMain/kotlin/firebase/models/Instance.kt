@@ -561,10 +561,10 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         abstract val scheduleDate: Date
         abstract val instanceDate: Date
 
-        abstract val scheduleTime: Time // todo customtime ref
-        abstract val instanceTime: Time // todo customtime ref
+        abstract val scheduleTime: Time
+        abstract val instanceTime: Time
 
-        abstract val recordInstanceDateTime: DateTime? // todo customtime ref
+        abstract val recordInstanceDateTime: DateTime?
 
         abstract val done: Long?
         abstract val doneOffset: Double?
@@ -592,7 +592,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val instanceTime get() = recordInstanceTime ?: scheduleTime
 
-            override val recordInstanceDateTime: DateTime? // todo customtime ref
+            override val recordInstanceDateTime: DateTime?
                 get() {
                     val date = instanceRecord.instanceDate
                     val time = recordInstanceTime
@@ -648,8 +648,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             override val scheduleDate = scheduleDateTime.date
             override val instanceDate = scheduleDate
 
-            override val scheduleTime = scheduleDateTime.time
-            override val instanceTime = scheduleTime
+            override val scheduleTime = scheduleDateTime.time // todo customtime ref
+            override val instanceTime = scheduleTime // todo customtime ref
 
             override val done: Long? = null
             override val doneOffset: Double? = null

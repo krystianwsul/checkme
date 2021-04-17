@@ -107,6 +107,8 @@ class DomainFactoryRule : TestRule {
         DomainThreadChecker.instance = mockk(relaxed = true)
 
         RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }
+        RxJavaPlugins.setErrorHandler { it.printStackTrace() }
+
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
 
         mockBase64()

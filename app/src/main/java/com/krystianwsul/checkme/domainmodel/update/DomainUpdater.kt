@@ -15,16 +15,16 @@ abstract class DomainUpdater {
             params.notifierParams?.let { notifier.updateNotifications(now, it) }
         }
 
-        fun DomainFactory.saveAndNotifyCloud(params: Params) {
+        fun DomainFactory.saveAndNotifyCloud(params: Params, now: ExactTimeStamp.Local) {
             params.apply {
-                saveParams?.let(::save)
+                saveParams?.let { save(it, now) }
 
                 cloudParams?.let(::notifyCloud)
             }
         }
     }
 
-    abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>, trigger: Boolean = true): Single<T>
+    abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T>
 
     data class Result<T : Any>(val data: T, val params: Params) {
 

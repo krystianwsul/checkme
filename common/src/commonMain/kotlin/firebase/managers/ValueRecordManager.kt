@@ -34,13 +34,13 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         }
     }
 
-    protected fun set(throwIfUnequal: (T) -> Unit, valueCallback: () -> T): ChangeWrapper<T> { // lazy to prevent parsing if LOCAL
+    protected fun set(throwIfUnequal: (T) -> Unit, valueCallback: () -> T): ChangeWrapper<T>? { // lazy to prevent parsing if LOCAL
         return if (isSaved) { // todo isSaved propagate
             throwIfUnequal(value)
 
             isSaved = false
 
-            ChangeWrapper(ChangeType.LOCAL, value)
+            null
         } else {
             value = valueCallback()
 

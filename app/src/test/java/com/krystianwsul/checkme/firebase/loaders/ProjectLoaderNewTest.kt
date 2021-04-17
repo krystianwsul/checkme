@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
@@ -21,11 +22,8 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 @ExperimentalStdlibApi
 class ProjectLoaderNewTest {
@@ -45,10 +43,13 @@ class ProjectLoaderNewTest {
 
         override val database = object : ProjectProvider.Database() {
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
                 if (!rootInstanceObservables.containsKey(taskFirebaseKey))
                     rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-                return rootInstanceObservables.getValue(taskFirebaseKey)
+
+                return rootInstanceObservables.getValue(taskFirebaseKey).map {
+                    ProjectProvider.RootInstanceData(true, it)
+                }
             }
 
             override fun getNewId(path: String): String {
@@ -61,12 +62,15 @@ class ProjectLoaderNewTest {
         fun acceptInstance(
                 projectId: String,
                 taskId: String,
-                map: Map<String, Map<String, InstanceJson>>
+                map: Map<String, Map<String, InstanceJson>>,
         ) {
             val key = "$projectId-$taskId"
             rootInstanceObservables.getValue(key).accept(Snapshot(key, map))
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -316,8 +320,7 @@ class ProjectLoaderNewTest {
         projectManager.value.single().name = name
         projectManager.save(mockk(relaxed = true))
 
-        changeProjectEmissionChecker.checkLocal {
-            acceptProject(PrivateProjectJson(name = name))
-        }
+        // doesn't emit ChangeType.LOCAL
+        acceptProject(PrivateProjectJson(name = name))
     }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
+import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
@@ -22,21 +23,25 @@ class PrivateProjectRecord(
         projectKey.key
 ) {
 
-    override lateinit var taskRecords: MutableMap<String, PrivateTaskRecord>
-        private set
+    override val taskRecordsRelay = BehaviorSubject(
+            projectJson.tasks
+                    .mapValues { (id, taskJson) ->
+                        check(id.isNotEmpty())
+
+                        PrivateTaskRecord(id, this, taskJson)
+                    }
+    )
+
+    override val taskRecords: Map<String, PrivateTaskRecord> get() = taskRecordsRelay.value
+
+    fun mutateTaskRecords(action: (MutableMap<String, PrivateTaskRecord>) -> Unit) {
+        taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
+    }
 
     override lateinit var customTimeRecords: MutableMap<CustomTimeId.Private, PrivateCustomTimeRecord>
         private set
 
     init {
-        taskRecords = projectJson.tasks
-                .mapValues { (id, taskJson) ->
-                    check(id.isNotEmpty())
-
-                    PrivateTaskRecord(id, this, taskJson)
-                }
-                .toMutableMap()
-
         initTaskHierarchyRecords()
 
         customTimeRecords = projectJson.customTimes
@@ -120,7 +125,10 @@ class PrivateProjectRecord(
         val remoteTaskRecord = PrivateTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 
-        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
+        mutateTaskRecords {
+            it[remoteTaskRecord.id] = remoteTaskRecord
+        }
+
         return remoteTaskRecord
     }
 }

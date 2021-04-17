@@ -100,6 +100,10 @@ interface SharedProjectsLoader {
                 { mapChanges, projectKey ->
                     val projectEntry = mapChanges.newMap.getValue(projectKey)
 
+                    if (projectEntry.initialProjectRecord != null) {
+                        check(mapChanges.userChangeType == ChangeType.LOCAL)
+                    }
+
                     ProjectLoader.Impl(
                             projectEntry.databaseRx.observable,
                             domainDisposable,
@@ -123,7 +127,11 @@ interface SharedProjectsLoader {
                 .flatMap {
                     it.newLoaderMap
                             .values
-                            .map { projectLoader -> projectLoader.initialProjectEvent.map { projectLoader to it } }
+                            .map { projectLoader ->
+                                projectLoader.initialProjectEvent
+                                        .doOnSuccess { check(it.changeType == ChangeType.REMOTE) }
+                                        .map { projectLoader to it }
+                            }
                             .zipSingle()
                 }
                 .map {
@@ -149,12 +157,10 @@ interface SharedProjectsLoader {
                 .replayImmediate()
 
         override val removeProjectEvents = projectLoadersObservable.map {
-            ChangeWrapper(
-                    it.userChangeType,
-                    RemoveProjectsEvent(it.removedProjectKeys)
-            )
+            ChangeWrapper(it.userChangeType, RemoveProjectsEvent(it.removedProjectKeys))
         }
                 .filter { it.data.projectKeys.isNotEmpty() }
+                .doOnNext { check(it.changeType == ChangeType.REMOTE) }
                 .replayImmediate()
 
         override fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord {

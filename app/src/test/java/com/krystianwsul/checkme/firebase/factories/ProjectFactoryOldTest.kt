@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -26,10 +27,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.After
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 import kotlin.random.Random
 
 @ExperimentalStdlibApi
@@ -56,7 +54,7 @@ class ProjectFactoryOldTest {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<Snapshot<Map<String, Map<String, InstanceJson>>>> {
+            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
                 TODO("Not yet implemented")
             }
 
@@ -125,6 +123,9 @@ class ProjectFactoryOldTest {
 
         override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 

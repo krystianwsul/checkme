@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.utils.MapRelayProperty
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -66,26 +67,25 @@ class ProjectsFactory(
     init {
         privateProject.fixNotificationShown(localFactory, now)
 
-        val addProjectChangeTypes =
-                sharedProjectsLoader.addProjectEvents.map { (changeType, addProjectEvent) ->
-                    val projectKey = addProjectEvent.initialProjectEvent
-                            .projectRecord
-                            .projectKey
+        val addProjectChangeTypes = sharedProjectsLoader.addProjectEvents.mapNotNull { (changeType, addProjectEvent) ->
+            val projectKey = addProjectEvent.initialProjectEvent
+                    .projectRecord
+                    .projectKey
 
-                    check(!sharedProjectFactories.containsKey(projectKey))
+            check(!sharedProjectFactories.containsKey(projectKey))
 
-                    val sharedProjectFactory = SharedProjectFactory(
-                            addProjectEvent.projectLoader,
-                            addProjectEvent.initialProjectEvent,
-                            factoryProvider,
-                            domainDisposable,
-                            deviceDbInfo,
-                    )
+            val sharedProjectFactory = SharedProjectFactory(
+                    addProjectEvent.projectLoader,
+                    addProjectEvent.initialProjectEvent,
+                    factoryProvider,
+                    domainDisposable,
+                    deviceDbInfo,
+            )
 
-                    sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
+            sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
-                    changeType
-                }
+            changeType.takeIf { it == ChangeType.REMOTE } // filtering out internal events for adding project
+        }
 
         val removeProjectChangeTypes =
                 sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->

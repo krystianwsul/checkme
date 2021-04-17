@@ -40,11 +40,12 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
         user.setToken(deviceDbInfo)
     }
 
-    fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): ChangeType {
-        val changeWrapper = myUserManager.set(snapshot)
-        user = MyUser(changeWrapper.data)
+    fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): ChangeType? {
+        return myUserManager.set(snapshot)?.let {
+            user = MyUser(it.data)
 
-        return changeWrapper.changeType
+            it.changeType
+        }
     }
 
     fun save(values: MutableMap<String, Any?>) = myUserManager.save(values)

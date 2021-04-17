@@ -65,10 +65,7 @@ class DomainFactory(
 
         var firstRun = false
 
-        val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
-                .distinctUntilChanged()
-                .replay(1)!!
-                .apply { connect() }
+        val isSaved = Observable.just(false)!! // todo find a new use for toolbar progress bar
 
         private val ChangeType.runType
             get() = when (this) {
@@ -83,8 +80,6 @@ class DomainFactory(
     val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
-
-    val isSaved = BehaviorRelay.createDefault(false)!!
 
     private val changeTypeRelay = PublishRelay.create<ChangeType>()
 
@@ -149,23 +144,6 @@ class DomainFactory(
 
     val copiedTaskKeys = mutableMapOf<TaskKey, TaskKey>()
 
-    private fun updateIsSaved() {
-        val oldSaved = isSaved.value!!
-        val newSaved = projectsFactory.isSaved || myUserFactory.isSaved || friendsFactory.isSaved
-        MyCrashlytics.log("DomainFactory.updateIsSaved $oldSaved -> $newSaved")
-
-        if (newSaved || oldSaved) {
-            val savedList =
-                    projectsFactory.savedList + myUserFactory.savedList + friendsFactory.savedList
-            val entry = savedList.toMutableList()
-                    .apply { add(0, "saved managers:") }
-                    .joinToString("\n")
-            Preferences.saveLog.logLineHour(entry, true)
-        }
-
-        isSaved.accept(newSaved)
-    }
-
     data class SaveParams(val notificationType: NotificationType, val forceDomainChanged: Boolean = false) {
 
         companion object {
@@ -181,7 +159,7 @@ class DomainFactory(
         }
     }
 
-    fun save(saveParams: SaveParams) {
+    fun save(saveParams: SaveParams, now: ExactTimeStamp.Local) {
         DomainThreadChecker.instance.requireDomainThread()
 
         Preferences.tickLog.logLineHour("DomainFactory.save")
@@ -198,8 +176,11 @@ class DomainFactory(
 
         val changes = localChanges || values.isNotEmpty()
 
-        if (changes || saveParams.forceDomainChanged) domainListenerManager.notify(saveParams.notificationType)
-        if (changes) updateIsSaved()
+        if (changes || saveParams.forceDomainChanged) {
+            domainListenerManager.notify(saveParams.notificationType)
+
+            updateShortcuts(now)
+        }
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
@@ -233,7 +214,7 @@ class DomainFactory(
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType")
 
-        // check(changeType == ChangeType.REMOTE) todo issaved
+        check(changeType == ChangeType.REMOTE)
 
         DomainThreadChecker.instance.requireDomainThread()
 
@@ -292,11 +273,8 @@ class DomainFactory(
                             notifyParams,
                             SaveParams(NotificationType.All, runType == RunType.REMOTE),
                     )
-                },
-                false,
+                }
         )
-
-        updateIsSaved()
     }
 
     private enum class RunType {

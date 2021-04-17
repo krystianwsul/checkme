@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
@@ -11,10 +12,7 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.After
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 
 @ExperimentalStdlibApi
 class SharedProjectsLoaderOldTest {
@@ -42,7 +40,7 @@ class SharedProjectsLoaderOldTest {
 
         fun acceptProject(
                 projectKey: ProjectKey.Shared,
-                projectJson: SharedProjectJson
+                projectJson: SharedProjectJson,
         ) {
             sharedProjectObservables.getValue(projectKey).accept(Snapshot(
                     projectKey.key,
@@ -50,6 +48,9 @@ class SharedProjectsLoaderOldTest {
             ))
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -152,8 +153,8 @@ class SharedProjectsLoaderOldTest {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkLocal {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf()))
+        removeProjectsEmissionChecker.checkRemote {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
         }
     }
 
@@ -165,8 +166,8 @@ class SharedProjectsLoaderOldTest {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkLocal {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(projectKey2)))
+        removeProjectsEmissionChecker.checkRemote {
+            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey2)))
         }
 
         addProjectEmissionChecker.checkRemote {

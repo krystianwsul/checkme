@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
@@ -9,7 +10,6 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.models.Task
@@ -20,11 +20,8 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 @ExperimentalStdlibApi
 class ProjectLoaderOldTest {
@@ -43,7 +40,7 @@ class ProjectLoaderOldTest {
         override val database = object : ProjectProvider.Database() {
 
             override fun getRootInstanceObservable(taskFirebaseKey: String) =
-                    Observable.just<Snapshot<Map<String, Map<String, InstanceJson>>>>(Snapshot("", null))
+                    Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
 
             override fun getNewId(path: String): String {
                 TODO("Not yet implemented")
@@ -52,6 +49,9 @@ class ProjectLoaderOldTest {
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
     }
+
+    @get:Rule
+    val domainFactoryRule = DomainFactoryRule()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -261,8 +261,7 @@ class ProjectLoaderOldTest {
         projectManager.value.single().name = name
         projectManager.save(mockk(relaxed = true))
 
-        changeProjectEmissionChecker.checkLocal {
-            acceptProject(PrivateProjectJson(name = name))
-        }
+        // doesn't emit ChangeType.LOCAL
+        acceptProject(PrivateProjectJson(name = name))
     }
 }

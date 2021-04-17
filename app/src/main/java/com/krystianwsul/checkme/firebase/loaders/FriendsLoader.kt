@@ -57,6 +57,7 @@ class FriendsLoader(
     ).replayImmediate()
 
     val initialFriendsEvent = databaseRx.firstOrError()
+            .doOnSuccess { check(it.original.changeType == ChangeType.REMOTE) }
             .flatMap {
                 it.newMap
                         .values

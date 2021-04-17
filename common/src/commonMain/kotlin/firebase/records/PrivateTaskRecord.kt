@@ -46,14 +46,14 @@ class PrivateTaskRecord private constructor(
             false,
             id,
             projectRecord,
-            taskJson
+            taskJson,
     )
 
     constructor(projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
             true,
             projectRecord.getTaskRecordId(),
             projectRecord,
-            taskJson
+            taskJson,
     )
 
     override fun newScheduleWrapper(
@@ -67,8 +67,12 @@ class PrivateTaskRecord private constructor(
             weeklyScheduleJson as? PrivateWeeklyScheduleJson,
             monthlyDayScheduleJson as? PrivateMonthlyDayScheduleJson,
             monthlyWeekScheduleJson as? PrivateMonthlyWeekScheduleJson,
-            yearlyScheduleJson as? PrivateYearlyScheduleJson
+            yearlyScheduleJson as? PrivateYearlyScheduleJson,
     )
 
-    override fun deleteFromParent() = check(privateProjectRecord.taskRecords.remove(id) == this)
+    override fun deleteFromParent() {
+        privateProjectRecord.mutateTaskRecords {
+            check(it.remove(id) == this)
+        }
+    }
 }

@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 
@@ -11,7 +10,7 @@ class MyUserCustomTime(myUser: MyUser, userCustomTimeRecord: UserCustomTimeRecor
         Time.Custom.User(myUser, userCustomTimeRecord), MyCustomTime {
 
     override var endExactTimeStamp
-        get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }
+        get() = super.endExactTimeStamp
         set(value) {
             check((value == null) != (customTimeRecord.endTime == null))
 

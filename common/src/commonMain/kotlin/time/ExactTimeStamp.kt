@@ -66,6 +66,23 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
                 return Offset(long, finalOffset)
             }
+
+            fun fromDateTime(dateTime: DateTime, offset: Double): Offset {
+                val date = dateTime.date
+                val hourMinute = dateTime.hourMinute
+
+                /**
+                 * This doesn't actually construct a valid DateTimeSoy.  It's just a hacky way to get the correct
+                 * values into DateTimeTz.
+                 */
+
+                val dateTimeSoy = DateTimeSoy(date.year, date.month, date.day, hourMinute.hour, hourMinute.minute)
+                val dateTimeTz = dateTimeSoy.toOffsetUnadjusted(TimezoneOffset(offset))
+
+                return Offset(dateTimeTz)
+            }
+
+            fun compare(a: Offset, b: Offset) = compareValuesBy(a, b, { it.date }, { it.hourMilli })
         }
 
         override val date get() = Date(toDateTimeTz())

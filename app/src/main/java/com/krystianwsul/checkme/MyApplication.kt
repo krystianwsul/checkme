@@ -104,7 +104,7 @@ class MyApplication : Application() {
         AndroidDomainUpdater.init()
 
         Preferences.language.applySettingStartup()
-
+        Preferences.setVersionCode()
         Preferences.tickLog.logLineDate("MyApplication.onCreate")
 
         FirebaseDatabase.getInstance().apply {

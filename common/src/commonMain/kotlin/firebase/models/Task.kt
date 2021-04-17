@@ -25,7 +25,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             EndData(
                     ExactTimeStamp.Local(it.time),
                     it.deleteInstances,
-                    ExactTimeStamp.Offset.fromOffset(it.time, it.offset)
+                    ExactTimeStamp.Offset.fromOffset(it.time, it.offset),
             )
         }
     }

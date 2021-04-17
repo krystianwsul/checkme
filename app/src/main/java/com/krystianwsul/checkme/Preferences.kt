@@ -43,6 +43,7 @@ object Preferences {
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
     private const val KEY_SHOW_PROJECTS = "showProjects"
     private const val KEY_LANGUAGE = "language"
+    private const val KEY_VERSION_CODE = "versionCode"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -87,6 +88,10 @@ object Preferences {
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
 
     val saveLog = Logger(KEY_SAVE_LOG)
+
+    val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
+
+    fun setVersionCode() = sharedPreferences.edit { putInt(KEY_VERSION_CODE, BuildConfig.VERSION_CODE) }
 
     init {
         tokenRelay.distinctUntilChanged()

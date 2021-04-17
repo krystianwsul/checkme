@@ -72,7 +72,6 @@ class InstanceGenerationTest {
                         mockk(relaxed = true),
                         taskJson,
                 ),
-                mockk(relaxed = true),
         )
     }
 

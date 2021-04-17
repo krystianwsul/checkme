@@ -60,7 +60,7 @@ class InstanceRelevance(val instance: Instance<*>) {
     }
 
     fun setRemoteRelevant(
-            remoteCustomTimeRelevances: Map<CustomTimeKey.Project<*>, RemoteCustomTimeRelevance>, // todo customtime relevance
+            projectCustomTimeRelevances: Map<CustomTimeKey.Project<*>, ProjectCustomTimeRelevance>, // todo customtime relevance
             remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>,
     ) {
         check(relevant)
@@ -69,13 +69,13 @@ class InstanceRelevance(val instance: Instance<*>) {
                 .time
                 .timePair
                 .customTimeKey
-                ?.let { remoteCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>).setRelevant() } // todo customtime relevance
+                ?.let { projectCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>).setRelevant() } // todo customtime relevance
 
         remoteProjectRelevances.getValue(instance.task.project.projectKey).setRelevant()
 
         instance.scheduleKey
                 .scheduleTimePair
                 .customTimeKey
-                ?.let { remoteCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>).setRelevant() } // todo customtime relevance
+                ?.let { projectCustomTimeRelevances.getValue(it as CustomTimeKey.Project<*>).setRelevant() } // todo customtime relevance
     }
 }

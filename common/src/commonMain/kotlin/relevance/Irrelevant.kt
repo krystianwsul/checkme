@@ -143,7 +143,7 @@ object Irrelevant {
 
         val remoteCustomTimes = project.customTimes
         val remoteCustomTimeRelevances =
-                remoteCustomTimes.associate { it.key to RemoteCustomTimeRelevance(it) }
+                remoteCustomTimes.associate { it.key to ProjectCustomTimeRelevance(it) }
 
         if (project is PrivateProject) {
             project.customTimes

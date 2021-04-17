@@ -48,7 +48,7 @@ object RelevanceChecker {
 
                 val rootUsers = rootUserManager.records.mapValues { RootUser(it.value) }
 
-                val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values } // todo customtime relevance remove irrelevant
+                val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values }
                 val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
                 userCustomTimeRelevances.values

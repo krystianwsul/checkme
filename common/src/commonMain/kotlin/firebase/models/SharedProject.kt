@@ -146,14 +146,8 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(
-            ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>,
-            allowCopy: Boolean,
-    ): SharedCustomTime { // todo customtime migrate
+    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom.Project<*>): SharedCustomTime { // todo customtime migrate
         fun copy(): SharedCustomTime {
-            if (!allowCopy) throw UnsupportedOperationException()
-
             val private = customTime as? PrivateCustomTime
 
             val customTimeJson = SharedCustomTimeJson(
@@ -173,7 +167,7 @@ class SharedProject(
                     customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
                     customTime.getHourMinute(DayOfWeek.SATURDAY).minute,
                     private?.projectId?.key,
-                    private?.id?.value
+                    private?.id?.value,
             )
 
             return newRemoteCustomTime(customTimeJson)

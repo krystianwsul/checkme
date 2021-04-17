@@ -93,15 +93,12 @@ class PrivateProject(
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,
             customTime: Time.Custom.Project<*>,
-            allowCopy: Boolean,
     ): PrivateCustomTime = when (customTime) { // todo customtime migrate
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {
                 customTimes.single { it.id == customTime.privateKey }
             } else {
-                if (!allowCopy) throw UnsupportedOperationException()
-
                 val customTimeJson = PrivateCustomTimeJson(
                         customTime.name,
                         customTime.getHourMinute(DayOfWeek.SUNDAY).hour,

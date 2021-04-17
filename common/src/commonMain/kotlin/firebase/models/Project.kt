@@ -95,12 +95,7 @@ abstract class Project<T : ProjectType>(
             instanceJsons: MutableMap<String, InstanceJson>,
     ): TaskRecord<T>
 
-    private fun convertScheduleKey(
-            userInfo: UserInfo,
-            oldTask: Task<*>,
-            oldScheduleKey: ScheduleKey,
-            allowCopy: Boolean,
-    ): ScheduleKey {
+    private fun convertScheduleKey(userInfo: UserInfo, oldTask: Task<*>, oldScheduleKey: ScheduleKey): ScheduleKey {
         check(oldTask.project != this)
 
         val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
@@ -115,7 +110,7 @@ abstract class Project<T : ProjectType>(
                     else -> throw IllegalStateException()
                 }
 
-                getOrCreateCustomTime(ownerKey, customTime, allowCopy)
+                getOrCreateCustomTime(ownerKey, customTime)
             }
             is Time.Custom.User -> customTime
         }
@@ -140,12 +135,7 @@ abstract class Project<T : ProjectType>(
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(deviceDbInfo.key, oldInstance, newProjectKey)
 
-            val newScheduleKey = convertScheduleKey(
-                    deviceDbInfo.userInfo,
-                    oldTask,
-                    oldInstance.scheduleKey,
-                    true,
-            )
+            val newScheduleKey = convertScheduleKey(deviceDbInfo.userInfo, oldTask, oldInstance.scheduleKey)
 
             InstanceConversionData(newInstance, newScheduleKey, updater)
         }
@@ -184,7 +174,6 @@ abstract class Project<T : ProjectType>(
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
             customTime: Time.Custom.Project<*>,
-            allowCopy: Boolean = true,
     ): Time.Custom.Project<T> // todo customtime migrate
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
@@ -204,14 +193,7 @@ abstract class Project<T : ProjectType>(
 
         val instanceDate = instance.instanceDate
 
-        val newInstanceTime = instance.instanceTime.let {
-            when (it) {
-                is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
-                is Time.Custom.User -> it
-                is Time.Normal -> it
-            }
-        }
-
+        val newInstanceTime = getOrCopyTime(ownerKey, instance.instanceTime)
         val instanceTimeString = JsonTime.fromTime<T>(newInstanceTime).toJson()
 
         val parentState = instance.parentState

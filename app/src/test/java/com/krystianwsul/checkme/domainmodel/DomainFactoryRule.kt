@@ -107,7 +107,7 @@ class DomainFactoryRule : TestRule {
         every { ImageManager.prefetch(any(), any(), any()) } returns Unit
 
         mockkObject(DefaultCustomTimeCreator)
-        every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
+        every { DefaultCustomTimeCreator.createDefaultCustomTimes(any(), any()) } returns Unit
 
         DomainThreadChecker.instance = mockk(relaxed = true)
 

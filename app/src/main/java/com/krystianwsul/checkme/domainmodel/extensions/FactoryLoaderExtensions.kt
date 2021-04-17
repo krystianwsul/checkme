@@ -13,8 +13,6 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable =
         CompletableDomainUpdate.create("updateDeviceDbInfo") {
             DomainThreadChecker.instance.requireDomainThread()
 
-            if (myUserFactory.isSaved || projectsFactory.isSharedSaved) throw SavedFactoryException()
-
             this.deviceDbInfo = deviceDbInfo
 
             myUserFactory.user.apply {

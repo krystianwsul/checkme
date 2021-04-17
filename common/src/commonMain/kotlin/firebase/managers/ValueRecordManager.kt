@@ -7,15 +7,16 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class ValueRecordManager<T : Any> : RecordManager {
 
-    final override var isSaved = false
-        protected set
-
-    abstract var value: T
-        protected set
+    private var _value: T? = null
+    val value get() = _value!!
 
     abstract val records: Collection<RemoteRecord>
 
     protected abstract val databasePrefix: String
+
+    protected fun setInitialValue(value: T) {
+        _value = value
+    }
 
     final override fun save(values: MutableMap<String, Any?>) {
         val myValues = mutableMapOf<String, Any?>()
@@ -26,25 +27,17 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         if (myValues.isNotEmpty()) {
             ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
 
-            check(!isSaved)
-
-            isSaved = newIsSaved
-
             values += myValues.mapKeys { "$databasePrefix/${it.key}" }
         }
     }
 
-    protected fun set(throwIfUnequal: (T) -> Unit, valueCallback: () -> T): ChangeWrapper<T>? { // lazy to prevent parsing if LOCAL
-        return if (isSaved) { // todo isSaved propagate
-            throwIfUnequal(value)
-
-            isSaved = false
-
-            null
-        } else {
-            value = valueCallback()
+    protected fun set(valueChanged: (T) -> Boolean, valueCallback: () -> T): ChangeWrapper<T>? { // lazy to prevent parsing if LOCAL
+        return if (_value?.let(valueChanged) != false) {
+            _value = valueCallback()
 
             ChangeWrapper(ChangeType.REMOTE, value)
+        } else {
+            null
         }
     }
 }

@@ -5,7 +5,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.managers.JsonDifferenceException
 import com.krystianwsul.common.firebase.managers.ValueRecordManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.UserKey
@@ -24,20 +23,24 @@ class MyUserManager(
 
     override val databasePrefix = DatabaseWrapper.USERS_KEY
 
-    override var value = if (!snapshot.exists) {
-        val userWrapper = UserWrapper(
-                deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
-        )
+    init {
+        setInitialValue(
+                if (!snapshot.exists) {
+                    val userWrapper = UserWrapper(
+                            deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
+                    )
 
-        MyUserRecord(true, userWrapper, snapshot.toKey())
-    } else {
-        snapshot.toRecord()
+                    MyUserRecord(true, userWrapper, snapshot.toKey())
+                } else {
+                    snapshot.toRecord()
+                }
+        )
     }
 
-    override val records = listOf(value)
+    override val records get() = listOf(value)
 
     override fun set(snapshot: Snapshot<UserWrapper>) = set(
-            { JsonDifferenceException.compare(it.createObject, snapshot.value) },
+            { it.createObject != snapshot.value },
             { snapshot.toRecord() },
     )
 }

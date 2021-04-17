@@ -20,8 +20,6 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
         get() = userRelay.value!!
         private set(value) = userRelay.accept(value)
 
-    val isSaved get() = myUserManager.isSaved
-
     val sharedProjectKeysObservable =
             userRelay.map { ChangeWrapper(ChangeType.REMOTE, it.projectIds) }.distinctUntilChanged()!!
 
@@ -32,8 +30,6 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
                 .startWithItem(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
     }.distinctUntilChanged()!!
-
-    val savedList get() = myUserManager.savedList
 
     init {
         user.name = deviceDbInfo.name

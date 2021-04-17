@@ -401,10 +401,10 @@ class ProjectsFactoryNewTest {
                         InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
                                 Pair(
                                         InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
-                                        InstanceJson(done = done.long, doneOffset = done.offset)
+                                        InstanceJson(done = done.long, doneOffset = done.offset),
                                 )
                         )
-                )
+                ),
         )
     }
 

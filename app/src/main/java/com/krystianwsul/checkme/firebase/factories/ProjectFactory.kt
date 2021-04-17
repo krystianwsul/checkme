@@ -36,10 +36,6 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     var project: Project<T>
         private set
 
-    val isSaved get() = projectManager.isSaved || rootInstanceManagers.values.any { it.isSaved }
-
-    val savedList get() = projectManager.savedList + rootInstanceManagers.values.flatMap { it.savedList }
-
     private fun newRootInstanceManagers(
             projectRecord: ProjectRecord<T>,
             snapshots: Map<TaskKey, Snapshot<Map<String, Map<String, InstanceJson>>>>,

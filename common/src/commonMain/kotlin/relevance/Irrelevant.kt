@@ -4,11 +4,13 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.soywiz.klock.days
 
 object Irrelevant {
 
     fun setIrrelevant(
+            userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
             parent: Project.Parent,
             project: Project<*>,
             now: ExactTimeStamp.Local,
@@ -142,13 +144,16 @@ object Irrelevant {
         }
 
         val remoteCustomTimes = project.customTimes
-        val remoteCustomTimeRelevances =
-                remoteCustomTimes.associate { it.key to ProjectCustomTimeRelevance(it) }
+
+        val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
+                userCustomTimeRelevances,
+                remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
+        )
 
         if (project is PrivateProject) {
             project.customTimes
                     .filter { it.notDeleted(getIrrelevantNow(it.endExactTimeStamp)) }
-                    .forEach { remoteCustomTimeRelevances.getValue(it.key).setRelevant() }
+                    .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
         }
 
         val remoteProjects = listOf(project)
@@ -160,15 +165,16 @@ object Irrelevant {
 
         taskRelevances.values
                 .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
         instanceRelevances.values
                 .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
-        val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
+        val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
+                .values
                 .filter { it.relevant }
-                .map { it.customTime }
+                .map { it.customTime as Time.Custom.Project<*> }
 
         val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 

@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImp
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
@@ -290,18 +291,27 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
             val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
 
+            val userCustomTimeRelevances = domainFactory.run {
+                friendsFactory.userMap
+                        .map { it.value.value } +
+                        myUserFactory.user
+            }
+                    .flatMap { it.customTimes.values }
+                    .associate { it.key to CustomTimeRelevance(it) }
+
             domainFactory.projectsFactory
                     .projects
                     .values
                     .forEach {
                         val results = Irrelevant.setIrrelevant(
+                                userCustomTimeRelevances,
                                 object : Project.Parent {
 
                                     override fun deleteProject(project: Project<*>) = throw NotImplementedError()
                                 },
                                 it,
                                 exactTimeStamp,
-                                false
+                                false,
                         )
 
                         results.irrelevantExistingInstances

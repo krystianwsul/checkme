@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
@@ -46,6 +47,11 @@ object RelevanceChecker {
                 val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
                 val rootUsers = rootUserManager.records.mapValues { RootUser(it.value.value) }
+
+                val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values } // todo customtime relevance remove irrelevant
+                val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
+
+//                userCustomTimeRelevances.filter { it.value.customTime } todo customtime mark relevant
 
                 var privateData: JsPrivateProjectManager? = null
                 var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
@@ -115,12 +121,13 @@ object RelevanceChecker {
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
                         Irrelevant.setIrrelevant(
+                                userCustomTimeRelevances,
                                 object : Project.Parent {
 
                                     override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
                                 },
                                 privateProject,
-                                ExactTimeStamp.Local.now
+                                ExactTimeStamp.Local.now,
                         )
 
                         check(privateData == null)
@@ -141,12 +148,13 @@ object RelevanceChecker {
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 
                                 val removedSharedProjects = Irrelevant.setIrrelevant(
+                                        userCustomTimeRelevances,
                                         object : Project.Parent {
 
                                             override fun deleteProject(project: Project<*>) = Unit
                                         },
                                         sharedProject,
-                                        ExactTimeStamp.Local.now
+                                        ExactTimeStamp.Local.now,
                                 ).removedSharedProjects
                                 check(removedSharedProjects.size < 2)
 

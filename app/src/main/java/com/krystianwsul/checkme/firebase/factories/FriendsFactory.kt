@@ -31,7 +31,7 @@ class FriendsFactory(
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
     private val strangerProjectManager = StrangerProjectManager()
 
-    private val userMap = rootUserManager.records
+    val userMap = rootUserManager.records
             .mapValues { it.value.newValue(RootUser(it.value.value)) }
             .toMutableMap()
 

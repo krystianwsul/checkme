@@ -99,7 +99,7 @@ class DomainFactory(
 
         projectsFactory.privateProject.let {
             if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(it)
+                DefaultCustomTimeCreator.createDefaultCustomTimes(it, myUserFactory.user)
 
                 it.defaultTimesCreated = true
             }

@@ -148,9 +148,9 @@ class SharedProject(
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>, // todo customtime migrate
+            customTime: Time.Custom.Project<*>,
             allowCopy: Boolean,
-    ): SharedCustomTime {
+    ): SharedCustomTime { // todo customtime migrate
         fun copy(): SharedCustomTime {
             if (!allowCopy) throw UnsupportedOperationException()
 

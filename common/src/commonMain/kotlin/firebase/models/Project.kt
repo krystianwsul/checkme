@@ -183,7 +183,7 @@ abstract class Project<T : ProjectType>(
 
     protected abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>, // todo customtime migrate
+            customTime: Time.Custom.Project<*>,
             allowCopy: Boolean = true,
     ): Time.Custom.Project<T> // todo customtime migrate
 

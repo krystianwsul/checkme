@@ -92,9 +92,9 @@ class PrivateProject(
 
     override fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>, // todo customtime migrate
+            customTime: Time.Custom.Project<*>,
             allowCopy: Boolean,
-    ) = when (customTime) {
+    ): PrivateCustomTime = when (customTime) { // todo customtime migrate
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {

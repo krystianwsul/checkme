@@ -51,7 +51,9 @@ object RelevanceChecker {
                 val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values } // todo customtime relevance remove irrelevant
                 val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
-//                userCustomTimeRelevances.filter { it.value.customTime } todo customtime mark relevant
+                userCustomTimeRelevances.values
+                        .filter { (it.customTime as Time.Custom.User).notDeleted(ExactTimeStamp.Local.now) }
+                        .forEach { it.setRelevant() }
 
                 var privateData: JsPrivateProjectManager? = null
                 var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
@@ -89,6 +91,10 @@ object RelevanceChecker {
                             callback(root)
                         }
                     }
+
+                    userCustomTimeRelevances.values
+                            .filter { !it.relevant }
+                            .forEach { (it.customTime as Time.Custom.User).delete() }
 
                     if (sharedData!!.second.isEmpty()) {
                         saveProjects()
@@ -161,10 +167,7 @@ object RelevanceChecker {
                                 removedSharedProjects.singleOrNull()
                             }
 
-                    sharedData = Pair(
-                            sharedProjectManager,
-                            sharedDataInner.filterNotNull(),
-                    )
+                    sharedData = Pair(sharedProjectManager, sharedDataInner.filterNotNull())
 
                     projectCallback()
                 }

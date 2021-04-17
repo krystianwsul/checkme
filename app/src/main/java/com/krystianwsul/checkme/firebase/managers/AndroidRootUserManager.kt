@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.UserKey
 class AndroidRootUserManager(
         children: List<FriendsLoader.UserWrapperData>,
         private val databaseWrapper: DatabaseWrapper,
-) : RootUserManager() {
+) : RootUserManager<ReasonWrapper<RootUserRecord>>() {
 
     companion object {
 
@@ -27,6 +27,8 @@ class AndroidRootUserManager(
                 children.associate { it.snapshot.toKey() to ReasonWrapper(it.reason, it.snapshot.toRecord()) }
         )
     }
+
+    override fun valueToRecord(value: ReasonWrapper<RootUserRecord>) = value.value
 
     fun set(userWrapperData: FriendsLoader.UserWrapperData) = set(
             userWrapperData.snapshot.toKey(),

@@ -7,7 +7,10 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class JsRootUserManager(databaseWrapper: DatabaseWrapper, userWrappers: Map<String, UserWrapper>) : RootUserManager() {
+class JsRootUserManager(
+        databaseWrapper: DatabaseWrapper,
+        userWrappers: Map<String, UserWrapper>,
+) : RootUserManager<ReasonWrapper<RootUserRecord>>() {
 
     init {
         setInitialRecords(
@@ -21,4 +24,6 @@ class JsRootUserManager(databaseWrapper: DatabaseWrapper, userWrappers: Map<Stri
                 }
         )
     }
+
+    override fun valueToRecord(value: ReasonWrapper<RootUserRecord>) = value.value
 }

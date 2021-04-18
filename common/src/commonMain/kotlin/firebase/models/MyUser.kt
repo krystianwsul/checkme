@@ -4,7 +4,6 @@ import com.badoo.reaktive.subject.publish.PublishSubject
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.firebase.records.MyUserRecord
-import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
 
@@ -33,7 +32,7 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
         friendChanges.onNext(Unit)
     }
 
-    fun newCustomTime(customTimeJson: UserCustomTimeJson): Time.Custom.User {
+    fun newCustomTime(customTimeJson: UserCustomTimeJson): MyUserCustomTime {
         val userCustomTimeRecord = remoteMyUserRecord.newCustomTimeRecord(customTimeJson)
         val userCustomTime = MyUserCustomTime(this, userCustomTimeRecord)
         check(!customTimes.containsKey(userCustomTime.id))

@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserCustomTimeJson
+import com.krystianwsul.common.firebase.models.PrivateCustomTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
@@ -37,17 +38,23 @@ fun DomainUpdater.updateCustomTime(
         customTimeId: CustomTimeKey,
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
-): Completable = CompletableDomainUpdate.create("updateCustomTime") {
+): Completable = CompletableDomainUpdate.create("updateCustomTime") { now ->
     check(name.isNotEmpty())
 
     val customTime = getCustomTime(customTimeId) as MyCustomTime
 
-    customTime.setName(this, name)
+    if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES && customTime is PrivateCustomTime) {
+        customTime.endExactTimeStamp = now
 
-    for (dayOfWeek in DayOfWeek.values()) {
-        val hourMinute = hourMinutes.getValue(dayOfWeek)
+        createUserCustomTime(name, hourMinutes)
+    } else {
+        customTime.setName(this, name)
 
-        customTime.setHourMinute(this, dayOfWeek, hourMinute)
+        for (dayOfWeek in DayOfWeek.values()) {
+            val hourMinute = hourMinutes.getValue(dayOfWeek)
+
+            customTime.setHourMinute(this, dayOfWeek, hourMinute)
+        }
     }
 
     DomainUpdater.Params(false, notificationType)
@@ -64,24 +71,7 @@ fun DomainUpdater.createCustomTime(
     check(DayOfWeek.set == hourMinutes.keys)
 
     val customTime = if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
-        myUserFactory.user.newCustomTime(UserCustomTimeJson(
-                name,
-                hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
-                hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
-                hourMinutes.getValue(DayOfWeek.MONDAY).hour,
-                hourMinutes.getValue(DayOfWeek.MONDAY).minute,
-                hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
-                hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
-                hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
-                hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
-                hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
-                hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
-                hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
-                hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
-                hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
-                hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-                ownerKey = ownerKey.key,
-        ))
+        createUserCustomTime(name, hourMinutes)
     } else {
         projectsFactory.privateProject.newRemoteCustomTime(PrivateCustomTimeJson(
                 name,
@@ -104,3 +94,25 @@ fun DomainUpdater.createCustomTime(
 
     DomainUpdater.Result(customTime.key, false, notificationType)
 }.perform(this)
+
+private fun DomainFactory.createUserCustomTime(
+        name: String,
+        hourMinutes: Map<DayOfWeek, HourMinute>,
+) = myUserFactory.user.newCustomTime(UserCustomTimeJson(
+        name,
+        hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
+        hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
+        hourMinutes.getValue(DayOfWeek.MONDAY).hour,
+        hourMinutes.getValue(DayOfWeek.MONDAY).minute,
+        hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
+        hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
+        hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
+        hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
+        hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
+        hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
+        hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
+        hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
+        hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
+        hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
+        ownerKey = ownerKey.key,
+))

@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserCustomTimeJson
-import com.krystianwsul.common.firebase.models.PrivateCustomTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
@@ -42,20 +41,17 @@ fun DomainUpdater.updateCustomTime(
     check(name.isNotEmpty())
 
     val customTime = getCustomTime(customTimeId) as MyCustomTime
+    customTime.setName(this, name)
 
-    if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES && customTime is PrivateCustomTime) {
-        customTime.endExactTimeStamp = now
+    for (dayOfWeek in DayOfWeek.values()) {
+        val hourMinute = hourMinutes.getValue(dayOfWeek)
 
-        createUserCustomTime(name, hourMinutes)
-    } else {
-        customTime.setName(this, name)
-
-        for (dayOfWeek in DayOfWeek.values()) {
-            val hourMinute = hourMinutes.getValue(dayOfWeek)
-
-            customTime.setHourMinute(this, dayOfWeek, hourMinute)
-        }
+        customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
+
+    customTime.endExactTimeStamp = now
+
+    createUserCustomTime(name, hourMinutes)
 
     DomainUpdater.Params(false, notificationType)
 }.perform(this)
@@ -114,5 +110,4 @@ private fun DomainFactory.createUserCustomTime(
         hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
         hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
         hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-        ownerKey = ownerKey.key,
 ))

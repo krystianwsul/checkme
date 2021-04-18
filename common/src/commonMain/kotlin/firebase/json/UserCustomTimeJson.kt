@@ -24,5 +24,4 @@ data class UserCustomTimeJson @JvmOverloads constructor(
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
         var endTime: Long? = null,
-        val ownerKey: String = "",
 ) : CustomTimeJson, Parcelable

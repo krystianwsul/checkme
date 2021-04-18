@@ -80,7 +80,6 @@ fun DomainUpdater.createCustomTime(
                 hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
                 hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
                 hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-                ownerKey = ownerKey.key,
         ))
     } else {
         projectsFactory.privateProject.newRemoteCustomTime(PrivateCustomTimeJson(

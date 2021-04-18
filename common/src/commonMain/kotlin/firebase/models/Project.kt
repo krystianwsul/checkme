@@ -102,7 +102,7 @@ abstract class Project<T : ProjectType>(
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val newCustomTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
+        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
             is Time.Custom.Project<*> -> {
                 val ownerKey = when (customTime) {
                     is PrivateCustomTime -> userInfo.key
@@ -110,12 +110,12 @@ abstract class Project<T : ProjectType>(
                     else -> throw IllegalStateException()
                 }
 
-                getOrCreateCustomTime(ownerKey, customTime)
+                getOrCreateCustomTime(ownerKey, oldScheduleDate.dayOfWeek, customTime)
             }
             is Time.Custom.User -> customTime
         }
 
-        return ScheduleKey(oldScheduleDate, TimePair(newCustomTime.key))
+        return ScheduleKey(oldScheduleDate, convertedTime.timePair)
     }
 
     private class InstanceConversionData(
@@ -171,14 +171,25 @@ abstract class Project<T : ProjectType>(
         return newTask to instanceDatas.map { it.updater }
     }
 
-    protected abstract fun getOrCreateCustomTime(
+    private fun getOrCreateCustomTime(
+            ownerKey: UserKey,
+            dayOfWeek: DayOfWeek,
+            customTime: Time.Custom.Project<*>,
+    ): Time {
+        return if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES)
+            Time.Normal(customTime.getHourMinute(dayOfWeek))
+        else
+            getOrCreateCustomTimeOld(ownerKey, customTime)
+    }
+
+    protected abstract fun getOrCreateCustomTimeOld(
             ownerKey: UserKey,
             customTime: Time.Custom.Project<*>,
-    ): Time.Custom.Project<T> // todo customtime migrate
+    ): Time.Custom.Project<T>
 
-    fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
+    fun getOrCopyTime(ownerKey: UserKey, dayOfWeek: DayOfWeek, time: Time) = time.let {
         when (it) {
-            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, it)
+            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, dayOfWeek, it)
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
@@ -193,7 +204,7 @@ abstract class Project<T : ProjectType>(
 
         val instanceDate = instance.instanceDate
 
-        val newInstanceTime = getOrCopyTime(ownerKey, instance.instanceTime)
+        val newInstanceTime = getOrCopyTime(ownerKey, instanceDate.dayOfWeek, instance.instanceTime)
         val instanceTimeString = JsonTime.fromTime<T>(newInstanceTime).toJson()
 
         val parentState = instance.parentState

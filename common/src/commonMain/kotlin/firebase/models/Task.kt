@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -595,11 +596,10 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
         for ((scheduleData, time) in scheduleDatas) {
-            val copiedTime = project.getOrCopyTime(ownerKey, time)
-
             when (scheduleData) {
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
+                    val copiedTime = project.getOrCopyTime(ownerKey, date.dayOfWeek, time)
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
                             project.copyScheduleHelper.newSingle(
@@ -619,6 +619,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
+                        val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                                 project.copyScheduleHelper.newWeekly(
                                         now.long,
@@ -640,6 +642,17 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 is ScheduleData.MonthlyDay -> {
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
+                    val today = Date.today()
+
+                    val dayOfWeek = getDateInMonth(
+                            today.year,
+                            today.month,
+                            scheduleData.dayOfMonth,
+                            scheduleData.beginningOfMonth,
+                    ).dayOfWeek
+
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             project.copyScheduleHelper.newMonthlyDay(
                                     now.long,
@@ -659,6 +672,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 }
                 is ScheduleData.MonthlyWeek -> {
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             project.copyScheduleHelper.newMonthlyWeek(
@@ -679,6 +693,12 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is ScheduleData.Yearly -> {
+                    val copiedTime = project.getOrCopyTime(
+                            ownerKey,
+                            Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
+                            time,
+                    )
+
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
                             project.copyScheduleHelper.newYearly(
                                     now.long,
@@ -702,13 +722,20 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         intervalsProperty.invalidate()
     }
 
-    fun copySchedules(
-            deviceDbInfo: DeviceDbInfo,
-            now: ExactTimeStamp.Local,
-            schedules: List<Schedule<*>>,
-    ) {
+    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp.Local, schedules: List<Schedule<*>>) {
         for (schedule in schedules) {
-            val copiedTime = project.getOrCopyTime(deviceDbInfo.key, schedule.time)
+            val today = Date.today()
+
+            val dayOfWeek = when (schedule) {
+                is SingleSchedule -> schedule.date.dayOfWeek
+                is WeeklySchedule -> schedule.dayOfWeek
+                is MonthlyDaySchedule -> schedule.getDateInMonth(today.year, today.month).dayOfWeek
+                is MonthlyWeekSchedule -> schedule.dayOfWeek
+                is YearlySchedule -> schedule.getDateInYear(today.year).dayOfWeek
+                else -> throw UnsupportedOperationException()
+            }
+
+            val copiedTime = project.getOrCopyTime(deviceDbInfo.key, dayOfWeek, schedule.time)
 
             val assignedTo = schedule.takeIf { it.rootTask.project == project }
                     ?.assignedTo

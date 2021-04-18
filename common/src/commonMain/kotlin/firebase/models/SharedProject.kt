@@ -146,7 +146,7 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: Time.Custom.Project<*>): SharedCustomTime { // todo customtime migrate
+    override fun getOrCreateCustomTimeOld(ownerKey: UserKey, customTime: Time.Custom.Project<*>): SharedCustomTime {
         fun copy(): SharedCustomTime {
             val private = customTime as? PrivateCustomTime
 

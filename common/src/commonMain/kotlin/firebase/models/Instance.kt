@@ -403,7 +403,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             it.instanceJsonTime = dateTime?.time?.let {
                 task.project
-                        .getOrCopyTime(ownerKey, it)
+                        .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it)
                         .let { JsonTime.fromTime<T>(it) }
             }
         }

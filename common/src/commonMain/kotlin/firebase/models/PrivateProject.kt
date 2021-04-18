@@ -90,10 +90,10 @@ class PrivateProject(
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
             getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    override fun getOrCreateCustomTime(
+    override fun getOrCreateCustomTimeOld(
             ownerKey: UserKey,
             customTime: Time.Custom.Project<*>,
-    ): PrivateCustomTime = when (customTime) { // todo customtime migrate
+    ): PrivateCustomTime = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {

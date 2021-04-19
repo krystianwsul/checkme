@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.soywiz.klock.days
 
 object Irrelevant {
@@ -28,8 +27,8 @@ object Irrelevant {
         // relevant hack
         val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
-        val taskHierarchies = project.taskHierarchies // todo taskhierarchy relevance
-        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey as TaskHierarchyKey to TaskHierarchyRelevance(it) } // todo taskhierarchy relevance
+        val taskHierarchies = project.taskHierarchies
+        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances
         val rootInstances = project.getRootInstances(null, now.toOffset().plusOne(), now).toList()
@@ -196,7 +195,7 @@ object Irrelevant {
                 irrelevantNoScheduleOrParents,
                 irrelevantTasks,
                 irrelevantRemoteCustomTimes,
-                irrelevantRemoteProjects.map { it as SharedProject }
+                irrelevantRemoteProjects.map { it as SharedProject },
         )
     }
 
@@ -204,7 +203,7 @@ object Irrelevant {
 
     data class Result(
             val irrelevantExistingInstances: Collection<Instance<*>>,
-            val irrelevantTaskHierarchies: Collection<ProjectTaskHierarchy<*>>,
+            val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
             val irrelevantSchedules: Collection<Schedule<*>>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
             val irrelevantTasks: Collection<Task<*>>,

@@ -96,7 +96,6 @@ abstract class Project<T : ProjectType>(
     }
 
     protected abstract fun copyTaskRecord(
-// todo taskhierchy write double-check
             oldTask: Task<*>,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,

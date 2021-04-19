@@ -7,7 +7,6 @@ import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class PrivateTaskJson @JvmOverloads constructor(
-        // todo taskhierarchy copy?
         override var name: String = "",
         override val startTime: Long = 0,
         override var startTimeOffset: Double? = null,

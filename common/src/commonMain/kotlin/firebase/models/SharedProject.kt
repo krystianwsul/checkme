@@ -216,7 +216,7 @@ class SharedProject(
             oldTask.endExactTimeStamp?.long,
             oldTask.note,
             instanceJsons,
-            ordinal = oldTask.ordinal
+            ordinal = oldTask.ordinal,
     ))
 
     private fun newTask(taskJson: SharedTaskJson): Task<ProjectType.Shared> {

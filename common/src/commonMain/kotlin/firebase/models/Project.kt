@@ -23,7 +23,7 @@ abstract class Project<T : ProjectType>(
 
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
-    protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T> // todo taskhierarchy read
+    protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom.Project<T>>
 
     abstract val projectKey: ProjectKey<T>

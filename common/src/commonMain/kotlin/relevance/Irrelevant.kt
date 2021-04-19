@@ -27,7 +27,7 @@ object Irrelevant {
         // relevant hack
         val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
-        val taskHierarchies = project.taskHierarchies
+        val taskHierarchies = project.taskHierarchies // todo taskhierarchy relevance
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances

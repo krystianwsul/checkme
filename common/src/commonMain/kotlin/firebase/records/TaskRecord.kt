@@ -256,5 +256,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
     fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)
 
+    fun newTaskHierarchyRecordId() = projectRecord.newNestedTaskHierarchyRecordId(id)
+
     private class MalformedTaskException(message: String) : Exception(message)
 }

@@ -137,8 +137,11 @@ class SharedProjectRecord(
     override fun getScheduleRecordId(taskId: String) =
             databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() =
-            databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
+    override fun getProjectTaskHierarchyRecordId() =
+            databaseWrapper.newSharedProjectTaskHierarchyRecordId(projectKey)
+
+    override fun newNestedTaskHierarchyRecordId(taskId: String) =
+            databaseWrapper.newSharedNestedTaskHierarchyRecordId(projectKey, taskId)
 
     override fun getCustomTimeRecord(id: String) =
             customTimeRecords.getValue(CustomTimeId.Project.Shared(id))

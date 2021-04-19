@@ -149,7 +149,7 @@ class DomainFactoryRule : TestRule {
             }
 
             var taskHierarchyId = 0
-            every { getPrivateTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
+            every { newPrivateProjectTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
 
             var privateCustomTimeId = 0
             every { newPrivateCustomTimeRecordId(any()) } answers { "privateCustomTimeId" + ++privateCustomTimeId }

@@ -24,7 +24,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val taskRecords: Map<String, TaskRecord<T>>
 
-    lateinit var taskHierarchyRecords: MutableMap<String, TaskHierarchyRecord>
+    lateinit var taskHierarchyRecords: MutableMap<String, ProjectTaskHierarchyRecord>
         private set
 
     protected fun initTaskHierarchyRecords() {
@@ -32,7 +32,7 @@ abstract class ProjectRecord<T : ProjectType>(
                 .mapValues { (id, taskHierarchyJson) ->
                     check(id.isNotEmpty())
 
-                    TaskHierarchyRecord(id, this, taskHierarchyJson)
+                    ProjectTaskHierarchyRecord(id, this, taskHierarchyJson)
                 }
                 .toMutableMap()
     }
@@ -54,15 +54,16 @@ abstract class ProjectRecord<T : ProjectType>(
                 taskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newTaskHierarchyRecord(taskHierarchyJson: ProjectTaskHierarchyJson): TaskHierarchyRecord {
-        val taskHierarchyRecord = TaskHierarchyRecord(this, taskHierarchyJson)
+    fun newTaskHierarchyRecord(taskHierarchyJson: ProjectTaskHierarchyJson): ProjectTaskHierarchyRecord {
+        val taskHierarchyRecord = ProjectTaskHierarchyRecord(this, taskHierarchyJson)
         check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
 
         taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
         return taskHierarchyRecord
     }
 
-    abstract fun getTaskHierarchyRecordId(): String
+    abstract fun getProjectTaskHierarchyRecordId(): String
+    abstract fun newNestedTaskHierarchyRecordId(taskId: String): String
 
     abstract fun getTaskRecordId(): String
 

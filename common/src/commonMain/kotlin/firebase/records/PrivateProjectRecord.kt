@@ -98,8 +98,11 @@ class PrivateProjectRecord(
     override fun getScheduleRecordId(taskId: String) =
             databaseWrapper.newPrivateScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() =
-            databaseWrapper.getPrivateTaskHierarchyRecordId(projectKey)
+    override fun getProjectTaskHierarchyRecordId() =
+            databaseWrapper.newPrivateProjectTaskHierarchyRecordId(projectKey)
+
+    override fun newNestedTaskHierarchyRecordId(taskId: String) =
+            databaseWrapper.newPrivateNestedTaskHierarchyRecordId(projectKey, taskId)
 
     override fun getCustomTimeRecord(id: String) =
             customTimeRecords.getValue(CustomTimeId.Project.Private(id))

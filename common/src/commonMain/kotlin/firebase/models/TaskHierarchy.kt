@@ -9,6 +9,12 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) : TaskParentEntry {
 
+    companion object {
+
+        // todo after flipping this, remove all code for creating ProjectTaskHierarchies
+        const val WRITE_NESTED_TASK_HIERARCHIES = false
+    }
+
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 
     final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }

@@ -2,8 +2,8 @@ package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
@@ -177,7 +177,7 @@ object IntervalBuilder {
 
         abstract fun toIntervalBuilder(): IntervalBuilder<T>
 
-        class Parent<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : TypeBuilder<T>() {
+        class Parent<T : ProjectType>(val parentTaskHierarchy: ProjectTaskHierarchy<T>) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = parentTaskHierarchy.startExactTimeStampOffset
 
@@ -230,7 +230,7 @@ object IntervalBuilder {
 
         data class Child<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val parentTaskHierarchy: TaskHierarchy<T>,
+                val parentTaskHierarchy: ProjectTaskHierarchy<T>,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset

@@ -55,7 +55,7 @@ class PrivateProject(
 
         projectRecord.taskHierarchyRecords
                 .values
-                .map { TaskHierarchy(this, it) }
+                .map { ProjectTaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
 
         initializeInstanceHierarchyContainers()

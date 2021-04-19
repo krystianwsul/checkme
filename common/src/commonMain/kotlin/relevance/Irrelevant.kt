@@ -203,7 +203,7 @@ object Irrelevant {
 
     data class Result(
             val irrelevantExistingInstances: Collection<Instance<*>>,
-            val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
+            val irrelevantTaskHierarchies: Collection<ProjectTaskHierarchy<*>>,
             val irrelevantSchedules: Collection<Schedule<*>>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
             val irrelevantTasks: Collection<Task<*>>,

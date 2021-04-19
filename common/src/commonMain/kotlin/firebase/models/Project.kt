@@ -81,7 +81,7 @@ abstract class Project<T : ProjectType>(
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
+        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()
@@ -231,13 +231,13 @@ abstract class Project<T : ProjectType>(
         return instanceJson to updater
     }
 
-    fun <V : TaskHierarchy<*>> copyTaskHierarchy(
+    fun <V : ProjectTaskHierarchy<*>> copyTaskHierarchy(
             // todo taskhierarchy copy
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
             childTaskId: String,
-    ): TaskHierarchy<T> {
+    ): ProjectTaskHierarchy<T> {
         check(parentTaskId.isNotEmpty())
         check(childTaskId.isNotEmpty())
 
@@ -253,7 +253,7 @@ abstract class Project<T : ProjectType>(
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = TaskHierarchy(this, taskHierarchyRecord)
+        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()
@@ -267,7 +267,7 @@ abstract class Project<T : ProjectType>(
         _tasks.remove(task.id)
     }
 
-    fun deleteTaskHierarchy(taskHierarchy: TaskHierarchy<T>) {
+    fun deleteTaskHierarchy(taskHierarchy: ProjectTaskHierarchy<T>) {
         taskHierarchyContainer.removeForce(taskHierarchy.id)
         taskHierarchy.invalidateTasks()
     }
@@ -277,13 +277,13 @@ abstract class Project<T : ProjectType>(
     fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy<T>> {
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> {
         check(childTaskKey.taskId.isNotEmpty())
 
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T>> {
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> {
         check(parentTaskKey.taskId.isNotEmpty())
 
         return taskHierarchyContainer.getByParentTaskKey(parentTaskKey)

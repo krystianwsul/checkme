@@ -16,4 +16,6 @@ class NestedTaskHierarchy<T : ProjectType>(
     override fun deleteFromParent() {
         // todo taskhierarchy childTask.deleteTaskHierarchy(this)
     }
+
+    override fun fixOffsets() {}
 }

@@ -365,7 +365,7 @@ abstract class Project<T : ProjectType>(
                         }
         )
 
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now).filterIsInstance<ProjectTaskHierarchy<T>>() // todo taskhierarchy write
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

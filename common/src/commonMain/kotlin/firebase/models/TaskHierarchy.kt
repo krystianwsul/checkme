@@ -71,4 +71,6 @@ abstract class TaskHierarchy<T : ProjectType, U : TaskHierarchyJson>(
     }
 
     override fun toString() = super.toString() + ", taskHierarchyKey: $taskHierarchyKey, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp, parentTaskKey: $parentTaskKey, childTaskKey: $childTaskKey"
+
+    abstract fun fixOffsets()
 }

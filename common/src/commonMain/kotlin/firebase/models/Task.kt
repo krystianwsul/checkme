@@ -63,8 +63,17 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     val imageJson get() = taskRecord.image
 
-    private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
-    val parentTaskHierarchies by parentTaskHierarchiesProperty
+    private val parentProjectTaskHierarchiesProperty = invalidatableLazy { // todo taskhierarchies read
+        project.getTaskHierarchiesByChildTaskKey(taskKey)
+    }
+
+    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty // todo taskhierarchies read
+
+    private val nestedProjectTaskHierarchies = taskRecord.taskHierarchyRecords
+            .mapValues { NestedTaskHierarchy(this, it.value) }
+            .toMutableMap()
+
+    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedProjectTaskHierarchies.values // todo taskhierarchies read
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervals by intervalsProperty
@@ -428,7 +437,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
             currentByHierarchy: Boolean = false,
-    ): List<ProjectTaskHierarchy<T>> {
+    ): List<TaskHierarchy<T, *>> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
                 it.taskHierarchy
@@ -843,7 +852,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
 
     fun invalidateParentTaskHierarchies() {
-        parentTaskHierarchiesProperty.invalidate()
+        parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }
 

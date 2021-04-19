@@ -19,7 +19,7 @@ class ProjectTaskHierarchy<T : ProjectType>(
 
     override fun deleteFromParent() = project.deleteTaskHierarchy(this)
 
-    fun fixOffsets() {
+    override fun fixOffsets() {
         if (taskHierarchyRecord.startTimeOffset == null)
             taskHierarchyRecord.startTimeOffset = startExactTimeStamp.offset
 

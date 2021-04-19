@@ -30,7 +30,5 @@ class NestedTaskHierarchyRecord(
             taskHierarchyJson,
     )
 
-    override fun deleteFromParent() {
-        // check(taskRecord.taskHierarchyRecords.remove(id) == this) todo taskhierarchy
-    }
+    override fun deleteFromParent() = check(taskRecord.taskHierarchyRecords.remove(id) == this)
 }

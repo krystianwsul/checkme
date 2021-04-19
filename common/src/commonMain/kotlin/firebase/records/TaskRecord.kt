@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.schedule.*
@@ -35,6 +36,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
     val noScheduleOrParentRecords = taskJson.noScheduleOrParent
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
+            .toMutableMap()
+
+    val taskHierarchyRecords = taskJson.taskHierarchies
+            .mapValues { NestedTaskHierarchyRecord(it.key, this, it.value) }
             .toMutableMap()
 
     final override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
@@ -73,7 +78,8 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                 monthlyDayScheduleRecords.values +
                 monthlyWeekScheduleRecords.values +
                 yearlyScheduleRecords.values +
-                noScheduleOrParentRecords.values
+                noScheduleOrParentRecords.values +
+                taskHierarchyRecords.values
 
     init {
         if (name.isEmpty()) throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
@@ -251,6 +257,14 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
         noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
         return noScheduleOrParentRecord
+    }
+
+    fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
+        val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)
+        check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
+
+        taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
+        return taskHierarchyRecord
     }
 
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)

@@ -39,6 +39,8 @@ class SharedTaskRecord private constructor(
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
+            taskJson.taskHierarchies = taskHierarchyRecords.mapValues { it.value.createObject }
+
             return taskJson
         }
 

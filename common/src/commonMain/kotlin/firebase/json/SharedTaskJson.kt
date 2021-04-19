@@ -7,6 +7,7 @@ import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class SharedTaskJson @JvmOverloads constructor(
+        // todo taskhierarchy copy?
         override var name: String = "",
         override val startTime: Long = 0,
         override var startTimeOffset: Double? = null,
@@ -18,4 +19,5 @@ data class SharedTaskJson @JvmOverloads constructor(
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
+        override val taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
 ) : TaskJson<ProjectType.Shared>

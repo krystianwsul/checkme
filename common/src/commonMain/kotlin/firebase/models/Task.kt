@@ -1005,18 +1005,24 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     fun createParentNestedTaskHierarchy(parentTask: Task<T>, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
         val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
-        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(taskHierarchyJson)
+
+        return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
+    }
+
+    private fun createParentNestedTaskHierarchy(
+            nestedTaskHierarchyJson: NestedTaskHierarchyJson,
+    ): NestedTaskHierarchy<T> {
+        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
         val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
 
         nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 
         taskHierarchy.invalidateTasks()
 
-        return taskHierarchy.taskHierarchyKey
+        return taskHierarchy
     }
 
     fun <V : TaskHierarchy<*>> copyParentNestedTaskHierarchy(
-            // todo taskhierarchy copy clean this up
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
@@ -1031,12 +1037,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 startTaskHierarchy.endExactTimeStampOffset?.offset,
         )
 
-        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(taskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
-
-        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
-
-        taskHierarchy.invalidateTasks()
+        createParentNestedTaskHierarchy(taskHierarchyJson)
     }
 
     interface ScheduleTextFactory {

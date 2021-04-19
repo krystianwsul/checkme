@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -72,7 +72,7 @@ abstract class Project<T : ProjectType>(
             childTask: Task<T>,
             now: ExactTimeStamp.Local,
     ): TaskHierarchyKey {
-        val taskHierarchyJson = TaskHierarchyJson(
+        val taskHierarchyJson = ProjectTaskHierarchyJson(
                 parentTask.id,
                 childTask.id,
                 now.long,
@@ -241,7 +241,7 @@ abstract class Project<T : ProjectType>(
 
         val endTime = startTaskHierarchy.endExactTimeStamp?.long
 
-        val taskHierarchyJson = TaskHierarchyJson(
+        val taskHierarchyJson = ProjectTaskHierarchyJson(
                 parentTaskId,
                 childTaskId,
                 now.long,

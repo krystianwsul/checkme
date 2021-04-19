@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
 
 
 class TaskHierarchyRecord(
         create: Boolean,
         val id: String,
         private val projectRecord: ProjectRecord<*>,
-        override val createObject: TaskHierarchyJson
+        override val createObject: ProjectTaskHierarchyJson,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -30,12 +30,12 @@ class TaskHierarchyRecord(
     constructor(
             id: String,
             projectRecord: ProjectRecord<*>,
-            taskHierarchyJson: TaskHierarchyJson
+            taskHierarchyJson: ProjectTaskHierarchyJson,
     ) : this(false, id, projectRecord, taskHierarchyJson)
 
     constructor(
             projectRecord: ProjectRecord<*>,
-            taskHierarchyJson: TaskHierarchyJson
+            taskHierarchyJson: ProjectTaskHierarchyJson,
     ) : this(
             true,
             projectRecord.getTaskHierarchyRecordId(),

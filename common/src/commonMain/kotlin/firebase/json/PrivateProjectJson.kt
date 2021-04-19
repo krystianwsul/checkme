@@ -12,7 +12,7 @@ data class PrivateProjectJson @JvmOverloads constructor(
         override var endTime: Long? = null,
         override var endTimeOffset: Double? = null,
         override var tasks: MutableMap<String, PrivateTaskJson> = mutableMapOf(),
-        override var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
+        override var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, PrivateCustomTimeJson> = mutableMapOf(),
         var defaultTimesCreated: Boolean = false,
 ) : ProjectJson<ProjectType.Private>, Parsable

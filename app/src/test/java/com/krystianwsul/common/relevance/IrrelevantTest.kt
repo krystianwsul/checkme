@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
@@ -283,7 +283,7 @@ class IrrelevantTest {
                 startTime = now.long,
         )
         val child1TaskId = "child1TaskKey"
-        val taskHierarchy1Json = TaskHierarchyJson(
+        val taskHierarchy1Json = ProjectTaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
                 startTime = now.long,
@@ -295,7 +295,7 @@ class IrrelevantTest {
                 startTime = now.long,
         )
         val child2TaskId = "child2TaskKey"
-        val taskHierarchy2Json = TaskHierarchyJson(
+        val taskHierarchy2Json = ProjectTaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child2TaskId,
                 startTime = now.long,

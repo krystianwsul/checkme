@@ -77,7 +77,7 @@ abstract class Project<T : ProjectType>(
                 parentTask.id,
                 childTask.id,
                 now.long,
-                now.offset
+                now.offset,
         )
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
@@ -328,7 +328,7 @@ abstract class Project<T : ProjectType>(
         projectRecord.endTimeOffset = null
     }
 
-    fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
+    fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id) // todo taskhierarchy read
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 

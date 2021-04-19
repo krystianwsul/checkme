@@ -4,7 +4,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
-import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord

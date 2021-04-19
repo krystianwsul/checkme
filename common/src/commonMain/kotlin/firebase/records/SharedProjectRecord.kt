@@ -3,8 +3,8 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
-import com.krystianwsul.common.firebase.json.SharedTaskJson
 import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.utils.*
 
 class SharedProjectRecord(

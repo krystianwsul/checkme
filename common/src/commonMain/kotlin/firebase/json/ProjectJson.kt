@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.utils.ProjectType
 
 interface ProjectJson<T : ProjectType> {

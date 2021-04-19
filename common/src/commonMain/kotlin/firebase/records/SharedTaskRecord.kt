@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.SharedTaskJson
 import com.krystianwsul.common.firebase.json.schedule.*
+import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.utils.ProjectType
 
 class SharedTaskRecord private constructor(

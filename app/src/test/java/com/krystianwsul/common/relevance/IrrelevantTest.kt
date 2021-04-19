@@ -3,6 +3,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
@@ -241,7 +242,7 @@ class IrrelevantTest {
     }
 
     @Test
-    fun testDeletedChildTaskIsntInInstance() {
+    fun testDeletedChildTaskIsntInInstanceProjectTaskHierarchy() {
         // 1: Create task with single schedule and single child
         // 2: Delete single child with remove instances option
         // 3: Add new child
@@ -284,7 +285,6 @@ class IrrelevantTest {
         )
         val child1TaskId = "child1TaskKey"
         val taskHierarchy1Json = ProjectTaskHierarchyJson(
-                // todo customtime relevance
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
                 startTime = now.long,
@@ -297,7 +297,6 @@ class IrrelevantTest {
         )
         val child2TaskId = "child2TaskKey"
         val taskHierarchy2Json = ProjectTaskHierarchyJson(
-                // todo customtime relevance
                 parentTaskId = parentTaskId,
                 childTaskId = child2TaskId,
                 startTime = now.long,
@@ -339,6 +338,138 @@ class IrrelevantTest {
                 now,
                 bySchedule = true,
                 onlyRoot = true
+        ).single()
+        assertEquals(2, parentInstance.getChildInstances().size)
+
+        val child1Instance = parentInstance.getChildInstances().single {
+            it.instanceKey
+                    .taskKey
+                    .taskId == child1TaskId
+        }
+
+        child1Instance.setDone(shownFactory, true, now)
+
+        now = ExactTimeStamp.Local(day1, hour3)
+
+        child1Task.setEndData(Task.EndData(now, true))
+        child2Task.setEndData(Task.EndData(now, true))
+
+        now = ExactTimeStamp.Local(day1, hour4)
+
+        assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
+        assertTrue(
+                parentInstance.getChildInstances().single {
+                    it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+                } == child1Instance
+        )
+
+        now = ExactTimeStamp.Local(day2, hour5)
+
+        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now, false)
+    }
+
+    @Test
+    fun testDeletedChildTaskIsntInInstanceNestedTaskHierarchy() {
+        // 1: Create task with single schedule and single child
+        // 2: Delete single child with remove instances option
+        // 3: Add new child
+        // 4: Reschedule instance
+        // 5: check instance has only the second child
+
+        val day1 = Date(2020, 10, 6) // tuesday
+        val day2 = Date(2020, 10, 7) // wednesday
+        val hour1 = HourMinute(1, 0).toHourMilli()
+        val hour2 = HourMinute(2, 0).toHourMilli()
+        val hour3 = HourMinute(3, 0).toHourMilli()
+        val hour4 = HourMinute(4, 0).toHourMilli()
+        val hour5 = HourMinute(5, 0).toHourMilli()
+
+        var now = ExactTimeStamp.Local(day1, hour1)
+
+        val projectKey = ProjectKey.Private(userKey.key)
+
+        val singleScheduleWrapper = PrivateScheduleWrapper(
+                singleScheduleJson = PrivateSingleScheduleJson(
+                        startTime = now.long,
+                        startTimeOffset = now.offset,
+                        year = day1.year,
+                        month = day1.month,
+                        day = day1.day,
+                        hour = hour2.hour,
+                        minute = hour2.minute,
+                )
+        )
+
+        val parentTaskJson = PrivateTaskJson(
+                name = "parentTask",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper),
+        )
+        val parentTaskId = "parentTaskKey"
+
+        val taskHierarchy1Json = NestedTaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                startTime = now.long,
+                startTimeOffset = now.offset,
+        )
+        val taskHierarchy1Id = "taskHierarchy1"
+
+        val child1TaskJson = PrivateTaskJson(
+                name = "child1Task",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                taskHierarchies = mapOf(taskHierarchy1Id to taskHierarchy1Json),
+        )
+        val child1TaskId = "child1TaskKey"
+
+        val taskHierarchy2Json = NestedTaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                startTime = now.long,
+                startTimeOffset = now.offset,
+        )
+        val taskHierarchy2Id = "taskHierarchy2"
+
+        val child2TaskJson = PrivateTaskJson(
+                name = "child2Task",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                taskHierarchies = mapOf(taskHierarchy2Id to taskHierarchy2Json),
+        )
+        val child2TaskId = "child2TaskKey"
+
+        val projectJson = PrivateProjectJson(
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                tasks = mutableMapOf(
+                        parentTaskId to parentTaskJson,
+                        child1TaskId to child1TaskJson,
+                        child2TaskId to child2TaskJson,
+                ),
+        )
+
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val project = PrivateProject(projectRecord, mockk())
+
+        val parentTask = project.tasks.single { it.isRootTask(now) }
+        assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
+
+        val child1Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child1TaskId }
+                .childTask
+
+        val child2Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child2TaskId }
+                .childTask
+
+        now = ExactTimeStamp.Local(day1, hour2)
+
+        val parentInstance = parentTask.getInstances(
+                null,
+                now.toOffset().plusOne(),
+                now,
+                bySchedule = true,
+                onlyRoot = true,
         ).single()
         assertEquals(2, parentInstance.getChildInstances().size)
 

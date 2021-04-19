@@ -17,6 +17,11 @@ class ProjectTaskHierarchy<T : ProjectType>(
 
     override val taskHierarchyKey by lazy { TaskHierarchyKey.Project(project.projectKey, taskHierarchyRecord.id) }
 
+    override fun invalidateTasks() {
+        parentTask.invalidateChildTaskHierarchies()
+        childTask.invalidateParentTaskHierarchies()
+    }
+
     override fun deleteFromParent() = project.deleteTaskHierarchy(this)
 
     override fun fixOffsets() {

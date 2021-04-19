@@ -59,7 +59,6 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createChildTask(
-            // todo taskhierarchy write start here
             parentTask: Task<T>,
             now: ExactTimeStamp.Local,
             name: String,

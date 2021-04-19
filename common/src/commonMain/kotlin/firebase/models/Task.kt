@@ -995,7 +995,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         }
     }
 
-    fun deleteTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
+    fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
         check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
 
         nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
@@ -1012,7 +1012,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
         nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 
-        taskHierarchy.invalidateTasks() // todo taskhierarchy write
+        taskHierarchy.invalidateTasks()
 
         return taskHierarchy.taskHierarchyKey
     }

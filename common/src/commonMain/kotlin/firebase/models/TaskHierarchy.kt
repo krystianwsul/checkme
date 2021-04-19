@@ -55,7 +55,7 @@ abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) :
         invalidateTasks()
     }
 
-    fun invalidateTasks() {
+    fun invalidateTasks() { // todo taskhierarchy read
         parentTask.invalidateChildTaskHierarchies()
         childTask.invalidateParentTaskHierarchies()
     }

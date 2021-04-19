@@ -12,9 +12,7 @@ class NestedTaskHierarchy<T : ProjectType>(
     override val childTaskKey get() = childTask.taskKey
     override val childTaskId get() = childTaskKey.taskId
 
-    override fun deleteFromParent() {
-        // todo taskhierarchy childTask.deleteTaskHierarchy(this)
-    }
+    override fun deleteFromParent() = childTask.deleteTaskHierarchy(this)
 
     override fun fixOffsets() {}
 }

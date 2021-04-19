@@ -997,6 +997,14 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         }
     }
 
+    fun deleteTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
+        check(nestedProjectTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
+
+        nestedProjectTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
+
+        nestedTaskHierarchy.invalidateTasks()
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String

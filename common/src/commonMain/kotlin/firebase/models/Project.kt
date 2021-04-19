@@ -232,6 +232,7 @@ abstract class Project<T : ProjectType>(
     }
 
     fun <V : TaskHierarchy<*>> copyTaskHierarchy(
+            // todo taskhierarchy copy
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,

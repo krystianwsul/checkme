@@ -63,17 +63,17 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     val imageJson get() = taskRecord.image
 
-    private val parentProjectTaskHierarchiesProperty = invalidatableLazy { // todo taskhierarchies read
+    private val parentProjectTaskHierarchiesProperty = invalidatableLazy { // todo taskhierarchy read
         project.getTaskHierarchiesByChildTaskKey(taskKey)
     }
 
-    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty // todo taskhierarchies read
+    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty // todo taskhierarchy read
 
-    private val nestedProjectTaskHierarchies = taskRecord.taskHierarchyRecords
+    val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
             .mapValues { NestedTaskHierarchy(this, it.value) }
             .toMutableMap()
 
-    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedProjectTaskHierarchies.values // todo taskhierarchies read
+    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values // todo taskhierarchy read
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervals by intervalsProperty
@@ -852,11 +852,11 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
 
     fun invalidateParentTaskHierarchies() {
-        parentProjectTaskHierarchiesProperty.invalidate()
-        invalidateIntervals()
+        parentProjectTaskHierarchiesProperty.invalidate() // todo taskhierarchy read
+        invalidateIntervals() // todo taskhierarchy read
     }
 
-    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
+    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate() // todo taskhierarchy read
 
     fun invalidateIntervals() = intervalsProperty.invalidate()
 
@@ -998,9 +998,9 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
 
     fun deleteTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
-        check(nestedProjectTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
+        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
 
-        nestedProjectTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
+        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
 
         nestedTaskHierarchy.invalidateTasks()
     }

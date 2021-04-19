@@ -23,7 +23,7 @@ abstract class Project<T : ProjectType>(
 
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
-    protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
+    protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T> // todo taskhierarchy read
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom.Project<T>>
 
     abstract val projectKey: ProjectKey<T>
@@ -283,10 +283,16 @@ abstract class Project<T : ProjectType>(
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> {
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T>> {
         check(parentTaskKey.taskId.isNotEmpty())
 
-        return taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
+        val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
+
+        val nestedTaskHierarchies = tasks.flatMap {
+            it.nestedParentTaskHierarchies.values
+        }.filter { it.parentTaskKey == parentTaskKey }
+
+        return projectTaskHierarchies + nestedTaskHierarchies
     }
 
     fun delete(parent: Parent) {

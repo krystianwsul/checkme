@@ -257,7 +257,7 @@ abstract class Project<T : ProjectType>(
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord) // todo taskhierarchy write
+        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()
@@ -357,6 +357,7 @@ abstract class Project<T : ProjectType>(
             DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     fun convertRemoteToRemoteHelper(
+            // todo taskhierarchy copy
             now: ExactTimeStamp.Local,
             remoteToRemoteConversion: RemoteToRemoteConversion<T>,
             startTask: Task<T>,
@@ -370,12 +371,12 @@ abstract class Project<T : ProjectType>(
                         .filter {
                             listOf(
                                     it.scheduleDateTime,
-                                    it.instanceDateTime
+                                    it.instanceDateTime,
                             ).maxOrNull()!!.toLocalExactTimeStamp() >= now
                         }
         )
 
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now).filterIsInstance<ProjectTaskHierarchy<T>>() // todo taskhierarchy write
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now).filterIsInstance<ProjectTaskHierarchy<T>>() // todo taskhierarchy copy
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

@@ -73,21 +73,25 @@ abstract class Project<T : ProjectType>(
             childTask: Task<T>,
             now: ExactTimeStamp.Local,
     ): TaskHierarchyKey {
-        val taskHierarchyJson = ProjectTaskHierarchyJson(
-                parentTask.id,
-                childTask.id,
-                now.long,
-                now.offset,
-        )
+        return if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
+            childTask.createParentNestedTaskHierarchy(parentTask, now)
+        } else {
+            val taskHierarchyJson = ProjectTaskHierarchyJson(
+                    parentTask.id,
+                    childTask.id,
+                    now.long,
+                    now.offset,
+            )
 
-        val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
+            val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord) // todo taskhierarchy write
+            val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
 
-        taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
-        taskHierarchy.invalidateTasks()
+            taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
+            taskHierarchy.invalidateTasks()
 
-        return taskHierarchy.taskHierarchyKey
+            return taskHierarchy.taskHierarchyKey
+        }
     }
 
     protected abstract fun copyTaskRecord(

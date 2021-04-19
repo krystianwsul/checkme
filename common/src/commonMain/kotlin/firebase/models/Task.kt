@@ -5,9 +5,7 @@ import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
-import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
@@ -1003,6 +1001,20 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
 
         nestedTaskHierarchy.invalidateTasks()
+    }
+
+    fun createParentNestedTaskHierarchy(parentTask: Task<T>, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+        val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
+
+        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(taskHierarchyJson)
+
+        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
+
+        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
+
+        taskHierarchy.invalidateTasks() // todo taskhierarchy write
+
+        return taskHierarchy.taskHierarchyKey
     }
 
     interface ScheduleTextFactory {

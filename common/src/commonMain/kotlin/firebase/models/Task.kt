@@ -852,11 +852,11 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
 
     fun invalidateParentTaskHierarchies() {
-        parentProjectTaskHierarchiesProperty.invalidate() // todo taskhierarchy read
-        invalidateIntervals() // todo taskhierarchy read
+        parentProjectTaskHierarchiesProperty.invalidate()
+        invalidateIntervals()
     }
 
-    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate() // todo taskhierarchy read
+    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
     fun invalidateIntervals() = intervalsProperty.invalidate()
 

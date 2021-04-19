@@ -50,7 +50,7 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    protected fun initializeInstanceHierarchyContainers() { // todo taskhierarchy read
+    protected fun initializeInstanceHierarchyContainers() {
         tasks.forEach {
             it.existingInstances
                     .values

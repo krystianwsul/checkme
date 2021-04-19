@@ -328,7 +328,7 @@ abstract class Project<T : ProjectType>(
         projectRecord.endTimeOffset = null
     }
 
-    fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id) // todo taskhierarchy read
+    fun getProjectTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 

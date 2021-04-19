@@ -261,7 +261,7 @@ class ProjectsFactory(
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy<*> {
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
-                    .getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+                    .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
             is TaskHierarchyKey.Nested -> projects.getValue(taskHierarchyKey.childTaskKey.projectKey)
                     .getTaskForce(taskHierarchyKey.childTaskKey.taskId)
                     .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)

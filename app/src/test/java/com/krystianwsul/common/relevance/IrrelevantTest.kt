@@ -284,6 +284,7 @@ class IrrelevantTest {
         )
         val child1TaskId = "child1TaskKey"
         val taskHierarchy1Json = ProjectTaskHierarchyJson(
+                // todo customtime relevance
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
                 startTime = now.long,
@@ -296,6 +297,7 @@ class IrrelevantTest {
         )
         val child2TaskId = "child2TaskKey"
         val taskHierarchy2Json = ProjectTaskHierarchyJson(
+                // todo customtime relevance
                 parentTaskId = parentTaskId,
                 childTaskId = child2TaskId,
                 startTime = now.long,

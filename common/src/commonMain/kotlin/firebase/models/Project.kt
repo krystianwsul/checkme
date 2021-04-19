@@ -235,34 +235,33 @@ abstract class Project<T : ProjectType>(
         return instanceJson to updater
     }
 
-    fun <V : ProjectTaskHierarchy<*>> copyTaskHierarchy(
-            // todo taskhierarchy copy
+    fun <V : TaskHierarchy<*>> copyTaskHierarchy(
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
-            childTaskId: String,
-    ): ProjectTaskHierarchy<T> {
-        check(parentTaskId.isNotEmpty())
-        check(childTaskId.isNotEmpty())
+            childTask: Task<*>,
+    ) {
+        if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
+            @Suppress("UNCHECKED_CAST")
+            (childTask as Task<T>).copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
+        } else {
+            check(parentTaskId.isNotEmpty())
 
-        val endTime = startTaskHierarchy.endExactTimeStamp?.long
+            val taskHierarchyJson = ProjectTaskHierarchyJson(
+                    parentTaskId,
+                    childTask.id,
+                    now.long,
+                    now.offset,
+                    startTaskHierarchy.endExactTimeStampOffset?.long,
+                    startTaskHierarchy.endExactTimeStampOffset?.offset,
+            )
 
-        val taskHierarchyJson = ProjectTaskHierarchyJson(
-                parentTaskId,
-                childTaskId,
-                now.long,
-                now.offset,
-                endTime
-        )
+            val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
+            val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
 
-        val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
-
-        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
-
-        taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
-        taskHierarchy.invalidateTasks()
-
-        return taskHierarchy
+            taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
+            taskHierarchy.invalidateTasks()
+        }
     }
 
     fun deleteTask(task: Task<T>) {
@@ -357,7 +356,6 @@ abstract class Project<T : ProjectType>(
             DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     fun convertRemoteToRemoteHelper(
-            // todo taskhierarchy copy
             now: ExactTimeStamp.Local,
             remoteToRemoteConversion: RemoteToRemoteConversion<T>,
             startTask: Task<T>,
@@ -376,7 +374,7 @@ abstract class Project<T : ProjectType>(
                         }
         )
 
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now).filterIsInstance<ProjectTaskHierarchy<T>>() // todo taskhierarchy copy
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

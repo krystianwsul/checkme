@@ -477,14 +477,7 @@ class DomainFactory(
             val childTask =
                     remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
-            val taskHierarchy = newProject.copyTaskHierarchy(
-                    now,
-                    startTaskHierarchy,
-                    parentTask.id,
-                    childTask.id,
-            )
-
-            remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)
+            newProject.copyTaskHierarchy(now, startTaskHierarchy, parentTask.id, childTask)
         }
 
         val endData = Task.EndData(now, true)

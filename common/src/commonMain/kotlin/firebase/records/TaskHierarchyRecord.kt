@@ -20,6 +20,6 @@ abstract class TaskHierarchyRecord<T : TaskHierarchyJson>(
     var endTime by Committer(createObject::endTime)
     var endTimeOffset by Committer(createObject::endTimeOffset)
 
-    val parentTaskId get() = createObject.parentTaskId
+    val parentTaskId get() = createObject.parentTaskId // todo taskhierarchy check usages
     abstract val childTaskId: String
 }

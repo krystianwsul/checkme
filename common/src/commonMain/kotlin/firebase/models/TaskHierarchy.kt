@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class TaskHierarchy<T : ProjectType, U : TaskHierarchyJson>(
         private val project: Project<T>,
-        private val taskHierarchyRecord: TaskHierarchyRecord<U>,
+        protected val taskHierarchyRecord: TaskHierarchyRecord<U>,
 ) : TaskParentEntry {
 
     final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }

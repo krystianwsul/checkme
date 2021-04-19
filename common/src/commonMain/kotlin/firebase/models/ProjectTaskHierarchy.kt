@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class ProjectTaskHierarchy<T : ProjectType>(
         private val project: Project<T>,
-        private val taskHierarchyRecord: ProjectTaskHierarchyRecord,
+        taskHierarchyRecord: ProjectTaskHierarchyRecord,
 ) : TaskHierarchy<T, ProjectTaskHierarchyJson>(project, taskHierarchyRecord) {
 
     override val childTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.childTaskId) }

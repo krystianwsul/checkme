@@ -148,8 +148,15 @@ class DomainFactoryRule : TestRule {
                 "noScheduleOrParentId" + ++noScheduleOrParentId
             }
 
-            var taskHierarchyId = 0
-            every { newPrivateProjectTaskHierarchyRecordId(any()) } answers { "taskHierarchyId" + ++taskHierarchyId }
+            var projectTaskHierarchyId = 0
+            every { newPrivateProjectTaskHierarchyRecordId(any()) } answers {
+                "projectTaskHierarchyId" + ++projectTaskHierarchyId
+            }
+
+            var nestedTaskHierarchyId = 0
+            every { newPrivateNestedTaskHierarchyRecordId(any(), any()) } answers {
+                "nestedTaskHierarchyId" + ++nestedTaskHierarchyId
+            }
 
             var privateCustomTimeId = 0
             every { newPrivateCustomTimeRecordId(any()) } answers { "privateCustomTimeId" + ++privateCustomTimeId }

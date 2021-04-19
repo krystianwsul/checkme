@@ -258,9 +258,16 @@ class ProjectsFactory(
             .singleOrNull { it.key.key == projectId }
             ?.value
 
-    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) =
-            projects.getValue(taskHierarchyKey.projectId)
+    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy<*> {
+        return when (taskHierarchyKey) {
+            is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
                     .getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+            is TaskHierarchyKey.Nested -> projects.getValue(taskHierarchyKey.childTaskKey.projectKey)
+                    .getTaskForce(taskHierarchyKey.childTaskKey.taskId)
+                    .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)
+            else -> throw UnsupportedOperationException() // compilation
+        }
+    }
 
     fun getSchedule(scheduleId: ScheduleId) = projects.getValue(scheduleId.projectId)
             .getTaskForce(scheduleId.taskId)

@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.soywiz.klock.days
 
 object Irrelevant {
@@ -28,7 +29,7 @@ object Irrelevant {
         val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
         val taskHierarchies = project.taskHierarchies // todo taskhierarchy relevance
-        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
+        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey as TaskHierarchyKey to TaskHierarchyRelevance(it) } // todo taskhierarchy relevance
 
         val existingInstances = project.existingInstances
         val rootInstances = project.getRootInstances(null, now.toOffset().plusOne(), now).toList()

@@ -41,7 +41,7 @@ abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) :
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
     abstract val childTaskId: String
 
-    val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
+    abstract val taskHierarchyKey: TaskHierarchyKey
 
     final override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)

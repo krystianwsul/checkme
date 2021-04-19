@@ -15,7 +15,10 @@ class NestedTaskHierarchy<T : ProjectType>(
 
     override val taskHierarchyKey by lazy { TaskHierarchyKey.Nested(childTaskKey, taskHierarchyRecord.id) }
 
-    override fun invalidateTasks() = parentTask.invalidateChildTaskHierarchies()
+    override fun invalidateTasks() {
+        parentTask.invalidateChildTaskHierarchies()
+        childTask.invalidateIntervals()
+    }
 
     override fun deleteFromParent() = childTask.deleteNestedTaskHierarchy(this)
 

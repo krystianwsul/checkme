@@ -849,7 +849,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         intervalsProperty.invalidate()
     }
 
-    fun invalidateParentTaskHierarchies() {
+    fun invalidateProjectParentTaskHierarchies() {
         parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }

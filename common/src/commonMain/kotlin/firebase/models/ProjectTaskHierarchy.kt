@@ -19,7 +19,7 @@ class ProjectTaskHierarchy<T : ProjectType>(
 
     override fun invalidateTasks() {
         parentTask.invalidateChildTaskHierarchies()
-        childTask.invalidateParentTaskHierarchies()
+        childTask.invalidateProjectParentTaskHierarchies()
     }
 
     override fun deleteFromParent() = project.deleteTaskHierarchy(this)

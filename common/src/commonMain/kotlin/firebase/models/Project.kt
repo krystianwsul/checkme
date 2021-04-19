@@ -50,7 +50,7 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    protected fun initializeInstanceHierarchyContainers() {
+    protected fun initializeInstanceHierarchyContainers() { // todo taskhierarchy read
         tasks.forEach {
             it.existingInstances
                     .values
@@ -81,7 +81,7 @@ abstract class Project<T : ProjectType>(
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
+        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord) // todo taskhierarchy write
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()
@@ -253,7 +253,7 @@ abstract class Project<T : ProjectType>(
 
         val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
 
-        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
+        val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord) // todo taskhierarchy write
 
         taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
         taskHierarchy.invalidateTasks()

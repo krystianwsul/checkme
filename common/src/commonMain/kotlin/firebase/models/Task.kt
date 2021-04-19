@@ -63,17 +63,17 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     val imageJson get() = taskRecord.image
 
-    private val parentProjectTaskHierarchiesProperty = invalidatableLazy { // todo taskhierarchy read
+    private val parentProjectTaskHierarchiesProperty = invalidatableLazy {
         project.getTaskHierarchiesByChildTaskKey(taskKey)
     }
 
-    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty // todo taskhierarchy read
+    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
 
     val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
             .mapValues { NestedTaskHierarchy(this, it.value) }
             .toMutableMap()
 
-    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values // todo taskhierarchy read
+    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervals by intervalsProperty

@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -21,4 +20,4 @@ data class SharedMonthlyWeekScheduleJson @JvmOverloads constructor(
         override var oldestVisible: String? = null,
         override val assignedTo: Map<String, Boolean> = mapOf(),
         override val time: String? = null,
-) : MonthlyWeekScheduleJson<ProjectType.Shared>, AssignedToJson
+) : MonthlyWeekScheduleJson, AssignedToJson

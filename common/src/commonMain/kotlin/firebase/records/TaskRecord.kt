@@ -116,7 +116,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                             this,
                             scheduleWrapper,
                             id,
-                            scheduleWrapperBridge
+                            scheduleWrapperBridge,
                     )
                 }
                 scheduleWrapperBridge.weeklyScheduleJson != null -> {
@@ -128,7 +128,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                             this,
                             scheduleWrapper,
                             id,
-                            scheduleWrapperBridge
+                            scheduleWrapperBridge,
                     )
                 }
                 scheduleWrapperBridge.monthlyDayScheduleJson != null -> {
@@ -139,7 +139,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                             this,
                             scheduleWrapper,
                             id,
-                            scheduleWrapperBridge
+                            scheduleWrapperBridge,
                     )
                 }
                 scheduleWrapperBridge.monthlyWeekScheduleJson != null -> {
@@ -149,7 +149,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                             this,
                             scheduleWrapper,
                             id,
-                            scheduleWrapperBridge
+                            scheduleWrapperBridge,
                     )
                 }
                 else -> {
@@ -159,7 +159,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                             this,
                             scheduleWrapper,
                             id,
-                            scheduleWrapperBridge
+                            scheduleWrapperBridge,
                     )
                 }
             }
@@ -184,17 +184,17 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
     }
 
     protected abstract fun newScheduleWrapper(
-            singleScheduleJson: SingleScheduleJson<T>? = null,
-            weeklyScheduleJson: WeeklyScheduleJson<T>? = null,
-            monthlyDayScheduleJson: MonthlyDayScheduleJson<T>? = null,
-            monthlyWeekScheduleJson: MonthlyWeekScheduleJson<T>? = null,
-            yearlyScheduleJson: YearlyScheduleJson<T>? = null,
-    ): ScheduleWrapper<T>
+            singleScheduleJson: SingleScheduleJson? = null,
+            weeklyScheduleJson: WeeklyScheduleJson? = null,
+            monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
+            monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
+            yearlyScheduleJson: YearlyScheduleJson? = null,
+    ): ScheduleWrapper
 
-    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson<T>): SingleScheduleRecord<T> {
+    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord<T> {
         val singleScheduleRecord = SingleScheduleRecord(
                 this,
-                newScheduleWrapper(singleScheduleJson = singleScheduleJson)
+                newScheduleWrapper(singleScheduleJson = singleScheduleJson),
         )
 
         check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
@@ -203,10 +203,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return singleScheduleRecord
     }
 
-    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson<T>): WeeklyScheduleRecord<T> {
+    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord<T> {
         val weeklyScheduleRecord = WeeklyScheduleRecord(
                 this,
-                newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)
+                newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
         )
 
         check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
@@ -215,10 +215,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return weeklyScheduleRecord
     }
 
-    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson<T>): MonthlyDayScheduleRecord<T> {
+    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord<T> {
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
                 this,
-                newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson)
+                newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
         )
 
         check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
@@ -227,10 +227,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson<T>): MonthlyWeekScheduleRecord<T> {
+    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord<T> {
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
                 this,
-                newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson)
+                newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
         )
 
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
@@ -239,10 +239,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return monthlyWeekScheduleRecord
     }
 
-    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson<T>): YearlyScheduleRecord<T> {
+    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord<T> {
         val yearlyScheduleRecord = YearlyScheduleRecord(
                 this,
-                newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson)
+                newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
         )
 
         check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))

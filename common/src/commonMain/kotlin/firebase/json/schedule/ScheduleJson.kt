@@ -1,9 +1,7 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-import com.krystianwsul.common.utils.ProjectType
 
-
-interface ScheduleJson<T : ProjectType> {
+interface ScheduleJson {
 
     val startTime: Long
     var startTimeOffset: Double?

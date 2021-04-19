@@ -9,9 +9,9 @@ import com.krystianwsul.common.utils.ProjectType
 
 class MonthlyWeekScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        scheduleWrapper: ScheduleWrapper<T>,
+        scheduleWrapper: ScheduleWrapper,
         id: String? = null,
-        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
+        override val scheduleWrapperBridge: ScheduleWrapperBridge = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : RepeatingScheduleRecord<T>(
         taskRecord,
         scheduleWrapper,

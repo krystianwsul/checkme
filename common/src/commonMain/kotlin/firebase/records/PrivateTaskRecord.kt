@@ -59,11 +59,11 @@ class PrivateTaskRecord private constructor(
     )
 
     override fun newScheduleWrapper(
-            singleScheduleJson: SingleScheduleJson<ProjectType.Private>?,
-            weeklyScheduleJson: WeeklyScheduleJson<ProjectType.Private>?,
-            monthlyDayScheduleJson: MonthlyDayScheduleJson<ProjectType.Private>?,
-            monthlyWeekScheduleJson: MonthlyWeekScheduleJson<ProjectType.Private>?,
-            yearlyScheduleJson: YearlyScheduleJson<ProjectType.Private>?,
+            singleScheduleJson: SingleScheduleJson?,
+            weeklyScheduleJson: WeeklyScheduleJson?,
+            monthlyDayScheduleJson: MonthlyDayScheduleJson?,
+            monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
+            yearlyScheduleJson: YearlyScheduleJson?,
     ) = PrivateScheduleWrapper(
             singleScheduleJson as? PrivateSingleScheduleJson,
             weeklyScheduleJson as? PrivateWeeklyScheduleJson,

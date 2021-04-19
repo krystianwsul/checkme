@@ -59,11 +59,11 @@ class SharedTaskRecord private constructor(
     )
 
     override fun newScheduleWrapper(
-            singleScheduleJson: SingleScheduleJson<ProjectType.Shared>?,
-            weeklyScheduleJson: WeeklyScheduleJson<ProjectType.Shared>?,
-            monthlyDayScheduleJson: MonthlyDayScheduleJson<ProjectType.Shared>?,
-            monthlyWeekScheduleJson: MonthlyWeekScheduleJson<ProjectType.Shared>?,
-            yearlyScheduleJson: YearlyScheduleJson<ProjectType.Shared>?,
+            singleScheduleJson: SingleScheduleJson?,
+            weeklyScheduleJson: WeeklyScheduleJson?,
+            monthlyDayScheduleJson: MonthlyDayScheduleJson?,
+            monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
+            yearlyScheduleJson: YearlyScheduleJson?,
     ) = SharedScheduleWrapper(
             singleScheduleJson as? SharedSingleScheduleJson,
             weeklyScheduleJson as? SharedWeeklyScheduleJson,

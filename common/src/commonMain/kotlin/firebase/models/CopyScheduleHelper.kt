@@ -42,7 +42,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             day: Int,
             copiedTime: Time,
             assignedTo: Set<String>,
-    ): SingleScheduleJson<T>
+    ): SingleScheduleJson
 
     abstract fun newWeekly(
             startTime: Long,
@@ -55,7 +55,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             until: String?,
             interval: Int,
             assignedTo: Set<String>,
-    ): WeeklyScheduleJson<T>
+    ): WeeklyScheduleJson
 
     abstract fun newMonthlyDay(
             startTime: Long,
@@ -68,7 +68,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
-    ): MonthlyDayScheduleJson<T>
+    ): MonthlyDayScheduleJson
 
     abstract fun newMonthlyWeek(
             startTime: Long,
@@ -82,7 +82,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
-    ): MonthlyWeekScheduleJson<T>
+    ): MonthlyWeekScheduleJson
 
     abstract fun newYearly(
             startTime: Long,
@@ -95,7 +95,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
-    ): YearlyScheduleJson<T>
+    ): YearlyScheduleJson
 
     object Private : CopyScheduleHelper<ProjectType.Private>() {
 
@@ -109,7 +109,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 day: Int,
                 copiedTime: Time,
                 assignedTo: Set<String>,
-        ): SingleScheduleJson<ProjectType.Private> {
+        ): SingleScheduleJson {
             check(assignedTo.isEmpty())
 
             val destructuredTime = copiedTime.destructure<ProjectType.Private>()
@@ -140,7 +140,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 until: String?,
                 interval: Int,
                 assignedTo: Set<String>,
-        ): WeeklyScheduleJson<ProjectType.Private> {
+        ): WeeklyScheduleJson {
             check(assignedTo.isEmpty())
 
             val destructuredTime = copiedTime.destructure<ProjectType.Private>()
@@ -172,7 +172,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): MonthlyDayScheduleJson<ProjectType.Private> {
+        ): MonthlyDayScheduleJson {
             check(assignedTo.isEmpty())
 
             val destructuredTime = copiedTime.destructure<ProjectType.Private>()
@@ -205,7 +205,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): MonthlyWeekScheduleJson<ProjectType.Private> {
+        ): MonthlyWeekScheduleJson {
             check(assignedTo.isEmpty())
 
             val destructuredTime = copiedTime.destructure<ProjectType.Private>()
@@ -238,7 +238,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): YearlyScheduleJson<ProjectType.Private> {
+        ): YearlyScheduleJson {
             check(assignedTo.isEmpty())
 
             val destructuredTime = copiedTime.destructure<ProjectType.Private>()
@@ -302,7 +302,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 until: String?,
                 interval: Int,
                 assignedTo: Set<String>,
-        ): WeeklyScheduleJson<ProjectType.Shared> {
+        ): WeeklyScheduleJson {
             val destructuredTime = copiedTime.destructure<ProjectType.Shared>()
 
             return SharedWeeklyScheduleJson(
@@ -333,7 +333,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): MonthlyDayScheduleJson<ProjectType.Shared> {
+        ): MonthlyDayScheduleJson {
             val destructuredTime = copiedTime.destructure<ProjectType.Shared>()
 
             return SharedMonthlyDayScheduleJson(
@@ -365,7 +365,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): MonthlyWeekScheduleJson<ProjectType.Shared> {
+        ): MonthlyWeekScheduleJson {
             val destructuredTime = copiedTime.destructure<ProjectType.Shared>()
 
             return SharedMonthlyWeekScheduleJson(
@@ -397,7 +397,7 @@ sealed class CopyScheduleHelper<T : ProjectType> {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
-        ): YearlyScheduleJson<ProjectType.Shared> {
+        ): YearlyScheduleJson {
             val destructuredTime = copiedTime.destructure<ProjectType.Shared>()
 
             return SharedYearlyScheduleJson(

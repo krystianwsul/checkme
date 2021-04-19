@@ -10,9 +10,9 @@ import com.krystianwsul.common.utils.ProjectType
 
 open class SingleScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        scheduleWrapper: ScheduleWrapper<T>,
+        scheduleWrapper: ScheduleWrapper,
         id: String? = null,
-        override val scheduleWrapperBridge: ScheduleWrapperBridge<T> =
+        override val scheduleWrapperBridge: ScheduleWrapperBridge =
                 ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : ScheduleRecord<T>(
         taskRecord,

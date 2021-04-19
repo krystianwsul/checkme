@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectType
 
 sealed class AssignedToHelper<T : ProjectType> {
 
-    abstract fun getAssignedTo(scheduleJson: ScheduleJson<T>): Set<String>
+    abstract fun getAssignedTo(scheduleJson: ScheduleJson): Set<String>
 
     abstract fun setAssignedTo(
             assignedToJson: WriteAssignedToJson,
@@ -18,7 +18,7 @@ sealed class AssignedToHelper<T : ProjectType> {
 
     object Private : AssignedToHelper<ProjectType.Private>() {
 
-        override fun getAssignedTo(scheduleJson: ScheduleJson<ProjectType.Private>) = setOf<String>()
+        override fun getAssignedTo(scheduleJson: ScheduleJson) = setOf<String>()
 
         override fun setAssignedTo(
                 assignedToJson: WriteAssignedToJson,
@@ -29,7 +29,7 @@ sealed class AssignedToHelper<T : ProjectType> {
 
     object Shared : AssignedToHelper<ProjectType.Shared>() {
 
-        override fun getAssignedTo(scheduleJson: ScheduleJson<ProjectType.Shared>) = (scheduleJson as AssignedToJson).assignedTo.keys
+        override fun getAssignedTo(scheduleJson: ScheduleJson) = (scheduleJson as AssignedToJson).assignedTo.keys
 
         override fun setAssignedTo(
                 assignedToJson: WriteAssignedToJson,

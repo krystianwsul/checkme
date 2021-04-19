@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -18,4 +17,4 @@ data class SharedSingleScheduleJson @JvmOverloads constructor(
         override val minute: Int? = null,
         override var assignedTo: Map<String, Boolean> = mapOf(),
         override val time: String? = null,
-) : SingleScheduleJson<ProjectType.Shared>, WriteAssignedToJson
+) : SingleScheduleJson, WriteAssignedToJson

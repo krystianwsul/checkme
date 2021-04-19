@@ -16,8 +16,8 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord<T : ProjectType>(
         val taskRecord: TaskRecord<T>,
-        final override val createObject: ScheduleWrapper<T>,
-        private val scheduleJson: ScheduleJson<T>,
+        final override val createObject: ScheduleWrapper,
+        private val scheduleJson: ScheduleJson,
         scheduleTypeSubkey: String,
         _id: String?,
 ) : RemoteRecord(_id == null) {
@@ -65,5 +65,5 @@ abstract class ScheduleRecord<T : ProjectType>(
 
     val assignedTo get() = taskRecord.assignedToHelper.getAssignedTo(scheduleJson)
 
-    abstract val scheduleWrapperBridge: ScheduleWrapperBridge<T>
+    abstract val scheduleWrapperBridge: ScheduleWrapperBridge
 }

@@ -8,8 +8,8 @@ import com.krystianwsul.common.utils.ProjectType
 
 abstract class RepeatingScheduleRecord<T : ProjectType>(
         taskRecord: TaskRecord<T>,
-        createObject: ScheduleWrapper<T>,
-        repeatingScheduleJson: RepeatingScheduleJson<T>,
+        createObject: ScheduleWrapper,
+        repeatingScheduleJson: RepeatingScheduleJson,
         endTimeKey: String,
         id: String?,
 ) : ScheduleRecord<T>(

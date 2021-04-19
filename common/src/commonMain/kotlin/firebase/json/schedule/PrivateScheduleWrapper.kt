@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -11,4 +10,4 @@ data class PrivateScheduleWrapper @JvmOverloads constructor(
         val monthlyDayScheduleJson: PrivateMonthlyDayScheduleJson? = null,
         val monthlyWeekScheduleJson: PrivateMonthlyWeekScheduleJson? = null,
         val yearlyScheduleJson: PrivateYearlyScheduleJson? = null,
-) : ScheduleWrapper<ProjectType.Private>
+) : ScheduleWrapper

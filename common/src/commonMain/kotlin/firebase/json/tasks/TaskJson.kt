@@ -21,7 +21,7 @@ interface TaskJson<T : ProjectType> {
     var endData: EndData?
 
     var instances: MutableMap<String, InstanceJson>
-    val schedules: Map<String, ScheduleWrapper<T>>
+    val schedules: Map<String, ScheduleWrapper>
     var noScheduleOrParent: Map<String, NoScheduleOrParentJson>
     val taskHierarchies: Map<String, NestedTaskHierarchyJson>
 

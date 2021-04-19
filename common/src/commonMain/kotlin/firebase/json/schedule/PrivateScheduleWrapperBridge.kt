@@ -1,9 +1,7 @@
 package com.krystianwsul.common.firebase.json.schedule
 
-import com.krystianwsul.common.utils.ProjectType
-
 class PrivateScheduleWrapperBridge(privateScheduleWrapper: PrivateScheduleWrapper)
-    : ScheduleWrapperBridge<ProjectType.Private> {
+    : ScheduleWrapperBridge {
 
     override val singleScheduleJson = privateScheduleWrapper.singleScheduleJson
     override val weeklyScheduleJson = privateScheduleWrapper.weeklyScheduleJson

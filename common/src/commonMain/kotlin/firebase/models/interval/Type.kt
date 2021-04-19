@@ -12,7 +12,7 @@ sealed class Type<T : ProjectType> {
 
     abstract val taskParentEntries: Collection<TaskParentEntry>
 
-    data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T, *>) : Type<T>() {
+    data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
 
         override val taskParentEntries get() = listOf(parentTaskHierarchy)
 

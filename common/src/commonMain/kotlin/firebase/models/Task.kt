@@ -437,7 +437,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
             currentByHierarchy: Boolean = false,
-    ): List<TaskHierarchy<T, *>> {
+    ): List<TaskHierarchy<T>> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
                 it.taskHierarchy

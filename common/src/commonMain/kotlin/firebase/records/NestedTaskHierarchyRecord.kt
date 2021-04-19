@@ -12,6 +12,8 @@ class NestedTaskHierarchyRecord(
 
     override val key get() = taskRecord.key + "/" + TASK_HIERARCHIES + "/" + id
 
+    override val startTimeOffset: Double get() = createObject.startTimeOffset
+
     override val childTaskId get() = taskRecord.id
 
     constructor(

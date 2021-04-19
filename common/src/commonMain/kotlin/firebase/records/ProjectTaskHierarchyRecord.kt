@@ -12,6 +12,8 @@ class ProjectTaskHierarchyRecord(
 
     override val key get() = projectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
 
+    override var startTimeOffset by Committer(createObject::startTimeOffset)
+
     override val childTaskId get() = createObject.childTaskId
 
     constructor(

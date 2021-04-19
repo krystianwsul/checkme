@@ -177,7 +177,7 @@ object IntervalBuilder {
 
         abstract fun toIntervalBuilder(): IntervalBuilder<T>
 
-        class Parent<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T, *>) : TypeBuilder<T>() {
+        class Parent<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = parentTaskHierarchy.startExactTimeStampOffset
 
@@ -230,7 +230,7 @@ object IntervalBuilder {
 
         data class Child<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val parentTaskHierarchy: TaskHierarchy<T, *>,
+                val parentTaskHierarchy: TaskHierarchy<T>,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset

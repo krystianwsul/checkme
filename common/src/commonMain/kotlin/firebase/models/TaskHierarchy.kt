@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.records.TaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
@@ -8,10 +7,9 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-abstract class TaskHierarchy<T : ProjectType, U : TaskHierarchyJson>(
-        private val project: Project<T>,
-        protected val taskHierarchyRecord: TaskHierarchyRecord<U>,
-) : TaskParentEntry {
+abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) : TaskParentEntry {
+
+    protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 
     final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
 

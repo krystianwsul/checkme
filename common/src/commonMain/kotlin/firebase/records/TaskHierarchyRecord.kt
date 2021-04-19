@@ -15,7 +15,7 @@ abstract class TaskHierarchyRecord<T : TaskHierarchyJson>(
     }
 
     val startTime get() = createObject.startTime
-    var startTimeOffset by Committer(createObject::startTimeOffset)
+    abstract val startTimeOffset: Double?
 
     var endTime by Committer(createObject::endTime)
     var endTimeOffset by Committer(createObject::endTimeOffset)
